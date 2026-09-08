@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  Sparse package manifest.
+
+  Plain English: this is a name tag for a normal .exe. Windows hands out certain
+  permissions only to programs that have a registered name and publisher. Two of the
+  permissions this project needs are in that group:
+
+    - Windows.Media.Ocr             (documented package-identity-only)
+    - graphicsCaptureWithoutBorder  (must be declared in a package manifest)
+
+  AllowExternalContent = true is what makes this "sparse": the binaries stay where
+  the normal build put them, and only this manifest lives inside the .msix.
+-->
+
+<Package
+    xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+    xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+    xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+    xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+    IgnorableNamespaces="uap uap10 rescap">
+
+  <Identity
+      Name="CelesteCaptureHarness"
+      Publisher="CN=CelesteDev"
+      Version="1.0.0.0"
+      ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>Celeste Capture Harness</DisplayName>
+    <PublisherDisplayName>CelesteDev</PublisherDisplayName>
+    <Logo>Images\StoreLogo.png</Logo>
+    <uap10:AllowExternalContent>true</uap10:AllowExternalContent>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily
+        Name="Windows.Desktop"
+        MinVersion="10.0.22000.0"
+        MaxVersionTested="10.0.26200.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <!-- EntryPoint="Windows.FullTrustApplication" is the classic desktop-bridge
+         shape and is what the sparse-package samples use. It requires the
+         runFullTrust capability below, and it must NOT be combined with the
+         uap10:TrustLevel / uap10:RuntimeBehavior pair - that is a different
+         (mediumIL "modern win32") model, and mixing the two fails manifest
+         validation with 0x80080204. -->
+    <Application
+        Id="CaptureHarness"
+        Executable="CaptureHarness.exe"
+        EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+          DisplayName="Celeste Capture Harness"
+          Description="WGC probe harness - pre-v3 checklist step 6"
+          BackgroundColor="transparent"
+          Square150x150Logo="Images\Square150x150Logo.png"
+          Square44x44Logo="Images\Square44x44Logo.png"
+          AppListEntry="none" />
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <!-- Required by EntryPoint="Windows.FullTrustApplication". -->
+    <rescap:Capability Name="runFullTrust" />
+
+    <!-- THE reason this manifest exists. -->
+    <rescap:Capability Name="graphicsCaptureWithoutBorder" />
+  </Capabilities>
+
+</Package>

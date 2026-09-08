@@ -1,0 +1,30 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+
+# Captured data and logs may contain private desktop text
+*.log
+harness/textpattern-results.txt
+**/harness-log.txt
+
+# .NET and packaging output
+**/bin/
+**/obj/
+**/stage/
+**/probe*-work/
+*.msix
+*.appx
+*.appxbundle
+TestResults/
+artifacts/
+.vs/
+
+# Local IDE and OS files
+*.user
+*.suo
+.DS_Store
+Thumbs.db
