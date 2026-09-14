@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hatchery Gate 1 mockup — useful draft</title>
+  <style>
+    :root {
+      --ink: #15364b;
+      --paper: #f7fbf9;
+      --mist: #dcefeb;
+      --blue: #2f6fe4;
+      --blue-dark: #1e4f9e;
+      --apricot: #ffb66e;
+      --raspberry: #d65372;
+      --moss: #3f7769;
+      --line: #9bb8b3;
+      --white: #ffffff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--mist);
+      color: var(--ink);
+      font: 16px/1.45 "Segoe UI", Arial, sans-serif;
+    }
+    a { color: inherit; }
+    a:focus-visible, button:focus-visible { outline: 3px solid var(--raspberry); outline-offset: 3px; }
+    .prototype {
+      padding: 9px 18px;
+      background: #15364b;
+      color: #fff;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: .01em;
+    }
+    .app {
+      width: min(1420px, calc(100% - 32px));
+      min-height: calc(100vh - 48px);
+      margin: 16px auto 32px;
+      overflow: hidden;
+      border: 2px solid var(--ink);
+      border-radius: 24px 24px 42px 24px;
+      background: var(--paper);
+      box-shadow: 10px 12px 0 rgba(21, 54, 75, .16);
+    }
+    header {
+      min-height: 74px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 12px 22px;
+      border-bottom: 2px solid var(--ink);
+      background: #fff;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; font: 800 24px/1 "Bahnschrift", "Segoe UI", sans-serif; }
+    .egg {
+      width: 34px; height: 40px; display: grid; place-items: center;
+      border: 2px solid var(--ink); border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+      background: var(--apricot); transform: rotate(-7deg); font-size: 17px;
+    }
+    .family { color: #5d727f; font-weight: 650; }
+    .tag { margin-left: auto; padding: 8px 12px; border: 1px solid #b67524; border-radius: 999px; background: #fff2d5; color: #6f4716; font-size: 13px; font-weight: 700; }
+    .shell { display: grid; grid-template-columns: 220px 1fr; min-height: 730px; }
+    nav { padding: 24px 16px; border-right: 2px solid var(--ink); background: #eaf4f1; }
+    nav a { display: block; margin-bottom: 7px; padding: 11px 12px; border-radius: 11px; text-decoration: none; font-weight: 700; }
+    nav a.active { background: var(--ink); color: white; }
+    .nest {
+      margin-top: 34px; padding: 15px; border: 1.5px solid var(--ink); border-radius: 18px 18px 30px 18px;
+      background: var(--white); font-size: 13px;
+    }
+    .nest strong { display: block; margin-bottom: 5px; font-size: 15px; }
+    .dot { display: inline-block; width: 9px; height: 9px; margin-right: 6px; border-radius: 50%; background: var(--moss); }
+    main { padding: 32px clamp(20px, 4vw, 58px) 44px; }
+    .lead { display: flex; justify-content: space-between; gap: 30px; align-items: end; margin-bottom: 24px; }
+    h1 { max-width: 720px; margin: 0; font: 800 clamp(34px, 5vw, 63px)/.98 "Bahnschrift", "Segoe UI", sans-serif; letter-spacing: -.035em; }
+    .lead p { max-width: 300px; margin: 0; color: #526d78; font-weight: 600; }
+    .workbench {
+      position: relative; overflow: hidden; min-height: 430px; padding: 24px;
+      border: 2px solid var(--ink); border-radius: 28px 28px 70px 28px;
+      background-color: #dceeff;
+      background-image: radial-gradient(#a6c2d2 1px, transparent 1px);
+      background-size: 18px 18px;
+    }
+    .bench-label { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 3; }
+    .bench-label strong { font: 800 19px "Bahnschrift", sans-serif; }
+    .legend { padding: 6px 10px; border-radius: 999px; background: white; border: 1px solid var(--ink); font-size: 12px; font-weight: 700; }
+    .world { position: relative; z-index: 2; display: grid; grid-template-columns: .88fr 1fr 1fr; gap: 24px; align-items: end; min-height: 310px; padding: 30px 10px 0; }
+    .notice {
+      align-self: center; padding: 18px 19px; border: 2px solid var(--ink); border-radius: 8px;
+      background: #fffdf3; box-shadow: 5px 6px 0 rgba(21,54,75,.2); transform: rotate(-2deg);
+    }
+    .notice .pin { width: 13px; height: 13px; margin: -28px auto 12px; border-radius: 50%; background: var(--raspberry); border: 2px solid var(--ink); }
+    .notice small { color: #6b7b82; font-weight: 700; }
+    .notice p { margin: 9px 0 0; }
+    .house, .shed { position: relative; min-height: 235px; padding: 72px 20px 22px; border: 2px solid var(--ink); background: white; }
+    .house { border-radius: 16px 16px 28px 28px; }
+    .house::before {
+      content: ""; position: absolute; left: -13px; right: -13px; top: -45px; height: 88px;
+      border: 2px solid var(--ink); background: var(--blue); transform: skewY(-5deg); border-radius: 14px 14px 6px 6px;
+    }
+    .shed { border-radius: 44px 44px 18px 18px; background: #fff7e7; }
+    .shed::before {
+      content: ""; position: absolute; left: 14px; right: 14px; top: 28px; height: 12px;
+      border-radius: 999px; background: var(--apricot); border: 2px solid var(--ink);
+    }
+    .world h2 { position: relative; margin: 0 0 13px; font: 800 21px "Bahnschrift", sans-serif; }
+    .date { position: relative; float: left; margin-right: 12px; padding: 7px 10px; border: 2px solid var(--ink); border-radius: 10px; background: #eaf1ff; text-align: center; font-weight: 800; }
+    .date span { display: block; font-size: 25px; line-height: .9; }
+    .world p { position: relative; margin: 0 0 8px; font-size: 14px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; clear: both; padding-top: 15px; }
+    .chip { padding: 6px 9px; border: 1.5px solid var(--ink); border-radius: 999px; background: white; font-size: 12px; font-weight: 700; }
+    .chip.shared { background: #dff2e8; }
+    .path { position: absolute; inset: 95px 10% auto 12%; z-index: 1; width: 78%; height: 150px; pointer-events: none; }
+    .uncertain {
+      position: relative; z-index: 3; display: flex; align-items: center; gap: 12px; max-width: 520px; margin: -13px 0 0 24px;
+      padding: 12px 15px; border: 2px solid #8c5a18; border-radius: 14px; background: #fff2d5; color: #65400f;
+    }
+    .uncertain b { font-size: 20px; }
+    .actions { display: flex; align-items: center; gap: 14px; margin-top: 24px; }
+    .primary, .secondary { display: inline-block; padding: 13px 18px; border: 2px solid var(--ink); border-radius: 12px; font-weight: 800; text-decoration: none; }
+    .primary { background: var(--ink); color: white; box-shadow: 4px 4px 0 var(--apricot); }
+    .secondary { background: white; }
+    .actions small { margin-left: auto; color: #5c737c; }
+    @media (max-width: 900px) {
+      .shell { grid-template-columns: 1fr; } nav { display: none; }
+      .lead { align-items: start; flex-direction: column; }
+      .world { grid-template-columns: 1fr; gap: 60px; }
+      .path { display: none; } .workbench { min-height: auto; }
+      .actions { flex-wrap: wrap; } .actions small { width: 100%; margin: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <div class="prototype">Gate 1 concept mockup · synthetic household and notice · no real action or measured result</div>
+  <div class="app">
+    <header>
+      <div class="brand"><span class="egg">H</span>Hatchery</div>
+      <div class="family">Maya + Leo’s week</div>
+      <div class="tag">Draft only</div>
+    </header>
+    <div class="shell">
+      <nav aria-label="Mockup screens">
+        <a class="active" href="01-week-draft.html">This week</a>
+        <a href="02-correct-once.html">Corrections</a>
+        <a href="03-workshop.html">Workshop</a>
+        <a href="04-later-case.html">Completed work</a>
+        <a href="05-responsibility-controls.html">Responsibilities</a>
+        <div class="nest">
+          <strong><span class="dot"></span>Apprentice is drafting</strong>
+          Nothing can be added to a real calendar or list from this mockup.
+        </div>
+      </nav>
+      <main>
+        <div class="lead">
+          <h1>One notice. A whole Saturday, ready to review.</h1>
+          <p>Hatchery starts with useful work, then asks only about what it cannot safely settle.</p>
+        </div>
+
+        <section class="workbench" aria-label="Linked draft from a synthetic notice">
+          <div class="bench-label">
+            <strong>Miniature Saturday</strong>
+            <span class="legend">Blue thread means these drafts depend on each other</span>
+          </div>
+          <svg class="path" viewBox="0 0 800 150" aria-hidden="true">
+            <path d="M40,74 C210,5 250,135 395,75 S620,10 770,76" fill="none" stroke="#2f6fe4" stroke-width="8" stroke-linecap="round" stroke-dasharray="2 17"/>
+          </svg>
+          <div class="world">
+            <article class="notice">
+              <div class="pin"></div>
+              <small>Synthetic notice</small>
+              <p><strong>Northside Swim</strong><br>Saturday, 10:30 am<br>Bring cap, towel and water.</p>
+            </article>
+            <article class="house">
+              <h2>Commitment draft</h2>
+              <div class="date">SAT<span>19</span></div>
+              <p><strong>Leo · Swim training</strong></p>
+              <p>10:30–11:30 am</p>
+              <p>Location needs confirmation</p>
+            </article>
+            <article class="shed">
+              <h2>Preparation draft</h2>
+              <p>For Leo: swim cap + towel</p>
+              <p>Ready by Friday evening</p>
+              <div class="chips">
+                <span class="chip">Swim cap</span>
+                <span class="chip">Towel</span>
+                <span class="chip shared">Shared water</span>
+              </div>
+            </article>
+          </div>
+          <div class="uncertain"><b>?</b><span><strong>One answer needed:</strong> Which Northside pool? The notice does not say.</span></div>
+        </section>
+
+        <div class="actions">
+          <a class="primary" href="02-correct-once.html">Review the linked drafts</a>
+          <a class="secondary" href="05-responsibility-controls.html">Check responsibility limits</a>
+          <small>Nothing has been written outside this illustrative screen.</small>
+        </div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

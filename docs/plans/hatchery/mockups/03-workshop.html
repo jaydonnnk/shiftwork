@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hatchery Gate 1 mockup — workshop</title>
+  <style>
+    :root { --ink:#15364b; --paper:#f7fbf9; --mist:#dcefeb; --blue:#2f6fe4; --apricot:#ffb66e; --raspberry:#d65372; --moss:#3f7769; --white:#fff; --lavender:#dcd8ff; }
+    *{box-sizing:border-box} body{margin:0;min-width:320px;background:var(--mist);color:var(--ink);font:16px/1.45 "Segoe UI",Arial,sans-serif} a{color:inherit} a:focus-visible{outline:3px solid var(--raspberry);outline-offset:3px}
+    .prototype{padding:9px 18px;background:var(--ink);color:white;text-align:center;font-size:13px}.app{width:min(1420px,calc(100% - 32px));min-height:calc(100vh - 48px);margin:16px auto 32px;overflow:hidden;border:2px solid var(--ink);border-radius:24px 24px 42px 24px;background:var(--paper);box-shadow:10px 12px 0 rgba(21,54,75,.16)}
+    header{min-height:74px;display:flex;align-items:center;gap:24px;padding:12px 22px;border-bottom:2px solid var(--ink);background:white}.brand{display:flex;align-items:center;gap:10px;font:800 24px/1 "Bahnschrift","Segoe UI",sans-serif}.egg{width:34px;height:40px;display:grid;place-items:center;border:2px solid var(--ink);border-radius:50% 50% 45% 45%/60% 60% 40% 40%;background:var(--apricot);transform:rotate(-7deg);font-size:17px}.family{color:#5d727f;font-weight:650}.tag{margin-left:auto;padding:8px 12px;border:1px solid #8a4970;border-radius:999px;background:#ffe4f0;color:#733552;font-size:13px;font-weight:700}
+    .shell{display:grid;grid-template-columns:220px 1fr;min-height:730px}nav{padding:24px 16px;border-right:2px solid var(--ink);background:#eaf4f1}nav a{display:block;margin-bottom:7px;padding:11px 12px;border-radius:11px;text-decoration:none;font-weight:700}nav a.active{background:var(--ink);color:white}.nest{margin-top:34px;padding:15px;border:1.5px solid var(--ink);border-radius:18px 18px 30px 18px;background:white;font-size:13px}.nest strong{display:block;margin-bottom:5px;font-size:15px}
+    main{padding:30px clamp(20px,4vw,54px) 44px}.lead{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:22px}h1{max-width:730px;margin:0;font:800 clamp(34px,5vw,60px)/.98 "Bahnschrift","Segoe UI",sans-serif;letter-spacing:-.035em}.lead p{max-width:330px;margin:0;color:#526d78;font-weight:600}
+    .workshop{overflow:hidden;border:2px solid var(--ink);border-radius:28px 28px 64px 28px;background:#cfe9e2}.statusbar{display:flex;align-items:center;gap:13px;padding:14px 20px;border-bottom:2px solid var(--ink);background:#ffe9b7}.statuslamp{width:13px;height:13px;border:2px solid var(--ink);border-radius:50%;background:#fff}.statusbar strong{font:800 17px "Bahnschrift",sans-serif}.statusbar span:last-child{margin-left:auto;font-size:13px;font-weight:700}
+    .floor{position:relative;min-height:410px;padding:28px;background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:30px 30px}.recipe{display:flex;align-items:center;gap:16px;position:relative;z-index:2;margin-bottom:29px}.version{flex:1;padding:15px 17px;border:2px solid var(--ink);border-radius:14px;background:white}.version.old{opacity:.72}.version.candidate{box-shadow:5px 5px 0 var(--apricot)}.version small{display:block;color:#61767e;font-weight:700}.version strong{display:block;margin-top:4px;font-size:16px}.recipe .arr{font-size:30px;font-weight:900;color:var(--blue)}
+    .worlds{position:relative;z-index:2;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.world{position:relative;min-height:218px;padding:17px 15px 20px;border:2px solid var(--ink);border-radius:50% 50% 24px 24px/24px 24px 18px 18px;background:#eef7ff;box-shadow:inset 0 -24px #bdd9a8}.world:nth-child(2){background:#fff2da;box-shadow:inset 0 -24px #d0b8e7}.world:nth-child(3){background:#f4efff;box-shadow:inset 0 -24px #add8d0}.world:nth-child(4){background:#ffeaf0;box-shadow:inset 0 -24px #b8d7ed}.world::before{content:"";display:block;width:54px;height:35px;margin:7px auto 12px;border:2px solid var(--ink);border-bottom:0;border-radius:40px 40px 0 0;background:var(--apricot)}.world h2{margin:0 0 8px;font:800 16px "Bahnschrift",sans-serif;text-align:center}.world p{margin:0;text-align:center;font-size:13px}.queued{display:block;width:max-content;margin:13px auto 0;padding:5px 9px;border:1.5px solid var(--ink);border-radius:999px;background:white;font-size:11px;font-weight:800}.track{position:absolute;left:7%;right:7%;bottom:17px;height:16px;border:2px solid var(--ink);border-radius:999px;background:repeating-linear-gradient(90deg,var(--ink) 0 6px,#fff 6px 19px)}
+    .evidence{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:18px}.boundary,.limits{padding:17px 19px;border:1.5px solid var(--ink);background:white}.boundary{border-radius:16px 16px 30px 16px;box-shadow:inset 7px 0 var(--blue)}.limits{border-radius:16px 16px 16px 30px;box-shadow:inset 7px 0 var(--raspberry)}.evidence strong{display:block;margin-bottom:5px}.evidence p{margin:0;font-size:14px;color:#536d76}
+    .actions{display:flex;align-items:center;gap:14px;margin-top:24px}.primary,.secondary{display:inline-block;padding:13px 18px;border:2px solid var(--ink);border-radius:12px;font-weight:800;text-decoration:none}.primary{background:var(--ink);color:white;box-shadow:4px 4px 0 var(--apricot)}.secondary{background:white}.actions small{margin-left:auto;color:#5c737c}
+    @media(max-width:1050px){.worlds{grid-template-columns:1fr 1fr}.track{display:none}}@media(max-width:880px){.shell{grid-template-columns:1fr}nav{display:none}.lead{align-items:start;flex-direction:column}.evidence{grid-template-columns:1fr}}@media(max-width:600px){.worlds{grid-template-columns:1fr}.recipe{align-items:stretch;flex-direction:column}.recipe .arr{transform:rotate(90deg);text-align:center}.actions{flex-wrap:wrap}.actions small{width:100%;margin:0}}
+  </style>
+</head>
+<body>
+  <div class="prototype">Gate 1 concept mockup · practice plan only · zero tests run and zero results available</div>
+  <div class="app">
+    <header><div class="brand"><span class="egg">H</span>Hatchery</div><div class="family">Maya + Leo’s workshop</div><div class="tag">Practice queued</div></header>
+    <div class="shell">
+      <nav aria-label="Mockup screens">
+        <a href="01-week-draft.html">This week</a><a href="02-correct-once.html">Corrections</a><a class="active" href="03-workshop.html">Workshop</a><a href="04-later-case.html">Completed work</a><a href="05-responsibility-controls.html">Responsibilities</a>
+        <div class="nest"><strong>Miniature worlds only</strong>They contain no real calendar, list, credentials or permission to act.</div>
+      </nav>
+      <main>
+        <div class="lead"><h1>The lesson enters a miniature week.</h1><p>The workshop makes the practice plan visible without pretending that a proposed lesson has already worked.</p></div>
+        <section class="workshop">
+          <div class="statusbar"><span class="statuslamp"></span><strong>Waiting for independent checks</strong><span>No candidate is promoted</span></div>
+          <div class="floor">
+            <div class="recipe">
+              <div class="version old"><small>Current procedure</small><strong>Remove preparation when its event is cancelled.</strong></div>
+              <div class="arr" aria-hidden="true">›</div>
+              <div class="version candidate"><small>Candidate lesson from your correction</small><strong>Remove an item only when no active commitment still needs it.</strong></div>
+            </div>
+            <div class="worlds" aria-label="Illustrative queued practice cases">
+              <article class="world"><h2>Solo cancellation</h2><p>Only Leo’s swim needs the towel.</p><span class="queued">Queued · not run</span></article>
+              <article class="world"><h2>Shared supplies</h2><p>Maya’s tennis still needs water and sunblock.</p><span class="queued">Queued · not run</span></article>
+              <article class="world"><h2>Factual change</h2><p>A later start time should not rewrite the procedure.</p><span class="queued">Queued · not run</span></article>
+              <article class="world"><h2>Ambiguous notice</h2><p>An unclear child or venue should request an answer.</p><span class="queued">Queued · not run</span></article>
+            </div>
+            <div class="track" aria-hidden="true"></div>
+          </div>
+        </section>
+        <section class="evidence">
+          <div class="boundary"><strong>What would count later</strong><p>Independent unseen cases must show fewer wrong actions at comparable useful completion than the fixed procedure and simpler revision approaches.</p></div>
+          <div class="limits"><strong>What remains unknown now</strong><p>Whether the candidate passes, transfers to real work, saves parent time or is better than a shared product fix.</p></div>
+        </section>
+        <div class="actions"><a class="primary" href="04-later-case.html">View the illustrative later-case storyboard</a><a class="secondary" href="02-correct-once.html">Edit the lesson</a><small>Storyboard next; not evidence.</small></div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

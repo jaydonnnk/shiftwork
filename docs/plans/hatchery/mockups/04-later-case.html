@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hatchery Gate 1 mockup — later case storyboard</title>
+  <style>
+    :root{--ink:#15364b;--paper:#f7fbf9;--mist:#dcefeb;--blue:#2f6fe4;--apricot:#ffb66e;--raspberry:#d65372;--moss:#3f7769;--white:#fff}
+    *{box-sizing:border-box}body{margin:0;min-width:320px;background:var(--mist);color:var(--ink);font:16px/1.45 "Segoe UI",Arial,sans-serif}a{color:inherit}a:focus-visible{outline:3px solid var(--raspberry);outline-offset:3px}.prototype{padding:9px 18px;background:#7e2947;color:white;text-align:center;font-size:13px;font-weight:700}.app{width:min(1420px,calc(100% - 32px));min-height:calc(100vh - 48px);margin:16px auto 32px;overflow:hidden;border:2px solid var(--ink);border-radius:24px 24px 42px 24px;background:var(--paper);box-shadow:10px 12px 0 rgba(21,54,75,.16)}
+    header{min-height:74px;display:flex;align-items:center;gap:24px;padding:12px 22px;border-bottom:2px solid var(--ink);background:white}.brand{display:flex;align-items:center;gap:10px;font:800 24px/1 "Bahnschrift","Segoe UI",sans-serif}.egg{width:34px;height:40px;display:grid;place-items:center;border:2px solid var(--ink);border-radius:50% 50% 45% 45%/60% 60% 40% 40%;background:var(--apricot);transform:rotate(-7deg);font-size:17px}.family{color:#5d727f;font-weight:650}.tag{margin-left:auto;padding:8px 12px;border:1px solid #8a4970;border-radius:999px;background:#ffe4f0;color:#733552;font-size:13px;font-weight:700}
+    .shell{display:grid;grid-template-columns:220px 1fr;min-height:730px}nav{padding:24px 16px;border-right:2px solid var(--ink);background:#eaf4f1}nav a{display:block;margin-bottom:7px;padding:11px 12px;border-radius:11px;text-decoration:none;font-weight:700}nav a.active{background:var(--ink);color:white}.nest{margin-top:34px;padding:15px;border:1.5px solid var(--ink);border-radius:18px 18px 30px 18px;background:white;font-size:13px}.nest strong{display:block;margin-bottom:5px;font-size:15px}
+    main{padding:30px clamp(20px,4vw,54px) 44px}.lead{display:flex;justify-content:space-between;gap:30px;align-items:end;margin-bottom:22px}h1{max-width:790px;margin:0;font:800 clamp(34px,5vw,59px)/.98 "Bahnschrift","Segoe UI",sans-serif;letter-spacing:-.035em}.lead p{max-width:300px;margin:0;color:#526d78;font-weight:600}
+    .story{position:relative;display:grid;grid-template-columns:.76fr 1.24fr;min-height:438px;overflow:hidden;border:2px solid var(--ink);border-radius:28px 28px 68px 28px;background:#d9edff}.incoming{padding:29px;border-right:2px solid var(--ink);background:#fff0cf}.incoming h2,.outcome h2{margin:0 0 15px;font:800 23px "Bahnschrift",sans-serif}.notice{padding:20px;border:2px solid var(--ink);border-radius:7px;background:#fffdf5;box-shadow:6px 7px 0 rgba(21,54,75,.17);transform:rotate(-1.2deg)}.notice small{font-weight:700;color:#687981}.notice p{margin:10px 0 0;font-size:18px}.memory{margin-top:25px;padding:14px 14px 14px 44px;border:1.5px dashed var(--ink);border-radius:14px;background:white;position:relative;font-size:14px}.memory::before{content:"↺";position:absolute;left:13px;top:10px;font-size:23px;color:var(--blue)}.memory strong{display:block}
+    .outcome{position:relative;padding:29px 34px;background-color:#d9edff;background-image:radial-gradient(#aac5d3 1px,transparent 1px);background-size:18px 18px}.stamp{position:absolute;right:25px;top:22px;padding:7px 10px;border:2px solid #7c2e49;border-radius:7px;color:#7c2e49;background:#ffe7ef;font:800 12px "Bahnschrift",sans-serif;transform:rotate(4deg)}.linked{position:relative;display:grid;grid-template-columns:1fr 48px 1fr;align-items:stretch;margin-top:25px}.mini{padding:19px;border:2px solid var(--ink);background:white}.mini.commit{border-radius:16px 5px 5px 29px}.mini.prep{border-radius:5px 16px 29px 5px;box-shadow:5px 6px 0 var(--apricot)}.mini h3{margin:0 0 13px;font:800 18px "Bahnschrift",sans-serif}.mini p{margin:7px 0;font-size:14px}.cancel{color:#8f304e;text-decoration:line-through}.active{color:#266153;font-weight:800}.bridge{display:grid;place-items:center}.bridge span{display:grid;place-items:center;width:40px;height:40px;border:2px solid var(--ink);border-radius:50%;background:var(--blue);color:white;font-size:24px;font-weight:900}.kept{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.pill{padding:6px 9px;border:1.5px solid var(--ink);border-radius:999px;background:#dff2e8;font-size:12px;font-weight:800}.explainer{margin-top:23px;padding:15px 17px;border-left:6px solid var(--moss);background:white;font-size:14px}.explainer strong{display:block;margin-bottom:3px}.uncertain{margin-top:17px;padding:13px 15px;border:2px solid #8c5a18;border-radius:13px;background:#fff2d5;color:#65400f;font-size:14px}
+    .quote{margin:18px 0 0;text-align:center;font:800 clamp(20px,2.5vw,31px) "Bahnschrift",sans-serif;color:#214b65}.quote span{display:block;margin-top:5px;font:600 13px "Segoe UI",sans-serif;color:#6b7c83}.actions{display:flex;align-items:center;gap:14px;margin-top:22px}.primary,.secondary{display:inline-block;padding:13px 18px;border:2px solid var(--ink);border-radius:12px;font-weight:800;text-decoration:none}.primary{background:var(--ink);color:white;box-shadow:4px 4px 0 var(--apricot)}.secondary{background:white}.actions small{margin-left:auto;color:#5c737c}
+    @media(max-width:980px){.shell{grid-template-columns:1fr}nav{display:none}.lead{align-items:start;flex-direction:column}.story{grid-template-columns:1fr}.incoming{border-right:0;border-bottom:2px solid var(--ink)}}@media(max-width:660px){.linked{grid-template-columns:1fr}.bridge{padding:8px}.bridge span{transform:rotate(90deg)}.actions{flex-wrap:wrap}.actions small{width:100%;margin:0}}
+  </style>
+</head>
+<body>
+  <div class="prototype">Illustrative storyboard only · this unseen-case outcome has not been generated, tested or observed</div>
+  <div class="app">
+    <header><div class="brand"><span class="egg">H</span>Hatchery</div><div class="family">Maya + Leo’s completed work</div><div class="tag">Simulated outcome</div></header>
+    <div class="shell">
+      <nav aria-label="Mockup screens"><a href="01-week-draft.html">This week</a><a href="02-correct-once.html">Corrections</a><a href="03-workshop.html">Workshop</a><a class="active" href="04-later-case.html">Completed work</a><a href="05-responsibility-controls.html">Responsibilities</a><div class="nest"><strong>Evidence label</strong>This page describes the intended product moment. It is not a performance claim.</div></nav>
+      <main>
+        <div class="lead"><h1>The next case keeps what still matters.</h1><p>A concrete storyboard of the intended “correct it once” payoff, with its unresolved question still visible.</p></div>
+        <section class="story">
+          <div class="incoming">
+            <h2>A later notice arrives</h2>
+            <article class="notice"><small>Synthetic later notice</small><p>“Leo’s swim session is cancelled. Maya’s tennis lesson continues as planned.”</p></article>
+            <div class="memory"><strong>Earlier correction carried forward</strong>Keep shared preparation while another active commitment depends on it.</div>
+          </div>
+          <div class="outcome">
+            <span class="stamp">STORYBOARD · NOT OBSERVED</span>
+            <h2>Proposed linked update</h2>
+            <div class="linked">
+              <article class="mini commit"><h3>Commitments</h3><p class="cancel">Leo · Swim training</p><p class="active">Maya · Tennis remains active</p><p>No other event changes proposed</p></article>
+              <div class="bridge"><span>✓</span></div>
+              <article class="mini prep"><h3>Preparation</h3><p>Swim-only items removed</p><p>Shared items preserved for Maya</p><div class="kept"><span class="pill">Water kept</span><span class="pill">Sunblock kept</span></div></article>
+            </div>
+            <div class="explainer"><strong>What would make this meaningful</strong>The notice must be genuinely unseen by the revised procedure, the result must survive independent checks, and the same rule must work in real authorized work without adding more review burden.</div>
+            <div class="uncertain"><strong>Still needs a parent:</strong> the notice does not confirm whether Maya and Leo share the same departure plan.</div>
+          </div>
+        </section>
+        <p class="quote">“I corrected this once, and it handled the next unseen case correctly.”<span>Intended user reaction · not a testimonial</span></p>
+        <div class="actions"><a class="primary" href="05-responsibility-controls.html">Choose what Hatchery may do</a><a class="secondary" href="03-workshop.html">Inspect the workshop</a><small>No real work occurred.</small></div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

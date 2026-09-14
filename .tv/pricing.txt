@@ -1,0 +1,148 @@
+
+Tavily
+See how we ranked #1 on SealQA and SimpleQA, and 
+what shipped in August
+Product
+Solutions
+Resources
+Docs
+Pricing
+Endpoints
+Overview
+The web access layer for AI agents
+Search
+Fast and relevant web results
+Extract
+Clean and structured content for LLMs
+Research
+An agent for in-depth web research
+Crawl
+Content extracted from entire websites
+Map
+Discover URLs across any website
+Industries
+Financial
+Explore
+Use Cases
+Learn
+Blog
+Events
+Certification
+Community
+Company
+About
+Careers
+Partnerships
+Brand
+Contact
+Login
+/pricing plans
+Find a plan to power your AI Agents
+Researcher
+Free
+ / month
+For new creators
+1,000 API credits / month
+No credit card required
+Email support
+Get Started
+Pay As You Go
+$0.008
+ / credit
+For flexible usage
+Pay only for what you use
+Cancel anytime
+Email support
+Get Started
+Project
+$
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+0
+1
+2
+3
+4
+5
+6
+7
+8
+9
+ / month
+Built for enthusiasts
+Slide to adjust plan
+4,000 API credits / month
+Higher rate limits
+Email support
+Get Started
+Enterprise
+Custom
+For corporations
+Custom API calls
+Custom rate limits
+Enterprise-grade support and SLAs
+Enterprise-grade security and privacy
+Talk to Sales
+Free for students
+We're dedicated to supporting the pursuit of knowledge
+by offering our service at no cost for students.
+Start exploring
+FAQ
+Common questions
+If you have any questions, please reach out to our team!
+Contact Us
+How do I start using Tavily and get an API key?
+Sign up for a free account and get your API key from the dashboard, this key authenticates all API requests.
+Install the SDK (e.g., Python or JavaScript) and plug in your API key to start making calls.You start with 1,000 free API credits per month with no credit card required.
+When do my monthly API credits reset?
+Your API credits reset on the first day of each month, regardless of the billing date. This ensures you start each month with a clean slate of credits to use for your searches.
+What is an API credit and how is usage calculated?
+API credits are consumed based on the type of request you make (such as search, extract, or crawl). More advanced or higher-volume requests use more credits. Full usage details are available in the documentation.
+What happens if I run out of credits?
+If you exhaust your monthly credits, requests will stop until your credits reset or you upgrade to a paid plan. Paid plans provide higher monthly limits and uninterrupted usage.
+Power your AI with real-time web search
+Explore API docs
+Try it out
+Built by researchers. Trusted by 2M+ developers.
+Opt into comms
+By submitting my email address, I agree to receive marketing communications. For more information, please see the
+Privacy Policy
+.
+Product
+Overview
+Pricing
+Docs
+Solutions
+Financial Services
+Use Cases
+Resources
+Blog
+Events
+Certification
+Community
+Company
+About
+Careers
+Partnerships
+Startups
+Brand
+Contact
+©
+2026
+Tavily Inc. All rights reserved.
+Website Terms
+Platform Terms
+Privacy Policy
+Cookie Notice
+Acceptable Use
+Trust Center
+Cookie Settings
+Accessibility
