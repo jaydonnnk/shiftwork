@@ -1,22 +1,24 @@
 # Hatchery — working brief and evidence register
 
-Updated: 2026-09-14.
+Updated: 2026-09-15.
 
-**State:** Hatchery selected for software-factory planning toward a build.
+**State:** Superseded. On 2026-09-15 the user explicitly scrapped Hatchery as the
+active project and selected Shiftwork for Gate 1 planning. Hatchery remains here
+only as historical evidence and a source of selected mechanisms; see
+[`SHIFTWORK_PLAN.md`](SHIFTWORK_PLAN.md).
 **Latest review:** CANNOT JUSTIFY 35 today. Independent planning forecast 14/20
 (28/40); current defensible forecast caps total 16/20 (32/40). Revised conditional
 best case remains 17/20 (34/40), not a demonstrated score.
 **Remaining target gap:** Impact 4.0/5 is below the user's >=4.5 target; 35/40 needs
 real evidence supporting Impact 4.5. Literal organiser exclusivity still fails.
-**Approvals:** no product, architecture, program-design or slice-plan gate approved.
-**Next step:** Gate 1 — Product is in progress for review under the existing
-software-factory process. No gate is approved. See
-[workflow status](plans/hatchery/00-status.md).
+**Approvals:** no Hatchery gate was approved.
+**Next step:** none for Hatchery. Shiftwork Gate 1 is active and unapproved; see
+[`plans/shiftwork/00-status.md`](plans/shiftwork/00-status.md).
 
-This file captures the proposal and independent review. It is not an approved
-implementation specification. No implementation or product trials were performed
-in the research turn. Current service access, costs and compatibility must be
-checked when the corresponding work becomes relevant.
+This file captures the historical proposal and independent review. It is not an
+approved implementation specification. No Hatchery implementation or product
+trial was performed. Only the mechanisms explicitly imported by the Shiftwork
+brief remain active planning context.
 
 ## 1. Product thesis and full vision
 
@@ -69,6 +71,10 @@ requirements for two children. After approval, the apprentice acts on a real
 notice using the user's selected calendar and list.
 
 ## 2. What the user has and has not decided
+
+**Supersession note, 2026-09-15:** the user explicitly selected Shiftwork and
+scrapped Hatchery as active scope. The remainder of this section records earlier
+authorization history and must not be read as current direction.
 
 Confirmed direction: prepare Hatchery context, then use software-factory to plan
 and build it. Do not restart broad brainstorming or ask the user to select an idea
@@ -572,9 +578,8 @@ or time compression; sandbox runtime has not been measured to fit these slots.
 
 ## 11. Planning sequence and immediate open decisions
 
-Use `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`. Workflow files belong
-in `docs/plans/hatchery/`. This brief may contain future technical options; the
-Gate 1 product document should not. No gate has been approved.
+**Historical sequence only; do not execute.** Hatchery was superseded before Gate 1
+approval. Active workflow files now belong in `docs/plans/shiftwork/`.
 
 1. Gate 1 (in progress): review the proposed extracurricular-family audience and the linked
    commitments/preparation responsibilities, total-effort success metric and plain
@@ -609,8 +614,9 @@ outreach, commits or implementation are authorized by this documentation request
 Shiftwork was the alternative: a Stardew-inspired town where humans learn AI
 engineering by building systems and living with later consequences. Hatchery
 reverses that relationship: the apprentice practises and carries useful capability
-into the user's life. No comparative implementation evidence establishes a winner.
-The user has now selected Hatchery for this planning process.
+into the user's life. No comparative implementation evidence established a winner.
+After an independent adjudication returned `REVISE SHIFTWORK BEFORE ADOPTION`, the
+user selected the revised Shiftwork direction on 2026-09-15. Hatchery is superseded.
 
 Do not revive previously rejected directions or repeat their competitor research:
 Celeste/Aster, GRAFT/FormSwitch, Doc Rot Hunter, Statement, build doctors, SDK/codegen,

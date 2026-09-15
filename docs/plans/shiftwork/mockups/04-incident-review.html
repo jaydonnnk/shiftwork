@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shiftwork Gate 1 — incident review</title>
+  <link rel="stylesheet" href="wireframe.css">
+</head>
+<body>
+  <div class="prototype">Gate 1 storyboard · proposed incident and repair choices · no test has run</div>
+  <div class="app">
+    <header><div class="brand">SHIFTWORK</div><div class="crumb">Incident BWB-01</div><div class="state">LEARNER OWNS REPAIR</div></header>
+    <div class="shell">
+      <nav aria-label="Shiftwork screens"><a href="01-shift-board.html">Shift board</a><a href="02-owner-brief.html">Owner brief</a><a href="03-customer-shift.html">Customer shift</a><a class="active" href="04-incident-review.html">Incident review</a><a href="05-inherited-shift.html">Inherited shift</a><a href="06-away-shift.html">Away shift</a><div class="nav-note"><strong>Imported from Hatchery</strong>One necessary correction must prevent a later unseen failure.</div></nav>
+      <main>
+        <p class="eyebrow">Observed failure · storyboard</p>
+        <h1>The service answered from yesterday’s stock.</h1>
+        <p class="intro">It told a customer that one copy remained after the final copy had already sold. New stock is data; ignoring freshness is the reusable procedural failure.</p>
+        <section class="grid two">
+          <article class="panel soft stack"><h2>Evidence available to you</h2><div class="metric"><strong>Customer output</strong><br>“Yes, one paperback is available.”</div><div class="metric"><strong>Current shop record</strong><br>Available copies: 0</div><div class="metric"><strong>Committed stance violated</strong><br>Freshness-first — records must be verified before answering.</div></article>
+          <article class="panel stack"><h2>Choose the repair direction</h2><p class="muted">Several repairs are defensible; each trades safety, speed and usefulness differently, and the chosen repair must survive a later unseen case.</p><div class="choice">Verify freshness at answer time<br><span class="muted">Re-check the shop record before replying; refuse or ask when it is stale. Buys: closes the failure family. Costs: slower replies and more refusals.</span></div><div class="choice">Answer from the shop’s live record<br><span class="muted">Read current stock at request time instead of a cached copy. Buys: attacks the root cause. Costs: depends on a source you do not control; a silent sync failure is a new failure family.</span></div><div class="choice">Stop claiming exact stock<br><span class="muted">Say “recently showed N available” with the record’s age. Buys: stays fast and helpful. Costs: softens a hard error into a caveat a customer may ignore.</span></div><p class="muted">The storyboard continues with freshness verification; other repairs change what the later shifts test.</p></article>
+        </section>
+        <div class="divider"></div>
+        <section class="grid three"><article class="panel"><h3>Learner authority</h3><p>Contract, diagnosis acceptance, repair direction and visible regression example.</p></article><article class="panel"><h3>Optional assistant</h3><p>Explain logs, offer bounded hints or propose a labelled patch after being asked.</p></article><article class="panel"><h3>Independent boundary</h3><p>Sealed cases, outcome rules and promotion remain outside both learner and assistant control.</p></article></section>
+        <div class="callout"><strong>Assistance record: 0 of 3 hints used</strong>Authorship must remain inspectable. Passing later checks cannot silently rewrite who made the decision.</div>
+        <div class="actions"><a class="button" href="03-customer-shift.html">Back to evidence</a><a class="button primary" href="05-inherited-shift.html">View the intended later test</a><small>Repair has not been implemented.</small></div>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

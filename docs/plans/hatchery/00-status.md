@@ -1,15 +1,24 @@
 # Status: Hatchery
 
-- Gate 1 — Product: in progress
-- Gate 2 — Architecture: pending
-- Gate 3 — Program Design: pending
-- Gate 4 — Slice plan: pending
+**Project status:** SUPERSEDED 2026-09-15 — retained as historical evidence only.
+
+- Gate 1 — Product: stopped, not approved
+- Gate 2 — Architecture: not started
+- Gate 3 — Program Design: not started
+- Gate 4 — Slice plan: not started
 
 ## Slices
 
 No slices approved or implemented. Define the checklist at Gate 4.
 
 ## Notes for a fresh session
+
+- 2026-09-15: user explicitly scrapped Hatchery as the active direction and
+  selected Shiftwork for software-factory planning. Do not resume Hatchery unless
+  the user explicitly reopens it. See `../../SHIFTWORK_PLAN.md` and
+  `../shiftwork/00-status.md`.
+- Preserve this folder as historical product evidence and a source of selected
+  mechanisms. Do not treat its mockups or product proposal as active scope.
 
 - 2026-09-14: user selected Hatchery for software-factory planning toward a build
   and requested AGENTS.md plus docs/HATCHERY_PLAN.md as durable context.
@@ -26,9 +35,8 @@ No slices approved or implemented. Define the checklist at Gate 4.
 - Read ../../../AGENTS.md, ../../HATCHERY_PLAN.md and all existing files in this
   folder before continuing. Also read ../../../HACKATHON_REQUIREMENTS.md.
 - Apply C:/Users/jayd0/.agents/skills/software-factory/SKILL.md.
-- Gate 1 is in progress: review 01-product.md and the plain HTML mockups, revise as
-  requested, then obtain explicit Gate 1 approval. Implementation follows Gate 4
-  approval under the existing workflow; no gate may be assumed complete.
+- Historical 2026-09-14 state: Gate 1 was in progress for review. It was stopped
+  unapproved when Shiftwork became active; do not continue these artifacts.
 - Current review: CANNOT JUSTIFY 35 today. Independent planning forecast 28/40;
   current forecast caps total 32/40. Conditional best-case 34/40 (4.5 technology, 4.5 design,
   4.0 impact, 4.0 idea). Impact still misses the user's >=4.5 target. 35/40 needs
@@ -59,10 +67,10 @@ No slices approved or implemented. Define the checklist at Gate 4.
   and Skills Dojo. Nemotron 3.5 Lightning released August 11 and is advertised on
   Token Factory. SPADE/PRACTICE training results do not prove inference-only transfer.
   See ../../HATCHERY_PLAN.md for dates, availability caveats, sources and tests.
-- Keep context notes current when authorized; record gate approvals and slice
-  completion only when explicitly approved or actually verified, respectively.
+- Keep this history intact. Record all new gate approvals and slices under Shiftwork.
 
 ## Approval history
 
 None. Direction selection and documentation requests do not approve a gate.
 The 2026-09-14 go authorizes creating Gate 1 artifacts, not approving Gate 1.
+The project was superseded before Gate 1 approval.
