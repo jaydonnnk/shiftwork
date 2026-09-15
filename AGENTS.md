@@ -1,26 +1,67 @@
-# Shiftwork: project instructions
+# Shiftwork: project and execution instructions
 
-## Read first
+These instructions combine Shiftwork's product constraints with the repository's
+execution rules. Project authority and evidence boundaries always take precedence
+over generic workflow convenience.
+
+## 1. Operating principles
+
+- Honesty, accuracy and epistemic humility matter more than agreeableness. Never
+  invent numbers, quotes, sources, test results, adoption evidence or tool state.
+- Lead with the answer. Be brief. Explain complex choices in short, concrete steps
+  suitable for a reader who benefits from extra structure and low cognitive load.
+- Push back when the user's logic is weak. Lead with blockers, falsifiers, failure
+  modes and uncertainty instead of softening a critique.
+- Prefer the simplest complete solution. Find the root cause, change the narrowest
+  responsible layer and avoid temporary fixes, unnecessary abstractions and side effects.
+- Challenge non-trivial work before presenting it: is there a simpler or more
+  coherent solution, and would a senior reviewer accept the evidence?
+- The latest explicit user instruction overrides older notes. Never infer approval
+  for implementation, external services or a later software-factory gate.
+
+## 2. Read order and authority
+
+Before working on Shiftwork, read:
 
 1. `HACKATHON_REQUIREMENTS.md` — official-rule checklist; keep product opinions out.
-2. `docs/SHIFTWORK_PLAN.md` — current direction, adjudication, hypotheses, risks and evidence plan.
-3. `docs/plans/shiftwork/00-status.md` and every existing document beneath that folder
-   — software-factory decisions and actual approvals.
-4. `docs/HATCHERY_PLAN.md` and `docs/plans/hatchery/` only when historical context or
-   an imported Hatchery mechanism is relevant. Hatchery is not active scope.
+2. `docs/SHIFTWORK_PLAN.md` — current direction, adjudication, hypotheses, risks
+   and evidence plan.
+3. `docs/plans/shiftwork/00-status.md` and every existing file beneath that folder
+   — approved software-factory decisions, mockups, evidence and actual gate state.
+4. `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` when the task concerns
+   a product gate, feature, architecture, program design, slice plan or implementation.
+5. `docs/HATCHERY_PLAN.md` and `docs/plans/hatchery/` only when historical context
+   or an imported Hatchery mechanism is relevant. Hatchery is not active scope.
 
-The latest explicit user instruction takes precedence over older planning notes.
-Approved gate documents supersede provisional choices in `SHIFTWORK_PLAN.md`; update
-the brief when that happens so the documents remain consistent.
+Approved gate documents supersede provisional choices in `docs/SHIFTWORK_PLAN.md`.
+When a gate changes a durable decision, update the supporting brief so the documents
+remain consistent. Current official rules and primary sources supersede stored
+summaries when a time-sensitive external claim is being made.
 
-## Current direction and authorization
+## 3. Current direction and authorization
 
+- Current gate state: Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
+  pending; Gate 3 — Program Design pending; Gate 4 — Slice Plan pending.
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.
-- This selection authorizes creating and reviewing Shiftwork Gate 1 only. It does
-  not approve Gate 1, a technology stack, participant outreach, external service
-  use, or implementation. Resume from the first unapproved gate.
+- On 2026-09-15 the user later explicitly approved Shiftwork Gate 1 after the
+  service-workbench redesign. A requested final independent review remains a
+  safeguard: backtrack Gate 1 only for a concrete product-level blocker; otherwise
+  Gate 2 drafting may begin.
+- Gate 1 approval does not approve Gate 2, a technology stack, implementation,
+  installs, credentials, participant outreach, purchases, external service use,
+  deployment, commits or pushes.
+- The latest independent verdict before selection was `REVISE SHIFTWORK BEFORE
+  ADOPTION`. Selection did not prove the technical, learning, Tavily or organiser-
+  dependence claims.
+- Current forecast: 27/40; defensible pre-evidence cap: 31/40; conditional best
+  case: 35/40. These are subjective forecasts, not achieved scores. No capability,
+  learning gain, prize merit or working central mechanism has been demonstrated.
+  Potential Impact remains capped at 4.0 without stronger evidence.
+
+## 4. Product definition and scope filters
+
 - Shiftwork is a persistent applied-AI-engineering learning environment. A learner
   keeps one real system working for a fictional business across successive shifts;
   later shifts inherit the learner's artifact, decisions, incidents and business state.
@@ -33,14 +74,14 @@ the brief when that happens so the documents remain consistent.
 - Central mechanic: a learner's versioned service receives fixed customer requests;
   independently authored checks reduce its real outputs into an append-only,
   transparent business ledger that the next shift must inherit.
-- Latest independent verdict before the user's selection: `REVISE SHIFTWORK BEFORE
-  ADOPTION`. The user has now selected the revised direction, while its technical,
-  learning, Tavily and organiser-dependence claims remain unproven.
-- Current conditional forecast: 27/40; defensible pre-evidence cap 31/40;
-  conditional best case 35/40. No score, learning gain or working mechanism has
-  been demonstrated. Potential Impact remains capped at 4.0 without stronger evidence.
+- Build a whole product with persistent objects, repeat usefulness and a visible
+  before/after. Do not ship a developer console disguised as a learning product.
+- The town is an explanatory layer, not the differentiator. Progress must be caused
+  by the learner's working system and inherited consequences, not XP or animation.
+- Label synthetic business consequences. Determinism makes them reproducible, not
+  equivalent to real revenue, customer trust, learning impact or employer validation.
 
-## Hatchery mechanisms to import
+### Hatchery mechanisms that may be imported
 
 Import only mechanisms that strengthen Shiftwork's causal learning loop:
 
@@ -49,43 +90,147 @@ Import only mechanisms that strengthen Shiftwork's causal learning loop:
 - one necessary correction preventing a later unseen failure;
 - separation of factual updates from procedural failures;
 - useful scaffolding before asking the learner to teach or correct;
-- immutable evaluator, credentials, promotion and permission boundaries;
+- immutable evaluator, credential, promotion and permission boundaries; and
 - visible remaining limits and reduced-assistance transfer to a fresh setting.
 
 Exclude Hatchery's household-assistant product, AI pet, XP, automatic permission
 growth, background personal automation and decorative practice worlds.
 
-## User communication and product filters
+## 5. Required software-factory process
 
-- Honesty, accuracy and epistemic humility matter more than agreeableness. Never
-  invent numbers, quotes, sources, test results or adoption evidence.
-- Be brief. Lead with the answer. Explain complex choices in short concrete steps.
-- Build a whole product with persistent objects, repeat usefulness and a visible
-  before/after. Do not ship a developer console disguised as a learning product.
-- The town is an explanatory layer, not the differentiator. Progress must be caused
-  by the learner's working system and inherited consequences, not XP or animation.
-- Synthetic business consequences must be labelled. Determinism makes them
-  reproducible, not equivalent to real revenue, trust or employer validation.
-- Create visualization and mockup files as `.html`, never `.tsx`. Gate 1 mockups
-  must be plain HTML, one per screen, with no framework or build step.
+Use `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` for product work.
+Workflow documents live in `docs/plans/shiftwork/`; `docs/SHIFTWORK_PLAN.md` is a
+supporting brief, not a substitute for the four gate documents.
 
-## Required process
+1. Product
+2. Architecture
+3. Program Design
+4. Vertical Slice Plan
 
-Use `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
+Rules:
 
-- Workflow documents live in `docs/plans/shiftwork/`; `SHIFTWORK_PLAN.md` is the
-  supporting brief, not a substitute for the four gate documents.
-- Gates: Product -> Architecture -> Program Design -> Vertical Slice Plan. Write
-  and review each separately; obtain explicit approval at each gate.
-- Gate 1: user problem, measurable success, short announcement and plain HTML
-  screen mockups. Keep implementation choices in the background brief until Gate 2.
-- No implementation code before Gate 4 approval. Direction selection and context
-  updates are not gate approval.
-- Record approvals and completed slices in `00-status.md`. After every slice, show
-  the actual working result and record evidence before continuing.
-- At the Gate 1 permission pause, ask exactly: `Approve Gate 1, or what should change?`
+- Write and review each gate separately. Obtain explicit approval at every gate.
+- Resume from the first unapproved gate in `00-status.md`. Do not redo an approved
+  gate unless the user requests it or later evidence invalidates it.
+- Gate 1 contains the user problem, measurable success, short announcement and
+  plain HTML screen mockups. Keep implementation choices out of Gate 1.
+- For Gate 1 UI, create one plain `.html` file per screen with no framework or
+  build step. More generally, create visualization files as `.html`, never `.tsx`.
+- At a Gate 1 approval or re-approval pause, ask exactly:
+  `Approve Gate 1, or what should change?`
+- No implementation code may exist before Gate 4 approval. Direction selection,
+  context updates, research and evidence plans are not gate approval.
+- Record approvals and completed slices in `00-status.md`. If later work exposes a
+  concrete earlier-gate error, stop, backtrack that gate, revise it and obtain
+  explicit re-approval.
+- After Gate 4 approval, implement one vertical slice at a time. Each slice must end
+  in a visible, working, testable result; record the evidence before continuing.
+- After each slice, show the actual result, update `00-status.md`, and ask whether
+  to continue or re-steer. Do not build horizontal layers that cannot run end to end.
+- Documentation-only maintenance, instruction consolidation and other small changes
+  that do not alter product behavior do not create a new product gate.
 
-## Technology and evidence boundaries for later gates
+## 6. Execution discipline
+
+### Before editing
+
+- Inspect `git status`. Treat existing changes as the user's work unless proven
+  otherwise. Never stash, discard, rewrite or stage unrelated changes.
+- For a non-trivial task outside the gate workflow, write a short actionable plan
+  before editing. Re-plan when evidence invalidates the approach. Skip process
+  ceremony for a small, obvious, one-file change.
+- Establish a baseline proportional to risk. For implementation, run the relevant
+  existing checks before changing behavior when practical and record pre-existing
+  failures. Documentation-only changes do not require a full test suite.
+- Do not install tools or dependencies merely because they are missing. Record the
+  unavailable check unless the user has authorized installation.
+
+### While working
+
+- Keep the change inside the user's requested scope and preserve existing behavior
+  outside it. Once the applicable gate authority exists, fix in-scope bugs directly
+  from logs, failing tests and reproducible evidence instead of asking for step-by-step
+  guidance.
+- After a user correction, revise the active plan and any in-scope durable decision
+  record that would otherwise repeat the mistake. Do not create generic lessons files
+  or widen the diff merely to document a correction.
+- Use subagents only when the user explicitly requests them or the active runtime
+  policy allows them, and only for bounded, independent work. Give each agent one
+  focused task. A second LLM is never an independent oracle for correctness.
+- Prefer non-interactive commands. Never launch an editor, interactive rebase,
+  login flow or confirmation prompt during an unattended run.
+- On Windows/PowerShell, prefer `rg`, `Get-Content`, `npm.cmd` and `npx.cmd`. Do not
+  assume `rtk` exists or that PowerShell permits `.ps1` npm shims.
+- Do not create branches, commits, tags or pushes unless the user has authorized
+  that Git operation. Never stage everything implicitly.
+- Do not modify CI, lint configuration or lockfiles unless the task requires it.
+- Never store secrets, tokens or credentials in repository notes or logs.
+
+### Verification
+
+- A step is complete only when its result matches the request and the relevant
+  tests, build, lint, type checks or rendered output have been verified in proportion
+  to the change's risk.
+- Tests must be capable of failing against the broken or pre-change behavior. Never
+  delete, skip, weaken or silence a check merely to obtain green output.
+- If a test is invalid, explain why and preserve the evidence. If it fails once and
+  passes on rerun, report it as flaky; do not treat one rerun as clean proof.
+- For implementation, run focused checks while iterating and the relevant full suite
+  before final completion. Compare with the baseline; any new failure is yours.
+- Inspect the final diff for accidental scope, secrets, generated noise and line-
+  ending damage. Run `git diff --check`.
+- For local previews, report the actual URL and port. For UI, inspect representative
+  desktop and mobile views rather than relying on CSS values alone.
+
+## 7. Long unattended runs
+
+Apply this section only when the user explicitly asks for work to run without them
+watching. Do not create `PROGRESS.md` for short interactive work or small edits.
+
+### Progress state
+
+- If `PROGRESS.md` exists for the active task and contains unchecked work, read it
+  fully, re-verify the last completed step and resume from the first unchecked step.
+  Do not restart completed work.
+- Otherwise create `PROGRESS.md` with the goal, dependency-ordered checklist,
+  relevant dirty-worktree state and a dated run log. Put risky independent checks
+  early so blockers surface before broad edits.
+- Use `[ ]` for pending, `[x]` for done and verified, and `[!]` for blocked with a
+  one-line reason. After each step, record only the facts needed to resume.
+- Keep `PROGRESS.md` concise, under roughly 150 lines. Include assumptions, failures,
+  exact verification commands, skipped scope and a final Result section.
+- `PROGRESS.md` is operational memory only. It may never record or imply a product
+  gate approval. `docs/plans/shiftwork/00-status.md` remains authoritative for gates
+  and slices, and approved gate documents remain authoritative for decisions.
+- Never commit `PROGRESS.md` or any other file unless commits are explicitly authorized.
+
+### Autonomy and hard stops
+
+- Execute reversible steps clearly covered by the request without waiting. If a
+  harmless ambiguity remains, choose the reading a careful colleague would choose,
+  record the assumption and continue.
+- If one part is impossible, unsafe or contradicted by evidence, complete independent
+  in-scope work and record why that part was skipped.
+- Stop for missing authority, destructive or irreversible ambiguity, a required
+  product decision, credentials, payment, outreach, deployment, or any software-
+  factory approval. Unattended mode never widens authorization.
+- After three materially different failed attempts at the same step, record the
+  outputs, mark it blocked and move to an independent step. Mark dependent steps
+  blocked with the same cause. If no independent work remains, finish with a clear
+  blocked result instead of guessing.
+
+### Context and output hygiene
+
+- Treat files as durable context. Update progress after each verified step and before
+  a likely compaction so a fresh session can continue without chat history.
+- The mandatory read order still applies. After that, prefer targeted line ranges,
+  `rg`, quiet test output and tailed logs. Avoid dependency trees, binary dumps,
+  lockfile output and redundant full-file reads.
+- Do not echo the full plan or progress log into chat. Give concise milestone updates.
+- Run servers and watchers in a controllable background session with captured logs;
+  record how to stop them and clean them up before completion unless still needed.
+
+## 8. Technology and evidence boundaries for later gates
 
 - Token Factory Sandboxes must execute the learner-owned artifact and produce
   inspectable evidence if sandbox execution is claimed. Public ingress is not
@@ -101,7 +246,7 @@ Use `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
 - Repeated probing can leak hidden contracts. Plan isolation, holdout rotation,
   attempt limits and raw-trace retention; filesystem hiding alone is insufficient.
 - Business consequences must be deterministic reductions from observed outputs.
-  Record orders, incidents, refunds and backlog as synthetic scenario state; do not
+  Record orders, incidents, refunds and backlog as synthetic scenario state; never
   present them as real commercial outcomes.
 - Tavily should discover changes in allow-listed official sources for a reviewed
   mission-curation workflow. A human verifies the primary source before the change
@@ -115,7 +260,7 @@ Use `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
 - Actual Token Factory access, available Nemotron models, Tavily access, costs,
   latency and runtime compatibility remain unverified. No API keys are needed at Gate 1.
 
-## Adjudication warnings to preserve
+## 9. Adjudication warnings and proof boundaries
 
 - KodeKloud Engineer is a direct professional-simulation precursor. DeployU, FDE,
   TENTROPY, Forage, Bitburner and Screeps cover other major components. Treat the
@@ -124,17 +269,15 @@ Use `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
   harness cannot exercise a service. Prove the exact loop with a bounded spike later.
 - Nebius documents endpoint creation on a minutes-scale; never storyboard a literal
   20-second public deployment without measured evidence or a time-compression label.
-- Employer proof requires employer acceptance. Sealed synthetic tests alone do not provide it.
+- Employer proof requires employer acceptance. Sealed synthetic tests do not provide it.
 - The three justification tests are proof slices after Gate 4 approval, not permission
   to bypass the gates: central mechanism, reduced-assistance transfer, Tavily ablation.
 
-## Working conventions and history
+## 10. Repository history and closed directions
 
-- Windows / PowerShell. Prefer `rg`, `npm.cmd` and `npx.cmd`; do not assume `rtk`
-  or working PowerShell npm shims. Report the actual local preview URL and port.
-- Protect unrelated dirty-worktree changes. Never stage everything implicitly.
-  No commits, pushes, installs, purchases or outreach are authorized by Gate 1.
-- Hatchery's files remain as historical evidence and a mechanism donor. Its Gate 1
-  was stopped unapproved when the user selected Shiftwork on 2026-09-15.
+- Protect all unrelated dirty-worktree changes. Current authorization does not include
+  installs, commits, pushes, purchases, participant outreach or deployment.
+- Hatchery's files remain historical evidence and a mechanism donor. Its Gate 1 was
+  stopped unapproved when the user selected Shiftwork on 2026-09-15.
 - Treat Celeste, Aster, GRAFT/FormSwitch, Statement, Doc Rot Hunter and the other
-  rejected detector, migration, code-health and generic assistant directions as closed.
+  rejected detector, migration, code-health and generic-assistant directions as closed.

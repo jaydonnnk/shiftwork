@@ -1,16 +1,17 @@
 # Gate 1 Manual Test Kit — Shiftwork
 
-**Status:** prepared 2026-09-15. No test has run. This is formative evidence, not
-statistical proof, and it is not a measurement of the 20-point north star (that
-needs a sufficiently powered study, decided at Gate 3).
+**Status:** prepared 2026-09-15 and still unrun. Gate 1 was later approved without
+meeting any human threshold in this kit. A future run would be formative evidence,
+not statistical proof or a measurement of the 20-point north star (that needs a
+sufficiently powered study, decided at Gate 3).
 
 ## Purpose and limits
 
-Gate 1 asks whether the product definition on the six screens is understandable
-and whether its decisions feel like real judgement. Use five people with basic
-coding knowledge if possible. Run these personally; Gate 1 authorizes no external
-outreach. Passing this kit must never be presented as learning, employer or
-commercial evidence.
+This optional post-approval kit asks whether the product definition on the six
+screens is understandable and whether its decisions feel like real judgement. Use
+five people with basic coding knowledge if possible. Run these personally; Gate 1
+approval authorizes no external outreach. Passing this kit must never be presented
+as learning, employer or commercial evidence.
 
 Watch items from the 2026-09-15 review:
 
@@ -111,7 +112,9 @@ Copy one block per participant.
 - Any systematic confusion about authority or evidence (test 4) blocks approval.
 - Failures in tests 1–3 or 7 mean the product definition needs revision, not a
   scheduling workaround.
-- Record the aggregate verdict in `00-status.md`, then ask: "Approve Gate 1, or
-  what should change?"
+- Record the aggregate verdict in `00-status.md`. A concrete product-level failure
+  triggers software-factory backtracking: set Gate 1 to `in progress`, revise the
+  product artifacts, and then ask: "Approve Gate 1, or what should change?"
+- A pass does not become learning evidence or create a new approval requirement.
 - This kit never produces a learning or impact claim; the 20-point north star
   requires a sufficiently powered study (feasibility decided at Gate 3).

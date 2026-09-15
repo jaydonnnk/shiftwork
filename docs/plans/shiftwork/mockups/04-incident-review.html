@@ -3,29 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Shiftwork Gate 1 — incident review</title>
-  <link rel="stylesheet" href="wireframe.css">
+  <title>Shiftwork Gate 1 — repair an incident</title>
+  <link rel="stylesheet" href="wireframe.css?v=3">
 </head>
 <body>
-  <div class="prototype">Gate 1 storyboard · proposed incident and repair choices · no test has run</div>
-  <div class="app">
-    <header><div class="brand">SHIFTWORK</div><div class="crumb">Incident BWB-01</div><div class="state">LEARNER OWNS REPAIR</div></header>
-    <div class="shell">
-      <nav aria-label="Shiftwork screens"><a href="01-shift-board.html">Shift board</a><a href="02-owner-brief.html">Owner brief</a><a href="03-customer-shift.html">Customer shift</a><a class="active" href="04-incident-review.html">Incident review</a><a href="05-inherited-shift.html">Inherited shift</a><a href="06-away-shift.html">Away shift</a><div class="nav-note"><strong>Imported from Hatchery</strong>One necessary correction must prevent a later unseen failure.</div></nav>
-      <main>
-        <p class="eyebrow">Observed failure · storyboard</p>
-        <h1>The service answered from yesterday’s stock.</h1>
-        <p class="intro">It told a customer that one copy remained after the final copy had already sold. New stock is data; ignoring freshness is the reusable procedural failure.</p>
-        <section class="grid two">
-          <article class="panel soft stack"><h2>Evidence available to you</h2><div class="metric"><strong>Customer output</strong><br>“Yes, one paperback is available.”</div><div class="metric"><strong>Current shop record</strong><br>Available copies: 0</div><div class="metric"><strong>Committed stance violated</strong><br>Freshness-first — records must be verified before answering.</div></article>
-          <article class="panel stack"><h2>Choose the repair direction</h2><p class="muted">Several repairs are defensible; each trades safety, speed and usefulness differently, and the chosen repair must survive a later unseen case.</p><div class="choice">Verify freshness at answer time<br><span class="muted">Re-check the shop record before replying; refuse or ask when it is stale. Buys: closes the failure family. Costs: slower replies and more refusals.</span></div><div class="choice">Answer from the shop’s live record<br><span class="muted">Read current stock at request time instead of a cached copy. Buys: attacks the root cause. Costs: depends on a source you do not control; a silent sync failure is a new failure family.</span></div><div class="choice">Stop claiming exact stock<br><span class="muted">Say “recently showed N available” with the record’s age. Buys: stays fast and helpful. Costs: softens a hard error into a caveat a customer may ignore.</span></div><p class="muted">The storyboard continues with freshness verification; other repairs change what the later shifts test.</p></article>
-        </section>
-        <div class="divider"></div>
-        <section class="grid three"><article class="panel"><h3>Learner authority</h3><p>Contract, diagnosis acceptance, repair direction and visible regression example.</p></article><article class="panel"><h3>Optional assistant</h3><p>Explain logs, offer bounded hints or propose a labelled patch after being asked.</p></article><article class="panel"><h3>Independent boundary</h3><p>Sealed cases, outcome rules and promotion remain outside both learner and assistant control.</p></article></section>
-        <div class="callout"><strong>Assistance record: 0 of 3 hints used</strong>Authorship must remain inspectable. Passing later checks cannot silently rewrite who made the decision.</div>
-        <div class="actions"><a class="button" href="03-customer-shift.html">Back to evidence</a><a class="button primary" href="05-inherited-shift.html">View the intended later test</a><small>Repair has not been implemented.</small></div>
-      </main>
-    </div>
-  </div>
+  <div class="prototype">Illustrative incident and repair workspace. No test has run and no repair is selected.</div>
+  <header class="topbar">
+    <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
+    <div class="engagement">Incident BWB-01 · stale stock answer</div>
+    <div class="state">You choose the repair</div>
+  </header>
+  <nav class="journey" aria-label="Shiftwork journey"><div class="journey-track">
+    <a href="01-shift-board.html"><span class="step-no">1</span>Shift board</a>
+    <a href="02-owner-brief.html"><span class="step-no">2</span>Set the contract</a>
+    <a href="03-customer-shift.html"><span class="step-no">3</span>Run the shift</a>
+    <a class="active" href="04-incident-review.html" aria-current="page"><span class="step-no">4</span>Repair</a>
+    <a href="05-inherited-shift.html"><span class="step-no">5</span>Return</a>
+    <a href="06-away-shift.html"><span class="step-no">6</span>Away shift</a>
+  </div></nav>
+
+  <main class="page">
+    <section class="page-head">
+      <div>
+        <p class="stage-kicker">Incident BWB-01 · linked to Customer Request 1</p>
+        <h1>The service trusted yesterday’s stock.</h1>
+        <p class="lead">Trace the mismatch, decide which tradeoff you accept, then change the artifact and add a check that can fail.</p>
+      </div>
+      <aside class="phase-card"><strong>Your authority</strong>You accept or reject the diagnosis, choose the repair direction, and write the visible regression check.</aside>
+    </section>
+
+    <section class="workspace equal">
+      <article class="surface danger">
+        <h2>Observed mismatch</h2>
+        <div class="evidence-pair">
+          <div><strong>Your service output</strong><p class="wrong">“One paperback is available.”</p><p class="muted small">Based on a record refreshed yesterday</p></div>
+          <div><strong>Shop record at answer time</strong><p class="truth">0 paperbacks available</p><p class="muted small">Final copy sold 12 minutes earlier</p></div>
+        </div>
+        <ul class="plain-list">
+          <li>Customer request: “Is Salt Roads in stock?”</li>
+          <li>Visible check covered missing stock, not stale stock.</li>
+          <li>Contract stance: whichever rule you committed on the prior screen.</li>
+        </ul>
+      </article>
+
+      <aside class="workbench" aria-label="Repair workspace">
+        <div class="workbench-head">
+          <div><small>Your working artifact</small><strong>Repair workspace</strong></div>
+          <span class="owner-stamp">Awaiting your change</span>
+        </div>
+        <div class="artifact-body">
+          <div class="file-strip"><span>contract</span><span class="active">service logic</span><span>visible checks</span><span>change log</span></div>
+          <div class="diff"><pre><span class="minus">- use newest inventory record</span>
+<span class="plus">+ write your chosen freshness rule</span>
+
+<span class="code-dim">visible check to add:</span>
+given the stock changes after refresh,
+your service should _________</pre></div>
+          <div class="artifact-foot"><span>Version 1 · unchanged</span><span>Assistant use · none</span></div>
+        </div>
+      </aside>
+
+      <section class="surface span-all">
+        <h2>Choose a repair direction</h2>
+        <p class="muted">Each direction protects something and gives something up. None is preselected; the later check must respect what you chose.</p>
+        <div class="repair-grid" role="radiogroup" aria-label="Repair direction">
+          <label class="choice"><input type="radio" name="repair"><span><strong>Check the source at answer time</strong>Protects exact claims from stale records. Adds latency and creates more refusals when the source is unavailable.</span></label>
+          <label class="choice"><input type="radio" name="repair"><span><strong>Refresh on a fixed clock</strong>Keeps answers fast with a known refresh rhythm. Accepts a bounded window where recent sales are not visible.</span></label>
+          <label class="choice"><input type="radio" name="repair"><span><strong>Qualify every stock claim</strong>Keeps the service available and honest about record age. Leaves more interpretation and follow-up work to the customer.</span></label>
+        </div>
+      </section>
+
+      <section class="surface green span-all">
+        <h2>Help is optional and attributable</h2>
+        <p>You can request a log explanation, one hint, or a labelled patch proposal. The record keeps what you asked for and whether you accepted it. External checks and the final result remain outside both learner and assistant control.</p>
+      </section>
+    </section>
+
+    <div class="honesty">The evidence and choices are storyboard content. No repair has been written, tested, or shown to prevent a later failure.</div>
+    <div class="actions"><a class="button" href="03-customer-shift.html">Back to the run evidence</a><a class="button primary" href="05-inherited-shift.html">Record my repair and end the shift</a><small>Nothing is saved in this mockup.</small></div>
+  </main>
 </body>
 </html>

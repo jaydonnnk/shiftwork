@@ -4,36 +4,75 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Shiftwork Gate 1 — shift board</title>
-  <link rel="stylesheet" href="wireframe.css">
+  <link rel="stylesheet" href="wireframe.css?v=3">
 </head>
 <body>
-  <div class="prototype">Gate 1 grayscale wireframe · fictional bookshop · no system has run and no result is measured</div>
-  <div class="app">
-    <header><div class="brand">SHIFTWORK</div><div class="crumb">Bellwether Books · Engagement 01</div><div class="state">PLANNING ONLY</div></header>
-    <div class="shell">
-      <nav aria-label="Shiftwork screens">
-        <a class="active" href="01-shift-board.html">Shift board</a><a href="02-owner-brief.html">Owner brief</a><a href="03-customer-shift.html">Customer shift</a><a href="04-incident-review.html">Incident review</a><a href="05-inherited-shift.html">Inherited shift</a><a href="06-away-shift.html">Away shift</a>
-        <div class="nav-note"><strong>What persists</strong>Your service, decisions, incidents, limitations and the shop's synthetic state.</div>
-      </nav>
-      <main>
-        <p class="eyebrow">Day 1 · one active responsibility</p>
-        <h1>Keep one useful system alive through the week.</h1>
-        <p class="intro">You are responsible for the bookshop's customer-information service. Later shifts inherit what you decide and what your system actually does.</p>
-        <section class="grid three">
-          <article class="panel"><span class="label filled">Active</span><span class="big-number">01</span><h2>Bookshop service</h2><p class="muted">Answer inventory and policy questions without inventing certainty.</p></article>
-          <article class="panel soft"><span class="label">Next</span><span class="big-number">—</span><h2>Customer shift</h2><p class="muted">Locked until you define what correct behaviour means.</p></article>
-          <article class="panel dashed"><span class="label">Later</span><span class="big-number">02</span><h2>Away shift</h2><p class="muted">A fresh business with less help. This tests transfer, not memory.</p></article>
-        </section>
-        <div class="divider"></div>
-        <section class="grid three">
-          <article class="panel soft"><h3>Decision record</h3><p><strong>0</strong> learner decisions recorded</p></article>
-          <article class="panel soft"><h3>Incident ledger</h3><p><strong>0</strong> observed incidents</p></article>
-          <article class="panel soft"><h3>Known limitations</h3><p><strong>Not yet defined</strong></p></article>
-        </section>
-        <div class="callout"><strong>The town is not the score.</strong>Visible progress must come from maintained work and inherited consequences—not XP, pets or cosmetic upgrades.</div>
-        <div class="actions"><a class="button primary" href="02-owner-brief.html">Read the owner brief</a><small>Concept journey only.</small></div>
-      </main>
-    </div>
-  </div>
+  <div class="prototype">Interactive concept with sample data. Nothing shown here has run or been measured.</div>
+  <header class="topbar">
+    <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
+    <div class="engagement">Bellwether Books · your first engagement</div>
+    <div class="state">Planning preview</div>
+  </header>
+  <nav class="journey" aria-label="Shiftwork journey"><div class="journey-track">
+    <a class="active" href="01-shift-board.html" aria-current="page"><span class="step-no">1</span>Shift board</a>
+    <a href="02-owner-brief.html"><span class="step-no">2</span>Set the contract</a>
+    <a href="03-customer-shift.html"><span class="step-no">3</span>Run the shift</a>
+    <a href="04-incident-review.html"><span class="step-no">4</span>Repair</a>
+    <a href="05-inherited-shift.html"><span class="step-no">5</span>Return</a>
+    <a href="06-away-shift.html"><span class="step-no">6</span>Away shift</a>
+  </div></nav>
+
+  <main class="page">
+    <section class="page-head">
+      <div>
+        <p class="stage-kicker">Day one at Bellwether Books</p>
+        <h1>You keep this service running.</h1>
+        <p class="lead">Build one customer-information service, watch it meet real-looking shop requests, and return to the same work after things change.</p>
+      </div>
+      <aside class="phase-card"><strong>Your responsibility</strong>The contract, visible checks, service logic, repair choices, and known limits are yours.</aside>
+    </section>
+
+    <section class="workspace">
+      <article class="paper-note">
+        <span class="tag">Shift brief</span>
+        <p class="note-quote">“Help customers find books and understand our policies without inventing certainty.”</p>
+        <ul class="rule-list">
+          <li><strong>First:</strong> decide what a safe, useful answer means.</li>
+          <li><strong>Then:</strong> write one check a customer answer must pass.</li>
+          <li><strong>During the shift:</strong> run your service against the customer queue.</li>
+          <li><strong>After an incident:</strong> change the artifact and keep the decision on record.</li>
+        </ul>
+        <div class="stat-line">
+          <div><strong>0</strong><span>decisions recorded</span></div>
+          <div><strong>0</strong><span>requests run</span></div>
+          <div><strong>1</strong><span>service you own</span></div>
+        </div>
+      </article>
+
+      <aside class="workbench" aria-label="Learner-owned service preview">
+        <div class="workbench-head">
+          <div><small>Your working artifact</small><strong>Bellwether service</strong></div>
+          <span class="owner-stamp">Owned by you</span>
+        </div>
+        <div class="artifact-body">
+          <div class="file-strip"><span class="active">contract</span><span>visible checks</span><span>service logic</span><span>change log</span></div>
+          <div class="code-window"><pre><span class="code-dim"># You will define this behavior</span>
+<span class="code-key">when</span> a customer asks a question:
+  find the shop evidence
+  decide if it is enough
+  <span class="code-good">answer, ask, or decline</span>
+  attach the evidence used</pre></div>
+          <div class="artifact-foot"><span>Version 0 · not started</span><span>Persists into later shifts</span></div>
+        </div>
+      </aside>
+
+      <section class="surface green span-all">
+        <h2>What makes a later shift different</h2>
+        <p>The next shift inherits this exact artifact, your decisions, the incidents it caused, and its unresolved limits. Progress comes from changing the working service—not from points or badges.</p>
+      </section>
+    </section>
+
+    <div class="actions"><a class="button primary" href="02-owner-brief.html">Define how the service should behave</a><small>The controls illustrate the intended product; they do not save.</small></div>
+  </main>
 </body>
 </html>

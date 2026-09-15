@@ -3,8 +3,8 @@
 Updated: 2026-09-15.
 
 **State:** Superseded. On 2026-09-15 the user explicitly scrapped Hatchery as the
-active project and selected Shiftwork for Gate 1 planning. Hatchery remains here
-only as historical evidence and a source of selected mechanisms; see
+active project and selected Shiftwork, which has since reached Gate 1 approval.
+Hatchery remains here only as historical evidence and a source of selected mechanisms; see
 [`SHIFTWORK_PLAN.md`](SHIFTWORK_PLAN.md).
 **Latest review:** CANNOT JUSTIFY 35 today. Independent planning forecast 14/20
 (28/40); current defensible forecast caps total 16/20 (32/40). Revised conditional
@@ -12,7 +12,8 @@ best case remains 17/20 (34/40), not a demonstrated score.
 **Remaining target gap:** Impact 4.0/5 is below the user's >=4.5 target; 35/40 needs
 real evidence supporting Impact 4.5. Literal organiser exclusivity still fails.
 **Approvals:** no Hatchery gate was approved.
-**Next step:** none for Hatchery. Shiftwork Gate 1 is active and unapproved; see
+**Next step:** none for Hatchery. Shiftwork Gate 1 is approved and its requested
+final review precedes Gate 2 drafting; see
 [`plans/shiftwork/00-status.md`](plans/shiftwork/00-status.md).
 
 This file captures the historical proposal and independent review. It is not an
