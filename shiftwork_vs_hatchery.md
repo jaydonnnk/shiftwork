@@ -3,6 +3,9 @@
 > Superseded as the active handoff on 2026-09-15. The user selected the revised
 > Shiftwork direction after independent adjudication. Current context lives in
 > `docs/SHIFTWORK_PLAN.md` and `docs/plans/shiftwork/`.
+> Everything below is a time-bounded historical snapshot. Any later use of
+> "current," "open work," or the embedded new-chat prompt is archival and must not
+> override the active Shiftwork status files.
 
 ## Completed
 

@@ -1,7 +1,7 @@
 # Product: Shiftwork
 
-**Gate state:** In progress for review. Nothing in this document is an approval,
-measured result or production capability.
+**Gate state:** APPROVED 2026-09-15. Approval covers this product definition and
+the six mockups; it is not a measured result or production capability.
 
 ## Problem
 
@@ -32,7 +32,7 @@ fictional business with new information and policies. Record which important
 decisions and repairs the learner made, whether generated patches caused success,
 and whether the learner voluntarily wants another engagement.
 
-## Product decisions proposed at Gate 1
+## Product decisions approved at Gate 1
 
 - The primary job is applied-AI-engineering education for people with basic coding
   knowledge. Career exploration is context; employer validation is excluded.
@@ -54,9 +54,10 @@ and whether the learner voluntarily wants another engagement.
 - Orders, refunds, backlog and shop state are explicitly fictional scenario outcomes.
   They are not presented as real revenue, trust or employer proof.
 - The first transfer case moves to a bike cooperative with less assistance and
-  question families the bookshop did not have—estimated commitments, safety
-  refusals, context-dependent compatibility. It tests whether the learner
-  re-derives judgement rather than replays bookshop-specific answers.
+  question families the bookshop did not have—future commitments, safety
+  escalation and a state-changing booking that must survive request retries.
+  It tests whether the learner re-derives judgement rather than replays
+  bookshop-specific answers.
 
 ## Announcement — the blog post before the feature
 
@@ -64,44 +65,44 @@ and whether the learner voluntarily wants another engagement.
 
 Meet Shiftwork, an applied-AI learning world where your work does not disappear when
 the lesson ends. Take responsibility for one bookshop service, decide what it must
-get right, and watch real customer requests expose the consequences of your choices.
+get right, and watch the shop's customer requests expose the consequences of your choices.
 Fix an incident once, then return for a later shift that inherits your system,
 decisions and unresolved problems. When you are ready, take an away shift in a new
 business with less help and find out what you can actually transfer.
 
 ## Screen journey
 
-1. **Shift board:** choose the single active bookshop responsibility and see the
-   persistent records that will survive later shifts.
-2. **Owner brief:** commit one correctness stance from competing options with
-   visible tradeoffs; define evidence, uncertainty and refusal boundaries before
-   touching the system.
-3. **Customer shift:** watch illustrative customer requests reach the learner's
-   service and see the proposed observable outcomes.
-4. **Incident review:** inspect one failure, choose among competing repair
-   directions and see exactly how much assistance was used.
-5. **Inherited shift:** return to the same system and face an unseen related case;
-   the screen distinguishes intended causality from unmeasured storyboard claims.
-6. **Away shift:** attempt a fresh business whose question families differ in kind
-   from the bookshop's, with less assistance, and compare the promised evidence
-   against a matched ordinary tutorial.
+1. **Shift board:** see the learner-owned artifact before anything else: its
+   contract, visible checks, service logic and change log, plus the responsibility
+   that will survive later shifts.
+2. **Set the contract:** choose a correctness stance from competing tradeoffs,
+   fill the remaining boundaries and write one visible check before the shift.
+3. **Run the shift:** see the customer queue, the learner's exact sample output,
+   its supporting record and the complete output-to-ledger evidence chain.
+4. **Repair:** trace an incident back to the customer request, choose among
+   balanced repair directions and see where the learner changes the artifact.
+5. **Return:** restore the same learner-owned artifact and history while keeping
+   the later customer case and independent check hidden until the shift starts.
+6. **Away shift:** begin a blank bike-cooperative artifact with less assistance and
+   new reasoning about future commitments, safety escalation and retried actions.
+   Study design remains outside the learner-facing screen.
 
 ## Screens
 
 - [`mockups/01-shift-board.html`](mockups/01-shift-board.html) — the active bookshop
-  responsibility and persistent records.
+  responsibility and the learner-owned service workbench.
 - [`mockups/02-owner-brief.html`](mockups/02-owner-brief.html) — competing
-  correctness stances with visible tradeoffs, committed by the learner.
-- [`mockups/03-customer-shift.html`](mockups/03-customer-shift.html) — illustrative
-  customer requests, service outputs and transparent consequences.
-- [`mockups/04-incident-review.html`](mockups/04-incident-review.html) — evidence,
-  competing repair directions and bounded assistance.
-- [`mockups/05-inherited-shift.html`](mockups/05-inherited-shift.html) — the later
-  unseen case and inherited work.
-- [`mockups/06-away-shift.html`](mockups/06-away-shift.html) — reduced-assistance
-  transfer with question families that differ in kind, and an honest evidence state.
+  correctness stances, editable boundaries and a learner-written visible check.
+- [`mockups/03-customer-shift.html`](mockups/03-customer-shift.html) — an illustrative
+  queue, exact service output and transparent output-to-ledger evidence chain.
+- [`mockups/04-incident-review.html`](mockups/04-incident-review.html) — linked
+  evidence, competing repair directions and the learner's repair workspace.
+- [`mockups/05-inherited-shift.html`](mockups/05-inherited-shift.html) — the restored
+  artifact and history, with the later case still sealed until execution.
+- [`mockups/06-away-shift.html`](mockups/06-away-shift.html) — a learner-facing,
+  reduced-assistance transfer brief without study-design language.
 
-## Unresolved product decisions
+## Open product hypotheses and evidence questions
 
 1. Do target learners want continuing responsibility, or does persistence feel like
    maintenance overhead added to a normal lab?

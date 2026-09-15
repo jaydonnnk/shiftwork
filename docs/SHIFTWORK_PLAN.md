@@ -3,7 +3,9 @@
 Updated: 2026-09-15.
 
 **State:** selected by the user as the sole active hackathon direction.
-**Gate state:** Gate 1 — Product is in progress and unapproved.
+**Gate state:** Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
+pending. A requested final independent Gate 1 review may backtrack only for a
+concrete product-level blocker.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** no application, Sandbox execution, learner study, transfer
 result, Tavily ablation, prize merit or score has been demonstrated.
@@ -47,9 +49,14 @@ outputs and fixed rules. An LLM-authored story about what happened does not coun
 - The user asked to retain Hatchery components that strengthen Shiftwork and to
   preserve the independent verdict, bookshop engagement, authority boundary and
   missed risks as durable context.
-- This decision authorizes Shiftwork Gate 1 preparation and review. It does not
-  approve Gate 1 or authorize implementation, installs, paid services, participant
-  outreach, credential use, commits, pushes or deployment.
+- At project selection, authorization covered Shiftwork Gate 1 preparation and
+  review only; it did not itself approve any gate or authorize implementation,
+  installs, paid services, participant outreach, credential use, commits, pushes
+  or deployment.
+- Later on 2026-09-15, the user explicitly approved Gate 1 after the
+  service-workbench redesign. If the requested final independent review finds no
+  concrete product-level blocker, Gate 2 drafting may begin. Gate 2 approval and
+  implementation remain unauthorized.
 - Hatchery remains historical evidence and a mechanism donor. Do not merge the
   household-assistant product into Shiftwork.
 
@@ -262,9 +269,11 @@ Scope cuts that fund proof:
 
 ## 12. Gate sequence and immediate unknowns
 
-1. Gate 1: approve or revise the learner problem, success target and screen journey.
-2. Gate 2: inspect the repository and decide system boundaries, execution path,
-   persistence, model role, deployment and external services.
+1. Gate 1: approved 2026-09-15. The requested final independent review may
+   backtrack only for a concrete product-level blocker.
+2. Gate 2: after that review passes, inspect the repository and decide system
+   boundaries, execution path, persistence, model role, deployment and external
+   services.
 3. Gate 3: define interfaces, authority enforcement, sealed-case isolation, metrics
    and the three test protocols before implementation bodies.
 4. Gate 4: approve visible end-to-end slices; execute the central-mechanism proof first.

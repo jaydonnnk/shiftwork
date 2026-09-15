@@ -3,29 +3,90 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Shiftwork Gate 1 — owner brief</title>
-  <link rel="stylesheet" href="wireframe.css">
+  <title>Shiftwork Gate 1 — set the contract</title>
+  <link rel="stylesheet" href="wireframe.css?v=3">
 </head>
 <body>
-  <div class="prototype">Gate 1 grayscale wireframe · illustrative learner choices · no architecture is selected</div>
-  <div class="app">
-    <header><div class="brand">SHIFTWORK</div><div class="crumb">Bellwether Books · Owner brief</div><div class="state">LEARNER DECIDES</div></header>
-    <div class="shell">
-      <nav aria-label="Shiftwork screens"><a href="01-shift-board.html">Shift board</a><a class="active" href="02-owner-brief.html">Owner brief</a><a href="03-customer-shift.html">Customer shift</a><a href="04-incident-review.html">Incident review</a><a href="05-inherited-shift.html">Inherited shift</a><a href="06-away-shift.html">Away shift</a><div class="nav-note"><strong>Authority boundary</strong>The assistant may explain options. You commit the important decisions.</div></nav>
-      <main>
-        <p class="eyebrow">Before the first shift</p>
-        <h1>Decide what your service must never get wrong.</h1>
-        <p class="intro">The owner needs helpful answers, but a confident invention is worse than an honest refusal.</p>
-        <section class="grid two">
-          <article class="panel soft stack"><h2>Owner request</h2><p>“Help customers find books, check price and availability, and understand our returns policy.”</p><div class="metric"><strong>Hard boundary</strong><br>Never invent price, availability or a policy exception.</div><div class="metric"><strong>Useful behaviour</strong><br>Ask a clarifying question or decline when evidence is insufficient.</div></article>
-          <article class="panel stack"><h2>Your correctness stance</h2><p class="muted">No default is applied. Your commitment is recorded and inherited by later shifts.</p><div class="choice">Freshness-first<br><span class="muted">Answer only from records verified at answer time. Buys: no stale answers. Costs: more refusals and slower replies.</span></div><div class="choice">Helpful with labels<br><span class="muted">Use the newest record, show its age and label uncertainty. Buys: more completed requests. Costs: a customer may act on stale data anyway.</span></div><div class="choice">Exact where it matters<br><span class="muted">Hard checks for price and stock; judgement elsewhere. Buys: a middle path. Costs: deciding what “matters” is itself a decision you must defend.</span></div><p class="muted">Storyboard preview continues with freshness-first; other stances produce different incidents.</p></article>
-        </section>
-        <div class="divider"></div>
-        <section class="grid three"><article class="panel"><h3>What may be approximate?</h3><p class="muted">Recommendations, clearly labelled.</p></article><article class="panel"><h3>When should it ask?</h3><p class="muted">Ambiguous title, edition or customer intent.</p></article><article class="panel"><h3>Your response budget</h3><p class="muted">Choose before the shift; do not move it after seeing results.</p></article></section>
-        <div class="callout"><strong>Optional help: unused</strong>Hints and proposed patches must remain visible and attributable.</div>
-        <div class="actions"><a class="button" href="01-shift-board.html">Back</a><a class="button primary" href="03-customer-shift.html">Commit decisions and open shift</a><small>Static choices; nothing is saved.</small></div>
-      </main>
-    </div>
-  </div>
+  <div class="prototype">Interactive concept with sample choices. Nothing is saved, run, or measured.</div>
+  <header class="topbar">
+    <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
+    <div class="engagement">Bellwether Books · set the service contract</div>
+    <div class="state">You decide</div>
+  </header>
+  <nav class="journey" aria-label="Shiftwork journey"><div class="journey-track">
+    <a href="01-shift-board.html"><span class="step-no">1</span>Shift board</a>
+    <a class="active" href="02-owner-brief.html" aria-current="page"><span class="step-no">2</span>Set the contract</a>
+    <a href="03-customer-shift.html"><span class="step-no">3</span>Run the shift</a>
+    <a href="04-incident-review.html"><span class="step-no">4</span>Repair</a>
+    <a href="05-inherited-shift.html"><span class="step-no">5</span>Return</a>
+    <a href="06-away-shift.html"><span class="step-no">6</span>Away shift</a>
+  </div></nav>
+
+  <main class="page">
+    <section class="page-head">
+      <div>
+        <p class="stage-kicker">Before the first customer arrives</p>
+        <h1>Write the rules your service must live by.</h1>
+        <p class="lead">There is no hidden “correct” stance. Choose what to protect, what to trade away, and one visible example that proves you meant it.</p>
+      </div>
+      <aside class="phase-card"><strong>Optional help</strong>Ask for an explanation if a tradeoff is unclear. The commitment still belongs to you.</aside>
+    </section>
+
+    <section class="workspace equal">
+      <article class="paper-note">
+        <span class="tag">Owner’s note</span>
+        <p class="note-quote">“Be useful, but never invent a price, stock count, or policy exception.”</p>
+        <p class="muted">Choose the operating stance that best matches your own risk judgement.</p>
+        <div class="choice-set" role="radiogroup" aria-label="Correctness stance">
+          <label class="choice"><input type="radio" name="stance"><span><strong>Verify every exact claim now</strong>More confidence in price and stock. Slower answers and more refusals when records cannot be reached.</span></label>
+          <label class="choice"><input type="radio" name="stance"><span><strong>Use the newest record and show its age</strong>More completed answers. The customer must interpret a clear staleness warning.</span></label>
+          <label class="choice"><input type="radio" name="stance"><span><strong>Reserve hard checks for high-risk facts</strong>Fewer delays on low-risk questions. You must define and maintain the risk boundary.</span></label>
+        </div>
+      </article>
+
+      <aside class="workbench" aria-label="Contract artifact">
+        <div class="workbench-head">
+          <div><small>Your working artifact</small><strong>Contract draft</strong></div>
+          <span class="owner-stamp">Edited by you</span>
+        </div>
+        <div class="artifact-body">
+          <div class="file-strip"><span class="active">contract</span><span>visible checks</span><span>service logic</span></div>
+          <div class="code-window"><pre><span class="code-key">Must never</span>
+Invent price, stock, or policy
+
+<span class="code-key">May</span>
+Recommend with a clear label
+
+<span class="code-key">Ask when</span>
+<span class="code-dim">You still need to decide</span>
+
+<span class="code-key">Response limit</span>
+<span class="code-dim">You still need to decide</span></pre></div>
+          <div class="artifact-foot"><span>Draft · not committed</span><span>No stance preselected</span></div>
+        </div>
+      </aside>
+
+      <section class="surface span-all">
+        <h2>Finish the contract</h2>
+        <div class="contract-fields">
+          <div class="field"><label for="ask-rule">Ask for clarification when</label><select id="ask-rule"><option>Choose a boundary…</option><option>Title or edition is unclear</option><option>Any requested fact is unclear</option><option>Only high-risk facts are unclear</option></select></div>
+          <div class="field"><label for="wait-limit">Maximum answer time</label><select id="wait-limit"><option>Choose a limit…</option><option>1 second</option><option>3 seconds</option><option>8 seconds</option></select></div>
+          <div class="field"><label for="known-limit">Known limitation to declare</label><input id="known-limit" type="text" placeholder="Write one honest limit"></div>
+        </div>
+      </section>
+
+      <section class="surface signal span-all">
+        <h2>Write one visible check before the shift</h2>
+        <div class="contract-fields">
+          <div class="field"><label for="given">Given</label><textarea id="given">A stock record has no refresh time.</textarea></div>
+          <div class="field"><label for="when">When</label><textarea id="when">A customer asks if the title is available.</textarea></div>
+          <div class="field"><label for="then">Then</label><textarea id="then" placeholder="Write the behavior you expect"></textarea></div>
+        </div>
+      </section>
+    </section>
+
+    <div class="honesty">The inputs work as a mockup, but your choices are not saved and no customer request is sent.</div>
+    <div class="actions"><a class="button" href="01-shift-board.html">Back to the board</a><a class="button primary" href="03-customer-shift.html">Commit my contract and open the shift</a><small>Sample journey only.</small></div>
+  </main>
 </body>
 </html>
