@@ -1,7 +1,7 @@
 # Status: Shiftwork
 
 - Gate 1 — Product: APPROVED 2026-09-15
-- Gate 2 — Architecture: pending
+- Gate 2 — Architecture: APPROVED 2026-09-15
 - Gate 3 — Program Design: pending
 - Gate 4 — Slice plan: pending
 
@@ -68,6 +68,62 @@ No slices approved or implemented. Define the checklist at Gate 4.
   and drafted. If it finds a product-level blocker, apply the software-factory
   backtracking rule instead. This authorizes Gate 2 drafting only—not Gate 2 approval,
   implementation, installs, credentials, deployment, purchases or outreach.
+- 2026-09-15 final independent review: **PASS — GATE 1 FINAL REVIEW**. Checkout verified
+  on branch `shiftwork/gate-2-architecture` (`git merge-base --is-ancestor main HEAD`
+  passed, worktree clean); `docs/adr/` does not exist. Checks performed: (1) document/
+  screen consistency between `01-product.md` and screens 01–06; (2) static scans — no
+  scripts, external URLs, inline `src`, `url()` in CSS, or preselected radio/checkboxes,
+  all 42 local hrefs resolve, all `for`/`id` pairs match; (3) live browser matrix of all
+  six screens at 1280/640/390 px (18 combinations) with no horizontal overflow, active
+  journey step visible and correct media-query branch in each; (4) all six journey links
+  clicked through to the correct screen and active step; (5) keyboard/control check —
+  logical tab order, visible 3 px `#f0bd4f` focus outline, radios/selects/text input/
+  checkbox all operable; (6) clean browser console; (7) visual screenshot inspection
+  including narrow-width collapse of the screen 03 trace; (8) claim hygiene — ledger
+  labelled synthetic, prototype/evidence disclaimers present, no real-outcome claims.
+  Minor non-blocking findings recorded, not fixed (Gate 1 artifacts are approved):
+  `wireframe.css:423-432` stretches the three `06-away-shift.html:71-73` checkboxes to
+  full width (cosmetic; operable, labelled, keyboard-accessible); page `<title>`s
+  contain "Gate 1"; screen 06's yellow strip and screen 04's "prior screen" line are
+  static-mockup wording. `docs/plans/shiftwork/evidence/` is empty — no screenshot
+  images exist on disk or in git history, so nothing was available to inspect; the
+  pre-redesign screenshots were already recorded as not retained. Evidence limitations:
+  the five-person manual kit remains UNRUN and every human threshold unmet — this
+  review is agent/browser inspection, not human or learning evidence; literal 200%
+  browser zoom was NOT verifiable (the in-app browser exposes no zoom control), so
+  viewport-equivalent reflow at 640 px and 390 px was substituted; rendering was
+  exercised in one Chromium engine (DPR 2) via same-origin iframes, with no second
+  engine. Metadata alignment: `01-product.md:3` and `docs/SHIFTWORK_PLAN.md` lines
+  6–8, 55–59 and 272 already match the recorded approval — no edit was required. Gate
+  1 state is unchanged (APPROVED); Gate 2 was set to `in progress` and drafting began.
+- 2026-09-15 Gate 2: `02-architecture.md` **drafted, not approved**. The draft covers
+  the bookshop central loop only: controller/sandbox split (controller owns all durable
+  state; sandboxes are disposable), artifact versioning and restart restoration,
+  evaluator/credential/sealed-case isolation, repeated-probing leakage controls,
+  deterministic append-only hash-chained ledger with pure-reducer replay, bounded
+  Nemotron assist roles with authorship preservation, the Tavily
+  curation-only boundary, env var names only, observability, local dev path,
+  verified/proposed/unverified claims with primary-source links, least-confident
+  decisions, failure containment and rollback. Four ADR candidates are listed inside
+  the document (sealed-evaluator isolation; deterministic ledger ownership and replay;
+  artifact versioning and restoration; execution topology — promotable only after the
+  bounded sandbox capability spike). **No ADR files were created** and `docs/adr/`
+  does not exist.
+- 2026-09-15 Gate 2 review and approval: the draft was independently reviewed this
+  session for internal consistency, fit against `AGENTS.md` §8 evidence boundaries and
+  the Gate 2 template, and five primary sources were re-fetched to spot-check the §16
+  "Verified" claims (sandbox overview, Nemotron service page, `contree` CLI page,
+  Serverless overview, inference quickstart) — all held. One correction was applied:
+  §1 Fit now lists `shiftwork_vs_hatchery.md` among the top-level docs. Non-blocking
+  notes carried to later gates: `HACKATHON_REQUIREMENTS.md` says "DevPods" but the live
+  Nebius docs name it "Devlabs" (the architecture uses the correct current name; the
+  requirements file is stale — do not edit it without authorization); the away-shift
+  transfer (the north-star metric) has no per-engagement assist/check-family config yet
+  (Gate 3); and the local-first design must still satisfy the hackathon's hosted-demo
+  obligation (Gate 4). The user then explicitly **APPROVED Gate 2** on 2026-09-15.
+  Gate 2 approval covers the architecture document only; it does not authorize Gate 3
+  drafting, implementation, installs, credentials, ADR file creation, commits,
+  deployment or outreach. Gate 3 has not started and no implementation exists.
 - Read `../../../AGENTS.md`, `../../SHIFTWORK_PLAN.md`,
   `../../../HACKATHON_REQUIREMENTS.md` and every file in this folder before continuing.
 - Apply `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
@@ -100,3 +156,12 @@ No slices approved or implemented. Define the checklist at Gate 4.
 - Gate 1 — Product: approved by the user on 2026-09-15 after the service-workbench
   redesign. The final independent review remains a requested safeguard, not human
   evidence and not Gate 2 approval.
+- Gate 1 — Product: final independent review completed 2026-09-15 with verdict
+  **PASS — GATE 1 FINAL REVIEW**. No backtrack. Gate 1 remains APPROVED; Gate 2
+  drafting authorized and started.
+- Gate 2 — Architecture: approved by the user on 2026-09-15 after an independent
+  review of `02-architecture.md` (internal consistency, `AGENTS.md` §8 boundaries,
+  Gate 2 template fit) and a re-fetch of five primary sources confirming the §16
+  "Verified" claims. One correction applied (§1 Fit enumeration). Approval covers the
+  architecture document only; it does not authorize Gate 3, implementation, ADR file
+  creation, installs, credentials, commits, deployment or outreach.
