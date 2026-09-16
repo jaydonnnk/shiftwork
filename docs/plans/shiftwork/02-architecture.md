@@ -1,7 +1,8 @@
 # Architecture: Shiftwork — first bookshop engagement
 
-Gate: 2 — Architecture (draft, **not approved**). Written 2026-09-15.
-Sources accessed 2026-09-15. No ADR files exist; `docs/adr/` has not been created.
+Gate: 2 — Architecture (APPROVED 2026-09-15). Written 2026-09-15.
+Sources accessed 2026-09-15. ADRs 0001–0003 were later promoted from §19 candidates
+during Gate 3 drafting (2026-09-15); candidate #4 stays deferred until spike evidence.
 
 Scope: only the first bookshop engagement and the central loop —
 learner-owned versioned service → fixed request batch → isolated execution evidence →
@@ -362,8 +363,9 @@ spike before slices depend on them):**
 
 ## 19. ADR candidates
 
-For durable decisions that may outlive this gate. **None are created now**
-(`docs/adr/` does not exist); each would be proposed only with Gate 2 approval.
+Candidates 1–3 were recorded as ADRs 0001–0003 in `docs/adr/` during Gate 3
+drafting on 2026-09-15, after Gate 2 approval. Candidate 4 remains deferred until
+spike evidence; recording the first three does not approve Gate 3 or the topology.
 
 1. **Sealed-evaluator isolation** — expected outcomes and evaluator logic never
    enter any learner- or model-readable environment; evaluation is deterministic

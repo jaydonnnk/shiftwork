@@ -1,11 +1,12 @@
 # Shiftwork — working brief and adjudication register
 
-Updated: 2026-09-15.
+Updated: 2026-09-16.
 
 **State:** selected by the user as the sole active hackathon direction.
 **Gate state:** Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
-pending. A requested final independent Gate 1 review may backtrack only for a
-concrete product-level blocker.
+APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-16; Gate 4 — Slice
+Plan pending (drafting not yet authorized). Backtrack an earlier gate only for a
+concrete blocker.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** no application, Sandbox execution, learner study, transfer
 result, Tavily ablation, prize merit or score has been demonstrated.
@@ -54,9 +55,11 @@ outputs and fixed rules. An LLM-authored story about what happened does not coun
   installs, paid services, participant outreach, credential use, commits, pushes
   or deployment.
 - Later on 2026-09-15, the user explicitly approved Gate 1 after the
-  service-workbench redesign. If the requested final independent review finds no
-  concrete product-level blocker, Gate 2 drafting may begin. Gate 2 approval and
-  implementation remain unauthorized.
+  service-workbench redesign, the requested final independent review passed, and the
+  user explicitly approved Gate 2 (the architecture document) on 2026-09-15. On
+  2026-09-16 the user approved Gate 3 (the program-design document) after the
+  seven-blocker revision; implementation, installs, credentials, commits, deployment
+  and outreach remain unauthorized.
 - Hatchery remains historical evidence and a mechanism donor. Do not merge the
   household-assistant product into Shiftwork.
 
@@ -217,7 +220,7 @@ the later consequence is narrated instead of caused by execution.
 ### Test 2 — reduced-assistance transfer
 
 Compare Shiftwork with a strong static tutorial using matched time, visible tests
-and hint budget. Use structurally equivalent bookshop and bike-cooperative tasks and
+and total assistance budget. Use structurally equivalent bookshop and bike-cooperative tasks and
 counterbalance their order. Record independently passed cases, time, hints, generated
 patch use, learner explanation, learner-authored decisions and voluntary return.
 
@@ -232,6 +235,13 @@ Record valid new constraints, false positives, review time and executable fixtur
 changed. Kill Tavily centrality if it finds nothing useful beyond polling, changes
 only prose, lets unverified content affect scoring, or creates more review burden
 than manual maintenance. This can kill the Tavily prize strategy without killing Shiftwork.
+
+Gate 3 pre-registers the bounded historical replay in `03-program-design.md` §8.1:
+12 dated events across four official domains in a fixed 2025-08-01–2026-07-31
+window, method-blind chronological selection within known-page/structural strata,
+and fail-closed thresholds. Tavily must produce at least two useful structural
+discoveries across two domains, with at most 10 reviewed candidates and a median
+30 review minutes per useful frozen fixture. These are proposed falsifiers, not results.
 
 ## 10. What both comparison agents missed or overstated
 
@@ -269,13 +279,11 @@ Scope cuts that fund proof:
 
 ## 12. Gate sequence and immediate unknowns
 
-1. Gate 1: approved 2026-09-15. The requested final independent review may
-   backtrack only for a concrete product-level blocker.
-2. Gate 2: after that review passes, inspect the repository and decide system
-   boundaries, execution path, persistence, model role, deployment and external
-   services.
-3. Gate 3: define interfaces, authority enforcement, sealed-case isolation, metrics
-   and the three test protocols before implementation bodies.
+1. Gate 1: approved 2026-09-15; final independent review passed 2026-09-15.
+2. Gate 2: approved 2026-09-15 — system boundaries, execution path, persistence,
+   model role, deployment and external services decided in `02-architecture.md`.
+3. Gate 3: approved 2026-09-16 — interfaces, authority enforcement, sealed-case
+   isolation, metrics and the three test protocols defined before implementation bodies.
 4. Gate 4: approve visible end-to-end slices; execute the central-mechanism proof first.
 
 Unknowns include Token Factory Sandbox access, available Nemotron models, Tavily

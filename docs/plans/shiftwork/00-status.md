@@ -2,7 +2,7 @@
 
 - Gate 1 — Product: APPROVED 2026-09-15
 - Gate 2 — Architecture: APPROVED 2026-09-15
-- Gate 3 — Program Design: pending
+- Gate 3 — Program Design: APPROVED 2026-09-16
 - Gate 4 — Slice plan: pending
 
 ## Slices
@@ -124,6 +124,96 @@ No slices approved or implemented. Define the checklist at Gate 4.
   Gate 2 approval covers the architecture document only; it does not authorize Gate 3
   drafting, implementation, installs, credentials, ADR file creation, commits,
   deployment or outreach. Gate 3 has not started and no implementation exists.
+- 2026-09-15 Gate 3 (in progress): the user approved a drafting plan that decided the
+  five open questions. (1) Stack confirmed concretized: Python 3.12+, FastAPI, SQLite
+  via stdlib `sqlite3` + raw parameterized SQL (no ORM/Alembic), pydantic v2
+  (`frozen=True`), pytest, plain-HTML/vanilla-JS static client; learner artifact is one
+  loopback HTTP JSON service with a stdlib-only template. (2) Spike framing confirmed:
+  the deterministic core is designed against a fake/local executor; the real sandbox
+  adapter is a Gate 4 slice gated on the capability spike, which is specified but NOT
+  run (credentials unauthorized). (3) Config numbers proposed as provisional defaults
+  in `03-program-design.md` §7 for the user to challenge. (4) Original study verdict:
+  no powered study before the 2026-10-30 deadline; no impact claim at submission.
+  The original estimate and claim of a frozen protocol were corrected on 2026-09-16
+  (see below and `03-program-design.md` §8). (5) ADRs #1–#3 created in `docs/adr/`
+  (sealed-evaluator isolation; deterministic ledger ownership and replay; artifact
+  versioning and restoration); ADR #4 (execution topology) remains deferred until spike
+  evidence. Delivered: `03-program-design.md` (files, types & signatures, call stack, a
+  39-test plan, config appendix, study decision, spike protocol, least-confident
+  decisions) and the three ADR files. The Gate 3 document records two new tables
+  (`engagement_config`, `rotation_draws`) and two endpoint additions (`POST
+  /api/shifts/{id}/close`, `GET /api/engagements/{slug}/assist-events`) beyond
+  architecture §3/§4. Also fixed the stale Gate 2 "draft, not approved" header in
+  `02-architecture.md` and the stale gate-state lines in `docs/SHIFTWORK_PLAN.md`.
+  Gate 3 is NOT approved; the user's explicit decision is pending. No implementation
+  code, spike run, installs, credentials, commits or deployment occurred.
+- 2026-09-16 Gate 3 review corrections (documentation only): user authorized applying
+  fixes and reporting manual needs, not gate approval or implementation. Rotation now
+  draws one fresh variant per family per attempt, atomically with the run; reservations
+  survive failures/restarts. Six variants per bookshop family cover two three-attempt
+  shifts; the bike co-op keeps three per family (27 proposed cases total). Refills need
+  newly authored variants, never a reset of exposure history. Defined `ChainStatus`,
+  five response projections and `SealedCase`; clarified fixed bookshop "May" copy,
+  public-versus-sealed comparisons, decision records and unresolved-incident inheritance.
+  Reconciled assist roles, deferral references and architecture §19's stale ADR note.
+  The test plan now has 41 named specifications, including full-budget cross-shift
+  holdouts and rendered synthetic labels; these are not implemented or passing tests.
+  The prior review's study arithmetic was wrong: the two-independent-arm approximation
+  is about 93 participants/arm (186 total), not 47. No impact claim at submission remains
+  the plan; the comparison requirements are not a complete frozen study protocol.
+  Removed the false temp-directory isolation claim: local execution is trusted-fixture-
+  only. Restored gate backtracking for spike failures that invalidate approved decisions.
+  Delta verification: `git diff --check` and inline Node assertions passed for document
+  whitespace/fences, gate state, ADR status, defined API types, 41 unique numbered test
+  specifications, nine reason-code mappings, rotation capacity (old inventory fails)
+  and the corrected power arithmetic. A second bounded, read-only agent check found
+  missing current request text and visible-check correlation in the new projections;
+  both fields and their test assertions were added and the document checks rerun.
+  This is static documentation verification, not runtime, security, rendering, human
+  or learning evidence, and neither LLM review is an independent oracle. The earlier
+  broad PASS subclaims are not a correctness certificate. Gate 3 remains NOT approved;
+  Gate 4 has not started. Next manual step is review of the revised Gate 3 document
+  and an explicit approval decision; credentials and participant work are not needed
+  for this documentation pass. No build, install, spike, external service use, commit
+  or push occurred. `AGENTS.md` retains an older gate-state snapshot; this status file
+  records the later approvals, and no project instruction file was edited.
+- 2026-09-16 Gate 3 adversarial follow-up (documentation only): the review returned
+  **STILL NEEDS ATTENTION** with seven specification blockers. The user selected the
+  recommended fixes with two refinements: contract catalogs are immutable/versioned and
+  evaluated for consistency with learner choices (not a hidden correct stance); Tavily
+  remains in scope with a pre-registered, falsifiable ablation. The revised design now
+  derives customer text from validated structured output; hashes files + contract +
+  catalog version together; defines safe draft/public API projections; uses a shared
+  total assist cap (bookshop 6, away shift 2); records aggregate version-level assistance
+  without proposal-to-version links while retaining the minimal accepted/rejected signal
+  required by the approved authorship measure; makes shift close atomic/idempotent and
+  hash-chained; freezes versioned contract option ids with free-text declared limits as
+  a non-scored pressure valve; and specifies the Tavily corpus, selection rule and kill
+  thresholds. The test plan now contains 49 named specifications. Public official-source
+  pages were read to sanity-check the Tavily domain classes; no Tavily API, credentials,
+  build, test, spike, deployment, implementation, commit or push occurred. **Gate 3 is
+  still NOT approved** and Gate 4 has not started; explicit user approval remains next.
+- 2026-09-16 Gate 3 approval: the user explicitly **APPROVED Gate 3** after the seven-blocker
+  revision. The approving pass was a full in-session document review of `03-program-design.md`,
+  `00-status.md` and `SHIFTWORK_PLAN.md` §9: every blocker has design text plus a named test
+  specification that can fail against the pre-revision behavior — customer text derived from
+  validated structure (test 42); file bytes + contract + catalog hash in the version
+  fingerprint (tests 21/43); safe draft/public projections with no internal refs (20/41/45);
+  one shared assist cap per shift (38/46); atomic idempotent close (33); immutable versioned
+  catalogs with consistency-not-correctness and a non-scored free-text limit valve (14/22/43/44);
+  pre-registered Tavily corpus and kill thresholds (48/49). Both user refinements to the
+  earlier review advice were accepted: the minimal accepted/rejected patch signal stays with
+  no proposal-to-version link (aggregate counts cannot answer the approved authorship
+  question), and the Tavily bar is two cross-domain structural discoveries at 10-candidate /
+  30-minute review caps. Verified this session: 49 sequential test specifications;
+  `SHIFTWORK_PLAN.md` §9 matches §8.1; ADRs 0001–0003 exist; working tree is docs-only — no
+  implementation, no commit. Limits: static document review only — not runtime, security,
+  human or learning evidence; no LLM review is an independent oracle; the 12-event Tavily
+  corpus is not assembled and no API call occurred. Gate 3 approval covers the program-design
+  document only; it does not authorize Gate 4 drafting, implementation, installs, credentials,
+  spike runs, commits, deployment or outreach. Gate 4 has not started. The `AGENTS.md` §3
+  gate-state snapshot was updated the same day (explicit user instruction) to record Gates
+  1–3 approved.
 - Read `../../../AGENTS.md`, `../../SHIFTWORK_PLAN.md`,
   `../../../HACKATHON_REQUIREMENTS.md` and every file in this folder before continuing.
 - Apply `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
@@ -165,3 +255,8 @@ No slices approved or implemented. Define the checklist at Gate 4.
   "Verified" claims. One correction applied (§1 Fit enumeration). Approval covers the
   architecture document only; it does not authorize Gate 3, implementation, ADR file
   creation, installs, credentials, commits, deployment or outreach.
+- Gate 3 — Program Design: approved by the user on 2026-09-16 after the adversarial
+  follow-up revision resolved all seven specification blockers and a full document review
+  of the revised design found no blockers. Approval covers `03-program-design.md` only;
+  it does not authorize Gate 4 drafting, implementation, installs, credentials, spike
+  runs, commits, deployment or outreach.
