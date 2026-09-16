@@ -41,14 +41,15 @@ summaries when a time-sensitive external claim is being made.
 ## 3. Current direction and authorization
 
 - Current gate state: Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
-  pending; Gate 3 — Program Design pending; Gate 4 — Slice Plan pending.
+  APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-16; Gate 4 — Slice
+  Plan pending (drafting not yet authorized).
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.
-- On 2026-09-15 the user later explicitly approved Shiftwork Gate 1 after the
-  service-workbench redesign. A requested final independent review remains a
-  safeguard: backtrack Gate 1 only for a concrete product-level blocker; otherwise
-  Gate 2 drafting may begin.
+- On 2026-09-15 the user explicitly approved Shiftwork Gate 1 after the
+  service-workbench redesign; the requested final independent review later returned
+  PASS, and Gate 2 was drafted and approved the same day. On 2026-09-16 the user
+  approved Gate 3 after the seven-blocker revision. Gate backtracking follows §5.
 - Gate 1 approval does not approve Gate 2, a technology stack, implementation,
   installs, credentials, participant outreach, purchases, external service use,
   deployment, commits or pushes.
