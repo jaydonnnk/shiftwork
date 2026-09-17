@@ -105,9 +105,9 @@ re-verified. Factual field list only.
 - **Tavily question**: "Did you use Tavily in your project? To qualify: your project
   must make a functional, runtime call to the Tavily API as part of its solution."
   The approved design keeps Tavily in the offline curation pipeline, never in the
-  app's runtime path (architecture §11; Gate 3 test 39); whether a shipped,
+  app's runtime path (architecture S11; Gate 3 test 39); whether a shipped,
   operator-run curation CLI's live `discover()` call satisfies the qualification is
-  an interpretation question. Decision of record: Gate 4 `04-slices.md` §11
+  an interpretation question. Decision of record: Gate 4 `04-slices.md` S11
   decision 5 — pursue the bonus via that shipped call, answer "yes" only after it
   actually ships, and let the Test 3 KEEP/DROP verdict govern the pitch.
 - Builders & Brews IRL city award dropdown (optional).

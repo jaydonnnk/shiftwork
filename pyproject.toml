@@ -1,0 +1,16 @@
+[project]
+name = "shiftwork"
+version = "0.1.0"
+description = "Shiftwork — persistent applied-AI-engineering learning environment (Nebius x NVIDIA hackathon build)."
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "httpx",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]

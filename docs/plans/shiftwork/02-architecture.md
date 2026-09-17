@@ -1,7 +1,7 @@
 # Architecture: Shiftwork — first bookshop engagement
 
 Gate: 2 — Architecture (APPROVED 2026-09-15). Written 2026-09-15.
-Sources accessed 2026-09-15. ADRs 0001–0003 were later promoted from §19 candidates
+Sources accessed 2026-09-15. ADRs 0001–0003 were later promoted from S19 candidates
 during Gate 3 drafting (2026-09-15); candidate #4 stays deferred until spike evidence.
 
 Scope: only the first bookshop engagement and the central loop —
@@ -18,10 +18,10 @@ after Gate 4.
   introduces the first runtime; nothing existing is modified.
 - The current six mockups (`docs/plans/shiftwork/mockups/`) stay the UI source of
   truth and are implemented later against this architecture, not now.
-- The controller (see §2) is a new local application. It does not replace or wrap
+- The controller (see S2) is a new local application. It does not replace or wrap
   any existing service.
 - `.gitignore` already excludes `.env*` and key material; secrets must never enter
-  the repository (§12).
+  the repository (S12).
 
 ## 2. Runtime and module boundaries
 
@@ -116,12 +116,12 @@ Main path — one shift run:
 5. Harness starts the learner service on loopback inside the sandbox, sends the
    batch in fixed order, captures every response, status, timing and log.
 6. Captures return to the controller; the sandbox is torn down (it is never a
-   source of truth — see §6).
+   source of truth — see S6).
 7. Deterministic evaluator (controller-side, no LLM) runs the check set against
    the captures: invariants, contract-conformance (using the committed contract),
    sealed acceptance cases, regression checks from earlier shifts.
 8. Ledger reducer derives the event set from check results with a pure function
-   and hash-chains the new events (§10).
+   and hash-chains the new events (S10).
 9. UI renders the run: exact outputs, check outcomes, incident openings, ledger
    deltas. No sealed expectation is rendered.
 10. Learner repairs: edit → new version → new run. The incident links the failing
@@ -165,7 +165,7 @@ Main path — one shift run:
   | Tavily key | curation tool only | no | no |
 
 - Mechanisms for scoping and injecting the inference key (env at provision time,
-  file transfer, egress rules) are documented as unverified in §16 and must be
+  file transfer, egress rules) are documented as unverified in S16 and must be
   pinned by the capability spike before slices depend on them.
 - The learner artifact must run with no controller credentials present; if the
   spike shows safe injection is impossible, a controller-side inference proxy on
@@ -240,7 +240,7 @@ controller mints and injects), `SHIFTWORK_ASSIST_MODEL`.
 
 External systems: Nebius Token Factory (inference + Sandboxes), Tavily (curation
 only). Nothing else. No webhooks; no public ingress into the sandboxes is required
-by this design (§16 covers what remains unverified).
+by this design (S16 covers what remains unverified).
 
 ## 13. Observability and execution evidence
 
@@ -279,7 +279,7 @@ by this design (§16 covers what remains unverified).
   produce or fail to produce that evidence.
 - Hackathon obligations still require a real runtime call to Token Factory
   inference or execution on Nebius AI Cloud, plus at least one NVIDIA open-source
-  model; the proposed design does both if the unverified items in §16 resolve
+  model; the proposed design does both if the unverified items in S16 resolve
   favorably (and the ablation checks must survive regardless of track).
 
 ## 16. Verified facts, proposed architecture, unverified assumptions
@@ -309,7 +309,7 @@ by this design (§16 covers what remains unverified).
   https://docs.tavily.com/documentation/quickstart
 
 **Proposed (this document; decided here, not yet verified against reality):**
-everything in §2–§15 — the controller/sandbox split, tables, routes, reducer,
+everything in S2–S15 — the controller/sandbox split, tables, routes, reducer,
 isolation model, local-dev path.
 
 **Unverified (must not be assumed either way; resolve with a bounded capability
