@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shiftwork tracer board</title>
+<style>
+  :root { color-scheme: dark; }
+  body { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; padding: 24px; background: #101216; color: #d7dae0; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .sub { color: #8d949e; font-size: 12px; margin-bottom: 12px; }
+  .synthetic { display: inline-block; border: 1px solid #6b5b2a; background: #2a2413; color: #e2c56d; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 16px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  button { font: inherit; font-size: 12px; padding: 6px 12px; border-radius: 6px; border: 1px solid #3a3f47; background: #1a1e24; color: #d7dae0; cursor: pointer; }
+  button:hover { background: #22272e; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
+  .card { border: 1px solid #2a2f36; border-radius: 8px; padding: 12px; background: #14171c; }
+  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #8d949e; margin: 0 0 8px; }
+  .kv { font-size: 12px; line-height: 1.7; }
+  .kv b { color: #8d949e; font-weight: normal; display: inline-block; min-width: 150px; }
+  pre { font-size: 11px; line-height: 1.5; overflow: auto; max-height: 260px; background: #0c0e12; border: 1px solid #22262c; border-radius: 6px; padding: 8px; margin: 0; }
+  #status { font-size: 12px; min-height: 18px; margin: 4px 0; color: #7fb3ff; white-space: pre-wrap; }
+  #status.error { color: #ff8080; }
+  .empty { color: #6d747d; }
+</style>
+</head>
+<body>
+  <h1>Shiftwork: tracer shift board</h1>
+  <div class="sub">Slice 1 tracer. Everything below the label is scenario state, not production data.</div>
+  <div class="synthetic">Synthetic scenario state. Not real revenue, trust or employer proof.</div>
+
+  <div class="actions">
+    <button id="btn-open">Open shift</button>
+    <button id="btn-save">Save draft (append note)</button>
+    <button id="btn-freeze">Freeze version</button>
+    <button id="btn-run">Run shift</button>
+    <button id="btn-close">Close shift</button>
+    <button id="btn-refresh">Refresh</button>
+  </div>
+
+  <div id="status"></div>
+
+  <div class="grid">
+    <div class="card"><h2>Shift</h2><div id="shift" class="kv"></div></div>
+    <div class="card"><h2>Artifact version</h2><div id="version" class="kv"></div></div>
+    <div class="card"><h2>Latest run</h2><div id="run" class="kv"></div></div>
+    <div class="card"><h2>Incidents</h2><div id="incidents" class="kv"></div></div>
+    <div class="card"><h2>Ledger totals</h2><div id="ledger" class="kv"></div></div>
+    <div class="card"><h2>Board payload (raw)</h2><pre id="raw"></pre></div>
+  </div>
+
+<script>
+const SLUG = "bookshop";
+let shiftId = null;
+
+const status = (message, isError = false) => {
+  const el = document.getElementById("status");
+  el.textContent = message;
+  el.className = isError ? "error" : "";
+};
+
+const api = async (path, options = {}) => {
+  const response = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
+  const payload = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(response.status + " " + (payload ? JSON.stringify(payload) : path));
+  }
+  return payload;
+};
+
+const line = (label, value) =>
+  "<div><b>" + label + "</b>" +
+  (value === null || value === undefined || value === "" ? "<span class='empty'>none</span>" : value) +
+  "</div>";
+
+const render = (board) => {
+  const shift = board.latest_shift;
+  const version = board.latest_version;
+  const run = board.latest_run;
+  document.getElementById("shift").innerHTML =
+    line("id", shift && shift.id) +
+    line("seq", shift && shift.seq) +
+    line("state", shift && shift.state) +
+    line("attempts used", board.attempts_used + " of " + board.attempt_limit) +
+    line("attempts remaining", board.attempts_remaining);
+  document.getElementById("version").innerHTML =
+    line("id", version && version.id) +
+    line("content hash", version && version.content_hash) +
+    line("created by", version && version.created_by);
+  document.getElementById("run").innerHTML =
+    line("id", run && run.id) +
+    line("state", run && run.state) +
+    line("adapter", run && run.adapter) +
+    line("requests executed", board.requests_run);
+  document.getElementById("incidents").innerHTML = board.open_incidents.length
+    ? board.open_incidents.map((incident) =>
+        line(incident.id, incident.reason_code + " (" + incident.state + ")")).join("")
+    : "<span class='empty'>no open incidents</span>";
+  document.getElementById("ledger").innerHTML =
+    line("events", board.ledger_event_count) +
+    line("chain status", board.chain_status) +
+    Object.entries(board.ledger_totals)
+      .map(([type, count]) => line(type.toLowerCase(), count)).join("");
+  document.getElementById("raw").textContent = JSON.stringify(board, null, 2);
+  if (shift && shift.state === "open") { shiftId = shift.id; }
+};
+
+const refresh = async () => {
+  const board = await api("/api/engagements/" + SLUG + "/board");
+  render(board);
+};
+
+const runAction = async (label, action) => {
+  try {
+    status(label + "...");
+    await action();
+    await refresh();
+    status(label + ": done");
+  } catch (error) {
+    status(label + " failed: " + error.message, true);
+  }
+};
+
+document.getElementById("btn-open").onclick = () =>
+  runAction("open shift", async () => {
+    const shift = await api("/api/engagements/" + SLUG + "/shifts", { method: "POST" });
+    shiftId = shift.id;
+  });
+
+document.getElementById("btn-save").onclick = () =>
+  runAction("save draft", async () => {
+    const draft = await api("/api/shifts/" + shiftId + "/draft");
+    const files = draft.files;
+    files["service.py"] += "\n# learner note at " + new Date().toISOString() + "\n";
+    await api("/api/shifts/" + shiftId + "/draft", { method: "PUT", body: JSON.stringify({ files }) });
+  });
+
+document.getElementById("btn-freeze").onclick = () =>
+  runAction("freeze version", async () => {
+    await api("/api/shifts/" + shiftId + "/artifact/versions", { method: "POST" });
+  });
+
+document.getElementById("btn-run").onclick = () =>
+  runAction("run shift", async () => {
+    const started = await api("/api/shifts/" + shiftId + "/runs", { method: "POST" });
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      const run = await api("/api/runs/" + started.id);
+      if (run.state === "FINALIZED" || run.state === "FAILED") { return; }
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+    throw new Error("run did not finish");
+  });
+
+document.getElementById("btn-close").onclick = () =>
+  runAction("close shift", async () => {
+    await api("/api/shifts/" + shiftId + "/close", { method: "POST" });
+  });
+
+document.getElementById("btn-refresh").onclick = () => runAction("refresh", async () => {});
+
+refresh().catch((error) => status("board load failed: " + error.message, true));
+</script>
+</body>
+</html>

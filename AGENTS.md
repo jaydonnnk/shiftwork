@@ -49,7 +49,9 @@ summaries when a time-sensitive external claim is being made.
   approved 2026-09-16); Gate 4 — Slice Plan APPROVED 2026-09-17 (after three review
   rounds the same day; slice work proceeds one slice at a time under `04-slices.md`
   S10; installs, credentials, external services, spike runs, deployment, outreach
-  and ADR #4 remain separately authorized).
+  and ADR #4 remain separately authorized). Slice 1 (tracer bullet) is implemented
+  and demonstrated 2026-09-17; its evidence is recorded in
+  `docs/plans/shiftwork/00-status.md`. Slices 2–17 are not implemented.
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.

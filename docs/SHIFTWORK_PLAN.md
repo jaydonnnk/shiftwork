@@ -12,9 +12,12 @@ rounds the same day; all accepted fixes and consistency corrections applied). Sl
 work proceeds one slice at a time under `04-slices.md` S10; credentials, installs,
 spike runs, external services, deployment, outreach and ADR #4 each remain
 separately authorized. Backtrack an earlier gate only for a concrete blocker.
+Slice 1 (tracer bullet) is implemented and demonstrated 2026-09-17; its evidence is
+recorded in `docs/plans/shiftwork/00-status.md`. No later slice has started.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
-**Evidence state:** no application, Sandbox execution, learner study, transfer
-result, Tavily ablation, prize merit or score has been demonstrated.
+**Evidence state:** a Slice 1 tracer application exists with stubbed persistence,
+stubbed evaluation and placeholder hashes; no Sandbox execution, learner study,
+transfer result, Tavily ablation, prize merit or score has been demonstrated.
 **Working forecast:** current 27/40; pre-evidence cap 31/40; conditional best
 case 35/40. Potential Impact remains at most 4.0 in that best case.
 

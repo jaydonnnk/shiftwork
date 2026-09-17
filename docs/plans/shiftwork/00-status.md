@@ -17,7 +17,7 @@ Gate 4 APPROVED 2026-09-17. Build order (one slice at a time; after each slice:
 demo evidence run and shown, slice checked off here, then "Continue to slice N+1,
 or re-steer?"):
 
-- [ ] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser)
+- [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
 - [ ] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event
 - [ ] Slice 3 — Executor conformance (recorded + local_process), deepening Slice 2 execution
 - [ ] Slice 4 — Contract-parameterized evaluator + first sealed family, deepening Slice 2 evaluation
@@ -35,9 +35,10 @@ or re-steer?"):
 - [ ] Slice 16 — Submission packaging: test build + demo video
 - [ ] Slice 17 — Hosted deployment (conditional: only if Option B selected at the Slice 13 exit)
 
-No slice is implemented. Slice work proceeds only under `04-slices.md` S10 —
-credentials, installs, spike runs, external services, deployment, outreach and
-ADR #4 each remain separately authorized.
+Slice 1 is implemented and its evidence recorded 2026-09-17; slices 2–17 are not
+implemented. Slice work proceeds only under `04-slices.md` S10 — credentials,
+installs, spike runs, external services, deployment, outreach and ADR #4 each remain
+separately authorized.
 
 ## Notes for a fresh session
 
@@ -412,6 +413,42 @@ ADR #4 each remain separately authorized.
   authorization covers documentation commits, not slice work. Limits: static
   document work — no implementation, installs, credentials, spike run, external
   service use, deployment or outreach occurred. Scores remain conditional forecasts.
+- 2026-09-17 Slice 1 (tracer bullet) IMPLEMENTED and demonstrated: the full HTTP
+  lifecycle runs end to end with stubbed persistence and stubbed evaluation. New
+  files: `shiftwork/` (app.py factory, api/schemas.py + api/routes.py, domain/models.py,
+  store/db.py + store/repo.py with an inline tracer schema, executor/recorded.py,
+  orchestrator.py, config.py, client/index.html stub board), `demos/lifecycle.py`,
+  `shiftwork/fixtures/runs/tracer_transcript.json`, `tests/conftest.py`,
+  `tests/api/test_tracer_lifecycle.py` and `tests/packaging/test_clean_env_install_and_run.py`
+  (test 51). Evidence run this session: (1) `python -m demos.lifecycle` exit 0: board
+  -> open `bookshop-shift-01` -> draft round trip -> freeze `ver-0001`
+  (`placeholder-1`) -> `run-0001` FINALIZED through the `recorded` adapter (3 captures)
+  -> check `cr-0001` fail STALE_BEYOND_RULE -> chained ledger with genesis prev_hash
+  (SALE_COMPLETED, INCIDENT_OPENED) -> incident `BWB-01` OPEN -> close, final line
+  "lifecycle evidence complete ... FINALIZED ... chain VALID with 2 events";
+  (2) `pytest tests/api -q` 2 passed (lifecycle smoke asserting every route status
+  and persisted row counts, plus restart persistence); (3) browser check on port 8017
+  showing the stub board with the artifact version, open incident and ledger totals;
+  (4) `pytest tests/packaging -q -s` re-run 2026-09-17 printed
+  `clean-env mechanism: stdlib venv + pip` and `1 passed in 21.82s`; a full
+  `pytest tests -q` re-run printed `3 passed`. Environment notes: test 51 performs
+  a clean-env install from `requirements.lock` into a fresh temporary venv, and
+  that install did run (whether it reached PyPI or was served from pip's cache was
+  not separately instrumented). The project `.venv` (Python 3.12.13) already
+  matches `requirements.lock` exactly (22 packages, verified with `uv pip list`)
+  and was not modified. The stdlib-venv path is the mechanism selected here; an
+  earlier version of this note claimed the stdlib path "is blocked on this machine
+  by Windows Application Control (WinError 4551)" and "exercised its uv fallback,"
+  which was false as recorded and has been corrected in `MISTAKES.md` (the block
+  was a one-off, not reproducible on re-test, and the uv fallback never ran). All
+  tracer stubs (placeholder content hashes, hardcoded
+  check result, placeholder chain hashes, hardcoded ledger events and incident,
+  inline tracer schema) are documented Slice 2+ replacements; hashing, evaluation,
+  reducer, sealed cases, budgets, rotation and inheritance are NOT yet real, so no
+  hackathon capability, learning or prize claim follows from this evidence. The only
+  network operation was test 51's clean-env package install from the lockfile; no
+  credential use, Nebius or Tavily inference call, spike run, deployment, outreach
+  or commit occurred.
 - Read `../../../AGENTS.md`, `../../SHIFTWORK_PLAN.md`,
   `../../../HACKATHON_REQUIREMENTS.md` and every file in this folder before continuing.
 - Apply `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.

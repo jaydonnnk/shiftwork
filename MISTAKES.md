@@ -40,3 +40,26 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   clauses a reviewer named. A prior PASS is not evidence for clauses it never
   enumerated. (Second occurrence of the clause-mapping pattern; at 4 occurrences
   graduate into agents.md.)
+## 2026-09-17 Slice 1 test 51: logged a transient, unreproduced OS-policy block as a standing fact
+
+- **What happened:** the Slice 1 evidence note and this log recorded that test 51's
+  stdlib-venv path "is blocked on this machine by Windows Application Control
+  (WinError 4551)" and that the test "exercised its uv fallback." A re-run on
+  2026-09-17 (`pytest tests/packaging -q -s`) printed `clean-env mechanism:
+  stdlib venv + pip` and `1 passed in 21.47s`, and a direct probe of a freshly
+  created stdlib venv returned exit 0. The stdlib path works and is selected; the
+  uv fallback never ran. An independent review caught the false claim, not my own
+  checks.
+- **Root cause:** I recorded a single transient `WinError 4551` observation as a
+  durable machine property, and asserted which code path executed without
+  capturing the test's own `clean-env mechanism:` line. The note also contradicted
+  itself: "no install ran this session" alongside "test 51 passed," when test 51
+  performs a clean-env install into a fresh temp venv by construction.
+- **Prevention rule:** when an evidence note states which mechanism, branch or
+  fallback ran, quote the program's own verbatim output (the mechanism line and the
+  pass/skip/fail count) instead of inferring it. Treat a one-off OS or policy error
+  as transient until reproduced; never log it as a standing property. A test that
+  installs into a fresh environment is an install: do not write "no install ran" in
+  the same note that records it passing. Packaging checks may still probe a fresh
+  interpreter and keep a uv fallback for genuinely blocked machines, but record the
+  fallback as exercised only when the probe actually failed.
