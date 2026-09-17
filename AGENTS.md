@@ -43,11 +43,13 @@ summaries when a time-sensitive external claim is being made.
 ## 3. Current direction and authorization
 
 - Current gate state: Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
-  APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17 (re-approved after
-  the backtrack revisions: test 33 close-semantics fixed, §5.8 clarified, appended
-  test 50; originally APPROVED 2026-09-16, BACKTRACKED 2026-09-17); Gate 4 — Slice
-  Plan in progress (draft `04-slices.md` exists, NOT approved; queued revisions
-  unblocked by the Gate 3 re-approval and now being applied).
+  APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17 (re-approved a
+  second time after the §2 packaging backtrack — `pyproject.toml`, `requirements.lock`,
+  `demos/`, test 51; history: first backtrack re-approved 2026-09-17, originally
+  approved 2026-09-16); Gate 4 — Slice Plan APPROVED 2026-09-17 (after three review
+  rounds the same day; slice work proceeds one slice at a time under `04-slices.md`
+  §10; installs, credentials, external services, spike runs, deployment, outreach
+  and ADR #4 remain separately authorized).
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.
@@ -55,8 +57,11 @@ summaries when a time-sensitive external claim is being made.
   service-workbench redesign; the requested final independent review later returned
   PASS, and Gate 2 was drafted and approved the same day. On 2026-09-16 the user
   approved Gate 3 after the seven-blocker revision; on 2026-09-17 it was backtracked
-  for two concrete defects and re-approved the same day after revisions. Gate
-  backtracking follows §5.
+  twice (first: test 33 close-semantics and the credential-reachability test; second:
+  the §2 packaging file-map omission) and re-approved the same day after each
+  revision. On 2026-09-17 the user also approved Gate 4 after three review rounds;
+  slice work proceeds one slice at a time under `04-slices.md` §10. Gate backtracking
+  follows §5.
 - Gate 1 approval does not approve Gate 2, a technology stack, implementation,
   installs, credentials, participant outreach, purchases, external service use,
   deployment, commits or pushes.

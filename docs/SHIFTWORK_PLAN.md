@@ -4,12 +4,14 @@ Updated: 2026-09-17.
 
 **State:** selected by the user as the sole active hackathon direction.
 **Gate state:** Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
-APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17 (re-approved after
-the backtrack revisions: test 33 close-semantics fixed, §5.8 clarified, credential-
-reachability test 50 appended; originally APPROVED 2026-09-16, BACKTRACKED 2026-09-17);
-Gate 4 — Slice Plan in progress (draft exists; queued revisions unblocked by the Gate 3
-re-approval and now being applied, still NOT approved). Backtrack an
-earlier gate only for a concrete blocker.
+APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17 (re-approved a
+second time after the §2 packaging backtrack — `pyproject.toml`, `requirements.lock`,
+`demos/`, test 51; history: first backtrack re-approved 2026-09-17, originally
+approved 2026-09-16); Gate 4 — Slice Plan APPROVED 2026-09-17 (after three review
+rounds the same day; all accepted fixes and consistency corrections applied). Slice
+work proceeds one slice at a time under `04-slices.md` §10; credentials, installs,
+spike runs, external services, deployment, outreach and ADR #4 each remain
+separately authorized. Backtrack an earlier gate only for a concrete blocker.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** no application, Sandbox execution, learner study, transfer
 result, Tavily ablation, prize merit or score has been demonstrated.

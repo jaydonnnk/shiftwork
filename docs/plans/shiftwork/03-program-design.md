@@ -1,9 +1,14 @@
 # Program Design: Shiftwork — first bookshop engagement (+ away-shift config)
 
-Gate: 3 — Program Design (APPROVED 2026-09-16; BACKTRACKED to in progress 2026-09-17 —
-test 33 close-semantics ambiguity and a missing credential-reachability test
-specification; RE-APPROVED 2026-09-17). Written 2026-09-15; revised 2026-09-16 and
-2026-09-17.
+Gate: 3 — Program Design (APPROVED 2026-09-16; BACKTRACKED 2026-09-17 — test 33
+close-semantics ambiguity and a missing credential-reachability test specification —
+and RE-APPROVED 2026-09-17; BACKTRACKED a second time 2026-09-17 — the §2 file map
+omitted packaging (`pyproject.toml`, `requirements.lock`), the `demos/` entry points
+and the clean-env install check — and RE-APPROVED 2026-09-17 after §2 and test 51
+were revised; a consistency correction was applied the same day during the Gate 4
+review at the user's direction: the provisional Python bound in §2 was tightened to
+`>=3.12,<3.14` to match the approved 3.12+ stack decision). Written 2026-09-15;
+revised 2026-09-16 and 2026-09-17.
 Scope: the approved architecture (`02-architecture.md`) concretized to the file,
 type, call-stack, test and configuration level. **No implementation code** — types
 and signatures only. Nothing here authorizes implementation; slices start after
@@ -36,9 +41,14 @@ choice. The away shift's editable "May estimate when" maps to `may_estimate_when
 
 ## 2. Files
 
-Repository root gains two trees; nothing existing is modified.
+Repository root gains five entries; nothing existing is modified: `pyproject.toml`,
+`requirements.lock` and the `shiftwork/`, `demos/` and `tests/` trees. Every
+`python -m demos.<name>` command referenced by the slice plan resolves to a module
+here; each module is the canonical runnable evidence command for its slice.
 
 ```
+pyproject.toml           Project metadata: bounded Python requirement (`>=3.12,<3.14`, matching the approved 3.12+ stack decision) plus the pinned runtime/test dependency set (FastAPI, Uvicorn, Pydantic, pytest)
+requirements.lock        Exact `==` pins of the full resolved dependency set (runtime + test); installed by the setup command; regenerated only by an explicit documented command
 shiftwork/
   app.py                 FastAPI factory; lifespan: DB open, ensure_schema, mount client; adapter selection
   config.py              Pinned constants: limits, total assist budgets, reason-code render map, model ids, image ref. No secrets.
@@ -82,7 +92,13 @@ shiftwork/
     requests/            Fixed request batches, literal bytes, reused verbatim by every adapter
     runs/                Recorded run transcripts used by offline determinism tests
   templates/artifact/    Stdlib-only learner service scaffold (server, response contract, contract file)
-tests/                   Mirrors the package layout; shared adapter conformance cases in tests/executor/conformance.py
+demos/                   Canonical runnable evidence entry points referenced by the slice plan (`python -m demos.<name>`)
+  lifecycle.py           Tracer-bullet lifecycle demo (mocked core, full loop)
+  thin_path.py           Thin real vertical path: hash → capture → CheckResult → ledger event
+  evaluate_transcript.py Evaluator demo: fixture transcript in, CheckResults out
+  finalize_run.py        Finalization demo: idempotent hash-chained events
+  test1.py               Test 1 central-mechanism driver (--adapter recorded | local_process | tokenfactory)
+tests/                   Mirrors the package layout; shared adapter conformance cases in tests/executor/conformance.py; clean-env packaging checks in tests/packaging/
 ```
 
 ## 3. Types & signatures
@@ -1061,9 +1077,21 @@ conformance gate and rendered client assertions run in their Gate 4 browser slic
     are the case arm. Number 50 is appended without renumbering 1–49 to preserve
     existing cross-references.
 
+### N. Packaging and reproducibility (`tests/packaging/`)
+
+51. `test_clean_env_install_and_run` — a freshly created environment containing only
+    Python within the bounded version range and the repository checkout installs from
+    the lock and runs: `pip install -r requirements.lock` succeeds from the pins alone,
+    the app boots and serves, and a checked-in `python -m demos.<name>` entry point
+    completes without credentials. It fails if any imported dependency is absent from
+    the lock, if an undeclared system package is required, or if the run needs a key.
+    Owned by the tracer slice and re-run by the packaging slice. Number 51 is appended
+    without renumbering 1–50 to preserve existing cross-references.
+
 These are test specifications, not implemented tests or passing results. Test 41's
 rendered assertions require a browser during the applicable Gate 4 slice; test 50's
-`tokenfactory` arm requires the real adapter slice.
+`tokenfactory` arm requires the real adapter slice; test 51 re-runs in the packaging
+slice.
 
 ## 7. Configuration appendix (provisional — challenge these)
 
