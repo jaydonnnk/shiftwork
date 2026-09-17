@@ -1,6 +1,8 @@
 # Nebius x NVIDIA Global AI Hackathon Requirements
 
 **Checked:** 2026-09-11
+**Submission form fields added:** 2026-09-17 (user-provided from the live Devpost
+submission form; on any conflict the official rules prevail)
 **Official rules:** <https://nebiusglobalaihackathon.devpost.com/rules>
 
 If this file conflicts with the current official rules, the official rules prevail.
@@ -83,6 +85,32 @@ If this file conflicts with the current official rules, the official rules preva
 - Submit all materials in English. If any material is not in English, include an
   English translation of the video, description, testing instructions, and other
   submitted material.
+
+## Submission form fields (live Devpost form)
+
+Source: user-provided 2026-09-17 from the live submission form; not independently
+re-verified. Factual field list only.
+
+- Submitter type, country, province/state; track selection; new-vs-existing project
+  declaration.
+- **Upload a File** field for judges and organizers (zip/pdf/other, 35 MB limit) —
+  a delivery channel for a test build besides a repo release or hosted URL.
+- **Model feedback questions** (require real usage evidence; answers must never be
+  fabricated or rated without observed data): which Nemotron model(s) and how used;
+  Nemotron quality 1–10; fine-tuned / prompt-engineered / out-of-box; comparison
+  against other models; recommend 1–10; experience 1–10; improvements wanted.
+- **Nebius capabilities question**: "e.g. GPU instance types, deployment setup, API
+  access, scaling" — the GPU wording is illustrative; Token Factory API access is a
+  legitimate answer and renting GPUs is not required.
+- **Tavily question**: "Did you use Tavily in your project? To qualify: your project
+  must make a functional, runtime call to the Tavily API as part of its solution."
+  The approved design keeps Tavily in the offline curation pipeline, never in the
+  app's runtime path (architecture §11; Gate 3 test 39); whether a shipped,
+  operator-run curation CLI's live `discover()` call satisfies the qualification is
+  an interpretation question. Decision of record: Gate 4 `04-slices.md` §11
+  decision 5 — pursue the bonus via that shipped call, answer "yes" only after it
+  actually ships, and let the Test 3 KEEP/DROP verdict govern the pitch.
+- Builders & Brews IRL city award dropdown (optional).
 
 ## Demonstration video requirements
 
