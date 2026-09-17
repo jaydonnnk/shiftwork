@@ -178,6 +178,7 @@ Rules:
   that Git operation. Never stage everything implicitly.
 - Do not modify CI, lint configuration or lockfiles unless the task requires it.
 - Never store secrets, tokens or credentials in repository notes or logs.
+- Do not use em dashes whatsover, or §. It should be S1 for example instead of §
 
 ### Mistake logging
 
