@@ -1,6 +1,9 @@
 # Program Design: Shiftwork — first bookshop engagement (+ away-shift config)
 
-Gate: 3 — Program Design (APPROVED 2026-09-16). Written 2026-09-15; revised 2026-09-16.
+Gate: 3 — Program Design (APPROVED 2026-09-16; BACKTRACKED to in progress 2026-09-17 —
+test 33 close-semantics ambiguity and a missing credential-reachability test
+specification; RE-APPROVED 2026-09-17). Written 2026-09-15; revised 2026-09-16 and
+2026-09-17.
 Scope: the approved architecture (`02-architecture.md`) concretized to the file,
 type, call-stack, test and configuration level. **No implementation code** — types
 and signatures only. Nothing here authorizes implementation; slices start after
@@ -842,8 +845,10 @@ with `resolving_version_id`; otherwise keep OPEN or CLOSED_UNRESOLVED as appropr
 `routes.close_shift → orchestrator.close_shift → begin immediate transaction → if already
 closed, return the existing Shift without writes → refuse if a run is in flight`
 → capture `CloseShiftFacts` → `reduce_close(fixtures, facts)` → unchained drafts →
-`chain.append(prev_hash, start_seq)` → insert `LIMIT_DECLARED` events → unresolved OPEN
-incidents become `CLOSED_UNRESOLVED` → `repo.close_shift` → commit once.
+`chain.append(prev_hash, start_seq)` → insert `LIMIT_DECLARED` events (derived from
+`CloseShiftFacts.declared_limits` only) → unresolved OPEN incidents become
+`CLOSED_UNRESOLVED` and are inherited as incident rows, never as `LIMIT_DECLARED`
+events → `repo.close_shift` → commit once.
 Concurrent or retried close requests serialize on the shift row and cannot append a
 second event set; a fault at any boundary rolls the entire close back.
 Next shift seed = latest version, decisions/check files, all unresolved incidents
@@ -964,10 +969,15 @@ conformance gate and rendered client assertions run in their Gate 4 browser slic
 ### H. Flows (`tests/api/`)
 32. `test_open_shift_seeds_from_inheritance` — board after open equals prior version,
     open incidents, unresolved limits, ledger summary.
-33. `test_close_shift_records_unresolved_limits` — unresolved incidents become inherited
-    limits with hash-chained `LIMIT_DECLARED` events; closing during an in-flight run is
-    refused. Repeated and concurrent closes return one closed shift and one event set;
-    injected faults at every boundary leave neither a partial close nor partial events.
+33. `test_close_shift_records_unresolved_limits` — closing writes hash-chained
+    `LIMIT_DECLARED` events for the version's declared limits
+    (`CloseShiftFacts.declared_limits`) exactly once; unresolved OPEN incidents become
+    `CLOSED_UNRESOLVED` incident rows and are inherited that way, never as
+    `LIMIT_DECLARED` events. The next shift's seeded board shows declared limits in
+    `unresolved_limits` and the incidents in `incidents`, as two distinct inheritances.
+    Closing during an in-flight run is refused. Repeated and concurrent closes return
+    one closed shift and one event set; injected faults at every boundary leave neither
+    a partial close nor partial events.
 34. `test_repair_resolves_only_on_passing_later_run` — incident resolves only when a
     later run of the new version passes the linked check.
 35. `test_away_shift_has_no_inherited_artifact` — bike co-op starts from template with
@@ -1034,8 +1044,26 @@ conformance gate and rendered client assertions run in their Gate 4 browser slic
     attributable unless they pass human verification and executable-change criteria;
     missing either effectiveness or review-burden threshold kills the prize claim.
 
+### M. Executor credential isolation (`tests/executor/`)
+
+50. `test_executor_env_exposes_no_controller_credentials` — the environment an adapter
+    run executes in (subprocess env for `local_process`; provisioned sandbox env for
+    `tokenfactory`; no environment at all for `recorded`) contains no controller
+    credential material: unique markers injected into the controller env for
+    `NEBIUS_API_KEY`, `CONTREE_SESSION`, `TAVILY_API_KEY`, `SHIFTWORK_DB_PATH` and
+    sealed-store access appear in no executed environment, no in-sandbox reachable file
+    and no captured log; `local_process` scrubs the child environment to a pinned
+    allowlist before the subprocess starts; only the scoped `InferenceGrant` (when
+    present) is reachable by the artifact. For `tokenfactory` this asserts the
+    provisioning payload/env construction and is exercised live in the real-adapter
+    slice alongside the spike's secret-injection probe. This is the credential arm of
+    Test 1's "hidden cases or credentials are reachable" kill condition; tests 16–18
+    are the case arm. Number 50 is appended without renumbering 1–49 to preserve
+    existing cross-references.
+
 These are test specifications, not implemented tests or passing results. Test 41's
-rendered assertions require a browser during the applicable Gate 4 slice.
+rendered assertions require a browser during the applicable Gate 4 slice; test 50's
+`tokenfactory` arm requires the real adapter slice.
 
 ## 7. Configuration appendix (provisional — challenge these)
 

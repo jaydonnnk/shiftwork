@@ -2,12 +2,17 @@
 
 - Gate 1 — Product: APPROVED 2026-09-15
 - Gate 2 — Architecture: APPROVED 2026-09-15
-- Gate 3 — Program Design: APPROVED 2026-09-16
-- Gate 4 — Slice plan: pending
+- Gate 3 — Program Design: APPROVED 2026-09-17 (re-approved after the backtrack
+  revisions: test 33 close-semantics fixed, §5.8 clarified, test 50 appended).
+  Originally APPROVED 2026-09-16, BACKTRACKED to in progress 2026-09-17.
+- Gate 4 — Slice plan: in progress (drafting authorized 2026-09-16; queued revisions
+  unblocked by the Gate 3 re-approval above and now being applied)
 
 ## Slices
 
-No slices approved or implemented. Define the checklist at Gate 4.
+No slices approved or implemented. The slice checklist is being drafted in
+`04-slices.md` (Gate 4, in progress 2026-09-16); it becomes authoritative here
+when the user approves Gate 4.
 
 ## Notes for a fresh session
 
@@ -214,6 +219,69 @@ No slices approved or implemented. Define the checklist at Gate 4.
   spike runs, commits, deployment or outreach. Gate 4 has not started. The `AGENTS.md` §3
   gate-state snapshot was updated the same day (explicit user instruction) to record Gates
   1–3 approved.
+- 2026-09-16 Gate 4 (in progress): the user explicitly authorized **drafting** the
+  Gate 4 vertical-slice plan (`04-slices.md`) and nothing more. Gate 4 approval,
+  implementation, installs, credentials, spike runs, external services, commits,
+  pushes, deployment and outreach each still need separate explicit authorization.
+- 2026-09-16 Gate 4 draft + independent cross-check: `04-slices.md` drafted (16 slices,
+  4 phases; Test 1 executable at Slice 8, conditional on the offline executor and re-run
+  at Slice 14; documented disagreement with the literal "proof first" reading of
+  SHIFTWORK_PLAN §12; Option A test-build demo baseline). The user-requested independent
+  adversarial review returned **REVISE — GATE 4** with two blockers, both test-coverage
+  bookkeeping: (B1) tests 9/10/18/23/44 and the prompt/assist arms of 16/17 were marked
+  fully landed in slices where some specified clauses cannot yet execute; (B2) three
+  test-41 clauses (nested sentinel injection, incident-view label, empty/error states)
+  were orphaned. Revisions applied: partial-completion annotations with named completing
+  slices (Slice 5 now also opens incidents per Gate 3 §5.5, resolving an internal
+  contradiction; Slice 10 declares test 41 complete; Slice 12 re-runs 16/17
+  non-vacuously), plus the review's non-blocking notes (Option A interpretation risk,
+  Test 2 deliberately not sliced per Gate 3 §8, permanent-conditionality sentence in
+  risk 1, checklist note in §2, keyboard traversal in the client browser matrix). No
+  backtracking of Gates 1–3 was found necessary. Limits: both the draft and the review
+  are static document work by LLMs — not runtime, security, human or learning evidence,
+  and neither is an independent oracle. **Gate 4 remains NOT approved**; the user's
+  explicit decision is pending. No implementation, installs, credentials, spike,
+  external service, commit or push occurred.
+- 2026-09-17 Gate 3 BACKTRACK (documentation only): a second, fully cold independent
+  architect review of `04-slices.md` returned **BLOCK — BACKTRACK GATE 3** with seven
+  findings. Adjudication (verified line-by-line against the sources): findings 1–2 are
+  genuine Gate 3 defects — (1) test 33 said unresolved incidents "become inherited
+  limits with `LIMIT_DECLARED` events", contradicting §5.8/`CloseShiftFacts`, which
+  keep declared limits and incidents as separate inheritances; (2) Test 1's
+  "credentials are reachable" kill condition had no named test — test 20 covers
+  learner-visible payloads, not the executed artifact's environment, while
+  architecture §7 requires learner execution without controller credentials.
+  Findings 3–7 are Gate 4 revisions (incomplete clause repairs: test 18's prompt arm
+  orphaned, test 43's ledger-resolution and test 44's evaluator-rule clauses claimed
+  while those layers are mocked; Slice 8's "Test 1" label overclaims on offline
+  adapters; Slice 2 does not match the literal software-factory "real happy path"
+  rule; prose demo evidence lacks runnable entry points; the submission-compliance
+  path lacks a hard no-go and Slice 16 omits YouTube/availability obligations).
+  Applied now (Gate 3 only): test 33 revised; §5.8 clarified (`LIMIT_DECLARED`
+  derives from declared limits only); new test 50
+  `test_executor_env_exposes_no_controller_credentials` appended without renumbering
+  1–49 (user decision). Gate 3 set to in progress here and mirrored in
+  `SHIFTWORK_PLAN.md` and `AGENTS.md` §3. User decisions recorded: (A) Slice 2 will
+  be restructured into a thin real vertical path (one artifact, request, sealed case,
+  evaluator result, ledger event) with Slices 3–5 adding conformance, variants and
+  hardening — this Gate 4 revision, and all other `04-slices.md` edits, are QUEUED
+  and must not be applied until Gate 3 is explicitly re-approved. Limits: both
+  reviews are static LLM document work — not runtime, security, human or learning
+  evidence, and neither is an independent oracle. No implementation, installs,
+  credentials, spike, external service, commit or push occurred. The QUEUED
+  constraint is now satisfied — see the re-approval entry below.
+- 2026-09-17 Gate 3 RE-APPROVED: the user reviewed the revised `03-program-design.md`
+  and approved Gate 3 (re-approval of the backtracked document). The 2026-09-16
+  approval and the 2026-09-17 backtrack both remain the historical record. This
+  unblocks the queued Gate 4 revisions: decision A (restructure Slice 2 into a thin
+  real vertical path — one artifact, one request, one sealed case, one evaluator
+  result, one real ledger event — with conformance, variants and hardening pushed to
+  Slices 3–5) and edits S4-2..S4-14, each with clause-level test re-mapping per the
+  `MISTAKES.md` prevention rule. Those `04-slices.md` edits are now being applied;
+  Gate 4 is still NOT approved and will be presented separately. Limits: both prior
+  reviews are static LLM document work — not runtime, security, human or learning
+  evidence, and neither is an independent oracle. Gate 3 approval does not authorize
+  implementation, installs, credentials, spike runs, commits, deployment or outreach.
 - Read `../../../AGENTS.md`, `../../SHIFTWORK_PLAN.md`,
   `../../../HACKATHON_REQUIREMENTS.md` and every file in this folder before continuing.
 - Apply `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
@@ -260,3 +328,15 @@ No slices approved or implemented. Define the checklist at Gate 4.
   of the revised design found no blockers. Approval covers `03-program-design.md` only;
   it does not authorize Gate 4 drafting, implementation, installs, credentials, spike
   runs, commits, deployment or outreach.
+- Gate 3 — Program Design: BACKTRACKED to in progress on 2026-09-17 after a cold
+  independent review found two concrete Gate 3 defects (test 33 close-semantics
+  ambiguity; no test for Test 1's credential-reachability kill condition). Revisions
+  applied the same day (revised test 33, clarified §5.8, appended test 50). The
+  2026-09-16 approval above remains the historical record; explicit re-approval of
+  the revised document is pending and must precede any Gate 4 revision or approval.
+- Gate 3 — Program Design: RE-APPROVED by the user on 2026-09-17 after reviewing the
+  revised `03-program-design.md`. This satisfies the precondition above and unblocks
+  the queued Gate 4 revisions (decision A Slice 2 thin-real-path restructure plus
+  edits S4-2..S4-14, with clause-level test re-mapping). Approval covers
+  `03-program-design.md` only; it does not approve Gate 4, and does not authorize
+  implementation, installs, credentials, spike runs, commits, deployment or outreach.
