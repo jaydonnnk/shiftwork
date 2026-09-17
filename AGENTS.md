@@ -30,7 +30,9 @@ Before working on Shiftwork, read:
    — approved software-factory decisions, mockups, evidence and actual gate state.
 4. `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` when the task concerns
    a product gate, feature, architecture, program design, slice plan or implementation.
-5. `docs/HATCHERY_PLAN.md` and `docs/plans/hatchery/` only when historical context
+5. `MISTAKES.md` — logged agent errors, root causes and prevention rules. Check
+   before working to avoid repeating known mistakes.
+6. `docs/HATCHERY_PLAN.md` and `docs/plans/hatchery/` only when historical context
    or an imported Hatchery mechanism is relevant. Hatchery is not active scope.
 
 Approved gate documents supersede provisional choices in `docs/SHIFTWORK_PLAN.md`.
@@ -41,15 +43,20 @@ summaries when a time-sensitive external claim is being made.
 ## 3. Current direction and authorization
 
 - Current gate state: Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
-  APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-16; Gate 4 — Slice
-  Plan pending (drafting not yet authorized).
+  APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17 (re-approved after
+  the backtrack revisions: test 33 close-semantics fixed, §5.8 clarified, appended
+  test 50; originally APPROVED 2026-09-16, BACKTRACKED 2026-09-17); Gate 4 — Slice
+  Plan in progress (draft `04-slices.md` exists, NOT approved; queued revisions
+  unblocked by the Gate 3 re-approval and now being applied).
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.
 - On 2026-09-15 the user explicitly approved Shiftwork Gate 1 after the
   service-workbench redesign; the requested final independent review later returned
   PASS, and Gate 2 was drafted and approved the same day. On 2026-09-16 the user
-  approved Gate 3 after the seven-blocker revision. Gate backtracking follows §5.
+  approved Gate 3 after the seven-blocker revision; on 2026-09-17 it was backtracked
+  for two concrete defects and re-approved the same day after revisions. Gate
+  backtracking follows §5.
 - Gate 1 approval does not approve Gate 2, a technology stack, implementation,
   installs, credentials, participant outreach, purchases, external service use,
   deployment, commits or pushes.
@@ -166,6 +173,16 @@ Rules:
   that Git operation. Never stage everything implicitly.
 - Do not modify CI, lint configuration or lockfiles unless the task requires it.
 - Never store secrets, tokens or credentials in repository notes or logs.
+
+### Mistake logging
+
+- After making a coding error (broken build, failed test, wrong output, reverted
+  change), append an entry to `MISTAKES.md` with: what happened, root cause, and a
+  prevention rule.
+- Before starting work, scan `MISTAKES.md` for entries relevant to the current task
+  and follow their prevention rules.
+- When a failure pattern repeats 4+ times, graduate it from `MISTAKES.md` into a
+  permanent rule in this file and remove the log entry.
 
 ### Verification
 
