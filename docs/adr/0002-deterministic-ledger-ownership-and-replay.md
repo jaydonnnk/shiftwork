@@ -2,8 +2,8 @@
 
 - Status: Accepted (decision approved within Gate 2 on 2026-09-15; recorded as an ADR
   during Gate 3 drafting on 2026-09-15)
-- Sources: `docs/plans/shiftwork/02-architecture.md` §9, §19 candidate 2;
-  `docs/plans/shiftwork/03-program-design.md` §3.1, §3.4, §3.5, §6.A, §6.B
+- Sources: `docs/plans/shiftwork/02-architecture.md` S9, S19 candidate 2;
+  `docs/plans/shiftwork/03-program-design.md` S3.1, S3.4, S3.5, S6.A, S6.B
 
 ## Context
 

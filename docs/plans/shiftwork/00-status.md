@@ -3,7 +3,7 @@
 - Gate 1 — Product: APPROVED 2026-09-15
 - Gate 2 — Architecture: APPROVED 2026-09-15
 - Gate 3 — Program Design: APPROVED 2026-09-17 (re-approved a second time after the
-  §2 packaging backtrack was revised with `pyproject.toml`, `requirements.lock`, the
+  S2 packaging backtrack was revised with `pyproject.toml`, `requirements.lock`, the
   `demos/` tree, `tests/packaging/` and test 51; the earlier approvals and both
   backtracks remain the historical record — see Approval history).
 - Gate 4 — Slice plan: APPROVED 2026-09-17 (after three 2026-09-17 review rounds —
@@ -17,7 +17,7 @@ Gate 4 APPROVED 2026-09-17. Build order (one slice at a time; after each slice:
 demo evidence run and shown, slice checked off here, then "Continue to slice N+1,
 or re-steer?"):
 
-- [ ] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser)
+- [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
 - [ ] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event
 - [ ] Slice 3 — Executor conformance (recorded + local_process), deepening Slice 2 execution
 - [ ] Slice 4 — Contract-parameterized evaluator + first sealed family, deepening Slice 2 evaluation
@@ -35,9 +35,10 @@ or re-steer?"):
 - [ ] Slice 16 — Submission packaging: test build + demo video
 - [ ] Slice 17 — Hosted deployment (conditional: only if Option B selected at the Slice 13 exit)
 
-No slice is implemented. Slice work proceeds only under `04-slices.md` §10 —
-credentials, installs, spike runs, external services, deployment, outreach and
-ADR #4 each remain separately authorized.
+Slice 1 is implemented and its evidence recorded 2026-09-17; slices 2–17 are not
+implemented. Slice work proceeds only under `04-slices.md` S10 — credentials,
+installs, spike runs, external services, deployment, outreach and ADR #4 each remain
+separately authorized.
 
 ## Notes for a fresh session
 
@@ -140,11 +141,11 @@ ADR #4 each remain separately authorized.
   bounded sandbox capability spike). **No ADR files were created** and `docs/adr/`
   does not exist.
 - 2026-09-15 Gate 2 review and approval: the draft was independently reviewed this
-  session for internal consistency, fit against `AGENTS.md` §8 evidence boundaries and
-  the Gate 2 template, and five primary sources were re-fetched to spot-check the §16
+  session for internal consistency, fit against `AGENTS.md` S8 evidence boundaries and
+  the Gate 2 template, and five primary sources were re-fetched to spot-check the S16
   "Verified" claims (sandbox overview, Nemotron service page, `contree` CLI page,
   Serverless overview, inference quickstart) — all held. One correction was applied:
-  §1 Fit now lists `shiftwork_vs_hatchery.md` among the top-level docs. Non-blocking
+  S1 Fit now lists `shiftwork_vs_hatchery.md` among the top-level docs. Non-blocking
   notes carried to later gates: `HACKATHON_REQUIREMENTS.md` says "DevPods" but the live
   Nebius docs name it "Devlabs" (the architecture uses the correct current name; the
   requirements file is stale — do not edit it without authorization); the away-shift
@@ -162,10 +163,10 @@ ADR #4 each remain separately authorized.
   the deterministic core is designed against a fake/local executor; the real sandbox
   adapter is a Gate 4 slice gated on the capability spike, which is specified but NOT
   run (credentials unauthorized). (3) Config numbers proposed as provisional defaults
-  in `03-program-design.md` §7 for the user to challenge. (4) Original study verdict:
+  in `03-program-design.md` S7 for the user to challenge. (4) Original study verdict:
   no powered study before the 2026-10-30 deadline; no impact claim at submission.
   The original estimate and claim of a frozen protocol were corrected on 2026-09-16
-  (see below and `03-program-design.md` §8). (5) ADRs #1–#3 created in `docs/adr/`
+  (see below and `03-program-design.md` S8). (5) ADRs #1–#3 created in `docs/adr/`
   (sealed-evaluator isolation; deterministic ledger ownership and replay; artifact
   versioning and restoration); ADR #4 (execution topology) remains deferred until spike
   evidence. Delivered: `03-program-design.md` (files, types & signatures, call stack, a
@@ -173,7 +174,7 @@ ADR #4 each remain separately authorized.
   decisions) and the three ADR files. The Gate 3 document records two new tables
   (`engagement_config`, `rotation_draws`) and two endpoint additions (`POST
   /api/shifts/{id}/close`, `GET /api/engagements/{slug}/assist-events`) beyond
-  architecture §3/§4. Also fixed the stale Gate 2 "draft, not approved" header in
+  architecture S3/S4. Also fixed the stale Gate 2 "draft, not approved" header in
   `02-architecture.md` and the stale gate-state lines in `docs/SHIFTWORK_PLAN.md`.
   Gate 3 is NOT approved; the user's explicit decision is pending. No implementation
   code, spike run, installs, credentials, commits or deployment occurred.
@@ -185,7 +186,7 @@ ADR #4 each remain separately authorized.
   newly authored variants, never a reset of exposure history. Defined `ChainStatus`,
   five response projections and `SealedCase`; clarified fixed bookshop "May" copy,
   public-versus-sealed comparisons, decision records and unresolved-incident inheritance.
-  Reconciled assist roles, deferral references and architecture §19's stale ADR note.
+  Reconciled assist roles, deferral references and architecture S19's stale ADR note.
   The test plan now has 41 named specifications, including full-budget cross-shift
   holdouts and rendered synthetic labels; these are not implemented or passing tests.
   The prior review's study arithmetic was wrong: the two-independent-arm approximation
@@ -225,7 +226,7 @@ ADR #4 each remain separately authorized.
   still NOT approved** and Gate 4 has not started; explicit user approval remains next.
 - 2026-09-16 Gate 3 approval: the user explicitly **APPROVED Gate 3** after the seven-blocker
   revision. The approving pass was a full in-session document review of `03-program-design.md`,
-  `00-status.md` and `SHIFTWORK_PLAN.md` §9: every blocker has design text plus a named test
+  `00-status.md` and `SHIFTWORK_PLAN.md` S9: every blocker has design text plus a named test
   specification that can fail against the pre-revision behavior — customer text derived from
   validated structure (test 42); file bytes + contract + catalog hash in the version
   fingerprint (tests 21/43); safe draft/public projections with no internal refs (20/41/45);
@@ -236,12 +237,12 @@ ADR #4 each remain separately authorized.
   no proposal-to-version link (aggregate counts cannot answer the approved authorship
   question), and the Tavily bar is two cross-domain structural discoveries at 10-candidate /
   30-minute review caps. Verified this session: 49 sequential test specifications;
-  `SHIFTWORK_PLAN.md` §9 matches §8.1; ADRs 0001–0003 exist; working tree is docs-only — no
+  `SHIFTWORK_PLAN.md` S9 matches S8.1; ADRs 0001–0003 exist; working tree is docs-only — no
   implementation, no commit. Limits: static document review only — not runtime, security,
   human or learning evidence; no LLM review is an independent oracle; the 12-event Tavily
   corpus is not assembled and no API call occurred. Gate 3 approval covers the program-design
   document only; it does not authorize Gate 4 drafting, implementation, installs, credentials,
-  spike runs, commits, deployment or outreach. Gate 4 has not started. The `AGENTS.md` §3
+  spike runs, commits, deployment or outreach. Gate 4 has not started. The `AGENTS.md` S3
   gate-state snapshot was updated the same day (explicit user instruction) to record Gates
   1–3 approved.
 - 2026-09-16 Gate 4 (in progress): the user explicitly authorized **drafting** the
@@ -251,17 +252,17 @@ ADR #4 each remain separately authorized.
 - 2026-09-16 Gate 4 draft + independent cross-check: `04-slices.md` drafted (16 slices,
   4 phases; Test 1 executable at Slice 8, conditional on the offline executor and re-run
   at Slice 14; documented disagreement with the literal "proof first" reading of
-  SHIFTWORK_PLAN §12; Option A test-build demo baseline). The user-requested independent
+  SHIFTWORK_PLAN S12; Option A test-build demo baseline). The user-requested independent
   adversarial review returned **REVISE — GATE 4** with two blockers, both test-coverage
   bookkeeping: (B1) tests 9/10/18/23/44 and the prompt/assist arms of 16/17 were marked
   fully landed in slices where some specified clauses cannot yet execute; (B2) three
   test-41 clauses (nested sentinel injection, incident-view label, empty/error states)
   were orphaned. Revisions applied: partial-completion annotations with named completing
-  slices (Slice 5 now also opens incidents per Gate 3 §5.5, resolving an internal
+  slices (Slice 5 now also opens incidents per Gate 3 S5.5, resolving an internal
   contradiction; Slice 10 declares test 41 complete; Slice 12 re-runs 16/17
   non-vacuously), plus the review's non-blocking notes (Option A interpretation risk,
-  Test 2 deliberately not sliced per Gate 3 §8, permanent-conditionality sentence in
-  risk 1, checklist note in §2, keyboard traversal in the client browser matrix). No
+  Test 2 deliberately not sliced per Gate 3 S8, permanent-conditionality sentence in
+  risk 1, checklist note in S2, keyboard traversal in the client browser matrix). No
   backtracking of Gates 1–3 was found necessary. Limits: both the draft and the review
   are static document work by LLMs — not runtime, security, human or learning evidence,
   and neither is an independent oracle. **Gate 4 remains NOT approved**; the user's
@@ -271,22 +272,22 @@ ADR #4 each remain separately authorized.
   architect review of `04-slices.md` returned **BLOCK — BACKTRACK GATE 3** with seven
   findings. Adjudication (verified line-by-line against the sources): findings 1–2 are
   genuine Gate 3 defects — (1) test 33 said unresolved incidents "become inherited
-  limits with `LIMIT_DECLARED` events", contradicting §5.8/`CloseShiftFacts`, which
+  limits with `LIMIT_DECLARED` events", contradicting S5.8/`CloseShiftFacts`, which
   keep declared limits and incidents as separate inheritances; (2) Test 1's
   "credentials are reachable" kill condition had no named test — test 20 covers
   learner-visible payloads, not the executed artifact's environment, while
-  architecture §7 requires learner execution without controller credentials.
+  architecture S7 requires learner execution without controller credentials.
   Findings 3–7 are Gate 4 revisions (incomplete clause repairs: test 18's prompt arm
   orphaned, test 43's ledger-resolution and test 44's evaluator-rule clauses claimed
   while those layers are mocked; Slice 8's "Test 1" label overclaims on offline
   adapters; Slice 2 does not match the literal software-factory "real happy path"
   rule; prose demo evidence lacks runnable entry points; the submission-compliance
   path lacks a hard no-go and Slice 16 omits YouTube/availability obligations).
-  Applied now (Gate 3 only): test 33 revised; §5.8 clarified (`LIMIT_DECLARED`
+  Applied now (Gate 3 only): test 33 revised; S5.8 clarified (`LIMIT_DECLARED`
   derives from declared limits only); new test 50
   `test_executor_env_exposes_no_controller_credentials` appended without renumbering
   1–49 (user decision). Gate 3 set to in progress here and mirrored in
-  `SHIFTWORK_PLAN.md` and `AGENTS.md` §3. User decisions recorded: (A) Slice 2 will
+  `SHIFTWORK_PLAN.md` and `AGENTS.md` S3. User decisions recorded: (A) Slice 2 will
   be restructured into a thin real vertical path (one artifact, request, sealed case,
   evaluator result, ledger event) with Slices 3–5 adding conformance, variants and
   hardening — this Gate 4 revision, and all other `04-slices.md` edits, are QUEUED
@@ -307,8 +308,8 @@ ADR #4 each remain separately authorized.
   reviews are static LLM document work — not runtime, security, human or learning
   evidence, and neither is an independent oracle. Gate 3 approval does not authorize
   implementation, installs, credentials, spike runs, commits, deployment or outreach.
-- 2026-09-17 Gate 4 §11 decisions (documentation only): the user answered all four open
-  questions in `04-slices.md` §11. (1) `NEBIUS_API_KEY`: a bounded early availability
+- 2026-09-17 Gate 4 S11 decisions (documentation only): the user answered all four open
+  questions in `04-slices.md` S11. (1) `NEBIUS_API_KEY`: a bounded early availability
   smoke check (key valid, model reachable) is authorized to run once a key is provided,
   retiring the submission-critical access unknown early; the full live assist-gateway
   demonstration still lands at Slice 12, which builds against recorded responses until
@@ -317,14 +318,14 @@ ADR #4 each remain separately authorized.
   spike verifies a Nebius service can host the app. (3) Config numbers: attempt_limit 3,
   bookshop rotation 6/family, assist budgets 6/2 accepted as starting values; still
   challengeable at Slices 2/7/11/12, but changes after inventory authoring are expensive
-  (capacity invariant, Gate 3 §7.1). (4) Sealed-inventory authorship: the agent drafts
+  (capacity invariant, Gate 3 S7.1). (4) Sealed-inventory authorship: the agent drafts
   all 27 cases + fixtures; the user reviews every case and expected answer before
   sealing — the agent's review is not evidence (not an independent oracle). Applied to
-  `04-slices.md`: §11 rewritten as resolved decisions, with matching edits in the Slice
-  2 authoring note, Slice 12 authorization, §8, §9 risk 1 and §10. **Gate 4 remains NOT
+  `04-slices.md`: S11 rewritten as resolved decisions, with matching edits in the Slice
+  2 authoring note, Slice 12 authorization, S8, S9 risk 1 and S10. **Gate 4 remains NOT
   approved**; user review and an explicit approval decision are next. No credential was
   used; no implementation, installs, spike run, external service, commit or push
-  occurred. The `docs/SHIFTWORK_PLAN.md` and `AGENTS.md` §3 gate-state snapshots still
+  occurred. The `docs/SHIFTWORK_PLAN.md` and `AGENTS.md` S3 gate-state snapshots still
   describe the revisions as "being applied" and were left unedited pending user
   instruction.
 - 2026-09-17 Devpost form fold (documentation only): at the user's instruction the
@@ -333,13 +334,13 @@ ADR #4 each remain separately authorized.
   "GPU instance types" wording, Builders & Brews dropdown) were added to
   `HACKATHON_REQUIREMENTS.md` under "Submission form fields (live Devpost form)".
   The Tavily runtime-call clause conflicts with the approved offline curation-only
-  boundary (architecture §11; Gate 3 test 39) — recording it is a factual fold, not
+  boundary (architecture S11; Gate 3 test 39) — recording it is a factual fold, not
   a design change. No gate state changed; Gate 4 remains NOT approved. No
   implementation, installs, credentials, external service, commit or push occurred.
 - 2026-09-17 Gate 4 review round 2 (BLOCK) + Gate 3 backtrack #2: an independent
   static review of the Gate 4 documents returned BLOCK with five blockers and three
   revisions — G4-01 (the "optional" Slices 13–14 Sandbox path is actually
-  product-critical: offline adapters cannot execute learner-edited code), G4-02 (§2
+  product-critical: offline adapters cannot execute learner-edited code), G4-02 (S2
   file map omits `pyproject.toml`, a dependency lock, `demos/` and the clean-env
   install check), G4-03 (test 9's capture-retention clause has no owning slice),
   G4-04 (Slice 14 overclaims a full isolation verdict without a hostile canary),
@@ -347,32 +348,32 @@ ADR #4 each remain separately authorized.
   snapshots), G4-07 (Git-Bash-only demo commands), G4-08 (no deployment slice if
   hosting is chosen). The user accepted the fix list and decided the Tavily
   question: pursue the prize via the shipped operator-run curation CLI (Slice 15's
-  live `discover()` call); no runtime-path change, no architecture §11 / test 39
+  live `discover()` call); no runtime-path change, no architecture S11 / test 39
   backtrack, no organizer clarification; the form is answered "yes" only after the
-  call has actually shipped. Applied now (Gate 3 only): §2 gains `pyproject.toml`,
-  `requirements.lock`, the `demos/` tree and `tests/packaging/`; §6 gains appended
+  call has actually shipped. Applied now (Gate 3 only): S2 gains `pyproject.toml`,
+  `requirements.lock`, the `demos/` tree and `tests/packaging/`; S6 gains appended
   test 51 `test_clean_env_install_and_run` without renumbering 1–50; the tests
   preface notes test 51 re-runs at the packaging slice. Gate 3 set to in progress
-  here and mirrored in `SHIFTWORK_PLAN.md` and `AGENTS.md` §3. All `04-slices.md`
-  edits (G4-01/03/04/05/07/08 + the §11 Tavily decision) are QUEUED and must not be
+  here and mirrored in `SHIFTWORK_PLAN.md` and `AGENTS.md` S3. All `04-slices.md`
+  edits (G4-01/03/04/05/07/08 + the S11 Tavily decision) are QUEUED and must not be
   applied until Gate 3 is explicitly re-approved. Limits: this review is static LLM
   document work — not runtime, security, human or learning evidence, and not an
   independent oracle. No implementation, installs, credentials, spike, external
   service, commit or push occurred.
 - 2026-09-17 Gate 3 RE-APPROVED (second time) + Gate 4 revision round 2 applied: the
-  user reviewed the packaging revision of `03-program-design.md` (§2 file map now
+  user reviewed the packaging revision of `03-program-design.md` (S2 file map now
   carries `pyproject.toml`, `requirements.lock`, the `demos/` tree and
-  `tests/packaging/`; §6 test 51 appended) and approved Gate 3. That released the
+  `tests/packaging/`; S6 test 51 appended) and approved Gate 3. That released the
   queued round-2 edits, all now applied to `04-slices.md`: G4-01 (Slices 13–14 on the
   mandatory packaging path; Slice 16 depends on Slices 1–14; sandbox no-go wording in
-  §9/§10), G4-03 (test 9 capture-retention clause named and demonstrated at Slice 8),
+  S9/S10), G4-03 (test 9 capture-retention clause named and demonstrated at Slice 8),
   G4-04 (Slice 14 re-runs tests 16–18 against the real adapter plus a canary hostile
   artifact), G4-05 (Slice 12 model-feedback evidence pack written to
   `evidence/model-feedback.md`; Slice 16 assembles form answers from it), G4-06 (this
-  entry; `SHIFTWORK_PLAN.md` and `AGENTS.md` §3 snapshots updated), G4-07 (`demos/`
+  entry; `SHIFTWORK_PLAN.md` and `AGENTS.md` S3 snapshots updated), G4-07 (`demos/`
   modules are the canonical shell-independent evidence path; PowerShell where HTTP is
-  unavoidable) and G4-08 (conditional Slice 17 + §8 five-condition Option B exit
-  gate). §11 decisions 5–6 recorded (Tavily via the shipped curation CLI's live
+  unavoidable) and G4-08 (conditional Slice 17 + S8 five-condition Option B exit
+  gate). S11 decisions 5–6 recorded (Tavily via the shipped curation CLI's live
   `discover()` call; execution path submission-critical with a pre-authorized early
   sandbox entitlement/I-O smoke check). **Gate 4 remains NOT approved**; it is now
   presented for the user's review and the explicit software-factory approval
@@ -382,7 +383,7 @@ ADR #4 each remain separately authorized.
   commit or push occurred.
 - 2026-09-17 Gate 4 review round 3 (user verdict REVISE — three consistency
   corrections; documentation only): (1) the provisional Python bound in
-  `03-program-design.md` §2 was tightened from `>=3.11,<3.14` to `>=3.12,<3.14` to
+  `03-program-design.md` S2 was tightened from `>=3.11,<3.14` to `>=3.12,<3.14` to
   match the approved 3.12+ stack decision — test 51's clean-env install would
   otherwise create an unintended Python 3.11 support obligation; (2) the Gate 3
   header now records its second backtrack/re-approval (packaging, test 51) plus the
@@ -390,7 +391,7 @@ ADR #4 each remain separately authorized.
   `HACKATHON_REQUIREMENTS.md` Tavily checklist was made neutral (whether a shipped
   operator-run curation CLI's live `discover()` call satisfies "functional, runtime
   call ... as part of its solution" is an interpretation question) and now points to
-  the decision of record (`04-slices.md` §11 decision 5). The reviewer reported no
+  the decision of record (`04-slices.md` S11 decision 5). The reviewer reported no
   remaining blocking defect in the 17-slice sequence. Limits: static LLM document
   work — not runtime, security, human or learning evidence, and not an independent
   oracle. Gate 3 remains APPROVED (the bound correction is a user-directed
@@ -400,18 +401,54 @@ ADR #4 each remain separately authorized.
   occurred.
 - 2026-09-17 Gate 4 APPROVED: the user explicitly approved Gate 4 after the round-3
   corrections. Recorded in the gate line above, the Slice checklist (now
-  authoritative here, per `04-slices.md` §2) and Approval history; the
+  authoritative here, per `04-slices.md` S2) and Approval history; the
   `04-slices.md` header is marked APPROVED the same day. Approval authorizes
   building the 17 slices in order, one at a time, each ending with the demonstrated
   demo evidence, a check-off here and the "Continue to slice N+1, or re-steer?"
   pause — and nothing else: installs, credentials, external services, the Slice 13
   spike, the Slice 15 ablation, deployment, outreach and ADR #4 remain separately
-  authorized (`04-slices.md` §10). Separately the same day, the user authorized
+  authorized (`04-slices.md` S10). Separately the same day, the user authorized
   documentation Git operations only: commit of the approved gate documents on this
   branch, publish of the branch and merge to main (no co-author trailers); that
   authorization covers documentation commits, not slice work. Limits: static
   document work — no implementation, installs, credentials, spike run, external
   service use, deployment or outreach occurred. Scores remain conditional forecasts.
+- 2026-09-17 Slice 1 (tracer bullet) IMPLEMENTED and demonstrated: the full HTTP
+  lifecycle runs end to end with stubbed persistence and stubbed evaluation. New
+  files: `shiftwork/` (app.py factory, api/schemas.py + api/routes.py, domain/models.py,
+  store/db.py + store/repo.py with an inline tracer schema, executor/recorded.py,
+  orchestrator.py, config.py, client/index.html stub board), `demos/lifecycle.py`,
+  `shiftwork/fixtures/runs/tracer_transcript.json`, `tests/conftest.py`,
+  `tests/api/test_tracer_lifecycle.py` and `tests/packaging/test_clean_env_install_and_run.py`
+  (test 51). Evidence run this session: (1) `python -m demos.lifecycle` exit 0: board
+  -> open `bookshop-shift-01` -> draft round trip -> freeze `ver-0001`
+  (`placeholder-1`) -> `run-0001` FINALIZED through the `recorded` adapter (3 captures)
+  -> check `cr-0001` fail STALE_BEYOND_RULE -> chained ledger with genesis prev_hash
+  (SALE_COMPLETED, INCIDENT_OPENED) -> incident `BWB-01` OPEN -> close, final line
+  "lifecycle evidence complete ... FINALIZED ... chain VALID with 2 events";
+  (2) `pytest tests/api -q` 2 passed (lifecycle smoke asserting every route status
+  and persisted row counts, plus restart persistence); (3) browser check on port 8017
+  showing the stub board with the artifact version, open incident and ledger totals;
+  (4) `pytest tests/packaging -q -s` re-run 2026-09-17 printed
+  `clean-env mechanism: stdlib venv + pip` and `1 passed in 21.82s`; a full
+  `pytest tests -q` re-run printed `3 passed`. Environment notes: test 51 performs
+  a clean-env install from `requirements.lock` into a fresh temporary venv, and
+  that install did run (whether it reached PyPI or was served from pip's cache was
+  not separately instrumented). The project `.venv` (Python 3.12.13) already
+  matches `requirements.lock` exactly (22 packages, verified with `uv pip list`)
+  and was not modified. The stdlib-venv path is the mechanism selected here; an
+  earlier version of this note claimed the stdlib path "is blocked on this machine
+  by Windows Application Control (WinError 4551)" and "exercised its uv fallback,"
+  which was false as recorded and has been corrected in `MISTAKES.md` (the block
+  was a one-off, not reproducible on re-test, and the uv fallback never ran). All
+  tracer stubs (placeholder content hashes, hardcoded
+  check result, placeholder chain hashes, hardcoded ledger events and incident,
+  inline tracer schema) are documented Slice 2+ replacements; hashing, evaluation,
+  reducer, sealed cases, budgets, rotation and inheritance are NOT yet real, so no
+  hackathon capability, learning or prize claim follows from this evidence. The only
+  network operation was test 51's clean-env package install from the lockfile; no
+  credential use, Nebius or Tavily inference call, spike run, deployment, outreach
+  or commit occurred.
 - Read `../../../AGENTS.md`, `../../SHIFTWORK_PLAN.md`,
   `../../../HACKATHON_REQUIREMENTS.md` and every file in this folder before continuing.
 - Apply `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
@@ -448,9 +485,9 @@ ADR #4 each remain separately authorized.
   **PASS — GATE 1 FINAL REVIEW**. No backtrack. Gate 1 remains APPROVED; Gate 2
   drafting authorized and started.
 - Gate 2 — Architecture: approved by the user on 2026-09-15 after an independent
-  review of `02-architecture.md` (internal consistency, `AGENTS.md` §8 boundaries,
-  Gate 2 template fit) and a re-fetch of five primary sources confirming the §16
-  "Verified" claims. One correction applied (§1 Fit enumeration). Approval covers the
+  review of `02-architecture.md` (internal consistency, `AGENTS.md` S8 boundaries,
+  Gate 2 template fit) and a re-fetch of five primary sources confirming the S16
+  "Verified" claims. One correction applied (S1 Fit enumeration). Approval covers the
   architecture document only; it does not authorize Gate 3, implementation, ADR file
   creation, installs, credentials, commits, deployment or outreach.
 - Gate 3 — Program Design: approved by the user on 2026-09-16 after the adversarial
@@ -461,7 +498,7 @@ ADR #4 each remain separately authorized.
 - Gate 3 — Program Design: BACKTRACKED to in progress on 2026-09-17 after a cold
   independent review found two concrete Gate 3 defects (test 33 close-semantics
   ambiguity; no test for Test 1's credential-reachability kill condition). Revisions
-  applied the same day (revised test 33, clarified §5.8, appended test 50). The
+  applied the same day (revised test 33, clarified S5.8, appended test 50). The
   2026-09-16 approval above remains the historical record; explicit re-approval of
   the revised document is pending and must precede any Gate 4 revision or approval.
 - Gate 3 — Program Design: RE-APPROVED by the user on 2026-09-17 after reviewing the
@@ -471,18 +508,18 @@ ADR #4 each remain separately authorized.
   `03-program-design.md` only; it does not approve Gate 4, and does not authorize
   implementation, installs, credentials, spike runs, commits, deployment or outreach.
 - Gate 3 — Program Design: BACKTRACKED a second time on 2026-09-17 after the Gate 4
-  review round 2 found §2's file map omitted packaging (`pyproject.toml`, dependency
-  lock, `demos/`, clean-env install test). Revisions applied the same day (§2 file
-  map + §6 test 51); the earlier approvals and the first backtrack remain the
+  review round 2 found S2's file map omitted packaging (`pyproject.toml`, dependency
+  lock, `demos/`, clean-env install test). Revisions applied the same day (S2 file
+  map + S6 test 51); the earlier approvals and the first backtrack remain the
   historical record.
 - Gate 3 — Program Design: RE-APPROVED a second time by the user on 2026-09-17 after
   reviewing the packaging revision. This released queued Gate 4 revision round 2
-  (G4-01/03/04/05/07/08 fixes plus §11 decisions 5–6), now applied to
+  (G4-01/03/04/05/07/08 fixes plus S11 decisions 5–6), now applied to
   `04-slices.md`. Approval covers `03-program-design.md` only; it does not approve
   Gate 4, and does not authorize implementation, installs, credentials, spike runs,
   commits, deployment or outreach.
 - Gate 3 — Program Design: consistency correction (user-directed, 2026-09-17, during
-  the Gate 4 review round 3) — the provisional Python bound in §2 was tightened from
+  the Gate 4 review round 3) — the provisional Python bound in S2 was tightened from
   `>=3.11,<3.14` to `>=3.12,<3.14` (test 51 would otherwise carry an unintended
   Python 3.11 support obligation), and the document header now records the second
   backtrack/re-approval it had omitted. Approval state unchanged.
@@ -491,5 +528,5 @@ ADR #4 each remain separately authorized.
   follow-up REVISE with three consistency corrections; corrections applied; no
   remaining blocking defect found in the 17-slice sequence). Approval covers the
   17-slice build order in `04-slices.md` and authorizes slice work one at a time
-  under its §10; it does not authorize installs, dependencies, credentials,
+  under its S10; it does not authorize installs, dependencies, credentials,
   external services, spike runs, deployment, outreach or ADR #4.

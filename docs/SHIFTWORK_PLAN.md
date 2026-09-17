@@ -5,16 +5,19 @@ Updated: 2026-09-17.
 **State:** selected by the user as the sole active hackathon direction.
 **Gate state:** Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
 APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17 (re-approved a
-second time after the §2 packaging backtrack — `pyproject.toml`, `requirements.lock`,
+second time after the S2 packaging backtrack — `pyproject.toml`, `requirements.lock`,
 `demos/`, test 51; history: first backtrack re-approved 2026-09-17, originally
 approved 2026-09-16); Gate 4 — Slice Plan APPROVED 2026-09-17 (after three review
 rounds the same day; all accepted fixes and consistency corrections applied). Slice
-work proceeds one slice at a time under `04-slices.md` §10; credentials, installs,
+work proceeds one slice at a time under `04-slices.md` S10; credentials, installs,
 spike runs, external services, deployment, outreach and ADR #4 each remain
 separately authorized. Backtrack an earlier gate only for a concrete blocker.
+Slice 1 (tracer bullet) is implemented and demonstrated 2026-09-17; its evidence is
+recorded in `docs/plans/shiftwork/00-status.md`. No later slice has started.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
-**Evidence state:** no application, Sandbox execution, learner study, transfer
-result, Tavily ablation, prize merit or score has been demonstrated.
+**Evidence state:** a Slice 1 tracer application exists with stubbed persistence,
+stubbed evaluation and placeholder hashes; no Sandbox execution, learner study,
+transfer result, Tavily ablation, prize merit or score has been demonstrated.
 **Working forecast:** current 27/40; pre-evidence cap 31/40; conditional best
 case 35/40. Potential Impact remains at most 4.0 in that best case.
 
@@ -241,7 +244,7 @@ changed. Kill Tavily centrality if it finds nothing useful beyond polling, chang
 only prose, lets unverified content affect scoring, or creates more review burden
 than manual maintenance. This can kill the Tavily prize strategy without killing Shiftwork.
 
-Gate 3 pre-registers the bounded historical replay in `03-program-design.md` §8.1:
+Gate 3 pre-registers the bounded historical replay in `03-program-design.md` S8.1:
 12 dated events across four official domains in a fixed 2025-08-01–2026-07-31
 window, method-blind chronological selection within known-page/structural strata,
 and fail-closed thresholds. Tavily must produce at least two useful structural

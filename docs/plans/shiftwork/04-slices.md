@@ -5,18 +5,18 @@ Gate: 4 — Vertical Slices (APPROVED 2026-09-17). Written 2026-09-16; revised
 Slice 2 is restructured into a thin real vertical path (user decision A), Slices 3–5
 are re-scoped to conformance / variants / hardening that deepen it, every test landing
 is re-mapped at clause level, Slice 8 is renamed an offline pre-proof, and Slice 16
-gains a hard submission no-go criterion; the user also resolved the four original §11
+gains a hard submission no-go criterion; the user also resolved the four original S11
 questions. Round 2 (after an independent Gate 4 review) put Slices 13–14 on the
 mandatory packaging path, made every demo command a checked-in `demos/` entry point
 (PowerShell where an HTTP command is unavoidable), added test 51 plus the Slice 12
-model-feedback evidence pack, added the conditional Slice 17, and recorded §11
+model-feedback evidence pack, added the conditional Slice 17, and recorded S11
 decisions 5–6. Round 3 applied the review's three consistency corrections (Python
 bound `>=3.12,<3.14`; Gate 3 header record; neutral Tavily checklist), and the user
 approved this plan the same day.
 Scope: the approved architecture (`02-architecture.md`) and program design
 (`03-program-design.md`) turned into a build order of visible, working, testable
 slices. This is the approved build order: slice work proceeds one slice at a time
-under §10. Credentials, installs, spike runs, external services, deployment,
+under S10. Credentials, installs, spike runs, external services, deployment,
 outreach and ADR #4 each remain separately authorized.
 
 Build stance: the deterministic core is buildable offline with zero credentials and
@@ -24,7 +24,7 @@ is the product's differentiator, so it is front-loaded. The Nemotron assist gate
 is the minimum path that satisfies the hackathon's runtime-inference + NVIDIA-model
 requirement, so it is on the submission critical path even though it builds after the
 core. The real Token Factory sandbox adapter is on the submission critical path too —
-only the verified Sandbox path can execute learner-edited artifacts (Gate 3 §3.3) —
+only the verified Sandbox path can execute learner-edited artifacts (Gate 3 S3.3) —
 and is gated on credentials that do not exist yet; the Tavily ablation and any hosted
 demo remain evidence-gated and optional.
 
@@ -42,7 +42,7 @@ Each slice below lists, in the same order:
   shell-independent evidence path; wherever an HTTP command is unavoidable it is supplied
   as a tested PowerShell command (a Git-Bash equivalent is optional).
 - **Still mocked / missing** — what stays fake, so no slice over-claims.
-- **Tests landed** — `03-program-design.md` §6 specification numbers that become real,
+- **Tests landed** — `03-program-design.md` S6 specification numbers that become real,
   failing-capable tests in this slice.
 - **Authoring / config decisions** — content the operator must create, or provisional
   numbers the user may challenge, before the slice can pass.
@@ -52,7 +52,7 @@ After **every** slice the workflow is: run the demo evidence, show the user the 
 result, check the slice off in `00-status.md`, then ask **"Continue to slice N+1, or
 re-steer?"** No slice is "done" on a green test alone; the user sees it run.
 
-Rules honored throughout (software-factory §Gate 4): Slice 1 is a tracer bullet wired
+Rules honored throughout (software-factory SGate 4): Slice 1 is a tracer bullet wired
 end to end with mocks. Slice 2 replaces the mocks with a **thin real end-to-end happy
 path** — one artifact frozen under a real content hash, one customer request really
 executed, one sealed case really evaluated into a `CheckResult`, one real hash-chained
@@ -86,7 +86,7 @@ testable state.
 | 14 | Real tokenfactory adapter + full Test 1 verdict | C | depends on Slice 13 |
 | 15 | Tavily curation + ablation | C | `TAVILY_API_KEY` |
 | 16 | Submission packaging — test build + demo video | D. Submission | deployment / external-action authorization |
-| 17 | Hosted deployment — **conditional**: only if Option B is selected at the Slice 13 exit (§8) | D. Submission | deployment / external-action authorization |
+| 17 | Hosted deployment — **conditional**: only if Option B is selected at the Slice 13 exit (S8) | D. Submission | deployment / external-action authorization |
 
 Phase A (1–8) is the critical path to the central-mechanism proof and needs no
 credentials. Phase B (9–11) makes the proof legible as a product rather than a
@@ -94,20 +94,20 @@ console. Phase C (12–15) is gated on credentials. Phase D (16–17) is the sub
 shape. **Dependency note: Slice 16 depends on Slices 1–14** — the offline core, the
 client, the Nemotron assist gateway (the hackathon's runtime-inference + NVIDIA-model
 compliance path) and the real sandbox adapter, because only the verified Sandbox path
-can execute learner-edited artifacts (Gate 3 §3.3): without it the shipped product
+can execute learner-edited artifacts (Gate 3 S3.3): without it the shipped product
 cannot run the core learner loop. **Slices 13–14 (spike + real tokenfactory adapter)
 are on the mandatory packaging path; Slice 15 (Tavily ablation) remains
 prize-conditional** and can be dropped without affecting compliance. The conditional
-Slice 17 exists only if Option B survives the Slice 13 exit (§8). On Gate 4 approval
+Slice 17 exists only if Option B survives the Slice 13 exit (S8). On Gate 4 approval
 this table becomes the slice checklist in `00-status.md`.
 
-Test 2 (reduced-assistance transfer) is deliberately **not sliced**: Gate 3 §8 defers
+Test 2 (reduced-assistance transfer) is deliberately **not sliced**: Gate 3 S8 defers
 it past the 2026-10-30 deadline and no impact claim is made at submission.
 
 ## 3. Interpretation of "execute the central-mechanism proof first"
 
-`docs/SHIFTWORK_PLAN.md` §12 records a preference to execute the central-mechanism
-proof (its §9 Test 1) first. I agree with the priority and have ordered the whole
+`docs/SHIFTWORK_PLAN.md` S12 records a preference to execute the central-mechanism
+proof (its S9 Test 1) first. I agree with the priority and have ordered the whole
 plan to serve it, but I want to surface a disagreement with the literal reading
 "Test 1 is the first thing executed," because following it literally would produce a
 false proof.
@@ -131,7 +131,7 @@ Slice 8 is a **pre-proof, not the full Test 1 verdict**, because running offline
 three structural limits that no amount of offline work can retire:
 
 1. **Hostile-code isolation is untestable offline.** `local_process` runs trusted
-   fixtures only (Gate 3 §3.3), so the "hidden cases reachable" *case* arm is only
+   fixtures only (Gate 3 S3.3), so the "hidden cases reachable" *case* arm is only
    partially adjudicated — a genuinely hostile artifact is never executed offline.
 2. **The credential arm is only fully adjudicated at Slice 14.** Test 50 offline covers
    `recorded` (no environment at all) and `local_process` (child env scrubbed to a pinned
@@ -168,7 +168,7 @@ not the final word on isolation.
 - **Still mocked / missing:** canonical hash (placeholder), evaluator (hardcoded
   verdicts), reducer (hardcoded events), sealed store (empty), rotation (none), budget
   (none), assist (absent), the six real screens (one stub page).
-- **Tests landed:** none of tests 1–50 from §6 (this is the wiring skeleton); a smoke
+- **Tests landed:** none of tests 1–50 from S6 (this is the wiring skeleton); a smoke
   check asserts the lifecycle returns persisted rows and can fail if a route is
   unwired, and **test 51** (clean-environment install-and-run) lands here — the
   packaging skeleton is part of this slice — and re-runs at Slice 16.
@@ -220,14 +220,14 @@ not the final word on isolation.
   satisfy a required executable dimension or silently become an evaluator rule" clause
   completes at Slice 4 and the "and inherited" clause at Slice 8). Plus a thin-path smoke
   check asserting the one real `CheckResult` and the one real hash-chained event are
-  produced and persisted, which fails if any step is still mocked. The §6
+  produced and persisted, which fails if any step is still mocked. The S6
   evaluator/reducer robustness suites (4–15, 42) are deliberately **not** claimed here —
   their full assertion sets need the deepened Slices 4–5, and claiming them against a
   one-case/one-event path would repeat the clause-level over-claim in `MISTAKES.md`.
 - **Authoring / config:** the **bookshop contract catalog v1** — immutable option ids,
-  learner labels and `evaluator_rule_id` bindings (§3.2 `ContractOptionId` set) — must be
+  learner labels and `evaluator_rule_id` bindings (S3.2 `ContractOptionId` set) — must be
   authored; the `engagement_config` row (attempt_limit, rotation_group_size, total assist
-  budget) is created from §7.1 defaults; and the **minimal real fixtures** the thin path
+  budget) is created from S7.1 defaults; and the **minimal real fixtures** the thin path
   needs must be authored — one pinned trusted fixture artifact (or recorded transcript),
   one fixed customer request (literal bytes), the frozen shop snapshot records that
   request touches, and **one sealed case** (the first `stale_information` variant) with
@@ -235,8 +235,8 @@ not the final word on isolation.
   **The user accepted these as starting values on 2026-09-17** (attempt_limit 3; bookshop
   rotation_group_size 6; total assist budget 6). They remain challengeable here and at
   Slices 7/11/12, but changing them after inventory is authored is not cheap (capacity
-  invariant, §7.1). All sealed cases and fixtures are agent-drafted with the user's
-  review required before sealing (§11 decision 4).
+  invariant, S7.1). All sealed cases and fixtures are agent-drafted with the user's
+  review required before sealing (S11 decision 4).
 - **Authorization:** none.
 
 ### Slice 3 — Executor conformance (recorded + local_process)
@@ -303,8 +303,8 @@ not the final word on isolation.
 - **Authoring / config:** **sealed family 1** — `stale_information`: the remaining five
   case specs + expected values + the matching request ordinals and snapshot records (the
   first variant was authored in Slice 2). Requires operator review for semantic
-  independence. The §7.2 **reason-code render map** wording is fixed here (it is pinned by
-  test 19 in Slice 6); any wording change revises Gate 3 §7.2.
+  independence. The S7.2 **reason-code render map** wording is fixed here (it is pinned by
+  test 19 in Slice 6); any wording change revises Gate 3 S7.2.
 - **Authorization:** none.
 
 ### Slice 5 — Reducer + hash chain + idempotent finalization
@@ -314,7 +314,7 @@ not the final word on isolation.
   (`append` assigns seq + hashes, `verify_chain` runs on every read, `BROKEN` aborts the
   read); `finalize_run` becomes one idempotent transaction (evaluate → reduce → chain →
   insert events → open incidents on failing checks → set FINALIZED), matching Gate 3
-  §5.5; incident **resolution** via the repair loop lands in Slice 7; evidence rendering
+  S5.5; incident **resolution** via the repair loop lands in Slice 7; evidence rendering
   (`get_run_outputs`/`get_run_checks`/`get_ledger`) replaces the thin Slice 2 single-event
   rendering and resolves derivation links and catalog-version references to raw records.
 - **Demo evidence:**
@@ -342,7 +342,7 @@ not the final word on isolation.
   re-version clause: a new catalog version may change wording/semantics while old ledger
   entries still resolve against their original catalog version).
 - **Authoring / config:** the **mission fixtures** (`MissionFixtures` weights + symbolic
-  transitions) must be authored and are inspectable (brief §5: weights must be
+  transitions) must be authored and are inspectable (brief S5: weights must be
   inspectable). Synthetic-consequence labels are wired here.
 - **Authorization:** none.
 
@@ -401,7 +401,7 @@ not the final word on isolation.
   (future-stimuli clause), 23 (incident-reconstruction clause).
 - **Authoring / config:** **sealed families 2 and 3** (`policy_exception`,
   `hostile_instruction`), 6 variants each, completing the 18-case bookshop inventory.
-  Capacity invariant check (§7.1) must pass: 6 variants/family cover two bookshop shifts
+  Capacity invariant check (S7.1) must pass: 6 variants/family cover two bookshop shifts
   at attempt_limit 3. Operator reviews semantic independence of newly authored variants.
 - **Authorization:** none.
 
@@ -413,8 +413,8 @@ not the final word on isolation.
   events; refuses in-flight runs); `open_next_shift` seeds from inheritance (latest
   version, decision/check files, unresolved incidents, declared limits, verified ledger
   summary); startup reconciliation (`reconcile_interrupted`). Then **executes the Test 1
-  offline pre-proof** (SHIFTWORK_PLAN §9) on the `local_process` adapter — a recorded
-  pre-proof, not the full Test 1 verdict (see §3).
+  offline pre-proof** (SHIFTWORK_PLAN S9) on the `local_process` adapter — a recorded
+  pre-proof, not the full Test 1 verdict (see S3).
 - **Demo evidence:**
   - `python -m pytest tests/api tests/orchestrator -q` green: board after open equals the
     prior version + open incidents + unresolved limits + ledger summary; closing writes
@@ -430,19 +430,19 @@ not the final word on isolation.
     unresolved incidents and then draws a **still-unexposed** related case over its own
     attempts. The causal comparison (pre-repair fixture fails, repaired fixture passes,
     same held-out stimuli) runs on `local_process`, **never on `recorded`**, because
-    `recorded` executes nothing and cannot show the artifact *caused* the outcome (§3 limit
+    `recorded` executes nothing and cannot show the artifact *caused* the outcome (S3 limit
     3). The process is **restarted** mid-arc and reconstructs artifact + state from tables.
     Every first-shift outbound surface is scanned for future customer wording — none
     appears. The command writes a **per-kill-condition verdict table** to
     `docs/plans/shiftwork/evidence/test1-central-mechanism.md` with the raw run, ledger
     replay and scan output, recording the result as **PRE-PROOF PASS / FAIL, conditional on
     the offline executor** — the isolation and provisioned-credential limbs are explicitly
-    marked "deferred to Slice 14" (§3 limits 1–2). This is the offline go/no-go for the
+    marked "deferred to Slice 14" (S3 limits 1–2). This is the offline go/no-go for the
     central mechanism; the full Test 1 verdict is recorded at Slice 14.
 - **Still mocked / missing:** assist, Tavily, the six screens (still the stub page), real
   sandbox isolation. Two of Test 1's kill-condition limbs (hostile-code isolation; the
   provisioned-sandbox credential arm) are only partially adjudicated offline and are
-  reserved for Slice 14 (see §3).
+  reserved for Slice 14 (see S3).
 - **Tests landed:** 32 (open seeds from inheritance — full); 33 (close semantics — full,
   matching the revised Gate 3 spec: `LIMIT_DECLARED` for declared limits exactly once,
   unresolved OPEN incidents → `CLOSED_UNRESOLVED` rows inherited as incidents and never as
@@ -504,7 +504,7 @@ widths, reporting the actual URL/port.
   have null `public_check_id`; no future customer text returned; sealed sentinels injected
   into nested ledger payloads, incident records and logs never serialize; the incident
   view visibly renders "Synthetic scenario"; labels hold in empty and error states).
-  **Test 41 is complete at Slice 10** — every clause of the §6 specification has landed
+  **Test 41 is complete at Slice 10** — every clause of the S6 specification has landed
   across Slices 9–10.
 - **Authoring / config:** none new (uses Slice 2 catalog).
 - **Authorization:** none.
@@ -526,7 +526,7 @@ widths, reporting the actual URL/port.
   (3 families × 3: `future_commitment`, `safety_escalation`, `retry_booking`), plus the
   away-shift `engagement_config` (total assist budget 2; allowed roles
   `STAKEHOLDER_DIALOGUE`, `HINT`, `DIAGNOSIS`). **Provisional assist budget 2 is
-  challengeable here** (Gate 3 §10 item 12: no learner evidence backs 6/2).
+  challengeable here** (Gate 3 S10 item 12: no learner evidence backs 6/2).
 - **Authorization:** none.
 
 ## 6. Phase C — external-service-gated (credentials separately authorized)
@@ -542,7 +542,7 @@ are specified, not run, until the user separately authorizes the relevant key/se
   assist budget, patch accept/reject with no proposal-to-version link, refusal of sealed
   refs. The assist UI surfaces in the client. This is the **minimum path that satisfies
   the hackathon's runtime Token Factory inference call + NVIDIA open-source model
-  requirement** (architecture §15, Best Apps and Agents track). It also produces the
+  requirement** (architecture S15, Best Apps and Agents track). It also produces the
   **model-feedback evidence pack** the submission form's model questions require:
   a rubric — correctness, usefulness, grounding, role adherence, boundary compliance —
   frozen **before** the first live call; for each recorded call the model ID, endpoint,
@@ -590,22 +590,22 @@ are specified, not run, until the user separately authorizes the relevant key/se
 
 ### Slice 13 — Token Factory capability spike (specified, gated)
 
-- **Delivers:** runs the bounded §9 spike probes and records raw evidence: file transfer
+- **Delivers:** runs the bounded S9 spike probes and records raw evidence: file transfer
   in/out of a sandbox, outbound networking from a sandbox, secret injection + scoping,
   timeouts/resource limits, ingress posture, and cost/latency/entitlements. Resolves
-  architecture §16 unverified items and decides whether **ADR #4 (execution topology)**
-  can be promoted. Also informs the Slice 16 hosting decision (§16 item 6: whether any
+  architecture S16 unverified items and decides whether **ADR #4 (execution topology)**
+  can be promoted. Also informs the Slice 16 hosting decision (S16 item 6: whether any
   Nebius service hosts an arbitrary container web app for a demo URL).
 - **Demo evidence:** a written spike report in `docs/plans/shiftwork/evidence/` with the
-  raw probe output per §9 question and a PASS/FAIL per row; an explicit ADR #4
+  raw probe output per S9 question and a PASS/FAIL per row; an explicit ADR #4
   promotable / not-promotable verdict.
 - **Still mocked / missing:** this is a spike, not product code; no adapter is built here.
 - **Tests landed:** none directly; produces the evidence Slice 14 and ADR #4 require.
 - **Authoring / config:** none.
 - **Authorization:** `NEBIUS_API_KEY` / `CONTREE_SESSION`. A bounded early sandbox
-  entitlement/I-O smoke check (§11 decision 6) is pre-authorized to run once sandbox
+  entitlement/I-O smoke check (S11 decision 6) is pre-authorized to run once sandbox
   credentials are provided, retiring the execution-access unknown before the full spike.
-  **Kill handling (Gate 3 §9):**
+  **Kill handling (Gate 3 S9):**
   a failed probe that invalidates an approved isolation/inference/execution assumption
   **stops the dependent slice and triggers backtracking** — update the affected gate
   document and obtain re-approval. ADR #4 is created only after this evidence and only
@@ -646,10 +646,10 @@ are specified, not run, until the user separately authorizes the relevant key/se
 
 - **Delivers:** the offline `curation/pipeline.py` (discover → human verify → freeze;
   never imported by `app.py`) and `curation/ablation.py` three-arm historical replay
-  (frozen / known-page polling / Tavily) against the §8.1 pre-registered corpus, with the
+  (frozen / known-page polling / Tavily) against the S8.1 pre-registered corpus, with the
   pre-registered kill thresholds. Produces the **Test 3** verdict. The shipped CLI's live
   `discover()` call is the qualifying functional Tavily call for the bonus (user decision,
-  §11 decision 5): it runs, and the form is answered "yes", only after the mandatory
+  S11 decision 5): it runs, and the form is answered "yes", only after the mandatory
   product path; the Test 3 KEEP/DROP verdict governs the pitch, not the fact of the call.
 - **Demo evidence:** `python -m pytest tests/curation -q` green: `app.py` import closure
   excludes `curation`; quarantined sources have no verifier/fixture, verified sources
@@ -660,12 +660,12 @@ are specified, not run, until the user separately authorizes the relevant key/se
   ablation run outputs `KEEP_TAVILY_CLAIM` or `DROP_TAVILY_CLAIM` written to
   `docs/plans/shiftwork/evidence/test3-tavily-ablation.md`.
 - **Still mocked / missing:** none; this is offline tooling. It can kill the Tavily prize
-  claim without killing Shiftwork (brief §9 Test 3).
+  claim without killing Shiftwork (brief S9 Test 3).
 - **Tests landed:** 39 (curation never imported by runtime), 48, 49 (ablation manifest
   pre-registered; kill rules fail closed).
 - **Authoring / config:** the **12-event Tavily corpus manifest** (3/domain across
   `cpsc.gov`, `gov.uk`, `ec.europa.eu`, `productsafety.gov.au`; 2 known-page + 1
-  structural each) with archived before/after evidence and canonical constraints. §8.1
+  structural each) with archived before/after evidence and canonical constraints. S8.1
   fixes domains, window, selection rule and thresholds — **implementation may not tune
   them after seeing comparator output.** If the manifest cannot supply all 12 with
   authoritative evidence, the ablation does not run and no Tavily claim is made.
@@ -697,7 +697,7 @@ are specified, not run, until the user separately authorizes the relevant key/se
   inheritance, and is linked in the submission; the repo, license and testing instructions
   are present; if any part is private, login credentials are in the testing instructions.
 - **Still mocked / missing:** depends on prior slices; a hosted URL is a stretch goal, not
-  a guaranteed deliverable (see §8). The offline downloadable test build is the committed
+  a guaranteed deliverable (see S8). The offline downloadable test build is the committed
   baseline.
 - **Tests landed:** none new; runs the full suite green before packaging, including
   test 51 (clean-environment install-and-run) from a freshly created environment.
@@ -731,7 +731,7 @@ are specified, not run, until the user separately authorizes the relevant key/se
 - **Authorization:** creating the container, deploying it, provisioning storage and any
   Nebius service action are external actions requiring explicit separate authorization.
 
-## 8. Demo URL / hosting decision (Gate 3 §11 deferral)
+## 8. Demo URL / hosting decision (Gate 3 S11 deferral)
 
 The architecture is local-first; the hackathon requires "a URL to a working demo,
 hosted application, **or test build**" (HACKATHON_REQUIREMENTS, Submission requirements).
@@ -747,20 +747,20 @@ Three options, in increasing risk and dependence on unverified facts:
   the interpretation risk; Option B exists to retire the rest.
   **User-confirmed as the plan of record on 2026-09-17.**
 - **Option B (stretch): hosted controller on Nebius.** Only viable if Slice 13 verifies
-  §16 item 6 (that some Nebius service hosts an arbitrary container web app). If it does,
+  S16 item 6 (that some Nebius service hosts an arbitrary container web app). If it does,
   a hosted URL strengthens "working demo." If it does not, fall back to Option A — the
-  design must not silently depend on it (architecture §14). Option B is selected at the
+  design must not silently depend on it (architecture S14). Option B is selected at the
   Slice 13 exit only if all five hold: the container works without redesign; SQLite
   persistence (or a deterministic, documented reset) is proven; public HTTPS access
   survives restart testing; uptime is funded through 2026-12-15; and the downloadable
   build stays visible as fallback. Slice 17 then delivers it.
 - **Option C (not planned): hosted learner sandboxes with public ingress.** Architecture
-  §16 item 1 does not document public sandbox ingress and the design does not require it;
+  S16 item 1 does not document public sandbox ingress and the design does not require it;
   not pursued unless the spike unexpectedly shows it is available and useful.
 
 Decision point: after Slice 13. Until then Option A is the safe plan and no slice
 silently assumes a hosted URL. **Conditional slice:** if the Slice 13 exit selects
-Option B, Slice 17 (§7) becomes active and carries the container build, deployment,
+Option B, Slice 17 (S7) becomes active and carries the container build, deployment,
 persistence/restart handling, monitoring, fallback-to-downloadable and funded-
 availability-through-2026-12-15 requirements; if not, Slice 17 is dropped and Option A
 remains the whole submission.
@@ -797,16 +797,16 @@ Top risks, leading with blockers:
    call a submission blocker, not an enhancement. Equally a hard no-go: if Nebius
    sandbox / `CONTREE_SESSION` access is **never** authorized, the Slice 13–14 spike and
    real adapter do not run and no shipped component can execute learner-edited artifacts
-   (Gate 3 §3.3: `recorded` replays bytes and executes nothing; `local_process` accepts
+   (Gate 3 S3.3: `recorded` replays bytes and executes nothing; `local_process` accepts
    only pinned operator fixtures). That is not a weaker story — it is not the working
    learning product, so the submission hard-stops or the product backtracks. **Resolved
    2026-09-17:** the user authorized bounded early availability smoke checks for both
-   credentials (§11 decisions 1 and 6) once credentials are provided, with the full live
+   credentials (S11 decisions 1 and 6) once credentials are provided, with the full live
    call at Slice 12. The remaining action is to provide `NEBIUS_API_KEY` and
    `CONTREE_SESSION`; until then both submission-critical access unknowns (Token Factory
    inference access and sandbox execute/transfer access) stay unverified.
 2. **The spike (Slice 13) may fail and force backtracking.** File transfer / egress /
-   secret injection into a sandbox are unverified (architecture §16, §18 item 1). A
+   secret injection into a sandbox are unverified (architecture S16, S18 item 1). A
    failure that invalidates an approved isolation or execution assumption stops Slice 14
    and reopens Gate 2/3 — now a submission-level stop since Slices 13–14 sit on the
    mandatory packaging path, not just a code change.
@@ -831,7 +831,7 @@ installs or dependencies; credentials or any external service (`NEBIUS_API_KEY`,
 `CONTREE_SESSION`, `TAVILY_API_KEY`); running the Slice 13 spike or the Slice 15
 ablation; commits, pushes, tags or branches; deployment or any hosted URL; participant
 outreach or the manual learner kit; or ADR #4 file creation. Each of those remains a
-separate explicit user authorization (the §11 decision 1 availability smoke check is one
+separate explicit user authorization (the S11 decision 1 availability smoke check is one
 such recorded authorization, conditional on the user providing a key). Scores remain
 conditional forecasts (current 27/40); no slice may inflate them, and a FAILED Test 1
 pre-proof at Slice 8 triggers backtracking, not a softened claim. If learner-edited
@@ -857,20 +857,20 @@ user granted separately later the same day.
 3. **Provisional config numbers.** Accepted as starting values: attempt_limit 3,
    bookshop rotation_group_size 6 per family, assist budgets 6 (bookshop) / 2 (away).
    They remain challengeable at Slices 2/7/11/12, but changing them after case inventory
-   is authored is expensive (capacity invariant, Gate 3 §7.1).
+   is authored is expensive (capacity invariant, Gate 3 S7.1).
 4. **Sealed-inventory authorship.** The agent drafts all 27 sealed cases and their
    fixtures; the user reviews every case and expected answer before sealing. The
    agent's own review is not evidence — a second LLM is not an independent oracle, so
    the user is the only valid reviewer.
 5. **Tavily prize (user decision, 2026-09-17).** The Tavily bonus is pursued through the
    already-planned operator-run curation CLI (Slice 15): its live `discover()` call is
-   the qualifying functional runtime Tavily call. No architecture §11 / test 39 backtrack
+   the qualifying functional runtime Tavily call. No architecture S11 / test 39 backtrack
    — the curation pipeline stays offline tooling, never imported by `app.py`, and the
    submission form is answered "yes" only after the call actually ships. The Test 3
    KEEP/DROP verdict governs the pitch, not the fact of the call. No organizer
    clarification email is sent.
 6. **Execution path is submission-critical (user decision, 2026-09-17).** Only the
-   verified Sandbox path can execute learner-edited artifacts (Gate 3 §3.3), so Slices
+   verified Sandbox path can execute learner-edited artifacts (Gate 3 S3.3), so Slices
    13–14 sit on the mandatory packaging path and Slice 16 depends on Slices 1–14. A
    bounded early sandbox entitlement/I-O smoke check is pre-authorized to run once
    sandbox credentials are provided (mirroring decision 1); if execution access never

@@ -2,11 +2,11 @@
 
 Gate: 3 — Program Design (APPROVED 2026-09-16; BACKTRACKED 2026-09-17 — test 33
 close-semantics ambiguity and a missing credential-reachability test specification —
-and RE-APPROVED 2026-09-17; BACKTRACKED a second time 2026-09-17 — the §2 file map
+and RE-APPROVED 2026-09-17; BACKTRACKED a second time 2026-09-17 — the S2 file map
 omitted packaging (`pyproject.toml`, `requirements.lock`), the `demos/` entry points
-and the clean-env install check — and RE-APPROVED 2026-09-17 after §2 and test 51
+and the clean-env install check — and RE-APPROVED 2026-09-17 after S2 and test 51
 were revised; a consistency correction was applied the same day during the Gate 4
-review at the user's direction: the provisional Python bound in §2 was tightened to
+review at the user's direction: the provisional Python bound in S2 was tightened to
 `>=3.12,<3.14` to match the approved 3.12+ stack decision). Written 2026-09-15;
 revised 2026-09-16 and 2026-09-17.
 Scope: the approved architecture (`02-architecture.md`) concretized to the file,
@@ -16,25 +16,25 @@ Gate 4 approval.
 
 Design stance: the deterministic core is specified against the executor adapter
 boundary and is fully testable offline. The real Token Factory sandbox adapter is a
-Gate 4 slice gated on the capability spike (§9), which is specified here but **not
+Gate 4 slice gated on the capability spike (S9), which is specified here but **not
 run** — Token Factory credentials are not authorized.
 
 ## 1. Confirmations of open architecture items
 
 | Architecture item | Decision made here |
 |---|---|
-| §16.7 — one loopback HTTP service per artifact | **Confirmed.** The learner artifact is exactly one HTTP JSON service on loopback. No other execution surface is supported. |
-| Artifact template | Python **stdlib only** (`http.server`). Reason: no runtime package install, because sandbox egress is unverified (architecture §16 item 3). The template scaffolds; the learner owns the code. |
-| Structured response contract | Confirmed as a requirement (brief §5, learner decision 3). The service answers with a small JSON envelope (§3.2, `ServiceResponse`): action, typed claims, evidence refs, record age. Deterministic evaluation needs structured claims, not free text. |
-| §3 endpoint names | Finalized in §4: same shapes as the architecture, plus shift close, safe assist-event listing and patch accept/reject. |
-| §12 env var names | Finalized in §7.3. |
-| §18.6 attempt / rotation numbers | §7.1: fresh variant per family per attempt; inventory covers two bookshop shifts. |
-| §20 deferred items | File layout §2; types/signatures §3; tests §6; limits/rotation §7.1; reason-code wording §7.2. Gate 4 and separately authorized work remain in §11. |
-| New tables beyond architecture §4 | `engagement_config` (away-shift assist/check-family config) and `rotation_draws` (durable exposure record — no in-memory authority across restarts). Everything else matches the §4 table list. |
+| S16.7 — one loopback HTTP service per artifact | **Confirmed.** The learner artifact is exactly one HTTP JSON service on loopback. No other execution surface is supported. |
+| Artifact template | Python **stdlib only** (`http.server`). Reason: no runtime package install, because sandbox egress is unverified (architecture S16 item 3). The template scaffolds; the learner owns the code. |
+| Structured response contract | Confirmed as a requirement (brief S5, learner decision 3). The service answers with a small JSON envelope (S3.2, `ServiceResponse`): action, typed claims, evidence refs, record age. Deterministic evaluation needs structured claims, not free text. |
+| S3 endpoint names | Finalized in S4: same shapes as the architecture, plus shift close, safe assist-event listing and patch accept/reject. |
+| S12 env var names | Finalized in S7.3. |
+| S18.6 attempt / rotation numbers | S7.1: fresh variant per family per attempt; inventory covers two bookshop shifts. |
+| S20 deferred items | File layout S2; types/signatures S3; tests S6; limits/rotation S7.1; reason-code wording S7.2. Gate 4 and separately authorized work remain in S11. |
+| New tables beyond architecture S4 | `engagement_config` (away-shift assist/check-family config) and `rotation_draws` (durable exposure record — no in-memory authority across restarts). Everything else matches the S4 table list. |
 
 The six mockups stay the UI source of truth. Free-text visible checks become a
-structured builder (§10.2); known limitations stay free text, stored but not evaluated
-(§10.11). These mappings do not establish that all UI promises are implemented.
+structured builder (S10.2); known limitations stay free text, stored but not evaluated
+(S10.11). These mappings do not establish that all UI promises are implemented.
 Screen 02's "May: Recommend with a clear label" is fixed scenario copy, not an
 editable input; the bookshop client displays it without inventing another learner
 choice. The away shift's editable "May estimate when" maps to `may_estimate_when`.
@@ -56,26 +56,26 @@ shiftwork/
     routes.py            HTTP handlers only; parse/validate, delegate, map typed errors to status codes
     schemas.py           Request/response pydantic models (frozen, extra="forbid")
   domain/
-    models.py            Every durable type in §3.2 (pydantic, frozen)
+    models.py            Every durable type in S3.2 (pydantic, frozen)
     canonical.py         canonical_bytes() + content_hash(): the ONLY place canonical serialization/hashing exists
     contract_catalog.py  Immutable, versioned contract-option catalogs and evaluator-rule bindings
     customer_answer.py   Deterministic customer-text rendering from validated structured responses
     errors.py            Typed error taxonomy: executor failures, budget, rotation, validation
   store/
-    schema.sql           DDL for the architecture §4 tables + engagement_config + rotation_draws
+    schema.sql           DDL for the architecture S4 tables + engagement_config + rotation_draws
     db.py                Connection factory (one per request/thread), pragmas, ensure_schema (user_version)
     repo.py              Raw parameterized SQL functions, one group per table; rows validated into models
     seed.py              Seeds engagements, request batches, shop snapshots, check templates
   evaluator/
     evaluator.py         Controller-only sealed loader plus pure evaluate(); no network or LLM.
   ledger/
-    reducer.py           Pure reduce(...) -> unchained event drafts (§3.4)
+    reducer.py           Pure reduce(...) -> unchained event drafts (S3.4)
     chain.py             Event hash assignment + verify_chain(); used inside the finalization transaction
   executor/
     base.py              ExecutorAdapter Protocol, RunRequest/RunResult, shared capture normalization
-    local_process.py     Trusted pinned-fixture subprocess adapter; rejects arbitrary learner code (§3.3)
+    local_process.py     Trusted pinned-fixture subprocess adapter; rejects arbitrary learner code (S3.3)
     recorded.py          Transcript replay adapter: deterministic captures from recorded fixtures
-    tokenfactory.py      Real sandbox adapter — lands in Gate 4 after the spike (§9). Same Protocol.
+    tokenfactory.py      Real sandbox adapter — lands in Gate 4 after the spike (S9). Same Protocol.
   sealed/
     store.py             Sealed case specs + expected values accessor; rotation draws delegate to rotation.py
     rotation.py          Draw-without-replacement policy, cycle accounting, exhaustion handling
@@ -134,7 +134,7 @@ def content_hash(value: JsonValue) -> str:
 ### 3.2 Durable domain models (`domain/models.py`)
 
 ```python
-class EngagementConfig(BaseModel):      # one row per engagement (new table, §1)
+class EngagementConfig(BaseModel):      # one row per engagement (new table, S1)
     slug: Slug
     business_kind: Literal["bookshop", "bike_coop"]
     assist_level: AssistLevel            # FULL | REDUCED
@@ -261,7 +261,7 @@ class CheckDef(BaseModel):
     authored_by: Literal["learner", "operator"]
     created_shift_id: Id | None
 
-class ReasonCode(StrEnum):              # §7.2 — the final learner-visible failure vocabulary
+class ReasonCode(StrEnum):              # S7.2 — the final learner-visible failure vocabulary
     INVENTED_FACT, STALE_BEYOND_RULE, MISSING_EVIDENCE, WRONG_ACTION,
     UNSAFE_CONTINUATION, DUPLICATE_COMMITMENT, LATENCY_BUDGET, MALFORMED_RESPONSE, REGRESSION
 
@@ -324,7 +324,7 @@ class MissionSource(BaseModel):
     fixture_ref: str | None              # required only when frozen
     status: Literal["quarantined", "verified", "frozen", "rejected"]
 
-class RotationDraw(BaseModel):          # append-only; durable exposure record (new table, §1)
+class RotationDraw(BaseModel):          # append-only; durable exposure record (new table, S1)
     id: Id
     engagement_slug: Slug
     family: str
@@ -398,7 +398,7 @@ class RunRequest(BaseModel):
     harness_ref: str
     image_ref: str
     deadline_s: int
-    inference_grant: InferenceGrant | None   # provisioning mechanism unverified (architecture §16 item 4)
+    inference_grant: InferenceGrant | None   # provisioning mechanism unverified (architecture S16 item 4)
 
 class RawCapture(BaseModel):
     request_ordinal: int
@@ -422,7 +422,7 @@ class ExecutorAdapter(Protocol):
 def normalize_captures(raw: Iterable[RawCapture], deadline_s: int) -> tuple[RunOutput, ...]: ...
 ```
 
-Adapter rules (enforced by the conformance suite, §6.G): raw bytes only; identical
+Adapter rules (enforced by the conformance suite, S6.G): raw bytes only; identical
 typed failure kinds for identical injected faults; nothing reads back from the executor
 except captures and logs. `local_process` is restricted to operator-authored test
 fixtures whose content hashes are pinned by the test suite; it must reject arbitrary
@@ -446,7 +446,7 @@ class SealedCase(BaseModel):
 class SealedCaseSet(BaseModel):          # loaded controller-side; expected values never render
     cases: tuple[SealedCase, ...]
 
-class MissionFixtures(BaseModel):        # inspectable scenario rules (brief §5: weights must be inspectable)
+class MissionFixtures(BaseModel):        # inspectable scenario rules (brief S5: weights must be inspectable)
     weights: dict[str, int]
     transitions: tuple[str, ...]         # symbolic transition rules resolved by the reducer
 
@@ -483,7 +483,7 @@ def reduce_close(
 The architecture's `reduce(...) -> events` is realized as: the reducer returns
 **unchained drafts**; `reduce_close` does the same for shift-close facts without
 manufacturing run outputs. `ledger/chain.py` assigns `seq`, `prev_hash`, `hash` inside
-the same finalization or close transaction (§5.5, §5.8). Same inputs must replay to
+the same finalization or close transaction (S5.5, S5.8). Same inputs must replay to
 identical drafts and identical hashes.
 
 ### 3.5 Ledger chain
@@ -510,15 +510,15 @@ class FreezeVersionRequest(BaseModel):
     contract: ContractParams
     learner_declared_generated_patch_use: bool         # version-level disclosure; no proposal id linkage
 
-def open_next_shift(slug: Slug) -> Shift: ...                 # seeds from inheritance (§5.1)
+def open_next_shift(slug: Slug) -> Shift: ...                 # seeds from inheritance (S5.1)
 def get_draft(shift_id: Id) -> DraftFiles: ...
 def save_draft(shift_id: Id, files: DraftFiles) -> Draft: ...
-def freeze_version(shift_id: Id, request: FreezeVersionRequest) -> ArtifactVersion: ...   # §5.2
-def start_run(shift_id: Id) -> Run: ...                       # budget + rotation enforced here (§5.3)
-async def execute_run(run_id: Id) -> None: ...                # background task (§5.4)
-def finalize_run(run_id: Id, result: RunResult) -> None: ...  # single transaction (§5.5)
-def close_shift(shift_id: Id) -> Shift: ...                   # atomic + idempotent (§5.8)
-def reconcile_interrupted() -> None: ...                      # startup recovery (§6.B.9)
+def freeze_version(shift_id: Id, request: FreezeVersionRequest) -> ArtifactVersion: ...   # S5.2
+def start_run(shift_id: Id) -> Run: ...                       # budget + rotation enforced here (S5.3)
+async def execute_run(run_id: Id) -> None: ...                # background task (S5.4)
+def finalize_run(run_id: Id, result: RunResult) -> None: ...  # single transaction (S5.5)
+def close_shift(shift_id: Id) -> Shift: ...                   # atomic + idempotent (S5.8)
+def reconcile_interrupted() -> None: ...                      # startup recovery (S6.B.9)
 ```
 
 Startup marks QUEUED, RUNNING and CAPTURED runs FAILED, keeps every completed output
@@ -769,7 +769,7 @@ must visibly render "Synthetic scenario", not just carry a JSON boolean.
 | `/api/incidents/{id}` | GET | — → `IncidentView` | Mismatch pair, linked version, repair state (screen 04) |
 | `/api/shifts/{id}/assist` | POST | `AssistRequest` → `AssistReply` | Bounded, logged, attributed; 403 for disallowed roles |
 | `/api/assist-events/{id}/decision` | POST | `AssistDecision` → `AssistEventView` | Records one accept/reject decision for a patch proposal; no version link |
-| `/api/engagements/{slug}/assist-events` | GET | — → `AssistEventView[]` | Safe attribution log (operator surface; see §10.9) |
+| `/api/engagements/{slug}/assist-events` | GET | — → `AssistEventView[]` | Safe attribution log (operator surface; see S10.9) |
 
 Errors are typed: every non-2xx maps to a `domain/errors.py` kind rendered with a
 stable `error_code` string. View models (`BoardView`, `LedgerView`, …) are response-only
@@ -818,7 +818,7 @@ engagement. Uniqueness covers `(shift_id, attempt_number)`, `(run_id, family)` a
 `(engagement_slug, variant_ref)`. A committed reservation consumes its attempt and
 variants even if provisioning fails or the controller crashes. A retry needs a new
 reservation; the evaluator loads exactly the persisted draws, not a fresh draw or
-an entire group. Inventory and exhaustion rules are specified in §7.1.
+an entire group. Inventory and exhaustion rules are specified in S7.1.
 
 ### 5.4 Execute run (async)
 `orchestrator.execute_run → executor adapter .execute(RunRequest)` → local process /
@@ -833,20 +833,20 @@ evaluator.evaluate(outputs, checks, visible_checks, drawn_cases, contract)` →
 → `reducer.reduce(fixtures, outputs, results, contract)` → drafts → `chain.append(drafts,
 prev_hash, start_seq)` → `repo.insert_ledger_events` → open/resolve incidents →
 `repo.set_run_state(FINALIZED)`. All of it commits together; a failure anywhere writes
-no check results and no events (run stays unfinalized; §6.B.9). A partial capture set
+no check results and no events (run stays unfinalized; S6.B.9). A partial capture set
 (a run that failed mid-batch) is finalized as FAILED with the completed prefix — no
 invented captures.
 
 ### 5.6 Render evidence
 `routes.get_run_outputs → repo.get_outputs(run) → parse ServiceResponse →
 validate_service_response against public records → render_customer_text → RunOutputView`
-(§3.2, §3.9). Invalid fields or false `record_age_ms` produce a failed check and no
+(S3.2, S3.9). Invalid fields or false `record_age_ms` produce a failed check and no
 customer answer; the exact raw body remains available as `body_base64`.
 `routes.get_run_checks → repo.get_check_results → CheckResultView` → reason codes and
 public evidence refs only, never `expected_ref` or variant ids.
 `routes.get_ledger → repo.read_events → chain.verify_chain` → `LedgerView` only on
 `VALID`; `BROKEN` returns a hard error without events or derived board counters.
-The output → public comparison → synthetic event chain follows §3.9.
+The output → public comparison → synthetic event chain follows S3.9.
 
 ### 5.7 Repair
 `routes.get_incident → repo.get_incident + failing output + check_result` → learner edits
@@ -870,8 +870,8 @@ second event set; a fault at any boundary rolls the entire close back.
 Next shift seed = latest version, decisions/check files, all unresolved incidents
 (including CLOSED_UNRESOLVED), limits and verified ledger summary. Closing cannot
 hide an unresolved incident from inheritance. The new run consumes fresh variants
-from the remaining inventory (§7.1); no future customer wording is released before
-execution, and sealed specs/expectations are never released at any time (§6.D, §6.K).
+from the remaining inventory (S7.1); no future customer wording is released before
+execution, and sealed specs/expectations are never released at any time (S6.D, S6.K).
 
 ### 5.9 Assist call
 `routes.assist → assist.gateway.assist → begin immediate transaction → check role against
@@ -881,13 +881,13 @@ prior model interactions against total_assist_budget_per_shift → reserve one i
 → complete AssistEvent → AssistReply`. Every model call consumes one unit even if it
 fails after reservation; rejected requests that never reach the model are logged but do
 not consume budget. Patch proposals return labelled diffs. The learner may record one
-accept/reject decision, but no proposal id is linked to a version; §5.2 snapshots only
+accept/reject decision, but no proposal id is linked to a version; S5.2 snapshots only
 aggregate counts and the version-level generated-patch-use disclosure.
 
 ### 5.10 Curation (offline)
 `curation.pipeline.discover (Tavily, quarantined) → verify(human) → freeze` →
 `repo.insert_mission_source` + frozen fixture file. Runtime imports of `curation` are
-forbidden (§6.J.39); Tavily never appears in any runtime path.
+forbidden (S6.J.39); Tavily never appears in any runtime path.
 
 ## 6. Test plan
 
@@ -1105,8 +1105,8 @@ slice.
 | Total assist budget | bookshop 6 model interactions/shift; bike co-op 2/shift | one cap across every allowed role prevents relabelling a request as dialogue or diagnosis to evade a hint-only limit; provisional, not evidence-backed |
 | Assist roles | bookshop: all five; bike co-op: `STAKEHOLDER_DIALOGUE`, `HINT`, `DIAGNOSIS` | away shift loses scaffolding and patch proposals |
 | Response-time limits | learner chooses 1 s / 3 s / 8 s, no default | screen 02 input; latency measured by the harness |
-| Executor selection | `recorded`, `local_process`, `tokenfactory` | local process accepts pinned trusted fixtures only (§3.3); real sandbox path needs separate authorization |
-| Assist model candidate | `nvidia/nemotron-3-super-120b-a12b` | documented in architecture §16; actual availability and id rechecked by the spike |
+| Executor selection | `recorded`, `local_process`, `tokenfactory` | local process accepts pinned trusted fixtures only (S3.3); real sandbox path needs separate authorization |
+| Assist model candidate | `nvidia/nemotron-3-super-120b-a12b` | documented in architecture S16; actual availability and id rechecked by the spike |
 
 Capacity invariant: variants per family must cover `attempt_limit × funded shifts`.
 For each bookshop family, shift 1 can consume at most variants 1–3; shift 2 still has
@@ -1121,7 +1121,7 @@ to author and review new variants. A refill increments `cycle`, appends new immu
 identities and keeps every prior draw. Relabelled copies of exposed cases do not count
 as new holdouts. Automatic recycling and within-shift reuse are forbidden.
 
-All knobs live in `config.py` + `engagement_config` rows (architecture §18 item 6).
+All knobs live in `config.py` + `engagement_config` rows (architecture S18 item 6).
 Changing a budget requires the capacity check to pass before the config is activated;
 these provisional counts bound opportunities to probe, not prove resistance to leakage.
 Assist calls reserve against their total budget atomically and every role shares the cap.
@@ -1130,7 +1130,7 @@ lower-assistance, but no learner evidence shows either number is pedagogically c
 
 ### 7.2 Reason codes (learner-visible vocabulary)
 
-Nine codes, 1:1 with `ReasonCode` (§3.2), rendered as one-line consequences without
+Nine codes, 1:1 with `ReasonCode` (S3.2), rendered as one-line consequences without
 numbers from sealed cases, without case text, without hidden counts:
 
 | Code | Learner-facing meaning |
@@ -1155,7 +1155,7 @@ serialized/rendered surfaces. Any necessary wording change revises this design.
 Documented by primary sources: `NEBIUS_API_KEY`, `CONTREE_SESSION`, `TAVILY_API_KEY`.
 Application names: `SHIFTWORK_DB_PATH`, `SHIFTWORK_EXECUTOR`,
 `SHIFTWORK_SANDBOX_IMAGE`, `SHIFTWORK_LEARNER_INFERENCE_KEY`, `SHIFTWORK_ASSIST_MODEL`.
-No values or credentials here; non-secret design defaults are listed in §7.1.
+No values or credentials here; non-secret design defaults are listed in S7.1.
 
 ## 8. Transfer-study decision
 
@@ -1182,7 +1182,7 @@ Consequences recorded here:
 - The Test 2 comparison requirements remain fixed: matched time/tests/total assistance budget;
   counterbalanced bookshop and bike-cooperative tasks; independently passed cases,
   time, hints, generated patch use, learner explanation, authored decisions and
-  voluntary return; brief §9 Test 2 kill criteria. These are protocol requirements,
+  voluntary return; brief S9 Test 2 kill criteria. These are protocol requirements,
   not a fully specified recruitment, randomization or analysis protocol. Execution
   waits until after the deadline, if ever, and needs separate authorization.
 - Test 1 (central mechanism) and Test 3 (Tavily ablation) remain possible pre-deadline
@@ -1253,15 +1253,15 @@ small replay supports only the bounded discovery claim, not broad superiority.
 
 ## 9. Capability spike protocol (specified, not run)
 
-Purpose: resolve architecture §16 items before any slice depends on the real sandbox.
+Purpose: resolve architecture S16 items before any slice depends on the real sandbox.
 Requires Token Factory credentials — **not authorized, not run**. When authorized:
 bounded, single-purpose probes with raw evidence retained.
 
-| # | Question (§16 item) | Observable evidence | Fails if |
+| # | Question (S16 item) | Observable evidence | Fails if |
 |---|---|---|---|
 | 1 | File transfer in/out of a sandbox (item 2) | artifact files in; captured bytes out; hashes match on both sides | no path to move arbitrary files in/out |
 | 2 | Outbound networking from a sandbox (item 3) | in-sandbox service reaches the inference base URL | egress blocked and no documented alternative |
-| 3 | Secret injection + scoping (item 4) | scoped key injected, usable in-sandbox, absent from logs/other paths | injection impossible → controller-side inference proxy fallback (§7 of architecture) |
+| 3 | Secret injection + scoping (item 4) | scoped key injected, usable in-sandbox, absent from logs/other paths | injection impossible → controller-side inference proxy fallback (S7 of architecture) |
 | 4 | Timeouts and resource limits (item 5) | measured deadline behavior, limits discoverable | no enforceable deadline → harness redesign |
 | 5 | Ingress posture (item 1) | whether any inbound request harness exists | not a failure — design does not require ingress |
 | 6 | Cost, latency, entitlements (item 6) | recorded numbers for budget planning | never a silent assumption |
@@ -1280,7 +1280,7 @@ itself demonstrate a reachable, authenticated, budget-enforced path before adopt
    be too cramped for the "applied-AI-engineering" feel (no SDKs). Alternative: allow
    packages once egress is proven.
 2. **Structured visible checks.** The mockup's Given/When/Then free text becomes an
-   enumerated builder (§1). Executable and honest, but may read as less expressive than
+   enumerated builder (S1). Executable and honest, but may read as less expressive than
    the mockup promises.
 3. **Reason-code wording.** Nine codes are a guess between "useful" and "non-quotable";
    the hostile leak review may demand fewer or blander strings.
@@ -1301,7 +1301,7 @@ itself demonstrate a reachable, authenticated, budget-enforced path before adopt
    labeled operator data (attempt counts, rotation cycles, chain status) is visible to
    the learner. Acceptable now; a hosted demo may need separation.
 10. **Sync handlers + single-writer SQLite** for the orchestration path (async executor,
-    sync store facade). Adequate at this scale; architecture §18.4 already lists SQLite
+    sync store facade). Adequate at this scale; architecture S18.4 already lists SQLite
     concurrency as the first component to revisit.
 11. **Declared limitations.** Free text is retained verbatim as a learner declaration;
     recording or inheriting it never means an evaluator verified it. The client must
@@ -1323,10 +1323,10 @@ itself demonstrate a reachable, authenticated, budget-enforced path before adopt
 - Spike execution → an authorized Gate 4 proof slice; real `tokenfactory.py`
   implementation depends on its evidence, not the other way around.
 - Tavily ablation execution and corpus-manifest population → an authorized Gate 4 proof
-  slice. §8.1 already fixes the domains, window, selection rule and kill thresholds;
+  slice. S8.1 already fixes the domains, window, selection rule and kill thresholds;
   implementation may not tune them after seeing comparator output.
 - Implementing and browser-checking the client against the mockups → Gate 4 slices.
-  Reason-code wording is decided in §7.2; hostile serialization tests verify that
+  Reason-code wording is decided in S7.2; hostile serialization tests verify that
   boundary during implementation rather than silently selecting new wording.
 - Deployment, credentials, installs, purchases, outreach → separate explicit authorization.
-- ADR #4 (execution topology) → only after spike evidence (architecture §19).
+- ADR #4 (execution topology) → only after spike evidence (architecture S19).
