@@ -121,3 +121,41 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **What happened:** a review probe denied the version-write statement after adding `log_ref`; reopening left schema version 2 with the new column, and the next startup failed with `duplicate column name: log_ref`.
 - **Root cause:** SQLite committed the ALTER TABLE independently because no explicit transaction enclosed both the DDL and schema version update; the original test covered only uninterrupted repetition.
 - **Prevention rule:** commit migration DDL and its version marker atomically; inject a failure between them, reopen the database and assert unchanged data plus a successful retry.
+
+## 2026-09-18 Slice 4 sealed family enforced a freshness limit no learner-visible artifact stated
+
+- **What happened:** the `stale_information` evaluator keyed its stance failures off
+  `max_record_age_ms`, `stale_assert_kinds` and `high_risk_kinds` stored only in the
+  sealed case block. Failing-transcript request 1 answered from the newest Dune
+  record with its true age (90 minutes), exactly what the committed
+  `USE_NEWEST_RECORD_WITH_AGE` label instructs, and was still scored
+  `fail/STALE_BEYOND_RULE` against a hidden 3600000 ms limit. An independent
+  execution review caught it (MAJOR-1); the family could not be sealed until the
+  user chose a fix route (catalog v2 whose labels state the constants).
+- **Root cause:** I treated the sealed `expected` block as a free parameter bag, so
+  rule constants that change verdicts lived outside every learner-visible artifact,
+  contradicting the approved rule that sealed cases check consistency with the
+  learner's chosen option (03-program-design S3.2). The Slice 2 case note had
+  attributed the limit to "the contract selected"; the six-case reshape dropped the
+  attribution without noticing the number had no visible owner.
+- **Prevention rule:** every sealed-case parameter that can change a verdict must be
+  stated in a learner-visible artifact (catalog label, contract, snapshot) or be
+  derived from one; keep rule constants in the visible artifact and pin them with a
+  guard test (`test_v2_labels_declare_the_rule_constants`,
+  `test_sealed_expected_blocks_carry_no_rule_parameters`).
+
+## 2026-09-18 Slice 4 probe injection silently no-opped on CRLF worktree bytes
+
+- **What happened:** to prove the revised test 11 closure scan was failing-capable, I
+  injected `import socket` into `domain/canonical.py` with a byte replace on
+  `b"import base64\n"`. The tracked file's worktree bytes are CRLF
+  (`core.autocrlf=true`), so nothing was replaced and the probe ran green; the
+  helper's "probe injected" line had been printed unconditionally. The mismatch
+  surfaced when the probe removal also failed to match; I re-ran the probe with
+  verified bytes and captured the real failure.
+- **Root cause:** the probe asserted neither the mutated bytes nor the expected
+  failing behavior, and its success message was not derived from the observed state.
+- **Prevention rule:** a mutation probe must verify the mutation landed (bytes or
+  behavior) before its result is trusted, and it must print the observed state, not
+  a constant. On this machine, tracked-file worktree bytes are CRLF, so byte-level
+  edits, pins and probes must match `\r\n` or normalize explicitly.
