@@ -1,0 +1,69 @@
+{
+  "engagement_slug": "bookshop",
+  "version": 2,
+  "frozen_at": "2026-09-18T00:00:00+00:00",
+  "content_hash": "8fa29ef4a46f34b541370873caf09967445075f805fcc25200c3738f3ac36a37",
+  "required_dimensions": ["MUST_NEVER", "STANCE"],
+  "options": [
+    {
+      "id": "NEVER_INVENT_PRICE_STOCK_POLICY",
+      "dimension": "MUST_NEVER",
+      "learner_label": "Never state a price, stock level or policy the shop records do not support",
+      "evaluator_rule_id": "invariant.never_invent_fact"
+    },
+    {
+      "id": "VERIFY_EXACT_CLAIMS_NOW",
+      "dimension": "STANCE",
+      "learner_label": "Re-verify every exact price and stock claim against the newest record before answering",
+      "evaluator_rule_id": "stance.verify_exact_now"
+    },
+    {
+      "id": "USE_NEWEST_RECORD_WITH_AGE",
+      "dimension": "STANCE",
+      "learner_label": "Answer from the newest record you have and report how old it is; refuse stock, price or availability claims from records older than one hour (ask, decline or escalate instead)",
+      "evaluator_rule_id": "freshness.use_newest_with_age"
+    },
+    {
+      "id": "HARD_CHECK_HIGH_RISK_ONLY",
+      "dimension": "STANCE",
+      "learner_label": "Hard-verify only high-risk claims (price): refuse a price from a record older than one hour; answer stock and availability from the newest cached record",
+      "evaluator_rule_id": "stance.hard_check_high_risk"
+    },
+    {
+      "id": "CLARIFY_TITLE_OR_EDITION",
+      "dimension": "CLARIFY_WHEN",
+      "learner_label": "Ask which title or edition the customer means when a request is ambiguous",
+      "evaluator_rule_id": "clarify.title_or_edition"
+    },
+    {
+      "id": "CLARIFY_ANY_UNCERTAIN_FACT",
+      "dimension": "CLARIFY_WHEN",
+      "learner_label": "Ask whenever any fact in the request is uncertain",
+      "evaluator_rule_id": "clarify.any_uncertain_fact"
+    },
+    {
+      "id": "CLARIFY_HIGH_RISK_FACT",
+      "dimension": "CLARIFY_WHEN",
+      "learner_label": "Ask only when an uncertain fact is high-risk",
+      "evaluator_rule_id": "clarify.high_risk_fact"
+    },
+    {
+      "id": "NEVER_UNSAFE_CONTINUATION",
+      "dimension": "ESCALATE_WHEN",
+      "learner_label": "Hand off to a human instead of continuing an unsafe request",
+      "evaluator_rule_id": "escalate.never_unsafe_continuation"
+    },
+    {
+      "id": "ESCALATE_UNSAFE_REPAIR",
+      "dimension": "ESCALATE_WHEN",
+      "learner_label": "Escalate when a repair would be unsafe to apply automatically",
+      "evaluator_rule_id": "escalate.unsafe_repair"
+    },
+    {
+      "id": "ESTIMATE_ONLY_WITH_EVIDENCE",
+      "dimension": "MAY_ESTIMATE_WHEN",
+      "learner_label": "Give an estimate only when evidence supports it, clearly labelled",
+      "evaluator_rule_id": "estimate.only_with_evidence"
+    }
+  ]
+}
