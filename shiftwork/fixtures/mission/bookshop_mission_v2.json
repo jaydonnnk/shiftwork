@@ -1,0 +1,17 @@
+{
+  "description": "Bookshop mission fixtures v2 (Slice 5). Weights are inspectable integer weights per consequence key; transitions are symbolic rules of the form '<REASON_CODE> -> <EVENT_TYPE> <consequence_key>' resolved by the pure reducer. STALE_BEYOND_RULE records a backlog item and opens no incident (matching the Slice 2/4 thin path); INVENTED_FACT and MISSING_EVIDENCE open incidents; MALFORMED_RESPONSE records a backlog item. All consequences are synthetic scenario state, not real revenue or customer trust.",
+  "engagement_slug": "bookshop",
+  "version": 2,
+  "weights": {
+    "re_check_stale_shelf_record": 1,
+    "invented_fact_incident": 3,
+    "missing_evidence_incident": 2,
+    "malformed_response_backlog": 1
+  },
+  "transitions": [
+    "STALE_BEYOND_RULE -> BACKLOG_RECORDED re_check_stale_shelf_record",
+    "INVENTED_FACT -> INCIDENT_OPENED invented_fact_incident",
+    "MISSING_EVIDENCE -> INCIDENT_OPENED missing_evidence_incident",
+    "MALFORMED_RESPONSE -> BACKLOG_RECORDED malformed_response_backlog"
+  ]
+}
