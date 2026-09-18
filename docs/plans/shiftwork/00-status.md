@@ -1217,6 +1217,24 @@ transcripts and the new v2 labels remain AGENT-DRAFTED and still require the
 user's review before sealing (`04-slices.md` S11 decision 4); nothing here
 claims publication or widened authority.
 
+### Publication: 2026-09-18
+
+Publication (user-authorized 2026-09-18 for commit and merge): eight focused
+commits on `shiftwork/slice-4` ending at `4a6da6b`, in order: catalog v2 and the
+v2 contract fixture `670b938`; the six-case family and its fixtures `e12613a`;
+structured-response validation and customer-text rendering `8ab1f4d`; the
+contract-parameterized evaluator, sealed-case loader, finalize wiring and suite
+`36da393`; the evaluate-transcript demo `845f807`; the sealed-cases LF rule and
+scan `5af4266`; the Slice 4 evidence and status sync `369b06a`; the mistakes log
+`4a6da6b`. Merged into main with `--no-ff` as `b20401a` ("Merge Slice 4
+contract-parameterized evaluator and first sealed family into main"). The tree
+is clean on both refs; `git log --oneline --graph` shows the eight commits under
+the merge. No push was performed; local `origin/*` refs are unchanged
+(`origin/main` at `53925c2`, `origin/shiftwork/slice-4` at `1e4e6c1`). No
+co-author trailers. Post-merge sanity on main: `pytest tests/evaluator -q` 12
+passed, `python -m demos.thin_path` exit 0 with the unchanged artifact
+content_hash and chain VALID.
+
 ## Approval history
 
 - Gate 1 — Product: approved by the user on 2026-09-15 after the service-workbench
