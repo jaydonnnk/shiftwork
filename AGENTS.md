@@ -51,8 +51,8 @@ summaries when a time-sensitive external claim is being made.
   S10; installs, credentials, external services, spike runs, deployment, outreach
   and ADR #4 remain separately authorized). Slices 1 (tracer bullet, 2026-09-17),
   2 (thin real vertical path, 2026-09-18) and 3 (recorded/local_process executor
-  conformance, 2026-09-18) are implemented and demonstrated; verbatim Slice 3
-  evidence is recorded in `docs/plans/shiftwork/00-status.md`. Test 50 is partial
+  conformance, 2026-09-18) are implemented, reviewed and merged to main; verbatim
+  Slice 3 evidence is recorded in `docs/plans/shiftwork/00-status.md`. Test 50 is partial
   (offline environment clauses only); test 29 is explicitly skipped until Slice 14.
   This is a trusted-fixture execution guard, not hostile-code isolation. Slices
   4-17 are not implemented.
@@ -182,6 +182,12 @@ Rules:
   assume `rtk` exists or that PowerShell permits `.ps1` npm shims.
 - Do not create branches, commits, tags or pushes unless the user has authorized
   that Git operation. Never stage everything implicitly.
+- Commit in coherent batches, never one bulk snapshot. When committing or
+  publishing a branch, stage one concern at a time (roughly a few related files
+  per commit, for example five files out of thirty) and give each commit a
+  specific message naming what changed and why. One commit covering an entire
+  slice with a generic message such as "implement slice 1" is not acceptable;
+  several focused, reviewable commits with meaningful messages are the standard.
 - Do not modify CI, lint configuration or lockfiles unless the task requires it.
 - Never store secrets, tokens or credentials in repository notes or logs.
 - Do not use em dashes whatsover, or S. It should be S1 for example instead of S
