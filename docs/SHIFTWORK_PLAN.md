@@ -3,12 +3,15 @@
 Updated: 2026-09-18.
 
 **State:** selected by the user as the sole active hackathon direction.
-**Gate state:** Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
-APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17 (re-approved a
-second time after the S2 packaging backtrack — `pyproject.toml`, `requirements.lock`,
-`demos/`, test 51; history: first backtrack re-approved 2026-09-17, originally
-approved 2026-09-16); Gate 4 — Slice Plan APPROVED 2026-09-17 (after three review
-rounds the same day; all accepted fixes and consistency corrections applied). Slice
+**Gate state:** Gate 1 — Product RE-APPROVED 2026-09-18 (first approved 2026-09-15;
+backtracked and revised the same day for the explicit junior applied AI engineer
+role framing and the selected isometric operational-room visual direction); Gate 2 —
+Architecture APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17
+(re-approved a second time after the S2 packaging backtrack — `pyproject.toml`,
+`requirements.lock`, `demos/`, test 51; history: first backtrack re-approved
+2026-09-17, originally approved 2026-09-16); Gate 4 — Slice Plan RE-APPROVED
+2026-09-18 (first approved 2026-09-17 after three review rounds; the reopen was
+scoped to the rewritten Slice 9 to 11 requirements). Slice
 work proceeds one slice at a time under `04-slices.md` S10; credentials, installs,
 spike runs, external services, deployment, outreach and ADR #4 each remain
 separately authorized. Backtrack an earlier gate only for a concrete blocker.
@@ -42,19 +45,27 @@ It is not a gate approval or implementation specification. Approved documents in
 ## 1. Product thesis
 
 Shiftwork is a persistent applied-AI-engineering learning environment for people
-with basic coding knowledge. The learner maintains one real service for a fictional
-business across successive operational shifts. Later shifts inherit the learner's
-artifact, decisions, incidents and business state rather than resetting into an
-unrelated exercise.
+with basic coding knowledge. The learner is cast explicitly as a **junior applied AI
+engineer on shift** and maintains one real service for a fictional client across
+successive operational shifts. Later shifts inherit the learner's artifact,
+decisions, incidents and business state rather than resetting into an unrelated
+exercise.
 
-Primary job: **applied-AI-engineering education**. Career exploration supplies
-context, not the core outcome. Employer proof is excluded until an employer or
-credible external reviewer accepts the evidence.
+Primary job: **applied-AI-engineering education**. The engineer role is the fiction
+that makes the work legible, not a credential. Employer proof is excluded until an
+employer or credible external reviewer accepts the evidence, and nothing may present
+the simulated title as job-readiness.
 
-Initial scope: one applied-AI role and one bookshop engagement. The learner must
+Initial scope: one applied-AI-engineer role and two client engagements (Bellwether
+Books, then the Northline Bike Cooperative away shift). The learner must
 make meaningful decisions about what the service must get right, how it should
 handle uncertainty, how it should be tested, and how an observed failure should
 be repaired. A town may make inherited state legible, but it is not differentiation.
+
+Future scope, recorded but not built: the role framing is the scalability seam.
+Further engagement packs for emerging roles people rarely see simulated (for example
+forward deployed engineer, GTM engineer) would reuse the same shift loop. Expansion
+waits until the central mechanism survives its tests and a new gate decision.
 
 Final central-mechanic hypothesis:
 
@@ -82,6 +93,24 @@ outputs and fixed rules. An LLM-authored story about what happened does not coun
   2026-09-16 the user approved Gate 3 (the program-design document) after the
   seven-blocker revision; implementation, installs, credentials, commits, deployment
   and outreach remain unauthorized.
+- On 2026-09-18 the user selected a fixed isometric operational-room composition for
+  the Phase B client. `plans/shiftwork/client-visual-direction.md` and its stored
+  reference image now define the acceptance target for Slices 9 through 11. The room
+  visualizes the existing request-to-output-to-check-to-ledger loop; it does not add
+  free-roam gameplay or change the product authority split. The existing plain
+  HTML/CSS/vanilla-JavaScript baseline remains unless Gate 3 is explicitly reopened.
+  Because the selection rewrote the Slice 9 to 11 requirements in an approved gate
+  document, Gate 4 is reopened pending explicit re-approval.
+- On 2026-09-18 the user directed that the learner is explicitly cast as a **junior
+  applied AI engineer on shift**, with each engagement framed as a fictional client
+  (Bellwether Books first, Northline Bike Cooperative away). The role is fiction, not
+  a credential: employer proof stays excluded and the simulated title is never
+  presented as job-readiness. The user also stated the scalability intent behind the
+  role framing: later engagement packs for emerging roles people rarely see simulated
+  (for example forward deployed engineer, GTM engineer). That expansion is future
+  scope only; shipped scope remains one role and two clients. `01-product.md` and the
+  six mockups are revised accordingly, which reopened Gate 1 pending explicit
+  re-approval.
 - Hatchery remains historical evidence and a mechanism donor. Do not merge the
   household-assistant product into Shiftwork.
 
