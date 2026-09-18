@@ -20,7 +20,7 @@ or re-steer?"):
 - [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
 - [x] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event; implemented and demonstrated 2026-09-18 (`python -m demos.thin_path`; evidence in Notes)
 - [x] Slice 3: Executor conformance (recorded + local_process); implemented, demonstrated, reviewed (PASS) and merged to main 2026-09-18 (verbatim evidence below; test 50 partial, test 29 skipped)
-- [ ] Slice 4 — Contract-parameterized evaluator + first sealed family, deepening Slice 2 evaluation
+- [x] Slice 4: Contract-parameterized evaluator + first sealed family; implemented and demonstrated 2026-09-18 (evidence below; the new sealed cases await the user's review)
 - [ ] Slice 5 — Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger
 - [ ] Slice 6 — Isolation and leakage hardening
 - [ ] Slice 7 — Budget + rotation + incidents + repair
@@ -37,10 +37,12 @@ or re-steer?"):
 
 Slices 1, 2 and 3 are implemented, reviewed and merged to main (2026-09-17 and
 2026-09-18; Slice 3 published as commit `8df3d6b`, `--no-ff` merge `1f38220`);
-slices 4-17 are not implemented. `shiftwork/slice-4` was created from the merge
-and Slice 4 has not started. Slice work proceeds only under `04-slices.md` S10;
-credentials, installs, spike runs, external services, deployment, outreach and
-ADR #4 each remain separately authorized.
+Slice 4 is implemented and demonstrated on `shiftwork/slice-4` and awaits the
+user's review of the new sealed cases (evidence below; the change set is
+distinguishable from the reviewed Slice 3 baseline at commit `1e4e6c1` by
+`git diff`); slices 5-17 are not implemented. Slice work proceeds only under
+`04-slices.md` S10; credentials, installs, spike runs, external services,
+deployment, outreach and ADR #4 each remain separately authorized.
 
 ## Notes for a fresh session
 
@@ -900,6 +902,320 @@ hostile-code-isolation evidence, and no LLM is an independent oracle. Test 50
 remains partial (offline clauses only); test 29 remains deferred;
 `tests/packaging` was deliberately not run; no install, credential use, external
 service, deployment or outreach occurred.
+
+## Slice 4 evidence: 2026-09-18
+
+Slice 4 is IMPLEMENTED and demonstrated; the user's review of the new sealed cases
+is pending (not yet accepted, not sealed as acceptance authority). An independent
+execution review of this change set returned REVISE on 2026-09-18; the corrections
+it required are recorded in the corrections subsection at the end of this section,
+and the evidence above stays as the first-pass record. Baseline:
+branch `shiftwork/slice-4` at commit `1e4e6c1` with a clean tree, so the whole
+Slice 4 change set is distinguishably `git diff` from the reviewed Slice 3 bytes;
+no tag, branch, commit or push was created. Scope: the contract-parameterized
+deterministic evaluator and the completed first sealed family
+(`stale_information`, all six variants), deepening the Slice 2 evaluation.
+
+New files: `shiftwork/domain/customer_answer.py` (validate structured responses
+against public records, recompute the asserted age, render customer text
+deterministically); `demos/evaluate_transcript.py` (approved demo entry point);
+`tests/evaluator/test_evaluator.py`; `tests/domain/test_customer_answer.py`;
+`shiftwork/fixtures/requests/stale_family.jsonl` (six requests, pin
+`6055e2c82fe365447346de86940ab3ff450d4d4c1fe9c6103042ba45882e5990`);
+`shiftwork/fixtures/shop/bookshop_stale_snapshot.json` (seven records including
+one superseded pair, pin
+`230d6f8aeb3eff61cb5d68ebaafe1fa5ce365aba4c9a9c0b96b85b8541cc0131`);
+`shiftwork/fixtures/runs/passing_stale.json` and `failing_stale.json`
+(hand-authored response bytes, both pinning the batch and snapshot hashes above).
+
+Changed: `shiftwork/evaluator/evaluator.py` (new-shape `SealedCase` with
+`schema_version`/`family`/`check_id`/`request_ordinals`/`expected`,
+`SealedCaseSet`, pure `evaluate(outputs, sealed_cases, contract, public_records)`,
+rule dispatch by the mirrored catalog rule ids, opaque `expected_ref`);
+`shiftwork/sealed/store.py` (`load_family` plus `load_drawn_cases` returning the
+family inventory because variant rotation lands at Slice 7;
+`UnsupportedSealedSchema` hard alarm on unknown schema versions);
+`shiftwork/domain/errors.py` (adds `ServiceResponseInvalid`,
+`UnsupportedSealedSchema`); `shiftwork/orchestrator.py` (`_finalize` evaluates the
+drawn case set under the frozen version contract against the run-consumed
+snapshot's public records, then reduces and chains as before; persisted `cr-` ids
+are still re-stamped sequentially per insert);
+`shiftwork/sealed/cases/bookshop_stale_information.json` (the Slice 2 one-case file
+reshaped into the six-case family inventory; the old one-case shape is
+superseded).
+
+Implemented rule semantics (documented in the evaluator module; the rule
+constants were revised the same day, see the corrections subsection): the
+`invariant.never_invent_fact` rule is stance-independent (a factual claim with no
+evidence is `MISSING_EVIDENCE`; a claim supported by nothing, or only by a
+case-listed superseded record, is `INVENTED_FACT`); `freshness.use_newest_with_age`
+fails a hard answer asserting a stock, price or availability claim from a record
+older than the one-hour limit stated in the catalog v2 label, with
+`STALE_BEYOND_RULE`; `stance.hard_check_high_risk` applies that failure only to
+price, the high-risk kind named in the v2 label; `stance.verify_exact_now` states
+no refusal threshold (the permissive tradeoff its own label describes) and adds no
+rule of its own. Parse or validation failures (unresolvable ref, false, missing or
+evidence-less age attestation, malformed body) fail `MALFORMED_RESPONSE` and never
+produce customer text; `render_customer_text` itself has no runtime consumer yet
+(module contract only, see the corrections subsection).
+
+### Failing-first and verification commands (verbatim)
+
+Before the implementation existed, the new tests failed at collection:
+
+```text
+ERROR tests/evaluator/test_evaluator.py
+ERROR tests/domain/test_customer_answer.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 2 errors during collection !!!!!!!!!!!!!!!!!!!
+2 warnings, 2 errors in 0.89s
+```
+
+(the evaluator module's ImportError for `UnsupportedSealedSchema`; the
+customer-answer module was `ModuleNotFoundError: No module named
+'shiftwork.domain.customer_answer'`).
+
+Baseline before any edit, `.venv/Scripts/python.exe -m pytest tests/domain
+tests/store tests/api tests/executor -q`: first run printed `1 failed, 75 passed,
+1 skipped, 2 warnings in 86.98s` (one `happy_path` conformance failure in a run
+over three times slower than the recorded 25s); the failing node printed
+`1 passed in 0.49s` alone and the clean rerun printed `76 passed, 1 skipped,
+2 warnings in 21.98s`. Recorded as a machine-load flake, not clean proof; the
+Slice 3 timing anomaly (215.67s) was not reproduced by any Slice 4 run.
+
+After implementation:
+
+```text
+.venv/Scripts/python.exe -m pytest tests/evaluator -q
+8 passed, 2 warnings in 0.61s
+
+.venv/Scripts/python.exe -m pytest tests/evaluator tests/domain/test_customer_answer.py -q
+11 passed, 2 warnings in 0.84s
+
+.venv/Scripts/python.exe -m pytest tests/domain tests/store tests/api tests/executor tests/evaluator -q
+87 passed, 1 skipped, 2 warnings in 21.64s
+```
+
+### Approved demo evidence (verbatim summary lines, both exit 0)
+
+```text
+.venv/Scripts/python.exe -m demos.evaluate_transcript --fixture fixtures/runs/passing_stale.json
+evaluate-transcript evidence complete: passing_stale.json -> 6 pass / 0 fail with reason codes and opaque expected_refs; sockets blocked; contract STANCE USE_NEWEST_RECORD_WITH_AGE
+
+.venv/Scripts/python.exe -m demos.evaluate_transcript --fixture fixtures/runs/failing_stale.json
+evaluate-transcript evidence complete: failing_stale.json -> 0 pass / 6 fail with reason codes and opaque expected_refs; sockets blocked; contract STANCE USE_NEWEST_RECORD_WITH_AGE
+```
+
+The failing transcript's reason codes in ordinal order: `STALE_BEYOND_RULE`,
+`STALE_BEYOND_RULE`, `INVENTED_FACT`, `INVENTED_FACT`, `MISSING_EVIDENCE`,
+`MALFORMED_RESPONSE`. The passing transcript's case 1 `expected_ref` is
+`sealed:6c5e7d09c1599646e8c9867ffea26c7cad5d56d5d5957fd551bbf29393595a9d`.
+
+Regression demos: `python -m demos.thin_path` exit 0 with the unchanged artifact
+content_hash `44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158`,
+one CheckResult fail/`STALE_BEYOND_RULE` (its `expected_ref` changed to the same
+`sealed:6c5e7d09...` value because the case file shape changed; the verdict did
+not), one `BACKLOG_RECORDED` event seq 1 chained on genesis, chain VALID;
+`python -m demos.lifecycle` exit 0 with chain VALID and 0 open incidents
+(Slice 4 opens none).
+
+### Clause-level coverage and limits
+
+- Test 11 FULL (revised): transitive import-closure scan over `evaluator/`,
+  `sealed/` and `domain/customer_answer.py`, following every resolvable
+  shiftwork import to a fixed point (the parsed set is asserted to include
+  `domain/models.py`, `canonical.py` and `errors.py`) with no HTTP client,
+  socket, SSL, assist, executor or curation imports anywhere in the closure,
+  plus a full six-case evaluation with `socket.socket`, `create_connection` and
+  `getaddrinfo` blocked. The block covers the scoring phase; the file-based
+  replay's event loop creates its loopback self-pipe first (framework resources
+  before a global trap, per `MISTAKES.md`).
+- Test 12 FULL: the failing fixture yields 6/6 failing verdicts with the
+  hand-derived reason codes; the passing fixture yields 6/6 passes.
+- Test 13 FULL (revised): no scalar from any sealed expected block (record ids,
+  superseded refs, claim values and notes; 25 tokens) appears in any serialized
+  evaluator result or in the thin-path API payload, and every `expected_ref` is
+  a distinct 64-hex opaque ref. The live API path does not yet carry the whole
+  family (per-run draws land at Slice 7).
+- Test 14 FULL: on the same failing transcript request 1 flips fail/pass/pass and
+  request 2 flips fail/pass/fail across `USE_NEWEST_RECORD_WITH_AGE`,
+  `VERIFY_EXACT_CLAIMS_NOW` and `HARD_CHECK_HIGH_RISK_ONLY`; the flips are
+  dictated by the constants the committed v2 labels state (the one-hour limit,
+  price as the high-risk kind), not by hidden case data; invariant failures
+  (requests 4, 5, 6) are identical under every stance; the correct transcript
+  passes under every stance. A binding-guard test pins the evaluator's rule-id
+  mirror to both frozen catalog versions.
+- Test 15 FULL (revised): `schema_version` 2 raises `UnsupportedSealedSchema` at
+  the case level and at the file level; version 1 still loads all six cases. An
+  empty or duplicated `request_ordinals` list raises `InvalidSealedCase` at
+  load time.
+- Test 42 FULL: pinned rendered sentences for answer (one and two claims), ask,
+  decline and escalate; a false age, unresolvable ref, age-without-evidence and
+  evidence-without-age all raise before any sentence exists; a malformed claim
+  never parses; no `reply_text` field or source string exists in the package.
+  `render_customer_text` has no runtime consumer yet; it is a module contract
+  until the S3.9 projection lands with the client slices.
+- Test 44 evaluator clause COMPLETE: rule-looking declared limits change no
+  verdict and surface nowhere in results; a declared limit cannot satisfy the
+  required STANCE dimension (refused by `validate_contract`).
+- NOT implemented, each with no data path yet rather than a silent stub: visible
+  checks and `CheckDef` evaluation (their data path lands with rotation/client
+  slices), latency-budget evaluation, and the clarify/escalate/estimate rule
+  bindings. `load_drawn_cases` returns the full family inventory while rotation
+  does not exist; Slice 7 replaces the body with exactly the persisted draws.
+- S7.2 render-map wording: reviewed against the implemented semantics and adopted
+  unchanged, so no Gate 3 revision is required; the map itself is materialized
+  where it is pinned (test 19, Slice 6).
+- ALL six cases, both transcripts, the batch and the snapshot are AGENT-DRAFTED
+  and require the user's review before they are treated as sealed acceptance
+  authority (`04-slices.md` S11 decision 4). The earlier user acceptance of the
+  Slice 3 fixture and template set does not cover them and is recorded above
+  unchanged; nothing here claims publication or widened authority.
+- Limits: offline runtime evidence on hand-authored fixtures only, not human,
+  learning, security-isolation or prize evidence; no UI or browser evidence.
+  Live-socket executor conformance cases stay load-sensitive by design: the
+  recorded `happy_path` flake class was reproduced by the review on `port_dead`
+  under CPU oversubscription (`REQUEST_TIMEOUT` against the real 5 s deadline),
+  which does not mask a logic bug. No
+  capability, learning-gain or prize claim follows. No install, dependency change,
+  credential use, external service or non-loopback network operation occurred;
+  `tests/packaging` was not run (its clean-env install is outside this task's
+  authorization). No branch, commit, tag or push was created.
+- Hygiene: `git diff --check` exit 0; no added line contains an em dash; every
+  new file and the sealed case file are LF (`i/lf w/lf` under the new attribute
+  rule); other edited tracked files show CRLF in this worktree only because
+  `core.autocrlf=true`, and their index bytes are LF; no new or changed file is
+  git-ignored; `git status` lists only the in-scope files. State summaries in
+  `AGENTS.md` S3 and `docs/SHIFTWORK_PLAN.md` were
+  synced; no gate decision changed.
+
+### Independent review corrections: 2026-09-18
+
+An independent, execution-based review of the uncommitted Slice 4 change set
+returned **REVISE**. The user adjudicated the one blocking semantic decision
+(create catalog v2 with the constants in the labels) and authorized the
+revision. Every finding below was reproduced or independently re-verified before
+this section was written.
+
+MAJOR-1, hidden stance parameters (fixed by the v2 catalog): the evaluator
+previously read `max_record_age_ms`, `stale_assert_kinds` and `high_risk_kinds`
+from the sealed case block, so the failing transcript's request 1 was scored
+`fail/STALE_BEYOND_RULE` for behavior the committed `USE_NEWEST_RECORD_WITH_AGE`
+label endorses ("answer from the newest record you have and report how old it
+is"), against a one-hour limit no learner-visible artifact stated. The approved
+rule (03-program-design S3.2: sealed cases check consistency with the learner's
+selected option, not a hidden right option) made this a sealing blocker.
+`shiftwork/fixtures/catalogs/bookshop_v2.json` is a new catalog version (v1 stays
+byte-frozen and replay-compatible) whose two freshness labels now state the
+constants: `USE_NEWEST_RECORD_WITH_AGE` refuses stock, price or availability
+claims from records older than one hour, and `HARD_CHECK_HIGH_RISK_ONLY` names
+price as the high-risk kind and refuses a price from a record older than one
+hour. The evaluator holds `FRESHNESS_LIMIT_MS` and `HIGH_RISK_KINDS` as fixed
+rule constants mirrored from those labels, and the six sealed `expected` blocks
+were reduced to scenario data only (`record_id`, `superseded_refs`,
+`expected_claim`, `note`). This restores the provenance the Slice 2 case note
+carried ("the one-hour freshness limit the contract selected") and the six-case
+reshape had dropped; the owner is now a visible label rather than an unpublished
+number. Every verdict in the recorded failing and passing matrices is unchanged;
+only the `expected_ref` values changed with the shrunken expected blocks.
+`VERIFY_EXACT_CLAIMS_NOW` remains the permissive stance its v2 label describes
+(no refusal threshold), which test 14 exercises.
+
+MAJOR-2, validation wiring (fixed by a regression test):
+`test_validation_failure_through_evaluate_is_malformed_response` scores a
+false-age body and an unresolvable-ref body through `evaluate` and asserts
+`MALFORMED_RESPONSE`. Failing capability verified by mutation: replacing the
+`validate_service_response` call in `_score` with a pass-through made the new
+test fail (`assert 'pass' == 'fail'`); the real call was restored and the suite
+re-ran green.
+
+Corrections from the minor findings and the missed-items list:
+
+- Test 11: the static scan is now a real transitive closure
+  (`_transitive_imports` follows every resolvable shiftwork import to a fixed
+  point and asserts `domain/models.py`, `canonical.py` and `errors.py` were
+  parsed). Failing capability verified by planting `import socket` in
+  `domain/canonical.py`, which the old one-level scan never parsed; the test
+  failed with `forbidden import in the evaluation closure: socket`, the probe
+  was removed and `git diff` for that file is empty.
+- Test 13: the sealed token set now collects every scalar in every expected
+  block (record ids, superseded refs, claim values, notes; 25 tokens). The live
+  API arm commits the v2 contract fixture `contract_stale_family.json`.
+- Test 15: the unknown-version alarm now also covers the file-level
+  `schema_version` (the review's probe, file v2 with cases v1, previously loaded
+  silently). A separate guard rejects an empty or duplicated `request_ordinals`
+  list at load time with the new `InvalidSealedCase` error.
+- New guards: `test_v2_labels_declare_the_rule_constants` pins the evaluator
+  constants to the v2 label text; `test_sealed_expected_blocks_carry_no_rule_parameters`
+  pins expected blocks to the four scenario keys so a hidden rule parameter
+  cannot return without failing the suite; the binding guard now checks both
+  catalog versions.
+- `.gitattributes` adds `shiftwork/sealed/cases/* text eol=lf` and the LF
+  checkout test now scans `SEALED_CASES_DIR`; the case file is LF.
+- Wording: the demo line now says "sockets blocked during scoring" (the phase
+  where the block holds by construction); `render_customer_text` is stated as a
+  module contract with no runtime consumer yet; the `MALFORMED_RESPONSE` arms
+  now exercised end to end are both the malformed body (case 6) and the
+  validation failures (new test).
+- Known untested edges, recorded for Slice 6/7 to pin before the data widens
+  (review items i-iv): a supporting non-superseded ref wins over a contradicting
+  ref; staleness is checked only for `action == "answer"`; the verified age is
+  the minimum over cited records; duplicate or overlapping ordinals are now
+  rejected at load time but not otherwise constrained.
+- `check_id` keeps the sealed-file-derived `-01` ordinal format; the deliberate
+  decision stays with Slice 6's leak lint (pre-existing at HEAD, learner-visible
+  by design in S3.2).
+
+Revised verification commands and verbatim result lines:
+
+```text
+.venv/Scripts/python.exe -m pytest tests/evaluator -q
+12 passed, 2 warnings in 0.63s
+
+.venv/Scripts/python.exe -m pytest tests/evaluator tests/domain/test_customer_answer.py -q
+15 passed, 2 warnings in 0.78s
+
+.venv/Scripts/python.exe -m pytest tests/domain tests/store tests/api tests/executor tests/evaluator -q
+91 passed, 1 skipped, 2 warnings in 22.18s
+
+mutation probe, validation wiring replaced by a pass-through:
+1 failed, 11 deselected, 2 warnings in 0.62s  (assert 'pass' == 'fail')
+
+mutation probe, `import socket` planted in domain/canonical.py:
+1 failed, 11 deselected, 2 warnings in 0.50s  (forbidden import in the evaluation closure: socket)
+```
+
+Revised demo outputs (both exit 0):
+
+```text
+.venv/Scripts/python.exe -m demos.evaluate_transcript --fixture fixtures/runs/passing_stale.json
+evaluate-transcript evidence complete: passing_stale.json -> 6 pass / 0 fail with reason codes and opaque expected_refs; sockets blocked during scoring; contract STANCE USE_NEWEST_RECORD_WITH_AGE
+
+.venv/Scripts/python.exe -m demos.evaluate_transcript --fixture fixtures/runs/failing_stale.json
+evaluate-transcript evidence complete: failing_stale.json -> 0 pass / 6 fail with reason codes and opaque expected_refs; sockets blocked during scoring; contract STANCE USE_NEWEST_RECORD_WITH_AGE
+```
+
+The failing transcript's reason codes in ordinal order are unchanged:
+`STALE_BEYOND_RULE`, `STALE_BEYOND_RULE`, `INVENTED_FACT`, `INVENTED_FACT`,
+`MISSING_EVIDENCE`, `MALFORMED_RESPONSE`. Case 1's new `expected_ref` is
+`sealed:7fcb2d9e60a39568df300a08f8c3b556a3622eff832f67d0a26d0c1851b3b395` on
+every surface (both transcript demos and the thin-path API check), replacing the
+pre-revision `sealed:6c5e7d09...`.
+
+Thin path and lifecycle regression demos re-ran after the revision:
+`python -m demos.thin_path` exit 0 with the unchanged artifact content_hash
+`44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158`, one
+CheckResult fail/`STALE_BEYOND_RULE` (new `expected_ref` above), one
+`BACKLOG_RECORDED` event seq 1 chained on genesis, chain VALID;
+`python -m demos.lifecycle` exit 0 with chain VALID and 0 open incidents.
+
+Scope and limits: the revision adds `bookshop_v2.json`,
+`contract_stale_family.json`, the guard tests and the changes above; it touches
+no gate document and changes no gate decision. It does not widen authorization:
+`tests/packaging` was not run; no install, dependency change, credential use,
+external service, branch, commit, tag or push occurred. The family, both
+transcripts and the new v2 labels remain AGENT-DRAFTED and still require the
+user's review before sealing (`04-slices.md` S11 decision 4); nothing here
+claims publication or widened authority.
 
 ## Approval history
 

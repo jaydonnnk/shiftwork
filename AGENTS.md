@@ -52,10 +52,12 @@ summaries when a time-sensitive external claim is being made.
   and ADR #4 remain separately authorized). Slices 1 (tracer bullet, 2026-09-17),
   2 (thin real vertical path, 2026-09-18) and 3 (recorded/local_process executor
   conformance, 2026-09-18) are implemented, reviewed and merged to main; verbatim
-  Slice 3 evidence is recorded in `docs/plans/shiftwork/00-status.md`. Test 50 is partial
+  Slice 3 evidence is recorded in `docs/plans/shiftwork/00-status.md`. Slice 4
+  (contract-parameterized evaluator + first sealed family, 2026-09-18) is
+  implemented and demonstrated, awaiting the user's review of the new sealed
+  cases; slices 5-17 are not implemented. Test 50 is partial
   (offline environment clauses only); test 29 is explicitly skipped until Slice 14.
-  This is a trusted-fixture execution guard, not hostile-code isolation. Slices
-  4-17 are not implemented.
+  This is a trusted-fixture execution guard, not hostile-code isolation.
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.
