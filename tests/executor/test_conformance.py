@@ -155,7 +155,7 @@ def test_local_process_rejects_untrusted_artifacts(executor, monkeypatch, capsys
 
 
 def test_byte_addressed_fixtures_match_lf_checkout():
-    roots = [config.ARTIFACT_TEMPLATE_DIR] + [
+    roots = [config.ARTIFACT_TEMPLATE_DIR, config.SEALED_CASES_DIR] + [
         config.FIXTURE_DIR / name for name in ("artifacts/bookshop", "requests", "shop", "runs")
     ]
     files = [path for root in roots for path in root.iterdir() if path.is_file()]
