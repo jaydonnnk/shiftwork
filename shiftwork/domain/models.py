@@ -201,6 +201,7 @@ class RunOutput(BaseModel):
     body: bytes
     elapsed_ms: int | None
     transport_error: ExecutorFailure | None = None
+    log_ref: str | None = None
 
 
 class CheckResult(BaseModel):

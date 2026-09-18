@@ -21,6 +21,7 @@ harness/textpattern-results.txt
 *.appxbundle
 TestResults/
 artifacts/
+!shiftwork/fixtures/artifacts/
 .vs/
 
 # Local IDE and OS files

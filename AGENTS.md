@@ -49,10 +49,13 @@ summaries when a time-sensitive external claim is being made.
   approved 2026-09-16); Gate 4 — Slice Plan APPROVED 2026-09-17 (after three review
   rounds the same day; slice work proceeds one slice at a time under `04-slices.md`
   S10; installs, credentials, external services, spike runs, deployment, outreach
-  and ADR #4 remain separately authorized). Slices 1 (tracer bullet, 2026-09-17) and
-  2 (thin real vertical path, 2026-09-18) are implemented and demonstrated; their
-  evidence is recorded in `docs/plans/shiftwork/00-status.md`. Slices 3–17 are not
-  implemented.
+  and ADR #4 remain separately authorized). Slices 1 (tracer bullet, 2026-09-17),
+  2 (thin real vertical path, 2026-09-18) and 3 (recorded/local_process executor
+  conformance, 2026-09-18) are implemented and demonstrated; verbatim Slice 3
+  evidence is recorded in `docs/plans/shiftwork/00-status.md`. Test 50 is partial
+  (offline environment clauses only); test 29 is explicitly skipped until Slice 14.
+  This is a trusted-fixture execution guard, not hostile-code isolation. Slices
+  4-17 are not implemented.
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.

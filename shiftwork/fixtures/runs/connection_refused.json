@@ -1,0 +1,11 @@
+{
+  "description": "Agent-authored golden transcript: service closes its listener before finishing response 1 but stays alive; connection 2 is refused. Operator review required before acceptance use.",
+  "request_batch_hash": "aaa03b3ae4d683d600b461e8e38a769d93b005ade708a29cde42346cb88ce970",
+  "shop_snapshot_hash": "bd66a4136c8dc1156ff50645195d437328cb3ea18206be9eba976d3ea168933f",
+  "wall_ms": 110,
+  "failure": "SERVICE_UNREACHABLE",
+  "captures": [
+    {"request_ordinal": 1, "http_status": 200, "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoiaW5fc3RvY2sifV0sImV2aWRlbmNlX3JlZnMiOlsiY2F0YWxvZzo5NzgwNDQxMDEzNTkzIl0sInJlY29yZF9hZ2VfbXMiOjU0MDAwMDB9", "elapsed_ms": 55, "transport_error": null, "log_base64": "dHJ1c3RlZCBmaXh0dXJlIHJlYWR5Cg=="},
+    {"request_ordinal": 2, "http_status": null, "body_base64": "", "elapsed_ms": 55, "transport_error": "SERVICE_UNREACHABLE", "log_base64": "dHJ1c3RlZCBmaXh0dXJlIHJlYWR5Cg=="}
+  ]
+}

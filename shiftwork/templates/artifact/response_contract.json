@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["action", "claims", "evidence_refs", "record_age_ms"],
+  "properties": {
+    "action": {"enum": ["answer", "ask", "decline", "escalate"]},
+    "claims": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "value"],
+        "properties": {
+          "kind": {"enum": ["price", "stock", "availability", "policy_answer", "booking", "none"]},
+          "value": {"description": "JSON value with no floating-point numbers; use integer minor units for prices."}
+        }
+      }
+    },
+    "evidence_refs": {"type": "array", "items": {"type": "string"}},
+    "record_age_ms": {"type": ["integer", "null"], "minimum": 0}
+  }
+}

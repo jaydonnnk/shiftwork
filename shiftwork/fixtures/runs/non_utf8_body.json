@@ -1,0 +1,10 @@
+{
+  "description": "Agent-authored golden transcript: complete non-UTF-8 body preserved verbatim. Operator review required before acceptance use.",
+  "request_batch_hash": "aaa03b3ae4d683d600b461e8e38a769d93b005ade708a29cde42346cb88ce970",
+  "shop_snapshot_hash": "bd66a4136c8dc1156ff50645195d437328cb3ea18206be9eba976d3ea168933f",
+  "wall_ms": 55,
+  "failure": "CAPTURE_NON_UTF8",
+  "captures": [
+    {"request_ordinal": 1, "http_status": 200, "body_base64": "//57ImFjdGlvbiI6ImFuc3dlciJ9", "elapsed_ms": 55, "transport_error": "CAPTURE_NON_UTF8", "log_base64": "dHJ1c3RlZCBmaXh0dXJlIHJlYWR5Cg=="}
+  ]
+}

@@ -19,7 +19,7 @@ or re-steer?"):
 
 - [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
 - [x] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event; implemented and demonstrated 2026-09-18 (`python -m demos.thin_path`; evidence in Notes)
-- [ ] Slice 3 — Executor conformance (recorded + local_process), deepening Slice 2 execution
+- [x] Slice 3: Executor conformance (recorded + local_process); implemented and demonstrated 2026-09-18 (verbatim evidence below; test 50 partial, test 29 skipped)
 - [ ] Slice 4 — Contract-parameterized evaluator + first sealed family, deepening Slice 2 evaluation
 - [ ] Slice 5 — Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger
 - [ ] Slice 6 — Isolation and leakage hardening
@@ -35,9 +35,10 @@ or re-steer?"):
 - [ ] Slice 16 — Submission packaging: test build + demo video
 - [ ] Slice 17 — Hosted deployment (conditional: only if Option B selected at the Slice 13 exit)
 
-Slices 1 and 2 are implemented and their evidence recorded (2026-09-17 and
-2026-09-18); slices 3–17 are not implemented. Slice work proceeds only under
-`04-slices.md` S10 — credentials, installs, spike runs, external services,
+Slices 1, 2 and 3 are implemented and their evidence recorded (2026-09-17 and
+2026-09-18); slices 4-17 are not implemented. Slice 3 remains uncommitted for the
+user's hostile review and publish flow. Slice work proceeds only under
+`04-slices.md` S10; credentials, installs, spike runs, external services,
 deployment, outreach and ADR #4 each remain separately authorized.
 
 ## Notes for a fresh session
@@ -602,6 +603,247 @@ deployment, outreach and ADR #4 each remain separately authorized.
   No capability, learning benefit, prize merit or score has been demonstrated.
 - Protect unrelated dirty-worktree changes. No installs, commits, pushes, purchases
   or participant outreach are authorized by Gate 1.
+
+## Slice 3 evidence: 2026-09-18
+
+Slice 3 is IMPLEMENTED and demonstrated, not published. Scope: executor protocol
+and frozen request/result models; shared raw-capture normalization; generalized
+recorded replay; local subprocess execution of pinned trusted fixtures only;
+stdlib learner HTTP template, literal JSONL requests, frozen snapshot and authored
+fault transcripts. The controller passes frozen artifact bytes through the new
+interface, binds request text and identities after normalization, and stores typed
+executor failures and captured evidence without scoring those failed runs.
+`RunOutput.log_ref` persists inline captured bytes; the API exposes `log_base64`,
+not an internal file path. Schema version 3 adds that nullable column, with a narrow
+schema-2 upgrade tested against a constructed temporary database retaining a row.
+No existing runtime database is presumed by that test.
+
+### Clause-level coverage and limits
+
+- Test 28: FULL for the approved offline case table. Happy path plus port dead,
+  timeout, truncation, non-UTF-8, refused connection and mid-batch termination
+  have equal normalized captures and typed failures across both adapters. Bodies,
+  HTTP status, ordinals, log bytes and capture timing are compared. Capture timing
+  uses an injected `perf_counter_ns` clock; real monotonic deadlines, real loopback
+  sockets and real subprocesses remain active. This is NOT equality of measured
+  performance or run wall time. A separate non-injected-clock check exercises
+  elapsed-time collection and literal request bytes against the frozen snapshot.
+- Test 30: FULL. Every case returns `RawCapture` with strict bytes, never parsed
+  service objects. Dict, list, text and bytearray bodies are refused. The controller
+  integration test spies on the single normalization call and verifies retained
+  failed bytes/logs after reopening the database, with no checks or ledger events.
+- Test 31: FULL. Unknown manifests, altered bytes with the original manifest,
+  extra files and path escapes are refused before subprocess creation. Trust is
+  based on a pinned manifest/file-byte hash pair using the existing canonical
+  implementation, not the caller's manifest alone. This is an execution guard,
+  NOT hostile-code isolation.
+- Test 50: PARTIAL, exactly the offline clauses. Recorded replay starts no process
+  and reads no execution environment. Local execution passes only `SYSTEMROOT`
+  and `WINDIR`, checked at spawn and in child-reported environment. Synthetic
+  markers for `NEBIUS_API_KEY`, `CONTREE_SESSION`, `TAVILY_API_KEY`,
+  `SHIFTWORK_DB_PATH`, sealed-store access and additional unlisted variables are
+  absent from those environments and captured logs/bodies, with two captures
+  required before absence checks. No real credentials were used. Host-filesystem
+  isolation, in-sandbox reachable-file checks, scoped grants and the live
+  `tokenfactory` provisioning arm remain unproved and deferred to Slice 14.
+- Test 29: explicitly SKIPPED until the real adapter and authorized Sandbox access
+  exist; exact skip output is below.
+- `recorded` still executes no learner code. The normal API path remains the
+  one-request Slice 2 replay, not a claim that arbitrary edited artifacts run
+  locally. Local execution accepts only the eight pinned fixtures.
+- ALL new fixtures and transcripts are agent-authored synthetic expectations,
+  not historical Sandbox captures or an independent oracle. User review remains
+  required before acceptance authority. The new service scaffold reads records
+  without implementing Slice 4 freshness decisions. Evaluator, sealed store,
+  canonical implementation, reducer and chain remain the minimal Slice 2 versions.
+- No Slice 4 evaluation, rotation, budget, incident, inheritance, client-screen or
+  tokenfactory implementation was added. No UI change or browser evidence is claimed.
+  No Sandbox, human, learning, transfer or prize evidence follows from these tests.
+- No install, dependency change, credential use, external service or non-loopback
+  network operation was performed. `tests/packaging` was NOT run: its clean-env
+  install is outside this task's authorization. No branch, commit, tag or push was
+  created; the user owns hostile review and publication. The state summaries in
+  `AGENTS.md` S3 and `docs/SHIFTWORK_PLAN.md` were synced, not the gate decisions.
+
+### Baseline and corrections
+
+Baseline command: `.venv/Scripts/python.exe -m pytest tests/domain tests/store tests/api -q`.
+Verbatim result line: `31 passed, 2 warnings in 2.58s`. The same FastAPI/Starlette
+warnings remain in final verification; nothing was installed to remove them.
+
+The failed environment trap, Windows log-newline mismatch, insufficient refusal
+fixture deadline, ignored fixture source directory and CRLF snapshot pin were
+corrected and recorded in `MISTAKES.md` with observed outputs and prevention rules.
+The refusal tests now allow five seconds to observe Winsock refusal; the deliberate
+timeout still uses a two-second real deadline. Assertions and failure kinds were
+not weakened. LF source rules plus a byte-level regression prevent checkout from
+changing the snapshot hash. Only source bytes were aligned; captured response
+bytes, including truncation and invalid UTF-8, are never normalized away.
+
+### Required executor command: verbatim output
+
+`.venv/Scripts/python.exe -m pytest tests/executor -q`
+
+```text
+happy_path: captures=2 bytes/status/ordinal/time/logs=identical failure=NONE (injected capture clock; real sockets/deadline)
+.port_dead: captures=1 bytes/status/ordinal/time/logs=identical failure=SERVICE_UNREACHABLE (injected capture clock; real sockets/deadline)
+.timeout: captures=1 bytes/status/ordinal/time/logs=identical failure=REQUEST_TIMEOUT (injected capture clock; real sockets/deadline)
+.truncated_body: captures=1 bytes/status/ordinal/time/logs=identical failure=CAPTURE_TRUNCATED (injected capture clock; real sockets/deadline)
+.non_utf8_body: captures=1 bytes/status/ordinal/time/logs=identical failure=CAPTURE_NON_UTF8 (injected capture clock; real sockets/deadline)
+.connection_refused: captures=2 bytes/status/ordinal/time/logs=identical failure=SERVICE_UNREACHABLE (injected capture clock; real sockets/deadline)
+.kill_mid_batch: captures=1 bytes/status/ordinal/time/logs=identical failure=SANDBOX_TERMINATED (injected capture clock; real sockets/deadline)
+.s............trusted-guard unknown_hash: PROVISION_FAILED; subprocess starts=0
+.trusted-guard modified_bytes: PROVISION_FAILED; subprocess starts=0
+.trusted-guard extra_file: PROVISION_FAILED; subprocess starts=0
+.trusted-guard path_escape: PROVISION_FAILED; subprocess starts=0
+...credential-guard recorded: captures=2; injected markers absent from bodies/logs; no process or environment access
+.credential-guard local_process: captures=2; injected markers absent from bodies/logs; spawn env and child-reported env match SYSTEMROOT/WINDIR allowlist
+.......                                       [100%]
+============================== warnings summary ===============================
+tests/executor/test_conformance.py::test_controller_normalizes_once_and_retains_failed_capture
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+tests/executor/test_conformance.py::test_controller_normalizes_once_and_retains_failed_capture
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+33 passed, 1 skipped, 2 warnings in 24.21s
+```
+
+### Required regression command: verbatim output
+
+`.venv/Scripts/python.exe -m pytest tests/domain tests/store tests/api tests/executor -q`
+
+```text
+...............................happy_path: captures=2 bytes/status/ordinal/time/logs=identical failure=NONE (injected capture clock; real sockets/deadline)
+.port_dead: captures=1 bytes/status/ordinal/time/logs=identical failure=SERVICE_UNREACHABLE (injected capture clock; real sockets/deadline)
+.timeout: captures=1 bytes/status/ordinal/time/logs=identical failure=REQUEST_TIMEOUT (injected capture clock; real sockets/deadline)
+.truncated_body: captures=1 bytes/status/ordinal/time/logs=identical failure=CAPTURE_TRUNCATED (injected capture clock; real sockets/deadline)
+.non_utf8_body: captures=1 bytes/status/ordinal/time/logs=identical failure=CAPTURE_NON_UTF8 (injected capture clock; real sockets/deadline)
+.connection_refused: captures=2 bytes/status/ordinal/time/logs=identical failure=SERVICE_UNREACHABLE (injected capture clock; real sockets/deadline)
+.kill_mid_batch: captures=1 bytes/status/ordinal/time/logs=identical failure=SANDBOX_TERMINATED (injected capture clock; real sockets/deadline)
+.s............trusted-guard unknown_hash: PROVISION_FAILED; subprocess starts=0
+.trusted-guard modified_bytes: PROVISION_FAILED; subprocess starts=0
+.trusted-guard extra_file: PROVISION_FAILED; subprocess starts=0
+.trusted-guard path_escape: PROVISION_FAILED; subprocess starts=0
+...credential-guard recorded: captures=2; injected markers absent from bodies/logs; no process or environment access
+.credential-guard local_process: captures=2; injected markers absent from bodies/logs; spawn env and child-reported env match SYSTEMROOT/WINDIR allowlist
+.......        [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+64 passed, 1 skipped, 2 warnings in 25.30s
+```
+
+### Deferred adapter: verbatim skip output
+
+`.venv/Scripts/python.exe -m pytest tests/executor/test_conformance.py::test_conformance_suite_tokenfactory -q -rs`
+
+```text
+s                                                                        [100%]
+=========================== short test summary info ===========================
+SKIPPED [1] tests\executor\test_conformance.py:88: Test 29: tokenfactory conformance requires the real adapter and authorized sandbox access in Slice 14
+1 skipped in 0.39s
+```
+
+### Thin-path regression demonstration
+
+`.venv/Scripts/python.exe -m demos.thin_path` exited 0. Verbatim final line:
+
+```text
+thin-path evidence complete: run run-0001 FINALIZED, content_hash 44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158, one CheckResult fail/STALE_BEYOND_RULE with opaque expected_ref, one BACKLOG_RECORDED event seq 1 chained on genesis, chain_status VALID
+```
+
+The artifact hash changes because the inline scaffold was replaced with the three
+on-disk template files. Canonical hashing and the original stale response outcome
+are unchanged. The original event hash printed by the same demo is
+`c0099aec092c13ec0c79c9bb934e80ba3396a47788897dc90a6c608382f1d695`.
+
+### Source-scope and Git-state verification
+
+An inline Python check compared `git diff --name-only` and
+`git ls-files --others --exclude-standard` against canonical/evaluator/sealed/ledger,
+client, dependency and packaging paths, scanned added lines/new files for em dashes,
+and printed staged paths and HEAD. Verbatim output before the docs-only state sync:
+
+```text
+protected Slice 2/dependency/client/packaging paths changed: []
+new em dashes: 0
+staged paths: []
+HEAD: 8eba305
+```
+
+`git ls-files --others --exclude-standard shiftwork/fixtures/artifacts` includes the
+trusted sources after the narrow `.gitignore` exception; the previously hidden
+source directory is now reviewable. The tests' exact-byte pins include those files.
+
+After syncing the documentation, `git diff --check` plus assertions over the
+three state summaries, added text and Git state printed:
+
+```text
+git diff --check: PASS
+Slice 3 evidence and state mirrors: PASS; Slice 4 unchecked
+new em dashes: 0
+Git state: shiftwork/slice-3; HEAD 8eba305; no staged changes
+```
+
+### Adversarial review corrections: 2026-09-18
+
+The execution-based review returned REVISE for two reproduced defects. The user
+then authorized applying both fixes and rerunning the tests. `executor/recorded.py`
+now rejects inconsistent transport metadata and invalid log base64, derives a
+missing non-UTF-8 failure from the captured bytes, and retains those bytes/logs
+through the controller's FAILED path without checks or ledger events. The valid
+combination of process termination and a truncated final response remains allowed.
+`store/db.py` now places the log-column ALTER TABLE and schema version update in
+one explicit transaction. An injected version-write failure rolls back the column;
+reopening and repeating the upgrade succeeds with the existing row preserved.
+
+Twelve tests were added to `tests/executor/test_conformance.py`. Before the fixes,
+the focused regression command (`-k "inconsistent_transport or derives_non_utf8 or
+termination_after_partial or failure_cannot_finalize or rolls_back_on_version_write"`)
+printed `11 failed, 1 passed, 34 deselected, 2 warnings in 3.81s`. Those were expected
+pre-fix failures; the passing case protects the legitimate termination/truncation
+combination. After the fixes, the replay-focused selection printed
+`11 passed, 35 deselected, 2 warnings in 1.82s`, and the schema selection (`-k
+"schema_two"`) printed `2 passed, 44 deselected in 0.58s`.
+
+Final commands and verbatim result lines:
+
+```text
+.venv/Scripts/python.exe -m pytest tests/executor -q
+45 passed, 1 skipped, 2 warnings in 24.00s
+
+.venv/Scripts/python.exe -m pytest tests/domain tests/store tests/api tests/executor -q
+76 passed, 1 skipped, 2 warnings in 25.56s
+
+.venv/Scripts/python.exe -m pytest tests/executor/test_conformance.py::test_conformance_suite_tokenfactory -q -rs
+SKIPPED [1] tests\executor\test_conformance.py:89: Test 29: tokenfactory conformance requires the real adapter and authorized sandbox access in Slice 14
+1 skipped in 0.60s
+```
+
+Both existing warnings remain: Starlette's deprecated `httpx` TestClient use and
+the deprecated `anyio.abc.BlockingPortal` alias. The thin-path demo exited 0 with
+the same artifact hash and ledger event hash recorded above, FINALIZED and chain
+VALID. The review's earlier combined run took `215.67s (0:03:35)` before passing;
+its diagnostic rerun took `24.43s`. That unexplained timing anomaly is retained,
+not erased by these faster post-fix runs.
+
+No fixture pins, executor interfaces, local-process implementation, evaluator,
+ledger, gate decisions or later-slice scope changed. The two error causes and
+prevention rules are recorded in `MISTAKES.md`. Test 50 remains partial and test 29
+remains deferred. Packaging was not run; no install, credential use, external
+service, branch, commit, tag or push occurred. User fixture review and publication
+remain separate from this correction evidence.
 
 ## Approval history
 

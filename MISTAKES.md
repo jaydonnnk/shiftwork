@@ -79,3 +79,45 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   a counterfactual guard, say the database was constructed for the check. Second
   occurrence of the unverified-state-as-fact pattern (first: the 2026-09-17 WinError
   4551 entry); at 4 occurrences graduate into `agents.md`.
+
+## 2026-09-18 Slice 3: environment trap broke the test runner
+
+- **What happened:** the first executor suite ended with `8 failed, 17 passed, 1 skipped, 11 errors in 17.62s`; the recorded-adapter test replaced global `os.environ` while asyncio created its loop and pytest reported results, causing `TypeError: 'types.SimpleNamespace' object is not subscriptable` and masking conformance diagnostics.
+- **Root cause:** a process-global fault injection outlived the boundary under test, and the replacement did not implement the mapping protocol.
+- **Prevention rule:** create framework resources before a global trap, scope the trap to the adapter call with guaranteed restoration, and restore normal state before framework teardown or reporting.
+
+## 2026-09-18 Slice 3: fixture log bytes depended on Windows newline translation
+
+- **What happened:** the isolated conformance check reported `1 failed, 1 passed in 1.09s`; live logs were `b'trusted fixture ready\r\n'` while the authored transcript pinned `b'trusted fixture ready\n'`.
+- **Root cause:** the fixture used text-mode stderr without pinning newline encoding, so the OS changed the emitted bytes.
+- **Prevention rule:** fix fixture output encoding at the producer; preserve captured bytes and exact-equality assertions rather than normalizing away evidence differences. Recompute fixture pins only after reviewing the producer change.
+
+## 2026-09-18 Slice 3: refusal fixture deadline expired before Winsock refused
+
+- **What happened:** executor checks reported `2 failed, 28 passed, 1 skipped in 17.87s`; port-dead and connection-refused cases timed out instead of observing refusal.
+- **Root cause:** their 2-second whole-run deadline was shorter than the measured OS refusal delay. A direct 8-second-timeout loopback probe printed `bound_not_listening ConnectionRefusedError winerror= 10061 elapsed_ms= 2047` and `closed ConnectionRefusedError winerror= 10061 elapsed_ms= 2014`.
+- **Prevention rule:** separate the deliberate timeout case from refusal tests; allow refusal tests enough time to observe the real socket error. Keep typed expectations unchanged and retain a short real deadline for the timeout case.
+
+## 2026-09-18 Slice 3: trusted sources hidden by a build-output ignore rule
+
+- **What happened:** `git check-ignore -v shiftwork/fixtures/artifacts/bookshop/service.py` printed `.gitignore:23:artifacts/\tshiftwork/fixtures/artifacts/bookshop/service.py`; the new executable fixtures existed locally but were absent from the reviewable untracked-file inventory.
+- **Root cause:** the pre-existing unanchored build-output rule also matched the approved source-fixture directory.
+- **Prevention rule:** check ignore status for new source directories and add a narrow source exception before treating the diff as reproducible.
+
+## 2026-09-18 Slice 3: snapshot pin depended on pre-checkout CRLF bytes
+
+- **What happened:** the checkout-format regression printed `1 failed in 0.83s`; the byte probe found `thin_stale.json` and `bookshop_snapshot.json` still using CRLF. The snapshot's current hash was `ad18bf6fce6b2742b963d728ce60b0988b4d954b903d638cb1777ec7c42cdf12`, but the declared LF checkout would hash to `bd66a4136c8dc1156ff50645195d437328cb3ea18206be9eba976d3ea168933f`.
+- **Root cause:** exact-byte pins were computed before aligning existing fixture files with the new `.gitattributes` LF rule; local green tests did not prove checkout reproducibility.
+- **Prevention rule:** assert byte-addressed source files already use their declared checkout newlines before freezing hashes; correct source bytes and explicit pins, never normalize captured response evidence.
+
+## 2026-09-18 Slice 3: replay trusted contradictory transport metadata
+
+- **What happened:** the adversarial review reproduced a replay with no HTTP status reaching FINALIZED and a ledger event; unmarked non-UTF-8 bytes instead reached evaluation, raised and lost their captured evidence on rollback. Invalid log base64 and conflicting failure kinds were also accepted.
+- **Root cause:** request/snapshot hashes and capture order were checked, but transport metadata was trusted independently of body/log bytes and run failure state.
+- **Prevention rule:** test malformed replay metadata as well as golden transcripts; validate transport consistency before success and retain unmarked non-UTF-8 bytes through the typed executor-failure path, never business evaluation.
+
+## 2026-09-18 Slice 3: migration DDL committed before its version marker
+
+- **What happened:** a review probe denied the version-write statement after adding `log_ref`; reopening left schema version 2 with the new column, and the next startup failed with `duplicate column name: log_ref`.
+- **Root cause:** SQLite committed the ALTER TABLE independently because no explicit transaction enclosed both the DDL and schema version update; the original test covered only uninterrupted repetition.
+- **Prevention rule:** commit migration DDL and its version marker atomically; inject a failure between them, reopen the database and assert unchanged data plus a successful retry.

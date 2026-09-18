@@ -1,5 +1,5 @@
 {
-  "description": "Frozen bookshop snapshot for the thin path. Holds ONLY the record the one fixed customer request touches: the Dune hardback shelf record, captured 90 minutes (5400000 ms) before the run. The stale age of this record is what the sealed stale_information case detects.",
+  "description": "Agent-drafted frozen snapshot: Dune hardback stock and price in integer minor units, both recorded 90 minutes (5400000 ms) before the run. The original thin request still uses the stock record. Operator review is required before acceptance use.",
   "engagement_slug": "bookshop",
   "snapshot_version": 1,
   "records": [
@@ -9,6 +9,14 @@
       "title": "Dune",
       "edition": "hardback",
       "value": "in_stock",
+      "record_age_ms": 5400000
+    },
+    {
+      "record_id": "catalog:9780441013593:price",
+      "kind": "price",
+      "title": "Dune",
+      "edition": "hardback",
+      "value": 1999,
       "record_age_ms": 5400000
     }
   ]

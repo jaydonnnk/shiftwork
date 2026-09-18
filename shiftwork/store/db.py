@@ -1,14 +1,10 @@
-"""SQLite connection factory and schema bootstrap.
-
-The real DDL lives in store/schema.sql (program design S2). Slice 2 replaces the
-tracer's inline stub schema with that file and bumps SCHEMA_VERSION to 2.
-"""
+"""SQLite connection factory and versioned schema bootstrap."""
 
 import sqlite3
 from pathlib import Path
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 
 def connect(db_path: str | Path) -> sqlite3.Connection:
@@ -22,12 +18,15 @@ def connect(db_path: str | Path) -> sqlite3.Connection:
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
     current = int(conn.execute("PRAGMA user_version").fetchone()[0])
-    if current not in (0, SCHEMA_VERSION):
+    if current not in (0, 2, SCHEMA_VERSION):
         raise RuntimeError(
             f"database schema is at version {current}, this build expects {SCHEMA_VERSION}. "
-            "A stale database file from a different schema cannot be migrated in place; "
-            "remove or point SHIFTWORK_DB_PATH at a fresh file."
+            "This schema cannot be migrated in place; "
+            "point SHIFTWORK_DB_PATH at a fresh file."
         )
     conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
-    conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
-    conn.commit()
+    with conn:
+        conn.execute("BEGIN IMMEDIATE")
+        if current == 2:
+            conn.execute("ALTER TABLE run_outputs ADD COLUMN log_ref TEXT")
+        conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")

@@ -12,15 +12,21 @@ rounds the same day; all accepted fixes and consistency corrections applied). Sl
 work proceeds one slice at a time under `04-slices.md` S10; credentials, installs,
 spike runs, external services, deployment, outreach and ADR #4 each remain
 separately authorized. Backtrack an earlier gate only for a concrete blocker.
-Slices 1 (tracer bullet, 2026-09-17) and 2 (thin real vertical path, 2026-09-18) are
-implemented and demonstrated; their evidence is recorded in
-`docs/plans/shiftwork/00-status.md`. Slice 3 has not started.
+Slices 1 (tracer bullet, 2026-09-17), 2 (thin real vertical path, 2026-09-18) and
+3 (recorded/local_process executor conformance, 2026-09-18) are implemented and
+demonstrated; verbatim Slice 3 evidence is recorded in
+`docs/plans/shiftwork/00-status.md`. Slice 4 has not started.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
-**Evidence state:** a Slice 2 thin real vertical path exists (real canonical hashing,
-one recorded replay, one sealed case scored, one hash-chained ledger event); it is
-real but minimal, and executor conformance, contract-parameterized evaluation and
-ledger hardening are not built. No Sandbox execution, learner study, transfer result,
-Tavily ablation, prize merit or score has been demonstrated.
+**Evidence state:** the Slice 2 thin real path remains (canonical hashing, one
+recorded replay, one sealed case scored, one hash-chained ledger event). Slice 3
+adds real loopback trusted-fixture execution, seven-case replay/local conformance,
+exact-byte artifact guards and a pinned child environment. Capture-time equality
+uses an injected clock, not equal measured performance. Tests 28, 30 and 31 land;
+test 50 is partial (offline environment/log clauses only), and test 29 is explicitly
+skipped until Slice 14. This is not hostile-code isolation. Fixtures and transcripts
+are agent-authored and require user review before acceptance authority. Contract-
+parameterized evaluation and ledger hardening are not built. No Sandbox execution,
+learner study, transfer result, Tavily ablation, prize merit or score is demonstrated.
 **Working forecast:** current 27/40; pre-evidence cap 31/40; conditional best
 case 35/40. Potential Impact remains at most 4.0 in that best case.
 

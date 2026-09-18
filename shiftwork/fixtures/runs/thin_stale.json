@@ -1,6 +1,10 @@
 {
   "description": "Thin-path transcript: ONE fixed customer request replayed by the recorded adapter into ONE real capture. The service hard-asserts in_stock from a shelf record 90 minutes old (5400000 ms), which the sealed stale_information case scores as STALE_BEYOND_RULE.",
   "adapter": "recorded",
+  "request_batch_hash": "a16e1895f1f5d21aeb01fdf73759712c16bb63fcddfce1638213a29e9c00757c",
+  "shop_snapshot_hash": "bd66a4136c8dc1156ff50645195d437328cb3ea18206be9eba976d3ea168933f",
+  "wall_ms": 55,
+  "failure": null,
   "captures": [
     {
       "request_ordinal": 1,
