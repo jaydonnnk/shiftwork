@@ -1,6 +1,9 @@
-"""Tracer subset of the durable domain models (program design S3.2).
+"""Durable domain models (program design S3.2).
 
-Slice 2 replaces the stubbed persistence and extends these types to the full set.
+Slice 2 carries the real contract, catalog, structured-response and ledger-draft
+types the thin vertical path needs. Later slices add the rotation, assist and
+curation models (RotationDraw, AssistEvent, MissionSource) without renumbering
+what exists here.
 """
 
 from datetime import datetime
@@ -63,6 +66,83 @@ class IncidentState(StrEnum):
     CLOSED_UNRESOLVED = "CLOSED_UNRESOLVED"
 
 
+class ContractDimension(StrEnum):
+    MUST_NEVER = "MUST_NEVER"
+    STANCE = "STANCE"
+    CLARIFY_WHEN = "CLARIFY_WHEN"
+    ESCALATE_WHEN = "ESCALATE_WHEN"
+    MAY_ESTIMATE_WHEN = "MAY_ESTIMATE_WHEN"
+    REPEAT_REQUEST_RULE = "REPEAT_REQUEST_RULE"
+
+
+class ContractOptionId(StrEnum):
+    NEVER_INVENT_PRICE_STOCK_POLICY = "NEVER_INVENT_PRICE_STOCK_POLICY"
+    VERIFY_EXACT_CLAIMS_NOW = "VERIFY_EXACT_CLAIMS_NOW"
+    USE_NEWEST_RECORD_WITH_AGE = "USE_NEWEST_RECORD_WITH_AGE"
+    HARD_CHECK_HIGH_RISK_ONLY = "HARD_CHECK_HIGH_RISK_ONLY"
+    CLARIFY_TITLE_OR_EDITION = "CLARIFY_TITLE_OR_EDITION"
+    CLARIFY_ANY_UNCERTAIN_FACT = "CLARIFY_ANY_UNCERTAIN_FACT"
+    CLARIFY_HIGH_RISK_FACT = "CLARIFY_HIGH_RISK_FACT"
+    NEVER_UNSAFE_CONTINUATION = "NEVER_UNSAFE_CONTINUATION"
+    ESTIMATE_ONLY_WITH_EVIDENCE = "ESTIMATE_ONLY_WITH_EVIDENCE"
+    ESCALATE_UNSAFE_REPAIR = "ESCALATE_UNSAFE_REPAIR"
+    DEDUPLICATE_BOOKING_BY_REQUEST_ID = "DEDUPLICATE_BOOKING_BY_REQUEST_ID"
+
+
+class ContractOption(BaseModel):
+    """Immutable once its catalog version has been used (program design S3.2)."""
+
+    model_config = _FROZEN
+
+    id: ContractOptionId
+    dimension: ContractDimension
+    learner_label: str
+    evaluator_rule_id: str
+
+
+class ContractCatalog(BaseModel):
+    model_config = _FROZEN
+
+    engagement_slug: Slug
+    version: int
+    content_hash: str
+    required_dimensions: tuple[ContractDimension, ...]
+    options: tuple[ContractOption, ...]
+    frozen_at: datetime
+
+
+class ContractParams(BaseModel):
+    """Frozen into an ArtifactVersion; drives parameterized checks (S3.2)."""
+
+    model_config = _FROZEN
+
+    catalog_version: int
+    must_never: tuple[ContractOptionId, ...]
+    selections: dict[ContractDimension, ContractOptionId]
+    response_time_limit_ms: Literal[1000, 3000, 8000]
+    declared_limits: tuple[str, ...]
+
+
+class Claim(BaseModel):
+    """Typed claim the evaluator compares deterministically. Floats forbidden."""
+
+    model_config = _FROZEN
+
+    kind: Literal["price", "stock", "availability", "policy_answer", "booking", "none"]
+    value: JsonValue
+
+
+class ServiceResponse(BaseModel):
+    """The structured response contract; captured bytes must validate (S3.2)."""
+
+    model_config = _FROZEN
+
+    action: Literal["answer", "ask", "decline", "escalate"]
+    claims: tuple[Claim, ...]
+    evidence_refs: tuple[str, ...]
+    record_age_ms: int | None = None
+
+
 class Shift(BaseModel):
     model_config = _FROZEN
 
@@ -75,13 +155,23 @@ class Shift(BaseModel):
 
 
 class ArtifactVersion(BaseModel):
+    """Immutable, content-hashed snapshot (program design S3.2).
+
+    ``content_hash`` covers the frozen ``files`` + ``contract`` (ContractParams) +
+    ``contract_catalog_hash``. ``files`` and ``storage_ref`` are internal: they are
+    never exposed in a public projection (S3.9).
+    """
+
     model_config = _FROZEN
 
     id: Id
     shift_id: Id
     parent_id: Id | None
     content_hash: str
-    contract: dict[str, JsonValue]
+    storage_ref: str
+    files: dict[str, str]
+    contract: ContractParams
+    contract_catalog_hash: str
     created_by: Literal["template", "learner"]
     created_at: datetime
 
@@ -141,13 +231,20 @@ class Incident(BaseModel):
     resolved_event_seq: int | None = None
 
 
-class LedgerEvent(BaseModel):
+class LedgerEventDraft(BaseModel):
+    """Reducer output before chaining; carries no seq/hash fields (S3.4)."""
+
     model_config = _FROZEN
 
     event_type: LedgerEventType
     cause_refs: tuple[Id, ...]
     payload: dict[str, JsonValue]
     synthetic: Literal[True] = True
+
+
+class LedgerEvent(LedgerEventDraft):
+    """After ledger.chain.append assigns seq and hashes (S3.5)."""
+
     seq: int
     prev_hash: str
     hash: str

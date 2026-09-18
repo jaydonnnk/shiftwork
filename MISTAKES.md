@@ -63,3 +63,19 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   the same note that records it passing. Packaging checks may still probe a fresh
   interpreter and keep a uv fallback for genuinely blocked machines, but record the
   fallback as exercised only when the probe actually failed.
+## 2026-09-18 Slice 2 evidence note asserted a runtime shiftwork.db that never existed
+
+- **What happened:** the Slice 2 evidence note recorded "the runtime `shiftwork.db` were
+  left untouched" and described "a stale git-ignored dev `shiftwork.db` left at version
+  1", implying an existing file. No `*.db` file exists anywhere in the tree or in git
+  history, and none was created; the demos and tests point `create_app` at temp paths.
+  An independent hostile review caught it, not my own checks.
+- **Root cause:** I wrote a file-state claim from assumption instead of running a check;
+  no command output backed the existence claim, and guard behavior ("a database left at
+  version 1 raises ...") was allowed to read as an observed file.
+- **Prevention rule:** every file-state claim in an evidence note ("exists", "left
+  untouched", "pre-existing", "created") must be backed by the command that shows it
+  (`git status --porcelain`, `find . -name '*.db'`, `git ls-files`). When the evidence is
+  a counterfactual guard, say the database was constructed for the check. Second
+  occurrence of the unverified-state-as-fact pattern (first: the 2026-09-17 WinError
+  4551 entry); at 4 occurrences graduate into `agents.md`.

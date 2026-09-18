@@ -33,6 +33,24 @@ class DraftUpdate(BaseModel):
     files: dict[str, str]
 
 
+class ContractView(BaseModel):
+    """Public projection of a frozen ContractParams (no expected values)."""
+
+    model_config = _FROZEN
+
+    catalog_version: int
+    must_never: tuple[str, ...]
+    selections: dict[str, str]
+    response_time_limit_ms: Literal[1000, 3000, 8000]
+    declared_limits: tuple[str, ...]
+
+
+class FreezeVersionRequest(BaseModel):
+    model_config = _FROZEN
+
+    contract: ContractView
+
+
 class ShiftView(BaseModel):
     model_config = _FROZEN
 
@@ -55,7 +73,8 @@ class ArtifactVersionView(BaseModel):
     shift_id: str
     parent_id: str | None = None
     content_hash: str
-    contract: dict[str, Any]
+    contract: ContractView
+    contract_catalog_hash: str
     created_by: Literal["template", "learner"]
     created_at: datetime
 
@@ -158,7 +177,7 @@ class IncidentView(BaseModel):
 class LedgerView(BaseModel):
     model_config = _FROZEN
 
-    chain_status: Literal["VALID"]
+    chain_status: Literal["VALID", "BROKEN"]
     events: tuple[LedgerEvent, ...]
 
 
@@ -178,7 +197,7 @@ class BoardView(BaseModel):
     total_incidents: int
     ledger_event_count: int
     ledger_totals: dict[str, int]
-    chain_status: Literal["VALID"]
+    chain_status: Literal["VALID", "BROKEN"]
 
     @classmethod
     def of(cls, snapshot: dict[str, Any]) -> "BoardView":

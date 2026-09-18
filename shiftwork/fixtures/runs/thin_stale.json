@@ -1,0 +1,14 @@
+{
+  "description": "Thin-path transcript: ONE fixed customer request replayed by the recorded adapter into ONE real capture. The service hard-asserts in_stock from a shelf record 90 minutes old (5400000 ms), which the sealed stale_information case scores as STALE_BEYOND_RULE.",
+  "adapter": "recorded",
+  "captures": [
+    {
+      "request_ordinal": 1,
+      "request_text": "Do you still have the hardback of Dune on the shelf?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoiaW5fc3RvY2sifV0sImV2aWRlbmNlX3JlZnMiOlsiY2F0YWxvZzo5NzgwNDQxMDEzNTkzIl0sInJlY29yZF9hZ2VfbXMiOjU0MDAwMDB9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    }
+  ]
+}
