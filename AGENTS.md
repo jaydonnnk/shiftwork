@@ -42,14 +42,20 @@ summaries when a time-sensitive external claim is being made.
 
 ## 3. Current direction and authorization
 
-- Current gate state: Gate 1 — Product APPROVED 2026-09-15; Gate 2 — Architecture
-  APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17 (re-approved a
-  second time after the S2 packaging backtrack — `pyproject.toml`, `requirements.lock`,
-  `demos/`, test 51; history: first backtrack re-approved 2026-09-17, originally
-  approved 2026-09-16); Gate 4 — Slice Plan APPROVED 2026-09-17 (after three review
-  rounds the same day; slice work proceeds one slice at a time under `04-slices.md`
-  S10; installs, credentials, external services, spike runs, deployment, outreach
-  and ADR #4 remain separately authorized). Slices 1 (tracer bullet, 2026-09-17),
+- Current gate state: Gate 1 — Product RE-APPROVED 2026-09-18 (first approved
+  2026-09-15; backtracked and revised the same day for the explicit junior applied
+  AI engineer role framing and the selected isometric operational-room visual
+  direction); Gate 2 — Architecture APPROVED 2026-09-15; Gate 3 — Program Design
+  APPROVED 2026-09-17 (re-approved a second time after the S2 packaging backtrack —
+  `pyproject.toml`, `requirements.lock`, `demos/`, test 51; history: first backtrack
+  re-approved 2026-09-17, originally approved 2026-09-16; the plain
+  HTML/CSS/vanilla-JS client baseline is unchanged, so a framework or rendering
+  engine for the isometric room would reopen Gate 3); Gate 4 — Slice Plan
+  RE-APPROVED 2026-09-18 (first approved 2026-09-17 after three review rounds; the
+  reopen was scoped to the rewritten Slice 9 to 11 requirements.
+  Slice work proceeds one slice at a time under `04-slices.md` S10; installs,
+  credentials, external services, spike runs, deployment, outreach and ADR #4 remain
+  separately authorized). Slices 1 (tracer bullet, 2026-09-17),
   2 (thin real vertical path, 2026-09-18) and 3 (recorded/local_process executor
   conformance, 2026-09-18) are implemented, reviewed and merged to main; verbatim
   Slice 3 evidence is recorded in `docs/plans/shiftwork/00-status.md`. Slice 4
@@ -84,14 +90,21 @@ summaries when a time-sensitive external claim is being made.
 ## 4. Product definition and scope filters
 
 - Shiftwork is a persistent applied-AI-engineering learning environment. A learner
-  keeps one real system working for a fictional business across successive shifts;
-  later shifts inherit the learner's artifact, decisions, incidents and business state.
+  is cast explicitly as a junior applied AI engineer on shift and keeps one real
+  system working for a fictional client across successive shifts; later shifts
+  inherit the learner's artifact, decisions, incidents and business state.
 - Primary job: applied-AI-engineering education for people with basic coding
-  knowledge. Career exploration is context. Employer proof is not a current claim.
-- Initial scope: one role and one bookshop engagement. The learner defines the
+  knowledge. The engineer role is fiction that makes the work legible, not a
+  credential. Employer proof is not a current claim and the simulated title is never
+  presented as job-readiness.
+- Initial scope: one applied-AI-engineer role and two client engagements (Bellwether
+  Books, then the Northline Bike Cooperative away shift). The learner defines the
   correctness contract, makes architecture and repair decisions, and owns visible
-  tests. Do not expand to multiple careers, a large town or an employer marketplace
-  before the central mechanism survives its tests.
+  tests. The role framing is the intended scalability seam: further engagement packs
+  for emerging roles people rarely see simulated (for example forward deployed
+  engineer, GTM engineer) are recorded as future scope only. Do not expand to
+  multiple careers, a large town or an employer marketplace before the central
+  mechanism survives its tests.
 - Central mechanic: a learner's versioned service receives fixed customer requests;
   independently authored checks reduce its real outputs into an append-only,
   transparent business ledger that the next shift must inherit.

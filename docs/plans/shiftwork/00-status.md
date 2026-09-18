@@ -1,33 +1,47 @@
 # Status: Shiftwork
 
-- Gate 1 — Product: APPROVED 2026-09-15
+- Gate 1 — Product: RE-APPROVED 2026-09-18 (first approved 2026-09-15; backtracked
+  and revised the same day for two user-directed changes: the learner is explicitly
+  cast as a junior applied AI engineer on shift with fictional clients, Bellwether
+  Books first and Northline Bike Cooperative away, and the user selected the fixed
+  isometric operational-room composition in `client-visual-direction.md`). Approval
+  covers the revised `01-product.md` and the six mockups. The role is fiction, not a
+  credential: employer proof stays excluded and nothing may claim job-readiness.
+  Multi-role engagement packs remain future scope only. Approval does not authorize
+  client implementation, installs, credentials, commits, deployment or outreach.
 - Gate 2 — Architecture: APPROVED 2026-09-15
 - Gate 3 — Program Design: APPROVED 2026-09-17 (re-approved a second time after the
   S2 packaging backtrack was revised with `pyproject.toml`, `requirements.lock`, the
   `demos/` tree, `tests/packaging/` and test 51; the earlier approvals and both
-  backtracks remain the historical record — see Approval history).
-- Gate 4 — Slice plan: APPROVED 2026-09-17 (after three 2026-09-17 review rounds —
-  BLOCK, then REVISE — every accepted fix and all three consistency corrections are
-  applied to `04-slices.md`; the reviewer reported no remaining blocking defect in
-  the 17-slice sequence)
+  backtracks remain the historical record — see Approval history). The plain
+  HTML/CSS/vanilla-JS client baseline is unchanged; adding a framework, rendering
+  engine or package for the isometric room would require reopening Gate 3.
+- Gate 4 — Slice plan: RE-APPROVED 2026-09-18 (first approved 2026-09-17 after three
+  review rounds that day; backtracked and revised the same day, scoped to the
+  rewritten Slice 9 to 11 requirements, which now carry the station-based
+  operational-room acceptance criteria and the engineer role copy rule; slices 1 to
+  8 and 12 to 17 are unchanged). Slice work proceeds one slice at a time under
+  `04-slices.md` S10; installs, credentials, external services, spike runs,
+  deployment, outreach and ADR #4 remain separately authorized.
 
 ## Slices
 
-Gate 4 APPROVED 2026-09-17. Build order (one slice at a time; after each slice:
-demo evidence run and shown, slice checked off here, then "Continue to slice N+1,
-or re-steer?"):
+Gate 4 APPROVED 2026-09-17 and RE-APPROVED 2026-09-18 (reopen scoped to the Slice 9
+to 11 requirements). Build order (one slice at a time; after each slice: demo
+evidence run and shown, slice checked off here, then "Continue to slice N+1, or
+re-steer?"):
 
 - [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
 - [x] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event; implemented and demonstrated 2026-09-18 (`python -m demos.thin_path`; evidence in Notes)
 - [x] Slice 3: Executor conformance (recorded + local_process); implemented, demonstrated, reviewed (PASS) and merged to main 2026-09-18 (verbatim evidence below; test 50 partial, test 29 skipped)
 - [x] Slice 4: Contract-parameterized evaluator + first sealed family; implemented and demonstrated 2026-09-18 (evidence below; the new sealed cases await the user's review)
-- [ ] Slice 5 — Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger
+- [x] Slice 5: Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger; implemented and demonstrated 2026-09-18 (`python -m demos.finalize_run` + `pytest tests/ledger -q`; evidence below)
 - [ ] Slice 6 — Isolation and leakage hardening
 - [ ] Slice 7 — Budget + rotation + incidents + repair
 - [ ] Slice 8 — Close → inheritance + Test 1 offline pre-proof
-- [ ] Slice 9 — Client: board + customer-shift screens (01, 03)
-- [ ] Slice 10 — Client: contract + repair screens (02, 04)
-- [ ] Slice 11 — Client: inherited + away screens (05, 06) + away config
+- [ ] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03)
+- [ ] Slice 10: Client contract/repair stations (02, 04)
+- [ ] Slice 11: Client inherited room + distinct away-shift workshop (05, 06) + away config
 - [ ] Slice 12 — Nemotron assist gateway (+ model-feedback evidence pack)
 - [ ] Slice 13 — Token Factory capability spike (credential-gated)
 - [ ] Slice 14 — Real tokenfactory adapter + full Test 1 verdict (depends on Slice 13)
@@ -45,6 +59,31 @@ distinguishable from the reviewed Slice 3 baseline at commit `1e4e6c1` by
 deployment, outreach and ADR #4 each remain separately authorized.
 
 ## Notes for a fresh session
+
+- 2026-09-18 role framing (user-directed): the learner is explicitly cast as a
+  **junior applied AI engineer on shift**, and each engagement is a fictional client
+  (Bellwether Books first, Northline Bike Cooperative as the away client). The role
+  is framing, not a credential: employer proof stays excluded and nothing may claim
+  job-readiness. The user also named the scalability intent: later engagement packs
+  for emerging roles people rarely see simulated (for example forward deployed
+  engineer, GTM engineer). That expansion is recorded as future scope only; shipped
+  scope remains one role and two clients until the central mechanism survives its
+  tests. `01-product.md` and the six mockup header/kicker lines are revised
+  accordingly. Because this edits approved gate documents, Gate 1 and the Slice 9 to
+  11 requirements of Gate 4 were backtracked and then RE-APPROVED by the user on
+  2026-09-18; see Approval history.
+
+- 2026-09-18 Phase B visual steering: the user supplied and selected the isometric
+  Bellwether operational-room reference now stored at
+  `references/shiftwork-operational-diorama.jpg`. The durable acceptance brief is
+  `client-visual-direction.md`; Slices 9 through 11 now require the station-based room,
+  evidence panel, causal evidence path, persistent return state and distinct Northline
+  workshop. The generated image is composition reference only; its embedded text is not
+  approved copy or evidence. The approved product journey, authority boundaries,
+  plain HTML/CSS/vanilla-JavaScript baseline and slice order are unchanged; the
+  rewritten Slice 9 to 11 requirements reopened Gate 4 and the accompanying product
+  edits reopened Gate 1, and both were re-approved by the user on 2026-09-18. No
+  client implementation occurred.
 
 - 2026-09-15: user explicitly scrapped Hatchery as active scope and selected
   Shiftwork for software-factory planning. Hatchery remains historical evidence
@@ -1235,6 +1274,126 @@ co-author trailers. Post-merge sanity on main: `pytest tests/evaluator -q` 12
 passed, `python -m demos.thin_path` exit 0 with the unchanged artifact
 content_hash and chain VALID.
 
+## Slice 5 evidence: 2026-09-18
+
+Slice 5 is IMPLEMENTED and demonstrated. It proceeded under the user's explicit
+"start with slice 5" go-ahead; per the 2026-09-18 Gate 4 backtrack note, slices
+1-8 are unaffected by the rewritten Slice 9-11 requirements, and nothing here
+touches the client, the isometric direction or any gate decision. Scope: the
+Slice 2 single ledger event hardened into the full ledger layer per Gate 3
+S3.4/S3.5/S5.5/S5.6.
+
+New files: `demos/finalize_run.py`; `tests/ledger/test_ledger.py`;
+`shiftwork/fixtures/mission/bookshop_mission_v2.json` (inspectable `weights` +
+symbolic `transitions` of the form `<REASON_CODE> -> <EVENT_TYPE>
+<consequence_key>`, resolved by the pure reducer; STALE_BEYOND_RULE and
+MALFORMED_RESPONSE record backlog, INVENTED_FACT and MISSING_EVIDENCE open
+incidents, so the thin path still opens none). Deleted
+`shiftwork/fixtures/mission/bookshop_mission_v1.json` (superseded consequences
+shape; only `config.BOOKSHOP_MISSION` referenced it).
+
+Changed: `shiftwork/ledger/reducer.py` (Gate 3 S3.4 shape: `MissionFixtures`
+weights + transitions, `resolve_transitions`, `transition_for`, pure
+`reduce(fixtures, raw_outputs, check_results, committed_contract)` and
+`reduce_close(fixtures, facts)` emitting LIMIT_DECLARED drafts from
+`declared_limits` only); `shiftwork/domain/models.py` (adds `CloseShiftFacts`);
+`shiftwork/ledger/chain.py` (adds S3.5 `append(drafts, prev_hash=, start_seq=)`;
+`verify_chain` unchanged); `shiftwork/orchestrator.py` (`finalize_run` is now one
+idempotent transaction: evaluate -> insert checks -> reduce -> `chain.append` ->
+insert events -> open incidents on INCIDENT_OPENED transitions -> FINALIZED; a
+fault anywhere rolls back to zero checks/events/incidents and marks FAILED;
+re-finalize is a no-op; `execute_run` commits captures then delegates;
+`customer_text_for` derives the customer sentence or None; `ledger` enriches each
+event with resolved derivation links and the raw catalog record its
+`catalog_version` references; BROKEN now aborts both `ledger` and
+`board_snapshot` with a hard error, so no unverified events or counters are
+served); `shiftwork/api/schemas.py` (`RunOutputView.customer_text`; new
+`LedgerEventDerivation`/`LedgerEventCatalog`/`LedgerEventView`; `LedgerView` and
+`BoardView.chain_status` narrowed to VALID because BROKEN aborts the read);
+`shiftwork/api/routes.py` (outputs view carries the derived customer text);
+`shiftwork/config.py` (mission pointer to v2); `demos/lifecycle.py` (one stale
+wording: incidents open only when a failing check maps to INCIDENT_OPENED).
+
+### Clause-level coverage and limits
+
+- Tests 4, 5, 6, 7 FULL: identical drafts in-process twice and in a subprocess;
+  reducer import closure free of socket/urllib/requests/httpx/subprocess and
+  reduce runs with sockets disabled and writes refused; every tamper (payload,
+  hash, prev_hash, seq, reorder) is BROKEN while a valid prefix stays VALID;
+  corrections append referencing events and the original stored rows are
+  byte-identical with no `update_ledger_event`/`delete_ledger_event` existing.
+- Test 8 FULL: finalize twice nets zero new events, checks and incidents (the
+  single captured answer opens one INVENTED_FACT incident).
+- Test 9 PARTIAL: a fault injected at each of the check-insert, event-insert and
+  incident-insert boundaries leaves zero checks, zero events, zero incidents, no
+  missing hash parent (the recovered chain starts at genesis) and the run FAILED;
+  a committed FINALIZED run keeps its events and state across a reopened
+  connection. NOT claimed: the reservation-retention clause (Slice 7) and the
+  restart-marks-FAILED / capture-retention clauses (Slice 8,
+  `reconcile_interrupted`).
+- Test 10 PARTIAL: board totals, event count, incident count and chain status
+  equal a replay of the stored events. NOT claimed: the inheritance-seeds-match
+  clause (Slice 8).
+- Test 23 ledger-reconstruction clause COMPLETE: a fresh connection reconstructs
+  the events and verifies VALID from tables alone.
+- Test 43 ledger-resolution-after-re-version clause COMPLETE: with a v3 catalog
+  present whose STANCE label was rewritten, an event pinned to catalog_version 2
+  still resolves to the untouched v2 raw record.
+- Fixture-pairing correction: `finalize_run` evaluates against the snapshot the
+  run consumed (the thin-path bookshop snapshot). The `failing_stale` transcript
+  cites the stale-family snapshot and is scored only by
+  `demos.evaluate_transcript`; feeding it to finalize produced MALFORMED
+  mismatch artifacts, so the tests and demo use one snapshot-consistent captured
+  answer (a stock claim contradicted by the cited record) that scores
+  INVENTED_FACT and opens an incident.
+- S5.6 tension, NOT silently resolved: Gate 3 S5.6 says the checks view carries
+  "never `expected_ref`", but test 13 (FULL at Slice 4, not in Slice 5's landed
+  list) asserts the API checks payload carries an opaque `sealed:`-prefixed
+  expected_ref. The shipped opaque behavior is kept; dropping the field would
+  edit a landed FULL test. Flagged for a user decision at review.
+
+### Verification (verbatim)
+
+```text
+.venv/Scripts/python.exe -m pytest tests/ledger -q
+11 passed, 2 warnings in 3.55s
+
+.venv/Scripts/python.exe -m pytest tests/domain tests/store tests/api tests/executor tests/evaluator tests/ledger -q
+102 passed, 1 skipped, 2 warnings in 29.32s
+
+.venv/Scripts/python.exe -m demos.finalize_run
+run run-0001 state=FINALIZED
+  seq 1 INCIDENT_OPENED reason=INVENTED_FACT ordinal=1 catalog_v2
+  incident BWB-01 INVENTED_FACT state=OPEN
+  rendered customer texts: 1 of 1
+  board open_incidents=1 chain=VALID
+finalize-run evidence complete: run run-0001 FINALIZED, 1 hash-chained events chain VALID, 1 incidents opened, finalize twice nets zero new events, ledger derivation and catalog-version links resolved
+```
+
+Mutation probes (each verified landed before trusting its result, then restored):
+removing the finalize idempotency guard made
+`test_finalization_idempotent` fail (`1 failed`); removing the finalize rollback
+made `test_interrupted_finalization_writes_no_events` fail (`1 failed`). After
+restoration the ledger suite printed `11 passed`.
+
+Regression demos unchanged: `demos.thin_path` exit 0 with content_hash
+`44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158`, one
+fail/STALE_BEYOND_RULE, one BACKLOG_RECORDED seq 1, chain VALID;
+`demos.lifecycle` exit 0 chain VALID with 1 events and 0 open incidents;
+`demos.evaluate_transcript` 6 pass / 0 fail and 0 pass / 6 fail on the passing
+and failing stale fixtures with sockets blocked during scoring.
+
+Limits: offline runtime evidence only; not human, learning, security-isolation
+or prize evidence. No UI change and no browser evidence. Rotation, budget,
+incident resolution/repair and inheritance remain absent (Slices 7/8); the six
+screens remain the stub page (and are being redesigned under the backtracked
+Gate 1). `tests/packaging` (test 51) was NOT run (clean-env install is outside
+this slice's authorization). No install, dependency change, credential use,
+external service, branch, commit, tag or push occurred. The pre-existing
+uncommitted Gate 1/Gate 4 redesign edits (mockups, `01-product.md`,
+`04-slices.md`, `client-visual-direction.md`, `references/`, `MISTAKES.md`,
+`SHIFTWORK_PLAN.md`) were left untouched and unstaged.
+
 ## Approval history
 
 - Gate 1 — Product: approved by the user on 2026-09-15 after the service-workbench
@@ -1289,3 +1448,30 @@ content_hash and chain VALID.
   17-slice build order in `04-slices.md` and authorizes slice work one at a time
   under its S10; it does not authorize installs, dependencies, credentials,
   external services, spike runs, deployment, outreach or ADR #4.
+- Gate 1 — Product: BACKTRACKED to in progress on 2026-09-18 after two user-directed
+  changes: (a) the learner is now explicitly cast as a junior applied AI engineer on
+  shift serving fictional clients, with multi-role engagement packs (for example
+  forward deployed engineer, GTM engineer) recorded as future scope only, and (b) the
+  user selected the fixed isometric operational-room composition now specified in
+  `client-visual-direction.md`. Revisions applied to `01-product.md` and the six
+  mockups the same day. The 2026-09-15 approval and final review remain the
+  historical record; explicit re-approval is pending and does not authorize client
+  implementation, installs, credentials, commits, deployment or outreach.
+- Gate 4 — Vertical Slices: BACKTRACKED to in progress on 2026-09-18 because the
+  selected visual direction rewrote the Slice 9 to 11 acceptance requirements in
+  `04-slices.md` S5 (station-based operational room, evidence panel, causal evidence
+  path, persistent return state, distinct Northline workshop). Slices 1 to 8 and 12
+  to 17 are unchanged. The 2026-09-17 approval remains the historical record;
+  explicit re-approval is pending.
+- Gate 1 — Product: RE-APPROVED by the user on 2026-09-18 after reviewing the revised
+  `01-product.md` and the six mockups (explicit junior applied AI engineer role
+  framing, fictional clients, fiction-not-credential boundary, multi-role expansion
+  as future scope only, and the selected isometric operational-room composition).
+  Approval covers the product definition and the six mockups; it does not authorize
+  client implementation before Slice 9, installs, credentials, commits, deployment
+  or outreach.
+- Gate 4 — Vertical Slices: RE-APPROVED by the user on 2026-09-18, scoped to the
+  rewritten Slice 9 to 11 client requirements in `04-slices.md` S5. Slices 1 to 8 and
+  12 to 17 remain under the 2026-09-17 approval. Slice work continues one slice at a
+  time under S10; installs, credentials, external services, spike runs, deployment,
+  outreach and ADR #4 remain separately authorized.
