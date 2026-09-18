@@ -19,7 +19,7 @@ or re-steer?"):
 
 - [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
 - [x] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event; implemented and demonstrated 2026-09-18 (`python -m demos.thin_path`; evidence in Notes)
-- [x] Slice 3: Executor conformance (recorded + local_process); implemented and demonstrated 2026-09-18 (verbatim evidence below; test 50 partial, test 29 skipped)
+- [x] Slice 3: Executor conformance (recorded + local_process); implemented, demonstrated, reviewed (PASS) and merged to main 2026-09-18 (verbatim evidence below; test 50 partial, test 29 skipped)
 - [ ] Slice 4 — Contract-parameterized evaluator + first sealed family, deepening Slice 2 evaluation
 - [ ] Slice 5 — Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger
 - [ ] Slice 6 — Isolation and leakage hardening
@@ -35,11 +35,12 @@ or re-steer?"):
 - [ ] Slice 16 — Submission packaging: test build + demo video
 - [ ] Slice 17 — Hosted deployment (conditional: only if Option B selected at the Slice 13 exit)
 
-Slices 1, 2 and 3 are implemented and their evidence recorded (2026-09-17 and
-2026-09-18); slices 4-17 are not implemented. Slice 3 remains uncommitted for the
-user's hostile review and publish flow. Slice work proceeds only under
-`04-slices.md` S10; credentials, installs, spike runs, external services,
-deployment, outreach and ADR #4 each remain separately authorized.
+Slices 1, 2 and 3 are implemented, reviewed and merged to main (2026-09-17 and
+2026-09-18; Slice 3 published as commit `8df3d6b`, `--no-ff` merge `1f38220`);
+slices 4-17 are not implemented. `shiftwork/slice-4` was created from the merge
+and Slice 4 has not started. Slice work proceeds only under `04-slices.md` S10;
+credentials, installs, spike runs, external services, deployment, outreach and
+ADR #4 each remain separately authorized.
 
 ## Notes for a fresh session
 
@@ -606,7 +607,8 @@ deployment, outreach and ADR #4 each remain separately authorized.
 
 ## Slice 3 evidence: 2026-09-18
 
-Slice 3 is IMPLEMENTED and demonstrated, not published. Scope: executor protocol
+Slice 3 is IMPLEMENTED, demonstrated, independently reviewed (PASS, 2026-09-18)
+and published; the review and publication entry is below. Scope: executor protocol
 and frozen request/result models; shared raw-capture normalization; generalized
 recorded replay; local subprocess execution of pinned trusted fixtures only;
 stdlib learner HTTP template, literal JSONL requests, frozen snapshot and authored
@@ -843,7 +845,61 @@ ledger, gate decisions or later-slice scope changed. The two error causes and
 prevention rules are recorded in `MISTAKES.md`. Test 50 remains partial and test 29
 remains deferred. Packaging was not run; no install, credential use, external
 service, branch, commit, tag or push occurred. User fixture review and publication
-remain separate from this correction evidence.
+are recorded separately in the next entry.
+
+### Independent execution review and publication: 2026-09-18
+
+An independent, execution-based review of the complete uncommitted Slice 3
+implementation returned **PASS** with no acceptance-blocking defect. It covered
+every tracked modification and untracked source, including the trusted fixtures
+that the pre-existing `artifacts/` ignore rule had hidden, and traced frozen
+artifact to adapter to raw captures to normalization to controller-owned
+identities to persistence/API to finalization or typed failure. No project file
+was edited during the review; the committed bytes are the reviewed bytes.
+
+Re-run under `.venv`: `pytest tests/executor -q` printed `45 passed, 1 skipped,
+2 warnings in 25.34s`; `pytest tests/domain tests/store tests/api tests/executor
+-q` printed `76 passed, 1 skipped, 2 warnings in 26.40s`; the tokenfactory node
+printed `1 skipped in 0.39s` with the explicit Slice 14 reason;
+`python -m demos.thin_path` exited 0 with the run FINALIZED, content_hash
+`44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158` and
+chain_status VALID; `git diff --check` passed. Both known warnings remain
+(Starlette/httpx TestClient; anyio BlockingPortal alias); nothing was installed
+to suppress them. The earlier combined-run timing anomaly (215.67s) was not
+reproduced and remains unexplained.
+
+Independent probes beyond the suite: 8/8 malformed replay transcripts (invalid
+JSON, wrong root type, null or wrongly shaped captures, invalid body base64,
+negative timing, missing status, invalid log base64) returned INTERNAL with zero
+accepted captures; changed snapshot, different valid batch and a path escape all
+returned PROVISION_FAILED; a failed replay retained raw bytes, logs and
+controller-owned identities after reopening the database with checks=0 and
+events=0; an injected interruption of the actual schema-2 upgrade left version 2
+without the column and every pre-existing row byte-identical, and the retry plus
+repetition reached version 3; a real 1-second deadline returned at 1.031s;
+cancellation during a real socket read propagated and cleaned up child and
+workspace; live termination after a partial response produced SANDBOX_TERMINATED
+with the truncated prefix, status and logs retained; four targeted in-memory
+mutations of the two fixes were each detected by the existing regressions; a
+source-only copy of the Git-visible files passed fixture pins, a live run and the
+thin demo with no installation.
+
+User fixture acceptance: after being asked to review it, the user accepted the
+Slice 3 fixture and template set as a starting set. That acceptance is not
+independent execution evidence, a learning result, or authority to seal Slice 4
+cases; new sealed cases still require the user's review before sealing
+(`04-slices.md` S11 decision 4).
+
+Publication (user-authorized 2026-09-18): commit `8df3d6b` "Implement Slice 3
+recorded/local_process executor conformance" (42 files) on `shiftwork/slice-3`,
+pushed as `origin/shiftwork/slice-3`; `--no-ff` merge `1f38220` into main,
+pushed; `shiftwork/slice-4` branch created from the merge. No co-author trailers.
+
+Limits: this review is agent execution work, not human, learning, security or
+hostile-code-isolation evidence, and no LLM is an independent oracle. Test 50
+remains partial (offline clauses only); test 29 remains deferred;
+`tests/packaging` was deliberately not run; no install, credential use, external
+service, deployment or outreach occurred.
 
 ## Approval history
 

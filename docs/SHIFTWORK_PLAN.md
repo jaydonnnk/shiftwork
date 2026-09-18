@@ -13,8 +13,8 @@ work proceeds one slice at a time under `04-slices.md` S10; credentials, install
 spike runs, external services, deployment, outreach and ADR #4 each remain
 separately authorized. Backtrack an earlier gate only for a concrete blocker.
 Slices 1 (tracer bullet, 2026-09-17), 2 (thin real vertical path, 2026-09-18) and
-3 (recorded/local_process executor conformance, 2026-09-18) are implemented and
-demonstrated; verbatim Slice 3 evidence is recorded in
+3 (recorded/local_process executor conformance, 2026-09-18) are implemented,
+reviewed and merged to main; verbatim Slice 3 evidence is recorded in
 `docs/plans/shiftwork/00-status.md`. Slice 4 has not started.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** the Slice 2 thin real path remains (canonical hashing, one
