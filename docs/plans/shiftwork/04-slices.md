@@ -1,6 +1,11 @@
 # Vertical Slice Plan: Shiftwork
 
-Gate: 4 — Vertical Slices (APPROVED 2026-09-17). Written 2026-09-16; revised
+Gate: 4 — Vertical Slices (RE-APPROVED 2026-09-18, scoped to the rewritten Slice 9
+to 11 client requirements; first APPROVED 2026-09-17). The reopen covered S5's
+rewritten client requirements, which now carry the user-selected isometric
+operational-room acceptance criteria and the explicit junior applied AI engineer
+role framing; Slices 1 to 8 and 12 to 17 remain under the 2026-09-17 approval, which
+stays the historical record. Written 2026-09-16; revised
 2026-09-17 (three rounds). Round 1 applied the edits queued behind the Gate 3 re-approval:
 Slice 2 is restructured into a thin real vertical path (user decision A), Slices 3–5
 are re-scoped to conformance / variants / hardening that deepen it, every test landing
@@ -78,9 +83,9 @@ testable state.
 | 6 | Isolation and leakage hardening | A | none |
 | 7 | Budget + rotation + incidents + repair | A | none |
 | 8 | Close → inheritance + **Test 1 offline pre-proof** | A | none |
-| 9 | Client: board + customer-shift screens (01, 03) | B. Client | none |
-| 10 | Client: contract + repair screens (02, 04) | B | none |
-| 11 | Client: inherited + away screens (05, 06) + away config | B | none |
+| 9 | Client: isometric room shell + board/customer-shift stations (01, 03) | B. Client | none |
+| 10 | Client: contract/repair stations (02, 04) | B | none |
+| 11 | Client: inherited room + distinct away-shift workshop (05, 06) + away config | B | none |
 | 12 | Nemotron assist gateway | C. External-gated | `NEBIUS_API_KEY` (live calls) |
 | 13 | Token Factory capability spike | C | `NEBIUS_API_KEY` / `CONTREE_SESSION` |
 | 14 | Real tokenfactory adapter + full Test 1 verdict | C | depends on Slice 13 |
@@ -461,42 +466,67 @@ not the final word on isolation.
 
 ## 5. Phase B — client (offline, no credentials)
 
-The six approved mockups (`mockups/`) are the UI source of truth. The client is plain
-HTML/CSS/vanilla JS, no framework, no build step, served by the same process. Each
-client slice replaces part of the stub page and is browser-checked at desktop and narrow
-widths, reporting the actual URL/port.
+The six approved mockups (`mockups/`) remain the workflow, copy and authority source
+of truth. Client copy casts the learner explicitly as the junior applied AI engineer
+on shift and each business as a fictional client, per the revised Gate 1 framing; the
+role is fiction, never a credential or job-readiness claim.
+[`client-visual-direction.md`](client-visual-direction.md) and its supplied
+reference image define the selected composition: one persistent isometric operational
+room with functional stations and an authoritative evidence panel. Text inside the
+generated reference is illustrative, not product copy. The client remains plain
+HTML/CSS/vanilla JS, no framework and no build step, served by the same process. A new
+framework, rendering engine or package requires a Gate 3 backtrack before Slice 9.
+Each client slice replaces part of the stub page and is browser-checked at desktop and
+narrow widths, reporting the actual URL/port.
 
 ### Slice 9 — Client: board + customer-shift screens (01, 03)
 
-- **Delivers:** `01-shift-board` and `03-customer-shift` against the real API: the
-  learner-owned artifact, contract, visible checks, change log, open incidents,
-  unresolved limits, ledger totals and attempts remaining; the customer queue, the exact
-  sample output, its supporting public record and the output→comparison→synthetic-event
-  evidence chain. Every business-state component visibly renders "Synthetic scenario".
+- **Delivers:** the shared Bellwether isometric room shell plus `01-shift-board` and
+  `03-customer-shift` against the real API. The room includes the owner desk, central
+  service workbench, customer queue, evidence pipeline, visually locked independent
+  evaluator booth, incident and ledger wall, and repair bench. Station controls and the
+  top journey navigation select real views; this is not a walkable game. The board shows
+  the learner-owned artifact, contract, visible checks, change log, open incidents,
+  unresolved limits, ledger totals and attempts remaining. The customer shift binds the
+  selected customer, exact output, supporting public record, independent result and
+  synthetic event to the same run and request ordinal. Every business-state component
+  visibly renders "Synthetic scenario".
 - **Demo evidence:** browser at the reported `localhost` port, desktop (1280) and narrow
-  (640, 390): board reflects a real run from Slice 8; screen 03 shows the exact output
-  body (base64 round-trips to the original bytes), the public record comparison with
-  provenance, and the linked synthetic ledger event; console clean; no horizontal
-  overflow; keyboard traversal reaches every control with a visible focus outline (this
-  browser matrix — widths, console, overflow, keyboard — applies to all client slices).
-  Removing a synthetic label fails the rendered check.
+  (640, 390): at 1280 px the full room and persistent evidence panel match the reference
+  composition; at narrow widths the readable room overview, selected station and evidence
+  panel stack without horizontal page scrolling. Board state reflects a real run from
+  Slice 8. Selecting a customer highlights the service workbench and evidence path, and
+  the panel shows the exact output body (base64 round-trips to the original bytes), public
+  record comparison with provenance, independent result and linked synthetic ledger
+  event. All stations have focusable controls, visible focus, text status labels and
+  equivalent keyboard operation. Console clean. Reduced-motion mode shows the final
+  evidence state without path animation. This browser matrix applies to all client
+  slices. Removing a synthetic label fails the rendered check.
 - **Still mocked / missing:** contract-authoring and repair screens (Slice 10), inherited
   and away screens (Slice 11); assist UI absent (Slice 12).
 - **Tests landed:** 41 (partial: synthetic labels render; public-evidence projections keep
   provenance; base64-decoded bodies equal originals; displayed customer text matches the
   executed batch ordinal; sealed-only failures show reason codes without an expected value).
-- **Authoring / config:** none new.
+- **Authoring / config:** production room artwork and station geometry are authored from
+  the reference. Essential labels and values remain HTML overlays, never baked into the
+  art. Empty, loading, error and no-incident scene states are required so sample values
+  cannot appear while real data is unavailable.
 - **Authorization:** none.
 
 ### Slice 10 — Client: contract + repair screens (02, 04)
 
-- **Delivers:** `02-owner-brief` (competing correctness stances, editable boundaries,
-  structured visible-check builder, the fixed "May: Recommend with a clear label" copy
-  displayed not editable) and `04-incident-review` (linked evidence, competing repair
-  directions, the repair workspace, visible checks living in the artifact's check file).
+- **Delivers:** `02-owner-brief` through the active owner desk and `04-incident-review`
+  through the active incident wall and repair bench. The contract view keeps competing
+  correctness stances, editable boundaries, structured visible-check builder and the
+  fixed "May: Recommend with a clear label" copy displayed not editable. The repair view
+  keeps linked evidence, competing repair directions, the repair workspace and visible
+  checks living in the artifact's check file. The independent evaluator booth remains
+  visually locked and cannot be selected as an editing surface.
 - **Demo evidence:** browser at desktop and narrow widths: author a contract and one
-  visible check on screen 02, freeze, run; trace an incident on screen 04 back to the
-  customer request, choose a repair direction, edit the artifact, freeze, re-run; visible
+  visible check through the owner desk, freeze, run; the customer request activates the
+  same room's evidence path; trace an incident from the ledger wall to the request and
+  output, then use the repair bench to choose a direction, edit the artifact, freeze and
+  re-run. The scene cannot show a repaired or resolved state before the API does. Visible
   verdicts link to the learner's check id and every sealed result has a null
   `public_check_id`.
 - **Still mocked / missing:** inherited and away screens (Slice 11); assist UI absent.
@@ -511,15 +541,21 @@ widths, reporting the actual URL/port.
 
 ### Slice 11 — Client: inherited + away screens (05, 06) + away config
 
-- **Delivers:** `05-inherited-shift` (restored artifact + history, the later case still
-  sealed until execution) and `06-away-shift` (blank bike-cooperative artifact, reduced
-  assistance, new families: future commitments, safety escalation, retried state-changing
-  booking; learning value labelled unmeasured). Adds the **bike-cooperative
-  `engagement_config`** and its away-shift assist/check-family configuration.
+- **Delivers:** `05-inherited-shift` in the same Bellwether room, with the restored
+  artifact version, history, incident state and unresolved limits visibly retained while
+  the later case remains sealed until execution. `06-away-shift` preserves the spatial
+  grammar but becomes a genuinely different Northline Bike Cooperative workshop with a
+  blank artifact and reduced assistance, not a renamed bookshop scene. Its stations cover
+  future commitments, safety escalation and retried state-changing booking; learning
+  value remains labelled unmeasured. Adds the **bike-cooperative `engagement_config`**
+  and its away-shift assist/check-family configuration.
 - **Demo evidence:** browser: screen 05 restores the same learner-owned artifact and
-  history with the next case hidden until the run; screen 06 starts the bike co-op from
-  the template with its own families and reduced assist config; the away shift has no
-  inherited artifact.
+  history in the same room with the next case visibly sealed until the run. The room
+  reflects the new version and incident state from API data, not decorative progression.
+  Screen 06 changes to the Northline workshop, starts from the template with its own
+  families and reduced assist config, and carries no bookshop artifact. At the end of the
+  slice, the five-second comprehension check in `client-visual-direction.md` must pass in
+  a manual inspection; this is interface comprehension, not learner or impact evidence.
 - **Still mocked / missing:** live assist (Slice 12); real sandbox (Slice 14).
 - **Tests landed:** 35 (away shift has no inherited artifact).
 - **Authoring / config:** the **bike-cooperative contract catalog** and **9 sealed cases**
