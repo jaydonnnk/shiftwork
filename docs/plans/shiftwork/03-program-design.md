@@ -7,8 +7,12 @@ omitted packaging (`pyproject.toml`, `requirements.lock`), the `demos/` entry po
 and the clean-env install check — and RE-APPROVED 2026-09-17 after S2 and test 51
 were revised; a consistency correction was applied the same day during the Gate 4
 review at the user's direction: the provisional Python bound in S2 was tightened to
-`>=3.12,<3.14` to match the approved 3.12+ stack decision). Written 2026-09-15;
-revised 2026-09-16 and 2026-09-17.
+`>=3.12,<3.14` to match the approved 3.12+ stack decision; BACKTRACKED a third time
+2026-09-18, scoped to one S5.6 sentence: the independent Slice 5 review (item K)
+found "never `expected_ref`" contradicted test 13's mandated opaque-ref assertion;
+S5.6 now permits `expected_ref` only as the opaque `sealed:` content digest, with
+no behavior change; and RE-APPROVED 2026-09-18). Written 2026-09-15;
+revised 2026-09-16, 2026-09-17 and 2026-09-18.
 Scope: the approved architecture (`02-architecture.md`) concretized to the file,
 type, call-stack, test and configuration level. **No implementation code** — types
 and signatures only. Nothing here authorizes implementation; slices start after
@@ -843,7 +847,9 @@ validate_service_response against public records → render_customer_text → Ru
 (S3.2, S3.9). Invalid fields or false `record_age_ms` produce a failed check and no
 customer answer; the exact raw body remains available as `body_base64`.
 `routes.get_run_checks → repo.get_check_results → CheckResultView` → reason codes and
-public evidence refs only, never `expected_ref` or variant ids.
+public evidence refs only; never a renderable expected value or variant ids
+(`expected_ref` is permitted only as the opaque `sealed:` content digest of the
+sealed case, per test 13; it is never the expected scalar).
 `routes.get_ledger → repo.read_events → chain.verify_chain` → `LedgerView` only on
 `VALID`; `BROKEN` returns a hard error without events or derived board counters.
 The output → public comparison → synthetic event chain follows S3.9.

@@ -13,7 +13,12 @@
 - Gate 3 — Program Design: APPROVED 2026-09-17 (re-approved a second time after the
   S2 packaging backtrack was revised with `pyproject.toml`, `requirements.lock`, the
   `demos/` tree, `tests/packaging/` and test 51; the earlier approvals and both
-  backtracks remain the historical record — see Approval history). The plain
+  backtracks remain the historical record — see Approval history). BACKTRACKED a
+  third time 2026-09-18, scoped to one S5.6 sentence: the independent Slice 5
+  review (item K) found "never `expected_ref`" contradicted test 13's mandated
+  opaque-ref assertion; S5.6 now permits `expected_ref` only as the opaque
+  `sealed:` content digest, no behavior change; RE-APPROVED a third time
+  2026-09-18). The plain
   HTML/CSS/vanilla-JS client baseline is unchanged; adding a framework, rendering
   engine or package for the isometric room would require reopening Gate 3.
 - Gate 4 — Slice plan: RE-APPROVED 2026-09-18 (first approved 2026-09-17 after three
@@ -54,7 +59,10 @@ Slices 1, 2 and 3 are implemented, reviewed and merged to main (2026-09-17 and
 Slice 4 is implemented and demonstrated on `shiftwork/slice-4` and awaits the
 user's review of the new sealed cases (evidence below; the change set is
 distinguishable from the reviewed Slice 3 baseline at commit `1e4e6c1` by
-`git diff`); slices 5-17 are not implemented. Slice work proceeds only under
+`git diff`); Slice 5 is implemented and demonstrated in the worktree (evidence
+below), and the fixes from its independent review (2 MAJOR, 2 MINOR, plus the
+Gate 3 item K escalation) landed 2026-09-18; slices 6-17 are not implemented.
+Slice work proceeds only under
 `04-slices.md` S10; credentials, installs, spike runs, external services,
 deployment, outreach and ADR #4 each remain separately authorized.
 
@@ -1319,7 +1327,9 @@ wording: incidents open only when a failing check maps to INCIDENT_OPENED).
 - Tests 4, 5, 6, 7 FULL: identical drafts in-process twice and in a subprocess;
   reducer import closure free of socket/urllib/requests/httpx/subprocess and
   reduce runs with sockets disabled and writes refused; every tamper (payload,
-  hash, prev_hash, seq, reorder) is BROKEN while a valid prefix stays VALID;
+  hash, prev_hash, seq, reorder) is BROKEN while a valid prefix stays VALID, and
+  a forged-but-self-consistent spliced event (caught only by the prev-hash
+  linkage check, mutation-probed) is BROKEN;
   corrections append referencing events and the original stored rows are
   byte-identical with no `update_ledger_event`/`delete_ledger_event` existing.
 - Test 8 FULL: finalize twice nets zero new events, checks and incidents (the
@@ -1328,7 +1338,10 @@ wording: incidents open only when a failing check maps to INCIDENT_OPENED).
   incident-insert boundaries leaves zero checks, zero events, zero incidents, no
   missing hash parent (the recovered chain starts at genesis) and the run FAILED;
   a committed FINALIZED run keeps its events and state across a reopened
-  connection. NOT claimed: the reservation-retention clause (Slice 7) and the
+  connection. Fault injection runs from the CAPTURED state only; the spec's
+  QUEUED/RUNNING fault clauses are NOT claimed and complete at Slice 8 with
+  `reconcile_interrupted` (the natural home for nonterminal-state handling).
+  Also NOT claimed: the reservation-retention clause (Slice 7) and the
   restart-marks-FAILED / capture-retention clauses (Slice 8,
   `reconcile_interrupted`).
 - Test 10 PARTIAL: board totals, event count, incident count and chain status
@@ -1339,18 +1352,29 @@ wording: incidents open only when a failing check maps to INCIDENT_OPENED).
 - Test 43 ledger-resolution-after-re-version clause COMPLETE: with a v3 catalog
   present whose STANCE label was rewritten, an event pinned to catalog_version 2
   still resolves to the untouched v2 raw record.
-- Fixture-pairing correction: `finalize_run` evaluates against the snapshot the
-  run consumed (the thin-path bookshop snapshot). The `failing_stale` transcript
-  cites the stale-family snapshot and is scored only by
-  `demos.evaluate_transcript`; feeding it to finalize produced MALFORMED
-  mismatch artifacts, so the tests and demo use one snapshot-consistent captured
-  answer (a stock claim contradicted by the cited record) that scores
-  INVENTED_FACT and opens an incident.
-- S5.6 tension, NOT silently resolved: Gate 3 S5.6 says the checks view carries
-  "never `expected_ref`", but test 13 (FULL at Slice 4, not in Slice 5's landed
-  list) asserts the API checks payload carries an opaque `sealed:`-prefixed
-  expected_ref. The shipped opaque behavior is kept; dropping the field would
-  edit a landed FULL test. Flagged for a user decision at review.
+- Fixture-pairing correction: `finalize_run` evaluates against the module-global
+  `config.BOOKSHOP_SNAPSHOT`, which is also the single snapshot path `execute_run`
+  hardcodes into `shop_snapshot_ref`; there is no per-run snapshot-pairing
+  mechanism and the `Run` model carries no snapshot field. The shipped fix was
+  making the tests and demo cite that snapshot's records: the `failing_stale`
+  transcript cites the stale-family snapshot and is scored only by
+  `demos.evaluate_transcript`, while finalize is fed one snapshot-consistent
+  captured answer (a stock claim contradicted by the cited record) that scores
+  INVENTED_FACT and opens an incident. Latent bug recorded, not fixed in Slice 5
+  (unreachable in-slice): any future run consuming `bookshop_stale_snapshot.json`
+  would be finalized against the wrong snapshot, reproducing the MALFORMED
+  mismatch artifacts; per-run snapshot pairing is deferred to the Slice 7/8
+  run-state work.
+- S5.6 tension, escalated and resolved as a Gate 3 wording correction: Gate 3
+  S5.6 said the checks view carries "never `expected_ref`", but test 13 (FULL at
+  Slice 4) asserts the API checks payload carries an opaque `sealed:`-prefixed
+  expected_ref. The independent Slice 5 review (item K) confirmed the shipped
+  behavior is the security-correct reading: `expected_ref` is `"sealed:" +
+  content_hash(case)`, a non-reversible digest that leaks no expected scalar, and
+  dropping the field would weaken a landed FULL test. On 2026-09-18 the user
+  approved the recommended fix route: keep the field, reconcile S5.6 to permit
+  `expected_ref` only as the opaque `sealed:` digest. Gate 3 backtracked for that
+  one sentence and was RE-APPROVED by the user on 2026-09-18. No behavior change.
 
 ### Verification (verbatim)
 
@@ -1393,6 +1417,50 @@ external service, branch, commit, tag or push occurred. The pre-existing
 uncommitted Gate 1/Gate 4 redesign edits (mockups, `01-product.md`,
 `04-slices.md`, `client-visual-direction.md`, `references/`, `MISTAKES.md`,
 `SHIFTWORK_PLAN.md`) were left untouched and unstaged.
+
+### Independent review fixes: 2026-09-18
+
+An independent Slice 5 review returned 2 MAJOR and 2 MINOR findings plus the item K
+Gate 3 escalation. The user approved the recommended fixes; all four findings are
+addressed:
+
+- Finding 1 (MAJOR, test 6 over-claim): added the linkage-only clause to
+  `test_chain_break_detection`: a forged event sealed with `chain.seal_draft(drafts[0],
+  seq=2, prev_hash="f"*64)` whose hash is self-consistent (asserted via
+  `chain.event_hash` recomputation), spliced at position 2, is BROKEN only because of
+  `verify_chain`'s prev-hash linkage check. Mutation probe (byte-verified, restored by
+  SHA-256): removing only `chain.py`'s linkage check made the test FAIL
+  (`1 failed, 2 warnings in 1.37s`); restored, it passes
+  (`1 passed, 2 warnings in 0.87s`). The FULL claim is now honest at clause level.
+- Finding 2 (MAJOR, snapshot over-claim): option (b), wording corrected above; the
+  latent wrong-snapshot bug is recorded and deferred to Slice 7/8. No code change;
+  `test_ledger.py`'s `_invented_output` docstring corrected to name the global.
+- Finding 3 (MINOR): the QUEUED/RUNNING fault-injection clause is now named as
+  deferred to Slice 8 in both the test-file docstring and the test 9 annotation above.
+- Finding 4 (MINOR): added `test_broken_chain_returns_409_on_ledger_and_board_routes`
+  asserting the HTTP ledger and board routes return 409 with the exact conflict
+  bodies (and no events/counters) on a tampered chain.
+- Item K: Gate 3 backtracked a third time for the one-sentence S5.6 reconciliation;
+  RE-APPROVED by the user 2026-09-18 (see Approval history). No behavior change.
+
+Verification (verbatim):
+
+```text
+.venv/Scripts/python.exe -m pytest tests/ledger -q
+12 passed, 2 warnings in 4.10s
+
+.venv/Scripts/python.exe -m pytest tests/domain tests/store tests/api tests/executor tests/evaluator tests/ledger -q
+103 passed, 1 skipped, 2 warnings in 28.79s
+
+.venv/Scripts/python.exe -m demos.finalize_run
+finalize-run evidence complete: run run-0001 FINALIZED, 1 hash-chained events chain VALID, 1 incidents opened, finalize twice nets zero new events, ledger derivation and catalog-version links resolved
+```
+
+`demos.thin_path` and `demos.lifecycle` both exit 0 unchanged. `tests/packaging`
+(test 51) still NOT run (outside slice authorization). Two MISTAKES.md entries
+logged (third occurrences of the clause-level-coverage and
+unverified-state-as-fact patterns). No install, credential use, external service,
+branch, commit, tag or push in this fix round.
 
 ## Approval history
 
@@ -1475,3 +1543,18 @@ uncommitted Gate 1/Gate 4 redesign edits (mockups, `01-product.md`,
   12 to 17 remain under the 2026-09-17 approval. Slice work continues one slice at a
   time under S10; installs, credentials, external services, spike runs, deployment,
   outreach and ADR #4 remain separately authorized.
+- Gate 3 — Program Design: BACKTRACKED a third time on 2026-09-18, scoped to one
+  S5.6 sentence. The independent Slice 5 review (item K) found S5.6's "never
+  `expected_ref`" internally contradicted test 13's mandated opaque-ref assertion;
+  the shipped `sealed:` content-digest behavior resolves the contradiction on the
+  side of the security intent. The user approved the recommended route on
+  2026-09-18: keep the opaque field and reconcile the S5.6 wording (no behavior
+  change). Revision applied the same day; explicit re-approval is pending. The
+  2026-09-16 and 2026-09-17 approvals and the earlier backtracks remain the
+  historical record.
+- Gate 3 — Program Design: RE-APPROVED a third time by the user on 2026-09-18,
+  scoped to the one-sentence S5.6 `expected_ref` reconciliation (no behavior
+  change). Approval covers `03-program-design.md` only; it does not approve any
+  other gate, and does not authorize installs, credentials, spike runs,
+  deployment or outreach. In the same message the user authorized committing the
+  Slice 5 worktree changes (no push).
