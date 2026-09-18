@@ -232,6 +232,17 @@ class Incident(BaseModel):
     resolved_event_seq: int | None = None
 
 
+class CloseShiftFacts(BaseModel):
+    """Facts captured at shift close; reduce_close turns these into drafts (S3.4)."""
+
+    model_config = _FROZEN
+
+    shift_id: Id
+    declared_limits: tuple[str, ...]
+    unresolved_incident_ids: tuple[Id, ...]
+    committed_contract: ContractParams
+
+
 class LedgerEventDraft(BaseModel):
     """Reducer output before chaining; carries no seq/hash fields (S3.4)."""
 

@@ -53,6 +53,24 @@ def seal_draft(draft: LedgerEventDraft, *, seq: int, prev_hash: str) -> LedgerEv
     return LedgerEvent(**draft.model_dump(), seq=seq, prev_hash=prev_hash, hash=digest)
 
 
+def append(
+    drafts: list[LedgerEventDraft] | tuple[LedgerEventDraft, ...],
+    *,
+    prev_hash: str,
+    start_seq: int,
+) -> list[LedgerEvent]:
+    """Seal drafts into ordered events; each hash chains to the previous (S3.5)."""
+    events: list[LedgerEvent] = []
+    seq = start_seq
+    current_prev = prev_hash
+    for draft in drafts:
+        event = seal_draft(draft, seq=seq, prev_hash=current_prev)
+        events.append(event)
+        seq = event.seq + 1
+        current_prev = event.hash
+    return events
+
+
 def next_seq(events: list[LedgerEvent]) -> int:
     return (events[-1].seq + 1) if events else 1
 

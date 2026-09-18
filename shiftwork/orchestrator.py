@@ -8,6 +8,7 @@ later slice (S5/S7); Slice 2 opens no incident.
 """
 
 import asyncio
+import base64
 import json
 import sqlite3
 from datetime import datetime, timezone
@@ -15,7 +16,8 @@ from pathlib import Path
 from typing import Any
 
 from shiftwork import config
-from shiftwork.domain import canonical, contract_catalog
+from shiftwork.domain import canonical, contract_catalog, customer_answer
+from shiftwork.domain.errors import ServiceResponseInvalid
 from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
@@ -24,9 +26,11 @@ from shiftwork.domain.models import (
     Incident,
     IncidentState,
     JsonValue,
+    LedgerEventType,
     Run,
     RunOutput,
     RunState,
+    ServiceResponse,
     Shift,
 )
 from shiftwork.evaluator import evaluator
@@ -217,11 +221,11 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
             outputs.append(output)
         if result.failure is not None:
             repo.update_run(conn, run_id, RunState.FAILED, result.failure, _now())
+            conn.commit()
         else:
             repo.update_run(conn, run_id, RunState.CAPTURED)
-            _finalize(conn, run, outputs)
-            repo.update_run(conn, run_id, RunState.FINALIZED, ended_at=_now())
-        conn.commit()
+            conn.commit()
+            finalize_run(conn, run_id)
     except Exception:
         conn.rollback()
         repo.update_run(conn, run_id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
@@ -243,41 +247,93 @@ def _public_records(snapshot_path: Path) -> dict[str, JsonValue]:
     return {record["record_id"]: record for record in data["records"]}
 
 
-def _finalize(conn: sqlite3.Connection, run: Run, outputs: list[RunOutput]) -> None:
-    """Real finalization: evaluate the drawn sealed cases, reduce to chained events.
+def _open_incidents(
+    conn: sqlite3.Connection,
+    run: Run,
+    pairs: list[tuple[CheckResult, reducer.MissionTransition]],
+    events: list,
+) -> None:
+    """Open one incident per failing check whose transition is INCIDENT_OPENED."""
+    slug = run.shift_id.rsplit("-shift-", 1)[0]
+    for (result, transition), event in zip(pairs, events):
+        if transition.event_type is not LedgerEventType.INCIDENT_OPENED:
+            continue
+        ordinal = repo.count_incidents(conn, slug) + 1
+        repo.insert_incident(
+            conn,
+            Incident(
+                id=f"{config.INCIDENT_PREFIX}-{ordinal:02d}",
+                engagement_slug=slug,
+                shift_id=run.shift_id,
+                opening_run_id=run.id,
+                failing_output_ref=result.observed_ref,
+                check_result_id=result.id,
+                reason_code=result.reason_code,
+                opened_event_seq=event.seq,
+                state=IncidentState.OPEN,
+            ),
+        )
 
-    Slice 4 scores every captured response against the sealed family inventory
-    (the whole first family while variant rotation does not exist) under the
-    version's committed contract, then reduces the failing checks into
-    hash-chained ledger drafts. No incident is opened (that is a later slice);
-    the run ends FINALIZED with real CheckResults and real LedgerEvents
-    persisted. The run-consumed snapshot is the same file the executor received.
+
+def finalize_run(conn: sqlite3.Connection, run_id: str) -> Run:
+    """Evaluate -> reduce -> chain -> events -> incidents -> FINALIZED (S5.5).
+
+    The whole sequence commits as one transaction: a failure anywhere leaves no
+    check results and no ledger events and marks the run FAILED. Re-finalizing
+    an already-finalized run is a no-op (zero net new events, no duplicate
+    incidents), which is the idempotency the repair loop and restart recovery
+    rely on.
     """
+    run = repo.get_run(conn, run_id)
+    if run is None:
+        raise LifecycleError("not_found", f"unknown run: {run_id}")
+    if run.state is RunState.FINALIZED or repo.list_check_results(conn, run_id):
+        return run
+
     shift = _require_shift(conn, run.shift_id)
     version = repo.get_version(conn, run.artifact_version_id)
     if version is None:
         raise LifecycleError("not_found", f"unknown artifact version: {run.artifact_version_id}")
-    cases = sealed_store.load_drawn_cases(run.id)
+    outputs = repo.list_outputs(conn, run_id)
+    cases = sealed_store.load_drawn_cases(run_id)
     public_records = _public_records(config.BOOKSHOP_SNAPSHOT)
     mission = reducer.load_mission(config.BOOKSHOP_MISSION)
 
-    check_results: list[CheckResult] = []
-    for result in evaluator.evaluate(outputs, cases, version.contract, public_records):
-        result = result.model_copy(
-            update={"id": f"cr-{repo.count_check_results(conn) + len(check_results) + 1:04d}"}
-        )
-        repo.insert_check_result(conn, result)
-        check_results.append(result)
+    try:
+        check_results: list[CheckResult] = []
+        for result in evaluator.evaluate(outputs, cases, version.contract, public_records):
+            result = result.model_copy(
+                update={"id": f"cr-{repo.count_check_results(conn) + len(check_results) + 1:04d}"}
+            )
+            repo.insert_check_result(conn, result)
+            check_results.append(result)
 
-    drafts = reducer.reduce_run(mission, run, check_results)
-    existing = repo.list_ledger_events(conn, shift.engagement_slug)
-    seq = chain.next_seq(existing)
-    prev_hash = chain.next_prev_hash(existing)
-    for draft in drafts:
-        event = chain.seal_draft(draft, seq=seq, prev_hash=prev_hash)
-        repo.insert_ledger_event(conn, shift.engagement_slug, event)
-        seq = event.seq + 1
-        prev_hash = event.hash
+        pairs: list[tuple[CheckResult, reducer.MissionTransition]] = []
+        for result in check_results:
+            if result.verdict != "fail" or result.reason_code is None:
+                continue
+            transition = reducer.transition_for(mission, result.reason_code)
+            if transition is not None:
+                pairs.append((result, transition))
+
+        drafts = reducer.reduce(mission, outputs, check_results, version.contract)
+        existing = repo.list_ledger_events(conn, shift.engagement_slug)
+        events = chain.append(
+            drafts,
+            prev_hash=chain.next_prev_hash(existing),
+            start_seq=chain.next_seq(existing),
+        )
+        for event in events:
+            repo.insert_ledger_event(conn, shift.engagement_slug, event)
+        _open_incidents(conn, run, pairs, events)
+        repo.update_run(conn, run_id, RunState.FINALIZED, ended_at=_now())
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        repo.update_run(conn, run_id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
+        conn.commit()
+        raise
+    return repo.get_run(conn, run_id)
 
 
 def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
@@ -312,14 +368,80 @@ def get_incident(conn: sqlite3.Connection, incident_id: str) -> Incident:
     return incident
 
 
+def customer_text_for(output: RunOutput) -> str | None:
+    """Derive the customer-facing sentence from an output's raw body (S5.6).
+
+    Returns None when the body does not parse, a cited ref resolves to no public
+    record, or the attested age is false; the exact raw bytes stay available as
+    ``body_base64`` on the view.
+    """
+    try:
+        response = ServiceResponse.model_validate_json(output.body)
+        validated = customer_answer.validate_service_response(
+            response, _public_records(config.BOOKSHOP_SNAPSHOT)
+        )
+    except (ValueError, ServiceResponseInvalid):
+        return None
+    return customer_answer.render_customer_text(validated)
+
+
+def _resolve_derivation(conn: sqlite3.Connection, event) -> dict[str, Any] | None:
+    """Resolve an event's cause refs to the raw run/check/output records."""
+    if len(event.cause_refs) < 3:
+        return None
+    run_id, check_id, observed_ref = event.cause_refs[0], event.cause_refs[1], event.cause_refs[2]
+    outputs = repo.list_outputs(conn, run_id)
+    output = next((item for item in outputs if item.id == observed_ref), None)
+    checks = repo.list_check_results(conn, run_id)
+    check = next((item for item in checks if item.id == check_id), None)
+    if output is None or check is None:
+        return None
+    return {
+        "run_id": run_id,
+        "check_id": check_id,
+        "observed_ref": observed_ref,
+        "request_ordinal": output.request_ordinal,
+        "request_text": output.request_text,
+        "output_body_base64": base64.b64encode(output.body).decode("ascii"),
+        "verdict": check.verdict,
+        "reason_code": check.reason_code.value if check.reason_code else None,
+    }
+
+
+def _resolve_catalog(slug: str, event) -> dict[str, Any] | None:
+    """Resolve an event payload's catalog_version reference to the raw catalog record."""
+    version = event.payload.get("catalog_version")
+    if not isinstance(version, int):
+        return None
+    path = config.CATALOG_DIR / f"{slug}_v{version}.json"
+    if not path.exists():
+        return None
+    return {"catalog_version": version, "catalog_record": json.loads(path.read_text(encoding="utf-8"))}
+
+
 def ledger(conn: sqlite3.Connection, slug: str) -> dict[str, Any]:
     if repo.get_engagement(conn, slug) is None:
         raise LifecycleError("not_found", f"unknown engagement: {slug}")
     events = repo.list_ledger_events(conn, slug)
-    return {
-        "events": events,
-        "chain_status": chain.verify_chain(events).value,
-    }
+    status = chain.verify_chain(events)
+    if status is chain.ChainStatus.BROKEN:
+        raise LifecycleError("conflict", "ledger chain is BROKEN; refusing unverified events")
+    enriched = []
+    for event in events:
+        enriched.append(
+            {
+                "seq": event.seq,
+                "event_type": event.event_type.value,
+                "cause_refs": list(event.cause_refs),
+                "payload": event.payload,
+                "synthetic": event.synthetic,
+                "prev_hash": event.prev_hash,
+                "hash": event.hash,
+                "derivation": _resolve_derivation(conn, event),
+                "catalog": _resolve_catalog(slug, event),
+            }
+        )
+    return {"events": enriched, "chain_status": status.value}
 
 
 def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -> dict[str, Any]:
@@ -334,6 +456,9 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
     attempt_limit = _attempt_limit(conn, slug)
     incidents = repo.list_incidents(conn, slug)
     events = repo.list_ledger_events(conn, slug)
+    status = chain.verify_chain(events)
+    if status is chain.ChainStatus.BROKEN:
+        raise LifecycleError("conflict", "ledger chain is BROKEN; refusing board counters")
     totals: dict[str, int] = {}
     for event in events:
         totals[event.event_type.value] = totals.get(event.event_type.value, 0) + 1
@@ -351,5 +476,5 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         "total_incidents": len(incidents),
         "ledger_event_count": len(events),
         "ledger_totals": totals,
-        "chain_status": chain.verify_chain(events).value,
+        "chain_status": status.value,
     }
