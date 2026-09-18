@@ -1,0 +1,63 @@
+{
+  "description": "Agent-drafted frozen snapshot for the stale_information sealed family: seven records across six customer requests, ages in milliseconds before the run. Records 1-2 are the Dune scenario already used by the thin path (unchanged values). Record 4 (catalog:9780525559474:superseded) is an older stock record for The Midnight Library that the newer record 3 supersedes. Operator review is required before acceptance use.",
+  "engagement_slug": "bookshop",
+  "snapshot_version": 1,
+  "records": [
+    {
+      "record_id": "catalog:9780441013593",
+      "kind": "stock",
+      "title": "Dune",
+      "edition": "hardback",
+      "value": "in_stock",
+      "record_age_ms": 5400000
+    },
+    {
+      "record_id": "catalog:9780441013593:price",
+      "kind": "price",
+      "title": "Dune",
+      "edition": "hardback",
+      "value": 1999,
+      "record_age_ms": 5400000
+    },
+    {
+      "record_id": "catalog:9780525559474",
+      "kind": "stock",
+      "title": "The Midnight Library",
+      "edition": "paperback",
+      "value": "out_of_stock",
+      "record_age_ms": 300000
+    },
+    {
+      "record_id": "catalog:9780525559474:superseded",
+      "kind": "stock",
+      "title": "The Midnight Library",
+      "edition": "paperback",
+      "value": "in_stock",
+      "record_age_ms": 10800000
+    },
+    {
+      "record_id": "catalog:9780593135204",
+      "kind": "stock",
+      "title": "Project Hail Mary",
+      "edition": "paperback",
+      "value": "in_stock",
+      "record_age_ms": 600000
+    },
+    {
+      "record_id": "catalog:9780441478125",
+      "kind": "availability",
+      "title": "The Left Hand of Darkness",
+      "edition": "paperback",
+      "value": "available",
+      "record_age_ms": 90000000
+    },
+    {
+      "record_id": "catalog:9781635575637",
+      "kind": "stock",
+      "title": "Piranesi",
+      "edition": "paperback",
+      "value": "in_stock",
+      "record_age_ms": 14400000
+    }
+  ]
+}

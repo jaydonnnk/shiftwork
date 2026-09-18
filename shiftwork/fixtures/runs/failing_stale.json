@@ -1,0 +1,58 @@
+{
+  "description": "Deliberately broken transcript for the stale_information family (negative control): six hand-authored captures that violate the committed rule, one per failure mode. Request 1 hard-asserts stock from a 90-minute-old record; request 2 hard-asserts price from the same stale record; request 3 answers from a superseded record; request 4 asserts a value the cited record contradicts; request 5 asserts a factual claim with no evidence at all; request 6 does not satisfy the response contract. Agent-drafted; operator review required before acceptance use.",
+  "adapter": "recorded",
+  "request_batch_hash": "6055e2c82fe365447346de86940ab3ff450d4d4c1fe9c6103042ba45882e5990",
+  "shop_snapshot_hash": "230d6f8aeb3eff61cb5d68ebaafe1fa5ce365aba4c9a9c0b96b85b8541cc0131",
+  "wall_ms": 130,
+  "failure": null,
+  "captures": [
+    {
+      "request_ordinal": 1,
+      "request_text": "Do you still have the hardback of Dune on the shelf?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoiaW5fc3RvY2sifV0sImV2aWRlbmNlX3JlZnMiOlsiY2F0YWxvZzo5NzgwNDQxMDEzNTkzIl0sInJlY29yZF9hZ2VfbXMiOjU0MDAwMDB9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 2,
+      "request_text": "What is the recorded price of the Dune hardback?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJwcmljZSIsInZhbHVlIjoxOTk5fV0sImV2aWRlbmNlX3JlZnMiOlsiY2F0YWxvZzo5NzgwNDQxMDEzNTkzOnByaWNlIl0sInJlY29yZF9hZ2VfbXMiOjU0MDAwMDB9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 3,
+      "request_text": "Is The Midnight Library in stock right now?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoiaW5fc3RvY2sifV0sImV2aWRlbmNlX3JlZnMiOlsiY2F0YWxvZzo5NzgwNTI1NTU5NDc0OnN1cGVyc2VkZWQiXSwicmVjb3JkX2FnZV9tcyI6MTA4MDAwMDB9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 4,
+      "request_text": "Can I get a copy of Project Hail Mary today?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoib3V0X29mX3N0b2NrIn1dLCJldmlkZW5jZV9yZWZzIjpbImNhdGFsb2c6OTc4MDU5MzEzNTIwNCJdLCJyZWNvcmRfYWdlX21zIjo2MDAwMDB9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 5,
+      "request_text": "Is The Left Hand of Darkness available to order?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJhdmFpbGFiaWxpdHkiLCJ2YWx1ZSI6ImF2YWlsYWJsZSJ9XSwiZXZpZGVuY2VfcmVmcyI6W10sInJlY29yZF9hZ2VfbXMiOm51bGx9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 6,
+      "request_text": "Do you have Piranesi on the shelf?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayJ9XSwiZXZpZGVuY2VfcmVmcyI6W10sInJlY29yZF9hZ2VfbXMiOm51bGx9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    }
+  ]
+}
