@@ -112,6 +112,7 @@ class RunOutputView(BaseModel):
     body_base64: str
     elapsed_ms: int | None = None
     transport_error: str | None = None
+    log_base64: str | None = None
 
     @classmethod
     def of(cls, output: RunOutput) -> "RunOutputView":
@@ -124,6 +125,11 @@ class RunOutputView(BaseModel):
             body_base64=base64.b64encode(output.body).decode("ascii"),
             elapsed_ms=output.elapsed_ms,
             transport_error=output.transport_error.value if output.transport_error else None,
+            log_base64=(
+                output.log_ref.removeprefix("data:application/octet-stream;base64,")
+                if output.log_ref and output.log_ref.startswith("data:application/octet-stream;base64,")
+                else None
+            ),
         )
 
 

@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS run_outputs (
     body BLOB NOT NULL,
     elapsed_ms INTEGER,
     transport_error TEXT,
+    log_ref TEXT,
     UNIQUE (run_id, request_ordinal)
 );
 

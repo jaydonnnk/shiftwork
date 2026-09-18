@@ -7,6 +7,7 @@ the reducer plus hash chain producing one real LedgerEvent. Incident opening is 
 later slice (S5/S7); Slice 2 opens no incident.
 """
 
+import asyncio
 import sqlite3
 from datetime import datetime, timezone
 from typing import Any
@@ -27,7 +28,8 @@ from shiftwork.domain.models import (
     Shift,
 )
 from shiftwork.evaluator import evaluator
-from shiftwork.executor.recorded import RawCapture, RecordedAdapter
+from shiftwork.executor import base as executor
+from shiftwork.executor.recorded import RecordedAdapter
 from shiftwork.ledger import chain, reducer
 from shiftwork.sealed import store as sealed_store
 from shiftwork.store import db, repo
@@ -42,47 +44,10 @@ class LifecycleError(Exception):
         self.message = message
 
 
-_SERVICE_TEMPLATE = '''"""Bookshop customer-information service (learner-owned artifact).
-
-Answers one fixed customer request at a time with a structured JSON envelope.
-This scaffold returns the seeded shop record as-is; the learner replaces it with
-logic that honours the freshness rule the contract selects.
-"""
-
-import json
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-RESPONSES = {
-    1: {
-        "action": "answer",
-        "claims": [{"kind": "stock", "value": "in_stock"}],
-        "evidence_refs": ["catalog:9780441013593"],
-        "record_age_ms": 5400000,
-    },
+BOOKSHOP_DRAFT_FILES: dict[str, str] = {
+    name: (config.ARTIFACT_TEMPLATE_DIR / name).read_bytes().decode("utf-8")
+    for name in ("service.py", "contract.json", "response_contract.json")
 }
-
-
-class Handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        length = int(self.headers.get("Content-Length", "0"))
-        request = json.loads(self.rfile.read(length) or b"{}")
-        fallback = {"action": "decline", "claims": [], "evidence_refs": [], "record_age_ms": None}
-        body = json.dumps(RESPONSES.get(request.get("ordinal"), fallback)).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
-
-    def log_message(self, *args):
-        pass
-
-
-if __name__ == "__main__":
-    HTTPServer(("127.0.0.1", 8080), Handler).serve_forever()
-'''
-
-BOOKSHOP_DRAFT_FILES: dict[str, str] = {"service.py": _SERVICE_TEMPLATE}
 
 
 def _now() -> datetime:
@@ -224,13 +189,36 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
     repo.update_run(conn, run_id, RunState.RUNNING)
     conn.commit()
     try:
-        captures = _adapter().execute(
-            shift_id=run.shift_id, artifact_version_id=run.artifact_version_id
+        version = repo.get_version(conn, run.artifact_version_id)
+        request = executor.RunRequest(
+            artifact_snapshot=executor.ArtifactSnapshotRef(
+                files={path: text.encode("utf-8") for path, text in version.files.items()},
+                manifest_hash=version.content_hash,
+            ),
+            request_batch=executor.BatchRef(path_ref="thin.jsonl", content_hash=config.THIN_BATCH_HASH),
+            shop_snapshot_ref=str(config.BOOKSHOP_SNAPSHOT),
+            harness_ref="stdlib-loopback-v1",
+            image_ref="local-python-stdlib",
+            deadline_s=5,
+            inference_grant=None,
         )
-        outputs = [_store_capture(conn, run, capture) for capture in captures]
-        repo.update_run(conn, run_id, RunState.CAPTURED)
-        _finalize(conn, run, outputs)
-        repo.update_run(conn, run_id, RunState.FINALIZED, ended_at=_now())
+        batch = {entry.ordinal: entry for entry in executor.load_batch(request.request_batch)}
+        result = asyncio.run(_adapter().execute(request))
+        outputs = []
+        for output in executor.normalize_captures(result.captures, request.deadline_s):
+            output = output.model_copy(update={
+                "id": f"{run.id}-out-{output.request_ordinal}",
+                "run_id": run.id,
+                "request_text": batch[output.request_ordinal].text,
+            })
+            repo.insert_output(conn, output)
+            outputs.append(output)
+        if result.failure is not None:
+            repo.update_run(conn, run_id, RunState.FAILED, result.failure, _now())
+        else:
+            repo.update_run(conn, run_id, RunState.CAPTURED)
+            _finalize(conn, run, outputs)
+            repo.update_run(conn, run_id, RunState.FINALIZED, ended_at=_now())
         conn.commit()
     except Exception:
         conn.rollback()
@@ -246,21 +234,6 @@ def execute_run_task(db_path: str, run_id: str) -> None:
         execute_run(conn, run_id)
     finally:
         conn.close()
-
-
-def _store_capture(conn: sqlite3.Connection, run: Run, capture: RawCapture) -> RunOutput:
-    output = RunOutput(
-        id=f"{run.id}-out-{capture.request_ordinal}",
-        run_id=run.id,
-        request_ordinal=capture.request_ordinal,
-        request_text=capture.request_text,
-        http_status=capture.http_status,
-        body=capture.body,
-        elapsed_ms=capture.elapsed_ms,
-        transport_error=capture.transport_error,
-    )
-    repo.insert_output(conn, output)
-    return output
 
 
 def _finalize(conn: sqlite3.Connection, run: Run, outputs: list[RunOutput]) -> None:

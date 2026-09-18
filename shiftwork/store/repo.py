@@ -325,13 +325,14 @@ def _output(row: sqlite3.Row) -> RunOutput:
         body=row["body"],
         elapsed_ms=row["elapsed_ms"],
         transport_error=row["transport_error"],
+        log_ref=row["log_ref"],
     )
 
 
 def insert_output(conn: sqlite3.Connection, output: RunOutput) -> None:
     conn.execute(
-        "INSERT INTO run_outputs (id, run_id, request_ordinal, request_text, http_status, body, elapsed_ms, transport_error) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO run_outputs (id, run_id, request_ordinal, request_text, http_status, body, elapsed_ms, transport_error, log_ref) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             output.id,
             output.run_id,
@@ -341,6 +342,7 @@ def insert_output(conn: sqlite3.Connection, output: RunOutput) -> None:
             output.body,
             output.elapsed_ms,
             output.transport_error.value if output.transport_error else None,
+            output.log_ref,
         ),
     )
 

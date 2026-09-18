@@ -1,0 +1,5 @@
+shiftwork/templates/artifact/* text eol=lf
+shiftwork/fixtures/artifacts/bookshop/* text eol=lf
+shiftwork/fixtures/requests/* text eol=lf
+shiftwork/fixtures/shop/* text eol=lf
+shiftwork/fixtures/runs/* text eol=lf

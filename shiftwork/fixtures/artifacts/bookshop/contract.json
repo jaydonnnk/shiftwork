@@ -1,0 +1,7 @@
+{
+  "catalog_version": 1,
+  "must_never": ["NEVER_INVENT_PRICE_STOCK_POLICY"],
+  "selections": {"STANCE": "USE_NEWEST_RECORD_WITH_AGE"},
+  "response_time_limit_ms": 3000,
+  "declared_limits": []
+}
