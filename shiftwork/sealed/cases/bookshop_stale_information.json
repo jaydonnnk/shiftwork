@@ -1,0 +1,15 @@
+{
+  "case_id": "bookshop-stale-information-01",
+  "variant": "stale_information",
+  "rule_id": "freshness.use_newest_with_age",
+  "request_ordinal": 1,
+  "request_text": "Do you still have the hardback of Dune on the shelf?",
+  "max_record_age_ms": 3600000,
+  "hard_assert_kinds": ["stock", "availability", "price"],
+  "expected": {
+    "action": "ask",
+    "reason_code": "STALE_BEYOND_RULE",
+    "note": "The only shelf record for the Dune hardback is 90 minutes old, beyond the one-hour freshness limit the contract selected (USE_NEWEST_RECORD_WITH_AGE). Asserting stock as a hard fact from a stale record is wrong; the service should qualify or re-check rather than answer in_stock.",
+    "acceptable_actions": ["ask", "decline", "escalate"]
+  }
+}

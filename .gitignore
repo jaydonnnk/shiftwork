@@ -38,3 +38,8 @@ __pycache__/
 venv/
 .mypy_cache/
 .ruff_cache/
+
+# Local runtime databases (scenario state, never committed)
+*.db
+*.sqlite
+*.sqlite3

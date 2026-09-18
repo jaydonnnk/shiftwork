@@ -7,9 +7,12 @@ import json
 import sqlite3
 from datetime import datetime
 
+from shiftwork.domain import canonical
+from shiftwork.domain.errors import VersionTampered
 from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
+    ContractParams,
     Incident,
     IncidentState,
     LedgerEvent,
@@ -43,6 +46,43 @@ def seed_engagement(conn: sqlite3.Connection, slug: str, business_kind: str, dis
 
 def get_engagement(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | None:
     return conn.execute("SELECT * FROM engagements WHERE slug = ?", (slug,)).fetchone()
+
+
+# --- engagement_config -----------------------------------------------------
+
+
+def seed_engagement_config(
+    conn: sqlite3.Connection,
+    slug: str,
+    *,
+    business_kind: str,
+    assist_level: str,
+    allowed_assist_roles: tuple[str, ...],
+    total_assist_budget_per_shift: int,
+    enabled_check_families: tuple[str, ...],
+    attempt_limit: int,
+    rotation_group_size: int,
+) -> None:
+    conn.execute(
+        "INSERT OR IGNORE INTO engagement_config (slug, business_kind, assist_level, "
+        "allowed_assist_roles_json, total_assist_budget_per_shift, enabled_check_families_json, "
+        "attempt_limit, rotation_group_size) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            slug,
+            business_kind,
+            assist_level,
+            _dump(list(allowed_assist_roles)),
+            total_assist_budget_per_shift,
+            _dump(list(enabled_check_families)),
+            attempt_limit,
+            rotation_group_size,
+        ),
+    )
+    conn.commit()
+
+
+def get_engagement_config(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM engagement_config WHERE slug = ?", (slug,)).fetchone()
 
 
 # --- shifts ----------------------------------------------------------------
@@ -122,13 +162,31 @@ def get_draft(conn: sqlite3.Connection, shift_id: str) -> tuple[dict[str, str], 
 # --- artifact_versions -----------------------------------------------------
 
 
+def _contract_from_json(raw: str) -> ContractParams:
+    return ContractParams.model_validate(_load(raw))
+
+
 def _version(row: sqlite3.Row) -> ArtifactVersion:
+    files = _load(row["files_json"])
+    contract = _contract_from_json(row["contract_json"])
+    contract_catalog_hash = row["contract_catalog_hash"]
+    recorded_hash = row["content_hash"]
+    recomputed = canonical.artifact_content_hash(
+        files, canonical.contract_params_json(contract), contract_catalog_hash
+    )
+    if recomputed != recorded_hash:
+        raise VersionTampered(
+            f"artifact version {row['id']} no longer reproduces its recorded content hash"
+        )
     return ArtifactVersion(
         id=row["id"],
         shift_id=row["shift_id"],
         parent_id=row["parent_id"],
-        content_hash=row["content_hash"],
-        contract=_load(row["contract_json"]),
+        content_hash=recorded_hash,
+        storage_ref=row["storage_ref"],
+        files=files,
+        contract=contract,
+        contract_catalog_hash=contract_catalog_hash,
         created_by=row["created_by"],
         created_at=row["created_at"],
     )
@@ -136,14 +194,18 @@ def _version(row: sqlite3.Row) -> ArtifactVersion:
 
 def insert_version(conn: sqlite3.Connection, version: ArtifactVersion) -> None:
     conn.execute(
-        "INSERT INTO artifact_versions (id, shift_id, parent_id, content_hash, contract_json, created_by, created_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO artifact_versions (id, shift_id, parent_id, content_hash, storage_ref, "
+        "files_json, contract_json, contract_catalog_hash, created_by, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             version.id,
             version.shift_id,
             version.parent_id,
             version.content_hash,
-            _dump(version.contract),
+            version.storage_ref,
+            _dump(version.files),
+            _dump(canonical.contract_params_json(version.contract)),
+            version.contract_catalog_hash,
             version.created_by,
             version.created_at.isoformat(),
         ),

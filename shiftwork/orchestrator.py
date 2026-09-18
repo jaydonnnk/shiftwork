@@ -1,31 +1,35 @@
-"""Tracer lifecycle: open shift, edit draft, freeze, run, stub finalize, close.
+"""Thin real vertical path: open shift, edit draft, freeze, run, real finalize, close.
 
-Slice 2 replaces the stubbed persistence and Slice 5+ replaces the stub
-finalization (evaluator, reducer, chain, incident opening) with the approved
-deterministic components.
+Slice 2 replaces the tracer's stub persistence and stub finalization with the real
+deterministic components: content-hashed freeze, the recorded adapter replaying one
+checked-in transcript, the sealed-case evaluator producing one real CheckResult, and
+the reducer plus hash chain producing one real LedgerEvent. Incident opening is a
+later slice (S5/S7); Slice 2 opens no incident.
 """
 
-import json
 import sqlite3
 from datetime import datetime, timezone
 from typing import Any
 
 from shiftwork import config
+from shiftwork.domain import canonical, contract_catalog
 from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
+    ContractParams,
     ExecutorFailure,
     Incident,
     IncidentState,
-    LedgerEvent,
-    LedgerEventType,
-    ReasonCode,
     Run,
     RunOutput,
     RunState,
+    ServiceResponse,
     Shift,
 )
+from shiftwork.evaluator import evaluator
 from shiftwork.executor.recorded import RawCapture, RecordedAdapter
+from shiftwork.ledger import chain, reducer
+from shiftwork.sealed import store as sealed_store
 from shiftwork.store import db, repo
 
 
@@ -38,17 +42,11 @@ class LifecycleError(Exception):
         self.message = message
 
 
-TRACER_CONTRACT: dict[str, Any] = {
-    "catalog_version": 0,
-    "must_never": ["NEVER_INVENT_PRICE_STOCK_POLICY"],
-    "response_time_limit_ms": 3000,
-    "declared_limits": ["Tracer contract stub, replaced by the catalog-backed contract (Slice 2 catalog, Slice 4 ContractParams)."],
-}
-
 _SERVICE_TEMPLATE = '''"""Bookshop customer-information service (learner-owned artifact).
 
-Answers one request at a time with a structured JSON envelope. This tracer
-scaffold returns fixed placeholder data; the learner replaces it with real logic.
+Answers one fixed customer request at a time with a structured JSON envelope.
+This scaffold returns the seeded shop record as-is; the learner replaces it with
+logic that honours the freshness rule the contract selects.
 """
 
 import json
@@ -57,24 +55,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 RESPONSES = {
     1: {
         "action": "answer",
-        "claims": [
-            {"kind": "price", "value": 1250},
-            {"kind": "stock", "value": "in_stock"},
-        ],
-        "evidence_refs": ["catalog:9780141187761"],
-        "record_age_ms": 30000,
-    },
-    2: {
-        "action": "answer",
         "claims": [{"kind": "stock", "value": "in_stock"}],
-        "evidence_refs": ["catalog:9780141187761"],
+        "evidence_refs": ["catalog:9780441013593"],
         "record_age_ms": 5400000,
-    },
-    3: {
-        "action": "answer",
-        "claims": [{"kind": "policy_answer", "value": "returns accepted within 30 days"}],
-        "evidence_refs": ["policy:returns"],
-        "record_age_ms": 60000,
     },
 }
 
@@ -99,7 +82,7 @@ if __name__ == "__main__":
     HTTPServer(("127.0.0.1", 8080), Handler).serve_forever()
 '''
 
-TRACER_DRAFT_FILES: dict[str, str] = {"service.py": _SERVICE_TEMPLATE}
+BOOKSHOP_DRAFT_FILES: dict[str, str] = {"service.py": _SERVICE_TEMPLATE}
 
 
 def _now() -> datetime:
@@ -120,8 +103,13 @@ def _require_open_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
     return shift
 
 
+def _attempt_limit(conn: sqlite3.Connection, slug: str) -> int:
+    row = repo.get_engagement_config(conn, slug)
+    return int(row["attempt_limit"]) if row else config.DEFAULT_ATTEMPT_LIMIT
+
+
 def _adapter() -> RecordedAdapter:
-    return RecordedAdapter(config.TRACER_TRANSCRIPT)
+    return RecordedAdapter(config.THIN_TRANSCRIPT)
 
 
 def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -> Shift:
@@ -136,9 +124,9 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
         opened_at=_now(),
     )
     repo.insert_shift(conn, shift)
-    # Tracer seeds the template draft. Later slices seed from the inherited
+    # Slice 2 seeds the template draft. Later slices seed from the inherited
     # artifact version and carry open incidents and ledger state forward.
-    repo.upsert_draft(conn, shift.id, TRACER_DRAFT_FILES, shift.opened_at)
+    repo.upsert_draft(conn, shift.id, BOOKSHOP_DRAFT_FILES, shift.opened_at)
     conn.commit()
     return shift
 
@@ -162,10 +150,26 @@ def save_draft(conn: sqlite3.Connection, shift_id: str, files: dict[str, str]) -
     return {"shift_id": shift_id, "files": files, "updated_at": updated_at}
 
 
-def freeze_version(conn: sqlite3.Connection, shift_id: str) -> ArtifactVersion:
+def freeze_version(
+    conn: sqlite3.Connection, shift_id: str, contract: ContractParams
+) -> ArtifactVersion:
+    """Freeze ONE immutable, content-hashed version of the draft + contract.
+
+    The hash covers the frozen files, the ContractParams and the catalog hash, so
+    any later change to a stored version is detected on read (test 21).
+    """
     shift = _require_open_shift(conn, shift_id)
-    if repo.get_draft(conn, shift_id) is None:
+    draft = repo.get_draft(conn, shift_id)
+    if draft is None:
         raise LifecycleError("conflict", f"no draft to freeze for shift: {shift_id}")
+    files, _ = draft
+
+    catalog = contract_catalog.load_catalog(shift.engagement_slug, contract.catalog_version)
+    contract_catalog.validate_contract(catalog, contract)
+
+    content_hash = canonical.artifact_content_hash(
+        files, canonical.contract_params_json(contract), catalog.content_hash
+    )
     ordinal = repo.count_versions(conn) + 1
     parent = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
         conn, shift.engagement_slug
@@ -174,9 +178,11 @@ def freeze_version(conn: sqlite3.Connection, shift_id: str) -> ArtifactVersion:
         id=f"ver-{ordinal:04d}",
         shift_id=shift_id,
         parent_id=parent.id if parent else None,
-        # Placeholder: Slice 2 computes the real content hash of files + contract.
-        content_hash=f"placeholder-{ordinal}",
-        contract=TRACER_CONTRACT,
+        content_hash=content_hash,
+        storage_ref=f"inline:{content_hash}",
+        files=dict(files),
+        contract=contract,
+        contract_catalog_hash=catalog.content_hash,
         created_by="learner",
         created_at=_now(),
     )
@@ -186,12 +192,13 @@ def freeze_version(conn: sqlite3.Connection, shift_id: str) -> ArtifactVersion:
 
 
 def start_run(conn: sqlite3.Connection, shift_id: str) -> Run:
-    _require_open_shift(conn, shift_id)
+    shift = _require_open_shift(conn, shift_id)
     version = repo.get_latest_version(conn, shift_id)
     if version is None:
         raise LifecycleError("conflict", "freeze a version before starting a run")
     used = repo.count_runs(conn, shift_id)
-    if used >= config.DEFAULT_ATTEMPT_LIMIT:
+    limit = _attempt_limit(conn, shift.engagement_slug)
+    if used >= limit:
         raise LifecycleError("conflict", "attempt budget exhausted for this shift")
     ordinal = repo.count_runs_all(conn) + 1
     run = Run(
@@ -222,7 +229,7 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
         )
         outputs = [_store_capture(conn, run, capture) for capture in captures]
         repo.update_run(conn, run_id, RunState.CAPTURED)
-        _finalize_stub(conn, run, outputs)
+        _finalize(conn, run, outputs)
         repo.update_run(conn, run_id, RunState.FINALIZED, ended_at=_now())
         conn.commit()
     except Exception:
@@ -256,61 +263,42 @@ def _store_capture(conn: sqlite3.Connection, run: Run, capture: RawCapture) -> R
     return output
 
 
-def _finalize_stub(conn: sqlite3.Connection, run: Run, outputs: list[RunOutput]) -> None:
-    """Hardcoded Slice 1 finalization: one failing check, two chained events, one incident."""
+def _finalize(conn: sqlite3.Connection, run: Run, outputs: list[RunOutput]) -> None:
+    """Real finalization: evaluate one sealed case, reduce to one chained event.
+
+    Slice 2 scores the one captured response against the one sealed case, then
+    reduces the resulting check into ONE hash-chained ledger event. No incident is
+    opened (that is a later slice); the run ends FINALIZED with a real CheckResult
+    and a real LedgerEvent persisted.
+    """
     shift = _require_shift(conn, run.shift_id)
-    failing = next((output for output in outputs if output.request_ordinal == 2), outputs[-1])
+    case = sealed_store.load_thin_case()
+    mission = reducer.load_mission(config.BOOKSHOP_MISSION)
 
-    check_result = CheckResult(
-        id=f"cr-{repo.count_check_results(conn) + 1:04d}",
-        run_id=run.id,
-        check_id="tracer-stale-check",
-        verdict="fail",
-        observed_ref=failing.id,
-        expected_ref=None,
-        reason_code=ReasonCode.STALE_BEYOND_RULE,
-    )
-    repo.insert_check_result(conn, check_result)
+    check_results: list[CheckResult] = []
+    for output in outputs:
+        if output.request_ordinal != case.request_ordinal:
+            continue
+        response = ServiceResponse.model_validate_json(output.body)
+        result = evaluator.evaluate(
+            case,
+            response,
+            check_result_id=f"cr-{repo.count_check_results(conn) + len(check_results) + 1:04d}",
+            run_id=run.id,
+            observed_ref=output.id,
+        )
+        repo.insert_check_result(conn, result)
+        check_results.append(result)
 
-    incident_id = f"{config.INCIDENT_PREFIX}-{repo.count_incidents(conn, shift.engagement_slug) + 1:02d}"
-    previous = repo.last_ledger_event(conn, shift.engagement_slug)
-    seq = previous.seq + 1 if previous else 1
-    prev_hash = previous.hash if previous else config.GENESIS_HASH
-
-    sale = LedgerEvent(
-        event_type=LedgerEventType.SALE_COMPLETED,
-        cause_refs=(run.id, outputs[0].id),
-        payload={"orders_completed": 1},
-        seq=seq,
-        prev_hash=prev_hash,
-        hash=f"placeholder-chain-{seq}",
-    )
-    repo.insert_ledger_event(conn, shift.engagement_slug, sale)
-
-    opened = LedgerEvent(
-        event_type=LedgerEventType.INCIDENT_OPENED,
-        cause_refs=(incident_id, check_result.id, failing.id),
-        payload={"reason_code": check_result.reason_code.value, "incident_id": incident_id},
-        seq=seq + 1,
-        prev_hash=sale.hash,
-        hash=f"placeholder-chain-{seq + 1}",
-    )
-    repo.insert_ledger_event(conn, shift.engagement_slug, opened)
-
-    repo.insert_incident(
-        conn,
-        Incident(
-            id=incident_id,
-            engagement_slug=shift.engagement_slug,
-            shift_id=shift.id,
-            opening_run_id=run.id,
-            failing_output_ref=failing.id,
-            check_result_id=check_result.id,
-            reason_code=ReasonCode.STALE_BEYOND_RULE,
-            opened_event_seq=opened.seq,
-            state=IncidentState.OPEN,
-        ),
-    )
+    drafts = reducer.reduce_run(mission, run, check_results)
+    existing = repo.list_ledger_events(conn, shift.engagement_slug)
+    seq = chain.next_seq(existing)
+    prev_hash = chain.next_prev_hash(existing)
+    for draft in drafts:
+        event = chain.seal_draft(draft, seq=seq, prev_hash=prev_hash)
+        repo.insert_ledger_event(conn, shift.engagement_slug, event)
+        seq = event.seq + 1
+        prev_hash = event.hash
 
 
 def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
@@ -348,10 +336,10 @@ def get_incident(conn: sqlite3.Connection, incident_id: str) -> Incident:
 def ledger(conn: sqlite3.Connection, slug: str) -> dict[str, Any]:
     if repo.get_engagement(conn, slug) is None:
         raise LifecycleError("not_found", f"unknown engagement: {slug}")
+    events = repo.list_ledger_events(conn, slug)
     return {
-        "events": repo.list_ledger_events(conn, slug),
-        # Placeholder: Slice 5 runs the real verify_chain on every read.
-        "chain_status": "VALID",
+        "events": events,
+        "chain_status": chain.verify_chain(events).value,
     }
 
 
@@ -364,6 +352,7 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
     latest_run = repo.get_latest_run(conn, latest_shift.id) if latest_shift else None
     requests_run = len(repo.list_outputs(conn, latest_run.id)) if latest_run else 0
     attempts_used = repo.count_runs(conn, latest_shift.id) if latest_shift else 0
+    attempt_limit = _attempt_limit(conn, slug)
     incidents = repo.list_incidents(conn, slug)
     events = repo.list_ledger_events(conn, slug)
     totals: dict[str, int] = {}
@@ -377,11 +366,11 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         "latest_run": latest_run,
         "requests_run": requests_run,
         "attempts_used": attempts_used,
-        "attempt_limit": config.DEFAULT_ATTEMPT_LIMIT,
-        "attempts_remaining": config.DEFAULT_ATTEMPT_LIMIT - attempts_used,
+        "attempt_limit": attempt_limit,
+        "attempts_remaining": attempt_limit - attempts_used,
         "open_incidents": [incident for incident in incidents if incident.state == IncidentState.OPEN],
         "total_incidents": len(incidents),
         "ledger_event_count": len(events),
         "ledger_totals": totals,
-        "chain_status": "VALID",
+        "chain_status": chain.verify_chain(events).value,
     }

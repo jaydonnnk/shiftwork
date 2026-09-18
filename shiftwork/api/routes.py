@@ -8,6 +8,8 @@ from fastapi.responses import JSONResponse
 
 from shiftwork import orchestrator
 from shiftwork.api import schemas
+from shiftwork.domain.errors import ShiftworkDomainError
+from shiftwork.domain.models import ContractParams
 from shiftwork.orchestrator import LifecycleError
 from shiftwork.store import db
 
@@ -23,6 +25,11 @@ def get_conn(request: Request) -> Iterator[sqlite3.Connection]:
 
 
 def lifecycle_error_handler(_request: Request, exc: LifecycleError) -> JSONResponse:
+    status_code = 404 if exc.kind == "not_found" else 409
+    return JSONResponse(status_code=status_code, content={"kind": exc.kind, "detail": exc.message})
+
+
+def domain_error_handler(_request: Request, exc: ShiftworkDomainError) -> JSONResponse:
     status_code = 404 if exc.kind == "not_found" else 409
     return JSONResponse(status_code=status_code, content={"kind": exc.kind, "detail": exc.message})
 
@@ -55,9 +62,20 @@ def write_draft(
     status_code=201,
 )
 def freeze_version(
-    shift_id: str, conn: sqlite3.Connection = Depends(get_conn)
+    shift_id: str,
+    body: schemas.FreezeVersionRequest,
+    conn: sqlite3.Connection = Depends(get_conn),
 ) -> schemas.ArtifactVersionView:
-    return schemas.ArtifactVersionView.of(orchestrator.freeze_version(conn, shift_id))
+    contract = ContractParams(
+        catalog_version=body.contract.catalog_version,
+        must_never=tuple(body.contract.must_never),
+        selections=body.contract.selections,
+        response_time_limit_ms=body.contract.response_time_limit_ms,
+        declared_limits=tuple(body.contract.declared_limits),
+    )
+    return schemas.ArtifactVersionView.of(
+        orchestrator.freeze_version(conn, shift_id, contract)
+    )
 
 
 @router.post("/shifts/{shift_id}/runs", response_model=schemas.RunView, status_code=202)

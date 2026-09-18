@@ -1,4 +1,8 @@
-"""Canonical Slice 1 evidence: drive the full HTTP lifecycle and print every record.
+"""Full-route walkthrough: drive the whole HTTP lifecycle and print every record.
+
+Walks the broader route surface (board, draft read/write, freeze, run, outputs,
+checks, ledger, board, close) against the real Slice 2 thin path. The focused
+Slice 2 evidence demo is demos.thin_path.
 
 Run from the repository root: python -m demos.lifecycle
 """
@@ -19,6 +23,14 @@ from fastapi.testclient import TestClient  # noqa: E402
 from shiftwork.app import create_app  # noqa: E402
 
 TERMINAL_RUN_STATES = {"FINALIZED", "FAILED"}
+
+CONTRACT = {
+    "catalog_version": 1,
+    "must_never": ["NEVER_INVENT_PRICE_STOCK_POLICY"],
+    "selections": {"STANCE": "USE_NEWEST_RECORD_WITH_AGE"},
+    "response_time_limit_ms": 3000,
+    "declared_limits": ["Answers one fixed shelf-stock request per shift."],
+}
 
 
 def _show(label: str, payload) -> None:
@@ -44,8 +56,8 @@ def _poll_run(client: TestClient, run_id: str) -> dict:
 
 
 def main() -> int:
-    with tempfile.TemporaryDirectory(prefix="shiftwork-tracer-") as workdir:
-        app = create_app(str(Path(workdir) / "tracer.db"))
+    with tempfile.TemporaryDirectory(prefix="shiftwork-lifecycle-") as workdir:
+        app = create_app(str(Path(workdir) / "lifecycle.db"))
         with TestClient(app) as client:
             status, board = _call(client, "GET", "/api/engagements/bookshop/board")
             _show(f"GET board (before) -> {status}", board)
@@ -58,7 +70,7 @@ def main() -> int:
             _show(f"GET draft -> {status}", draft)
 
             files = dict(draft["files"])
-            files["service.py"] += "\n# learner edit recorded by the tracer demo\n"
+            files["service.py"] += "\n# learner edit recorded by the lifecycle demo\n"
             status, saved = _call(
                 client, "PUT", f"/api/shifts/{shift_id}/draft", json={"files": files}
             )
@@ -72,7 +84,10 @@ def main() -> int:
             )
 
             status, version = _call(
-                client, "POST", f"/api/shifts/{shift_id}/artifact/versions"
+                client,
+                "POST",
+                f"/api/shifts/{shift_id}/artifact/versions",
+                json={"contract": CONTRACT},
             )
             _show(f"POST freeze -> {status}", version)
 
@@ -100,20 +115,14 @@ def main() -> int:
 
             status, board = _call(client, "GET", "/api/engagements/bookshop/board")
             _show(f"GET board (after run) -> {status}", board)
-            if not board["open_incidents"]:
-                raise SystemExit("board shows no open incident after the run")
-            incident_id = board["open_incidents"][0]["id"]
-
-            status, incident = _call(client, "GET", f"/api/incidents/{incident_id}")
-            _show(f"GET incident {incident_id} -> {status}", incident)
 
             status, closed = _call(client, "POST", f"/api/shifts/{shift_id}/close")
             _show(f"POST close -> {status}", closed)
 
             print(
-                f"lifecycle evidence complete: run {run_id} FINALIZED, incident {incident_id} "
-                f"{incident['state']}, ledger chain {ledger['chain_status']} with "
-                f"{len(ledger['events'])} events"
+                f"lifecycle evidence complete: run {run_id} FINALIZED, ledger chain "
+                f"{ledger['chain_status']} with {len(ledger['events'])} events, "
+                f"{len(board['open_incidents'])} open incidents (Slice 2 opens none)"
             )
     return 0
 

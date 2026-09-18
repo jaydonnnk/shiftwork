@@ -1,0 +1,41 @@
+{
+  "_comment": "Pinned golden hash vectors (program design S6 test 3). HASH_VERSION 1. Any change to canonical_bytes or content_hash that alters these hashes requires an explicit, reviewed update of this file; silent drift is a failure.",
+  "hash_version": 1,
+  "vectors": [
+    {
+      "name": "empty_object",
+      "payload": {},
+      "canonical": "{}",
+      "hash": "2fe348687419283c2987b1906fefc24bd79bba1eac14bc28494d07f955923299"
+    },
+    {
+      "name": "nested_key_order",
+      "payload": { "b": 1, "a": [1, 2, { "z": null, "y": true }] },
+      "canonical": "{\"a\":[1,2,{\"y\":true,\"z\":null}],\"b\":1}",
+      "hash": "f85f51bb9cb5e2b03bf5bfde71391d198b3c7df144be2e9340ca7e5705b36cf4"
+    },
+    {
+      "name": "integers_only",
+      "payload": { "price_minor": 1250, "age_ms": 5400000, "neg": -7, "zero": 0 },
+      "canonical": "{\"age_ms\":5400000,\"neg\":-7,\"price_minor\":1250,\"zero\":0}",
+      "hash": "7a66adfb1ce05a7758c3fc1a72265ee6e5527678e4f5ae0597328b30916e279f"
+    },
+    {
+      "name": "unicode_nfc",
+      "payload": { "note": "café résumé" },
+      "canonical": "{\"note\":\"café résumé\"}",
+      "hash": "ceb190dae059d5c8ac7224280a359004cedbce1dbd6eafb6e6b6fb660b7b848e"
+    },
+    {
+      "name": "envelope_shape",
+      "payload": {
+        "hash_version": 1,
+        "files_base64": { "service.py": "cHJpbnQoKQ==" },
+        "contract_json": { "catalog_version": 1 },
+        "contract_catalog_hash": "abc123"
+      },
+      "canonical": "{\"contract_catalog_hash\":\"abc123\",\"contract_json\":{\"catalog_version\":1},\"files_base64\":{\"service.py\":\"cHJpbnQoKQ==\"},\"hash_version\":1}",
+      "hash": "f8333ac5cf5b95b882b0a134df4ca21db86d871309a93aed18b49e45ea34a97e"
+    }
+  ]
+}

@@ -18,7 +18,7 @@ demo evidence run and shown, slice checked off here, then "Continue to slice N+1
 or re-steer?"):
 
 - [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
-- [ ] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event
+- [x] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event; implemented and demonstrated 2026-09-18 (`python -m demos.thin_path`; evidence in Notes)
 - [ ] Slice 3 — Executor conformance (recorded + local_process), deepening Slice 2 execution
 - [ ] Slice 4 — Contract-parameterized evaluator + first sealed family, deepening Slice 2 evaluation
 - [ ] Slice 5 — Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger
@@ -35,10 +35,10 @@ or re-steer?"):
 - [ ] Slice 16 — Submission packaging: test build + demo video
 - [ ] Slice 17 — Hosted deployment (conditional: only if Option B selected at the Slice 13 exit)
 
-Slice 1 is implemented and its evidence recorded 2026-09-17; slices 2–17 are not
-implemented. Slice work proceeds only under `04-slices.md` S10 — credentials,
-installs, spike runs, external services, deployment, outreach and ADR #4 each remain
-separately authorized.
+Slices 1 and 2 are implemented and their evidence recorded (2026-09-17 and
+2026-09-18); slices 3–17 are not implemented. Slice work proceeds only under
+`04-slices.md` S10 — credentials, installs, spike runs, external services,
+deployment, outreach and ADR #4 each remain separately authorized.
 
 ## Notes for a fresh session
 
@@ -449,6 +449,133 @@ separately authorized.
   network operation was test 51's clean-env package install from the lockfile; no
   credential use, Nebius or Tavily inference call, spike run, deployment, outreach
   or commit occurred.
+- 2026-09-18 Slice 2 (thin real vertical path) IMPLEMENTED and demonstrated: one
+  shift's data now flows real end to end: content-hashed freeze → recorded replay
+  of one checked-in transcript → one sealed case scored by a real deterministic
+  evaluator → one pure-reduced ledger draft sealed into one real hash-chained event.
+  The tracer's stub persistence and stub finalization are gone. New files:
+  `shiftwork/domain/canonical.py` (the only canonical-serialization/hash point;
+  floats rejected), `shiftwork/domain/errors.py`, `shiftwork/domain/contract_catalog.py`,
+  `shiftwork/evaluator/evaluator.py`, `shiftwork/sealed/store.py`,
+  `shiftwork/ledger/reducer.py`, `shiftwork/ledger/chain.py`,
+  `shiftwork/store/schema.sql` (real DDL, `PRAGMA user_version = 2`), the authored
+  fixtures (`fixtures/catalogs/bookshop_v1.json`,
+  `fixtures/runs/thin_stale.json`, `fixtures/shop/bookshop_snapshot.json`,
+  `fixtures/mission/bookshop_mission_v1.json`,
+  `sealed/cases/bookshop_stale_information.json`), `demos/thin_path.py`, and the tests
+  `tests/domain/test_canonical.py`, `tests/domain/test_contract_catalog.py`,
+  `tests/store/{conftest,test_versions,test_restore}.py`,
+  `tests/api/test_thin_path.py`. Modified: `domain/models.py` (real ContractParams,
+  ContractCatalog, Claim/ServiceResponse, ArtifactVersion with files/storage_ref/
+  contract/contract_catalog_hash, split LedgerEventDraft/LedgerEvent), `config.py`,
+  `store/db.py` (loads schema.sql; version-mismatch guard), `store/repo.py`
+  (engagement_config group; artifact_versions persist files/storage_ref/contract/
+  catalog hash and re-verify content_hash on read → VersionTampered),
+  `orchestrator.py` (real freeze + real finalize, no incident), `api/routes.py`
+  (freeze takes a contract body; domain-error handler), `api/schemas.py`
+  (ContractView/FreezeVersionRequest; chain_status may be BROKEN), `app.py` (seeds
+  engagement_config; registers the domain handler), `demos/lifecycle.py`, and
+  `tests/api/test_tracer_lifecycle.py` (rewritten to the real path). Deleted
+  `shiftwork/fixtures/runs/tracer_transcript.json` (staged via `git rm`, not committed).
+  Verbatim evidence run this session under the project `.venv` (Python 3.12.13):
+  (1) `python -m demos.thin_path` exit 0, final line:
+  "thin-path evidence complete: run run-0001 FINALIZED, content_hash
+  87fb5615fd5482f4a0c395a1f95fad7fa5fc4613d63c7b4e467b25b4bf714fb9, one CheckResult
+  fail/STALE_BEYOND_RULE with opaque expected_ref, one BACKLOG_RECORDED event seq 1
+  chained on genesis, chain_status VALID". The one captured output bytes were
+  `{"action":"answer","claims":[{"kind":"stock","value":"in_stock"}],"evidence_refs":["catalog:9780441013593"],"record_age_ms":5400000}`;
+  the one CheckResult was `cr-0001` verdict `fail` reason `STALE_BEYOND_RULE`
+  `expected_ref` `sealed:b8c5e7bee8760ce8d8cae47eb88cebd55ee8150944b4f21d513a545b10822f4e`
+  `public_check_id` null; the one event hash `c0099aec092c13ec0c79c9bb934e80ba3396a47788897dc90a6c608382f1d695`
+  on genesis prev_hash, `contract_catalog_hash`
+  `d3df268cc83863a75f465543de26ab712efd7be193200a5e82710093d235ced6`.
+  (2) `python -m pytest tests/domain tests/store -q` → "26 passed in 2.19s".
+  (3) `python -m pytest tests/api -q` → "5 passed".
+  (4) `python -m pytest tests/domain tests/store tests/api -q` → "31 passed in 1.91s".
+  (5) `python -m demos.lifecycle` exit 0, final line: "lifecycle evidence complete:
+  run run-0001 FINALIZED, ledger chain VALID with 1 events, 0 open incidents (Slice 2
+  opens none)". (6) `git diff --check` reported no whitespace errors. Freeze
+  determinism/immutability/restore are asserted by `tests/store/test_versions.py`
+  (identical inputs → identical hash; changed file/contract/catalog-hash → different
+  hash; a stored version whose files are tampered raises VersionTampered) and
+  `tests/store/test_restore.py` (version hash + draft reconstruct from tables on a
+  fresh connection). The evaluator scoring path was separately verified to run with
+  `socket.socket`/`socket.create_connection` patched to raise (offline, no credential).
+  Tests landed, with clause-level honesty per the `MISTAKES.md` prevention rule:
+  1, 2, 3 (canonical hashing, FULL); 21 (version immutability, FULL); 22
+  (freeze-requires-valid-contract, FULL); 23 (PARTIAL: latest version hash + draft
+  reconstruct from tables with no executor checkpoint; the ledger-reconstruction
+  clause completes at Slice 5 and the incident-reconstruction clause at Slice 7);
+  43 (PARTIAL: changing a used option's label or rule id is refused; the
+  ledger-resolution-after-re-version clause completes at Slice 5); 44 (PARTIAL: a
+  declared limit is stored and never scored, absent from the one CheckResult and the
+  one ledger event; the "cannot satisfy a required executable dimension or silently
+  become an evaluator rule" clause completes at Slice 4 and the "and inherited" clause
+  at Slice 8); plus the thin-path smoke check (`tests/api/test_thin_path.py`) asserting
+  the one real CheckResult and one real hash-chained event are produced and persisted,
+  which fails if any step is still mocked. NOT claimed: tests 4–15 and 42 (the S6
+  evaluator/reducer robustness suites need the deepened Slices 4–5), and none of the
+  deferred partial clauses listed above. Still mocked/minimal (each deepened by a
+  named later slice): executor is `recorded` replay of one transcript only: no
+  ExecutorAdapter Protocol, no normalize_captures, no local_process, no
+  conformance/fault suite (Slice 3); evaluator is one hardcoded sealed case: no
+  SealedCaseSet, no contract-parameterization across catalog options, no negative
+  control, no unknown-schema alarm, only one of six stale_information variants (Slice
+  4); ledger is one event; verify_chain runs on every ledger/board read, but there
+  are no purity/replay-equality proofs, no fault injection, no idempotent finalize and
+  no incident opening (Slice 5); rotation, budget, incidents, inheritance, assist and
+  the six screens are absent. Schema is now `user_version = 2`; a database left at
+  version 1 raises a clear RuntimeError from `db.ensure_schema` rather than
+  auto-migrating or auto-deleting (verified against a constructed version-1 database;
+  no `*.db` file exists or was created, since demos and tests use temp paths). ALL sealed cases and fixtures authored
+  here are AGENT-DRAFTED and require the user's review before they are treated as
+  sealed acceptance authority (`04-slices.md` S11 decision 4), specifically
+  `bookshop_v1.json` (catalog), `bookshop_stale_information.json` (the one sealed case
+  and its expected value), `thin_stale.json`, `bookshop_snapshot.json` and
+  `bookshop_mission_v1.json`. Limits: this is offline runtime evidence on one fixed
+  request, not human, learning, security-isolation or prize evidence; no capability,
+  learning-gain or prize claim follows. No commit, push, branch or tag was created; the
+  pre-existing uncommitted `.gitignore` `*.db` rule was left untouched and no runtime
+  `*.db` file exists or was created (demos and tests use temp paths); the only staged
+  change is the `git rm` of the obsolete tracer transcript. `tests/packaging` (test 51) was deliberately NOT re-run this session
+  because it performs a clean-env install from `requirements.lock`, which Slice 2's
+  no-install authorization does not cover; its demo dependency `demos.lifecycle` was
+  run directly under the existing `.venv` (exit 0, FINALIZED), so the demo half of test
+  51 is exercised but the install/serve half was not re-verified. No credential use,
+  Nebius or Tavily inference call, spike run, external service, deployment or outreach
+  occurred.
+- 2026-09-18 Slice 2 hostile review (independent, execution-based) and fixes: verdict
+  **PASS** with 2 MINOR findings, no BLOCKER or MAJOR defect. The reviewer re-ran the
+  recorded evidence under `.venv` (31 passed, both demos exit 0, `git diff --check`
+  clean), recomputed every pinned hash from the raw fixtures with a standalone script
+  that imports nothing from `shiftwork` (all 5 golden vectors, the catalog hash, the
+  `expected_ref`, the artifact content hash and the ledger event hash matched the
+  recorded values), mutation-tested the thin-path smoke check (a stubbed `_finalize`
+  produced failures, so it is not vacuous) and the read-back tamper guard, confirmed
+  `verify_chain` reports BROKEN when any of payload, seq, prev_hash, hash or
+  event_type is mutated in the stored event on both `/ledger` and `/board`, dumped
+  every table after a live run to confirm no sealed-case content is readable back
+  through any endpoint or table, and re-ran the evaluator with external egress blocked
+  (DNS and socket-connect patched to raise; offline, no credential; the only socket
+  activity was asyncio's loopback self-pipe inside `TestClient`). Findings and fixes
+  applied this session: (MINOR-1) the Slice 2 evidence note implied an existing runtime
+  `shiftwork.db`; no `*.db` file exists anywhere. The note is corrected to describe
+  the version-1 guard as verified behavior rather than an existing file, and the error
+  class is logged in `MISTAKES.md`. (MINOR-2)
+  `test_declared_limit_is_stored_but_never_scored` could pass vacuously when scoring
+  is dropped; exact-count asserts are added before the absence assertions, and the fix
+  was mutation-checked (a stubbed `_finalize` now fails it). The user approved
+  including the pre-existing uncommitted `.gitignore` `*.db` rules in this slice's
+  change set and authorized the standard slice publish flow (commit on
+  `shiftwork/slice-2`, push, `--no-ff` merge to main, no co-author trailers). Post-fix
+  re-run this session: `pytest tests/domain tests/store tests/api -q` -> "31 passed";
+  `python -m demos.thin_path` exit 0 with the same content_hash
+  87fb5615fd5482f4a0c395a1f95fad7fa5fc4613d63c7b4e467b25b4bf714fb9; `python -m
+  demos.lifecycle` exit 0; `git diff --check` clean. Mirrors (`AGENTS.md` S3 and
+  `docs/SHIFTWORK_PLAN.md`) were updated to Slice 2 in this session. Limits: the
+  review is agent execution work, not human, learning or security-isolation evidence,
+  and no LLM is an independent oracle; `tests/packaging` (test 51) was again not
+  re-run (install boundary).
 - Read `../../../AGENTS.md`, `../../SHIFTWORK_PLAN.md`,
   `../../../HACKATHON_REQUIREMENTS.md` and every file in this folder before continuing.
 - Apply `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md`.
