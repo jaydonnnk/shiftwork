@@ -70,8 +70,9 @@ summaries when a time-sensitive external claim is being made.
   conformance, 2026-09-18) are implemented, reviewed and merged to main; verbatim
   Slice 3 evidence is recorded in `docs/plans/shiftwork/00-status.md`. Slice 4
   (contract-parameterized evaluator + first sealed family, 2026-09-18) is
-  implemented and demonstrated, awaiting the user's review of the new sealed
-  cases. Slice 5 (reducer + hash chain + idempotent finalization, 2026-09-18) is
+  implemented and demonstrated; the user reviewed and sealed the six
+  `stale_information` cases as-is on 2026-09-18. Slice 5
+  (reducer + hash chain + idempotent finalization, 2026-09-18) is
   implemented and demonstrated; its independent review's fixes (a failing-capable
   chain-linkage test, route-level BROKEN 409 tests, corrected deferral and
   snapshot wording) landed the same day; slices 6-17 are not implemented.

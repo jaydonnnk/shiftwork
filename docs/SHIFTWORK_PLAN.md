@@ -23,8 +23,9 @@ Slices 1 (tracer bullet, 2026-09-17), 2 (thin real vertical path, 2026-09-18) an
 3 (recorded/local_process executor conformance, 2026-09-18) are implemented,
 reviewed and merged to main; verbatim Slice 3 evidence is recorded in
 `docs/plans/shiftwork/00-status.md`. Slice 4 (contract-parameterized evaluator
-and the first sealed family) is implemented and demonstrated, awaiting the
-user's review of the new sealed cases. Slice 5 (reducer, hash chain, idempotent
+and the first sealed family) is implemented and demonstrated, and the user
+reviewed and sealed the six `stale_information` cases as-is on 2026-09-18.
+Slice 5 (reducer, hash chain, idempotent
 finalization, ledger hardening) is implemented and demonstrated 2026-09-18; an
 independent review returned 2 MAJOR and 2 MINOR findings plus a Gate 3 wording
 escalation, and all fixes landed the same day (evidence in `00-status.md`).

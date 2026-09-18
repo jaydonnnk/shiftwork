@@ -39,7 +39,7 @@ re-steer?"):
 - [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
 - [x] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event; implemented and demonstrated 2026-09-18 (`python -m demos.thin_path`; evidence in Notes)
 - [x] Slice 3: Executor conformance (recorded + local_process); implemented, demonstrated, reviewed (PASS) and merged to main 2026-09-18 (verbatim evidence below; test 50 partial, test 29 skipped)
-- [x] Slice 4: Contract-parameterized evaluator + first sealed family; implemented and demonstrated 2026-09-18 (evidence below; the new sealed cases await the user's review)
+- [x] Slice 4: Contract-parameterized evaluator + first sealed family; implemented and demonstrated 2026-09-18; the six sealed cases were reviewed and SEALED as-is by the user 2026-09-18 (evidence below)
 - [x] Slice 5: Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger; implemented and demonstrated 2026-09-18 (`python -m demos.finalize_run` + `pytest tests/ledger -q`; evidence below)
 - [ ] Slice 6 — Isolation and leakage hardening
 - [ ] Slice 7 — Budget + rotation + incidents + repair
@@ -56,8 +56,9 @@ re-steer?"):
 
 Slices 1, 2 and 3 are implemented, reviewed and merged to main (2026-09-17 and
 2026-09-18; Slice 3 published as commit `8df3d6b`, `--no-ff` merge `1f38220`);
-Slice 4 is implemented and demonstrated on `shiftwork/slice-4` and awaits the
-user's review of the new sealed cases (evidence below; the change set is
+Slice 4 is implemented and demonstrated on `shiftwork/slice-4`, merged to main,
+and its six sealed cases were reviewed and SEALED as-is by the user on
+2026-09-18 (evidence below; the change set is
 distinguishable from the reviewed Slice 3 baseline at commit `1e4e6c1` by
 `git diff`); Slice 5 is implemented and demonstrated in the worktree (evidence
 below), and the fixes from its independent review (2 MAJOR, 2 MINOR, plus the
@@ -952,8 +953,9 @@ service, deployment or outreach occurred.
 
 ## Slice 4 evidence: 2026-09-18
 
-Slice 4 is IMPLEMENTED and demonstrated; the user's review of the new sealed cases
-is pending (not yet accepted, not sealed as acceptance authority). An independent
+Slice 4 is IMPLEMENTED and demonstrated; the user's review of the new sealed
+cases completed 2026-09-18: the family was SEALED as-is (see the sealing
+acceptance subsection at the end of this section). An independent
 execution review of this change set returned REVISE on 2026-09-18; the corrections
 it required are recorded in the corrections subsection at the end of this section,
 and the evidence above stays as the first-pass record. Baseline:
@@ -1281,6 +1283,26 @@ the merge. No push was performed; local `origin/*` refs are unchanged
 co-author trailers. Post-merge sanity on main: `pytest tests/evaluator -q` 12
 passed, `python -m demos.thin_path` exit 0 with the unchanged artifact
 content_hash and chain VALID.
+
+### Sealing acceptance: 2026-09-18
+
+The user reviewed the sealed family and SEALED IT AS-IS on 2026-09-18,
+satisfying the operator-review clause in `bookshop_stale_snapshot.json`'s
+description and `04-slices.md` S11 decision 4. Reviewed and accepted: the six
+`stale_information` cases in `bookshop_stale_information.json`, the frozen
+7-record snapshot, catalog v2 (whose learner-visible labels carry the one-hour
+freshness limit and the price high-risk kind), the passing and failing
+transcripts, and the two guard tests pinning the visible-rule boundary
+(`test_v2_labels_declare_the_rule_constants`,
+`test_sealed_expected_blocks_carry_no_rule_parameters`). Fresh evidence shown at
+the review: `pytest tests/evaluator -q` 12 passed;
+`demos.evaluate_transcript --fixture fixtures/runs/passing_stale.json` 6 pass /
+0 fail and `--fixture fixtures/runs/failing_stale.json` 0 pass / 6 fail, both
+with sockets blocked during scoring under STANCE USE_NEWEST_RECORD_WITH_AGE.
+From this point the family carries sealed acceptance authority: the learner
+artifact, Nemotron and agent runtime code may not read or modify these cases,
+and changes require a new authored variant under the rotation rules (Gate 3
+S7.1), never an edit to sealed content.
 
 ## Slice 5 evidence: 2026-09-18
 
