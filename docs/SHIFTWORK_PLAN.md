@@ -15,7 +15,9 @@ separately authorized. Backtrack an earlier gate only for a concrete blocker.
 Slices 1 (tracer bullet, 2026-09-17), 2 (thin real vertical path, 2026-09-18) and
 3 (recorded/local_process executor conformance, 2026-09-18) are implemented,
 reviewed and merged to main; verbatim Slice 3 evidence is recorded in
-`docs/plans/shiftwork/00-status.md`. Slice 4 has not started.
+`docs/plans/shiftwork/00-status.md`. Slice 4 (contract-parameterized evaluator
+and the first sealed family) is implemented and demonstrated, awaiting the
+user's review of the new sealed cases.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** the Slice 2 thin real path remains (canonical hashing, one
 recorded replay, one sealed case scored, one hash-chained ledger event). Slice 3
@@ -23,9 +25,12 @@ adds real loopback trusted-fixture execution, seven-case replay/local conformanc
 exact-byte artifact guards and a pinned child environment. Capture-time equality
 uses an injected clock, not equal measured performance. Tests 28, 30 and 31 land;
 test 50 is partial (offline environment/log clauses only), and test 29 is explicitly
-skipped until Slice 14. This is not hostile-code isolation. Fixtures and transcripts
-are agent-authored and require user review before acceptance authority. Contract-
-parameterized evaluation and ledger hardening are not built. No Sandbox execution,
+skipped until Slice 14. This is not hostile-code isolation. Slice 4 adds the
+contract-parameterized offline evaluator and completes the six-variant
+`stale_information` sealed family; tests 11-15 and 42 land fully and the test 44
+evaluator clause completes. Fixtures and transcripts
+are agent-authored and require user review before acceptance authority. Ledger
+hardening is not built. No Sandbox execution,
 learner study, transfer result, Tavily ablation, prize merit or score is demonstrated.
 **Working forecast:** current 27/40; pre-evidence cap 31/40; conditional best
 case 35/40. Potential Impact remains at most 4.0 in that best case.

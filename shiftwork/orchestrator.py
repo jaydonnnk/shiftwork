@@ -8,8 +8,10 @@ later slice (S5/S7); Slice 2 opens no incident.
 """
 
 import asyncio
+import json
 import sqlite3
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from shiftwork import config
@@ -21,10 +23,10 @@ from shiftwork.domain.models import (
     ExecutorFailure,
     Incident,
     IncidentState,
+    JsonValue,
     Run,
     RunOutput,
     RunState,
-    ServiceResponse,
     Shift,
 )
 from shiftwork.evaluator import evaluator
@@ -236,29 +238,33 @@ def execute_run_task(db_path: str, run_id: str) -> None:
         conn.close()
 
 
-def _finalize(conn: sqlite3.Connection, run: Run, outputs: list[RunOutput]) -> None:
-    """Real finalization: evaluate one sealed case, reduce to one chained event.
+def _public_records(snapshot_path: Path) -> dict[str, JsonValue]:
+    data = json.loads(snapshot_path.read_text(encoding="utf-8"))
+    return {record["record_id"]: record for record in data["records"]}
 
-    Slice 2 scores the one captured response against the one sealed case, then
-    reduces the resulting check into ONE hash-chained ledger event. No incident is
-    opened (that is a later slice); the run ends FINALIZED with a real CheckResult
-    and a real LedgerEvent persisted.
+
+def _finalize(conn: sqlite3.Connection, run: Run, outputs: list[RunOutput]) -> None:
+    """Real finalization: evaluate the drawn sealed cases, reduce to chained events.
+
+    Slice 4 scores every captured response against the sealed family inventory
+    (the whole first family while variant rotation does not exist) under the
+    version's committed contract, then reduces the failing checks into
+    hash-chained ledger drafts. No incident is opened (that is a later slice);
+    the run ends FINALIZED with real CheckResults and real LedgerEvents
+    persisted. The run-consumed snapshot is the same file the executor received.
     """
     shift = _require_shift(conn, run.shift_id)
-    case = sealed_store.load_thin_case()
+    version = repo.get_version(conn, run.artifact_version_id)
+    if version is None:
+        raise LifecycleError("not_found", f"unknown artifact version: {run.artifact_version_id}")
+    cases = sealed_store.load_drawn_cases(run.id)
+    public_records = _public_records(config.BOOKSHOP_SNAPSHOT)
     mission = reducer.load_mission(config.BOOKSHOP_MISSION)
 
     check_results: list[CheckResult] = []
-    for output in outputs:
-        if output.request_ordinal != case.request_ordinal:
-            continue
-        response = ServiceResponse.model_validate_json(output.body)
-        result = evaluator.evaluate(
-            case,
-            response,
-            check_result_id=f"cr-{repo.count_check_results(conn) + len(check_results) + 1:04d}",
-            run_id=run.id,
-            observed_ref=output.id,
+    for result in evaluator.evaluate(outputs, cases, version.contract, public_records):
+        result = result.model_copy(
+            update={"id": f"cr-{repo.count_check_results(conn) + len(check_results) + 1:04d}"}
         )
         repo.insert_check_result(conn, result)
         check_results.append(result)

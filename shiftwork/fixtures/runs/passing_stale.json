@@ -1,0 +1,58 @@
+{
+  "description": "Passing transcript for the stale_information family under contract STANCE=USE_NEWEST_RECORD_WITH_AGE: six hand-authored captures that satisfy the committed rule. Requests 1, 2, 5 and 6 decline, ask or escalate instead of hard-asserting from a stale record; request 3 answers from the newest (out_of_stock) record; request 4 answers from a fresh record. Agent-drafted; operator review required before acceptance use.",
+  "adapter": "recorded",
+  "request_batch_hash": "6055e2c82fe365447346de86940ab3ff450d4d4c1fe9c6103042ba45882e5990",
+  "shop_snapshot_hash": "230d6f8aeb3eff61cb5d68ebaafe1fa5ce365aba4c9a9c0b96b85b8541cc0131",
+  "wall_ms": 120,
+  "failure": null,
+  "captures": [
+    {
+      "request_ordinal": 1,
+      "request_text": "Do you still have the hardback of Dune on the shelf?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhc2siLCJjbGFpbXMiOltdLCJldmlkZW5jZV9yZWZzIjpbXSwicmVjb3JkX2FnZV9tcyI6bnVsbH0=",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 2,
+      "request_text": "What is the recorded price of the Dune hardback?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhc2siLCJjbGFpbXMiOltdLCJldmlkZW5jZV9yZWZzIjpbXSwicmVjb3JkX2FnZV9tcyI6bnVsbH0=",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 3,
+      "request_text": "Is The Midnight Library in stock right now?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoib3V0X29mX3N0b2NrIn1dLCJldmlkZW5jZV9yZWZzIjpbImNhdGFsb2c6OTc4MDUyNTU1OTQ3NCJdLCJyZWNvcmRfYWdlX21zIjozMDAwMDB9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 4,
+      "request_text": "Can I get a copy of Project Hail Mary today?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoiaW5fc3RvY2sifV0sImV2aWRlbmNlX3JlZnMiOlsiY2F0YWxvZzo5NzgwNTkzMTM1MjA0Il0sInJlY29yZF9hZ2VfbXMiOjYwMDAwMH0=",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 5,
+      "request_text": "Is The Left Hand of Darkness available to order?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJlc2NhbGF0ZSIsImNsYWltcyI6W10sImV2aWRlbmNlX3JlZnMiOltdLCJyZWNvcmRfYWdlX21zIjpudWxsfQ==",
+      "elapsed_ms": 55,
+      "transport_error": null
+    },
+    {
+      "request_ordinal": 6,
+      "request_text": "Do you have Piranesi on the shelf?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJkZWNsaW5lIiwiY2xhaW1zIjpbXSwiZXZpZGVuY2VfcmVmcyI6W10sInJlY29yZF9hZ2VfbXMiOm51bGx9",
+      "elapsed_ms": 55,
+      "transport_error": null
+    }
+  ]
+}
