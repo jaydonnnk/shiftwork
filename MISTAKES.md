@@ -159,3 +159,50 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   behavior) before its result is trusted, and it must print the observed state, not
   a constant. On this machine, tracked-file worktree bytes are CRLF, so byte-level
   edits, pins and probes must match `\r\n` or normalize explicitly.
+
+## 2026-09-18 Client visual brief patch omitted an added-line marker
+
+- **What happened:** the first combined `apply_patch` call failed validation before
+  changing any file because one wrapped line in the new-file hunk did not begin with
+  `+`.
+- **Root cause:** a large multi-file patch was assembled as one string without first
+  checking every line of the add-file section for a patch marker.
+- **Prevention rule:** create new files in a separate patch, keep multi-file patches
+  small, and verify every line in an add-file hunk begins with `+` before applying it.
+
+## 2026-09-18 Slice 5 test 6 claimed FULL while the linkage clause was not failing-capable
+
+- **What happened:** the Slice 5 evidence claimed test 6 FULL for "every tamper
+  (payload, hash, prev_hash, seq, reorder) is BROKEN", but the independent review
+  removed `verify_chain`'s prev-hash linkage check (`chain.py:88-89`, byte-verified
+  mutation) and the test still passed: the prev_hash tamper case is caught by hash
+  recomputation (the digest covers prev_hash), so the load-bearing linkage check had
+  zero failing-capable coverage. The reviewer proved linkage is load-bearing with a
+  forged-but-self-consistent spliced event that only linkage catches.
+- **Root cause:** clause coverage was claimed per named tamper input, not per
+  verifying code path; two independent checks can catch the same injected fault, and
+  a mutation probe on only the producer side (`append`) left the verifier clause
+  unprobed. Third occurrence of the count-level-not-clause-level pattern
+  (2026-09-16, 2026-09-17, this entry); at 4 occurrences graduate into `agents.md`.
+- **Prevention rule:** when a test asserts a guard fires, mutate EACH guard branch
+  independently and require a failure per branch; a tamper input that two checks can
+  catch proves neither. For hash-chain verifiers, include a forged-but-self-consistent
+  splice case alongside field-tamper cases.
+
+## 2026-09-18 Slice 5 status claimed a per-run snapshot pairing that does not exist
+
+- **What happened:** the Slice 5 evidence note said `finalize_run` "evaluates against
+  the snapshot the run consumed". The independent review found no pairing mechanism:
+  `finalize_run` reads the module global `config.BOOKSHOP_SNAPSHOT`, `execute_run`
+  hardcodes the same constant into `shop_snapshot_ref`, and `Run` has no snapshot
+  field. The actual fix shipped was making test/demo inputs cite that snapshot's
+  records. A latent bug follows: a run consuming `bookshop_stale_snapshot.json` would
+  finalize against the wrong snapshot.
+- **Root cause:** the note described the intended invariant instead of the mechanism
+  in the code; no read of `finalize_run`'s inputs backed the "the run consumed"
+  phrasing. Third occurrence of the unverified-state-as-fact pattern (WinError 4551,
+  Slice 2 runtime-db claim, this entry); at 4 occurrences graduate into `agents.md`.
+- **Prevention rule:** evidence notes must describe the code path that exists
+  (name the constant, field or function actually used), not the invariant it
+  happens to satisfy today; when inputs coincide by configuration rather than by
+  mechanism, say so and record the decoupling as a latent-bug note.

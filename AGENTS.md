@@ -48,7 +48,11 @@ summaries when a time-sensitive external claim is being made.
   direction); Gate 2 — Architecture APPROVED 2026-09-15; Gate 3 — Program Design
   APPROVED 2026-09-17 (re-approved a second time after the S2 packaging backtrack —
   `pyproject.toml`, `requirements.lock`, `demos/`, test 51; history: first backtrack
-  re-approved 2026-09-17, originally approved 2026-09-16; the plain
+  re-approved 2026-09-17, originally approved 2026-09-16; BACKTRACKED a third time
+  2026-09-18, scoped to one S5.6 sentence: the independent Slice 5 review found
+  "never `expected_ref`" contradicted test 13's opaque-ref assertion, and the
+  reconciled wording permits `expected_ref` only as the opaque `sealed:` digest
+  with no behavior change; RE-APPROVED a third time 2026-09-18; the plain
   HTML/CSS/vanilla-JS client baseline is unchanged, so a framework or rendering
   engine for the isometric room would reopen Gate 3); Gate 4 — Slice Plan
   RE-APPROVED 2026-09-18 (first approved 2026-09-17 after three review rounds; the
@@ -61,7 +65,11 @@ summaries when a time-sensitive external claim is being made.
   Slice 3 evidence is recorded in `docs/plans/shiftwork/00-status.md`. Slice 4
   (contract-parameterized evaluator + first sealed family, 2026-09-18) is
   implemented and demonstrated, awaiting the user's review of the new sealed
-  cases; slices 5-17 are not implemented. Test 50 is partial
+  cases. Slice 5 (reducer + hash chain + idempotent finalization, 2026-09-18) is
+  implemented and demonstrated; its independent review's fixes (a failing-capable
+  chain-linkage test, route-level BROKEN 409 tests, corrected deferral and
+  snapshot wording) landed the same day; slices 6-17 are not implemented.
+  Test 50 is partial
   (offline environment clauses only); test 29 is explicitly skipped until Slice 14.
   This is a trusted-fixture execution guard, not hostile-code isolation.
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and

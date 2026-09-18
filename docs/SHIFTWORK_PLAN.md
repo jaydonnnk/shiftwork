@@ -9,7 +9,11 @@ role framing and the selected isometric operational-room visual direction); Gate
 Architecture APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17
 (re-approved a second time after the S2 packaging backtrack — `pyproject.toml`,
 `requirements.lock`, `demos/`, test 51; history: first backtrack re-approved
-2026-09-17, originally approved 2026-09-16); Gate 4 — Slice Plan RE-APPROVED
+2026-09-17, originally approved 2026-09-16; BACKTRACKED a third time 2026-09-18,
+scoped to one S5.6 sentence after the independent Slice 5 review found "never
+`expected_ref`" contradicted test 13's opaque-ref assertion; the reconciled
+wording permits `expected_ref` only as the opaque `sealed:` digest, no behavior
+change, RE-APPROVED a third time 2026-09-18); Gate 4 — Slice Plan RE-APPROVED
 2026-09-18 (first approved 2026-09-17 after three review rounds; the reopen was
 scoped to the rewritten Slice 9 to 11 requirements). Slice
 work proceeds one slice at a time under `04-slices.md` S10; credentials, installs,
@@ -20,7 +24,10 @@ Slices 1 (tracer bullet, 2026-09-17), 2 (thin real vertical path, 2026-09-18) an
 reviewed and merged to main; verbatim Slice 3 evidence is recorded in
 `docs/plans/shiftwork/00-status.md`. Slice 4 (contract-parameterized evaluator
 and the first sealed family) is implemented and demonstrated, awaiting the
-user's review of the new sealed cases.
+user's review of the new sealed cases. Slice 5 (reducer, hash chain, idempotent
+finalization, ledger hardening) is implemented and demonstrated 2026-09-18; an
+independent review returned 2 MAJOR and 2 MINOR findings plus a Gate 3 wording
+escalation, and all fixes landed the same day (evidence in `00-status.md`).
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** the Slice 2 thin real path remains (canonical hashing, one
 recorded replay, one sealed case scored, one hash-chained ledger event). Slice 3
