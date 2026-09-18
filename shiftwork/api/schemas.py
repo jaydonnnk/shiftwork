@@ -10,7 +10,6 @@ from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
     Incident,
-    LedgerEvent,
     Run,
     RunOutput,
     Shift,
@@ -113,9 +112,10 @@ class RunOutputView(BaseModel):
     elapsed_ms: int | None = None
     transport_error: str | None = None
     log_base64: str | None = None
+    customer_text: str | None = None
 
     @classmethod
-    def of(cls, output: RunOutput) -> "RunOutputView":
+    def of(cls, output: RunOutput, customer_text: str | None = None) -> "RunOutputView":
         return cls(
             id=output.id,
             run_id=output.run_id,
@@ -130,6 +130,7 @@ class RunOutputView(BaseModel):
                 if output.log_ref and output.log_ref.startswith("data:application/octet-stream;base64,")
                 else None
             ),
+            customer_text=customer_text,
         )
 
 
@@ -180,11 +181,45 @@ class IncidentView(BaseModel):
         return cls.model_validate(incident)
 
 
+class LedgerEventDerivation(BaseModel):
+    model_config = _FROZEN
+
+    run_id: str
+    check_id: str
+    observed_ref: str
+    request_ordinal: int
+    request_text: str
+    output_body_base64: str
+    verdict: Literal["pass", "fail", "error"]
+    reason_code: str | None = None
+
+
+class LedgerEventCatalog(BaseModel):
+    model_config = _FROZEN
+
+    catalog_version: int
+    catalog_record: dict[str, Any]
+
+
+class LedgerEventView(BaseModel):
+    model_config = _FROZEN
+
+    seq: int
+    event_type: str
+    cause_refs: tuple[str, ...]
+    payload: dict[str, Any]
+    synthetic: bool
+    prev_hash: str
+    hash: str
+    derivation: LedgerEventDerivation | None = None
+    catalog: LedgerEventCatalog | None = None
+
+
 class LedgerView(BaseModel):
     model_config = _FROZEN
 
-    chain_status: Literal["VALID", "BROKEN"]
-    events: tuple[LedgerEvent, ...]
+    chain_status: Literal["VALID"]
+    events: tuple[LedgerEventView, ...]
 
 
 class BoardView(BaseModel):
@@ -203,7 +238,7 @@ class BoardView(BaseModel):
     total_incidents: int
     ledger_event_count: int
     ledger_totals: dict[str, int]
-    chain_status: Literal["VALID", "BROKEN"]
+    chain_status: Literal["VALID"]
 
     @classmethod
     def of(cls, snapshot: dict[str, Any]) -> "BoardView":

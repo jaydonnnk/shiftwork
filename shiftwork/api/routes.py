@@ -99,7 +99,10 @@ def get_run(run_id: str, conn: sqlite3.Connection = Depends(get_conn)) -> schema
 def get_outputs(
     run_id: str, conn: sqlite3.Connection = Depends(get_conn)
 ) -> list[schemas.RunOutputView]:
-    return [schemas.RunOutputView.of(output) for output in orchestrator.list_outputs(conn, run_id)]
+    return [
+        schemas.RunOutputView.of(output, customer_text=orchestrator.customer_text_for(output))
+        for output in orchestrator.list_outputs(conn, run_id)
+    ]
 
 
 @router.get("/runs/{run_id}/checks", response_model=list[schemas.CheckResultView])

@@ -122,7 +122,7 @@ def main() -> int:
             print(
                 f"lifecycle evidence complete: run {run_id} FINALIZED, ledger chain "
                 f"{ledger['chain_status']} with {len(ledger['events'])} events, "
-                f"{len(board['open_incidents'])} open incidents (Slice 2 opens none)"
+                f"{len(board['open_incidents'])} open incidents (no failing check maps to INCIDENT_OPENED)"
             )
     return 0
 
