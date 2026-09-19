@@ -1,7 +1,11 @@
 # Vertical Slice Plan: Shiftwork
 
-Gate: 4 — Vertical Slices (RE-APPROVED 2026-09-18, scoped to the rewritten Slice 9
-to 11 client requirements; first APPROVED 2026-09-17). The reopen covered S5's
+Gate: 4 — Vertical Slices (RE-APPROVED 2026-09-19 after the scoped reconciliation
+revision; first APPROVED 2026-09-17; the 2026-09-18 reopen was scoped to the
+rewritten Slice 9 to 11 client requirements; a follow-up revision was drafted later
+the same day and approved by the user in chat on 2026-09-19; see the revision
+notes below). The
+reopen covered S5's
 rewritten client requirements, which now carry the user-selected isometric
 operational-room acceptance criteria and the explicit junior applied AI engineer
 role framing; Slices 1 to 8 and 12 to 17 remain under the 2026-09-17 approval, which
@@ -18,6 +22,30 @@ model-feedback evidence pack, added the conditional Slice 17, and recorded S11
 decisions 5–6. Round 3 applied the review's three consistency corrections (Python
 bound `>=3.12,<3.14`; Gate 3 header record; neutral Tavily checklist), and the user
 approved this plan the same day.
+
+**Scoped revision 2026-09-19 (RE-APPROVED by the user in chat on 2026-09-19):** the
+Gate 3
+fourth-backtrack revision and the Slice 6 independent-verification audit changed
+clause ownership, so the following clauses are revised: Slice 6's repair owns the
+revised Gate 3 test 11/13/17 runtime checks and the audit's scanner/incident gaps;
+remaining reference coverage is mapped explicitly (prompt surfaces re-run at Slice
+12, real-provisioning surfaces at Slice 14); per-run snapshot pairing lands in Slice
+7 before varied execution; restart recovery is explicit in Slice 8; and slice
+completion gains an affected-ADR consistency check (S10). No other slice
+requirements change; the 2026-09-17 and 2026-09-18 approvals remain the historical
+record.
+
+**Follow-up revision 2026-09-19 (drafted after the round's adversarial re-review;
+RE-APPROVED by the user in chat on 2026-09-19):** two ownership items the first reconciliation left
+unresolved are assigned. Slice 7 gains the leak-response requirement ADR 0001 names:
+retiring an affected rotation group invalidates its dependent attempts by state
+(nothing is deleted), and a refill is not proof of invalidation. Slice 10 gains the
+remaining Gate 3 scoring-input alignment: `evaluate` receives the explicit
+`check_defs` and `visible_checks` inputs and the loader/scorer split matches
+S3.4/S5.5, landing with the visible-check scoring path that completes test 41. The
+Slice 6 repair scope, all other slice requirements and the 2026-09-17/2026-09-18/
+2026-09-19 approvals are unchanged.
+
 Scope: the approved architecture (`02-architecture.md`) and program design
 (`03-program-design.md`) turned into a build order of visible, working, testable
 slices. This is the approved build order: slice work proceeds one slice at a time
@@ -54,7 +82,8 @@ Each slice below lists, in the same order:
 - **Authorization** — what (if anything) beyond Gate 4 approval this slice needs.
 
 After **every** slice the workflow is: run the demo evidence, show the user the actual
-result, check the slice off in `00-status.md`, then ask **"Continue to slice N+1, or
+result, verify no affected ADR contradicts what was built (flag it for update if it
+does), check the slice off in `00-status.md`, then ask **"Continue to slice N+1, or
 re-steer?"** No slice is "done" on a green test alone; the user sees it run.
 
 Rules honored throughout (software-factory SGate 4): Slice 1 is a tracer bullet wired
@@ -302,9 +331,10 @@ not the final word on isolation.
   one of three bookshop families exists.
 - **Tests landed:** 11, 12, 13, 14, 15 (evaluator import closure, negative control, no
   expected values, contract-parameterized, unknown-schema alarm — all full); 42 (customer
-  text is derived, not authored — full). Completes the test 44 evaluator-rule clause: a
-  declared limit cannot satisfy a required executable dimension or silently become an
-  evaluator rule.
+  text is derived, not authored — full). The revised Gate 3 clauses of tests 11 and 13
+  are owned by the Slice 6 repair (see Slice 6). Completes the test 44 evaluator-rule
+  clause: a declared limit cannot satisfy a required executable dimension or silently
+  become an evaluator rule.
 - **Authoring / config:** **sealed family 1** — `stale_information`: the remaining five
   case specs + expected values + the matching request ordinals and snapshot records (the
   first variant was authored in Slice 2). Requires operator review for semantic
@@ -353,6 +383,28 @@ not the final word on isolation.
 
 ### Slice 6 — Isolation and leakage hardening
 
+- **Status: NEEDS REPAIR (reopened 2026-09-19).** Independent verification returned
+  REVISE: four injected file/path/incident/client faults passed the current suite, and
+  controller stdout/stderr plus computed imports escaped their scoped checks. The
+  2026-09-18 implementation and evidence are preserved in `00-status.md` as history,
+  not current coverage proof. The sealed `CheckResultView.check_id` removal stays;
+  ledger `check_id` values are public result IDs. Acceptance requires every reproduced
+  mutation to fail, a fresh independent re-review and the user's acceptance; Slice 7
+  must not start before that.
+- **Repair scope (from the 2026-09-19 audit):**
+  - the workspace observer records real file paths and bytes before subprocess
+    launch, not only `Path.write_bytes`;
+  - host-path needles are normalized on both sides (raw, backslash-escaped and
+    forward-slash forms; decoded nested JSON string values) with a scanner self-test;
+  - an incident-producing run is required and both its endpoint and the nested board
+    projection are scanned, alongside served HTML and controller stdout/stderr;
+  - the public-corpus filter cannot exempt fragments of a leaked note; exemptions
+    require independently justified public overlaps;
+  - computed dynamic-import targets are rejected for the named import mechanisms;
+  - the approved `GET`/`PUT /api/shifts/{id}/artifact` route is implemented (live
+    `GET` returned 404 and `PUT` 405 while `/draft` returned 200);
+  - provisioning enforces manifest filename containment (traversal, absolute paths,
+    collisions).
 - **Delivers:** the structural isolation that ADR 0001 requires and that Test 1's
   "hidden cases or credentials reachable" kill condition depends on: sealed import-graph
   enforcement, sandbox-payload manifest allowlist, sentinel-leak scanning of every
@@ -360,25 +412,37 @@ not the final word on isolation.
   draft round-trip with no internal refs.
 - **Demo evidence:**
   - `python -m pytest tests/sealed tests/api -q` green: a unique sentinel placed in a
-    sealed case appears in no sandbox payload, no prompt, no API response and no log;
+    sealed case appears in no sandbox payload, no prompt (non-vacuous from Slice 12),
+    no API response, no log, no served HTML and no controller stdout/stderr;
     `executor/`, `assist/`, `api/`, `client` never import `shiftwork.sealed`; the
-    provisioning manifest equals the allowlist exactly; reason-code strings contain no
+    provisioning manifest equals the allowlist exactly and filename containment
+    rejects traversal/absolute/collision destinations; reason-code strings contain no
     numbers, case text or hidden counts; injected host markers never reach a
     learner-visible payload; `GET`/`PUT .../artifact` round-trips with no internal refs.
+  - every mutation the 2026-09-19 audit reproduced fails against the repaired checks
+    and is restored byte-identically (the mutations are listed in `00-status.md`).
 - **Still mocked / missing:** rotation/budget, incident resolution/repair and
   inheritance still absent (Slices 7/8); assist gateway not yet built (its
   sealed-isolation test 37 lands in Slice 12).
-- **Tests landed:** 16 (partial: sentinel absent from every sandbox payload, API
-  response and log; the "no prompt" clause is vacuous until the assist gateway exists
-  and must re-run non-vacuously at Slice 12); 17 (partial: sealed import graph over
-  `executor/`, `api/`, `client`; the `assist/` arm completes at Slice 12); 18 (partial:
-  manifest equals the allowlist and sealed specs/expectations are absent from the manifest
-  and every API response; the "absent from every prompt before, during and after
-  execution" clause is vacuous until the assist gateway exists and re-runs non-vacuously
-  at Slice 12 and against real provisioning at Slice 14; the "future customer stimuli
-  stay absent until their run" clause completes at Slice 7 once per-run variant selection
-  exists); 19, 20 (render-map pinned, host paths/env never reach learner); 45
-  (draft round-trip has no internal refs).
+- **Tests landed:** 19 (render-map pin — supported as-is). 11, 13 (revised Gate 3
+  clauses owned here: scoring purity is checked after permitted loader I/O; API
+  identity/digest checks distinguish public links from internal case linkage).
+  16 (partial: sentinel absent from every sandbox payload, API response, log, served
+  HTML and controller stdout/stderr; the "no prompt" clause is vacuous until the
+  assist gateway exists and must re-run non-vacuously at Slice 12). 17 (partial:
+  sealed import graph over `executor/`, `api/`, `client`, now including the revised
+  clause — the runtime importer rule rejects computed dynamic-import targets for the
+  named mechanisms; the `assist/` arm completes at Slice 12). 18 (partial: manifest
+  equals the allowlist and sealed specs/expectations are absent from the manifest and
+  every API response; filename containment is repaired here; the "absent from every
+  prompt before, during and after execution" clause is vacuous until the assist
+  gateway exists and re-runs non-vacuously at Slice 12 and against real provisioning
+  at Slice 14; the "future customer stimuli stay absent until their run" clause
+  completes at Slice 7 once per-run variant selection exists). 20 (partial: path
+  needles normalized for forward-slash and nested-JSON forms; the written
+  specification is a local-adapter run, not a tokenfactory arm). 45 (draft
+  round-trip has no internal refs; NOT FULL, its audit-identified reference-coverage
+  gaps must close before acceptance).
 - **Authoring / config:** none new (uses Slice 3/4 fixtures + sentinels).
 - **Authorization:** none.
 
@@ -386,15 +450,24 @@ not the final word on isolation.
 
 - **Delivers:** `orchestrator.start_run` enforces the attempt limit and draws one
   never-exposed variant per enabled family atomically (`rotation_draws`), fail-closed on
-  exhaustion; incidents open on a failing check and resolve only when a later run of a new
+  exhaustion; each run persists the shop-snapshot reference it consumed and `finalize_run`
+  scores against that run's snapshot instead of the global `config.BOOKSHOP_SNAPSHOT`
+  (latent bug from the Slice 5 review; must land before runs consume varied snapshots);
+  incidents open on a failing check and resolve only when a later run of a new
   version passes the linked regression and the current unseen acceptance check; the repair
-  loop (edit → freeze → run → resolve). Authors the **remaining two bookshop families**.
+  loop (edit → freeze → run → resolve); leak response: retiring a compromised rotation
+  group invalidates its dependent attempts by state change, never by deletion, and a
+  refill is not proof of invalidation (no operator surface is added in this slice).
+  Authors the **remaining two bookshop families**.
 - **Demo evidence:**
   - `python -m pytest tests/orchestrator tests/api -q` green: the (limit+1)th run POST is
     409 with no run row; two concurrent boundary POSTs create exactly one run + one draw
     per family; all three attempts consume distinct variants and failed/interrupted runs
     still consume reservations; an exhausted family refuses the whole run; an incident
-    resolves only on a passing later run of the new version.
+    resolves only on a passing later run of the new version; a run that consumed a
+    non-default snapshot finalizes against the snapshot it consumed, not the module
+    default; a retired rotation group's dependent attempts read back as invalidated by
+    state, with their rows and captures retained.
   - CLI: run a failing artifact → incident opens with a reason code; repair → new version
     → new attempt → incident resolves; a third distinct attempt draws a third variant.
 - **Still mocked / missing:** inheritance/close (Slice 8); the six screens still the stub;
@@ -417,7 +490,9 @@ not the final word on isolation.
   become `CLOSED_UNRESOLVED` rows inherited as incidents, never as `LIMIT_DECLARED`
   events; refuses in-flight runs); `open_next_shift` seeds from inheritance (latest
   version, decision/check files, unresolved incidents, declared limits, verified ledger
-  summary); startup reconciliation (`reconcile_interrupted`). Then **executes the Test 1
+  summary); startup reconciliation (`reconcile_interrupted`: a run left RUNNING by a
+  restart is reconciled to FAILED with its captured bytes and rotation draws retained,
+  the gap the Slice 6 audit observed). Then **executes the Test 1
   offline pre-proof** (SHIFTWORK_PLAN S9) on the `local_process` adapter — a recorded
   pre-proof, not the full Test 1 verdict (see S3).
 - **Demo evidence:**
@@ -520,7 +595,10 @@ narrow widths, reporting the actual URL/port.
   correctness stances, editable boundaries, structured visible-check builder and the
   fixed "May: Recommend with a clear label" copy displayed not editable. The repair view
   keeps linked evidence, competing repair directions, the repair workspace and visible
-  checks living in the artifact's check file. The independent evaluator booth remains
+  checks living in the artifact's check file. The evaluator call stack completes the
+  approved Gate 3 S3.4/S5.5 signatures here: `evaluate` receives explicit `check_defs`
+  and `visible_checks` inputs, with the sealed-loader call staying outside the pure
+  scorer. The independent evaluator booth remains
   visually locked and cannot be selected as an editing surface.
 - **Demo evidence:** browser at desktop and narrow widths: author a contract and one
   visible check through the owner desk, freeze, run; the customer request activates the
@@ -531,7 +609,8 @@ narrow widths, reporting the actual URL/port.
   `public_check_id`.
 - **Still mocked / missing:** inherited and away screens (Slice 11); assist UI absent.
 - **Tests landed:** 41 (partial: visible verdict links to learner check id; sealed results
-  have null `public_check_id`; no future customer text returned; sealed sentinels injected
+  have null `public_check_id`; the evaluator call passes the explicit `check_defs` and
+  `visible_checks` inputs; no future customer text returned; sealed sentinels injected
   into nested ledger payloads, incident records and logs never serialize; the incident
   view visibly renders "Synthetic scenario"; labels hold in empty and error states).
   **Test 41 is complete at Slice 10** — every clause of the S6 specification has landed
@@ -610,7 +689,8 @@ are specified, not run, until the user separately authorizes the relevant key/se
 - **Tests landed:** 36, 37, 38 (assist logged/attributed, cannot touch sealed/evaluator,
   away-shift role restrictions), 46, 47 (budget applies across roles; patch decision +
   summary are minimal). Completes earlier partials non-vacuously: 16 (sentinel scan now
-  includes real assist prompts), 17 (the `assist/` arm of the sealed import graph), 18
+  includes real assist prompts), 17 (the `assist/` arm of the sealed import graph,
+  including the revised computed-dynamic-import clause), 18
   (the prompt-arm clause — sealed specs/expectations absent from every assist prompt
   before, during and after execution — now re-runs non-vacuously; re-run again against
   real provisioning at Slice 14).
@@ -861,8 +941,9 @@ Top risks, leading with blockers:
 ## 10. What Gate 4 approval does and does not authorize
 
 Approving this plan authorizes building the slices **in order, one at a time**, each
-ending in the demonstrated result above, with `00-status.md` updated and a
-"Continue to slice N+1, or re-steer?" pause after each. It does **not** authorize:
+ending in the demonstrated result above, with `00-status.md` updated, an affected-ADR
+consistency check (no ADR may silently contradict what a slice built; flag it for
+update), and a "Continue to slice N+1, or re-steer?" pause after each. It does **not** authorize:
 installs or dependencies; credentials or any external service (`NEBIUS_API_KEY`,
 `CONTREE_SESSION`, `TAVILY_API_KEY`); running the Slice 13 spike or the Slice 15
 ablation; commits, pushes, tags or branches; deployment or any hosted URL; participant

@@ -9,8 +9,19 @@
   credential: employer proof stays excluded and nothing may claim job-readiness.
   Multi-role engagement packs remain future scope only. Approval does not authorize
   client implementation, installs, credentials, commits, deployment or outreach.
-- Gate 2 — Architecture: APPROVED 2026-09-15
-- Gate 3 — Program Design: APPROVED 2026-09-17 (re-approved a second time after the
+- Gate 2 - Architecture: RE-APPROVED 2026-09-19 after the scoped backtrack
+  (originally APPROVED 2026-09-15). The user explicitly approved orchestration-
+  owned sealed loading and pure evaluator inputs, then authorized proceeding to
+  Gate 3. This is not Gate 3/4 approval or permission to resume implementation.
+- Gate 3 - Program Design: RE-APPROVED 2026-09-19 after the scoped fourth
+  backtrack, which was revised and closed the same day. Scoped revision: loader
+  ownership, explicit `public_records` scoring input, import/purity checks and
+  the opaque expected-ref/public-identity projection boundary; tests 11, 13 and
+  17 refined without renumbering. The user approved the revised document in chat
+  on 2026-09-19. Approval covers the revised `03-program-design.md`; it is not
+  Gate 4 approval or permission to resume implementation repairs. Prior approval
+  history: APPROVED 2026-09-17
+  (re-approved a second time after the
   S2 packaging backtrack was revised with `pyproject.toml`, `requirements.lock`, the
   `demos/` tree, `tests/packaging/` and test 51; the earlier approvals and both
   backtracks remain the historical record — see Approval history). BACKTRACKED a
@@ -19,20 +30,42 @@
   opaque-ref assertion; S5.6 now permits `expected_ref` only as the opaque
   `sealed:` content digest, no behavior change; RE-APPROVED a third time
   2026-09-18). The plain
-  HTML/CSS/vanilla-JS client baseline is unchanged; adding a framework, rendering
-  engine or package for the isometric room would require reopening Gate 3.
-- Gate 4 — Slice plan: RE-APPROVED 2026-09-18 (first approved 2026-09-17 after three
-  review rounds that day; backtracked and revised the same day, scoped to the
-  rewritten Slice 9 to 11 requirements, which now carry the station-based
-  operational-room acceptance criteria and the engineer role copy rule; slices 1 to
-  8 and 12 to 17 are unchanged). Slice work proceeds one slice at a time under
-  `04-slices.md` S10; installs, credentials, external services, spike runs,
-  deployment, outreach and ADR #4 remain separately authorized.
+  HTML/CSS/vanilla-JS client baseline is unchanged; framework or rendering
+  engine changes remain outside this Gate 3 backtrack's scope.
+- Gate 4 — Slice plan: RE-APPROVED 2026-09-19 after the scoped reconciliation
+  revision (first approved 2026-09-17 after three review rounds that day; reopened
+  and revised 2026-09-18, scoped to the rewritten Slice 9 to 11 requirements, which
+  carry the station-based operational-room acceptance criteria and the engineer role
+  copy rule; slices 1 to 8 and 12 to 17 were unchanged then). The 2026-09-19 revision
+  re-homed the revised Gate 3 test 11/13/17 runtime checks and the audit's
+  scanner/incident gaps into the Slice 6 repair, made per-run snapshot pairing a
+  Slice 7 deliverable, made restart recovery explicit in Slice 8, mapped
+  prompt/real-provisioning coverage to Slices 12/14, and added an affected-ADR
+  consistency check to slice completion; the user approved it in chat on 2026-09-19.
+  A follow-up revision drafted later the same day assigns the leak-response
+  invalidation requirement to Slice 7 and the remaining Gate 3 scoring-input
+  alignment (`check_defs`, `visible_checks`) to Slice 10; the user approved it in
+  chat on 2026-09-19.
+  Slice work proceeds one slice at a time under `04-slices.md` S10; installs,
+  credentials, external services, spike runs, deployment, outreach and ADR #4 remain
+  separately authorized.
+
+**Current recovery hold (2026-09-19):** Gates 2, 3 and 4 are re-approved; all scoped
+backtracks are closed. The Gate 4 reconciliation in `04-slices.md` was revised and
+approved 2026-09-19; the same-day follow-up revision (Slice 7 leak-response
+invalidation; Slice 10 scoring-input alignment) was approved by the user in chat on
+2026-09-19; the Slice 6 repair scope is unchanged. Slice 6 needs repair; Slice 7
+must not start. The ADR alignment
+(ADR 0001 superseding note; ADR 0002/0003 implementation-status notes) is recorded
+2026-09-19; ADR #4 stays deferred to Slice 13 evidence and separate authorization.
 
 ## Slices
 
-Gate 4 APPROVED 2026-09-17 and RE-APPROVED 2026-09-18 (reopen scoped to the Slice 9
-to 11 requirements). Build order (one slice at a time; after each slice: demo
+Gate 4 APPROVED 2026-09-17, RE-APPROVED 2026-09-18 (reopen scoped to the Slice 9
+to 11 requirements) and RE-APPROVED 2026-09-19 (scoped reconciliation revision; a
+same-day follow-up revision was approved by the user in chat 2026-09-19). Build
+order (one slice
+at a time; after each slice: demo
 evidence run and shown, slice checked off here, then "Continue to slice N+1, or
 re-steer?"):
 
@@ -41,7 +74,7 @@ re-steer?"):
 - [x] Slice 3: Executor conformance (recorded + local_process); implemented, demonstrated, reviewed (PASS) and merged to main 2026-09-18 (verbatim evidence below; test 50 partial, test 29 skipped)
 - [x] Slice 4: Contract-parameterized evaluator + first sealed family; implemented and demonstrated 2026-09-18; the six sealed cases were reviewed and SEALED as-is by the user 2026-09-18 (evidence below)
 - [x] Slice 5: Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger; implemented and demonstrated 2026-09-18 (`python -m demos.finalize_run` + `pytest tests/ledger -q`; evidence below)
-- [ ] Slice 6 — Isolation and leakage hardening
+- [ ] Slice 6: Isolation and leakage hardening; NEEDS REPAIR after independent verification 2026-09-19 (REVISE). Existing implementation retained; earlier evidence preserved below, with the superseding audit findings and gate hold.
 - [ ] Slice 7 — Budget + rotation + incidents + repair
 - [ ] Slice 8 — Close → inheritance + Test 1 offline pre-proof
 - [ ] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03)
@@ -62,10 +95,21 @@ and its six sealed cases were reviewed and SEALED as-is by the user on
 distinguishable from the reviewed Slice 3 baseline at commit `1e4e6c1` by
 `git diff`); Slice 5 is implemented and demonstrated in the worktree (evidence
 below), and the fixes from its independent review (2 MAJOR, 2 MINOR, plus the
-Gate 3 item K escalation) landed 2026-09-18; slices 6-17 are not implemented.
-Slice work proceeds only under
-`04-slices.md` S10; credentials, installs, spike runs, external services,
-deployment, outreach and ADR #4 each remain separately authorized.
+Gate 3 item K escalation) landed 2026-09-18. Slice 6's implementation remains on
+`shiftwork/slice-6`, but its completion claim was rejected by independent
+verification on 2026-09-19: file observation, leak scanners and response coverage
+have reproduced blind spots. The sealed `CheckResultView.check_id` removal is
+retained; a public ledger derivation's `check_id` is a different, public result ID.
+The loader ownership conflict spans Gate 2, Gate 3 and ADR 0001, not one clause.
+The 2026-09-18 Slice 6 report is preserved verbatim as history; the 2026-09-19
+verification section below supersedes its coverage and completion claims.
+Slices 7-17 are not implemented. Gate 2's ownership revision, the Gate 3
+fourth-backtrack revision and the Gate 4 reconciliation revision are re-approved;
+a same-day Gate 4 follow-up revision (Slice 7 leak-response invalidation;
+Slice 10 scoring-input alignment) was approved by the user in chat 2026-09-19;
+implementation remains paused pending the Slice 6 repair. Later work must follow
+those decisions and `04-slices.md` S10. Credentials, installs, spike runs, external
+services, deployment, outreach and ADR #4 each remain separately authorized.
 
 ## Notes for a fresh session
 
@@ -1484,8 +1528,596 @@ logged (third occurrences of the clause-level-coverage and
 unverified-state-as-fact patterns). No install, credential use, external service,
 branch, commit, tag or push in this fix round.
 
+## Slice 6 evidence: 2026-09-18
+
+Slice 6 (isolation and leakage hardening) is implemented and demonstrated on branch
+`shiftwork/slice-6`. Delivered: sealed import-graph enforcement, the sandbox-payload
+manifest allowlist, sentinel-leak scanning of every outbound surface, the
+reason-code render-map leak lint, host-path/env non-exposure and the draft
+round-trip with no internal refs.
+
+30 new tests across six files: `tests/sealed/test_render_map.py` (5),
+`tests/sealed/test_import_graph.py` (4), `tests/sealed/test_payload_manifest.py`
+(9), `tests/sealed/test_sentinel_leak.py` (6),
+`tests/api/test_host_path_env_isolation.py` (4),
+`tests/api/test_draft_round_trip.py` (2). Shared helpers: `tests/leakscan.py`
+(needle sets, decoded-surface walker, escaping-aware host-path scan) and
+`tests/sealed/conftest.py` plus a `local_request` factory promoted to
+`tests/conftest.py`.
+
+### Production changes
+
+Three files changed behaviour; the fourth is the leak fix.
+
+- `shiftwork/config.py` — added `REASON_CODE_RENDER_MAP` (the nine Gate 3 S7.2
+  strings, 1:1 with `ReasonCode`) and `SANDBOX_PAYLOAD_ALLOWLIST` (the four pinned
+  provisioning categories). Gate 3 S2 already required the render map to live here;
+  the client that consumes it lands in Slices 9 to 11, so nothing reads it yet.
+- `shiftwork/executor/base.py` — added `SandboxManifest`, `provisioning_manifest()`
+  and `provision_workspace()`. `provisioning_manifest` fail-closes in both
+  directions: a category outside the allowlist raises, and an allowlist category the
+  manifest does not provision raises, so the allowlist cannot drift silently.
+- `shiftwork/executor/local_process.py` — replaced the ad-hoc artifact and
+  `shop.json` writes with `provision_workspace()`, making the declared manifest the
+  single source of truth for what enters the sandbox. Written bytes are unchanged,
+  so the Slice 3 `TRUSTED_LOCAL_FIXTURES` pins and the `PROVISION_FAILED` early
+  return are both preserved; `tests/executor` is unchanged at 45 passed, 1 skipped.
+- `shiftwork/api/schemas.py` — **removed `check_id` from `CheckResultView`** (leak
+  fix, below).
+
+### Sealed-identity leak found and fixed
+
+`GET /api/runs/{id}/checks` returned `"check_id": "chk-stale-information-01"`. That
+value is the sealed case's own identity, taken directly from
+`SealedCase.check_id` at `evaluator.py:166`. It violates ADR 0001 ("never case text,
+expected values or hidden counts") and Gate 3 S3.9, whose `CheckResultView` field
+list never contained `check_id` and whose prose requires that the client show
+"Visible check passed" **without a sealed check id**. Because the ids are
+sequentially numbered, the field also disclosed the inventory's size and ordering.
+
+`CheckResult.id` does not leak: `orchestrator.finalize_run:306` overwrites the
+evaluator's `cr-{case.check_id}-{ordinal}` with the public `cr-0001` ordinal before
+persisting, and the ledger's `cause_refs` and derivation therefore carry only the
+public id. Verified by dumping the live responses, not by reading the code alone.
+
+Fix: drop the field from the projection. No test asserted on it and
+`shiftwork/client/index.html` does not reference it, so nothing consumed it. This
+aligns the code with the approved S3.9 projection rather than changing it, so it is
+treated as an in-scope Slice 6 bug fix and not a Gate 3 backtrack. `expected_ref`
+remains, as the Gate 3 third re-approval permits, only as the opaque `sealed:`
+digest.
+
+### Gate 3 wording discrepancy flagged, not silently resolved
+
+Gate 3 S6 test 17 reads: "`executor/`, `assist/`, `api/`, `client` never import
+`shiftwork.sealed`; **only `evaluator` does**." The as-built and as-designed
+direction is the reverse. Verified: the only module importing `shiftwork.sealed` is
+`shiftwork/orchestrator.py:40`; `shiftwork/evaluator/evaluator.py` does not import
+it (its 11 "sealed" hits are docstrings and `expected_ref_for`); and
+`shiftwork/sealed/store.py` imports the evaluator's `SealedCase` types. Relocating
+the loader into `evaluator` would give that module file access and break test 11's
+no-file-access purity requirement.
+
+`tests/sealed/test_import_graph.py` therefore enforces ADR 0001's forbidden set
+plus an exact permitted-importer allowlist (`{"orchestrator.py"}`), and records the
+divergence in its module docstring. **This is a one-clause Gate 3 wording error and
+needs a user decision**: reopen Gate 3 to correct test 17's "only evaluator" clause,
+or leave the approved text as the historical record with the test enforcing ADR
+0001. No behaviour change either way.
+
+### Clause-level coverage and limits
+
+- **16 PARTIAL.** Landed: the sentinel is absent from every API response (envelope
+  and decoded `*_base64` bodies), the controller log (`caplog` at DEBUG), the
+  outbound `RunRequest` serialization, the provisioned sandbox files and the
+  captured execution log bytes. Non-vacuity is proven twice: the sentinel token is
+  asserted unique across the whole repository before use, and
+  `test_sentinel_changes_the_opaque_expected_ref` asserts all six `expected_ref`
+  digests changed relative to the un-sentinelized family, so the sentinel provably
+  sat inside the block the evaluator hashed. **VACUOUS and NOT claimed: the "no
+  prompt" clause** — `shiftwork/assist/` does not exist; `test_no_assist_prompt_surface_exists_yet`
+  fails loudly when it does, and the clause re-runs at Slice 12. The user-sealed
+  `stale_information` family on disk was never modified: the sentinelized copy is
+  written to `tmp_path` and the loader is repointed.
+- **17 PARTIAL.** Landed: AST scan resolving every import including relative and
+  dynamic string forms over `executor/`, `api/`, `client`, plus `store/`, `ledger/`,
+  `domain/`, `curation/`; an exact permitted-importer rule package-wide; a text scan
+  of `shiftwork/client/`. **VACUOUS and NOT claimed: the `assist/` arm** — the
+  directory does not exist, asserted explicitly rather than skipped.
+- **18 PARTIAL.** Landed: the three-way equality `pinned allowlist == declared
+  manifest == bytes actually written`, where the third link is observed on the real
+  adapter path by recording `Path.write_bytes` during a live `LocalProcessAdapter`
+  subprocess run; both fail-closed guard arms; sealed material absent from the
+  manifest, the `RunRequest` serialization, the provisioned payload and every API
+  response; `recorded` proven to provision nothing. **VACUOUS and NOT claimed:
+  "absent from every prompt before, during and after execution"** (Slice 12), the
+  real-provisioning `tokenfactory` arm (Slice 14), and **"future customer stimuli
+  stay absent until their run"** (Slice 7, needs per-run variant selection).
+- **19 FULL.** Render map pinned 1:1 against an independently duplicated copy of
+  the S7.2 list; no digits and no spelled-out counts or sealed terms
+  (word-boundary matched, so ordinary prose cannot false-positive); no sealed case
+  text, checked against the real inventory expanded into 25-character note
+  fragments; no contract option ids or evaluator rule ids.
+- **20 PARTIAL (offline arms).** Landed: a real `local_process` run of the
+  `env_probe` trusted fixture — which genuinely prints its whole child environment
+  to stderr (`fixtures/artifacts/bookshop/service.py:49-50`), so the projected
+  `log_base64` really carries an environment dump — projected through
+  `RunOutputView` and scanned for nine injected env markers and eight host-path
+  needles; a full API lifecycle scanned for the same, including 404/409 error
+  bodies. Distinct from test 50, which asserts the spawn boundary; this asserts the
+  projection layer, so a controller that scrubs correctly but echoes a path into a
+  response passes 50 and fails here. The only host-derived values that may appear
+  are the two pinned allowlist OS variables, bounded explicitly. **NOT claimed: the
+  `tokenfactory` arm** (Slice 14).
+- **45 FULL.** GET returns the saved filenames and text; PUT round-trips them; a
+  later save replaces rather than merges, so a removed filename does not survive;
+  non-ASCII, CRLF and tab-bearing text survives byte for byte; and every public
+  projection omits 17 injected internal refs. Injection is real, not hypothetical:
+  the shop snapshot is relocated to a marker-named directory and the database to a
+  marker-named path, so the runtime `shop_snapshot_ref` and DB path carry unique
+  tokens; `storage_ref` is read back from the table and asserted to start with
+  `inline:` before being used as a needle.
+- **One vacuous needle removed rather than kept.** The `log_ref` data-URI scheme was
+  dropped from test 45's needle set: the recorded thin transcript carries no
+  `log_ref` (`fixtures/runs/thin_stale.json` has `log_ref: null`), so `log_base64`
+  is always null on that path and the needle could never fail. Prefix stripping is
+  covered non-vacuously by test 20's local-adapter arm, which base64-decodes real
+  log bytes. Recorded here so the coverage claim is not read as broader than it is.
+
+### Baseline and verification (verbatim)
+
+Baseline before any edit, on `.venv` Python 3.12.13:
+
+```
+.venv/Scripts/python.exe -m pytest tests -q
+104 passed, 1 skipped, 2 warnings in 37.12s
+```
+
+Executor suite re-run after the `provision_workspace` refactor, identical to the
+Slice 3 baseline:
+
+```
+.venv/Scripts/python.exe -m pytest tests/executor -q
+45 passed, 1 skipped, 2 warnings in 22.14s
+```
+
+Final full suite:
+
+```
+.venv/Scripts/python.exe -m pytest tests -q
+134 passed, 1 skipped, 2 warnings in 38.49s
+```
+
+104 + 30 new = 134; the one skip remains test 29 (`tokenfactory` conformance,
+Slice 14). No pre-existing failure was masked and no check was weakened.
+`git diff --check` clean. `tests/packaging` (test 51) runs inside the full suite and
+still passes.
+
+### Approved demo evidence (verbatim)
+
+`04-slices.md` names `python -m pytest tests/sealed tests/api -q` as this slice's
+demo evidence:
+
+```
+.venv/Scripts/python.exe -m pytest tests/sealed tests/api -q
+35 passed, 2 warnings in 4.56s
+```
+
+The Slice 2 to 5 demos were re-run for regressions; all five exit 0 and the
+deterministic hashes are unchanged, which is the evidence that the provisioning
+refactor and the `check_id` removal did not perturb the frozen path:
+
+```
+.venv/Scripts/python.exe -m demos.thin_path            exit 0
+thin-path evidence complete: run run-0001 FINALIZED, content_hash 44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158, one CheckResult fail/STALE_BEYOND_RULE with opaque expected_ref, one BACKLOG_RECORDED event seq 1 chained on genesis, chain_status VALID
+
+.venv/Scripts/python.exe -m demos.lifecycle            exit 0
+lifecycle evidence complete: run run-0001 FINALIZED, ledger chain VALID with 1 events, 0 open incidents (no failing check maps to INCIDENT_OPENED)
+
+.venv/Scripts/python.exe -m demos.finalize_run         exit 0
+finalize-run evidence complete: run run-0001 FINALIZED, 1 hash-chained events chain VALID, 1 incidents opened, finalize twice nets zero new events, ledger derivation and catalog-version links resolved
+
+.venv/Scripts/python.exe -m demos.evaluate_transcript --fixture fixtures/runs/passing_stale.json   exit 0
+evaluate-transcript evidence complete: passing_stale.json -> 6 pass / 0 fail with reason codes and opaque expected_refs; sockets blocked during scoring; contract STANCE USE_NEWEST_RECORD_WITH_AGE
+
+.venv/Scripts/python.exe -m demos.evaluate_transcript --fixture fixtures/runs/failing_stale.json   exit 0
+evaluate-transcript evidence complete: failing_stale.json -> 0 pass / 6 fail with reason codes and opaque expected_refs; sockets blocked during scoring; contract STANCE USE_NEWEST_RECORD_WITH_AGE
+```
+
+The `thin_path` content hash matches the value recorded in the Slice 2 and Slice 5
+evidence byte for byte.
+
+### Mutation probes: 17 of 17 fired
+
+Every guard branch was mutated independently and byte-verified, with CRLF-aware
+anchors, restoration asserted byte-identical, and `git status --porcelain` compared
+before and after (identical). Each probe names the tests that must fail; a probe
+whose scoped run stayed green would mean the coverage claim is false.
+
+Import graph (5 probes, scoped to `tests/sealed/test_import_graph.py`):
+
+| # | Mutation | Failed as required |
+|---|---|---|
+| A | static `shiftwork.sealed` import added to `api/routes.py` | forbidden-dir + permitted-set |
+| B | import added to `app.py`, outside every forbidden dir | permitted-set only |
+| C | dynamic `"shiftwork.sealed.store"` string in `executor/base.py` | forbidden-dir + permitted-set |
+| D | `shiftwork.sealed/cases` reference in `client/index.html` | client scan only |
+| E | permitted-importer allowlist widened to admit `api/routes.py` **and** the import added | forbidden-dir only |
+
+Probe E exists because A and C fail both rules and so prove neither on its own: the
+forbidden-dir rule is load-bearing only against tampering with the allowlist
+itself, which is exactly what E mutates.
+
+Slice 6 guards (12 probes):
+
+| # | Mutation | Failed as required |
+|---|---|---|
+| 19a | a number enters a render string | numbers/counts lint + pin |
+| 19b | sealed operator-note prose pasted into a render string | case-text lint + pin |
+| 19c | a reason code loses its render string | 1:1 check + pin |
+| 18a | undeclared extra file written into the sandbox | written-equals-declared |
+| 18b | the real sealed family file provisioned into the sandbox | written-equals-declared + sealed-material |
+| 18c | a `sealed` category added to the declared manifest | categories-equal-allowlist (+4) |
+| 16a | `expected_ref_for` renders `str(case.expected)` instead of hashing it | sentinel API/log scan + opaque-ref change |
+| 16b | drawn sealed cases written to the controller log | sentinel API/log scan |
+| 20a | a credential name added to `CHILD_ENV_ALLOWLIST` | local-adapter projection scan |
+| 20b | absolute host path wired into a projected `request_text` | API host-path scan + internal-ref scan |
+| 45a | durable `storage_ref` added to `ArtifactVersionView` | internal-ref scan |
+| 45b | draft save merges into the stored set instead of replacing it | round-trip |
+
+Probe 20b failed on its first run and exposed a defect in the test rather than the
+product: the host-path needles were raw Windows absolute paths, but a JSON response
+backslash-escapes them, so six of the eight needles could never match and the test
+passed against a real leak. Fixed by scanning the raw, backslash-unescaped and
+forward-slash forms of every surface (`leakscan.path_forms` / `host_leaks`), plus a
+scanner self-test `test_host_path_scan_detects_a_json_escaped_path` that injects a
+path into a serialized surface and requires detection. 20b then fired on both
+required tests. Logged in `MISTAKES.md` as the fourth occurrence of the
+coverage-claimed-not-proven pattern and graduated into a permanent `AGENTS.md` S6
+Verification rule.
+
+### Scope and authorization
+
+No install, credential use, external service call, deployment, outreach, branch
+push, commit or tag in this slice. Authorization was Gate 4 approval plus the
+user's instruction to start Slice 6; `04-slices.md` records "Authorization: none"
+for this slice. The user-sealed `stale_information` inventory was read but never
+modified. The pre-existing uncommitted `AGENTS.md` change (the branch-per-slice
+rule) is the user's work and was preserved; this slice added two separate hunks to
+that file. The sentinel token is deliberately not quoted in this note, because
+`test_sentinel_is_unique_in_the_repository` asserts it appears in no other
+repository file.
+
+## Slice 6 independent verification and recovery: 2026-09-19
+
+**Verdict: REVISE. Slice 6 NEEDS REPAIR; Slice 7 is on hold.** The user requested
+step-by-step recovery after reviewing the audit. That authorizes preparing the
+corrections, not accepting a revised gate. Gate 2 is now backtracked for the
+sealed-loader ownership decision; its revised document awaits explicit approval.
+Gate 3, Gate 4 and ADR reconciliation remain queued, with separate gate approvals
+before implementation resumes. No implementation was changed in this document round.
+
+This section records the state at the audit, not the current state: the later
+sections below record the 2026-09-19 re-approvals of Gates 2, 3 and 4, the closed
+backtracks, the applied ADR notes and the follow-up Gate 4 revision. Read the
+header state and the approval sections for the current position.
+
+The preceding 2026-09-18 Slice 6 report is retained verbatim as historical reporting,
+not current coverage evidence. The commands below ran during the earlier audit in
+this session; they were not re-run or newly claimed by this documentation update.
+
+### Reproduced regression evidence and its limits
+
+```
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging -p no:cacheprovider
+133 passed, 1 skipped, 2 warnings in 26.35s
+
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -m pytest tests/executor -q -p no:cacheprovider
+45 passed, 1 skipped, 2 warnings in 20.40s
+
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -m pytest tests/sealed tests/api -q -p no:cacheprovider
+35 passed, 2 warnings in 5.14s
+```
+
+The audit did NOT run test 51: `tests/packaging/test_clean_env_install_and_run.py`
+creates an environment and invokes an installer, contrary to the audit's explicit
+no-install/no-external-network constraint. The exact full-suite claim of 134 passes
+is therefore UNVERIFIED by this audit. Its passing-test claim and the old report's
+"No install" statement cannot both be accurate; historical installer execution
+and authorization were not independently established.
+
+All five prior demo invocations exited 0 using `.venv/Scripts/python.exe -B -m`:
+`demos.lifecycle`, `demos.thin_path`, `demos.finalize_run`, and
+`demos.evaluate_transcript --fixture fixtures/runs/passing_stale.json` /
+`fixtures/runs/failing_stale.json`. The thin-path hash remains
+`44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158`.
+Correction to the earlier report: original Slice 2 evidence records
+`87fb5615fd5482f4a0c395a1f95fad7fa5fc4613d63c7b4e467b25b4bf714fb9`;
+`44abb...` is recorded from Slice 3 onward, not as the original Slice 2 hash.
+Recorded-demo equality is not evidence of real sandbox provisioning.
+
+### Mutations that the suite failed to catch
+
+Each mutation below was applied separately, verified against actual file bytes,
+exercised, and restored byte-identically. These are deliberately introduced
+faults proving test blind spots, not observed leaks in the restored application.
+All four ran this command:
+
+```
+.venv/Scripts/python.exe -B -m pytest tests -q --ignore=tests/packaging -p no:cacheprovider --tb=short
+```
+
+| Mutation | Observed exposure (live probe; command not captured) | Verbatim pytest summary |
+|---|---|---|
+| Add an undeclared `write_text` in `provision_workspace` | `LIVE_UNDECLARED_FILES ['unexpected.txt'] BYTES b'undeclared'` | `133 passed, 1 skipped, 2 warnings in 27.83s` |
+| Add a forward-slash host filename to `RunView` | HTTP 200 run response contains `debug_path` pointing to the host's `shiftwork/api/schemas.py` | `133 passed, 1 skipped, 2 warnings in 28.56s` |
+| Make `IncidentView.of` project the sealed identity through `check_result_id` | HTTP 200 incident response contains `chk-stale-information-01` | `133 passed, 1 skipped, 2 warnings in 27.92s` |
+| Paste a full sealed operator note into the served client HTML | `LIVE_ROOT 200 SEALED_NOTE_PRESENT True` | `133 passed, 1 skipped, 2 warnings in 26.57s` |
+
+The exposure column records live-probe observations made with each mutation applied;
+the exact probe commands were not captured, and the pytest command above is the
+suite-level result only. The suite alone cannot produce a 200 incident response:
+the app's recorded transcript fails with `STALE_BEYOND_RULE`, which the mission does
+not map to `INCIDENT_OPENED`, so `open_incidents` is empty in both API tests. The
+Slice 6 repair must re-run each mutation and record the probe command beside its
+result.
+
+Two further independently restored probes:
+
+```
+.venv/Scripts/python.exe -B -m pytest tests/sealed/test_sentinel_leak.py -s -q -p no:cacheprovider
+6 passed, 2 warnings in 2.21s
+STDOUT_CONTAINS_SEALED_SENTINEL True
+
+.venv/Scripts/python.exe -B -m pytest tests/sealed/test_import_graph.py -q -p no:cacheprovider
+4 passed in 0.11s
+LIVE_IMPORTED_MODULE shiftwork.sealed
+```
+
+The first inserted `print(cases.model_dump_json())` after the controller loaded
+cases; `caplog` did not scan stdout. The second added a computed import formed
+from `"shiftwork." + "sealed"` in the API module; the literal-reference lint
+missed it. Neither result is a full-suite run. The sentinel token is not quoted here.
+
+The 17 supplied mutation cases did trigger their required failures, as did the
+independently removed ledger previous-hash linkage check. This confirms the named
+probes, not every guard or possible serialized surface.
+
+### Coverage corrections and remaining repair work
+
+- The workspace observer records only `Path.write_bytes`, not the actual file
+  inventory. Observe paths and bytes before subprocess launch, regardless of the
+  writing API (`tests/sealed/conftest.py`, `test_payload_manifest.py`).
+- `host_leaks` normalizes surfaces but not needles. Forward-slash paths and nested
+  JSON evade it. Normalize both sides and scan decoded JSON string values.
+- The incident loops in the host/ref tests contribute no successful incident
+  response on the backlog-only fixture. Require an incident-producing run and scan
+  both its endpoint and nested board projection. Include served HTML and controller
+  stdout/stderr rather than equating the chosen lifecycle calls with every surface.
+- The public-corpus filter includes the client being audited. Appending one sealed
+  note makes its own fragments exempt while the case-ID survival guards still pass.
+  Exemptions must come from independently justified public overlaps, not leaked output.
+- Per-needle positive controls found 69 of 1,470 all-sealed needles and 2 of 1,352
+  identity needles missed in ordinary JSON; raw Windows paths account for misses.
+  Each group's direct body/log/nested-output base64 controls had zero misses.
+  All 1 sentinel, 9 env, 8 host and 17 internal-ref needles matched the tested ordinary
+  JSON and direct base64 forms with their respective scanners. That does not prove
+  live surface population or slash/nested-JSON variants.
+- Test 19's current pinned vocabulary is supported. Tests 16-18, 20 and 45 have
+  current repair gaps; test 45 is not FULL. Sandbox/request/response field-name
+  needles are not injected values. Prompt and real-sandbox surfaces remain absent.
+  Test 20's written specification requires a local-adapter run, not a tokenfactory arm.
+- Preserve the sealed `CheckResultView.check_id` removal. The restored live API
+  samples exposed public `cr-0001`-style links, not raw sealed case IDs. A ledger's
+  `check_id` key is a public result ID, so forbidding that key everywhere is wrong.
+  Three runs returned the same opaque expected digest: linkability is observed;
+  total inventory size and ordering are not established by that observation.
+- The manifest guards category membership, not filename containment. Direct helper
+  probes accepted traversal/absolute destinations and collisions; the real adapter
+  rejected those artifact inputs through its existing fixture pins with
+  `PROVISION_FAILED`. This is not a demonstrated current adapter escape or proof
+  of hostile-code isolation. Real untrusted provisioning remains later scope.
+
+### Gate and ADR reconciliation queue
+
+1. **Gate 2 (RE-APPROVED 2026-09-19; see the next section):** replace
+   evaluator-exclusive store access with orchestration-owned loading and explicitly
+   supplied pure-scoring inputs. The old co-located loader plus pure function was
+   feasible: Gate 3 test 11 never prohibited a loader's file access. This was an
+   ownership decision, not an impossibility fix.
+2. **Gate 3 (RE-APPROVED 2026-09-19; see the Gate 3 re-approval section below):**
+   reconcile the file map, loader call stack and test 17; the implemented importer
+   set is different, not stricter than the approved set. Reconcile S3.9's
+   omitted/forbidden `expected_ref` with S5.6's allowed opaque digest. Keep the
+   approved `/artifact` endpoint contract; live
+   `GET .../artifact` returned 404, `PUT` returned 405, while `/draft` returned 200.
+   Fix the code after the relevant re-approvals rather than silently renaming the spec.
+   The remaining signature inputs (`check_defs`, `visible_checks`) are assigned to
+   Slice 10 by the 2026-09-19 follow-up revision (RE-APPROVED 2026-09-19).
+3. **Gate 4 (RE-APPROVED 2026-09-19; revision applied and approved):** the
+   reconciliation retained the scanner/incident gaps in Slice 6 and mapped remaining
+   reference coverage to Slices 12/14, per-run snapshot pairing to Slice 7 before
+   varied execution, and restart recovery to Slice 8. An affected-ADR consistency
+   check was added to slice completion.
+4. **ADRs (applied 2026-09-19; see `docs/adr/`):** preserve and explicitly supersede ADR
+   0001's old loader ownership; distinguish accepted decisions from implementation
+   status in ADRs 0002/0003. Correction-event representation already uses production
+   chain/persistence primitives in `tests/ledger/test_ledger.py`; no operator workflow
+   is implemented or assigned. A constructed RUNNING run remained RUNNING after
+   restart, confirming the deferred recovery work. ADR 0001's dependent-attempt
+   invalidation now has an owner: Slice 7, assigned by the 2026-09-19 follow-up
+   revision; the ADR records that a refill is not proof of invalidation.
+   ADR #4 must not be created before Slice 13 evidence and separate authorization.
+5. **Implementation (unblocked 2026-09-19; the Slice 6 repair is next):** require
+   every demonstrated bad mutation to fail, re-run authorized tests/demos, obtain
+   independent re-review, then ask before starting Slice 7.
+
+### Preservation and authority
+
+Before and after the audit, `git status --porcelain` was identical on
+`shiftwork/slice-6`; all 147 tracked/non-ignored file bytes matched the initial
+aggregate digest `0aa0dd31c97c8f7e1b77095c907a2896ceab69e41d85d91ae5b908d933e33457`.
+That digest records the audit boundary before this subsequent documentation update.
+The user-sealed inventory and the pre-existing branch-per-slice instruction were
+preserved. The audit used temporary fixture databases and the requested local
+loopback executor tests, not external services. No install, credential use, external
+call, commit or push occurred during the audit. Prior author actions remain unverified.
+
+The current documentation step changes only `00-status.md`, `02-architecture.md`,
+`docs/SHIFTWORK_PLAN.md` and the gate/slice-state mirror in `AGENTS.md`; it does not
+change code, tests, ADRs, Gate 3, Gate 4 or the branch rule. Next decision:
+**Approve Gate 2, or what should change?**
+
+## Gate 2 re-approval and Gate 3 revision: 2026-09-19
+
+The user explicitly approved the scoped Gate 2 revision and instructed proceeding
+to the next step. Gate 2 is RE-APPROVED; its architectural body is unchanged from
+the reviewed revision. The preceding recovery entry records the earlier Gate 2
+pause, not the current approval state. Gate 3 is now IN PROGRESS, BACKTRACKED a
+fourth time, and its revised document is NOT re-approved.
+
+The Gate 3 revision aligns the loader file map, signatures and call stack with
+Gate 2: `orchestrator` calls `sealed.store.load_drawn_cases`, then passes cases and
+public shop records to the pure evaluator. `public_records` is explicit in the
+signature; planned `check_defs` and `visible_checks` inputs remain. The per-run
+snapshot binding is a target requirement, not an assertion that the current global
+snapshot code already implements it.
+
+S3.9 now permits only the already authorized opaque `sealed:` expected digest,
+not raw expectations, sealed case/check IDs or storage paths. Public result IDs
+remain valid ledger/incident links; orchestration assigns them before persistence.
+Digest stability permits correlation, not a claim of unlinkability. The approved
+`GET`/`PUT /api/shifts/{id}/artifact` route remains unchanged; `/draft` stays an
+implementation mismatch to fix during Slice 6 repair.
+
+Test specifications 11, 13 and 17 are refined without renumbering: scoring purity
+is checked after allowed loader I/O; API identity/digest checks distinguish public
+links from internal case linkage; the runtime importer rule resolves absolute,
+relative and literal dynamic imports and rejects computed targets for the named
+import mechanisms rather than claiming arbitrary obfuscation is understood.
+These new assertions are NOT implemented or demonstrated by editing this document.
+Gate 4 must explicitly assign their current-runtime coverage to Slice 6 repair and
+retain named later prerequisites; prior FULL claims do not prove the revised clauses.
+
+Only gate/status documentation and its mirrors changed in this step. Gate 4,
+ADRs, code, tests, the sealed inventory and the existing branch rule are untouched.
+The current blocker is explicit Gate 3 approval; Gate 4 reconciliation and its
+separate approval precede ADR updates and Slice 6 implementation repairs.
+Installs, credentials, external services and Git publication remain unauthorized;
+ADR #4 stays reserved for Slice 13 evidence and separate authorization.
+
+Next decision: **Approve Gate 3, or what should change?** Resolved 2026-09-19:
+the user approved the revised document in chat; see the next section.
+
+## Gate 3 fourth-backtrack re-approval: 2026-09-19
+
+The user approved the revised `03-program-design.md` in chat on 2026-09-19,
+closing the scoped fourth backtrack. The preceding entries record the earlier
+Gate 2 and Gate 3 pauses and their pre-approval states, not the current state.
+
+The approved revision aligns the file map, signatures and call stack with the
+re-approved Gate 2 decision: controller orchestration loads drawn sealed cases
+(`sealed.store.load_drawn_cases`) and passes the cases plus explicit public shop
+records to the pure evaluator, with `public_records` explicit in the signature.
+Tests 11, 13 and 17 are refined without renumbering; S3.9 permits only the opaque
+`sealed:` expected digest and keeps public CheckResult IDs valid in ledger and
+incident links. The approved `GET`/`PUT /api/shifts/{id}/artifact` route is
+unchanged; `/draft` remains an implementation mismatch to fix during Slice 6
+repair. The revised clauses are specifications: nothing new is implemented or
+demonstrated by this record.
+
+Gate 4 reconciliation in `04-slices.md` was revised and approved 2026-09-19 (see
+the next section); it maps the revised tests 11, 13 and 17 runtime checks into the
+Slice 6 repair and retains named later prerequisites. The ADR updates follow the
+approved gate decisions, and the Slice 6 repairs follow those decisions.
+Slice 7 must not start before Slice 6 is repaired, re-verified and accepted.
+Installs, credentials, external services, spike runs, commits, pushes, deployment,
+outreach and ADR #4 remain separately authorized.
+
+## Gate 4 scoped revision re-approval: 2026-09-19
+
+The user approved the revised `04-slices.md` in chat on 2026-09-19, closing the
+scoped reconciliation. The preceding entries record the earlier Gate 2 and Gate 3
+pauses and their pre-approval states, not the current state.
+
+The approved revision: Slice 6's repair owns the revised Gate 3 test 11/13/17
+runtime checks and the audit's scanner/incident gaps; remaining reference coverage is
+mapped explicitly (prompt surfaces re-run at Slice 12, real-provisioning surfaces at
+Slice 14); per-run snapshot pairing lands in Slice 7 before varied execution;
+restart recovery is explicit in Slice 8; slice completion gains an affected-ADR
+consistency check. No other slice requirements changed, and the 2026-09-17 and
+2026-09-18 approvals remain the historical record.
+
+Next: the Slice 6 repair, then re-verification, then independent re-review and user
+acceptance before Slice 7. The ADR alignment (ADR 0001 superseding note; ADR
+0002/0003 implementation-status notes) is recorded 2026-09-19; ADR #4 stays deferred
+to Slice 13 evidence and separate authorization. Installs, credentials, external
+services, spike runs, commits, pushes, deployment and outreach remain separately
+authorized.
+
+## Adversarial re-review and record corrections: 2026-09-19
+
+An independent adversarial re-review of the recovery round reproduced the audit's
+counts (133 passed and 1 skipped with packaging excluded; 35 passed for
+`tests/sealed tests/api`; 45 passed and 1 skipped for `tests/executor`; the five
+demos at exit 0 with the unchanged `44abb...` hash; the 1470/1352 needle sets and
+the 69/2 JSON-miss counts; live `GET`/`PUT .../artifact` 404/405 versus `/draft`
+200, confirmed by reading the routes and the static mount). It returned REVISE on
+record-level defects, all corrected in this round:
+
+- ADR 0001's claim that the Slice 6 repair owns the loader/call-stack alignment had
+  no matching Gate 4 item. The Gate 4 follow-up revision assigns the remaining Gate 3
+  scoring-input alignment (`check_defs`, `visible_checks`) to Slice 10, and ADR 0001
+  now records that plus the already-implemented loader ownership.
+- The queued dependent-attempt invalidation item is assigned to Slice 7 by the same
+  follow-up revision; ADR 0001 records that no invalidation mechanism exists yet.
+- Stale same-day gate-state lines were corrected in `00-status.md` (the Slices
+  preamble), `03-program-design.md` (the scoped-revision note) and
+  `02-architecture.md` (the Gate 2 revision note).
+- The audit's mutation table now labels its exposure column as live-probe evidence
+  whose commands were not captured, states that the recorded pytest command cannot
+  produce those observations, and requires each probe command to be recorded during
+  the Slice 6 repair.
+- The `MISTAKES.md` mistake-logging rule now allows graduated entries to stay as
+  incident history (user decision 2026-09-19); the entry was reworded to match.
+
+No code, tests, ADRs (other than the ADR 0001 status note), gate bodies or sealed
+inventory changed in this round; the Slice 6 repair scope is unchanged. The Gate 4
+follow-up revision awaited explicit re-approval; the user approved it in chat on
+2026-09-19 (see Approval history).
+
 ## Approval history
 
+- Gate 4 - Vertical Slices follow-up revision: approved by the user in chat on
+  2026-09-19 (Slice 7 leak-response invalidation; Slice 10 scoring-input alignment;
+  the Slice 6 repair scope and the earlier 2026-09-19 reconciliation approval
+  unchanged). Approval covers `04-slices.md`; it is not by itself implementation
+  authorization and does not authorize installs, credentials, spike runs, commits,
+  deployment or outreach.
+- Gate 4 - Vertical Slices: RE-APPROVED 2026-09-19 after the scoped reconciliation
+  revision (Slice 6 repair ownership of the revised Gate 3 test 11/13/17 runtime
+  checks and the audit's scanner/incident gaps; per-run snapshot pairing in Slice 7;
+  restart recovery in Slice 8; prompt/real-provisioning mapping in Slices 12/14;
+  affected-ADR check in slice completion). Approval covers `04-slices.md`; it is not
+  by itself implementation authorization and does not authorize installs, credentials,
+  spike runs, commits, deployment or outreach.
+- Gate 3 - Program Design: RE-APPROVED a fourth time by the user in chat on
+  2026-09-19, closing the scoped fourth backtrack: loader/signature/call-stack
+  alignment with Gate 2, explicit `public_records` scoring input, refined tests
+  11, 13 and 17, and the opaque expected-ref/identity-projection reconciliation.
+  Approval covers `03-program-design.md` only; it is not Gate 4 approval and does
+  not by itself authorize implementation repairs, installs, credentials, spike
+  runs, commits, deployment or outreach.
+- Gate 2 - Architecture: RE-APPROVED by the user 2026-09-19 after the scoped
+  sealed-loader ownership backtrack; the user also authorized proceeding to Gate 3.
+  This does not approve Gate 3/4, ADR changes or implementation.
+- Gate 3 - Program Design: BACKTRACKED a fourth time 2026-09-19 after Gate 2
+  re-approval. Loader/signature/call-stack, purity/import checks and safe expected-
+  ref/identity projection corrections drafted for review; NOT re-approved.
+- Gate 2 - Architecture: BACKTRACKED 2026-09-19 after the Slice 6 audit and the
+  user's instruction to execute recovery step by step. Scoped revision drafted
+  for sealed-store ownership; NOT re-approved. Gate 3/4 reconciliation and
+  implementation are blocked pending separate approvals.
 - Gate 1 — Product: approved by the user on 2026-09-15 after the service-workbench
   redesign. The final independent review remains a requested safeguard, not human
   evidence and not Gate 2 approval.

@@ -4,6 +4,8 @@
   during Gate 3 drafting on 2026-09-15)
 - Sources: `docs/plans/shiftwork/02-architecture.md` S6, S19 candidate 3;
   `docs/plans/shiftwork/03-program-design.md` S3.2, S3.6, S5.1, S5.2, S6.E
+- Implementation status 2026-09-19: accepted, partially implemented; see the status
+  note at the end.
 
 ## Context
 
@@ -33,3 +35,14 @@ artifact, because checks are parameterized by it.
   and never a source of truth.
 - Storage grows monotonically (append-only); acceptable at single-learner scale, and the
   natural place to revisit if the product ever becomes multi-tenant.
+
+## Implementation status 2026-09-19
+
+Accepted, partially implemented. Landed: Slice 2 (2026-09-18) froze immutable
+content-hashed versions (files plus declared contract parameters) with real hashing,
+and the artifact plus version hash reconstruct from tables after a process restart.
+The draft round-trip landed in Slice 6 and is part of the Slice 6 repair (test 45 is
+not FULL). Pending: attempt budgets counted from durable `runs` rows land in Slice
+7; close and inheritance restoration, plus interrupted-run handling on restart,
+land in Slice 8. The Gate 4 re-approval (2026-09-19) keeps these mappings in
+`04-slices.md`.

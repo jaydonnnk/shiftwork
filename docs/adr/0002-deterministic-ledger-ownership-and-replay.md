@@ -4,6 +4,8 @@
   during Gate 3 drafting on 2026-09-15)
 - Sources: `docs/plans/shiftwork/02-architecture.md` S9, S19 candidate 2;
   `docs/plans/shiftwork/03-program-design.md` S3.1, S3.4, S3.5, S6.A, S6.B
+- Implementation status 2026-09-19: accepted, partially implemented; see the status
+  note at the end.
 
 ## Context
 
@@ -37,3 +39,16 @@ scenario state and must remain labelled as such.
 - Hashing discipline bounds what may enter hashed payloads (no floats; canonical
   encoding only), which constrains future schema changes and requires explicit hash
   versioning if the format ever changes.
+
+## Implementation status 2026-09-19
+
+Accepted, partially implemented. Landed: Slice 5 (2026-09-18, implemented,
+demonstrated and independently reviewed) delivered the pure reducer, the hash chain
+with verification on every read, correction events that reference rather than
+rewrite, and idempotent single-transaction finalization with fault-injection probes
+and a failing-capable chain-linkage test. Pending: restart reconstruction rules (a
+run left RUNNING across a restart is reconciled to FAILED with captures and draws
+retained) complete at Slice 8. Correction-event representation already uses the
+production chain and persistence primitives in `tests/ledger`; no operator workflow
+for correction events is implemented and none is assigned. The Gate 4 re-approval
+(2026-09-19) keeps these mappings in `04-slices.md`.
