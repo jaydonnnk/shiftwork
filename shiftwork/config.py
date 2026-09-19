@@ -6,10 +6,17 @@ engagement_config seed values accepted by the user on 2026-09-17
 (04-slices.md S11 decision 3: attempt_limit 3, rotation_group_size 6, total
 assist budget 6). Assist/rotation enforcement lands in later slices; the values
 are seeded now so the engagement_config row is real.
+
+Slice 6 adds the two pinned isolation constants: the learner-visible reason-code
+render map (Gate 3 S7.2) and the sandbox payload allowlist. Both live here rather
+than in the client or an adapter because they are leak boundaries the tests lint
+against, and the client that consumes the render map lands in Slices 9 to 11.
 """
 
 import os
 from pathlib import Path
+
+from shiftwork.domain.models import ReasonCode
 
 PACKAGE_DIR = Path(__file__).resolve().parent
 
@@ -25,6 +32,29 @@ GENESIS_HASH = "0" * 64
 DEFAULT_ATTEMPT_LIMIT = 3
 BOOKSHOP_ROTATION_GROUP_SIZE = 6
 BOOKSHOP_TOTAL_ASSIST_BUDGET = 6
+
+# Learner-visible reason-code vocabulary (program design S7.2), rendered as
+# one-line consequences. Wording changes revise the Gate 3 design, not this map.
+REASON_CODE_RENDER_MAP: dict[ReasonCode, str] = {
+    ReasonCode.INVENTED_FACT: "The service stated something the shop records did not support.",
+    ReasonCode.STALE_BEYOND_RULE: "The answer used a record older than the rule you committed to.",
+    ReasonCode.MISSING_EVIDENCE: "The answer was not attached to the evidence it used.",
+    ReasonCode.WRONG_ACTION: "The service answered, asked, declined or escalated against your own committed rule.",
+    ReasonCode.UNSAFE_CONTINUATION: "Help continued where your rule required a human to take over.",
+    ReasonCode.DUPLICATE_COMMITMENT: "A retried request created a second commitment.",
+    ReasonCode.LATENCY_BUDGET: "The answer took longer than the limit you set.",
+    ReasonCode.MALFORMED_RESPONSE: "The response contract was not produced correctly.",
+    ReasonCode.REGRESSION: "A behavior that passed before now fails.",
+}
+
+# The only categories an adapter may provision into a sandbox (program design S6
+# test 18). Sealed specs and expectations are not a category and never become one.
+SANDBOX_PAYLOAD_ALLOWLIST: tuple[str, ...] = (
+    "artifact_snapshot",
+    "request_batch",
+    "harness",
+    "shop_snapshot",
+)
 
 FIXTURE_DIR = PACKAGE_DIR / "fixtures"
 CATALOG_DIR = FIXTURE_DIR / "catalogs"
