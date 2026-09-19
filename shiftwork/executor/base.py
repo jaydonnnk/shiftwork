@@ -6,6 +6,7 @@ from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBytes
 
+from shiftwork import config
 from shiftwork.domain import canonical
 from shiftwork.domain.models import ExecutorFailure, RunOutput
 
@@ -60,6 +61,118 @@ class ExecutorAdapter(Protocol):
     name: str
 
     async def execute(self, request: RunRequest) -> RunResult: ...
+
+
+SANDBOX_SHOP_SNAPSHOT_NAME = "shop.json"
+
+# Device names Win32 resolves before ordinary files, so a payload declared as ``NUL``
+# or ``CON.txt`` never materializes as a payload file.
+_RESERVED_DEVICE_NAMES = frozenset(
+    {"con", "prn", "aux", "nul", *(f"com{n}" for n in range(1, 10)), *(f"lpt{n}" for n in range(1, 10))}
+)
+
+
+def _collapsed_name(path: str) -> str:
+    """The single name the platform resolves ``path`` to: casefolded, trailing dots/space dropped.
+
+    NTFS is case-insensitive and strips trailing dots and spaces from a final
+    component, so ``SHOP.JSON``, ``shop.json.`` and ``shop.json `` all name the same
+    file. The collision check compares this collapsed form, never the literal string.
+    """
+    return path.casefold().rstrip(" .")
+
+
+def _validate_sandbox_path(path: str) -> None:
+    """Reject a declared payload path that could leave or alias the workspace.
+
+    Containment is a filename rule, not a category rule: ``../escape`` is not made
+    safe by being declared under an allowlisted category. Backslashes and ``:`` are
+    rejected outright because a Windows separator or drive-letter form would slip
+    past a POSIX containment check. A payload path is a single filename: a directory
+    component cannot be provisioned (the payload cannot create directories, and a
+    junction placed inside the workspace could redirect a nested write outside it).
+    Names the platform collapses or reserves (case, trailing dots or spaces, device
+    names) are refused here, because two declared paths aliasing one file, or a
+    declared path that never materializes, is not a payload.
+    """
+    if not path or path in (".", ".."):
+        raise ValueError(f"sandbox payload path is not a filename: {path!r}")
+    if path.startswith("/") or "\\" in path or ":" in path:
+        raise ValueError(f"sandbox payload path is absolute or ambiguous: {path!r}")
+    if "/" in path:
+        raise ValueError(f"sandbox payload path is not a single filename: {path!r}")
+    collapsed = _collapsed_name(path)
+    if not collapsed or collapsed in (".", ".."):
+        raise ValueError(f"sandbox payload path is not a filename: {path!r}")
+    if collapsed.split(".", 1)[0] in _RESERVED_DEVICE_NAMES:
+        raise ValueError(f"sandbox payload path is a reserved device name: {path!r}")
+
+
+class SandboxManifest(ExecutorModel):
+    """The declared sandbox payload: what enters the sandbox and what stays out.
+
+    ``provisioned`` maps an allowlisted category to the sandbox-relative paths
+    written for it; ``controller_side`` maps a category to a ref that is delivered
+    without ever entering the sandbox (the request batch is streamed one request at
+    a time by the harness, and the harness itself is controller code). Sealed specs
+    and expectations are not a category and cannot become one.
+    """
+
+    provisioned: dict[str, tuple[str, ...]]
+    controller_side: dict[str, str]
+
+    @property
+    def paths(self) -> tuple[str, ...]:
+        return tuple(sorted(path for group in self.provisioned.values() for path in group))
+
+    @property
+    def categories(self) -> frozenset[str]:
+        return frozenset(self.provisioned) | frozenset(self.controller_side)
+
+
+def provisioning_manifest(request: RunRequest) -> SandboxManifest:
+    """Declare the exact payload for ``request``, fail-closed against the allowlist."""
+    manifest = SandboxManifest(
+        provisioned={
+            "artifact_snapshot": tuple(sorted(request.artifact_snapshot.files)),
+            "shop_snapshot": (SANDBOX_SHOP_SNAPSHOT_NAME,),
+        },
+        controller_side={
+            "request_batch": request.request_batch.path_ref,
+            "harness": request.harness_ref,
+        },
+    )
+    extra = manifest.categories - set(config.SANDBOX_PAYLOAD_ALLOWLIST)
+    if extra:
+        raise ValueError(f"sandbox payload category outside the allowlist: {sorted(extra)}")
+    missing = set(config.SANDBOX_PAYLOAD_ALLOWLIST) - manifest.categories
+    if missing:
+        raise ValueError(f"sandbox payload manifest is missing allowlisted categories: {sorted(missing)}")
+    seen: set[str] = set()
+    for group in manifest.provisioned.values():
+        for path in group:
+            _validate_sandbox_path(path)
+            collapsed = _collapsed_name(path)
+            if collapsed in seen:
+                raise ValueError(f"sandbox payload path collision: {path!r}")
+            seen.add(collapsed)
+    return manifest
+
+
+def provision_workspace(root: Path, request: RunRequest, shop_snapshot: bytes) -> SandboxManifest:
+    """Write exactly the manifest's provisioned paths into ``root``.
+
+    Every write is derived from the manifest, so a declared-but-unwritten path or an
+    undeclared write is a mismatch the isolation tests can observe. The caller supplies
+    the already-validated snapshot bytes; this function performs no trust decisions.
+    """
+    manifest = provisioning_manifest(request)
+    files = request.artifact_snapshot.files
+    sources = {"artifact_snapshot": files, "shop_snapshot": {SANDBOX_SHOP_SNAPSHOT_NAME: shop_snapshot}}
+    for category, paths in manifest.provisioned.items():
+        for path in paths:
+            (root / path).write_bytes(sources[category][path])
+    return manifest
 
 
 class RequestStimulus(ExecutorModel):

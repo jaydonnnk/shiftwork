@@ -154,6 +154,27 @@ def test_local_process_rejects_untrusted_artifacts(executor, monkeypatch, capsys
         print(f"trusted-guard {change}: PROVISION_FAILED; subprocess starts=0")
 
 
+def test_local_process_types_a_provisioning_failure(executor, monkeypatch, capsys):
+    """A fault on the writer path is a typed PROVISION_FAILED result, never a raised exception.
+
+    The writer runs after the trust gate, so no pinned fixture reaches it with an
+    invalid manifest today; the arm exists because the real-provisioning adapter
+    (Slice 14) wires the writer differently, and an untyped OSError escaping
+    ``execute()`` would break the adapter contract.
+    """
+    request = request_for(executor)
+
+    def failing_provision(root, request, shop_snapshot):
+        raise OSError("probe: provisioning fault after the trust gate")
+
+    monkeypatch.setattr(executor.local, "provision_workspace", failing_provision)
+    result = execute(executor.local.LocalProcessAdapter(), request)
+    assert result.failure is ExecutorFailure.PROVISION_FAILED
+    assert result.captures == ()
+    with capsys.disabled():
+        print("provisioning-fault: PROVISION_FAILED; captures=0")
+
+
 def test_byte_addressed_fixtures_match_lf_checkout():
     roots = [config.ARTIFACT_TEMPLATE_DIR, config.SEALED_CASES_DIR] + [
         config.FIXTURE_DIR / name for name in ("artifacts/bookshop", "requests", "shop", "runs")

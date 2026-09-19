@@ -11,7 +11,7 @@ from pathlib import Path
 from shiftwork import config
 from shiftwork.domain import canonical
 from shiftwork.domain.models import ExecutorFailure
-from shiftwork.executor.base import RawCapture, RunRequest, RunResult, load_batch
+from shiftwork.executor.base import RawCapture, RunRequest, RunResult, load_batch, provision_workspace
 
 
 CHILD_ENV_ALLOWLIST = ("SYSTEMROOT", "WINDIR")
@@ -90,9 +90,10 @@ class LocalProcessAdapter:
         deadline = started + request.deadline_s
         with tempfile.TemporaryDirectory(prefix="shiftwork-fixture-") as workspace:
             root = Path(workspace)
-            for path, body in files.items():
-                (root / path).write_bytes(body)
-            (root / "shop.json").write_bytes(snapshot)
+            try:
+                provision_workspace(root, request, snapshot)
+            except (OSError, ValueError, KeyError):
+                return RunResult(captures=(), executor_ref=None, failure=ExecutorFailure.PROVISION_FAILED, wall_ms=int((time.monotonic() - started) * 1000))
             child_env = {key: os.environ[key] for key in CHILD_ENV_ALLOWLIST if key in os.environ}
             process = None
             stdout_task = None
