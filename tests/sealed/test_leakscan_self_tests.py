@@ -1,0 +1,84 @@
+"""Scanner self-tests for the shared leak-scan helpers (``tests/leakscan.py``).
+
+The leak scans are only as strong as their decoders: one that returns the response
+envelope alone turns every absence assertion that uses it into a pass. Each check
+below injects a payload into a representative serialized surface and requires
+detection, so a removed decoding arm, a lowered nesting bound or a missing recursion
+guard fails here before it can silently weaken test 16, 18, 20 or 45.
+
+Recorded counts (2026-09-19 review round): 2 of the 1352 identity needles contain a
+backslash and cannot match a serialized JSON surface as written; both are masked by a
+slash-free twin, which the last test pins rather than assumes.
+"""
+
+import base64
+import json
+from pathlib import Path
+
+import pytest
+
+from leakscan import (
+    BASE64_DECODINGS,
+    MAX_JSON_NESTING,
+    decoded_surfaces,
+    sealed_identity_strings,
+)
+
+TOKEN = "leakscan-decoder-token"
+
+
+@pytest.mark.parametrize("encoding", ("utf-8", "utf-16-le", "utf-16-be"))
+def test_base64_field_is_decoded_under_each_declared_encoding(encoding: str) -> None:
+    """A payload base64-encoded in UTF-16 is invisible to a UTF-8-only decode.
+
+    The three encodings are listed here literally rather than read from
+    ``BASE64_DECODINGS``: a case parametrized by the constant under test vanishes
+    when that constant is narrowed, which is a vacuity trap, not a failure. The
+    membership assert ties the requirement back to the implementation.
+    """
+    assert encoding in BASE64_DECODINGS, f"{encoding} is not in BASE64_DECODINGS"
+    body = json.dumps({"log_base64": base64.b64encode(TOKEN.encode(encoding)).decode("ascii")})
+    surfaces = decoded_surfaces(body)
+    assert any(TOKEN in surface for surface in surfaces), f"{encoding} payload was not decoded"
+
+
+def test_deeply_nested_base64_payloads_are_reached_within_the_bound() -> None:
+    """Each level re-encodes the same value; a 12-level payload is reached inside the bound."""
+    payload = TOKEN
+    for _ in range(12):
+        payload = base64.b64encode(json.dumps({"log_base64": payload}).encode("utf-8")).decode("ascii")
+    body = json.dumps({"log_base64": payload})
+    assert any(TOKEN in surface for surface in decoded_surfaces(body)), (
+        f"a 12-level nested payload was not decoded (bound {MAX_JSON_NESTING})"
+    )
+
+
+def test_deeply_nested_envelope_does_not_error_the_scan() -> None:
+    """A pathological JSON-looking body must not raise out of the scanner."""
+    pathological = "[" * 20000
+    assert decoded_surfaces(pathological) == [pathological]
+
+
+def test_deeply_nested_string_value_does_not_error_the_scan() -> None:
+    """A pathological JSON-looking string value must not raise out of the recursive walk."""
+    pathological = "[" * 20000
+    body = json.dumps({"detail": pathological})
+    surfaces = decoded_surfaces(body)
+    assert surfaces[0] == body and pathological in surfaces
+
+
+def test_identity_needles_a_serialized_surface_cannot_carry_have_a_capable_twin() -> None:
+    """The backslash-only identity needles are masked by capable twins, and the mask is checked.
+
+    ``json.dumps`` doubles every backslash, so a needle containing one cannot appear
+    in the envelope as serialized. Both such needles are masked by a slash-free twin
+    (the family file name or ``sealed/cases``), so the identity scan is not weakened
+    by their absence; this test pins that property instead of assuming it.
+    """
+    needles = sealed_identity_strings()
+    incapable = [needle for needle in needles if needle not in json.dumps({"probe": needle})]
+    assert incapable, "no needle was found incapable; this check would be vacuous"
+    for needle in incapable:
+        twins = {needle.replace("\\", "/"), Path(needle).name}
+        capable = [twin for twin in twins if twin in needles and twin not in incapable]
+        assert capable, f"a needle a serialized surface cannot carry has no capable twin: {needle!r}"
