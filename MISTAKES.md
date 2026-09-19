@@ -231,3 +231,42 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   is graduated into `AGENTS.md` S6 Verification. The graduated entries are kept
   here as incident history, per the AGENTS.md mistake-logging rule (user decision,
   2026-09-19).
+
+## 2026-09-19 Slice 6 repair fixture written with CRLF by write_text
+
+- **What happened:** the new `missing_evidence` transcript fixture was written with
+  `Path.write_text` on Windows, which translated `\n` to `\r\n`; the LF-pinned
+  fixture check in `tests/executor/test_conformance.py` failed on it.
+- **Root cause:** text-mode writes on Windows apply `os.linesep` translation, and
+  the repository pins fixture files as LF bytes.
+- **Prevention rule:** write byte-pinned text fixtures with `write_bytes(...)` or
+  `write_text(..., newline="\n")`, never default `write_text`, on Windows.
+
+## 2026-09-19 Slice 6 review round: a self-test parametrized by the constant it tests
+
+- **What happened:** the new UTF-16 decoder self-test was parametrized over
+  `BASE64_DECODINGS`, the same constant it exists to guard. My failing-capability
+  probe narrowed that constant to `("utf-8",)` and the probe reported
+  `1 passed`: the utf-16 cases had disappeared instead of failing. The guard was
+  vacuous for exactly the inputs it claimed, and only the probe's own expectation
+  (a passing probe is a red flag) exposed it.
+- **Root cause:** the test's input list came from the implementation artifact rather
+  than from the requirement, so weakening the implementation weakened the evidence
+  in the same step. Same class as counting surfaces scanned instead of proving a
+  needle can match (the graduated AGENTS.md S6 rule).
+- **Prevention rule:** a failing-capability check enumerates the requirement's
+  literal inputs (the three encodings), never a constant read from the code under
+  test, and asserts each input is still covered; when a mutation probe passes,
+  treat the probe or the check as broken before concluding the guard is unnecessary.
+
+## 2026-09-19 Slice 6 review round: the getattr rule rebuilt an AST call and lost lineno
+
+- **What happened:** the `getattr(importlib, "import_module")` branch of
+  `_dynamic_import_findings` replaced the original call node with a synthetic
+  `ast.Call` built from the remaining arguments, so the "without a target argument"
+  message raised `AttributeError: 'Call' object has no attribute 'lineno'` and the
+  scanner self-test failed.
+- **Root cause:** a node was reconstructed to drop its first argument without
+  copying the source-location attributes.
+- **Prevention rule:** never rebuild an AST node to drop arguments; keep the
+  original node for locations and carry the remaining argument list separately.

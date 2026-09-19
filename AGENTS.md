@@ -89,11 +89,15 @@ summaries when a time-sensitive external claim is being made.
   implemented and demonstrated; its independent review's fixes (a failing-capable
   chain-linkage test, route-level BROKEN 409 tests, corrected deferral and
   snapshot wording) landed the same day. Slice 6 (isolation and leakage
-  hardening) has implementation from 2026-09-18 but NEEDS REPAIR after independent
-  verification on 2026-09-19 (REVISE): four injected file/path/incident/client
-  faults passed all 133 authorized tests; controller stdout and computed
-  imports also escaped their scoped checks. Test 19's pinned map is supported;
-  tests 16-18, 20 and 45 have current repair gaps, and test 45 is not FULL.
+  hardening) was repaired 2026-09-19: its four previously invisible injected faults
+  and two probes now each fail the suite, and the same-day adversarial review round
+  reproduced those rows and resolved its MAJOR-1 (error responses scanned),
+  MINOR-1/2/3 items (containment normalization, import-guard forms plus a
+  sealed-path rule, scanner decoder coverage) and the NITs, each with a
+  failing-capable proof (evidence in the 00-status Slice 6 repair and review-round
+  sections); independent re-review and user acceptance are pending. Test 19's
+  pinned map is supported; the tests 16-18, 20 and 45 gaps are closed pending
+  that re-review.
   Prompt/assist and real-sandbox surfaces remain deferred to Slices 12/14; future
   stimuli require Slice 7. Exact remaining clause ownership was reconciled and
   re-approved at Gate 4 (2026-09-19), not silently treated as delivered. The removal of the sealed
@@ -104,7 +108,8 @@ summaries when a time-sensitive external claim is being made.
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the
   user in chat on 2026-09-19, and implementation and Slice 7 remain on
-  hold pending the Slice 6 repairs. The revised
+  hold pending Slice 6 acceptance (repair implemented 2026-09-19; the review
+  round's findings were resolved the same day). The revised
   test 11/13/17 clauses are specifications, not new passing evidence; Gate 4 mapped
   their current-runtime checks into the Slice 6 repair and preserved later
   prerequisites (re-approved 2026-09-19). ADR reconciliation is recorded (2026-09-19; see `docs/adr/`); ADR #4 still

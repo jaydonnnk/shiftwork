@@ -30,8 +30,12 @@ scoring-input alignment to Slice 10, and was approved by the user in chat on
 2026-09-19). Gate 2's ownership revision
 and Gate 3's fourth-backtrack revision were re-approved by the user on 2026-09-19;
 both scoped backtracks are closed. Gate 4's scoped revision was re-approved by the
-user on 2026-09-19; the approvals do not authorize implementation during this hold. Slice 6 NEEDS REPAIR following the
-independent 2026-09-19 verification (REVISE); Slice 7 must not start.
+user on 2026-09-19; the approvals do not authorize implementation during this hold. Slice 6's repair is implemented 2026-09-19
+and the same-day adversarial review round's findings are resolved (error-response
+scanning, containment normalization, import-guard forms plus a sealed-path rule,
+scanner decoder coverage; see the 00-status repair review-round section);
+independent re-review and user acceptance are pending; Slice 7 must not start
+before acceptance.
 The approved ownership split is controller orchestration -> sealed loader ->
 cases passed to pure evaluation, not evaluator-owned file loading. ADR 0001
 supersession and the ADR 0002/0003 implementation-status notes were recorded
@@ -381,9 +385,10 @@ Scope cuts that fund proof:
    was approved by the user in chat on 2026-09-19.
 
 Slice 6 remains incomplete; no implementation or Slice 7 work continues until
-the Slice 6 repairs land. The Gate 4 clause ownership is reconciled and approved;
-the next step is the Slice 6 repair, not acceptance of the queued Gate 4 changes
-or the current Slice 6 implementation.
+the Slice 6 repair is re-verified and accepted. The review round resolved the
+adversarial review's findings on 2026-09-19; the Gate 4 clause ownership is
+reconciled and approved; the next step is the Slice 6 independent re-review, not
+acceptance of the queued Gate 4 changes or the current Slice 6 implementation.
 
 Unknowns include Token Factory Sandbox access, available Nemotron models, Tavily
 access, runtime cost and latency, public deployment behaviour, learner recruitment,

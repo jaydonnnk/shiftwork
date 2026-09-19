@@ -54,8 +54,12 @@
 backtracks are closed. The Gate 4 reconciliation in `04-slices.md` was revised and
 approved 2026-09-19; the same-day follow-up revision (Slice 7 leak-response
 invalidation; Slice 10 scoring-input alignment) was approved by the user in chat on
-2026-09-19; the Slice 6 repair scope is unchanged. Slice 6 needs repair; Slice 7
-must not start. The ADR alignment
+2026-09-19; the Slice 6 repair scope is unchanged. The Slice 6 repair is implemented
+2026-09-19 and updated the same day with the adversarial review's findings resolved
+(see the Slice 6 repair review-round section: MAJOR-1 error-response scanning,
+MINOR-1 containment normalization, MINOR-2 guard forms plus the sealed-path rule,
+MINOR-3 decoder coverage and the NIT dispositions); independent re-review and user
+acceptance are pending; Slice 7 must not start before acceptance. The ADR alignment
 (ADR 0001 superseding note; ADR 0002/0003 implementation-status notes) is recorded
 2026-09-19; ADR #4 stays deferred to Slice 13 evidence and separate authorization.
 
@@ -74,7 +78,7 @@ re-steer?"):
 - [x] Slice 3: Executor conformance (recorded + local_process); implemented, demonstrated, reviewed (PASS) and merged to main 2026-09-18 (verbatim evidence below; test 50 partial, test 29 skipped)
 - [x] Slice 4: Contract-parameterized evaluator + first sealed family; implemented and demonstrated 2026-09-18; the six sealed cases were reviewed and SEALED as-is by the user 2026-09-18 (evidence below)
 - [x] Slice 5: Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger; implemented and demonstrated 2026-09-18 (`python -m demos.finalize_run` + `pytest tests/ledger -q`; evidence below)
-- [ ] Slice 6: Isolation and leakage hardening; NEEDS REPAIR after independent verification 2026-09-19 (REVISE). Existing implementation retained; earlier evidence preserved below, with the superseding audit findings and gate hold.
+- [ ] Slice 6: Isolation and leakage hardening; repair implemented 2026-09-19 and the adversarial review round's findings resolved the same day (see the Slice 6 repair and review-round sections), independent re-review and user acceptance pending. Earlier evidence preserved below, with the audit findings.
 - [ ] Slice 7 — Budget + rotation + incidents + repair
 - [ ] Slice 8 — Close → inheritance + Test 1 offline pre-proof
 - [ ] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03)
@@ -102,12 +106,13 @@ have reproduced blind spots. The sealed `CheckResultView.check_id` removal is
 retained; a public ledger derivation's `check_id` is a different, public result ID.
 The loader ownership conflict spans Gate 2, Gate 3 and ADR 0001, not one clause.
 The 2026-09-18 Slice 6 report is preserved verbatim as history; the 2026-09-19
-verification section below supersedes its coverage and completion claims.
-Slices 7-17 are not implemented. Gate 2's ownership revision, the Gate 3
+verification section below supersedes its coverage and completion claims, and the
+same-day repair review round resolved the review's findings without implying
+acceptance. Slices 7-17 are not implemented. Gate 2's ownership revision, the Gate 3
 fourth-backtrack revision and the Gate 4 reconciliation revision are re-approved;
 a same-day Gate 4 follow-up revision (Slice 7 leak-response invalidation;
 Slice 10 scoring-input alignment) was approved by the user in chat 2026-09-19;
-implementation remains paused pending the Slice 6 repair. Later work must follow
+implementation remains paused pending the Slice 6 re-verification and acceptance. Later work must follow
 those decisions and `04-slices.md` S10. Credentials, installs, spike runs, external
 services, deployment, outreach and ADR #4 each remain separately authorized.
 
@@ -1968,6 +1973,218 @@ The current documentation step changes only `00-status.md`, `02-architecture.md`
 change code, tests, ADRs, Gate 3, Gate 4 or the branch rule. Next decision:
 **Approve Gate 2, or what should change?**
 
+## Slice 6 repair: 2026-09-19
+
+**Status: repair implemented; independent re-review and user acceptance pending. Slice 7 must not start before acceptance.**
+
+The repair scope is the one recorded in `04-slices.md` (Slice 6 repair list) and the
+2026-09-19 audit's coverage corrections. Delivered:
+
+- the workspace observer reads the real workspace inventory (paths and bytes) from
+  the filesystem the moment `provision_workspace` returns, before the subprocess
+  starts, so any writing API is observed rather than only `Path.write_bytes`
+  (`tests/conftest.py`; the per-directory sealed conftest was folded into the shared one);
+- host-path needles are normalized on both sides (raw, backslash-escaped and
+  forward-slash forms; decoded nested JSON string values) with scanner self-tests
+  for the JSON-escaped, forward-slash and nested forms (`tests/leakscan.py`, tests 20/45);
+- an incident-producing run is required and its endpoint and nested board projection
+  are scanned, alongside the served client HTML and controller stdout/stderr; the new
+  additive fixture `fixtures/runs/missing_evidence.json` drives MISSING_EVIDENCE to
+  INCIDENT_OPENED through the real finalize path (tests 16/18/20/45);
+- the public-corpus filter no longer includes the served client or the artifact
+  template, so a note pasted into a served projection cannot exempt its own
+  fragments (`tests/leakscan.py`);
+- computed dynamic-import targets are rejected for `__import__` and
+  `importlib.import_module`, explicit aliases included, with a per-mechanism
+  scanner self-test (test 17);
+- the approved `GET`/`PUT /api/shifts/{id}/artifact` route is implemented; the
+  unapproved `/draft` path is removed and the client, demo and tests use the
+  approved route;
+- provisioning enforces manifest filename containment: traversal, absolute and
+  ambiguous destinations and cross-category collisions are refused before the
+  writer runs, and a refused manifest writes nothing (test 18).
+
+Verbatim suite evidence (five guard tests added; the pre-repair baseline was
+`133 passed, 1 skipped`):
+
+```
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging -p no:cacheprovider
+138 passed, 1 skipped, 2 warnings in 27.05s
+
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -m pytest tests/sealed tests/api -q -p no:cacheprovider
+40 passed, 2 warnings in 4.42s
+```
+
+Demos re-run, all exit 0: `demos.lifecycle`, `demos.thin_path` (hash unchanged:
+`44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158`),
+`demos.finalize_run`, `demos.evaluate_transcript --fixture
+fixtures/runs/passing_stale.json` (6 pass / 0 fail) and `--fixture
+fixtures/runs/failing_stale.json` (0 pass / 6 fail).
+
+Mutation re-runs. Each mutation was applied to the working tree, the command below
+was run, and the mutated file was restored byte-identically (sha256 before == after
+asserted per file):
+
+```
+.venv/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging -p no:cacheprovider --tb=short
+```
+
+| Mutation applied | Reproduced failure (verbatim summary) | Failing guard |
+|---|---|---|
+| undeclared `write_text` in `provision_workspace` | `1 failed, 137 passed, 1 skipped` | `tests/sealed/test_payload_manifest.py::test_files_written_equal_the_declared_manifest` |
+| forward-slash host filename added to `RunView` | `2 failed, 136 passed, 1 skipped` | `tests/api/test_host_path_env_isolation.py::test_api_responses_expose_no_env_value_or_host_path`; `tests/api/test_draft_round_trip.py::test_public_projections_omit_injected_internal_refs` |
+| the sealed check identity reaches the incident and checks projections (the evaluator's id, which embeds it, survives finalization; the literal `check_result_id = result.check_id` at the named site is foreign-key-impossible as written, so the review re-derived the reachable form) | `1 failed, 137 passed, 1 skipped` | `tests/sealed/test_payload_manifest.py::test_sealed_absent_from_every_api_response` |
+| full sealed operator note pasted into the served client HTML | `1 failed, 137 passed, 1 skipped` | `tests/sealed/test_payload_manifest.py::test_sealed_absent_from_every_api_response` |
+| `print(cases.model_dump_json())` after the controller loads cases | `1 failed, 137 passed, 1 skipped` | `tests/sealed/test_sentinel_leak.py::test_sentinel_absent_from_every_api_response_and_the_controller_streams` |
+| computed `importlib.import_module("shiftwork." + "sealed")` in the API module | `1 failed, 137 passed, 1 skipped` | `tests/sealed/test_import_graph.py::test_no_forbidden_module_imports_the_sealed_store` |
+
+The four audit faults that previously passed all 133 authorized tests each now
+produce a real suite failure, as do the two probes that previously escaped. The
+sentinel token and the sealed note text are not quoted in this record; the sealed
+`stale_information` inventory was read but never modified (the client-HTML probe
+restored the file to its exact prior bytes). One self-inflicted test failure during
+the repair (a fixture written with CRLF by `write_text`) was logged in `MISTAKES.md`.
+
+Not claimed by this record: independent re-review and user acceptance (both
+pending); `tests/packaging` remains excluded per the audit's no-install constraint;
+test 45's sandbox/response arm and test 20's specification remain local-adapter
+runs, not tokenfactory arms (Slice 14).
+
+## Slice 6 repair review round: 2026-09-19
+
+**Status: the adversarial review's findings are resolved inside the repair round;
+independent re-review and user acceptance remain pending. Slice 7 must not start
+before acceptance.**
+
+An independent adversarial review of the uncommitted Slice 6 repair reproduced all
+six recorded mutation rows (real failing assertions, the recorded guard names, the
+recorded counts, byte-identical restores) and both suite baselines, so those claims
+stand. It then demonstrated one uncaught leak class and three residuals and
+returned REVISE. Every finding is resolved or explicitly recorded below; no finding
+was left unowned.
+
+**MAJOR-1, error-response bodies were not scanned (fixed).** The four lifecycle
+drivers now drive one 404, one 409 and one 422 after the finalized
+incident-producing run and scan the decoded bodies through the same
+`decoded_surfaces`/`leaks_in` pipeline, with status-code assertions so the arm
+cannot silently degrade to a success response. Failing capability was proven with
+the review's injection in `orchestrator.get_run`: the 404 detail was built from
+`check_results.check_id` read via SQL (no sealed import, so no import guard can see
+it). Pre-fix, that live leak passed everything: subset `40 passed`, full suite
+`138 passed, 1 skipped`, and a direct probe read 2 sealed identity needles out of
+the 404 body (1352-needle set, matching the review's count). Post-fix: full suite
+`1 failed, 137 passed, 1 skipped`, subset `1 failed, 39 passed`, with
+`AssertionError: GET /api/runs/run-0001-missing: [<sealed check identity>]` raised
+by `test_sealed_absent_from_every_api_response` (the needle is elided here: the
+check identity is sealed material and is not quoted in this record). Restored
+byte-identically: `shiftwork/orchestrator.py` sha256
+`83bf5a943eb00953759ce1ca0eabd47acfbc9b7a46a6894c9e84ba7824980d27` before and
+after, the same digest the review recorded for this file.
+
+**MINOR-1 and NIT-1, containment (fixed).** `provisioning_manifest` now refuses
+names the platform collapses (compare on the casefolded name with trailing dots and
+spaces stripped), reserved device names (`NUL`, `CON`, `COM1`, `LPT9.TXT`, with or
+without extension) and directory components, and the collision check compares the
+collapsed name rather than the literal string. Two tests cover the new refusals
+(`test_manifest_rejects_names_the_platform_would_collapse`,
+`test_manifest_rejects_reserved_device_names_and_directory_components`), and a
+refused manifest is asserted to write nothing. Only pinned trusted fixtures reach
+the writer today (`local_process.py` trust gate), so no escape was reachable; the
+rule is enforced for the Slice 14 real-provisioning arm. The untyped
+`FileNotFoundError` class is closed by decision: a fault on the writer path is now
+a typed `PROVISION_FAILED` result
+(`test_local_process_types_a_provisioning_failure`), because an exception escaping
+`execute()` would break the adapter contract once real provisioning exists. A
+junction inside a workspace is unreachable for a declared payload now that
+directory components are refused; symlinked ancestors stay outside the
+declared-path rule and are recorded for Slice 14.
+
+**MINOR-2, the import guard is a lint, not a boundary (fixed and recorded).** The
+named dynamic-import mechanisms now include the `getattr(importlib,
+"import_module")` string form, assignment aliases of either binding
+(`mods = importlib`, `fn = importlib.import_module`, chains of those) and every
+`exec` call, each with per-form self-tests proven failing-capable by branch
+removal. A new rule closes the demonstrated non-import path: only `config.py` (the
+definition) and `sealed/store.py` (the loader) may reference the sealed storage
+constant, in the attribute, binding, import or `getattr` string forms, and the
+review's own probe (a path read added to `shiftwork/api/routes.py`) now fails the
+suite. The residual is stated rather than claimed: a runtime-computed attribute
+name or a separator-split path string evades both lints, which is the boundary the
+Gate 3 clause already set ("arbitrary obfuscation is not understood").
+
+**MINOR-3, scanner decoders (fixed).** `decoded_surfaces` decodes `_base64` fields
+under UTF-8, UTF-16-LE and UTF-16-BE (a UTF-8-only decode rendered a UTF-16 payload
+invisible, not partial, so the docstring claim to the contrary is corrected),
+catches `RecursionError` on both parse sites so a pathological JSON-looking string
+cannot error the suite, and documents the nesting bound as `MAX_JSON_NESTING = 24`
+with its justification (no surface this repository produces nests past two levels;
+the bound exists so unbounded recursion is impossible). Five self-tests in
+`tests/sealed/test_leakscan_self_tests.py` cover the three decodings, a 12-level
+nested payload (the depth the review found missed at the old bound of 8) and both
+recursion-guard sites. A value split across two JSON fields stays out of scope, as
+recorded in the docstring.
+
+**NIT dispositions.** NIT-2: the two backslash-only identity needles that cannot
+match a serialized JSON surface are recorded in `tests/leakscan.py` and pinned by a
+self-test requiring each to have a capable slash-free twin (2 of 1352; the review's
+counts reproduce). NIT-3: the missing non-vacuity assert in
+`test_no_sealed_material_in_the_provisioned_sandbox_payload` is added. NIT-4: the
+mutation row 3 wording above is corrected (foreign-key-impossible as written), the
+scanner self-tests are re-attributed to tests 20/45, and the `04-slices.md` Slice 6
+status line still reads "NEEDS REPAIR". That gate document is deliberately not
+edited in this round: its status records the acceptance criteria (independent
+re-review and user acceptance), which remain unmet, and editing an approved gate
+document needs the user's authorization. The pre-existing client freeze button (it
+posts an empty body to `/artifact/versions`, so the endpoint returns 422) is
+unchanged at HEAD, predates the route rename and is not a Slice 6 finding; it is
+recorded for the client slices (9 to 11) and the Slice 16 verification.
+
+Mutation and probe re-runs for this round: each was applied to the worktree, the
+named check was run, and the file was restored byte-identically (sha256 before ==
+after asserted per file; no captured transcript is claimed beyond this table).
+
+| Probe | Observed failure | File and restore digest |
+|---|---|---|
+| 404 detail built from `check_results.check_id` (MAJOR-1) | `1 failed, 137 passed, 1 skipped`; subset `1 failed, 39 passed` | `shiftwork/orchestrator.py` `83bf5a943eb00953759ce1ca0eabd47acfbc9b7a46a6894c9e84ba7824980d27` |
+| collision key no longer collapses | `FAILED tests/sealed/test_payload_manifest.py::test_manifest_rejects_names_the_platform_would_collapse` | `shiftwork/executor/base.py` `a42ae18ebdcb6875dad84303d2465e8d64c4328fa8330bfc96731a191a8209f8` |
+| reserved-device-name branch removed | `FAILED tests/sealed/test_payload_manifest.py::test_manifest_rejects_reserved_device_names_and_directory_components` | `shiftwork/executor/base.py` (same digest) |
+| single-filename rule removed | `FAILED tests/sealed/test_payload_manifest.py::test_manifest_rejects_reserved_device_names_and_directory_components` | `shiftwork/executor/base.py` (same digest) |
+| provisioning failure left untyped | `FAILED tests/executor/test_conformance.py::test_local_process_types_a_provisioning_failure` | `shiftwork/executor/local_process.py` `7bc63f4cde0c2fbd56eb3793b4b23dc61aa4e58d43dc2fa656550b81ee6cac34` |
+| getattr string-form branch removed | `FAILED tests/sealed/test_import_graph.py::test_dynamic_import_scanner_rejects_each_named_mechanism` | `tests/sealed/test_import_graph.py` `37084c0e8e5cf4ba6c39d4485bd0c77ec48373246cbb9ca66b3b84ac5ea6961c` |
+| assignment-alias pass disabled | `FAILED tests/sealed/test_import_graph.py::test_dynamic_import_scanner_rejects_each_named_mechanism` | `tests/sealed/test_import_graph.py` (same digest) |
+| exec branch removed | `FAILED tests/sealed/test_import_graph.py::test_dynamic_import_scanner_rejects_each_named_mechanism` | `tests/sealed/test_import_graph.py` (same digest) |
+| sealed-path detector neutralized | `FAILED tests/sealed/test_import_graph.py::test_only_the_loader_references_the_sealed_storage_path` | `tests/sealed/test_import_graph.py` (same digest) |
+| path read added to the API module (the review's probe) | `FAILED tests/sealed/test_import_graph.py::test_only_the_loader_references_the_sealed_storage_path` | `shiftwork/api/routes.py` `ce429251f8341a6cef2c731a182aa2c98c8e7456977978226c2326d9036745ed` |
+| UTF-16 decodings removed | `2 failed, 1 passed` (`utf-16-le`, `utf-16-be`) | `tests/leakscan.py` `1c076729831d09c06a96d3a1891af808fbc7357ec8dd262b7df8961c07be237d` |
+| nesting bound lowered to 8 | `FAILED tests/sealed/test_leakscan_self_tests.py::test_deeply_nested_base64_payloads_are_reached_within_the_bound` | `tests/leakscan.py` (same digest) |
+| nested recursion guard removed | `FAILED tests/sealed/test_leakscan_self_tests.py::test_deeply_nested_string_value_does_not_error_the_scan` | `tests/leakscan.py` (same digest) |
+| top-level recursion guard removed | `FAILED tests/sealed/test_leakscan_self_tests.py::test_deeply_nested_envelope_does_not_error_the_scan` | `tests/leakscan.py` (same digest) |
+| family-name twin dropped from the identity set | `FAILED tests/sealed/test_leakscan_self_tests.py::test_identity_needles_a_serialized_surface_cannot_carry_have_a_capable_twin` | `tests/leakscan.py` (same digest) |
+
+Post-round suite evidence (eleven checks added; the pre-round baseline was
+`138 passed, 1 skipped`, itself five checks above the audit's `133 passed, 1
+skipped`):
+
+```
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging -p no:cacheprovider
+149 passed, 1 skipped, 2 warnings in 43.48s
+
+PYTHONDONTWRITEBYTECODE=1 .venv/Scripts/python.exe -m pytest tests/sealed tests/api -q -p no:cacheprovider
+50 passed, 2 warnings in 18.49s
+```
+
+Demos re-run after the round, all exit 0: `demos.lifecycle`, `demos.thin_path`
+(hash unchanged: `44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158`),
+`demos.finalize_run`, `demos.evaluate_transcript --fixture
+fixtures/runs/passing_stale.json` (6 pass / 0 fail) and `--fixture
+fixtures/runs/failing_stale.json` (0 pass / 6 fail).
+
+Self-inflicted errors in this round are logged in `MISTAKES.md` (a self-test
+parametrized by the constant it guarded, caught by a probe that passed when it
+should have failed; an AST node rebuilt without its line number). Not claimed:
+independent re-review, user acceptance, `tests/packaging` (no-install constraint)
+and the tokenfactory arms (Slice 14). No gate approval is implied by this record.
+
 ## Gate 2 re-approval and Gate 3 revision: 2026-09-19
 
 The user explicitly approved the scoped Gate 2 revision and instructed proceeding
@@ -2048,7 +2265,7 @@ restart recovery is explicit in Slice 8; slice completion gains an affected-ADR
 consistency check. No other slice requirements changed, and the 2026-09-17 and
 2026-09-18 approvals remain the historical record.
 
-Next: the Slice 6 repair, then re-verification, then independent re-review and user
+Next: independent re-review of the Slice 6 repair (evidence above), then user
 acceptance before Slice 7. The ADR alignment (ADR 0001 superseding note; ADR
 0002/0003 implementation-status notes) is recorded 2026-09-19; ADR #4 stays deferred
 to Slice 13 evidence and separate authorization. Installs, credentials, external
