@@ -206,3 +206,28 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   (name the constant, field or function actually used), not the invariant it
   happens to satisfy today; when inputs coincide by configuration rather than by
   mechanism, say so and record the decoupling as a latent-bug note.
+
+## 2026-09-18 Slice 6 host-path leak scan could never match the surface it scanned
+
+- **What happened:** test 20's host-path needles were raw Windows absolute paths
+  (`str(config.BOOKSHOP_SNAPSHOT)`, the package dir, the interpreter path), but a
+  FastAPI JSON response backslash-escapes them (`C:\\Users\\...`), so
+  `needle in surface` never matched. Six of the eight needles were vacuous and the
+  test passed against a real leak: mutation probe 20b wired
+  `str(config.BOOKSHOP_SNAPSHOT)` into a projected `request_text` and test 20 stayed
+  green. Only test 45 caught it, and only because it also carried a
+  backslash-free marker token. My own non-vacuity checks passed, because they
+  counted surfaces scanned rather than proving any needle could match.
+- **Root cause:** I wrote the absence assertion against the in-memory value without
+  checking how that value is serialized on the surface being scanned, and I treated
+  "the scan covered N surfaces" as evidence that each individual needle was capable
+  of failing.
+- **Prevention rule:** every absence/leak assertion needs a scanner self-test that
+  injects the needle into a representative serialized surface and requires
+  detection; a count of surfaces scanned is not evidence that a needle can match.
+  Compare against the surface's serialized form, not the in-memory value. Fourth
+  occurrence of the coverage-claimed-not-proven pattern (2026-09-16 clause mapping,
+  2026-09-17 repair scoping, 2026-09-18 Slice 5 guard branches, this entry), so it
+  is graduated into `AGENTS.md` S6 Verification. The graduated entries are kept
+  here as incident history, per the AGENTS.md mistake-logging rule (user decision,
+  2026-09-19).

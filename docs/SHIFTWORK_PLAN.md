@@ -1,24 +1,44 @@
 # Shiftwork — working brief and adjudication register
 
-Updated: 2026-09-18.
+Updated: 2026-09-19.
 
 **State:** selected by the user as the sole active hackathon direction.
 **Gate state:** Gate 1 — Product RE-APPROVED 2026-09-18 (first approved 2026-09-15;
 backtracked and revised the same day for the explicit junior applied AI engineer
-role framing and the selected isometric operational-room visual direction); Gate 2 —
-Architecture APPROVED 2026-09-15; Gate 3 — Program Design APPROVED 2026-09-17
-(re-approved a second time after the S2 packaging backtrack — `pyproject.toml`,
+role framing and the selected isometric operational-room visual direction); Gate 2 -
+Architecture RE-APPROVED 2026-09-19 after the scoped backtrack (originally APPROVED
+2026-09-15; orchestration-owned sealed loading and pure evaluator inputs explicitly
+approved); Gate 3 - Program Design RE-APPROVED 2026-09-19 after the scoped fourth
+backtrack for loader/signature/call-stack, purity/import checks and opaque-ref/
+public-identity projection reconciliation; the user approved the revised document
+in chat.
+Prior Gate 3 history: APPROVED 2026-09-17 (re-approved a second time after the S2
+packaging backtrack - `pyproject.toml`,
 `requirements.lock`, `demos/`, test 51; history: first backtrack re-approved
 2026-09-17, originally approved 2026-09-16; BACKTRACKED a third time 2026-09-18,
 scoped to one S5.6 sentence after the independent Slice 5 review found "never
 `expected_ref`" contradicted test 13's opaque-ref assertion; the reconciled
 wording permits `expected_ref` only as the opaque `sealed:` digest, no behavior
 change, RE-APPROVED a third time 2026-09-18); Gate 4 — Slice Plan RE-APPROVED
-2026-09-18 (first approved 2026-09-17 after three review rounds; the reopen was
-scoped to the rewritten Slice 9 to 11 requirements). Slice
-work proceeds one slice at a time under `04-slices.md` S10; credentials, installs,
-spike runs, external services, deployment, outreach and ADR #4 each remain
-separately authorized. Backtrack an earlier gate only for a concrete blocker.
+2026-09-19 after the scoped reconciliation revision (first approved 2026-09-17; the
+2026-09-18 reopen was scoped to the rewritten Slice 9 to 11 requirements; the
+2026-09-19 revision moved the revised test 11/13/17 checks into the Slice 6 repair,
+added snapshot pairing to Slice 7, restart recovery to Slice 8, prompt/real-provisioning
+mapping to Slices 12/14 and the ADR check to slice completion; a same-day follow-up
+revision assigns the leak-response invalidation to Slice 7 and the remaining
+scoring-input alignment to Slice 10, and was approved by the user in chat on
+2026-09-19). Gate 2's ownership revision
+and Gate 3's fourth-backtrack revision were re-approved by the user on 2026-09-19;
+both scoped backtracks are closed. Gate 4's scoped revision was re-approved by the
+user on 2026-09-19; the approvals do not authorize implementation during this hold. Slice 6 NEEDS REPAIR following the
+independent 2026-09-19 verification (REVISE); Slice 7 must not start.
+The approved ownership split is controller orchestration -> sealed loader ->
+cases passed to pure evaluation, not evaluator-owned file loading. ADR 0001
+supersession and the ADR 0002/0003 implementation-status notes were recorded
+2026-09-19 after the gate decisions.
+With the gates re-approved, slice work proceeds under `04-slices.md` S10;
+credentials, installs, spike runs, external services, deployment, outreach and
+ADR #4 each remain separately authorized. Backtrack an earlier gate only for a concrete blocker.
 Slices 1 (tracer bullet, 2026-09-17), 2 (thin real vertical path, 2026-09-18) and
 3 (recorded/local_process executor conformance, 2026-09-18) are implemented,
 reviewed and merged to main; verbatim Slice 3 evidence is recorded in
@@ -29,6 +49,11 @@ Slice 5 (reducer, hash chain, idempotent
 finalization, ledger hardening) is implemented and demonstrated 2026-09-18; an
 independent review returned 2 MAJOR and 2 MINOR findings plus a Gate 3 wording
 escalation, and all fixes landed the same day (evidence in `00-status.md`).
+Slice 6 has implementation but its completion/coverage claims were rejected on
+2026-09-19: four deliberately introduced provisioning/projection/client faults
+passed all 133 authorized tests, and stdout/import probes exposed further test
+blind spots. These are injected faults, not observed leaks in the restored app.
+Repair and re-verification remain outstanding; the original report is historical.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** the Slice 2 thin real path remains (canonical hashing, one
 recorded replay, one sealed case scored, one hash-chained ledger event). Slice 3
@@ -39,10 +64,13 @@ test 50 is partial (offline environment/log clauses only), and test 29 is explic
 skipped until Slice 14. This is not hostile-code isolation. Slice 4 adds the
 contract-parameterized offline evaluator and completes the six-variant
 `stale_information` sealed family; tests 11-15 and 42 land fully and the test 44
-evaluator clause completes. Fixtures and transcripts
-are agent-authored and require user review before acceptance authority. Ledger
-hardening is not built. No Sandbox execution,
-learner study, transfer result, Tavily ablation, prize merit or score is demonstrated.
+evaluator clause completes. The user sealed those six cases on 2026-09-18;
+further agent-authored acceptance cases still require user review. Slice 5 ledger
+hardening is implemented; Slice 6 verification remains incomplete. The 2026-09-19
+audit verified 133 passing tests and one skip with packaging excluded because
+installation was prohibited, not a full-suite result. No Token Factory Sandbox
+execution, learner study, transfer result, Tavily ablation, prize merit or score
+is demonstrated.
 **Working forecast:** current 27/40; pre-evidence cap 31/40; conditional best
 case 35/40. Potential Impact remains at most 4.0 in that best case.
 
@@ -338,12 +366,24 @@ Scope cuts that fund proof:
 
 ## 12. Gate sequence and immediate unknowns
 
-1. Gate 1: approved 2026-09-15; final independent review passed 2026-09-15.
-2. Gate 2: approved 2026-09-15 — system boundaries, execution path, persistence,
-   model role, deployment and external services decided in `02-architecture.md`.
-3. Gate 3: approved 2026-09-16 — interfaces, authority enforcement, sealed-case
-   isolation, metrics and the three test protocols defined before implementation bodies.
-4. Gate 4: approve visible end-to-end slices; execute the central-mechanism proof first.
+1. Gate 1: re-approved 2026-09-18; unchanged by this recovery.
+2. Gate 2: RE-APPROVED 2026-09-19 after the scoped sealed-loader ownership
+   backtrack; all other architecture decisions retain their prior scope.
+3. Gate 3: RE-APPROVED 2026-09-19 after the scoped fourth backtrack for
+   loader/signature/call-stack, purity/import checks and opaque-ref/public-identity
+   projections; the user approved the revised document in chat. The prior
+   2026-09-18 re-approval is historical.
+4. Gate 4: RE-APPROVED 2026-09-19 after the scoped reconciliation revision
+   (Slice 6 repair ownership of the revised test 11/13/17 checks and the audit gaps,
+   snapshot pairing in Slice 7, restart recovery in Slice 8, prompt/real-provisioning
+   mapping in Slices 12/14, ADR check in slice completion). A same-day follow-up
+   revision (Slice 7 leak-response invalidation; Slice 10 scoring-input alignment)
+   was approved by the user in chat on 2026-09-19.
+
+Slice 6 remains incomplete; no implementation or Slice 7 work continues until
+the Slice 6 repairs land. The Gate 4 clause ownership is reconciled and approved;
+the next step is the Slice 6 repair, not acceptance of the queued Gate 4 changes
+or the current Slice 6 implementation.
 
 Unknowns include Token Factory Sandbox access, available Nemotron models, Tavily
 access, runtime cost and latency, public deployment behaviour, learner recruitment,
