@@ -66,16 +66,16 @@ def main() -> int:
             _show(f"POST shift -> {status}", shift)
             shift_id = shift["id"]
 
-            status, draft = _call(client, "GET", f"/api/shifts/{shift_id}/draft")
-            _show(f"GET draft -> {status}", draft)
+            status, draft = _call(client, "GET", f"/api/shifts/{shift_id}/artifact")
+            _show(f"GET artifact -> {status}", draft)
 
             files = dict(draft["files"])
             files["service.py"] += "\n# learner edit recorded by the lifecycle demo\n"
             status, saved = _call(
-                client, "PUT", f"/api/shifts/{shift_id}/draft", json={"files": files}
+                client, "PUT", f"/api/shifts/{shift_id}/artifact", json={"files": files}
             )
             _show(
-                f"PUT draft -> {status}",
+                f"PUT artifact -> {status}",
                 {
                     "shift_id": saved["shift_id"],
                     "updated_at": saved["updated_at"],

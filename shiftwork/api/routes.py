@@ -44,13 +44,13 @@ def open_shift(slug: str, conn: sqlite3.Connection = Depends(get_conn)) -> schem
     return schemas.ShiftView.of(orchestrator.open_next_shift(conn, slug))
 
 
-@router.get("/shifts/{shift_id}/draft", response_model=schemas.DraftView)
-def read_draft(shift_id: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.DraftView:
+@router.get("/shifts/{shift_id}/artifact", response_model=schemas.DraftView)
+def read_artifact(shift_id: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.DraftView:
     return schemas.DraftView(**orchestrator.get_draft(conn, shift_id))
 
 
-@router.put("/shifts/{shift_id}/draft", response_model=schemas.DraftView)
-def write_draft(
+@router.put("/shifts/{shift_id}/artifact", response_model=schemas.DraftView)
+def write_artifact(
     shift_id: str, body: schemas.DraftUpdate, conn: sqlite3.Connection = Depends(get_conn)
 ) -> schemas.DraftView:
     return schemas.DraftView(**orchestrator.save_draft(conn, shift_id, body.files))

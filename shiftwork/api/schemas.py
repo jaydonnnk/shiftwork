@@ -139,7 +139,6 @@ class CheckResultView(BaseModel):
 
     id: str
     run_id: str
-    check_id: str
     verdict: Literal["pass", "fail", "error"]
     observed_ref: str
     expected_ref: str | None = None
@@ -151,12 +150,13 @@ class CheckResultView(BaseModel):
         return cls(
             id=result.id,
             run_id=result.run_id,
-            check_id=result.check_id,
             verdict=result.verdict,
             observed_ref=result.observed_ref,
             expected_ref=result.expected_ref,
             reason_code=result.reason_code.value if result.reason_code else None,
             # Sealed expectations are never rendered; only reason-code outcomes surface.
+            # CheckResult.check_id is the sealed case's own identity, so it is not
+            # projected either (Gate 3 S3.9: the client works without a sealed check id).
             public_check_id=None,
         )
 

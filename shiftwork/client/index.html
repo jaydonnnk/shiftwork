@@ -129,10 +129,10 @@ document.getElementById("btn-open").onclick = () =>
 
 document.getElementById("btn-save").onclick = () =>
   runAction("save draft", async () => {
-    const draft = await api("/api/shifts/" + shiftId + "/draft");
+    const draft = await api("/api/shifts/" + shiftId + "/artifact");
     const files = draft.files;
     files["service.py"] += "\n# learner note at " + new Date().toISOString() + "\n";
-    await api("/api/shifts/" + shiftId + "/draft", { method: "PUT", body: JSON.stringify({ files }) });
+    await api("/api/shifts/" + shiftId + "/artifact", { method: "PUT", body: JSON.stringify({ files }) });
   });
 
 document.getElementById("btn-freeze").onclick = () =>

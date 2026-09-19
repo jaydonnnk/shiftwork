@@ -42,7 +42,7 @@ def client(tmp_path):
 def _drive_to_run(test_client) -> tuple[str, str]:
     shift = _ok(test_client.post("/api/engagements/bookshop/shifts"), 201)
     test_client.put(
-        f"/api/shifts/{shift['id']}/draft",
+        f"/api/shifts/{shift['id']}/artifact",
         json={"files": {"service.py": "# learner revision\n"}},
     )
     _ok(
@@ -73,11 +73,11 @@ def test_lifecycle_persists_and_returns_real_rows(client):
     assert shift["seq"] == 1
     shift_id = shift["id"]
 
-    draft = _ok(test_client.get(f"/api/shifts/{shift_id}/draft"))
+    draft = _ok(test_client.get(f"/api/shifts/{shift_id}/artifact"))
     assert "service.py" in draft["files"]
     files = dict(draft["files"])
     files["service.py"] += "\n# edited by the learner\n"
-    updated = _ok(test_client.put(f"/api/shifts/{shift_id}/draft", json={"files": files}))
+    updated = _ok(test_client.put(f"/api/shifts/{shift_id}/artifact", json={"files": files}))
     assert updated["files"]["service.py"].endswith("# edited by the learner\n")
 
     version = _ok(
