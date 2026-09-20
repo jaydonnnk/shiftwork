@@ -30,14 +30,14 @@ scoring-input alignment to Slice 10, and was approved by the user in chat on
 2026-09-19). Gate 2's ownership revision
 and Gate 3's fourth-backtrack revision were re-approved by the user on 2026-09-19;
 both scoped backtracks are closed. Gate 4's scoped revision was re-approved by the
-user on 2026-09-19; the approvals do not authorize implementation during this hold. Slice 6's repair is implemented 2026-09-19
+user on 2026-09-19. Slice 6's repair is implemented 2026-09-19
 and the same-day adversarial review round's findings are resolved (error-response
 scanning, containment normalization, import-guard forms plus a sealed-path rule,
 scanner decoder coverage; see the 00-status repair review-round section);
 a fresh-session independent re-review returned PASS on 2026-09-19 (fourteen probes
 each failing the named guard with content-identical restores; suites and demos
 reproduced verbatim), and the user's same-day instruction accepted the slice.
-Slice 7 is in progress on `shiftwork/slice-7`.
+Slice 7 is implemented and demonstrated, with its evidence recorded in `00-status.md` (2026-09-20).
 The approved ownership split is controller orchestration -> sealed loader ->
 cases passed to pure evaluation, not evaluator-owned file loading. ADR 0001
 supersession and the ADR 0002/0003 implementation-status notes were recorded
@@ -61,7 +61,7 @@ passed all 133 authorized tests, and stdout/import probes exposed further test
 blind spots. These are injected faults, not observed leaks in the restored app.
 The repair and the adversarial review round resolved the findings, and an
 independent re-review returned PASS on 2026-09-19; Slice 6 is accepted and
-Slice 7 is in progress. The original report is historical.
+Slice 7 is implemented, demonstrated and recorded in `00-status.md` (2026-09-20). The original report is historical.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** the Slice 2 thin real path remains (canonical hashing, one
 recorded replay, one sealed case scored, one hash-chained ledger event). Slice 3
@@ -72,11 +72,12 @@ test 50 is partial (offline environment/log clauses only), and test 29 is explic
 skipped until Slice 14. This is not hostile-code isolation. Slice 4 adds the
 contract-parameterized offline evaluator and completes the six-variant
 `stale_information` sealed family; tests 11-15 and 42 land fully and the test 44
-evaluator clause completes. The user sealed those six cases on 2026-09-18;
-further agent-authored acceptance cases still require user review. Slice 5 ledger
+evaluator clause completes. The user sealed those six cases on 2026-09-18 and the two remaining bookshop
+families on 2026-09-20; further agent-authored acceptance cases still require user
+review. Slice 5 ledger
 hardening is implemented; Slice 6 is repaired, re-reviewed PASS and accepted
 (2026-09-19; fourteen-probe re-review with suites and demos reproduced), and
-Slice 7 is in progress. The 2026-09-19
+Slice 7 is implemented and demonstrated (evidence in `00-status.md`, 2026-09-20). The 2026-09-19
 audit verified 133 passing tests and one skip with packaging excluded because
 installation was prohibited, not a full-suite result. No Token Factory Sandbox
 execution, learner study, transfer result, Tavily ablation, prize merit or score
@@ -392,8 +393,8 @@ Scope cuts that fund proof:
 
 Slice 6 is accepted: the repair and the adversarial review round resolved the
 findings on 2026-09-19, an independent re-review returned PASS the same day
-(fourteen probes, suites and demos reproduced), and Slice 7 implementation is in
-progress under the user's instruction. The Gate 4 clause ownership is reconciled
+(fourteen probes, suites and demos reproduced), and Slice 7 is implemented,
+demonstrated and recorded in `00-status.md` (2026-09-20). The Gate 4 clause ownership is reconciled
 and approved.
 
 Unknowns include Token Factory Sandbox access, available Nemotron models, Tavily

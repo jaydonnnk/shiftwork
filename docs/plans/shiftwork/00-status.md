@@ -50,19 +50,15 @@
   credentials, external services, spike runs, deployment, outreach and ADR #4 remain
   separately authorized.
 
-**Current state (2026-09-19):** Gates 2, 3 and 4 are re-approved; all scoped
+**Current state (2026-09-20):** Gates 2, 3 and 4 are re-approved; all scoped
 backtracks are closed. The Gate 4 reconciliation in `04-slices.md` was revised and
 approved 2026-09-19; the same-day follow-up revision (Slice 7 leak-response
 invalidation; Slice 10 scoring-input alignment) was approved by the user in chat on
-2026-09-19; the Slice 6 repair scope is unchanged. The Slice 6 repair is implemented
-2026-09-19 and updated the same day with the adversarial review's findings resolved
-(see the Slice 6 repair review-round section: MAJOR-1 error-response scanning,
-MINOR-1 containment normalization, MINOR-2 guard forms plus the sealed-path rule,
-MINOR-3 decoder coverage and the NIT dispositions). A fresh-session independent
-re-review returned PASS on 2026-09-19 (fourteen probes reproduced with real
-failures and byte-identical restores; suites and demos reproduced verbatim), so
-Slice 6 is accepted under the user's same-day instruction and Slice 7 has started
-on `shiftwork/slice-7`. The ADR alignment
+2026-09-19. Slice 6 is repaired, re-reviewed PASS and accepted (2026-09-19; see the
+acceptance section). Slice 7 (budget + rotation + incidents + repair) is implemented
+and demonstrated: the Slice 7 report adjudication returned REVISE on 2026-09-20 and
+its four findings were repaired and re-proven the same day, families 2 and 3 were
+sealed by the user on 2026-09-20, and the evidence is recorded below. The ADR alignment
 (ADR 0001 superseding note; ADR 0002/0003 implementation-status notes) is recorded
 2026-09-19; ADR #4 stays deferred to Slice 13 evidence and separate authorization.
 
@@ -83,7 +79,7 @@ re-steer?"):
 - [x] Slice 4: Contract-parameterized evaluator + first sealed family; implemented and demonstrated 2026-09-18; the six sealed cases were reviewed and SEALED as-is by the user 2026-09-18 (evidence below)
 - [x] Slice 5: Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger; implemented and demonstrated 2026-09-18 (`python -m demos.finalize_run` + `pytest tests/ledger -q`; evidence below)
 - [x] Slice 6: Isolation and leakage hardening; repair implemented 2026-09-19 and the adversarial review round's findings resolved the same day (see the Slice 6 repair and review-round sections); independent re-review returned PASS 2026-09-19 (fourteen probes, suites and demos reproduced verbatim; evidence in the acceptance section) and the user's same-day instruction accepted the slice. Earlier evidence preserved below, with the audit findings.
-- [ ] Slice 7 — Budget + rotation + incidents + repair (started 2026-09-19 on `shiftwork/slice-7`)
+- [x] Slice 7: Budget + rotation + incidents + repair; implemented and demonstrated 2026-09-19, the Slice 7 report adjudication's findings repaired with failing-capable proofs 2026-09-20, families 2 and 3 sealed by the user 2026-09-20, committed in nine focused batches and merged to main (d4fe938) the same day; evidence below
 - [ ] Slice 8 — Close → inheritance + Test 1 offline pre-proof
 - [ ] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03)
 - [ ] Slice 10: Client contract/repair stations (02, 04)
@@ -103,20 +99,21 @@ and its six sealed cases were reviewed and SEALED as-is by the user on
 distinguishable from the reviewed Slice 3 baseline at commit `1e4e6c1` by
 `git diff`); Slice 5 is implemented and demonstrated in the worktree (evidence
 below), and the fixes from its independent review (2 MAJOR, 2 MINOR, plus the
-Gate 3 item K escalation) landed 2026-09-18. Slice 6's implementation remains on
-`shiftwork/slice-6`, but its completion claim was rejected by independent
-verification on 2026-09-19: file observation, leak scanners and response coverage
-have reproduced blind spots. The sealed `CheckResultView.check_id` removal is
+Gate 3 item K escalation) landed 2026-09-18. Slice 6's completion claim was rejected
+by independent verification on 2026-09-19 (file observation, leak scanners and
+response coverage had reproduced blind spots); the repair, the review round and a
+fresh-session re-review followed, and the user accepted the slice the same day (see
+the acceptance section). The sealed `CheckResultView.check_id` removal is
 retained; a public ledger derivation's `check_id` is a different, public result ID.
 The loader ownership conflict spans Gate 2, Gate 3 and ADR 0001, not one clause.
 The 2026-09-18 Slice 6 report is preserved verbatim as history; the 2026-09-19
-verification section below supersedes its coverage and completion claims, and the
-same-day repair review round resolved the review's findings without implying
-acceptance. Slices 7-17 are not implemented. Gate 2's ownership revision, the Gate 3
+verification section below supersedes its coverage and completion claims. Slice 7 is
+implemented and demonstrated with its evidence recorded below; Slices 8-17 are not
+implemented. Gate 2's ownership revision, the Gate 3
 fourth-backtrack revision and the Gate 4 reconciliation revision are re-approved;
 a same-day Gate 4 follow-up revision (Slice 7 leak-response invalidation;
-Slice 10 scoring-input alignment) was approved by the user in chat 2026-09-19;
-implementation remains paused pending the Slice 6 re-verification and acceptance. Later work must follow
+Slice 10 scoring-input alignment) was approved by the user in chat 2026-09-19.
+Later work must follow
 those decisions and `04-slices.md` S10. Credentials, installs, spike runs, external
 services, deployment, outreach and ADR #4 each remain separately authorized.
 
@@ -2252,6 +2249,85 @@ clause stays vacuous until Slice 12, and the scan coverage remains a trusted-fix
 guard, not hostile-code isolation. The `04-slices.md` Slice 6 status line still reads
 "NEEDS REPAIR" pending the user's authorization to edit that approved gate document
 (proposed one-line change: status to accepted, citing this review).
+
+## Slice 7 evidence and review-round repair: 2026-09-20
+
+**Status: implemented and demonstrated; the report adjudication returned REVISE and
+every finding was repaired and re-proven the same day; families 2 and 3 sealed by the
+user 2026-09-20.** Slice 7 (budget + rotation + incidents + repair) was implemented
+2026-09-19 and demonstrated with the suites and demos below. The adjudication
+reproduced every headline number (170 passed + 1 skipped; 27 orchestrator+api; all
+five hash constants; all six demos; the families-2/3 not-sealed flag) but found four
+defects, all in the Slice 7 evidence rather than the runtime behavior it covers. The
+adjudication also confirmed 12 of the 15 mutation rows and the migration and
+case-level-schema guards as clean behavioral proofs before the repair. No production
+file was changed by the repair.
+
+| Adjudication finding | Resolution (2026-09-20) | Failing-capable proof |
+|---|---|---|
+| D1: the `invalidate_state_filter_removed` proof was vacuous. The mutation left the fourth bound parameter in place, so SQLite raised a binding-count error and the harness counted the crash as caught; the corrected valid mutation passed the whole 27-test suite, so the state-scoping clause had no failing-capable test (the only scenario exercised had exactly one active draw for the family, where the rowcount is 1 with or without the filter). | Mutation corrected to valid SQL (clause and parameter dropped together); new `test_invalidate_rotation_group_retires_only_active_draws` seeds one invalidated plus one active draw for the family and asserts the returned count, the resulting states, the untouched other families and both dependent runs. | Under the corrected mutation the named test fails with `the state filter must scope to active draws only: retired 2 rows, expected 1`; the whole suite stays green without it. |
+| D2: the proof harness could not distinguish a behavioral failure from a crash (`--tb=no` plus `returncode != 0`). | Harness rewritten on the pytest junit report: every mutation names its expected test, and a proof requires that test to fail with `AssertionError` or pytest's `Failed` (DID NOT RAISE); vacuous, incidental and wrong-test catches are reported distinctly and fail the run. | Harness self-check: known-vacuous, known-crashing, wrong-test and clean mutations each classify correctly (4/4). |
+| D3: the tiebreak test name implied the redundant `cases.index(case)` term was necessary; only reversal of the term ever changed the pick. | Test renamed `test_select_variant_ordinal_tie_prefers_earlier_file_order` with a comment recording that removal is undetectable (min stability over the order-preserving filter) while reversal is what the test fails on. Production code unchanged. | The tiebreak-reversal mutation is still caught at assertion level. |
+| D4: no genuine v3 upgrade test. The only migration test started at `user_version = 2`, so the `current == 3` path of `if current in (2, 3)` was never exercised against a shape that already has `log_ref`. | `test_existing_schema_three_gets_rotation_columns_without_data_loss` builds the real v3 shape (log_ref present, rotation additions absent), asserts the upgrade adds the run refs, backfills the legacy run, creates `rotation_draws`, sets the version and is idempotent. | Four migration-branch mutations (v2 log_ref, v2 run columns, v3 run columns, backfill) each fail at assertion level; the v2 test now asserts `table_info` before the value SELECT so its catches are assertion-level too. |
+
+Additional repair coverage: the second `shared_ordinal` raise (a drawn variant binding
+several ordinals) had no test at all; added with its own mutation row. Wrong-exception
+catches (a `ValueError` escaping `pytest.raises`; the database UNIQUE constraint behind
+the exposure filter) now fail as `AssertionError` inside the named tests, and the
+exposure filter gained a direct unit proof so its mutation no longer depends on the
+constraint crash.
+
+Verbatim evidence (2026-09-20, repair state, all commands re-run before completion):
+
+```
+pytest tests -q → 174 passed, 1 skipped, 2 warnings in 40.08s
+pytest tests -q (merged main) → 174 passed, 1 skipped, 2 warnings in 63.57s
+pytest tests/orchestrator tests/api -q → 30 passed, 2 warnings in 3.44s
+pytest tests/sealed -q → 43 passed, 2 warnings in 2.94s
+tests/mutation_proofs.py → 20/20 FAIL_CAUGHT at assertion level, all sha256_restored=True
+harness self-check → vacuous / incidental / wrong-test / clean paths each classify correctly
+```
+
+All six demos exit 0 (no production file changed by the repair; the adjudication also
+reproduced every demo before it):
+
+- `python -m demos.thin_path`: one CheckResult per enabled family, one hash-chained
+  event per failing check, chain VALID, artifact content hash unchanged at
+  `44abb79897239264ac4d01a1f3688741cf9dd598019ab95e4f13813b02999158`.
+- `python -m demos.repair_loop`: the first attempt failed every variant and opened 3
+  incidents (reason codes only), the repair froze `ver-0002`, the second attempt passed
+  the three linked regressions and the three drawn second variants and resolved all
+  incidents with 3 hash-chained INCIDENT_RESOLVED events, and the third attempt drew
+  the third distinct variant per family; chain VALID with 6 events.
+- `python -m demos.lifecycle`: run FINALIZED, ledger chain VALID with 3 events, 0 open
+  incidents.
+- `python -m demos.finalize_run`: 3 hash-chained events, 3 incidents opened, a second
+  finalize nets zero new events.
+- `python -m demos.evaluate_transcript --fixture fixtures/runs/passing_stale.json`:
+  6 pass / 0 fail with sockets blocked during scoring.
+- `python -m demos.evaluate_transcript --fixture fixtures/runs/failing_stale.json`:
+  0 pass / 6 fail with sockets blocked during scoring.
+
+Hash constants re-verified: batch 1 `a16e1895f1f5d21a...`, batch 6 `6055e2c82fe36544...`,
+stale snapshot `230d6f8aeb3eff61...`, default snapshot `bd66a4136c8dc115...`, thin-path
+artifact `44abb79897239264...`.
+
+Families 2 and 3: the `policy_exception` and `hostile_instruction` inventories (six
+variants each, ordinals 1 to 6) were sealed by the user on 2026-09-20. The adjudication
+left semantic independence of the variants to operator review; the sealing resolves that
+input to the Slice 7 evidence.
+
+Commit record: nine focused commits `ab0819a..e23942b`; the branch was published as
+`origin/shiftwork/slice-7`; `--no-ff` merge `d4fe938` into main (it also lands the
+previously unmerged Slice 6 commits); main pushed `5a0d7cb..d4fe938`.
+
+Not claimed: a fresh-session independent re-review of the repaired state (the repair is
+backed by the reproduced suite and demo results plus the first-party assertion-level
+mutation table); the implementation round's "3 test bugs fixed" claim (no pre-fix state
+was ever committed, so it cannot be verified from history); test 50 (partial), test 29
+(skipped until Slice 14) and packaging test 51 (unverified under the no-install
+constraint); and every Token Factory, Nemotron, Tavily, deployment and learner-outcome
+claim.
 
 ## Gate 2 re-approval and Gate 3 revision: 2026-09-19
 

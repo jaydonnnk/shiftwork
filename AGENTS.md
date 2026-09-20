@@ -107,8 +107,9 @@ summaries when a time-sensitive external claim is being made.
   `CheckResultView.check_id` is retained; ledger `check_id` values are public result
   IDs, not sealed identities. Numbered sealed IDs expose identity/numbering, not
   necessarily the entire inventory size. Slices 8-17 are not implemented; Slice 7
-  (budget + rotation + incidents + repair) started 2026-09-19 on
-  `shiftwork/slice-7` and is in progress.
+  (budget + rotation + incidents + repair) is implemented and demonstrated, its
+  report adjudication's findings repaired with failing-capable proofs, and its
+  evidence recorded in `00-status.md` (2026-09-20).
   Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the

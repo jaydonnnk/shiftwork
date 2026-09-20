@@ -11,7 +11,8 @@ A case file or individual case declaring an unknown schema version raises
 ``request_ordinals`` list is empty or duplicated raises ``InvalidSealedCase``
 rather than silently never scoring (program design S6 test 15). The bookshop
 cases are agent-drafted; the user reviewed and sealed the ``stale_information``
-family on 2026-09-18, and families 2 and 3 await the same operator review.
+family on 2026-09-18, and sealed the ``policy_exception`` and ``hostile_instruction``
+families on 2026-09-20.
 """
 
 import json
