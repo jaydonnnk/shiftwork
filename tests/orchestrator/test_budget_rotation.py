@@ -94,7 +94,7 @@ def test_reservation_fault_rolls_back_the_whole_reservation(session, monkeypatch
     assert _counts(session.db_file, "runs", "rotation_draws") == (0, 0)
     assert session.board()["attempts_remaining"] == 3
     # The same reservation then succeeds unchanged: the fault was the only cause.
-    run = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    run = session.attempt()
     assert run["state"] == "FINALIZED"
     assert len(_draws_of(session.db_file, run["id"])) == len(config.BOOKSHOP_FAMILIES)
 
@@ -103,8 +103,8 @@ def test_two_concurrent_boundary_posts_reserve_exactly_once(session, monkeypatch
     # Test 25, clause 1: two concurrent POSTs at the boundary create exactly one
     # run row and one draw per enabled family - no orphan reservations, no
     # double-spend of the last attempt.
-    session.attempt(ATTEMPT_TRANSCRIPTS[0])
-    session.attempt(ATTEMPT_TRANSCRIPTS[1])
+    session.attempt()
+    session.attempt()
     assert session.board()["attempts_remaining"] == 1
 
     second = TestClient(create_app(str(session.db_file)))
@@ -141,14 +141,15 @@ def test_rotation_draws_unexposed_variant(session, tmp_path, restart, monkeypatc
     # Test 26: all three attempts consume distinct variants per family; a failed
     # run still consumes its committed reservation; a restart cannot redraw an
     # exposed variant, and evaluation uses only the saved identities.
-    first = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    first = session.attempt()
     assert first["state"] == "FINALIZED"
-    # A run that fails at execute still consumed its reservation: the transcript
-    # is paired with the default snapshot, so the recorded adapter refuses it.
+    # A run that fails at execute still consumed its reservation: the override
+    # replays a transcript authored for the thin snapshot on a run bound to the
+    # fuller one, so the recorded adapter's own hash check refuses it.
     failed = session.attempt(config.FIXTURE_DIR / "runs" / "thin_stale.json")
     assert failed["state"] == "FAILED", failed
     assert failed["failure_kind"] == "PROVISION_FAILED", failed
-    third = session.attempt(ATTEMPT_TRANSCRIPTS[2])
+    third = session.attempt()
     assert third["state"] == "FINALIZED"
 
     runs = session.board()["latest_run"]
@@ -213,7 +214,7 @@ def test_rotation_exhaustion_fail_closed(session, sealed_inventory):
     sealed_inventory["publish"](sealed_store.POLICY_EXCEPTION, limited, cycle=1)
     assert sealed_store.family_cycle(sealed_store.POLICY_EXCEPTION) == 1
 
-    first = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    first = session.attempt()
     assert first["state"] == "FINALIZED", first
     draws = _draws_of(session.db_file, first["id"])
     assert len(draws) == len(config.BOOKSHOP_FAMILIES)
@@ -246,7 +247,7 @@ def test_rotation_exhaustion_fail_closed(session, sealed_inventory):
     sealed_inventory["publish"](sealed_store.POLICY_EXCEPTION, all_cases, cycle=2)
     assert sealed_store.family_cycle(sealed_store.POLICY_EXCEPTION) == 2
 
-    second = session.attempt(ATTEMPT_TRANSCRIPTS[1])
+    second = session.attempt()
     assert second["state"] == "FINALIZED", second
     refilled = _draws_of(session.db_file, second["id"])
     assert {draw["family"]: draw["cycle"] for draw in refilled}[sealed_store.POLICY_EXCEPTION] == 2
@@ -276,7 +277,7 @@ def test_retired_rotation_group_invalidates_without_deleting(session):
     # Leak response (ADR 0001, Slice 7): retiring a compromised group invalidates
     # its dependent attempts by state change. Rows, captures and the run itself
     # stay readable; a refill is not proof of invalidation.
-    run = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    run = session.attempt()
     conn = db.connect(session.db_file)
     try:
         before_rows = _rows(session.db_file, "SELECT id, variant_ref, state FROM rotation_draws ORDER BY rowid")
@@ -306,7 +307,7 @@ def test_retired_rotation_group_invalidates_without_deleting(session):
         assert [
             (row["id"], row["body"], row["request_text"]) for row in _rows(session.db_file, "SELECT id, body, request_text FROM run_outputs")
         ] == outputs_before
-        session.attempt(ATTEMPT_TRANSCRIPTS[1])
+        session.attempt()
         assert repo.invalidated_run_ids(conn, config.BOOKSHOP_SLUG) == [run["id"]]
         refilled = repo.list_rotation_draws_for_run(
             conn, _rows(session.db_file, "SELECT id FROM runs ORDER BY rowid")[-1]["id"]
@@ -323,7 +324,7 @@ def test_invalidate_rotation_group_retires_only_active_draws(session):
     # the active row. Without the filter the call re-retires the invalidated row
     # too, and the returned count stops meaning "draws retired by this call".
     family = sealed_store.STALE_INFORMATION
-    first = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    first = session.attempt()
 
     conn = db.connect(session.db_file)
     try:
@@ -332,7 +333,7 @@ def test_invalidate_rotation_group_retires_only_active_draws(session):
     finally:
         conn.close()
 
-    second = session.attempt(ATTEMPT_TRANSCRIPTS[1])
+    second = session.attempt()
     conn = db.connect(session.db_file)
     try:
         states = [
@@ -379,14 +380,14 @@ def test_repair_resolution_same_version_never_resolves(session):
     # Test 34 negative 1: re-running the same artifact version never resolves an
     # incident, even when the regression and drawn acceptance both pass. The
     # resolution gate requires a NEW version (program design S5.7).
-    run_one = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
     board = session.board()
     assert len(board["open_incidents"]) == 3, board["open_incidents"]
 
     # Attempt 2 with the SAME version (no edit, no freeze): regressions and
     # drawn cases pass, but the version gate blocks resolution.
-    run_two = session.attempt(ATTEMPT_TRANSCRIPTS[1])
+    run_two = session.attempt()
     assert run_two["state"] == "FINALIZED"
     board = session.board()
     assert len(board["open_incidents"]) == 3, (
@@ -398,7 +399,7 @@ def test_repair_resolution_same_version_never_resolves(session):
 def test_repair_resolution_failing_acceptance_never_resolves(session, tmp_path):
     # Test 34 negative 2: a new version that passes the linked regression but
     # FAILS the drawn (never-exposed) acceptance case never resolves the incident.
-    run_one = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
     assert len(session.board()["open_incidents"]) == 3
 
@@ -430,17 +431,17 @@ def test_repair_resolution_failing_acceptance_never_resolves(session, tmp_path):
 def test_future_stimuli_absent_until_their_run(session):
     # Test 18 clause: later customer stimuli stay absent until their run. Attempt k
     # executes the prefix 1..k; ordinal k+1 must not appear in attempt k's outputs.
-    run_one = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
     outputs_one = _rows(session.db_file, f"SELECT request_ordinal FROM run_outputs WHERE run_id = '{run_one['id']}'")
     assert [row["request_ordinal"] for row in outputs_one] == [1]
 
-    run_two = session.attempt(ATTEMPT_TRANSCRIPTS[1])
+    run_two = session.attempt()
     assert run_two["state"] == "FINALIZED"
     outputs_two = _rows(session.db_file, f"SELECT request_ordinal FROM run_outputs WHERE run_id = '{run_two['id']}'")
     assert [row["request_ordinal"] for row in outputs_two] == [1, 2]
 
-    run_three = session.attempt(ATTEMPT_TRANSCRIPTS[2])
+    run_three = session.attempt()
     assert run_three["state"] == "FINALIZED"
     outputs_three = _rows(session.db_file, f"SELECT request_ordinal FROM run_outputs WHERE run_id = '{run_three['id']}'")
     assert [row["request_ordinal"] for row in outputs_three] == [1, 2, 3]
@@ -458,7 +459,7 @@ def test_incident_reconstruction_after_restart(session, restart):
     # Test 23 clause: after a restart, incidents and draws reconstruct from
     # tables, not from in-memory state. A fresh app instance over the same
     # database sees the same incidents, draws and board counters.
-    run_one = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
     board_before = session.board()
     assert len(board_before["open_incidents"]) == 3
@@ -543,7 +544,7 @@ def test_repair_resolution_failing_regression_never_resolves(session, tmp_path):
     # Test 34 negative 3: a new version whose drawn acceptance passes but whose
     # linked REGRESSION fails never resolves the incident. The resolution gate
     # requires both to pass (program design S5.7).
-    run_one = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
     assert len(session.board()["open_incidents"]) == 3
 
@@ -627,20 +628,20 @@ def test_resolved_incident_regression_excluded_from_later_run(session):
     # load_drawn_cases includes open-incident regressions but EXCLUDES resolved
     # ones: once an incident resolves, repeating its old stimulus is not part of
     # a later run's evidence (program design S5.3).
-    run_one = session.attempt(ATTEMPT_TRANSCRIPTS[0])
+    run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
     assert len(session.board()["open_incidents"]) == 3
 
     # Repair: new version, attempt 2 resolves all incidents.
     session.edit()
     session.freeze()
-    run_two = session.attempt(ATTEMPT_TRANSCRIPTS[1])
+    run_two = session.attempt()
     assert run_two["state"] == "FINALIZED"
     assert session.board()["open_incidents"] == []
 
     # Attempt 3: load_drawn_cases must NOT include the resolved incidents'
     # regression cases (ordinal 1 variants from run_one's draws).
-    run_three = session.attempt(ATTEMPT_TRANSCRIPTS[2])
+    run_three = session.attempt()
     assert run_three["state"] == "FINALIZED"
 
     conn = db.connect(session.db_file)

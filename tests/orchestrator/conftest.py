@@ -1,10 +1,11 @@
 """Shared session helpers for the Slice 7 orchestrator suite (budget, rotation, repair).
 
-Every test drives the real HTTP surface against a real database: the recorded
-adapter replays one checked-in transcript per attempt, paired with that attempt's
-stimulus prefix and the stale shop snapshot, so each run consumes exactly the refs
-its row persists. Tests that must fail a chosen attempt retarget a transcript copy
-in ``tmp_path``; the checked-in fixtures are never modified.
+Every test drives the real HTTP surface against a real database. The shipped
+controller binding (Slice 8) pairs each attempt's stimulus prefix with the fuller
+shop snapshot and its authored transcript, so attempts run with no config or
+environment mutation. A test that must fail or redirect one attempt overrides the
+authored pairing for that attempt's (batch, snapshot) key for the duration of the
+POST; the checked-in fixtures are never modified.
 """
 
 import base64
@@ -20,11 +21,11 @@ from shiftwork import config
 from shiftwork.app import create_app
 from shiftwork.sealed import store as sealed_store
 
-STALE_SNAPSHOT = config.FIXTURE_DIR / "shop" / "bookshop_stale_snapshot.json"
 RUNS_DIR = config.FIXTURE_DIR / "runs"
 # One transcript per attempt, each paired with that attempt's prefix batch and the
-# stale snapshot. Attempt 1 fails every family's first variant (MISSING_EVIDENCE,
-# which opens incidents); attempt 2 passes; attempt 3 answers the third request.
+# default shop snapshot. Attempt 1 fails every family's first variant
+# (MISSING_EVIDENCE, which opens incidents); attempt 2 passes; attempt 3 answers
+# the third request.
 ATTEMPT_TRANSCRIPTS = (
     RUNS_DIR / "bookshop_repair_01_incident.json",
     RUNS_DIR / "bookshop_repair_02.json",
@@ -43,9 +44,10 @@ TERMINAL_STATES = {"FINALIZED", "FAILED"}
 class BookshopShift:
     """One bookshop shift driven over HTTP, one attempt at a time."""
 
-    def __init__(self, client: TestClient, db_file: Path) -> None:
+    def __init__(self, client: TestClient, db_file: Path, monkeypatch=None) -> None:
         self.client = client
         self.db_file = db_file
+        self.monkeypatch = monkeypatch
         self.shift_id = ""
         self.versions: list[str] = []
 
@@ -71,14 +73,25 @@ class BookshopShift:
         self.versions.append(body["id"])
         return body
 
-    def attempt(self, transcript: Path) -> dict:
-        """POST one run with ``transcript`` as the replay and wait for a terminal state."""
-        previous = config.THIN_TRANSCRIPT
-        config.THIN_TRANSCRIPT = transcript
-        try:
-            response = self.client.post(f"/api/shifts/{self.shift_id}/runs")
-        finally:
-            config.THIN_TRANSCRIPT = previous
+    def attempt(self, transcript: Path | None = None) -> dict:
+        """POST one run and wait for a terminal state.
+
+        Without ``transcript`` the authored pairing for this attempt's stimulus
+        prefix and the bound snapshot resolves the replay. With one, that single
+        pairing is overridden for this POST (the authored map is restored after the
+        test), so a test can redirect or fail exactly this attempt.
+        """
+        if transcript is not None:
+            assert self.monkeypatch is not None, "an attempt override needs the monkeypatch fixture"
+            board = self.client.get("/api/engagements/bookshop/board")
+            assert board.status_code == 200, board.text
+            batch = config.BOOKSHOP_ATTEMPT_BATCHES[board.json()["attempts_used"]]
+            self.monkeypatch.setitem(
+                config.RECORDED_TRANSCRIPTS,
+                (batch, config.BOOKSHOP_SNAPSHOT_HASH),
+                str(transcript),
+            )
+        response = self.client.post(f"/api/shifts/{self.shift_id}/runs")
         assert response.status_code == 202, response.text
         return self.run(response.json()["id"])
 
@@ -106,10 +119,9 @@ class BookshopShift:
 @pytest.fixture()
 def session(tmp_path, monkeypatch):
     """An open shift with one frozen version, on a fresh database."""
-    monkeypatch.setattr(config, "BOOKSHOP_SNAPSHOT", STALE_SNAPSHOT)
     db_file = tmp_path / "orchestrator.db"
     with TestClient(create_app(str(db_file))) as client:
-        shift = BookshopShift(client, db_file)
+        shift = BookshopShift(client, db_file, monkeypatch)
         shift.open()
         shift.freeze()
         yield shift
@@ -118,12 +130,11 @@ def session(tmp_path, monkeypatch):
 @pytest.fixture()
 def restart(tmp_path, monkeypatch):
     """Enter another app instance over an existing database file (a restart)."""
-    monkeypatch.setattr(config, "BOOKSHOP_SNAPSHOT", STALE_SNAPSHOT)
     stack = contextlib.ExitStack()
 
     def build(db_file: Path) -> BookshopShift:
         client = stack.enter_context(TestClient(create_app(str(db_file))))
-        session = BookshopShift(client, db_file)
+        session = BookshopShift(client, db_file, monkeypatch)
         session.shift_id = "bookshop-shift-01"
         return session
 
