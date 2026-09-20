@@ -56,8 +56,6 @@ CONTRACT = {
     "declared_limits": ["NO_SAME_DAY_DELIVERY_PROMISE"],
 }
 
-INCIDENT_TRANSCRIPT = config.FIXTURE_DIR / "runs" / "missing_evidence.json"
-
 
 def test_pinned_allowlist_is_the_four_approved_categories() -> None:
     assert config.SANDBOX_PAYLOAD_ALLOWLIST == (
@@ -238,14 +236,15 @@ def test_recorded_adapter_provisions_no_sandbox_payload(
     assert sandbox_inventory == [], f"recorded replay wrote into a sandbox workspace: {sandbox_inventory}"
 
 
-def test_sealed_absent_from_every_api_response(tmp_path, monkeypatch) -> None:
+def test_sealed_absent_from_every_api_response(tmp_path) -> None:
     """Drive the full incident-producing lifecycle and scan every response.
 
     Error bodies are learner-visible surfaces too: the client renders the error
     detail, so a 404, a 409 and a 422 are driven after the run finalized and their
     decoded bodies enter the same scan as the success responses and served HTML.
+    The shipped default (Slice 8) replays attempt 1 against the fuller snapshot,
+    which opens incidents without any transcript redirection.
     """
-    monkeypatch.setattr(config, "THIN_TRANSCRIPT", INCIDENT_TRANSCRIPT)
     needles = sealed_identity_strings()
     surfaces: list[tuple[str, str]] = []
     called: set[str] = set()

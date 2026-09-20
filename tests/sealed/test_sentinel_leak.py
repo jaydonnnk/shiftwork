@@ -56,7 +56,6 @@ CONTRACT = {
 }
 
 REPO_ROOT = config.PACKAGE_DIR.parent
-INCIDENT_TRANSCRIPT = config.FIXTURE_DIR / "runs" / "missing_evidence.json"
 
 
 def _family_path():
@@ -161,9 +160,11 @@ def test_sentinel_changes_the_opaque_expected_ref(sentinel_family) -> None:
 
 
 def test_sentinel_absent_from_every_api_response_and_the_controller_streams(
-    tmp_path, sentinel_family, observed_requests, caplog, capsys, monkeypatch
+    tmp_path, sentinel_family, observed_requests, caplog, capsys
 ) -> None:
-    monkeypatch.setattr(config, "THIN_TRANSCRIPT", INCIDENT_TRANSCRIPT)
+    # The shipped default (Slice 8) replays attempt 1 against the fuller snapshot,
+    # which fails every family's first variant and opens incidents; the incident
+    # surfaces below are scanned for that real failure, not a redirected one.
 
     # The capture mechanisms are probed first: a scan of a surface nobody observes
     # would pass vacuously.
@@ -243,10 +244,9 @@ def test_sentinel_absent_from_every_api_response_and_the_controller_streams(
 
 
 def test_sentinel_absent_from_the_outbound_executor_payload(
-    tmp_path, sentinel_family, observed_requests, monkeypatch
+    tmp_path, sentinel_family, observed_requests
 ) -> None:
     """What the controller sends to an adapter is an outbound surface too."""
-    monkeypatch.setattr(config, "THIN_TRANSCRIPT", INCIDENT_TRANSCRIPT)
     with TestClient(create_app(str(tmp_path / "sentinel-payload.db"))) as client:
         shift = client.post("/api/engagements/bookshop/shifts")
         shift_id = shift.json()["id"]
