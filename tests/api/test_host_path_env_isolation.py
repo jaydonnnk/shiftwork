@@ -207,7 +207,7 @@ def test_api_responses_expose_no_env_value_or_host_path(env_markers, marker_db) 
         record("get", "/api/engagements/bookshop/ledger")
         board = record("get", "/api/engagements/bookshop/board")
 
-        incidents = board.json()["open_incidents"]
+        incidents = board.json()["incidents"]
         assert incidents, "no incident was produced; the incident surface was not scanned"
         for incident in incidents:
             record("get", f"/api/incidents/{incident['id']}")

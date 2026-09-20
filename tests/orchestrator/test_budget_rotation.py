@@ -383,15 +383,15 @@ def test_repair_resolution_same_version_never_resolves(session):
     run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
     board = session.board()
-    assert len(board["open_incidents"]) == 3, board["open_incidents"]
+    assert len(board["incidents"]) == 3, board["incidents"]
 
     # Attempt 2 with the SAME version (no edit, no freeze): regressions and
     # drawn cases pass, but the version gate blocks resolution.
     run_two = session.attempt()
     assert run_two["state"] == "FINALIZED"
     board = session.board()
-    assert len(board["open_incidents"]) == 3, (
-        f"same-version run resolved incidents: {board['open_incidents']}"
+    assert len(board["incidents"]) == 3, (
+        f"same-version run resolved incidents: {board['incidents']}"
     )
     assert run_two["artifact_version_id"] == run_one["artifact_version_id"]
 
@@ -401,7 +401,7 @@ def test_repair_resolution_failing_acceptance_never_resolves(session, tmp_path):
     # FAILS the drawn (never-exposed) acceptance case never resolves the incident.
     run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
-    assert len(session.board()["open_incidents"]) == 3
+    assert len(session.board()["incidents"]) == 3
 
     # Freeze a new version (the repair).
     session.edit()
@@ -421,7 +421,7 @@ def test_repair_resolution_failing_acceptance_never_resolves(session, tmp_path):
     # The original incidents from run_one must still be OPEN: the failing
     # acceptance case blocked resolution. New incidents may also have opened
     # from the failing ordinal 2, so check the originals specifically.
-    original_ids = {inc["id"] for inc in session.board()["open_incidents"] if inc["opening_run_id"] == run_one["id"]}
+    original_ids = {inc["id"] for inc in session.board()["incidents"] if inc["opening_run_id"] == run_one["id"]}
     assert len(original_ids) == 3, (
         f"failing acceptance resolved incidents from run_one: {original_ids}"
     )
@@ -462,11 +462,11 @@ def test_incident_reconstruction_after_restart(session, restart):
     run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
     board_before = session.board()
-    assert len(board_before["open_incidents"]) == 3
+    assert len(board_before["incidents"]) == 3
 
     restarted = restart(session.db_file)
     board_after = restarted.board()
-    assert len(board_after["open_incidents"]) == 3
+    assert len(board_after["incidents"]) == 3
     assert board_after["attempts_used"] == board_before["attempts_used"]
     assert board_after["attempts_remaining"] == board_before["attempts_remaining"]
     assert board_after["ledger_event_count"] == board_before["ledger_event_count"]
@@ -546,7 +546,7 @@ def test_repair_resolution_failing_regression_never_resolves(session, tmp_path):
     # requires both to pass (program design S5.7).
     run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
-    assert len(session.board()["open_incidents"]) == 3
+    assert len(session.board()["incidents"]) == 3
 
     # Freeze a new version (the repair).
     session.edit()
@@ -565,7 +565,7 @@ def test_repair_resolution_failing_regression_never_resolves(session, tmp_path):
     # The original incidents must still be OPEN: the failing regression blocked
     # resolution even though the acceptance passed and the version is new.
     original_open = [
-        inc for inc in session.board()["open_incidents"]
+        inc for inc in session.board()["incidents"]
         if inc["opening_run_id"] == run_one["id"]
     ]
     assert len(original_open) == 3, (
@@ -630,14 +630,14 @@ def test_resolved_incident_regression_excluded_from_later_run(session):
     # a later run's evidence (program design S5.3).
     run_one = session.attempt()
     assert run_one["state"] == "FINALIZED"
-    assert len(session.board()["open_incidents"]) == 3
+    assert len(session.board()["incidents"]) == 3
 
     # Repair: new version, attempt 2 resolves all incidents.
     session.edit()
     session.freeze()
     run_two = session.attempt()
     assert run_two["state"] == "FINALIZED"
-    assert session.board()["open_incidents"] == []
+    assert session.board()["incidents"] == []
 
     # Attempt 3: load_drawn_cases must NOT include the resolved incidents'
     # regression cases (ordinal 1 variants from run_one's draws).

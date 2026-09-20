@@ -124,7 +124,7 @@ def main() -> int:
             print(
                 f"lifecycle evidence complete: run {run_id} FINALIZED, ledger chain "
                 f"{ledger['chain_status']} with {len(ledger['events'])} events, "
-                f"{len(board['open_incidents'])} open incidents from the shipped "
+                f"{len(board['incidents'])} open incidents from the shipped "
                 f"repair-arc replay"
             )
     return 0

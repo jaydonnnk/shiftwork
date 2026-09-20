@@ -164,7 +164,7 @@ def test_public_projections_omit_injected_internal_refs(injected_hosts) -> None:
         record("get", f"/api/shifts/{shift_id}/artifact")
         record("post", f"/api/shifts/{shift_id}/close")
 
-        incidents = board.json()["open_incidents"]
+        incidents = board.json()["incidents"]
         assert incidents, "no incident was produced; the incident projection was not scanned"
         for incident in incidents:
             record("get", f"/api/incidents/{incident['id']}")

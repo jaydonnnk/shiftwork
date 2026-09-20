@@ -82,7 +82,7 @@ def main() -> int:
             assert run_one["state"] == "FINALIZED", run_one
 
             _, board = _call(client, "GET", "/api/engagements/bookshop/board")
-            opened = board["open_incidents"]
+            opened = board["incidents"]
             assert len(opened) == 3, f"expected one incident per enabled family, got {opened}"
             assert all(incident["reason_code"] == "MISSING_EVIDENCE" for incident in opened)
 
@@ -104,7 +104,7 @@ def main() -> int:
             run_two = _poll_run(client, started["id"])
             assert run_two["state"] == "FINALIZED", run_two
             _, board = _call(client, "GET", "/api/engagements/bookshop/board")
-            assert board["open_incidents"] == [], f"incidents did not resolve: {board['open_incidents']}"
+            assert board["incidents"] == [], f"incidents did not resolve: {board['incidents']}"
 
             # Attempt 3: a third distinct attempt draws a third variant per family.
             _, started = _call(client, "POST", f"/api/shifts/{shift_id}/runs")

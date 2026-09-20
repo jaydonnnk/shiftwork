@@ -92,10 +92,10 @@ const render = (board) => {
     line("state", run && run.state) +
     line("adapter", run && run.adapter) +
     line("requests executed", board.requests_run);
-  document.getElementById("incidents").innerHTML = board.open_incidents.length
-    ? board.open_incidents.map((incident) =>
+  document.getElementById("incidents").innerHTML = board.incidents.length
+    ? board.incidents.map((incident) =>
         line(incident.id, incident.reason_code + " (" + incident.state + ")")).join("")
-    : "<span class='empty'>no open incidents</span>";
+    : "<span class='empty'>no unresolved incidents</span>";
   document.getElementById("ledger").innerHTML =
     line("events", board.ledger_event_count) +
     line("chain status", board.chain_status) +

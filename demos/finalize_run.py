@@ -103,7 +103,7 @@ def main() -> int:
         print(f"  incident {incident.id} {incident.reason_code.value} state={incident.state.value}")
     rendered = [item["customer_text"] for item in outputs if item["customer_text"]]
     print(f"  rendered customer texts: {len(rendered)} of {len(outputs)}")
-    print(f"  board open_incidents={len(board['open_incidents'])} chain={board['chain_status']}")
+    print(f"  board incidents={len(board['incidents'])} chain={board['chain_status']}")
     print(
         f"finalize-run evidence complete: run {run.id} FINALIZED, {len(events_once)} hash-chained "
         f"events chain {ledger['chain_status']}, {len(incidents_once)} incidents opened, "

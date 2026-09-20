@@ -280,7 +280,7 @@ def test_sealed_absent_from_every_api_response(tmp_path) -> None:
         record("get", "/api/engagements/bookshop/ledger")
         board = record("get", "/api/engagements/bookshop/board")
 
-        incidents = board.json()["open_incidents"]
+        incidents = board.json()["incidents"]
         assert incidents, "no incident was produced; the incident projection was not scanned"
         for incident in incidents:
             record("get", f"/api/incidents/{incident['id']}")
