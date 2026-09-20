@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
             assist_level="scaffolded",
             allowed_assist_roles=("hint", "diagnose"),
             total_assist_budget_per_shift=config.BOOKSHOP_TOTAL_ASSIST_BUDGET,
-            enabled_check_families=("freshness",),
+            enabled_check_families=config.BOOKSHOP_FAMILIES,
             attempt_limit=config.DEFAULT_ATTEMPT_LIMIT,
             rotation_group_size=config.BOOKSHOP_ROTATION_GROUP_SIZE,
         )

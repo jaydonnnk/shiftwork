@@ -99,8 +99,11 @@ def get_run(run_id: str, conn: sqlite3.Connection = Depends(get_conn)) -> schema
 def get_outputs(
     run_id: str, conn: sqlite3.Connection = Depends(get_conn)
 ) -> list[schemas.RunOutputView]:
+    run = orchestrator.get_run(conn, run_id)
     return [
-        schemas.RunOutputView.of(output, customer_text=orchestrator.customer_text_for(output))
+        schemas.RunOutputView.of(
+            output, customer_text=orchestrator.customer_text_for(output, run.shop_snapshot_ref)
+        )
         for output in orchestrator.list_outputs(conn, run_id)
     ]
 

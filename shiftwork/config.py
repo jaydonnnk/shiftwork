@@ -33,6 +33,27 @@ DEFAULT_ATTEMPT_LIMIT = 3
 BOOKSHOP_ROTATION_GROUP_SIZE = 6
 BOOKSHOP_TOTAL_ASSIST_BUDGET = 6
 
+# The rotation groups enabled for the bookshop engagement. Slice 7 lands the
+# remaining two families, so all three draw one never-exposed variant per attempt.
+BOOKSHOP_FAMILIES: tuple[str, ...] = (
+    "stale_information",
+    "policy_exception",
+    "hostile_instruction",
+)
+
+# The frozen stimulus prefix each attempt executes: attempt k draws variants that
+# bind request ordinal k, and the run executes customer requests 1..k. Attempt 1
+# is byte-identical to thin.jsonl, so the Slice 2 thin-path transcripts still pair
+# with it.
+BOOKSHOP_ATTEMPT_BATCHES: tuple[str, ...] = (
+    "bookshop_attempt_01.jsonl",
+    "bookshop_attempt_02.jsonl",
+    "bookshop_attempt_03.jsonl",
+    "bookshop_attempt_04.jsonl",
+    "bookshop_attempt_05.jsonl",
+    "bookshop_attempt_06.jsonl",
+)
+
 # Learner-visible reason-code vocabulary (program design S7.2), rendered as
 # one-line consequences. Wording changes revise the Gate 3 design, not this map.
 REASON_CODE_RENDER_MAP: dict[ReasonCode, str] = {
