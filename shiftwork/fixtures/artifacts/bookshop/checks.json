@@ -1,0 +1,8 @@
+{
+  "checks": [
+    {
+      "id": "freshness",
+      "statement": "A stock, price or availability claim is only asserted from a record no older than one hour."
+    }
+  ]
+}

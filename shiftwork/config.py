@@ -118,7 +118,62 @@ RECORDED_TRANSCRIPTS: dict[tuple[str, str], str] = {
     ("bookshop_attempt_01.jsonl", THIN_SNAPSHOT_HASH): "thin_stale.json",
 }
 
+# The Test 1 offline pre-proof's two artifact stages (Slice 8). Each stage is a
+# complete trusted-fixture artifact: the shared harness, that stage's learner
+# service, the no-fault file, and the learner's change log and visible-check
+# files, so a run bound to it executes real bytes under `local_process` and the
+# next shift inherits the decisions and checks file-for-file. The pre-repair
+# stage asserts claims with no cited evidence (scored MISSING_EVIDENCE); the
+# repaired stage cites the record it answered from and refuses a hard claim from
+# a record past the one-hour limit. Pins live in TRUSTED_LOCAL_FIXTURES.
+REPAIR_ARC_STAGES = ("pre", "post")
+REPAIR_ARC_CONTRACT_JSON = {
+    "catalog_version": 2,
+    "must_never": ["NEVER_INVENT_PRICE_STOCK_POLICY"],
+    "selections": {"STANCE": "USE_NEWEST_RECORD_WITH_AGE"},
+    "response_time_limit_ms": 3000,
+    "declared_limits": [
+        "Answers shelf stock, price and availability questions only; "
+        "no delivery or reservation promises."
+    ],
+}
+REPAIR_ARC_DECLARED_LIMIT = REPAIR_ARC_CONTRACT_JSON["declared_limits"][0]
+_REPAIR_ARC_LEARNER_SERVICES = {
+    "pre": "repair_arc_pre_service.py",
+    "post": "repair_arc_post_service.py",
+}
+
+
+def repair_arc_artifact_files(stage: str) -> dict[str, str]:
+    """One pre-proof stage's frozen artifact files, as UTF-8 text (Slice 8).
+
+    The composition is pinned: the same harness bytes, the stage's learner
+    service, the no-fault file, and the learner's change log and visible-check
+    files. Both the pre-proof driver and its guard test build the artifact from
+    here, so the pinned hashes and the frozen version cannot drift apart.
+    """
+    if stage not in _REPAIR_ARC_LEARNER_SERVICES:
+        raise ValueError(f"unknown pre-proof stage: {stage!r}")
+    root = FIXTURE_DIR / "artifacts" / "bookshop"
+
+    def read(name: str) -> str:
+        return (root / name).read_text(encoding="utf-8")
+
+    return {
+        "service.py": read("service.py"),
+        "learner_service.py": read(_REPAIR_ARC_LEARNER_SERVICES[stage]),
+        "fixture.json": read("happy_path.json"),
+        "change_log.md": read("change_log.md"),
+        "checks.json": read("checks.json"),
+    }
+
+
 # The manifest alone is caller-supplied, so exact file bytes have a separate pin.
+# The `repair_arc_*` entries are the Test 1 pre-proof's artifact stages: their
+# manifest hash is the frozen artifact version's content hash under
+# REPAIR_ARC_CONTRACT_JSON and the bookshop v2 catalog, and their files hash
+# covers the base64 files alone. A guard test recomputes every pin from the
+# fixture files, so the pre-proof cannot run against unpinned bytes.
 TRUSTED_LOCAL_FIXTURES = {
     "happy_path": ("6e36ed1b3c602fa1585bc499f6cf9adcb232756ed5726bd50ea756eb8311433d", "10826190b7318ec0c27a5d41cf241d5453e04c20c4b33ad336815ecca1293924"),
     "port_dead": ("3fca29de3e0bb2cb9f1b87e4a6bc6e44ec0b2f0613d84dd9bebccd30d912e3fe", "9e4ae1f16d75a5d9fdc9d0897255664b0706abef9dcb7bc92a10ed11723afad9"),
@@ -128,6 +183,8 @@ TRUSTED_LOCAL_FIXTURES = {
     "connection_refused": ("c15bf5ca1fc39f818a8b51a2b7451574c99e94ce080b5446e94f812580fec99c", "dad47aea8427d2bad00367bc5824d19d6582a8d337f456269818ba68a94a8c7f"),
     "kill_mid_batch": ("3ed340e86545c9e8e23a727abb6964853631ae0a06c936d8976ad81c47c9062e", "ac3ffc04f0123f540e018ae91c86f80a1423afb7995b98f32766276f5dae8f58"),
     "env_probe": ("42b7be0ed72373478f205b3793066da8ebffb2c536b8e8779362b01f65f9a33a", "860018c4c94ef50a929ddc1f799e45427832b24b731123e1ad09ff99e2287d42"),
+    "repair_arc_pre": ("36c485fdd777913fc8c0034f7509d9f28a03a06b91c72e2f1e463b42bba7f8fd", "2b103de1c6b95bdecb2eac786034a11ead12040d0abcbc744d5e1db10cc97359"),
+    "repair_arc_post": ("390d8bad95c00cd7b8a9e7aebeb632930ba2146ec72a464e6d6b0a3021ef9f64", "651a825fe4b76f7aff52a08b62c7ab455fd805f9d1ed9bbb124ee6d03698f2ff"),
 }
 
 

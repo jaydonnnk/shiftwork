@@ -192,12 +192,29 @@ def test_pinned_fixture_hashes_match_exact_bytes(executor):
     root = config.FIXTURE_DIR / "artifacts" / "bookshop"
     contract = ContractParams.model_validate_json((root / "contract.json").read_bytes())
     catalog = contract_catalog.load_catalog("bookshop", 1)
-    assert set(config.TRUSTED_LOCAL_FIXTURES) == {c.name for c in CASES} | {"env_probe"}
+    assert set(config.TRUSTED_LOCAL_FIXTURES) == {c.name for c in CASES} | {"env_probe"} | {
+        f"repair_arc_{stage}" for stage in config.REPAIR_ARC_STAGES
+    }, "a trusted fixture was added or removed without updating this guard"
     for name, (manifest_hash, files_hash) in config.TRUSTED_LOCAL_FIXTURES.items():
+        if name.startswith("repair_arc_"):
+            continue  # the pre-proof's stages are pinned under their own contract, below
         request = request_for(executor, name)
         files = request.artifact_snapshot.files
         assert canonical.content_hash({path: base64.b64encode(body).decode("ascii") for path, body in files.items()}) == files_hash
         assert canonical.artifact_content_hash({path: body.decode("utf-8") for path, body in files.items()}, canonical.contract_params_json(contract), catalog.content_hash) == manifest_hash
+    # The pre-proof's stages are pinned under their own contract and catalog, so
+    # their manifest hashes recompute from the exact fixture files too.
+    arc_contract = ContractParams.model_validate(config.REPAIR_ARC_CONTRACT_JSON)
+    arc_catalog = contract_catalog.load_catalog("bookshop", 2)
+    for stage in config.REPAIR_ARC_STAGES:
+        manifest_hash, files_hash = config.TRUSTED_LOCAL_FIXTURES[f"repair_arc_{stage}"]
+        files = config.repair_arc_artifact_files(stage)
+        assert canonical.content_hash(
+            {path: base64.b64encode(text.encode("utf-8")).decode("ascii") for path, text in files.items()}
+        ) == files_hash, f"repair_arc_{stage} files no longer match their pin"
+        assert canonical.artifact_content_hash(
+            files, canonical.contract_params_json(arc_contract), arc_catalog.content_hash
+        ) == manifest_hash, f"repair_arc_{stage} manifest no longer matches its pin"
 
 
 @pytest.mark.parametrize("adapter_name", ["recorded", "local_process"])
