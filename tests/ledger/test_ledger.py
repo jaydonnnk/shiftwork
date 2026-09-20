@@ -5,10 +5,10 @@ clause and the test 43 ledger-resolution-after-re-version clause.
 
 Clause-level honesty: test 9's reservation-retention clause completes at Slice 7
 and its restart-marks-FAILED / capture-retention clauses complete at Slice 8 with
-``reconcile_interrupted``; test 9's fault injection runs from the CAPTURED state
-only, and faults from QUEUED/RUNNING complete at Slice 8 with
-``reconcile_interrupted``; test 10's inheritance-seeds-match clause completes at
-Slice 8. None of these is claimed here.
+``reconcile_interrupted`` (see ``test_restart_reconciles_nonterminal_runs_keeping_captures_and_draws``
+and ``test_restart_keeps_a_committed_finalized_run``); test 9's fault injection
+runs from the CAPTURED state only. Test 10's inheritance-seeds-match clause
+completes at Slice 8 in ``tests/orchestrator/test_close_inheritance.py``.
 """
 
 import base64
@@ -27,6 +27,7 @@ from shiftwork.app import create_app
 from shiftwork.domain.models import (
     CheckResult,
     ContractParams,
+    ExecutorFailure,
     ReasonCode,
     RunOutput,
     RunState,
@@ -103,6 +104,7 @@ def _invented_output(run_id: str) -> RunOutput:
         http_status=200,
         body=body,
         elapsed_ms=1,
+        log_ref=f"{run_id}-out-1.log",
     )
 
 
@@ -380,6 +382,94 @@ def test_interrupted_finalization_writes_no_events(tmp_path):
             reopened.close()
     finally:
         conn.close()
+
+
+def test_restart_reconciles_nonterminal_runs_keeping_captures_and_draws(tmp_path):
+    # Test 9's restart-marks-FAILED and capture-retention clauses (Slice 8):
+    # a restart reconciles QUEUED, RUNNING and CAPTURED runs to FAILED while a
+    # partial capture's bytes and every rotation draw stay intact, and no checks
+    # or events are written. A committed FINALIZED run is untouched.
+    db_file = tmp_path / "reconcile.db"
+    conn = _seeded_conn(db_file)
+    try:
+        shift = orchestrator.open_next_shift(conn)
+        orchestrator.freeze_version(conn, shift.id, _contract())
+        queued = orchestrator.start_run(conn, shift.id)
+        running = orchestrator.start_run(conn, shift.id)
+        captured = orchestrator.start_run(conn, shift.id)
+        repo.update_run(conn, running.id, RunState.RUNNING)
+        repo.insert_output(conn, _invented_output(running.id))
+        repo.update_run(conn, captured.id, RunState.CAPTURED)
+        repo.insert_output(conn, _invented_output(captured.id))
+        conn.commit()
+        outputs_before = {
+            run.id: [
+                (row.id, row.request_ordinal, bytes(row.body), row.request_text, row.http_status, row.elapsed_ms, row.log_ref, row.transport_error)
+                for row in repo.list_outputs(conn, run.id)
+            ]
+            for run in (running, captured)
+        }
+        draws_before = {
+            run.id: [
+                (draw.id, draw.family, draw.variant_ref, draw.run_id, draw.cycle, draw.state)
+                for draw in repo.list_rotation_draws_for_run(conn, run.id)
+            ]
+            for run in (queued, running, captured)
+        }
+        assert outputs_before[running.id] and draws_before[queued.id]
+
+        reconciled = orchestrator.reconcile_interrupted(conn)
+        assert set(reconciled) == {queued.id, running.id, captured.id}
+        for run in (queued, running, captured):
+            stored = repo.get_run(conn, run.id)
+            assert stored.state is RunState.FAILED
+            assert stored.failure_kind is ExecutorFailure.INTERNAL
+            assert repo.list_check_results(conn, run.id) == []
+            assert [
+                (draw.id, draw.family, draw.variant_ref, draw.run_id, draw.cycle, draw.state)
+                for draw in repo.list_rotation_draws_for_run(conn, run.id)
+            ] == draws_before[run.id], "a reconciliation changed the run's rotation draws"
+        assert repo.list_ledger_events(conn, config.BOOKSHOP_SLUG) == []
+        for run in (running, captured):
+            assert [
+                (row.id, row.request_ordinal, bytes(row.body), row.request_text, row.http_status, row.elapsed_ms, row.log_ref, row.transport_error)
+                for row in repo.list_outputs(conn, run.id)
+            ] == outputs_before[run.id], "a partial capture did not survive the reconciliation"
+        assert orchestrator.reconcile_interrupted(conn) == [], "reconciliation is not idempotent"
+        # The close is no longer blocked by the failed runs.
+        assert orchestrator.close_shift(conn, shift.id).state == "closed"
+    finally:
+        conn.close()
+
+    with TestClient(create_app(str(db_file))):
+        pass  # the lifespan's reconciliation runs against the same database
+    reopened = db.connect(db_file)
+    try:
+        for run in (queued, running, captured):
+            assert repo.get_run(reopened, run.id).state is RunState.FAILED
+        assert repo.list_ledger_events(reopened, config.BOOKSHOP_SLUG) == []
+    finally:
+        reopened.close()
+
+
+def test_restart_keeps_a_committed_finalized_run(finalized):
+    conn = finalized["conn"]
+    run_id = finalized["run_id"]
+    events_before = repo.list_ledger_events(conn, config.BOOKSHOP_SLUG)
+    checks_before = repo.list_check_results(conn, run_id)
+    assert events_before and checks_before
+    conn.close()
+
+    with TestClient(create_app(str(finalized["db_file"]))):
+        pass  # the lifespan's reconciliation must leave a committed run alone
+
+    reopened = db.connect(finalized["db_file"])
+    try:
+        assert repo.get_run(reopened, run_id).state is RunState.FINALIZED
+        assert repo.list_check_results(reopened, run_id) == checks_before
+        assert repo.list_ledger_events(reopened, config.BOOKSHOP_SLUG) == events_before
+    finally:
+        reopened.close()
 
 
 def test_projection_vs_replay_equivalence(finalized):

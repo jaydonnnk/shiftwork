@@ -135,7 +135,7 @@ def test_lifecycle_persists_and_returns_real_rows(client):
     assert board["attempt_limit"] == config.DEFAULT_ATTEMPT_LIMIT
     assert board["attempts_remaining"] == config.DEFAULT_ATTEMPT_LIMIT - 1
     assert board["ledger_totals"] == {"BACKLOG_RECORDED": families}
-    assert board["open_incidents"] == []
+    assert board["incidents"] == []
 
     closed = _ok(test_client.post(f"/api/shifts/{shift_id}/close"))
     assert closed["state"] == "closed"
@@ -169,9 +169,16 @@ def test_lifecycle_persists_and_returns_real_rows(client):
             "run_outputs": 1,
             "check_results": families,
             "incidents": 0,
-            "ledger_events": families,
+            # The close appended one LIMIT_DECLARED event for the contract's
+            # declared limit (Slice 8, program design S5.8).
+            "ledger_events": families + 1,
             "rotation_draws": families,
         }
+        event_types = [
+            row[0]
+            for row in conn.execute("SELECT event_type FROM ledger_events ORDER BY seq").fetchall()
+        ]
+        assert event_types == ["BACKLOG_RECORDED"] * families + ["LIMIT_DECLARED"]
         assert conn.execute("SELECT state FROM runs").fetchone()[0] == "FINALIZED"
     finally:
         conn.close()
@@ -189,4 +196,4 @@ def test_board_state_survives_restart(tmp_path):
         assert board["requests_run"] == 1
         assert board["ledger_event_count"] == len(config.BOOKSHOP_FAMILIES)
         assert board["chain_status"] == "VALID"
-        assert board["open_incidents"] == []
+        assert board["incidents"] == []

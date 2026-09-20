@@ -8,9 +8,10 @@ missing row, or a chain that does not verify.
 
 Test 44 (partial): a declared limit is stored on the frozen contract and never
 scored - it does not appear in any real CheckResult or any real ledger event.
-Deferred clauses (NOT claimed here): "a declared limit cannot satisfy a
-required executable dimension or silently become an evaluator rule" completes at
-Slice 4, and the "and inherited" clause completes at Slice 8.
+The "cannot satisfy a required executable dimension or silently become an
+evaluator rule" clause completes at Slice 4, and the "and inherited" clause lands
+here with the close/inheritance path:
+``test_declared_limit_is_inherited_and_never_becomes_an_evaluator_rule``.
 
 The shipped controller default binds the repair arc (Slice 8), so this thin-path
 check selects the thin profile explicitly; its assertions are unchanged.
@@ -154,3 +155,39 @@ def test_declared_limit_is_stored_but_never_scored(driven):
     ledger = _ok(client.get("/api/engagements/bookshop/ledger"))
     assert len(ledger["events"]) == len(config.BOOKSHOP_FAMILIES)
     assert DECLARED_LIMIT.lower() not in json.dumps(ledger["events"]).lower()
+
+
+def test_declared_limit_is_inherited_and_never_becomes_an_evaluator_rule(driven):
+    # Test 44's "and inherited" clause: the limit is declared at close, the next
+    # shift inherits it in unresolved_limits, and it still never satisfies a
+    # required executable dimension or becomes an evaluator rule.
+    client = driven["client"]
+    version = driven["version"]
+    shift_id = version["shift_id"]
+
+    closed = _ok(client.post(f"/api/shifts/{shift_id}/close"))
+    assert closed["state"] == "closed"
+    next_shift = _ok(client.post("/api/engagements/bookshop/shifts"), 201)
+    board = _ok(client.get("/api/engagements/bookshop/board"))
+    assert board["latest_shift"]["id"] == next_shift["id"]
+    assert board["unresolved_limits"] == [DECLARED_LIMIT]
+
+    # The declaration is a close event owned by the shift, not by a run or a
+    # check, and it carries no sealed or incident identity.
+    ledger = _ok(client.get("/api/engagements/bookshop/ledger"))
+    declared = [event for event in ledger["events"] if event["event_type"] == "LIMIT_DECLARED"]
+    assert len(declared) == 1
+    assert declared[0]["cause_refs"] == [shift_id]
+    assert declared[0]["payload"]["catalog_version"] == version["contract"]["catalog_version"]
+    assert set(declared[0]["payload"]) == {"declared_limit", "catalog_version"}
+
+    # Still never scored: no check result mentions it, and the first shift's
+    # checks are exactly the sealed verdicts.
+    checks = _ok(client.get(f"/api/runs/{driven['run_id']}/checks"))
+    assert DECLARED_LIMIT.lower() not in json.dumps(checks).lower()
+
+    # The inherited draft is the frozen version's files; the limit rides in the
+    # contract, not in a file the evaluator could read as a rule.
+    inherited = _ok(client.get(f"/api/shifts/{next_shift['id']}/artifact"))
+    original = _ok(client.get(f"/api/shifts/{shift_id}/artifact"))
+    assert inherited["files"] == original["files"]
