@@ -52,3 +52,13 @@ retained) complete at Slice 8. Correction-event representation already uses the
 production chain and persistence primitives in `tests/ledger`; no operator workflow
 for correction events is implemented and none is assigned. The Gate 4 re-approval
 (2026-09-19) keeps these mappings in `04-slices.md`.
+
+Update 2026-09-20 (Slice 8): the restart reconstruction rules landed.
+`reconcile_interrupted` (called from the app lifespan) marks every run a restart left
+QUEUED, RUNNING or CAPTURED as FAILED, keeping its completed captures, log bytes and
+rotation draws byte-for-byte and writing zero checks or events; FINALIZED runs are
+untouched and the call is idempotent. The close path appends its `LIMIT_DECLARED`
+events through the same `chain.append` inside the close transaction, so an inherited
+shift's declared limits enter the same verified chain
+(`tests/ledger/test_ledger.py`, `tests/orchestrator/test_close_inheritance.py`). The
+"Pending" sentence above is superseded; the decision body is unchanged.

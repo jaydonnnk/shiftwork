@@ -322,3 +322,83 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   in the test so the rowcount is observable, and verify a new or changed proof
   harness against known-vacuous and known-crashing mutations before trusting a
   green table.
+
+## 2026-09-20 Slice 8: the offline replay rebuilt inputs from current state
+
+- **What happened:** the first version of `demos/test1.py`'s offline re-scoring
+  re-derived each run's sealed case set with `sealed_store.load_drawn_cases`, which
+  reflects the incident state *today*. By the time the demo replayed shift 1, the
+  incidents were resolved, so the regression cases were no longer loaded: the replay
+  produced 18 CheckResults against 36 stored ones, `identical=False`, and the demo
+  reported `PRE-PROOF FAIL` on a mechanism that was working. Loading the case set the
+  run actually recorded (its stored check ids resolved through the sealed index)
+  reproduced all 36 exactly.
+- **Root cause:** I treated a live-selection helper as if it were a historical
+  accessor. `load_drawn_cases` deliberately follows the current incident state (a
+  resolved incident's stimulus is not re-scored), which is correct for a new run and
+  wrong for replaying an old one.
+- **Prevention rule:** when a check claims "the same inputs replay identically", the
+  replay must reconstruct the exact inputs the run consumed - the rows the run wrote -
+  never re-derive them with a selector that reads present state. Verify by comparing
+  counts first (stored vs re-derived) before interpreting a mismatch as a mechanism
+  failure.
+
+## 2026-09-20 Slice 8: an invalid mutation written into the proof table
+
+- **What happened:** the `limits_projection_unions_all_declarations` row replaced a
+  comprehension's filter line with `if True:  # MUTATION`, which is a `SyntaxError`
+  inside a comprehension. The run reported `NOT_CAUGHT` with `SyntaxError: invalid
+  syntax` instead of a green row - the harness caught it, but the row itself was the
+  defect, exactly the class of error the 2026-09-20 Slice 7 entry logged.
+- **Root cause:** I wrote the mutation as if the target line were a statement, without
+  re-reading the surrounding expression (a set comprehension).
+- **Prevention rule:** before adding a mutation row, reproduce the mutated file in a
+  scratch copy and require it to import/compile; a mutation must change behavior
+  without changing syntax validity. When the target is inside a comprehension or
+  expression, mutate only the expression itself.
+
+## 2026-09-20 Slice 8: an edit inserted a block in the middle of a dict literal
+
+- **What happened:** adding the `repair_arc_*` entries to
+  `config.TRUSTED_LOCAL_FIXTURES` was done with an edit whose replacement re-declared
+  the dict head, leaving the original entries after a closing brace - an invalid file.
+  It was caught by reading the file after the edit, before any test ran.
+- **Root cause:** the edit's old string ended at the dict's opening line, so the new
+  string re-created that line while the original body stayed in place.
+- **Prevention rule:** when an edit adds entries to a literal, replace the whole
+  literal (head through closing bracket), not just its head; after any structural
+  edit, re-read the region before running checks.
+
+## 2026-09-20 Slice 8: verification re-run used the wrong Python interpreter
+
+- **What happened:** a re-run of the full verification chain (`pytest`,
+  `mutation_proofs.py`, `demos.test1`) used bare `python`, which on this shell
+  resolves to a hermes-agent venv without pytest. The log showed
+  `No module named pytest` instead of the expected suite result; the run was
+  stopped and re-issued with `.venv/Scripts/python.exe`.
+- **Root cause:** assumed the shell PATH's `python` is the project interpreter;
+  in this environment it is not.
+- **Prevention rule:** always invoke this repository's checks with
+  `.venv/Scripts/python.exe` (or an activated `.venv`); a command that reports a
+  missing tool or module is treated as a harness error to diagnose before any
+  conclusion about the code.
+
+## 2026-09-20 Slice 8: a killed mutation run left a mutation applied (false regression)
+
+- **What happened:** the background verification chain (full suite -> mutation proofs
+  -> pre-proof demo) was killed while its mutation phase was running. The harness was
+  killed between mutating `orchestrator.start_run` and restoring it, so the worktree
+  kept the `start_run_ignores_the_inherited_version` mutation. The next full suite
+  reported 3 failures (one close test, both pre-proof tests) that looked like real
+  regressions; the next mutation run then reported that exact row as
+  `SKIP: pattern not found` plus one INCIDENTAL catch, which identified the stuck
+  mutation. After restoring the two lines the suite was 192 passed, 1 skipped and the
+  pre-proof passed again.
+- **Root cause:** `mutation_proofs.py` mutates real worktree files and restores them
+  after each row; a kill mid-row leaves the mutated bytes. No step in the routine
+  checks that the tree is in its intended (unmutated) state before running checks, so
+  the false failures were first read as product regressions.
+- **Prevention rule:** never kill `mutation_proofs.py` mid-run; if it is interrupted,
+  before trusting any test result verify all 38 row patterns are present exactly once
+  (with the harness's CRLF fallback), and treat a row's `pattern not found` as a
+  signal that the worktree, not the code under test, is wrong.

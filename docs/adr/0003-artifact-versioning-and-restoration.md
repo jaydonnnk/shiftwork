@@ -52,5 +52,21 @@ prior runs from the durable `runs` rows, refuses the over-limit reservation, and
 commits the run row, its batch and snapshot refs and one draw per enabled family in
 one `BEGIN IMMEDIATE` transaction (`tests/orchestrator/test_budget_rotation.py`; the
 route maps the refusal to 409). The 2026-09-19 sentence listing budgets as pending
-is superseded. Close and inheritance restoration, plus interrupted-run
-reconciliation on restart, remain Slice 8 as stated.
+is superseded.
+
+Update 2026-09-20 (Slice 8): close and inheritance restoration landed.
+`open_next_shift` seeds the new draft byte-for-byte from the inherited version's
+files (the template applies only when no version exists), and the artifact
+version, unresolved incidents, declared limits and ledger summary carry forward
+as engagement rows the board reads; `start_run` and `close_shift` use the version
+in force (this shift's own latest version or the inherited one). `close_shift` is
+one atomic, idempotent transaction that refuses while a run is in flight, appends
+the hash-chained `LIMIT_DECLARED` events for the version's declared limits exactly
+once and retires unresolved OPEN incidents as `CLOSED_UNRESOLVED` rows.
+Interrupted-run reconciliation landed with `reconcile_interrupted`, called from the
+app lifespan: a run a restart left QUEUED, RUNNING or CAPTURED is marked FAILED
+with its completed captures and rotation draws retained and zero checks or events
+written (`tests/ledger/test_ledger.py`,
+`tests/orchestrator/test_close_inheritance.py`, `tests/orchestrator/test_test1_preproof.py`).
+The 2026-09-19 "remain Slice 8 as stated" sentence is superseded; the decision body
+above is unchanged.
