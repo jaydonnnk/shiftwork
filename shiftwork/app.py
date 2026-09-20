@@ -1,5 +1,6 @@
 """FastAPI factory. The controller opens the DB, ensures the schema, seeds the
-bookshop engagement and mounts the static client."""
+bookshop engagement, reconciles runs a restart left nonterminal and mounts the
+static client."""
 
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -7,7 +8,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from shiftwork import config
+from shiftwork import config, orchestrator
 from shiftwork.api.routes import domain_error_handler, lifecycle_error_handler, router
 from shiftwork.domain.errors import ShiftworkDomainError
 from shiftwork.orchestrator import LifecycleError
@@ -33,6 +34,9 @@ async def lifespan(app: FastAPI):
             attempt_limit=config.DEFAULT_ATTEMPT_LIMIT,
             rotation_group_size=config.BOOKSHOP_ROTATION_GROUP_SIZE,
         )
+        # Startup recovery (Slice 8): a run a restart left nonterminal is failed
+        # with its captures and draws retained and no checks or events written.
+        orchestrator.reconcile_interrupted(conn)
     finally:
         conn.close()
     yield

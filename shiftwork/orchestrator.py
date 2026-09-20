@@ -10,7 +10,12 @@ version passes the linked regression and that family's current unseen variant.
 Slice 8 makes the run row the single source of execution identity: ``start_run``
 persists the controller-configured executor and shop snapshot, and ``execute_run``
 resolves the adapter from those persisted values, with an unmapped recorded pairing
-or an unimplemented adapter failing closed as a typed PROVISION_FAILED.
+or an unimplemented adapter failing closed as a typed PROVISION_FAILED. Slice 8
+also lands close and inheritance: ``close_shift`` records the committed declared
+limits as hash-chained LIMIT_DECLARED events and retires unresolved incidents as
+CLOSED_UNRESOLVED rows in one transaction, ``open_next_shift`` seeds the next
+draft from the inherited version, and ``reconcile_interrupted`` fails the runs a
+restart left nonterminal while keeping their captures and draws.
 """
 
 import asyncio
@@ -27,6 +32,7 @@ from shiftwork.domain.errors import ServiceResponseInvalid
 from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
+    CloseShiftFacts,
     ContractParams,
     DrawState,
     ExecutorFailure,
@@ -140,8 +146,20 @@ def _adapter_for(run: Run) -> executor.ExecutorAdapter | None:
 
 
 def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -> Shift:
+    """Open the next shift, seeded from the engagement's inheritance (S5.1).
+
+    The seed is the latest artifact version: its files become the new draft, so
+    the learner continues from the inherited artifact (the shipped template
+    applies only when no version exists yet). Unresolved incidents (OPEN and
+    CLOSED_UNRESOLVED), declared limits and the ledger summary are engagement
+    rows read live by the board, so they carry forward without a copy. A shift
+    that is still open refuses a second open with a conflict.
+    """
     if repo.get_engagement(conn, slug) is None:
         raise LifecycleError("not_found", f"unknown engagement: {slug}")
+    current = repo.get_latest_shift(conn, slug)
+    if current is not None and current.state == "open":
+        raise LifecycleError("conflict", f"shift {current.id} is still open; close it first")
     seq = repo.max_shift_seq(conn, slug) + 1
     shift = Shift(
         id=f"{slug}-shift-{seq:02d}",
@@ -151,9 +169,9 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
         opened_at=_now(),
     )
     repo.insert_shift(conn, shift)
-    # Slice 2 seeds the template draft. Later slices seed from the inherited
-    # artifact version and carry open incidents and ledger state forward.
-    repo.upsert_draft(conn, shift.id, BOOKSHOP_DRAFT_FILES, shift.opened_at)
+    inherited = repo.get_latest_version_for_engagement(conn, slug)
+    files = dict(inherited.files) if inherited is not None else BOOKSHOP_DRAFT_FILES
+    repo.upsert_draft(conn, shift.id, files, shift.opened_at)
     conn.commit()
     return shift
 
@@ -236,9 +254,16 @@ def start_run(
     consumes (Slice 8); the learner never supplies either through the API, and
     ``execute_run`` resolves the adapter from these persisted values. Callers that
     pass nothing get the shipped controller defaults.
+
+    The artifact version in force is this shift's own latest version, or the
+    inherited one before the learner freezes their own: a shift that opens from
+    inheritance can run the system it inherited without re-freezing identical
+    bytes (program design S5.1/S5.3).
     """
     shift = _require_open_shift(conn, shift_id)
-    version = repo.get_latest_version(conn, shift_id)
+    version = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
+        conn, shift.engagement_slug
+    )
     if version is None:
         raise LifecycleError("conflict", "freeze a version before starting a run")
 
@@ -411,11 +436,12 @@ def _resolution_drafts(
 ) -> list[tuple[str, LedgerEventDraft]]:
     """Resolution drafts this run has earned (program design S5.7).
 
-    An OPEN incident resolves only when all three hold: the linked regression
-    passes in this run, the run is not the incident's opening run's version, and
-    this run's drawn (never-exposed) variant for the same family passes. Re-running
-    an old regression alone never resolves anything, and a repeated version is not
-    a repair.
+    An unresolved incident (OPEN, or CLOSED_UNRESOLVED after a close inherited it)
+    resolves only when all three hold: the linked regression passes in this run,
+    the run is not the incident's opening run's version, and this run's drawn
+    (never-exposed) variant for the same family passes. Re-running an old
+    regression alone never resolves anything, and a repeated version is not a
+    repair.
     """
     results_by_check = {result.check_id: result for result in check_results}
     drawn_refs = {draw.variant_ref for draw in repo.list_rotation_draws_for_run(conn, run.id)}
@@ -425,7 +451,7 @@ def _resolution_drafts(
     slug = run.shift_id.rsplit("-shift-", 1)[0]
     resolutions: list[tuple[str, LedgerEventDraft]] = []
     for incident in repo.list_incidents(conn, slug):
-        if incident.state is not IncidentState.OPEN:
+        if incident.state is IncidentState.RESOLVED:
             continue
         linked = _incident_case(conn, incident)
         if linked is None:
@@ -527,11 +553,87 @@ def finalize_run(conn: sqlite3.Connection, run_id: str) -> Run:
 
 
 def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
+    """Close the shift atomically and idempotently (program design S5.8).
+
+    One transaction: refuse while a run of this shift is nonterminal; capture
+    ``CloseShiftFacts`` from the artifact version in force (this shift's own
+    latest version, or the inherited one when the shift never froze its own);
+    append the hash-chained LIMIT_DECLARED events for its declared limits exactly
+    once; retire the engagement's unresolved OPEN incidents as CLOSED_UNRESOLVED
+    rows (inherited as incidents, never as LIMIT_DECLARED events); mark the shift
+    closed. An already closed shift returns without writes, so a retried or
+    concurrent close cannot append a second event set, and a fault anywhere
+    leaves neither a partial close nor partial events.
+    """
     shift = _require_shift(conn, shift_id)
-    if shift.state == "open":
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        shift = _require_shift(conn, shift_id)
+        if shift.state == "closed":
+            conn.rollback()
+            return shift
+        in_flight = [
+            run.id
+            for run in repo.list_runs_for_shift(conn, shift_id)
+            if run.state not in (RunState.FINALIZED, RunState.FAILED)
+        ]
+        if in_flight:
+            raise LifecycleError("conflict", "run in flight; close refused: " + ", ".join(in_flight))
+        version = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
+            conn, shift.engagement_slug
+        )
+        drafts: list[LedgerEventDraft] = []
+        if version is not None:
+            facts = CloseShiftFacts(
+                shift_id=shift.id,
+                declared_limits=tuple(version.contract.declared_limits),
+                unresolved_incident_ids=tuple(
+                    incident.id
+                    for incident in repo.list_incidents(conn, shift.engagement_slug)
+                    if incident.state is IncidentState.OPEN
+                ),
+                committed_contract=version.contract,
+            )
+            drafts = reducer.reduce_close(reducer.load_mission(config.BOOKSHOP_MISSION), facts)
+        existing = repo.list_ledger_events(conn, shift.engagement_slug)
+        events = chain.append(
+            drafts,
+            prev_hash=chain.next_prev_hash(existing),
+            start_seq=chain.next_seq(existing),
+        )
+        for event in events:
+            repo.insert_ledger_event(conn, shift.engagement_slug, event)
+        repo.close_unresolved_incidents(conn, shift.engagement_slug)
         repo.close_shift(conn, shift_id, _now())
         conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     return _require_shift(conn, shift_id)
+
+
+def reconcile_interrupted(conn: sqlite3.Connection) -> list[str]:
+    """Startup recovery (S3.6, S6.B.9): fail the runs a restart left nonterminal.
+
+    A restart can leave runs in QUEUED, RUNNING or CAPTURED; none of them
+    resumes. Each is marked FAILED with the typed INTERNAL failure kind (the
+    interruption is the controller's, not the service's) while its completed
+    captures, log bytes and rotation draws stay byte-for-byte intact and no
+    checks or events are written. FINALIZED and FAILED runs are untouched, so
+    the call is idempotent. Returns the reconciled run ids.
+
+    Startup is the only reconciliation point (``app.py`` lifespan is the sole call
+    site): a run left nonterminal while the app keeps running, for example one
+    whose background task never executes, is not reconciled until the process
+    restarts, and ``close_shift`` refuses that shift until then.
+    """
+    reconciled: list[str] = []
+    for run in repo.list_nonterminal_runs(conn):
+        repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
+        reconciled.append(run.id)
+    if reconciled:
+        conn.commit()
+    return reconciled
 
 
 def get_run(conn: sqlite3.Connection, run_id: str) -> Run:
@@ -641,6 +743,10 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         raise LifecycleError("not_found", f"unknown engagement: {slug}")
     latest_shift = repo.get_latest_shift(conn, slug)
     latest_version = repo.get_latest_version(conn, latest_shift.id) if latest_shift else None
+    if latest_version is None and latest_shift is not None:
+        # A freshly opened shift has no version of its own yet; the board shows
+        # the inherited one until the learner freezes their own (Slice 8).
+        latest_version = repo.get_latest_version_for_engagement(conn, slug)
     latest_run = repo.get_latest_run(conn, latest_shift.id) if latest_shift else None
     requests_run = len(repo.list_outputs(conn, latest_run.id)) if latest_run else 0
     attempts_used = repo.count_runs(conn, latest_shift.id) if latest_shift else 0
@@ -663,8 +769,13 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         "attempts_used": attempts_used,
         "attempt_limit": attempt_limit,
         "attempts_remaining": attempt_limit - attempts_used,
-        "open_incidents": [incident for incident in incidents if incident.state == IncidentState.OPEN],
+        "incidents": [
+            incident
+            for incident in incidents
+            if incident.state in (IncidentState.OPEN, IncidentState.CLOSED_UNRESOLVED)
+        ],
         "total_incidents": len(incidents),
+        "unresolved_limits": repo.list_unresolved_limits(conn, slug),
         "ledger_event_count": len(events),
         "ledger_totals": totals,
         "chain_status": status.value,

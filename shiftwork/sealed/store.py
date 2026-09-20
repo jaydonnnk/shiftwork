@@ -92,12 +92,14 @@ def case_for_check_id(check_id: str) -> SealedCase | None:
 
 
 def load_drawn_cases(conn: sqlite3.Connection, run_id: str) -> SealedCaseSet:
-    """The cases this run evaluates: its persisted draws plus open-incident regressions.
+    """The cases this run evaluates: its persisted draws plus unresolved regressions.
 
     The draws are read back from ``rotation_draws`` - never re-selected - so a
     restart cannot redraw an exposed variant (program design S5.3, test 26). A
-    regression case is included only while its incident is OPEN: once resolved,
-    repeating the old stimulus is not part of a later run's evidence.
+    regression case is included while its incident is unresolved (OPEN or the
+    CLOSED_UNRESOLVED state a close leaves it in): the inherited incident still
+    waits on that regression, and a resolved incident's stimulus is not part of
+    a later run's evidence (program design S3.9, S5.7).
     """
     index = case_index()
     cases: list[SealedCase] = []
@@ -122,7 +124,7 @@ def load_drawn_cases(conn: sqlite3.Connection, run_id: str) -> SealedCaseSet:
         raise InvalidSealedCase(f"unknown run: {run_id}")
     engagement_slug = run.shift_id.rsplit("-shift-", 1)[0]
     for incident in repo.list_incidents(conn, engagement_slug):
-        if incident.state is not IncidentState.OPEN:
+        if incident.state is IncidentState.RESOLVED:
             continue
         failing = next(
             (

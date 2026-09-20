@@ -234,8 +234,9 @@ class BoardView(BaseModel):
     attempts_used: int
     attempt_limit: int
     attempts_remaining: int
-    open_incidents: tuple[IncidentView, ...]
+    incidents: tuple[IncidentView, ...]
     total_incidents: int
+    unresolved_limits: tuple[str, ...]
     ledger_event_count: int
     ledger_totals: dict[str, int]
     chain_status: Literal["VALID"]

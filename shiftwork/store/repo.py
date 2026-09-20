@@ -328,6 +328,22 @@ def count_runs_all(conn: sqlite3.Connection) -> int:
     return int(conn.execute("SELECT COUNT(*) AS n FROM runs").fetchone()["n"])
 
 
+def list_runs_for_shift(conn: sqlite3.Connection, shift_id: str) -> list[Run]:
+    rows = conn.execute(
+        "SELECT * FROM runs WHERE shift_id = ? ORDER BY attempt_number", (shift_id,)
+    ).fetchall()
+    return [_run(row) for row in rows]
+
+
+def list_nonterminal_runs(conn: sqlite3.Connection) -> list[Run]:
+    """Every run the controller has not finished with (startup recovery, S6.B.9)."""
+    rows = conn.execute(
+        "SELECT * FROM runs WHERE state NOT IN (?, ?) ORDER BY rowid",
+        (RunState.FINALIZED.value, RunState.FAILED.value),
+    ).fetchall()
+    return [_run(row) for row in rows]
+
+
 # --- run_outputs -----------------------------------------------------------
 
 
@@ -476,18 +492,40 @@ def resolve_incident(
     resolving_version_id: str,
     resolved_event_seq: int,
 ) -> None:
-    """The only incident mutation after opening: OPEN -> RESOLVED, and only here."""
+    """The only incident mutation after opening: unresolved -> RESOLVED, and only here.
+
+    Both unresolved states resolve: an incident a close retired as
+    CLOSED_UNRESOLVED is inherited by the next shift and resolves when a later
+    run of a new version passes its linked regression and the family's current
+    unseen acceptance check (program design S3.9, S5.7). RESOLVED rows never
+    change again.
+    """
     conn.execute(
         "UPDATE incidents SET state = ?, resolving_version_id = ?, resolved_event_seq = ? "
-        "WHERE id = ? AND state = ?",
+        "WHERE id = ? AND state IN (?, ?)",
         (
             IncidentState.RESOLVED.value,
             resolving_version_id,
             resolved_event_seq,
             incident_id,
             IncidentState.OPEN.value,
+            IncidentState.CLOSED_UNRESOLVED.value,
         ),
     )
+
+
+def close_unresolved_incidents(conn: sqlite3.Connection, slug: str) -> int:
+    """Retire the engagement's unresolved OPEN incidents as CLOSED_UNRESOLVED (S5.8).
+
+    The state change is the only incident mutation at close; no ledger event is
+    written, because the incident stays unresolved and is inherited as an
+    incident row, never as a declared limit.
+    """
+    cursor = conn.execute(
+        "UPDATE incidents SET state = ? WHERE engagement_slug = ? AND state = ?",
+        (IncidentState.CLOSED_UNRESOLVED.value, slug, IncidentState.OPEN.value),
+    )
+    return int(cursor.rowcount)
 
 
 # --- rotation_draws --------------------------------------------------------
@@ -598,3 +636,42 @@ def list_ledger_events(conn: sqlite3.Connection, slug: str) -> list[LedgerEvent]
         "SELECT * FROM ledger_events WHERE engagement_slug = ? ORDER BY seq", (slug,)
     ).fetchall()
     return [_ledger_event(row) for row in rows]
+
+
+def list_unresolved_limits(conn: sqlite3.Connection, slug: str) -> list[str]:
+    """Declared limits still in force, derived from LIMIT_DECLARED events (S5.1).
+
+    A limit is declared at the engagement's most recent close and stays in force
+    until a later close stops declaring it: the projection is exactly what that
+    close declared, in first-appearance order, deduplicated so a repeated
+    declaration cannot multiply a limit on the board. Events are append-only, so
+    a limit the artifact no longer carries leaves the projection without any
+    stored event being edited or deleted.
+    """
+    latest_closed = conn.execute(
+        "SELECT id FROM shifts WHERE engagement_slug = ? AND state = 'closed' "
+        "ORDER BY seq DESC LIMIT 1",
+        (slug,),
+    ).fetchone()
+    if latest_closed is None:
+        return []
+    rows = conn.execute(
+        "SELECT payload_json, cause_refs_json FROM ledger_events "
+        "WHERE engagement_slug = ? AND event_type = ? ORDER BY seq",
+        (slug, LedgerEventType.LIMIT_DECLARED.value),
+    ).fetchall()
+    declared_now = {
+        value
+        for row in rows
+        if (_load(row["cause_refs_json"]) or [None])[0] == latest_closed["id"]
+        for value in [_load(row["payload_json"]).get("declared_limit")]
+        if isinstance(value, str)
+    }
+    limits: list[str] = []
+    seen: set[str] = set()
+    for row in rows:
+        value = _load(row["payload_json"]).get("declared_limit")
+        if isinstance(value, str) and value in declared_now and value not in seen:
+            seen.add(value)
+            limits.append(value)
+    return limits
