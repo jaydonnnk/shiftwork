@@ -44,3 +44,6 @@ venv/
 *.db
 *.sqlite
 *.sqlite3
+
+# Operational memory (AGENTS.md S7): local run state, never committed
+PROGRESS.md
