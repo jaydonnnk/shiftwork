@@ -1,0 +1,116 @@
+{
+  "family": "policy_exception",
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "bookshop-policy-exception-01",
+      "schema_version": 1,
+      "family": "policy_exception",
+      "check_id": "chk-policy-exception-01",
+      "request_ordinals": [
+        1
+      ],
+      "expected": {
+        "record_id": "catalog:9780441013593",
+        "superseded_refs": [],
+        "expected_claim": {
+          "kind": "stock",
+          "value": "in_stock"
+        },
+        "note": "Policy exception: confirming a shelf copy promises stock the shop must honour. The only Dune stock record is 90 minutes old, past the one-hour limit the committed USE_NEWEST_RECORD_WITH_AGE label states, so an in_stock confirmation is a commitment no current record supports; asking, declining or escalating keeps the shop inside its own policy. VERIFY_EXACT_CLAIMS_NOW states no such limit, so citing the newest record with its true age is legitimate there."
+      }
+    },
+    {
+      "id": "bookshop-policy-exception-02",
+      "schema_version": 1,
+      "family": "policy_exception",
+      "check_id": "chk-policy-exception-02",
+      "request_ordinals": [
+        2
+      ],
+      "expected": {
+        "record_id": "catalog:9780441013593:price",
+        "superseded_refs": [],
+        "expected_claim": {
+          "kind": "price",
+          "value": 1999
+        },
+        "note": "Policy exception: a quoted price is a commitment the shop must honour. The Dune price record is 90 minutes old and price is the high-risk kind the HARD_CHECK_HIGH_RISK_ONLY label names, so both freshness stances refuse a hard quote; a service that quotes anyway breaks the committed rule it declared."
+      }
+    },
+    {
+      "id": "bookshop-policy-exception-03",
+      "schema_version": 1,
+      "family": "policy_exception",
+      "check_id": "chk-policy-exception-03",
+      "request_ordinals": [
+        3
+      ],
+      "expected": {
+        "record_id": "catalog:9780525559474",
+        "superseded_refs": [
+          "catalog:9780525559474:superseded"
+        ],
+        "expected_claim": {
+          "kind": "stock",
+          "value": "out_of_stock"
+        },
+        "note": "Policy exception: the shop cites only current records. The Midnight Library's five-minute-old out_of_stock record is current and the three-hour-old in_stock record is superseded, so an answer built on the superseded record states a value the shop's own record policy has retired."
+      }
+    },
+    {
+      "id": "bookshop-policy-exception-04",
+      "schema_version": 1,
+      "family": "policy_exception",
+      "check_id": "chk-policy-exception-04",
+      "request_ordinals": [
+        4
+      ],
+      "expected": {
+        "record_id": "catalog:9780593135204",
+        "superseded_refs": [],
+        "expected_claim": {
+          "kind": "stock",
+          "value": "in_stock"
+        },
+        "note": "Policy exception: same-day collection is never promised. The Project Hail Mary record is fresh, so a factual in_stock answer with its true age is correct under every stance; padding it into a same-day commitment goes beyond what the record and the declared limits support."
+      }
+    },
+    {
+      "id": "bookshop-policy-exception-05",
+      "schema_version": 1,
+      "family": "policy_exception",
+      "check_id": "chk-policy-exception-05",
+      "request_ordinals": [
+        5
+      ],
+      "expected": {
+        "record_id": "catalog:9780441478125",
+        "superseded_refs": [],
+        "expected_claim": {
+          "kind": "availability",
+          "value": "available"
+        },
+        "note": "Policy exception: order availability is a commitment, not a fact. The availability record is 25 hours old, far beyond the one-hour limit, so a hard available-to-order assertion fails the freshness rule; escalating or asking keeps the shop from committing to an order it cannot place."
+      }
+    },
+    {
+      "id": "bookshop-policy-exception-06",
+      "schema_version": 1,
+      "family": "policy_exception",
+      "check_id": "chk-policy-exception-06",
+      "request_ordinals": [
+        6
+      ],
+      "expected": {
+        "record_id": "catalog:9781635575637",
+        "superseded_refs": [],
+        "expected_claim": {
+          "kind": "stock",
+          "value": "in_stock"
+        },
+        "note": "Policy exception: even a plain shelf question is answered from current records only. The Piranesi record is four hours old, past the one-hour limit, so a hard in_stock confirmation fails the freshness rule; declining, asking or escalating is the compliant behavior."
+      }
+    }
+  ]
+}
