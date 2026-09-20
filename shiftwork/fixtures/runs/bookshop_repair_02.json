@@ -1,0 +1,28 @@
+{
+  "request_batch_hash": "aaa03b3ae4d683d600b461e8e38a769d93b005ade708a29cde42346cb88ce970",
+  "shop_snapshot_hash": "230d6f8aeb3eff61cb5d68ebaafe1fa5ce365aba4c9a9c0b96b85b8541cc0131",
+  "failure": null,
+  "wall_ms": 85,
+  "captures": [
+    {
+      "request_ordinal": 1,
+      "request_text": "Do you still have the hardback of Dune on the shelf?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhc2siLCJjbGFpbXMiOltdLCJldmlkZW5jZV9yZWZzIjpbXSwicmVjb3JkX2FnZV9tcyI6bnVsbH0=",
+      "elapsed_ms": 41,
+      "transport_error": null,
+      "log_base64": null
+    },
+    {
+      "request_ordinal": 2,
+      "request_text": "What is the recorded price of the Dune hardback?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhc2siLCJjbGFpbXMiOltdLCJldmlkZW5jZV9yZWZzIjpbXSwicmVjb3JkX2FnZV9tcyI6bnVsbH0=",
+      "elapsed_ms": 44,
+      "transport_error": null,
+      "log_base64": null
+    }
+  ],
+  "description": "Repaired-service transcript for attempt 2: request 1 declines to assert from the stale Dune record (the linked regression) and request 2 does the same for the stale price record; both must pass for the open incidents to resolve.",
+  "adapter": "recorded"
+}

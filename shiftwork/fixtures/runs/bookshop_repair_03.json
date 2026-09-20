@@ -1,0 +1,37 @@
+{
+  "request_batch_hash": "861417d43edf760802ce8b3a8a9acb6cc979293ddf442e885e00ea5ebbe51866",
+  "shop_snapshot_hash": "230d6f8aeb3eff61cb5d68ebaafe1fa5ce365aba4c9a9c0b96b85b8541cc0131",
+  "failure": null,
+  "wall_ms": 128,
+  "captures": [
+    {
+      "request_ordinal": 1,
+      "request_text": "Do you still have the hardback of Dune on the shelf?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhc2siLCJjbGFpbXMiOltdLCJldmlkZW5jZV9yZWZzIjpbXSwicmVjb3JkX2FnZV9tcyI6bnVsbH0=",
+      "elapsed_ms": 39,
+      "transport_error": null,
+      "log_base64": null
+    },
+    {
+      "request_ordinal": 2,
+      "request_text": "What is the recorded price of the Dune hardback?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhc2siLCJjbGFpbXMiOltdLCJldmlkZW5jZV9yZWZzIjpbXSwicmVjb3JkX2FnZV9tcyI6bnVsbH0=",
+      "elapsed_ms": 42,
+      "transport_error": null,
+      "log_base64": null
+    },
+    {
+      "request_ordinal": 3,
+      "request_text": "Is The Midnight Library in stock right now?",
+      "http_status": 200,
+      "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoib3V0X29mX3N0b2NrIn1dLCJldmlkZW5jZV9yZWZzIjpbImNhdGFsb2c6OTc4MDUyNTU1OTQ3NCJdLCJyZWNvcmRfYWdlX21zIjozMDAwMDB9",
+      "elapsed_ms": 47,
+      "transport_error": null,
+      "log_base64": null
+    }
+  ],
+  "description": "Repaired-service transcript for attempt 3: the earlier stimuli stay passing and request 3 answers from the newest Midnight Library record, excluding the superseded one.",
+  "adapter": "recorded"
+}
