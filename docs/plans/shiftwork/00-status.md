@@ -2329,6 +2329,47 @@ was ever committed, so it cannot be verified from history); test 50 (partial), t
 constraint); and every Token Factory, Nemotron, Tavily, deployment and learner-outcome
 claim.
 
+## Whole-repo architecture review (post-Slice 7): 2026-09-20
+
+Scope: every production module, test, fixture, demo, the client stub, the gate
+documents and the ADRs at `cf3b6c3` (main, after merge `d4fe938`). Method: direct
+file review plus fresh probes; no code change. Re-verified in this review:
+`pytest tests -q` (`.venv`, Python 3.12.13) printed `174 passed, 1 skipped,
+2 warnings`, matching the Slice 7 evidence; the package import graph computed from
+source is acyclic and the sealed package is imported only by `orchestrator.py` (plus
+`sealed/` itself); live API probes on temporary databases exercised the full
+lifecycle.
+
+Verdict: PASS on the approved boundaries (module layering and delegation, sealed
+isolation and leak containment, evaluator purity and hashing discipline, ledger
+chain plus idempotent finalization, budget/rotation/incident-resolution semantics,
+sandbox provisioning containment). No finding blocks Slice 8.
+
+Acted on 2026-09-20 (documentation and repository hygiene only):
+- ADR 0001's recovery-mechanism note and ADR 0003's budget note now carry dated
+  Slice 7 updates; the decisions themselves are unchanged.
+- `PROGRESS.md` is untracked and ignored: AGENTS.md S7 defines it as operational
+  memory, and its Slice 7 content is mirrored here; the local file remains.
+- The empty `docs/plans/shiftwork/evidence/` directory is KEPT: the plan writes the
+  Slice 8, 12, 13, 14 and 15 evidence files into it.
+
+Recorded limits (behavior unchanged, now stated):
+- Client stub: the freeze button's bodyless POST returns 422 because the freeze API
+  has required the contract body since Slice 4; the stub is replaced by Slices 9 to
+  11, and no current claim depends on it.
+- Run pairing: under the shipped defaults only attempt 1 can finalize; attempts 2
+  and 3 execute batch prefixes that the single recorded transcript refuses
+  (`PROVISION_FAILED`), so the repair loop is drivable only in-process by demos that
+  reassign `config` globals (`demos/repair_loop.py`). The per-run adapter and
+  transcript wiring decision is left open for the Slice 8/9 boundary; the Slice 10
+  client demo depends on it.
+- `demos.evaluate_transcript`'s socket blocking applies only to the scoring phase
+  (asyncio on Windows needs socket internals during replay); carried from the run
+  log.
+- Scalability: chain verification and ledger derivation enrichment are O(ledger
+  size) per read; adequate under the approved Gate 2 S18.4 single-learner frame, no
+  action taken.
+
 ## Gate 2 re-approval and Gate 3 revision: 2026-09-19
 
 The user explicitly approved the scoped Gate 2 revision and instructed proceeding
