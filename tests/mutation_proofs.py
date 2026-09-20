@@ -180,10 +180,16 @@ MUTATIONS = [
         "expect": "test_empty_ordinals_raises",
     },
     {
-        "name": "load_drawn_cases_incident_filter_removed",
+        "name": "load_drawn_cases_resolved_filter_removed",
         "file": "shiftwork/sealed/store.py",
-        "old": b"if incident.state is not IncidentState.OPEN:",
-        "new": b"if False:",
+        "old": b"""    for incident in repo.list_incidents(conn, engagement_slug):
+        if incident.state is IncidentState.RESOLVED:
+            continue
+        failing = next(""",
+        "new": b"""    for incident in repo.list_incidents(conn, engagement_slug):
+        if False:
+            continue
+        failing = next(""",
         "tests": "tests/orchestrator/test_budget_rotation.py::test_resolved_incident_regression_excluded_from_later_run",
         "expect": "test_resolved_incident_regression_excluded_from_later_run",
     },
@@ -298,6 +304,166 @@ MUTATIONS = [
         "tests": "tests/orchestrator/test_run_binding.py::test_snapshot_pins_and_authored_pairings_match_the_fixtures",
         "expect": "test_snapshot_pins_and_authored_pairings_match_the_fixtures",
     },
+    # Slice 8 close, inheritance, restart recovery and the pre-proof seam: each row
+    # independently breaks one guard branch and names the test that must fail.
+    {
+        "name": "close_version_fallback_removed",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""        version = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
+            conn, shift.engagement_slug
+        )
+        drafts: list[LedgerEventDraft] = []""",
+        "new": b"""        version = repo.get_latest_version(conn, shift_id)
+        drafts: list[LedgerEventDraft] = []""",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_close_declares_the_inherited_limits_when_a_shift_never_froze",
+        "expect": "test_close_declares_the_inherited_limits_when_a_shift_never_froze",
+    },
+    {
+        "name": "close_in_flight_refusal_removed",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""        in_flight = [
+            run.id
+            for run in repo.list_runs_for_shift(conn, shift_id)
+            if run.state not in (RunState.FINALIZED, RunState.FAILED)
+        ]
+        if in_flight:""",
+        "new": b"""        in_flight: list[str] = []
+        if in_flight:""",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_close_refuses_while_a_run_is_in_flight",
+        "expect": "test_close_refuses_while_a_run_is_in_flight",
+    },
+    {
+        "name": "close_idempotency_removed",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""        if shift.state == "closed":
+            conn.rollback()
+            return shift""",
+        "new": b"""        if False:
+            conn.rollback()
+            return shift""",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_close_shift_records_unresolved_limits",
+        "expect": "test_close_shift_records_unresolved_limits",
+    },
+    {
+        "name": "reconcile_marks_nothing",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"    for run in repo.list_nonterminal_runs(conn):",
+        "new": b"    for run in []:  # MUTATION: was repo.list_nonterminal_runs(conn)",
+        "tests": "tests/ledger/test_ledger.py::test_restart_reconciles_nonterminal_runs_keeping_captures_and_draws",
+        "expect": "test_restart_reconciles_nonterminal_runs_keeping_captures_and_draws",
+    },
+    {
+        "name": "resolution_ignores_closed_unresolved",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""    for incident in repo.list_incidents(conn, slug):
+        if incident.state is IncidentState.RESOLVED:
+            continue
+        linked = _incident_case(conn, incident)""",
+        "new": b"""    for incident in repo.list_incidents(conn, slug):
+        if incident.state is not IncidentState.OPEN:
+            continue
+        linked = _incident_case(conn, incident)""",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_inherited_unresolved_incident_resolves_on_a_later_passing_run",
+        "expect": "test_inherited_unresolved_incident_resolves_on_a_later_passing_run",
+    },
+    {
+        "name": "drawn_cases_skip_closed_unresolved",
+        "file": "shiftwork/sealed/store.py",
+        "old": b"""    for incident in repo.list_incidents(conn, engagement_slug):
+        if incident.state is IncidentState.RESOLVED:
+            continue
+        failing = next(""",
+        "new": b"""    for incident in repo.list_incidents(conn, engagement_slug):
+        if incident.state is not IncidentState.OPEN:
+            continue
+        failing = next(""",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_inherited_unresolved_incident_resolves_on_a_later_passing_run",
+        "expect": "test_inherited_unresolved_incident_resolves_on_a_later_passing_run",
+    },
+    {
+        "name": "resolve_incident_only_from_open",
+        "file": "shiftwork/store/repo.py",
+        "old": b"""        "WHERE id = ? AND state IN (?, ?)",
+        (
+            IncidentState.RESOLVED.value,
+            resolving_version_id,
+            resolved_event_seq,
+            incident_id,
+            IncidentState.OPEN.value,
+            IncidentState.CLOSED_UNRESOLVED.value,
+        ),""",
+        "new": b"""        "WHERE id = ? AND state IN (?, ?)",
+        (
+            IncidentState.RESOLVED.value,
+            resolving_version_id,
+            resolved_event_seq,
+            incident_id,
+            IncidentState.OPEN.value,
+            IncidentState.OPEN.value,
+        ),""",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_inherited_unresolved_incident_resolves_on_a_later_passing_run",
+        "expect": "test_inherited_unresolved_incident_resolves_on_a_later_passing_run",
+    },
+    {
+        "name": "limits_projection_unions_all_declarations",
+        "file": "shiftwork/store/repo.py",
+        "old": b"""        if (_load(row["cause_refs_json"]) or [None])[0] == latest_closed["id"]""",
+        "new": b"""        if True""",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_unresolved_limits_follow_the_latest_close",
+        "expect": "test_unresolved_limits_follow_the_latest_close",
+    },
+    {
+        "name": "close_leaves_incidents_open",
+        "file": "shiftwork/store/repo.py",
+        "old": b"        (IncidentState.CLOSED_UNRESOLVED.value, slug, IncidentState.OPEN.value),",
+        "new": b"        (IncidentState.OPEN.value, slug, IncidentState.OPEN.value),",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_close_shift_records_unresolved_limits",
+        "expect": "test_close_shift_records_unresolved_limits",
+    },
+    {
+        "name": "board_hides_closed_unresolved",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""        "incidents": [
+            incident
+            for incident in incidents
+            if incident.state in (IncidentState.OPEN, IncidentState.CLOSED_UNRESOLVED)
+        ],""",
+        "new": b"""        "incidents": [
+            incident
+            for incident in incidents
+            if incident.state is IncidentState.OPEN
+        ],""",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_close_shift_records_unresolved_limits",
+        "expect": "test_close_shift_records_unresolved_limits",
+    },
+    {
+        "name": "start_run_ignores_the_inherited_version",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""    version = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
+        conn, shift.engagement_slug
+    )
+    if version is None:""",
+        "new": b"""    version = repo.get_latest_version(conn, shift_id)
+    if version is None:""",
+        "tests": "tests/orchestrator/test_test1_preproof.py::test_full_budget_preserves_unseen_inherited_case",
+        "expect": "test_full_budget_preserves_unseen_inherited_case",
+    },
+    {
+        "name": "board_snapshot_inherited_version_fallback_removed",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"    if latest_version is None and latest_shift is not None:",
+        "new": b"    if False:  # MUTATION: inherited-version fallback disabled",
+        "tests": "tests/orchestrator/test_close_inheritance.py::test_open_shift_seeds_from_inheritance",
+        "expect": "test_open_shift_seeds_from_inheritance",
+    },
+    {
+        "name": "rotation_exhaustion_message_drops_the_refusal_detail",
+        "file": "shiftwork/sealed/rotation.py",
+        "old": b'            f"rotation group {family!r} has no never-exposed variant left; "',
+        "new": b'            f"rotation group {family!r} is exhausted; "',
+        "tests": "tests/orchestrator/test_test1_preproof.py::test_next_shift_needs_the_six_variant_inventory",
+        "expect": "test_next_shift_needs_the_six_variant_inventory",
+    },
 ]
 
 
@@ -383,15 +549,19 @@ def run_mutation(mutation: dict) -> dict:
         test_args = shlex.split(mutation["tests"])
         with tempfile.TemporaryDirectory() as tmp:
             report = Path(tmp) / "junit.xml"
-            result = subprocess.run(
+            process = subprocess.Popen(
                 [PYTHON, "-m", "pytest", *test_args, "-q", "--tb=short", "--no-header", "-rf",
                  f"--junitxml={report}"],
-                capture_output=True, text=True, cwd=str(REPO), timeout=240,
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, cwd=str(REPO),
             )
-            stdout = result.stdout + "\n" + result.stderr
+            try:
+                stdout, _ = process.communicate(timeout=240)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                partial, _ = process.communicate()
+                stdout = partial or ""
+                timeout = True
             failures, errors = read_junit(report)
-    except subprocess.TimeoutExpired:
-        timeout = True
     finally:
         target.write_bytes(original_bytes)
         restored_hash = sha256(target)
@@ -403,7 +573,8 @@ def run_mutation(mutation: dict) -> dict:
     last_line = summary_line(stdout)
 
     if timeout:
-        return {**base, "status": "NOT_CAUGHT", "detail": "TIMEOUT: no test failed"}
+        tail = " | ".join(line.strip() for line in stdout.splitlines()[-3:] if line.strip())
+        return {**base, "status": "NOT_CAUGHT", "detail": f"TIMEOUT: no test failed; last output: {tail[:200]}"}
 
     expect = mutation["expect"]
     matched = [key for key in failures if expect in key]
