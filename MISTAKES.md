@@ -270,3 +270,55 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   copying the source-location attributes.
 - **Prevention rule:** never rebuild an AST node to drop arguments; keep the
   original node for locations and carry the remaining argument list separately.
+
+## 2026-09-19 Slice 7: check-result-id ordinal double-counted within one transaction
+
+- **What happened:** `finalize_run` assigned each CheckResult an id of
+  `cr-{repo.count_check_results(conn) + len(check_results) + 1:04d}`. Because
+  `count_check_results` queries the same connection inside the uncommitted
+  transaction, it already sees the rows inserted earlier in the loop. Adding
+  `len(check_results)` double-counted every result after the first, producing
+  ids like cr-0001, cr-0003, cr-0006 instead of cr-0001, cr-0002, cr-0003.
+  The bug was invisible while only one family was enabled (one result per run);
+  it surfaced when Slice 7 enabled three families and the second result's id
+  skipped.
+- **Root cause:** I treated `count_check_results` as seeing only committed state
+  (pre-transaction), but SQLite's default isolation lets a connection read its
+  own uncommitted writes. The `len(check_results)` term was a redundant
+  compensator for a problem that did not exist.
+- **Prevention rule:** when an ordinal is derived from a COUNT on the same
+  connection inside an open transaction, the count already includes this
+  transaction's earlier inserts; do not add a local accumulator on top. Verify
+  by checking the second iteration's id, not just the first.
+
+## 2026-09-20 Slice 7 review round: a vacuous mutation proof and a harness that could not tell a crash from an assertion
+
+- **What happened:** the `invalidate_state_filter_removed` proof dropped the SQL
+  state clause but left the fourth bound parameter, so SQLite raised
+  `ProgrammingError: Incorrect number of bindings supplied` on every call. The
+  harness counted any non-zero pytest exit as FAIL_CAUGHT, so the row looked
+  green. The reviewer corrected the mutation to valid SQL and the whole 27-test
+  orchestrator+api suite passed: the state-scoping clause of
+  `invalidate_rotation_group` was covered by no failing-capable test, because
+  the only scenario exercised had exactly one active draw for the family, where
+  the rowcount is 1 with or without the filter. Two more rows were caught only
+  by incidental exceptions (ValueError from the removed shared-ordinal guard,
+  a UNIQUE-constraint integrity error from the removed exposure filter), and
+  the second `shared_ordinal` raise ("binds several request ordinals") had no
+  test at all.
+- **Root cause:** two compounding errors. First, a mutation that made the
+  program invalid (binding-count mismatch) rather than changing behavior, which
+  is the exact "require one real failure per branch, not a parse error" failure
+  the verification rules warn about. Second, a catch signal (`returncode != 0`
+  with `--tb=no`) that cannot distinguish an AssertionError, a collection
+  error, or a runtime crash, so the proof could not detect its own vacuity. The
+  suite also lacked the mixed-state scenario (one invalidated plus one active
+  draw for the same family) that makes the filter load-bearing.
+- **Prevention rule:** a mutation proof requires (1) a valid, behavior-changing
+  mutation, (2) a named expected test that must fail, and (3) an
+  assertion-level failure (AssertionError or pytest's `Failed: DID NOT RAISE`)
+  parsed from the junit report, with vacuous, incidental and wrong-test catches
+  failing the proof run. When a guard filters rows on state, seed both states
+  in the test so the rowcount is observable, and verify a new or changed proof
+  harness against known-vacuous and known-crashing mutations before trusting a
+  green table.

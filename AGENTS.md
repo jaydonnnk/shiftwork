@@ -95,21 +95,25 @@ summaries when a time-sensitive external claim is being made.
   MINOR-1/2/3 items (containment normalization, import-guard forms plus a
   sealed-path rule, scanner decoder coverage) and the NITs, each with a
   failing-capable proof (evidence in the 00-status Slice 6 repair and review-round
-  sections); independent re-review and user acceptance are pending. Test 19's
-  pinned map is supported; the tests 16-18, 20 and 45 gaps are closed pending
-  that re-review.
+  sections); a fresh-session independent re-review returned PASS on 2026-09-19
+  (fourteen probes each failing the named guard and restored content-identically;
+  suites and demos reproduced verbatim; evidence in the 00-status Slice 6 re-review
+  and acceptance section), and the user's same-day instruction accepted the slice.
+  Test 19's pinned map is supported; the tests 16-18, 20 and 45 gaps are closed and
+  re-verified.
   Prompt/assist and real-sandbox surfaces remain deferred to Slices 12/14; future
   stimuli require Slice 7. Exact remaining clause ownership was reconciled and
   re-approved at Gate 4 (2026-09-19), not silently treated as delivered. The removal of the sealed
   `CheckResultView.check_id` is retained; ledger `check_id` values are public result
   IDs, not sealed identities. Numbered sealed IDs expose identity/numbering, not
-  necessarily the entire inventory size. Slices 7-17 are not implemented.
+  necessarily the entire inventory size. Slices 8-17 are not implemented; Slice 7
+  (budget + rotation + incidents + repair) started 2026-09-19 on
+  `shiftwork/slice-7` and is in progress.
   Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the
-  user in chat on 2026-09-19, and implementation and Slice 7 remain on
-  hold pending Slice 6 acceptance (repair implemented 2026-09-19; the review
-  round's findings were resolved the same day). The revised
+  user in chat on 2026-09-19. Slice 6 is repaired, re-reviewed PASS and accepted
+  (2026-09-19); the review round's findings were resolved the same day. The revised
   test 11/13/17 clauses are specifications, not new passing evidence; Gate 4 mapped
   their current-runtime checks into the Slice 6 repair and preserved later
   prerequisites (re-approved 2026-09-19). ADR reconciliation is recorded (2026-09-19; see `docs/adr/`); ADR #4 still
@@ -118,7 +122,7 @@ summaries when a time-sensitive external claim is being made.
   2026-09-19 audit excluded packaging test 51 because installs were prohibited;
   its full-suite claim remains unverified. This is a trusted-fixture execution
   guard, not hostile-code isolation. Current evidence is in `00-status.md` under
-  "Slice 6 independent verification and recovery: 2026-09-19".
+  "Slice 6 independent re-review and acceptance: 2026-09-19".
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.
@@ -214,8 +218,10 @@ Rules:
   explicit re-approval.
 - After Gate 4 approval, implement one vertical slice at a time. Each slice must end
   in a visible, working, testable result; record the evidence before continuing.
-- After each slice, show the actual result, update `00-status.md`, and ask whether
-  to continue or re-steer. Do not build horizontal layers that cannot run end to end.
+- After each slice, show the actual result, update `00-status.md`, then invoke the
+  `architect-reviewer` skill (post-slice cleanup mode) to scan for stale or redundant
+  files before asking whether to continue or re-steer. Do not build horizontal layers
+  that cannot run end to end.
 - Documentation-only maintenance, instruction consolidation and other small changes
   that do not alter product behavior do not create a new product gate.
 

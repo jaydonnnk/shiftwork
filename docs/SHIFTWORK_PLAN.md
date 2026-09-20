@@ -34,8 +34,10 @@ user on 2026-09-19; the approvals do not authorize implementation during this ho
 and the same-day adversarial review round's findings are resolved (error-response
 scanning, containment normalization, import-guard forms plus a sealed-path rule,
 scanner decoder coverage; see the 00-status repair review-round section);
-independent re-review and user acceptance are pending; Slice 7 must not start
-before acceptance.
+a fresh-session independent re-review returned PASS on 2026-09-19 (fourteen probes
+each failing the named guard with content-identical restores; suites and demos
+reproduced verbatim), and the user's same-day instruction accepted the slice.
+Slice 7 is in progress on `shiftwork/slice-7`.
 The approved ownership split is controller orchestration -> sealed loader ->
 cases passed to pure evaluation, not evaluator-owned file loading. ADR 0001
 supersession and the ADR 0002/0003 implementation-status notes were recorded
@@ -53,11 +55,13 @@ Slice 5 (reducer, hash chain, idempotent
 finalization, ledger hardening) is implemented and demonstrated 2026-09-18; an
 independent review returned 2 MAJOR and 2 MINOR findings plus a Gate 3 wording
 escalation, and all fixes landed the same day (evidence in `00-status.md`).
-Slice 6 has implementation but its completion/coverage claims were rejected on
+Slice 6's completion/coverage claims were rejected on
 2026-09-19: four deliberately introduced provisioning/projection/client faults
 passed all 133 authorized tests, and stdout/import probes exposed further test
 blind spots. These are injected faults, not observed leaks in the restored app.
-Repair and re-verification remain outstanding; the original report is historical.
+The repair and the adversarial review round resolved the findings, and an
+independent re-review returned PASS on 2026-09-19; Slice 6 is accepted and
+Slice 7 is in progress. The original report is historical.
 **Latest verdict before selection:** `REVISE SHIFTWORK BEFORE ADOPTION`.
 **Evidence state:** the Slice 2 thin real path remains (canonical hashing, one
 recorded replay, one sealed case scored, one hash-chained ledger event). Slice 3
@@ -70,7 +74,9 @@ contract-parameterized offline evaluator and completes the six-variant
 `stale_information` sealed family; tests 11-15 and 42 land fully and the test 44
 evaluator clause completes. The user sealed those six cases on 2026-09-18;
 further agent-authored acceptance cases still require user review. Slice 5 ledger
-hardening is implemented; Slice 6 verification remains incomplete. The 2026-09-19
+hardening is implemented; Slice 6 is repaired, re-reviewed PASS and accepted
+(2026-09-19; fourteen-probe re-review with suites and demos reproduced), and
+Slice 7 is in progress. The 2026-09-19
 audit verified 133 passing tests and one skip with packaging excluded because
 installation was prohibited, not a full-suite result. No Token Factory Sandbox
 execution, learner study, transfer result, Tavily ablation, prize merit or score
@@ -384,11 +390,11 @@ Scope cuts that fund proof:
    revision (Slice 7 leak-response invalidation; Slice 10 scoring-input alignment)
    was approved by the user in chat on 2026-09-19.
 
-Slice 6 remains incomplete; no implementation or Slice 7 work continues until
-the Slice 6 repair is re-verified and accepted. The review round resolved the
-adversarial review's findings on 2026-09-19; the Gate 4 clause ownership is
-reconciled and approved; the next step is the Slice 6 independent re-review, not
-acceptance of the queued Gate 4 changes or the current Slice 6 implementation.
+Slice 6 is accepted: the repair and the adversarial review round resolved the
+findings on 2026-09-19, an independent re-review returned PASS the same day
+(fourteen probes, suites and demos reproduced), and Slice 7 implementation is in
+progress under the user's instruction. The Gate 4 clause ownership is reconciled
+and approved.
 
 Unknowns include Token Factory Sandbox access, available Nemotron models, Tavily
 access, runtime cost and latency, public deployment behaviour, learner recruitment,
