@@ -80,7 +80,9 @@ re-steer?"):
 - [x] Slice 5: Reducer + hash chain + idempotent finalization, hardening the Slice 2 ledger; implemented and demonstrated 2026-09-18 (`python -m demos.finalize_run` + `pytest tests/ledger -q`; evidence below)
 - [x] Slice 6: Isolation and leakage hardening; repair implemented 2026-09-19 and the adversarial review round's findings resolved the same day (see the Slice 6 repair and review-round sections); independent re-review returned PASS 2026-09-19 (fourteen probes, suites and demos reproduced verbatim; evidence in the acceptance section) and the user's same-day instruction accepted the slice. Earlier evidence preserved below, with the audit findings.
 - [x] Slice 7: Budget + rotation + incidents + repair; implemented and demonstrated 2026-09-19, the Slice 7 report adjudication's findings repaired with failing-capable proofs 2026-09-20, families 2 and 3 sealed by the user 2026-09-20, committed in nine focused batches and merged to main (d4fe938) the same day; evidence below
-- [ ] Slice 8 — Close → inheritance + Test 1 offline pre-proof
+- [ ] Slice 8 — Close → inheritance + Test 1 offline pre-proof (IN PROGRESS: the
+  controller-side run-binding seam, Route A with the repair arc as the shipped
+  default, is implemented and verified 2026-09-20; evidence below)
 - [ ] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03)
 - [ ] Slice 10: Client contract/repair stations (02, 04)
 - [ ] Slice 11: Client inherited room + distinct away-shift workshop (05, 06) + away config
@@ -2369,6 +2371,71 @@ Recorded limits (behavior unchanged, now stated):
 - Scalability: chain verification and ledger derivation enrichment are O(ledger
   size) per read; adequate under the approved Gate 2 S18.4 single-learner frame, no
   action taken.
+
+## Slice 8 run-binding seam (Route A): 2026-09-20
+
+**Status: IN PROGRESS. The controller-side run-binding seam is implemented and
+verified; Slice 8's close → inheritance, restart reconciliation and Test 1 offline
+pre-proof remain to build.** The user set Route A in chat on 2026-09-20 and chose
+the repair arc as the shipped default: a run persists the controller-configured
+adapter and shop snapshot at `start_run`, and `execute_run` resolves the adapter
+from the run row alone. No gate document needed changing; the affected-ADR check
+found no ADR contradicted or affected by the seam (ADRs 0001-0003 cover sealed
+isolation, ledger ownership and artifact versioning).
+
+Production changes:
+- `config`: `EXECUTOR_ADAPTER` replaces `TRACER_ADAPTER`; `BOOKSHOP_SNAPSHOT` now
+  names the fuller engagement snapshot (`bookshop_stale_snapshot.json`, content
+  hash `230d6f8a...`) and `THIN_SNAPSHOT` the minimal fixture
+  (`bookshop_snapshot.json`, `bd66a413...`), both pinned as constants; the
+  authored `RECORDED_TRANSCRIPTS` map keys each transcript by
+  `(request batch ref, snapshot content hash)`; `THIN_TRANSCRIPT` is removed.
+- `orchestrator.start_run` persists the configured executor and snapshot
+  (replacing the constant adapter write); `_adapter_for(run)` resolves
+  local_process / recorded / unknown; an unmapped pairing or an adapter with no
+  implementation fails closed as FAILED with `PROVISION_FAILED`, zero captures
+  and no adapter invocation.
+- `app.create_app(executor=, shop_snapshot=)` holds the controller-side selection
+  (program design 2, "adapter selection"); the route passes it into `start_run`,
+  and the request body still carries neither (the learner never picks either).
+- `executor/recorded.py` is unchanged: its hash check (line 25) still guards
+  every replay.
+
+Consequences recorded: the thin path (tests/api/test_thin_path.py,
+tests/api/test_tracer_lifecycle.py, tests/evaluator/test_evaluator.py,
+demos/thin_path.py) selects the thin profile explicitly with unchanged
+assertions; the executor-conformance request builders pin the thin snapshot
+because their checked-in transcripts are authored for it; the four tests that
+redirected `THIN_TRANSCRIPT` for incident surfaces now run the shipped repair arc
+natively; `demos/lifecycle` reports the shipped default (3 open incidents) and its
+previous "0 open incidents" line is superseded.
+
+Verbatim evidence (2026-09-20, all commands re-run before recording):
+
+```
+pytest tests -q → 179 passed, 1 skipped, 2 warnings  (baseline before the seam: 174 passed, 1 skipped)
+tests/mutation_proofs.py → 27/27 FAIL_CAUGHT at assertion level, all sha256_restored=True
+demos (all exit 0):
+- thin_path: 3 CheckResults (fail/STALE_BEYOND_RULE first), 3 BACKLOG_RECORDED, chain VALID,
+  artifact hash 44abb79897239264... unchanged
+- repair_loop: attempts 1-3 FINALIZED with zero config mutation; 3 incidents opened then resolved;
+  6 events, chain VALID
+- lifecycle: 3 events, chain VALID, 3 open incidents (shipped repair-arc replay)
+- finalize_run: 3 events, 3 incidents opened, finalize twice nets zero new events
+- evaluate_transcript passing/failing: 6 pass / 0 fail and 0 pass / 6 fail, sockets blocked
+```
+
+Seven new mutation rows cover the seam branches (resolution ignores the run row;
+unimplemented adapter falls through; unmapped pairing falls back to the batch;
+pairing key ignores the snapshot; route ignores the configured executor; route
+drops the configured snapshot; snapshot pin edited), each caught at assertion
+level by its named test. The new `tests/orchestrator/test_run_binding.py` also
+pins the authored map against the fixture files (keys must equal the hashes the
+transcripts declare).
+
+Not claimed: any close/inheritance, restart-recovery or pre-proof behavior (not
+built yet); this section is the seam evidence only. Branch `shiftwork/slice-8`;
+commits not yet authorized.
 
 ## Gate 2 re-approval and Gate 3 revision: 2026-09-19
 
