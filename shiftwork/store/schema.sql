@@ -2,9 +2,9 @@
 --
 -- Slice 2 replaces the tracer's inline stub schema with this real DDL. Tables
 -- whose owning slice has not landed yet are intentionally absent and are added
--- by that slice without renumbering: rotation_draws (Slice 7), assist_events
--- (Slice 12), mission_sources (Slice 15). The incidents table exists from the
--- tracer and is read by the board, but Slice 2 opens no incidents (Slice 5/7).
+-- by that slice without renumbering: assist_events (Slice 12), mission_sources
+-- (Slice 15). The incidents table exists from the tracer and is read by the
+-- board, but Slice 2 opens no incidents (Slice 5/7).
 
 CREATE TABLE IF NOT EXISTS engagements (
     slug TEXT PRIMARY KEY,
@@ -56,6 +56,8 @@ CREATE TABLE IF NOT EXISTS runs (
     id TEXT PRIMARY KEY,
     shift_id TEXT NOT NULL REFERENCES shifts(id),
     artifact_version_id TEXT NOT NULL REFERENCES artifact_versions(id),
+    request_batch_ref TEXT NOT NULL,
+    shop_snapshot_ref TEXT NOT NULL,
     attempt_number INTEGER NOT NULL,
     state TEXT NOT NULL,
     adapter TEXT NOT NULL,
@@ -100,6 +102,19 @@ CREATE TABLE IF NOT EXISTS incidents (
     state TEXT NOT NULL,
     resolving_version_id TEXT REFERENCES artifact_versions(id),
     resolved_event_seq INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS rotation_draws (
+    id TEXT PRIMARY KEY,
+    engagement_slug TEXT NOT NULL REFERENCES engagements(slug),
+    family TEXT NOT NULL,
+    variant_ref TEXT NOT NULL,
+    run_id TEXT NOT NULL REFERENCES runs(id),
+    cycle INTEGER NOT NULL,
+    drawn_at TEXT NOT NULL,
+    state TEXT NOT NULL DEFAULT 'active',
+    UNIQUE (engagement_slug, variant_ref),
+    UNIQUE (run_id, family)
 );
 
 CREATE TABLE IF NOT EXISTS ledger_events (

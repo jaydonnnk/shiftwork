@@ -13,11 +13,13 @@ from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
     ContractParams,
+    DrawState,
     Incident,
     IncidentState,
     LedgerEvent,
     LedgerEventType,
     ReasonCode,
+    RotationDraw,
     Run,
     RunOutput,
     RunState,
@@ -245,6 +247,8 @@ def _run(row: sqlite3.Row) -> Run:
         id=row["id"],
         shift_id=row["shift_id"],
         artifact_version_id=row["artifact_version_id"],
+        request_batch_ref=row["request_batch_ref"],
+        shop_snapshot_ref=row["shop_snapshot_ref"],
         attempt_number=row["attempt_number"],
         state=RunState(row["state"]),
         adapter=row["adapter"],
@@ -256,12 +260,15 @@ def _run(row: sqlite3.Row) -> Run:
 
 def insert_run(conn: sqlite3.Connection, run: Run) -> None:
     conn.execute(
-        "INSERT INTO runs (id, shift_id, artifact_version_id, attempt_number, state, adapter, failure_kind, started_at, ended_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO runs (id, shift_id, artifact_version_id, request_batch_ref, shop_snapshot_ref, "
+        "attempt_number, state, adapter, failure_kind, started_at, ended_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             run.id,
             run.shift_id,
             run.artifact_version_id,
+            run.request_batch_ref,
+            run.shop_snapshot_ref,
             run.attempt_number,
             run.state.value,
             run.adapter,
@@ -306,6 +313,15 @@ def count_runs(conn: sqlite3.Connection, shift_id: str) -> int:
     return int(
         conn.execute("SELECT COUNT(*) AS n FROM runs WHERE shift_id = ?", (shift_id,)).fetchone()["n"]
     )
+
+
+def list_runs(conn: sqlite3.Connection, slug: str) -> list[Run]:
+    rows = conn.execute(
+        "SELECT r.* FROM runs r JOIN shifts s ON s.id = r.shift_id "
+        "WHERE s.engagement_slug = ? ORDER BY r.rowid",
+        (slug,),
+    ).fetchall()
+    return [_run(row) for row in rows]
 
 
 def count_runs_all(conn: sqlite3.Connection) -> int:
@@ -452,6 +468,90 @@ def count_incidents(conn: sqlite3.Connection, slug: str) -> int:
             "SELECT COUNT(*) AS n FROM incidents WHERE engagement_slug = ?", (slug,)
         ).fetchone()["n"]
     )
+
+
+def resolve_incident(
+    conn: sqlite3.Connection,
+    incident_id: str,
+    resolving_version_id: str,
+    resolved_event_seq: int,
+) -> None:
+    """The only incident mutation after opening: OPEN -> RESOLVED, and only here."""
+    conn.execute(
+        "UPDATE incidents SET state = ?, resolving_version_id = ?, resolved_event_seq = ? "
+        "WHERE id = ? AND state = ?",
+        (
+            IncidentState.RESOLVED.value,
+            resolving_version_id,
+            resolved_event_seq,
+            incident_id,
+            IncidentState.OPEN.value,
+        ),
+    )
+
+
+# --- rotation_draws --------------------------------------------------------
+
+
+def _draw(row: sqlite3.Row) -> RotationDraw:
+    return RotationDraw(
+        id=row["id"],
+        engagement_slug=row["engagement_slug"],
+        family=row["family"],
+        variant_ref=row["variant_ref"],
+        run_id=row["run_id"],
+        cycle=row["cycle"],
+        drawn_at=row["drawn_at"],
+        state=DrawState(row["state"]),
+    )
+
+
+def insert_rotation_draw(conn: sqlite3.Connection, draw: RotationDraw) -> None:
+    conn.execute(
+        "INSERT INTO rotation_draws (id, engagement_slug, family, variant_ref, run_id, cycle, drawn_at, state) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            draw.id,
+            draw.engagement_slug,
+            draw.family,
+            draw.variant_ref,
+            draw.run_id,
+            draw.cycle,
+            draw.drawn_at.isoformat(),
+            draw.state.value,
+        ),
+    )
+
+
+def list_rotation_draws(conn: sqlite3.Connection, slug: str) -> list[RotationDraw]:
+    rows = conn.execute(
+        "SELECT * FROM rotation_draws WHERE engagement_slug = ? ORDER BY rowid", (slug,)
+    ).fetchall()
+    return [_draw(row) for row in rows]
+
+
+def list_rotation_draws_for_run(conn: sqlite3.Connection, run_id: str) -> list[RotationDraw]:
+    rows = conn.execute(
+        "SELECT * FROM rotation_draws WHERE run_id = ? ORDER BY family", (run_id,)
+    ).fetchall()
+    return [_draw(row) for row in rows]
+
+
+def invalidate_rotation_group(conn: sqlite3.Connection, slug: str, family: str) -> int:
+    """Retire a compromised group by state change; rows are never deleted."""
+    cursor = conn.execute(
+        "UPDATE rotation_draws SET state = ? WHERE engagement_slug = ? AND family = ? AND state = ?",
+        (DrawState.INVALIDATED.value, slug, family, DrawState.ACTIVE.value),
+    )
+    return int(cursor.rowcount)
+
+
+def invalidated_run_ids(conn: sqlite3.Connection, slug: str) -> list[str]:
+    rows = conn.execute(
+        "SELECT DISTINCT run_id FROM rotation_draws WHERE engagement_slug = ? AND state = ? ORDER BY run_id",
+        (slug, DrawState.INVALIDATED.value),
+    ).fetchall()
+    return [row["run_id"] for row in rows]
 
 
 # --- ledger_events ---------------------------------------------------------

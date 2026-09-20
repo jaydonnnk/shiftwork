@@ -27,6 +27,14 @@ class RunState(StrEnum):
     FAILED = "FAILED"
 
 
+class DrawState(StrEnum):
+    """Rotation-draw lifecycle. A compromised group is retired by this state change,
+    never by deletion (ADR 0001); a refill cannot clear it (program design S7.1)."""
+
+    ACTIVE = "active"
+    INVALIDATED = "invalidated"
+
+
 class ExecutorFailure(StrEnum):
     PROVISION_FAILED = "PROVISION_FAILED"
     SERVICE_UNREACHABLE = "SERVICE_UNREACHABLE"
@@ -182,6 +190,8 @@ class Run(BaseModel):
     id: Id
     shift_id: Id
     artifact_version_id: Id
+    request_batch_ref: str
+    shop_snapshot_ref: str
     attempt_number: int
     state: RunState
     adapter: Literal["local_process", "recorded", "tokenfactory"]
@@ -230,6 +240,27 @@ class Incident(BaseModel):
     state: IncidentState
     resolving_version_id: Id | None = None
     resolved_event_seq: int | None = None
+
+
+class RotationDraw(BaseModel):
+    """Append-only exposure record for one drawn variant (program design S3.2).
+
+    ``variant_ref`` is opaque and never reusable within an engagement; ``cycle``
+    names the operator-authored inventory generation, and a refill appends a new
+    cycle without deleting any prior draw. ``state`` is the only mutation, and it
+    exists so a compromised group can be retired by a state change.
+    """
+
+    model_config = _FROZEN
+
+    id: Id
+    engagement_slug: Slug
+    family: str
+    variant_ref: str
+    run_id: Id
+    cycle: int
+    drawn_at: datetime
+    state: DrawState = DrawState.ACTIVE
 
 
 class CloseShiftFacts(BaseModel):
