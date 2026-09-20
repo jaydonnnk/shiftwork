@@ -6,9 +6,9 @@ below injects a payload into a representative serialized surface and requires
 detection, so a removed decoding arm, a lowered nesting bound or a missing recursion
 guard fails here before it can silently weaken test 16, 18, 20 or 45.
 
-Recorded counts (2026-09-19 review round): 2 of the 1352 identity needles contain a
-backslash and cannot match a serialized JSON surface as written; both are masked by a
-slash-free twin, which the last test pins rather than assumes.
+Recorded counts (2026-09-19, Slice 7 all-family extension): 4 of the 4077 identity
+needles contain a backslash and cannot match a serialized JSON surface as written;
+each is masked by a slash-free twin, which the last test pins rather than assumes.
 """
 
 import base64
@@ -21,8 +21,11 @@ from leakscan import (
     BASE64_DECODINGS,
     MAX_JSON_NESTING,
     decoded_surfaces,
+    family_paths,
     sealed_identity_strings,
 )
+from shiftwork import config
+from shiftwork.sealed import store as sealed_store
 
 TOKEN = "leakscan-decoder-token"
 
@@ -82,3 +85,21 @@ def test_identity_needles_a_serialized_surface_cannot_carry_have_a_capable_twin(
         twins = {needle.replace("\\", "/"), Path(needle).name}
         capable = [twin for twin in twins if twin in needles and twin not in incapable]
         assert capable, f"a needle a serialized surface cannot carry has no capable twin: {needle!r}"
+
+
+def test_every_enabled_sealed_family_contributes_needles() -> None:
+    """A scanner that quietly reads one family would pass every absence scan.
+
+    The needle sets are only as wide as the families they read, so this pins that
+    the enabled family list, the file map and the needle collection all agree.
+    """
+    assert set(sealed_store._FAMILY_FILES) == set(config.BOOKSHOP_FAMILIES), (
+        "an enabled family has no sealed file, or a sealed file is not enabled"
+    )
+    assert len(config.BOOKSHOP_FAMILIES) >= 3, "the all-family scans would be mostly vacuous"
+    needles = set(sealed_identity_strings())
+    for path in family_paths():
+        assert path.name in needles, f"{path.name} is not an identity needle"
+    for family in config.BOOKSHOP_FAMILIES:
+        for case in sealed_store.load_family(family).cases:
+            assert case.check_id in needles, f"{case.check_id} is not an identity needle"

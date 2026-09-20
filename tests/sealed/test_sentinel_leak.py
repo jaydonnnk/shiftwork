@@ -93,10 +93,17 @@ def sentinel_family(tmp_path, monkeypatch):
     directory.mkdir()
     path = directory / "sentinel_family.json"
     path.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    files = dict(sealed_store._FAMILY_FILES)
+    files[sealed_store.STALE_INFORMATION] = path.name
+    # The other families stay real (a run draws one variant from each); they are
+    # copied so the patched directory remains a complete inventory.
+    for family, name in sealed_store._FAMILY_FILES.items():
+        if family != sealed_store.STALE_INFORMATION:
+            (directory / name).write_bytes((config.SEALED_CASES_DIR / name).read_bytes())
     monkeypatch.setattr(config, "SEALED_CASES_DIR", directory)
-    monkeypatch.setattr(sealed_store, "_FAMILY_FILES", {sealed_store.STALE_INFORMATION: path.name})
+    monkeypatch.setattr(sealed_store, "_FAMILY_FILES", files)
 
-    loaded = sealed_store.load_drawn_cases("run-sentinel").cases
+    loaded = sealed_store.load_family(sealed_store.STALE_INFORMATION).cases
     assert loaded, "the sentinel family did not load; every scan below would be vacuous"
     assert all(SENTINEL in json.dumps(case.expected) for case in loaded), (
         "the sentinel is not inside every loaded expected block"

@@ -4,14 +4,15 @@ Two needle sets, because "would this string ever legitimately appear on this
 surface?" has different answers per surface:
 
 ``all_sealed_strings``
-    Every string in the sealed inventory, including record ids and expected claim
-    values. Safe for the render-map lint, where the haystack is fixed operator
-    wording that can never coincide with a learner's own output.
+    Every string in the sealed inventory (all three families), including record
+    ids and expected claim values. Safe for the render-map lint, where the
+    haystack is fixed operator wording that can never coincide with a learner's
+    own output.
 
 ``sealed_identity_strings``
     Only material that cannot legitimately appear on a learner-visible surface:
     operator notes, sealed case and check identities, superseded refs and the
-    sealed file's name and host path. Record ids and expected claim values are
+    sealed files' names and host paths. Record ids and expected claim values are
     deliberately EXCLUDED here, because the shop snapshot is public and a passing
     run echoes exactly the expected claim in the learner's own response body -
     scanning for them would report a correct answer as a leak. Note fragments are
@@ -23,6 +24,7 @@ surface?" has different answers per surface:
 
 import base64
 import json
+from pathlib import Path
 
 from shiftwork import config
 from shiftwork.sealed import store as sealed_store
@@ -35,8 +37,15 @@ MIN_LENGTH = 8
 WINDOW = 25
 
 
-def _family_path():
-    return config.SEALED_CASES_DIR / sealed_store._FAMILY_FILES[sealed_store.STALE_INFORMATION]
+def family_paths() -> tuple[Path, ...]:
+    """One path per enabled sealed family, asserted to exist."""
+    paths = tuple(
+        config.SEALED_CASES_DIR / name for name in sealed_store._FAMILY_FILES.values()
+    )
+    assert len(paths) == len(sealed_store._FAMILY_FILES), "two families share a file name"
+    for path in paths:
+        assert path.is_file(), f"sealed family file missing: {path}"
+    return paths
 
 
 def _walk_strings(value: object, found: list[str]) -> None:
@@ -50,30 +59,34 @@ def _walk_strings(value: object, found: list[str]) -> None:
             _walk_strings(item, found)
 
 
-def _raw_family() -> dict:
-    path = _family_path()
-    assert path.is_file(), f"sealed family file missing: {path}"
-    return json.loads(path.read_text(encoding="utf-8"))
+def _raw_families() -> list[dict]:
+    return [json.loads(path.read_text(encoding="utf-8")) for path in family_paths()]
 
 
 def _cases():
-    cases = sealed_store.load_family(sealed_store.STALE_INFORMATION).cases
+    cases = [
+        case
+        for family in sealed_store._FAMILY_FILES
+        for case in sealed_store.load_family(family).cases
+    ]
     assert cases, "sealed inventory loaded empty; every leak scan would be vacuous"
     return cases
 
 
 def all_sealed_strings(min_length: int = MIN_LENGTH) -> tuple[str, ...]:
-    """Every string in the sealed inventory, plus case identities and the file path.
+    """Every string in the sealed inventory, plus case identities and the file paths.
 
     Long strings are also expanded into their ``WINDOW``-character fragments: a full
     operator note is never a substring of a short learner-facing render string, so
     without the fragments a partial paste would go undetected.
     """
     found: list[str] = []
-    _walk_strings(_raw_family(), found)
+    for raw in _raw_families():
+        _walk_strings(raw, found)
     for case in _cases():
         found.extend([case.id, case.check_id, case.family])
-    found.extend([_family_path().name, str(_family_path())])
+    for path in family_paths():
+        found.extend([path.name, str(path)])
     expanded: list[str] = list(found)
     for value in found:
         expanded.extend(note_windows(value))
@@ -126,11 +139,13 @@ def sealed_identity_strings(min_length: int = MIN_LENGTH) -> tuple[str, ...]:
         for ref in case.expected.get("superseded_refs", ()):
             if isinstance(ref, str):
                 found.append(ref)
-    # The two backslash-bearing entries cannot match a serialized JSON surface as
+    # The backslash-bearing entries cannot match a serialized JSON surface as
     # written (the envelope doubles every backslash), so they are masked by their
-    # slash-free twins: the family file name and "sealed/cases". The mask is pinned
+    # slash-free twins: the family file names and "sealed/cases". The mask is pinned
     # by the self-tests in tests/sealed/test_leakscan_self_tests.py, not assumed.
-    found.extend([_family_path().name, str(_family_path()), "sealed/cases", "sealed\\cases"])
+    found.extend(["sealed/cases", "sealed\\cases"])
+    for path in family_paths():
+        found.extend([path.name, str(path)])
     candidates = {value for value in found if len(value) >= min_length}
     corpus = _public_corpus()
     needles = tuple(sorted(value for value in candidates if value not in corpus))
