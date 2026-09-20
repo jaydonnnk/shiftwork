@@ -45,7 +45,6 @@ SNAPSHOT_MARKER = "sw6-host-marker-dir"
 DB_MARKER = "sw6-db-marker-dir"
 SANDBOX_MARKER = "sw6-sandbox-marker-parent"
 LOG_URI_PREFIX = "data:application/octet-stream;base64,"
-INCIDENT_TRANSCRIPT = config.FIXTURE_DIR / "runs" / "missing_evidence.json"
 
 LEARNER_FILES = {
     "service.py": "# learner edit\nprint('handled by the learner')\n",
@@ -133,8 +132,9 @@ def test_draft_round_trip_preserves_filenames_and_text(injected_hosts) -> None:
         assert client.get(f"/api/shifts/{shift_id}/artifact").json()["files"] == unicode_files
 
 
-def test_public_projections_omit_injected_internal_refs(injected_hosts, monkeypatch) -> None:
-    monkeypatch.setattr(config, "THIN_TRANSCRIPT", INCIDENT_TRANSCRIPT)
+def test_public_projections_omit_injected_internal_refs(injected_hosts) -> None:
+    # The marker snapshot is a byte copy of the shipped default, so the run's
+    # authored pairing (Slice 8) resolves and the incident surfaces are real.
     surfaces: list[tuple[str, str]] = []
     called: set[str] = set()
 

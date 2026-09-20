@@ -41,7 +41,6 @@ from shiftwork.executor.local_process import CHILD_ENV_ALLOWLIST, LocalProcessAd
 
 REPO_ROOT = config.PACKAGE_DIR.parent
 DB_MARKER = "sw6-env-marker-db"
-INCIDENT_TRANSCRIPT = config.FIXTURE_DIR / "runs" / "missing_evidence.json"
 
 ENV_NAMES = (
     "NEBIUS_API_KEY",
@@ -167,8 +166,10 @@ def test_local_adapter_projection_exposes_no_env_value_or_host_path(
             assert marker not in surface, f"env value for {name} reached a learner-visible projection"
 
 
-def test_api_responses_expose_no_env_value_or_host_path(env_markers, marker_db, monkeypatch) -> None:
-    monkeypatch.setattr(config, "THIN_TRANSCRIPT", INCIDENT_TRANSCRIPT)
+def test_api_responses_expose_no_env_value_or_host_path(env_markers, marker_db) -> None:
+    # The shipped default (Slice 8) replays attempt 1 against the fuller snapshot,
+    # which opens incidents natively; the incident surfaces below are scanned for
+    # that real failure, not a redirected one.
     surfaces: list[tuple[str, str]] = []
     called: set[str] = set()
 

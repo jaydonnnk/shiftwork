@@ -11,6 +11,9 @@ scored - it does not appear in any real CheckResult or any real ledger event.
 Deferred clauses (NOT claimed here): "a declared limit cannot satisfy a
 required executable dimension or silently become an evaluator rule" completes at
 Slice 4, and the "and inherited" clause completes at Slice 8.
+
+The shipped controller default binds the repair arc (Slice 8), so this thin-path
+check selects the thin profile explicitly; its assertions are unchanged.
 """
 
 import base64
@@ -44,7 +47,7 @@ def _ok(response, expected: int = 200):
 @pytest.fixture()
 def driven(tmp_path):
     db_file = tmp_path / "thin.db"
-    with TestClient(create_app(str(db_file))) as client:
+    with TestClient(create_app(str(db_file), shop_snapshot=config.THIN_SNAPSHOT)) as client:
         shift = _ok(client.post("/api/engagements/bookshop/shifts"), 201)
         version = _ok(
             client.post(
@@ -77,8 +80,8 @@ def test_thin_path_produces_real_checks_and_a_real_chained_event(driven):
     outputs = _ok(client.get(f"/api/runs/{run_id}/outputs"))
     assert len(outputs) == 1
     body = json.loads(base64.b64decode(outputs[0]["body_base64"]))
-    assert body["action"] == "answer"
-    assert body["record_age_ms"] == 5400000
+    assert body.get("action") == "answer"
+    assert body.get("record_age_ms") == 5400000
 
     # One drawn case per enabled family; all three bind the shared ordinal 1
     # and all three fail the stale answer with the same reason code under the

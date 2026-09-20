@@ -35,7 +35,9 @@ def _ok(response, expected: int = 200):
 @pytest.fixture()
 def client(tmp_path):
     db_file = tmp_path / "thin.db"
-    with TestClient(create_app(str(db_file))) as test_client:
+    # The shipped controller default serves the repair arc (Slice 8); this
+    # route-surface check pins the thin path and selects its profile explicitly.
+    with TestClient(create_app(str(db_file), shop_snapshot=config.THIN_SNAPSHOT)) as test_client:
         yield test_client, db_file
 
 
@@ -103,9 +105,9 @@ def test_lifecycle_persists_and_returns_real_rows(client):
     outputs = _ok(test_client.get(f"/api/runs/{run_id}/outputs"))
     assert [output["request_ordinal"] for output in outputs] == [1]
     body = json.loads(base64.b64decode(outputs[0]["body_base64"]))
-    assert body["action"] == "answer"
-    assert {"kind": "stock", "value": "in_stock"} in body["claims"]
-    assert body["record_age_ms"] == 5400000
+    assert body.get("action") == "answer"
+    assert {"kind": "stock", "value": "in_stock"} in body.get("claims", [])
+    assert body.get("record_age_ms") == 5400000
 
     # One drawn case per enabled family, each bound to the shared ordinal 1 and
     # each failing the stale answer with the same reason code.
@@ -177,10 +179,10 @@ def test_lifecycle_persists_and_returns_real_rows(client):
 
 def test_board_state_survives_restart(tmp_path):
     db_file = tmp_path / "persist.db"
-    with TestClient(create_app(str(db_file))) as test_client:
+    with TestClient(create_app(str(db_file), shop_snapshot=config.THIN_SNAPSHOT)) as test_client:
         _drive_to_run(test_client)
 
-    with TestClient(create_app(str(db_file))) as restarted:
+    with TestClient(create_app(str(db_file), shop_snapshot=config.THIN_SNAPSHOT)) as restarted:
         board = _ok(restarted.get("/api/engagements/bookshop/board"))
         assert board["latest_shift"]["state"] == "open"
         assert board["latest_run"]["state"] == "FINALIZED"
