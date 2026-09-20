@@ -348,20 +348,97 @@ def test_controller_normalizes_once_and_retains_failed_capture(executor, monkeyp
         conn.close()
 
 
+def _pre_rotation_schema(*, keep_log_ref: bool = False) -> str:
+    """``schema.sql`` with the later additions stripped: the v2 or v3 shape.
+
+    The default strips ``log_ref`` as well and yields the v2 shape;
+    ``keep_log_ref`` yields the genuine v3 shape that shipped before rotation
+    (log_ref present, rotation columns and table absent). Every strip is
+    asserted, so this helper cannot silently stop producing an older schema and
+    make the upgrade tests vacuous.
+    """
+    from shiftwork.store import db
+
+    sql = db.SCHEMA_PATH.read_text(encoding="utf-8")
+    fragments = [
+        "    request_batch_ref TEXT NOT NULL,\n",
+        "    shop_snapshot_ref TEXT NOT NULL,\n",
+    ]
+    if not keep_log_ref:
+        fragments.append("    log_ref TEXT,\n")
+    for fragment in fragments:
+        assert fragment in sql, f"schema.sql no longer contains {fragment!r}"
+        sql = sql.replace(fragment, "")
+    marker = "CREATE TABLE IF NOT EXISTS rotation_draws ("
+    start = sql.index(marker)
+    sql = sql[:start] + sql[sql.index(");", start) + len(");\n") :]
+    assert marker not in sql
+    return sql
+
+
+def _insert_legacy_run(conn) -> None:
+    """One pre-rotation run row, so the v3 to v4 backfill is exercised."""
+    conn.execute(
+        "INSERT INTO shifts VALUES ('legacy-shift', 'retained', 1, 'open', "
+        "'2026-09-18T00:00:00+00:00', NULL)"
+    )
+    conn.execute(
+        "INSERT INTO artifact_versions VALUES ('legacy-ver', 'legacy-shift', NULL, 'hash', "
+        "'inline:hash', '{}', '{}', 'catalog-hash', 'learner', '2026-09-18T00:00:00+00:00')"
+    )
+    conn.execute(
+        "INSERT INTO runs (id, shift_id, artifact_version_id, attempt_number, state, adapter, started_at) "
+        "VALUES ('legacy-run', 'legacy-shift', 'legacy-ver', 1, 'FINALIZED', 'recorded', "
+        "'2026-09-18T00:00:00+00:00')"
+    )
+
+
 def test_existing_schema_two_gets_log_column_without_data_loss(executor, tmp_path):
     from shiftwork.store import db
     conn = db.connect(tmp_path / "schema-two.db")
     try:
-        old_schema = db.SCHEMA_PATH.read_text(encoding="utf-8").replace("    log_ref TEXT,\n", "")
-        conn.executescript(old_schema)
+        conn.executescript(_pre_rotation_schema())
         conn.execute("INSERT INTO engagements VALUES ('retained', 'bookshop', 'Retained row')")
+        _insert_legacy_run(conn)
         conn.execute("PRAGMA user_version = 2")
         conn.commit()
         db.ensure_schema(conn)
         assert "log_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(run_outputs)")}
         assert conn.execute("SELECT display_name FROM engagements WHERE slug = 'retained'").fetchone()[0] == "Retained row"
+        # The v3 to v4 half of the same upgrade: columns added, legacy rows
+        # backfilled with the refs the controller hardcoded before rotation.
+        assert "request_batch_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
+        assert conn.execute("SELECT request_batch_ref, shop_snapshot_ref FROM runs WHERE id = 'legacy-run'").fetchone()[:] == ("thin.jsonl", "bookshop_snapshot.json")
         db.ensure_schema(conn)
-        assert conn.execute("PRAGMA user_version").fetchone()[0] == 3
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == db.SCHEMA_VERSION
+    finally:
+        conn.close()
+
+
+def test_existing_schema_three_gets_rotation_columns_without_data_loss(tmp_path):
+    from shiftwork.store import db
+    conn = db.connect(tmp_path / "schema-three.db")
+    try:
+        conn.executescript(_pre_rotation_schema(keep_log_ref=True))
+        conn.execute("INSERT INTO engagements VALUES ('retained', 'bookshop', 'Retained row')")
+        _insert_legacy_run(conn)
+        conn.execute("PRAGMA user_version = 3")
+        conn.commit()
+        # The fixture really is the v3 shape: log_ref present, rotation additions absent.
+        assert "log_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(run_outputs)")}
+        assert "request_batch_ref" not in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
+        db.ensure_schema(conn)
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == db.SCHEMA_VERSION
+        assert "request_batch_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
+        assert "log_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(run_outputs)")}
+        assert conn.execute("SELECT request_batch_ref, shop_snapshot_ref FROM runs WHERE id = 'legacy-run'").fetchone()[:] == ("thin.jsonl", "bookshop_snapshot.json")
+        assert "rotation_draws" in {
+            row["name"] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+        }
+        assert conn.execute("SELECT display_name FROM engagements WHERE slug = 'retained'").fetchone()[0] == "Retained row"
+        # Idempotent: bootstrapping an already-upgraded v3 database changes nothing.
+        db.ensure_schema(conn)
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == db.SCHEMA_VERSION
     finally:
         conn.close()
 
@@ -484,9 +561,9 @@ def test_schema_two_upgrade_rolls_back_on_version_write_failure(tmp_path):
     path = tmp_path / "interrupted-upgrade.db"
     conn = db.connect(path)
     try:
-        old_schema = db.SCHEMA_PATH.read_text(encoding="utf-8").replace("    log_ref TEXT,\n", "")
-        conn.executescript(old_schema)
+        conn.executescript(_pre_rotation_schema())
         conn.execute("INSERT INTO engagements VALUES ('retained', 'bookshop', 'Retained row')")
+        _insert_legacy_run(conn)
         conn.execute("PRAGMA user_version = 2")
         conn.commit()
         observed = []
@@ -498,7 +575,7 @@ def test_schema_two_upgrade_rolls_back_on_version_write_failure(tmp_path):
         conn.set_authorizer(deny_version_write)
         with pytest.raises(sqlite3.DatabaseError, match="not authorized"):
             db.ensure_schema(conn)
-        assert observed == ["3"]
+        assert observed == [str(db.SCHEMA_VERSION)]
         assert not conn.in_transaction
     finally:
         conn.close()
@@ -506,11 +583,17 @@ def test_schema_two_upgrade_rolls_back_on_version_write_failure(tmp_path):
     try:
         assert conn.execute("PRAGMA user_version").fetchone()[0] == 2
         assert "log_ref" not in {row["name"] for row in conn.execute("PRAGMA table_info(run_outputs)")}
+        assert "request_batch_ref" not in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
+        # New tables come from the idempotent executescript, which commits before
+        # the guarded transaction: an empty rotation_draws table survives the
+        # rollback harmlessly, but the columns and the version marker do not.
+        assert conn.execute("SELECT COUNT(*) FROM rotation_draws").fetchone()[0] == 0
         assert conn.execute("SELECT display_name FROM engagements WHERE slug = 'retained'").fetchone()[0] == "Retained row"
         db.ensure_schema(conn)
         db.ensure_schema(conn)
-        assert conn.execute("PRAGMA user_version").fetchone()[0] == 3
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == db.SCHEMA_VERSION
         assert "log_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(run_outputs)")}
+        assert conn.execute("SELECT request_batch_ref, shop_snapshot_ref FROM runs WHERE id = 'legacy-run'").fetchone()[:] == ("thin.jsonl", "bookshop_snapshot.json")
         assert conn.execute("SELECT display_name FROM engagements WHERE slug = 'retained'").fetchone()[0] == "Retained row"
     finally:
         conn.close()
