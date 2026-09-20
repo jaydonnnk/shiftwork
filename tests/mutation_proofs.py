@@ -1,4 +1,4 @@
-"""Mutation proofs for the Slice 7 guard branches.
+"""Mutation proofs for the Slice 7 guard branches and the Slice 8 run binding.
 
 Each mutation independently breaks one guard branch with a valid code change,
 runs the named test selection, and requires that the named expected test fails
@@ -224,6 +224,79 @@ MUTATIONS = [
         "new": b"""            pass  # MUTATION: was the legacy-run backfill UPDATE""",
         "tests": "tests/executor/test_conformance.py::test_existing_schema_two_gets_log_column_without_data_loss",
         "expect": "test_existing_schema_two_gets_log_column_without_data_loss",
+    },
+    # Slice 8 run binding (Route A): the run row is the single source of
+    # execution identity, unmapped pairings fail closed, and the controller
+    # configuration is what start_run persists.
+    {
+        "name": "resolution_ignores_run_row",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""    if run.adapter == "local_process":
+        return LocalProcessAdapter()
+    if run.adapter != "recorded":
+        return None""",
+        "new": b"""    if False:
+        return LocalProcessAdapter()
+    if False:
+        return None""",
+        "tests": "tests/orchestrator/test_run_binding.py::test_run_row_adapter_is_load_bearing",
+        "expect": "test_run_row_adapter_is_load_bearing",
+    },
+    {
+        "name": "unimplemented_adapter_falls_through",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""    if run.adapter != "recorded":
+        return None""",
+        "new": b"""    if run.adapter not in ("recorded", "tokenfactory"):
+        return None""",
+        "tests": "tests/orchestrator/test_run_binding.py::test_unimplemented_adapter_fails_closed_before_execution",
+        "expect": "test_unimplemented_adapter_fails_closed_before_execution",
+    },
+    {
+        "name": "unmapped_pairing_falls_back_to_the_batch",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""    ref = config.RECORDED_TRANSCRIPTS.get((run.request_batch_ref, snapshot_hash))
+    if ref is None:
+        return None""",
+        "new": b"""    ref = config.RECORDED_TRANSCRIPTS.get((run.request_batch_ref, snapshot_hash))
+    if ref is None:
+        ref = next((name for (batch, _), name in config.RECORDED_TRANSCRIPTS.items() if batch == run.request_batch_ref), None)
+    if ref is None:
+        return None""",
+        "tests": "tests/orchestrator/test_run_binding.py::test_unmapped_pairing_fails_closed_without_invoking_an_adapter",
+        "expect": "test_unmapped_pairing_fails_closed_without_invoking_an_adapter",
+    },
+    {
+        "name": "pairing_key_ignores_the_snapshot",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""    ref = config.RECORDED_TRANSCRIPTS.get((run.request_batch_ref, snapshot_hash))""",
+        "new": b"""    ref = next((name for (batch, _), name in config.RECORDED_TRANSCRIPTS.items() if batch == run.request_batch_ref), None)  # MUTATION: snapshot ignored""",
+        "tests": "tests/api/test_thin_path.py::test_thin_path_produces_real_checks_and_a_real_chained_event",
+        "expect": "test_thin_path_produces_real_checks_and_a_real_chained_event",
+    },
+    {
+        "name": "route_ignores_the_configured_executor",
+        "file": "shiftwork/api/routes.py",
+        "old": b"""        executor=request.app.state.executor,""",
+        "new": b"""        executor=None,""",
+        "tests": "tests/orchestrator/test_run_binding.py::test_route_persists_the_controller_configured_adapter",
+        "expect": "test_route_persists_the_controller_configured_adapter",
+    },
+    {
+        "name": "route_drops_the_configured_snapshot",
+        "file": "shiftwork/api/routes.py",
+        "old": b"""        shop_snapshot=request.app.state.shop_snapshot,""",
+        "new": b"""        shop_snapshot=None,""",
+        "tests": "tests/api/test_thin_path.py::test_thin_path_produces_real_checks_and_a_real_chained_event",
+        "expect": "test_thin_path_produces_real_checks_and_a_real_chained_event",
+    },
+    {
+        "name": "snapshot_pin_edited",
+        "file": "shiftwork/config.py",
+        "old": b'"bd66a4136c8dc1156ff50645195d437328cb3ea18206be9eba976d3ea168933f"',
+        "new": b'"ad66a4136c8dc1156ff50645195d437328cb3ea18206be9eba976d3ea168933f"',
+        "tests": "tests/orchestrator/test_run_binding.py::test_snapshot_pins_and_authored_pairings_match_the_fixtures",
+        "expect": "test_snapshot_pins_and_authored_pairings_match_the_fixtures",
     },
 ]
 
