@@ -1,10 +1,10 @@
-"""Canonical Slice 2 evidence: drive one shift's data real end to end and print every record.
+"""Canonical thin-path evidence: drive one shift's data real end to end and print every record.
 
 For one bookshop shift this prints the frozen version's real content_hash, the one
-executed request's captured output bytes, the one sealed case's CheckResult (reason
-code + opaque expected_ref), and the one hash-chained ledger event with
-chain_status VALID. Nothing is mocked: a placeholder hash or a missing row would
-fail the assertions below.
+executed request's captured output bytes, one CheckResult per enabled sealed family
+(reason code + opaque expected_ref), and one hash-chained ledger event per failing
+check with chain_status VALID. Nothing is mocked: a placeholder hash or a missing
+row would fail the assertions below.
 
 Run from the repository root: python -m demos.thin_path
 """
@@ -96,19 +96,20 @@ def main() -> int:
                 raise SystemExit(f"expected exactly one captured output, got {len(outputs)}")
 
             status, checks = _call(client, "GET", f"/api/runs/{run_id}/checks")
-            _show(f"GET checks -> {status} (the one real CheckResult)", checks)
-            if len(checks) != 1:
-                raise SystemExit(f"expected exactly one CheckResult, got {len(checks)}")
+            _show(f"GET checks -> {status} (one CheckResult per enabled family)", checks)
+            expected_families = len(config.BOOKSHOP_FAMILIES)
+            if len(checks) != expected_families:
+                raise SystemExit(f"expected {expected_families} CheckResults (one per family), got {len(checks)}")
             check = checks[0]
             if not check["expected_ref"].startswith("sealed:"):
                 raise SystemExit(f"expected_ref is not an opaque sealed ref: {check['expected_ref']!r}")
 
             status, ledger = _call(client, "GET", "/api/engagements/bookshop/ledger")
-            _show(f"GET ledger -> {status} (the one hash-chained event)", ledger)
+            _show(f"GET ledger -> {status} (one hash-chained event per failing check)", ledger)
             if ledger["chain_status"] != "VALID":
                 raise SystemExit(f"chain did not verify: {ledger['chain_status']}")
-            if len(ledger["events"]) != 1:
-                raise SystemExit(f"expected exactly one ledger event, got {len(ledger['events'])}")
+            if len(ledger["events"]) != expected_families:
+                raise SystemExit(f"expected {expected_families} ledger events (one per family), got {len(ledger['events'])}")
             event = ledger["events"][0]
             if event["prev_hash"] != config.GENESIS_HASH or len(event["hash"]) != 64:
                 raise SystemExit(f"event is not a real chained event: {event!r}")
@@ -118,10 +119,10 @@ def main() -> int:
 
             print(
                 "thin-path evidence complete: run "
-                f"{run_id} FINALIZED, content_hash {content_hash}, one CheckResult "
-                f"{check['verdict']}/{check['reason_code']} with opaque expected_ref, one "
-                f"{event['event_type']} event seq {event['seq']} chained on genesis, "
-                f"chain_status {ledger['chain_status']}"
+                f"{run_id} FINALIZED, content_hash {content_hash}, {len(checks)} CheckResults "
+                f"({check['verdict']}/{check['reason_code']} first) with opaque expected_refs, "
+                f"{len(ledger['events'])} {event['event_type']} events seq 1-{ledger['events'][-1]['seq']} "
+                f"chained on genesis, chain_status {ledger['chain_status']}"
             )
     return 0
 
