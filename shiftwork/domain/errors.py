@@ -75,3 +75,25 @@ class InvalidSealedCase(ShiftworkDomainError):
     """
 
     kind = "conflict"
+
+
+class RotationUnavailable(ShiftworkDomainError):
+    """An enabled family has no never-exposed variant left (program design S7.1).
+
+    Fail-closed: the whole run is refused and no reservation row is written. A
+    refill is the operator's explicit act; recycling or reusing an exposed
+    identity would fake an unseen stimulus.
+    """
+
+    kind = "conflict"
+
+
+class RotationMisconfigured(ShiftworkDomainError):
+    """The drawn variants do not agree on one shared request ordinal.
+
+    A run executes one stimulus prefix, so every family's drawn variant for that
+    attempt must bind the same ordinal. A mismatch is an inventory authoring
+    error, not something to resolve silently at run time.
+    """
+
+    kind = "conflict"

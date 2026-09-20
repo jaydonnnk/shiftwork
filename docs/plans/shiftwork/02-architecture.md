@@ -1,10 +1,36 @@
 # Architecture: Shiftwork — first bookshop engagement
 
-Gate: 2 — Architecture (APPROVED 2026-09-15). Written 2026-09-15.
-Sources accessed 2026-09-15. ADRs 0001–0003 were later promoted from S19 candidates
-during Gate 3 drafting (2026-09-15); candidate #4 stays deferred until spike evidence.
+Gate: 2 - Architecture (RE-APPROVED 2026-09-19 after the scoped backtrack;
+originally APPROVED 2026-09-15). Written 2026-09-15; scoped revision 2026-09-19
+explicitly re-approved by the user. Gate 3 requires its own approval.
+Sources accessed 2026-09-15; no external source was re-checked in this revision.
+ADRs 0001-0003 were promoted from S19 candidates during Gate 3 drafting
+(2026-09-15); candidate #4 stays deferred until spike evidence and separate authorization.
 
-Scope: only the first bookshop engagement and the central loop —
+### Scoped backtrack re-approved: sealed-store access ownership
+
+The Slice 6 verification found that the prior S2, S7 and S13 reserved sealed-store
+reads for an evaluator module, but controller orchestration calls the sealed loader
+and passes its data to a pure scorer. The user re-approved that explicit split in
+S2, S5, S7 and S13: controller orchestration owns loading; evaluation receives its
+inputs and does not load files. No implementation is changed by this revision.
+
+The earlier co-located loader and pure scoring function were feasible. The prior
+Gate 3 test 11 prohibited network/LLM dependencies, not a loader's file access;
+impossibility is not the reason for this change. The approved split makes the
+existing ownership explicit without widening learner or model access. Exact
+imports, signatures and their test requirements are now under separate Gate 3
+revision; they are NOT approved by the Gate 2 decision. ADR 0001's prior-ownership
+sentence is superseded by the dated note recorded later the same day (2026-09-19),
+with the original text kept as history. ADRs and Gate 4 were unchanged by this
+documentation step; the Gate 4 follow-up revision of 2026-09-19 is separate.
+
+All other architecture decisions remain unchanged. Statements about the repository
+before implementation retain their 2026-09-15 planning context; current delivery
+and the Slice 6 repair hold are recorded in `00-status.md`. This revision does not
+approve execution topology, credentials, installs, external calls or later slices.
+
+Scope: only the first bookshop engagement and the central loop -
 learner-owned versioned service → fixed request batch → isolated execution evidence →
 independently authored checks → deterministic append-only synthetic ledger →
 inherited next shift. Nothing here authorizes implementation; implementation starts
@@ -30,15 +56,16 @@ One process owns truth; all execution is disposable.
 | Module | Responsibility | Trust zone |
 |---|---|---|
 | **Web client** | Renders the six screens (shift board, contract, run, repair, return, away) | Untrusted (learner-editable browser) |
-| **Controller API** | HTTP surface, session, shift lifecycle, artifact drafts and snapshots, run orchestration, evidence rendering | Trusted |
+| **Controller API** | HTTP surface, session and public evidence rendering; delegates lifecycle operations to controller orchestration | Trusted |
+| **Controller orchestration** | Shift/run lifecycle, artifact drafts and snapshots; sole caller outside the sealed store of its loader; supplies evaluator inputs | Trusted (controller-side) |
 | **Artifact store** | Immutable, content-hashed versions + one mutable draft per shift | Trusted (controller-side) |
 | **Executor adapter** | Single interface for "run this artifact snapshot against this batch"; production implementation = Token Factory Sandbox; test implementation = fake/in-process | Trusted boundary; sandbox is untrusted |
 | **In-sandbox harness** | Starts the learner service on loopback, sends the fixed batch, captures raw outputs + logs | Untrusted (runs inside sandbox) |
-| **Deterministic evaluator** | Compares captured outputs against sealed expectations / committed contract; emits check results | Trusted; controller-side only |
+| **Deterministic evaluator** | Pure scoring of supplied captures, sealed cases, public records and committed contract; emits check results without loading stored data | Trusted; controller-side only |
 | **Ledger reducer** | Pure function: check results + raw outputs → ledger events; append-only, hash-chained | Trusted; controller-side only |
 | **Assist service** | Bounded Nemotron roles (stakeholder dialogue, hints, diagnosis, labelled patch proposals); every call logged | Trusted gateway; model itself untrusted output |
 | **Curation tool** | Offline Tavily-assisted mission-fixture review; operator-run, human-verified | Trusted; not part of runtime |
-| **Sealed store** | Sealed case specs + expected outcomes; read path exists only inside the evaluator | Trusted, most restricted |
+| **Sealed store** | Controller-only loader of sealed case specs + expected outcomes; called only by controller orchestration outside the store itself | Trusted, most restricted |
 
 Boundary rules:
 
@@ -117,9 +144,11 @@ Main path — one shift run:
    batch in fixed order, captures every response, status, timing and log.
 6. Captures return to the controller; the sandbox is torn down (it is never a
    source of truth — see S6).
-7. Deterministic evaluator (controller-side, no LLM) runs the check set against
-   the captures: invariants, contract-conformance (using the committed contract),
-   sealed acceptance cases, regression checks from earlier shifts.
+7. Controller orchestration loads applicable sealed cases through the sealed
+   store, then supplies the captures, cases, public records and committed contract
+   to the deterministic evaluator. The evaluator scores invariants,
+   contract-conformance, sealed acceptance and prior-shift regression checks
+   without loading files or using a database, network or LLM.
 8. Ledger reducer derives the event set from check results with a pure function
    and hash-chains the new events (S10).
 9. UI renders the run: exact outputs, check outcomes, incident openings, ledger
@@ -147,13 +176,23 @@ Main path — one shift run:
 
 ## 7. Evaluator, credential and sealed-case isolation
 
-- **Sealed cases never enter a sandbox.** They live in the controller-side sealed
-  store; only the evaluator reads them. The sandbox receives: artifact snapshot,
-  harness, fixed visible request batch, frozen shop-data snapshot — nothing else
-  from controller state.
-- **Evaluation is deterministic and LLM-free.** A second language model is never
-  an oracle. Nemotron can propose, diagnose or explain; it cannot compute check
-  verdicts, ledger events or pass declarations.
+- **Sealed cases never enter a sandbox or inference prompt.** They live in the
+  controller-side sealed store. Within the runtime application, only controller
+  orchestration outside that store may directly import or call its loader; it
+  supplies cases to the pure evaluator. Executor, assist, API handlers, client,
+  persistence, ledger, domain and curation modules must not directly import or
+  call the sealed store. API handlers may delegate lifecycle operations to
+  orchestration without receiving sealed cases. Operator-only case-authoring,
+  verification tools and tests are not learner/model interfaces; this runtime
+  importer rule does not prohibit their separately authorized inspection.
+- The sandbox receives only the artifact snapshot, harness, fixed visible request
+  batch and frozen shop-data snapshot from controller state. The module ownership
+  rule does not establish hostile-code isolation for the trusted local adapter;
+  real sandbox isolation still requires the separately authorized spike and tests.
+- **Evaluation is deterministic and LLM-free.** The scoring function receives its
+  inputs explicitly and performs no file/database access or network calls. A second
+  language model is never an oracle. Nemotron can propose, diagnose or explain;
+  it cannot compute check verdicts, ledger events or pass declarations.
 - **Credential separation:**
 
   | Credential | Controller | Sandbox | Learner/browser |
@@ -161,7 +200,7 @@ Main path — one shift run:
   | DB / internal state | yes | no | no |
   | Sandbox provisioning key | yes | no (injected by controller) | no |
   | Scoped inference key for the learner service | minted by controller | yes — scoped, budget-capped | never directly |
-  | Sealed store access | evaluator path only | no | no |
+  | Sealed store access | controller orchestration through the sealed loader only; evaluator receives supplied cases | no | no |
   | Tavily key | curation tool only | no | no |
 
 - Mechanisms for scoping and injecting the inference key (env at provision time,
@@ -251,7 +290,9 @@ by this design (S16 covers what remains unverified).
   records.
 - Operator surfaces: attempt counts, assist log, chain-verification status,
   provenance of mission fixtures. Learners can inspect their own service's raw
-  traces; sealed expectations remain invisible to everyone but the evaluator.
+  traces; runtime access to sealed expectations is confined to controller
+  orchestration, the sealed loader and the evaluator, never learner/model surfaces
+  or learner-readable logs.
 - Nothing about the run is summarized away: the raw capture is retained even when
   derived views exist.
 

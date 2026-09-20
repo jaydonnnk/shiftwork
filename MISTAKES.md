@@ -206,3 +206,119 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   (name the constant, field or function actually used), not the invariant it
   happens to satisfy today; when inputs coincide by configuration rather than by
   mechanism, say so and record the decoupling as a latent-bug note.
+
+## 2026-09-18 Slice 6 host-path leak scan could never match the surface it scanned
+
+- **What happened:** test 20's host-path needles were raw Windows absolute paths
+  (`str(config.BOOKSHOP_SNAPSHOT)`, the package dir, the interpreter path), but a
+  FastAPI JSON response backslash-escapes them (`C:\\Users\\...`), so
+  `needle in surface` never matched. Six of the eight needles were vacuous and the
+  test passed against a real leak: mutation probe 20b wired
+  `str(config.BOOKSHOP_SNAPSHOT)` into a projected `request_text` and test 20 stayed
+  green. Only test 45 caught it, and only because it also carried a
+  backslash-free marker token. My own non-vacuity checks passed, because they
+  counted surfaces scanned rather than proving any needle could match.
+- **Root cause:** I wrote the absence assertion against the in-memory value without
+  checking how that value is serialized on the surface being scanned, and I treated
+  "the scan covered N surfaces" as evidence that each individual needle was capable
+  of failing.
+- **Prevention rule:** every absence/leak assertion needs a scanner self-test that
+  injects the needle into a representative serialized surface and requires
+  detection; a count of surfaces scanned is not evidence that a needle can match.
+  Compare against the surface's serialized form, not the in-memory value. Fourth
+  occurrence of the coverage-claimed-not-proven pattern (2026-09-16 clause mapping,
+  2026-09-17 repair scoping, 2026-09-18 Slice 5 guard branches, this entry), so it
+  is graduated into `AGENTS.md` S6 Verification. The graduated entries are kept
+  here as incident history, per the AGENTS.md mistake-logging rule (user decision,
+  2026-09-19).
+
+## 2026-09-19 Slice 6 repair fixture written with CRLF by write_text
+
+- **What happened:** the new `missing_evidence` transcript fixture was written with
+  `Path.write_text` on Windows, which translated `\n` to `\r\n`; the LF-pinned
+  fixture check in `tests/executor/test_conformance.py` failed on it.
+- **Root cause:** text-mode writes on Windows apply `os.linesep` translation, and
+  the repository pins fixture files as LF bytes.
+- **Prevention rule:** write byte-pinned text fixtures with `write_bytes(...)` or
+  `write_text(..., newline="\n")`, never default `write_text`, on Windows.
+
+## 2026-09-19 Slice 6 review round: a self-test parametrized by the constant it tests
+
+- **What happened:** the new UTF-16 decoder self-test was parametrized over
+  `BASE64_DECODINGS`, the same constant it exists to guard. My failing-capability
+  probe narrowed that constant to `("utf-8",)` and the probe reported
+  `1 passed`: the utf-16 cases had disappeared instead of failing. The guard was
+  vacuous for exactly the inputs it claimed, and only the probe's own expectation
+  (a passing probe is a red flag) exposed it.
+- **Root cause:** the test's input list came from the implementation artifact rather
+  than from the requirement, so weakening the implementation weakened the evidence
+  in the same step. Same class as counting surfaces scanned instead of proving a
+  needle can match (the graduated AGENTS.md S6 rule).
+- **Prevention rule:** a failing-capability check enumerates the requirement's
+  literal inputs (the three encodings), never a constant read from the code under
+  test, and asserts each input is still covered; when a mutation probe passes,
+  treat the probe or the check as broken before concluding the guard is unnecessary.
+
+## 2026-09-19 Slice 6 review round: the getattr rule rebuilt an AST call and lost lineno
+
+- **What happened:** the `getattr(importlib, "import_module")` branch of
+  `_dynamic_import_findings` replaced the original call node with a synthetic
+  `ast.Call` built from the remaining arguments, so the "without a target argument"
+  message raised `AttributeError: 'Call' object has no attribute 'lineno'` and the
+  scanner self-test failed.
+- **Root cause:** a node was reconstructed to drop its first argument without
+  copying the source-location attributes.
+- **Prevention rule:** never rebuild an AST node to drop arguments; keep the
+  original node for locations and carry the remaining argument list separately.
+
+## 2026-09-19 Slice 7: check-result-id ordinal double-counted within one transaction
+
+- **What happened:** `finalize_run` assigned each CheckResult an id of
+  `cr-{repo.count_check_results(conn) + len(check_results) + 1:04d}`. Because
+  `count_check_results` queries the same connection inside the uncommitted
+  transaction, it already sees the rows inserted earlier in the loop. Adding
+  `len(check_results)` double-counted every result after the first, producing
+  ids like cr-0001, cr-0003, cr-0006 instead of cr-0001, cr-0002, cr-0003.
+  The bug was invisible while only one family was enabled (one result per run);
+  it surfaced when Slice 7 enabled three families and the second result's id
+  skipped.
+- **Root cause:** I treated `count_check_results` as seeing only committed state
+  (pre-transaction), but SQLite's default isolation lets a connection read its
+  own uncommitted writes. The `len(check_results)` term was a redundant
+  compensator for a problem that did not exist.
+- **Prevention rule:** when an ordinal is derived from a COUNT on the same
+  connection inside an open transaction, the count already includes this
+  transaction's earlier inserts; do not add a local accumulator on top. Verify
+  by checking the second iteration's id, not just the first.
+
+## 2026-09-20 Slice 7 review round: a vacuous mutation proof and a harness that could not tell a crash from an assertion
+
+- **What happened:** the `invalidate_state_filter_removed` proof dropped the SQL
+  state clause but left the fourth bound parameter, so SQLite raised
+  `ProgrammingError: Incorrect number of bindings supplied` on every call. The
+  harness counted any non-zero pytest exit as FAIL_CAUGHT, so the row looked
+  green. The reviewer corrected the mutation to valid SQL and the whole 27-test
+  orchestrator+api suite passed: the state-scoping clause of
+  `invalidate_rotation_group` was covered by no failing-capable test, because
+  the only scenario exercised had exactly one active draw for the family, where
+  the rowcount is 1 with or without the filter. Two more rows were caught only
+  by incidental exceptions (ValueError from the removed shared-ordinal guard,
+  a UNIQUE-constraint integrity error from the removed exposure filter), and
+  the second `shared_ordinal` raise ("binds several request ordinals") had no
+  test at all.
+- **Root cause:** two compounding errors. First, a mutation that made the
+  program invalid (binding-count mismatch) rather than changing behavior, which
+  is the exact "require one real failure per branch, not a parse error" failure
+  the verification rules warn about. Second, a catch signal (`returncode != 0`
+  with `--tb=no`) that cannot distinguish an AssertionError, a collection
+  error, or a runtime crash, so the proof could not detect its own vacuity. The
+  suite also lacked the mixed-state scenario (one invalidated plus one active
+  draw for the same family) that makes the filter load-bearing.
+- **Prevention rule:** a mutation proof requires (1) a valid, behavior-changing
+  mutation, (2) a named expected test that must fail, and (3) an
+  assertion-level failure (AssertionError or pytest's `Failed: DID NOT RAISE`)
+  parsed from the junit report, with vacuous, incidental and wrong-test catches
+  failing the proof run. When a guard filters rows on state, seed both states
+  in the test so the rowcount is observable, and verify a new or changed proof
+  harness against known-vacuous and known-crashing mutations before trusting a
+  green table.

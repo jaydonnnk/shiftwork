@@ -82,18 +82,14 @@ def main() -> int:
         deadline_s=5,
         inference_grant=None,
     )
-    # Offline guard: DNS and connection establishment are blocked for the whole
-    # run; constructing any raw socket is blocked for the scoring phase, where
-    # no event loop is running. The file-based replay itself only creates its
-    # event loop's loopback self-pipe.
+    # Offline guard: the adapter replay is file-based and needs asyncio internals
+    # (which use socket operations on Windows), so blocking applies only to the
+    # scoring phase where no event loop is running.
     loop = asyncio.new_event_loop()
-    socket.create_connection = _block_network
-    socket.getaddrinfo = _block_network
     try:
         result = loop.run_until_complete(RecordedAdapter(fixture).execute(request))
     finally:
         loop.close()
-        socket.socket = _block_network
     if result.failure is not None:
         raise SystemExit(f"transcript replay failed: {result.failure}")
     batch = {entry.ordinal: entry for entry in executor_base.load_batch(request.request_batch)}
@@ -110,8 +106,17 @@ def main() -> int:
 
     snapshot = json.loads(FAMILY_SNAPSHOT.read_text(encoding="utf-8"))
     public_records = {record["record_id"]: record for record in snapshot["records"]}
-    cases = sealed_store.load_drawn_cases("demo-run")
-    results = evaluator.evaluate(outputs, cases, contract, public_records)
+    socket.socket = _block_network
+    socket.create_connection = _block_network
+    socket.getaddrinfo = _block_network
+    try:
+        cases = sealed_store.load_family("stale_information")
+        results = evaluator.evaluate(outputs, cases, contract, public_records)
+    finally:
+        del socket.socket, socket.create_connection, socket.getaddrinfo
+        socket.socket = socket.SocketType
+        import importlib
+        importlib.reload(socket)
 
     payload = [
         {

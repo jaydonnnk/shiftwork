@@ -3,8 +3,10 @@
 Slice 2 replaces the tracer's stub persistence and stub finalization with the real
 deterministic components: content-hashed freeze, the recorded adapter replaying one
 checked-in transcript, the sealed-case evaluator producing one real CheckResult, and
-the reducer plus hash chain producing one real LedgerEvent. Incident opening is a
-later slice (S5/S7); Slice 2 opens no incident.
+the reducer plus hash chain producing one real LedgerEvent. Slice 7 adds budget
+enforcement with per-attempt rotation draws, binds each run to the request batch and
+shop snapshot it consumed, and resolves incidents only when a later run of a new
+version passes the linked regression and that family's current unseen variant.
 """
 
 import asyncio
@@ -22,11 +24,14 @@ from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
     ContractParams,
+    DrawState,
     ExecutorFailure,
     Incident,
     IncidentState,
     JsonValue,
+    LedgerEventDraft,
     LedgerEventType,
+    RotationDraw,
     Run,
     RunOutput,
     RunState,
@@ -37,6 +42,7 @@ from shiftwork.evaluator import evaluator
 from shiftwork.executor import base as executor
 from shiftwork.executor.recorded import RecordedAdapter
 from shiftwork.ledger import chain, reducer
+from shiftwork.sealed import rotation
 from shiftwork.sealed import store as sealed_store
 from shiftwork.store import db, repo
 
@@ -77,6 +83,28 @@ def _require_open_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
 def _attempt_limit(conn: sqlite3.Connection, slug: str) -> int:
     row = repo.get_engagement_config(conn, slug)
     return int(row["attempt_limit"]) if row else config.DEFAULT_ATTEMPT_LIMIT
+
+
+def _enabled_families(conn: sqlite3.Connection, slug: str) -> tuple[str, ...]:
+    row = repo.get_engagement_config(conn, slug)
+    if row is None:
+        return config.BOOKSHOP_FAMILIES
+    return tuple(json.loads(row["enabled_check_families_json"]))
+
+
+def _attempt_batch(ordinal: int) -> executor.BatchRef:
+    """The frozen stimulus prefix this attempt executes (program design S5.3).
+
+    The drawn variants share one request ordinal k; the run executes the customer
+    requests 1..k and nothing later, so future stimuli stay absent until their run.
+    """
+    refs = config.BOOKSHOP_ATTEMPT_BATCHES
+    if not 1 <= ordinal <= len(refs):
+        raise LifecycleError("conflict", f"no stimulus batch exists for request ordinal {ordinal}")
+    path_ref = refs[ordinal - 1]
+    path = config.FIXTURE_DIR / "requests" / path_ref
+    content_hash = canonical.content_hash(base64.b64encode(path.read_bytes()).decode("ascii"))
+    return executor.BatchRef(path_ref=path_ref, content_hash=content_hash)
 
 
 def _adapter() -> RecordedAdapter:
@@ -163,26 +191,61 @@ def freeze_version(
 
 
 def start_run(conn: sqlite3.Connection, shift_id: str) -> Run:
+    """Reserve one attempt: budget check, one never-exposed draw per family, atomically.
+
+    The whole reservation - run row, its frozen batch and snapshot refs, and one
+    draw per enabled family - commits in one transaction, so a concurrent boundary
+    POST cannot produce two runs and a fault between the run row and the draws
+    rolls the entire reservation back (program design S5.3, tests 24 and 25).
+    """
     shift = _require_open_shift(conn, shift_id)
     version = repo.get_latest_version(conn, shift_id)
     if version is None:
         raise LifecycleError("conflict", "freeze a version before starting a run")
-    used = repo.count_runs(conn, shift_id)
-    limit = _attempt_limit(conn, shift.engagement_slug)
-    if used >= limit:
-        raise LifecycleError("conflict", "attempt budget exhausted for this shift")
-    ordinal = repo.count_runs_all(conn) + 1
-    run = Run(
-        id=f"run-{ordinal:04d}",
-        shift_id=shift_id,
-        artifact_version_id=version.id,
-        attempt_number=used + 1,
-        state=RunState.QUEUED,
-        adapter=config.TRACER_ADAPTER,
-        started_at=_now(),
-    )
-    repo.insert_run(conn, run)
-    conn.commit()
+
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        used = repo.count_runs(conn, shift_id)
+        limit = _attempt_limit(conn, shift.engagement_slug)
+        if used >= limit:
+            raise LifecycleError("conflict", "attempt budget exhausted for this shift")
+
+        drawn: dict[str, Any] = {}
+        exposed = {draw.variant_ref for draw in repo.list_rotation_draws(conn, shift.engagement_slug)}
+        for family in _enabled_families(conn, shift.engagement_slug):
+            drawn[family] = rotation.select_variant(family, sealed_store.load_family(family).cases, exposed)
+        request_batch = _attempt_batch(rotation.shared_ordinal(drawn))
+
+        ordinal = repo.count_runs_all(conn) + 1
+        run = Run(
+            id=f"run-{ordinal:04d}",
+            shift_id=shift_id,
+            artifact_version_id=version.id,
+            request_batch_ref=request_batch.path_ref,
+            shop_snapshot_ref=str(config.BOOKSHOP_SNAPSHOT),
+            attempt_number=used + 1,
+            state=RunState.QUEUED,
+            adapter=config.TRACER_ADAPTER,
+            started_at=_now(),
+        )
+        repo.insert_run(conn, run)
+        for family, case in drawn.items():
+            repo.insert_rotation_draw(
+                conn,
+                RotationDraw(
+                    id=f"draw-{run.id}-{family}",
+                    engagement_slug=shift.engagement_slug,
+                    family=family,
+                    variant_ref=rotation.variant_ref(case),
+                    run_id=run.id,
+                    cycle=sealed_store.family_cycle(family),
+                    drawn_at=_now(),
+                ),
+            )
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     return run
 
 
@@ -196,13 +259,17 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
     conn.commit()
     try:
         version = repo.get_version(conn, run.artifact_version_id)
+        batch_path = config.FIXTURE_DIR / "requests" / run.request_batch_ref
         request = executor.RunRequest(
             artifact_snapshot=executor.ArtifactSnapshotRef(
                 files={path: text.encode("utf-8") for path, text in version.files.items()},
                 manifest_hash=version.content_hash,
             ),
-            request_batch=executor.BatchRef(path_ref="thin.jsonl", content_hash=config.THIN_BATCH_HASH),
-            shop_snapshot_ref=str(config.BOOKSHOP_SNAPSHOT),
+            request_batch=executor.BatchRef(
+                path_ref=run.request_batch_ref,
+                content_hash=canonical.content_hash(base64.b64encode(batch_path.read_bytes()).decode("ascii")),
+            ),
+            shop_snapshot_ref=run.shop_snapshot_ref,
             harness_ref="stdlib-loopback-v1",
             image_ref="local-python-stdlib",
             deadline_s=5,
@@ -275,6 +342,76 @@ def _open_incidents(
         )
 
 
+def _incident_case(conn: sqlite3.Connection, incident: Incident):
+    """The sealed case behind an incident's failing check, by internal check id."""
+    failing = next(
+        (
+            result
+            for result in repo.list_check_results(conn, incident.opening_run_id)
+            if result.id == incident.check_result_id
+        ),
+        None,
+    )
+    if failing is None:
+        return None
+    return sealed_store.case_for_check_id(failing.check_id)
+
+
+def _resolution_drafts(
+    conn: sqlite3.Connection,
+    run: Run,
+    cases,
+    check_results: list[CheckResult],
+) -> list[tuple[str, LedgerEventDraft]]:
+    """Resolution drafts this run has earned (program design S5.7).
+
+    An OPEN incident resolves only when all three hold: the linked regression
+    passes in this run, the run is not the incident's opening run's version, and
+    this run's drawn (never-exposed) variant for the same family passes. Re-running
+    an old regression alone never resolves anything, and a repeated version is not
+    a repair.
+    """
+    results_by_check = {result.check_id: result for result in check_results}
+    drawn_refs = {draw.variant_ref for draw in repo.list_rotation_draws_for_run(conn, run.id)}
+    drawn_by_family = {
+        case.family: case for case in cases.cases if rotation.variant_ref(case) in drawn_refs
+    }
+    slug = run.shift_id.rsplit("-shift-", 1)[0]
+    resolutions: list[tuple[str, LedgerEventDraft]] = []
+    for incident in repo.list_incidents(conn, slug):
+        if incident.state is not IncidentState.OPEN:
+            continue
+        linked = _incident_case(conn, incident)
+        if linked is None:
+            continue
+        regression = results_by_check.get(linked.check_id)
+        if regression is None or regression.verdict != "pass":
+            continue
+        opening = repo.get_run(conn, incident.opening_run_id)
+        if opening is None or opening.artifact_version_id == run.artifact_version_id:
+            continue
+        acceptance = drawn_by_family.get(linked.family)
+        acceptance_result = results_by_check.get(acceptance.check_id) if acceptance else None
+        if acceptance_result is None or acceptance_result.verdict != "pass":
+            continue
+        resolutions.append(
+            (
+                incident.id,
+                LedgerEventDraft(
+                    event_type=LedgerEventType.INCIDENT_RESOLVED,
+                    cause_refs=(run.id, regression.id, regression.observed_ref, incident.id),
+                    payload={
+                        "reason_code": incident.reason_code.value,
+                        "incident_id": incident.id,
+                        "family": linked.family,
+                        "resolving_version_id": run.artifact_version_id,
+                    },
+                ),
+            )
+        )
+    return resolutions
+
+
 def finalize_run(conn: sqlite3.Connection, run_id: str) -> Run:
     """Evaluate -> reduce -> chain -> events -> incidents -> FINALIZED (S5.5).
 
@@ -295,15 +432,19 @@ def finalize_run(conn: sqlite3.Connection, run_id: str) -> Run:
     if version is None:
         raise LifecycleError("not_found", f"unknown artifact version: {run.artifact_version_id}")
     outputs = repo.list_outputs(conn, run_id)
-    cases = sealed_store.load_drawn_cases(run_id)
-    public_records = _public_records(config.BOOKSHOP_SNAPSHOT)
+    cases = sealed_store.load_drawn_cases(conn, run_id)
+    # Score against the snapshot this run actually consumed, never the module
+    # default (the Slice 5 review's latent bug; program design S5.3/S5.5).
+    public_records = _public_records(Path(run.shop_snapshot_ref))
     mission = reducer.load_mission(config.BOOKSHOP_MISSION)
 
     try:
         check_results: list[CheckResult] = []
         for result in evaluator.evaluate(outputs, cases, version.contract, public_records):
+            # count_check_results sees this transaction's earlier inserts, so the
+            # ordinal is not double-counted by len(check_results).
             result = result.model_copy(
-                update={"id": f"cr-{repo.count_check_results(conn) + len(check_results) + 1:04d}"}
+                update={"id": f"cr-{repo.count_check_results(conn) + 1:04d}"}
             )
             repo.insert_check_result(conn, result)
             check_results.append(result)
@@ -317,15 +458,18 @@ def finalize_run(conn: sqlite3.Connection, run_id: str) -> Run:
                 pairs.append((result, transition))
 
         drafts = reducer.reduce(mission, outputs, check_results, version.contract)
+        resolutions = _resolution_drafts(conn, run, cases, check_results)
         existing = repo.list_ledger_events(conn, shift.engagement_slug)
         events = chain.append(
-            drafts,
+            drafts + [draft for _, draft in resolutions],
             prev_hash=chain.next_prev_hash(existing),
             start_seq=chain.next_seq(existing),
         )
         for event in events:
             repo.insert_ledger_event(conn, shift.engagement_slug, event)
         _open_incidents(conn, run, pairs, events)
+        for (incident_id, _draft), event in zip(resolutions, events[len(drafts):]):
+            repo.resolve_incident(conn, incident_id, run.artifact_version_id, event.seq)
         repo.update_run(conn, run_id, RunState.FINALIZED, ended_at=_now())
         conn.commit()
     except Exception:
@@ -368,17 +512,18 @@ def get_incident(conn: sqlite3.Connection, incident_id: str) -> Incident:
     return incident
 
 
-def customer_text_for(output: RunOutput) -> str | None:
+def customer_text_for(output: RunOutput, shop_snapshot_ref: str) -> str | None:
     """Derive the customer-facing sentence from an output's raw body (S5.6).
 
     Returns None when the body does not parse, a cited ref resolves to no public
     record, or the attested age is false; the exact raw bytes stay available as
-    ``body_base64`` on the view.
+    ``body_base64`` on the view. Records come from the run's own snapshot, so the
+    rendered sentence matches the records the run was scored against.
     """
     try:
         response = ServiceResponse.model_validate_json(output.body)
         validated = customer_answer.validate_service_response(
-            response, _public_records(config.BOOKSHOP_SNAPSHOT)
+            response, _public_records(Path(shop_snapshot_ref))
         )
     except (ValueError, ServiceResponseInvalid):
         return None

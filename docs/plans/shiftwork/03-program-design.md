@@ -1,8 +1,11 @@
 # Program Design: Shiftwork — first bookshop engagement (+ away-shift config)
 
-Gate: 3 — Program Design (APPROVED 2026-09-16; BACKTRACKED 2026-09-17 — test 33
-close-semantics ambiguity and a missing credential-reachability test specification —
-and RE-APPROVED 2026-09-17; BACKTRACKED a second time 2026-09-17 — the S2 file map
+Gate: 3 - Program Design (RE-APPROVED 2026-09-19 after the scoped fourth
+backtrack; the user approved the revised document in chat).
+
+Approval history: APPROVED 2026-09-16; BACKTRACKED 2026-09-17 for test 33
+close-semantics ambiguity and a missing credential-reachability test specification,
+and RE-APPROVED 2026-09-17; BACKTRACKED a second time 2026-09-17 - the S2 file map
 omitted packaging (`pyproject.toml`, `requirements.lock`), the `demos/` entry points
 and the clean-env install check — and RE-APPROVED 2026-09-17 after S2 and test 51
 were revised; a consistency correction was applied the same day during the Gate 4
@@ -11,8 +14,40 @@ review at the user's direction: the provisional Python bound in S2 was tightened
 2026-09-18, scoped to one S5.6 sentence: the independent Slice 5 review (item K)
 found "never `expected_ref`" contradicted test 13's mandated opaque-ref assertion;
 S5.6 now permits `expected_ref` only as the opaque `sealed:` content digest, with
-no behavior change; and RE-APPROVED 2026-09-18). Written 2026-09-15;
-revised 2026-09-16, 2026-09-17 and 2026-09-18.
+no behavior change; and RE-APPROVED 2026-09-18. BACKTRACKED a fourth time
+2026-09-19 for loader/signature/call-stack alignment with the re-approved Gate 2
+decision, explicit `public_records` scoring input, purity/import checks and
+opaque expected-ref/identity-projection reconciliation; RE-APPROVED 2026-09-19
+after the user approved the revised document in chat. Written 2026-09-15;
+revised 2026-09-16, 2026-09-17, 2026-09-18 and 2026-09-19.
+
+### Scoped revision: loader ownership and safe projections
+
+Gate 2 was explicitly re-approved on 2026-09-19: controller orchestration loads
+sealed cases and passes explicit inputs to a pure scorer. This Gate 3 backtrack
+aligns S2's file responsibilities, S3.4's loader/scorer signatures and S5's call
+stack with that decision. Public shop records become an explicit scoring input;
+existing planned visible-check inputs are retained, not removed to match the
+current partial implementation.
+
+Test 11 separates permitted loader I/O from scoring purity; test 17 specifies the
+runtime importer set and fail-closed treatment of computed dynamic-import targets.
+Test 13 and S3.9 reconcile the already permitted opaque `expected_ref` with the
+ban on exposing sealed case/check identities. Public CheckResult IDs remain usable
+in ledger and incident links. The digest is stable and can be correlated across
+runs; opaque does not mean unlinkable or prove hidden inventory size.
+
+The approved `GET`/`PUT /api/shifts/{id}/artifact` route remains unchanged. The
+existing `/draft` implementation is a repair item, not a newly approved route.
+Other signatures, product decisions, reason wording, test numbering and the plain
+HTML/CSS/vanilla-JS baseline are unchanged. The document describes the target
+contract, not proof that every input, projection or test clause is implemented.
+At revision time, Gate 4 clause ownership and ADR reconciliation followed
+separately and the repairs awaited the required re-approvals; the Gate 3 and Gate 4
+re-approvals were recorded later the same day (see `00-status.md`), and the Gate 4
+follow-up revision of 2026-09-19 assigns the remaining scoring-input alignment to
+Slice 10 (RE-APPROVED by the user in chat on 2026-09-19).
+
 Scope: the approved architecture (`02-architecture.md`) concretized to the file,
 type, call-stack, test and configuration level. **No implementation code** — types
 and signatures only. Nothing here authorizes implementation; slices start after
@@ -71,7 +106,7 @@ shiftwork/
     repo.py              Raw parameterized SQL functions, one group per table; rows validated into models
     seed.py              Seeds engagements, request batches, shop snapshots, check templates
   evaluator/
-    evaluator.py         Controller-only sealed loader plus pure evaluate(); no network or LLM.
+    evaluator.py         SealedCase/SealedCaseSet types and pure evaluate() over explicit inputs; no file/database access, network or LLM
   ledger/
     reducer.py           Pure reduce(...) -> unchained event drafts (S3.4)
     chain.py             Event hash assignment + verify_chain(); used inside the finalization transaction
@@ -81,7 +116,7 @@ shiftwork/
     recorded.py          Transcript replay adapter: deterministic captures from recorded fixtures
     tokenfactory.py      Real sandbox adapter — lands in Gate 4 after the spike (S9). Same Protocol.
   sealed/
-    store.py             Sealed case specs + expected values accessor; rotation draws delegate to rotation.py
+    store.py             Controller-only load_drawn_cases() accessor called by orchestrator; imports evaluator input types; resolves saved rotation draws
     rotation.py          Draw-without-replacement policy, cycle accounting, exhaustion handling
     cases/               Sealed case data (bookshop + bike co-op). Never mounted into a sandbox, never in a prompt.
   assist/
@@ -89,7 +124,7 @@ shiftwork/
   curation/
     pipeline.py          Offline Tavily curation CLI (discover → human verify → freeze fixture). Never imported by app.py.
     ablation.py          Three-arm historical-replay protocol and pre-registered Tavily kill thresholds
-  orchestrator.py        Shift/run lifecycle; budget enforcement; idempotent finalization; startup reconciliation
+  orchestrator.py        Shift/run lifecycle; sole runtime importer of sealed.store outside sealed/; loads cases/public records for pure scoring; budget, finalization and startup reconciliation
   client/                Static HTML/CSS/vanilla JS implementing the six mockups; no framework, no build step
   fixtures/
     catalogs/            Immutable versioned contract catalogs; used versions are never rewritten
@@ -275,7 +310,7 @@ class CheckResult(BaseModel):           # append-only
     check_id: Id
     verdict: Literal["pass", "fail", "error"]
     observed_ref: str
-    expected_ref: str | None            # opaque id into the sealed store; never a renderable value
+    expected_ref: str | None            # opaque sealed: content digest; never a path or expected value
     reason_code: ReasonCode | None
 
 class LedgerEventType(StrEnum):
@@ -450,6 +485,19 @@ class SealedCase(BaseModel):
 class SealedCaseSet(BaseModel):          # loaded controller-side; expected values never render
     cases: tuple[SealedCase, ...]
 
+def evaluate(
+    outputs: Sequence[RunOutput],
+    check_defs: Sequence[CheckDef],
+    visible_checks: Sequence[VisibleCheck],
+    sealed_cases: SealedCaseSet,
+    contract: ContractParams,
+    public_records: dict[str, JsonValue],
+) -> list[CheckResult]: ...
+
+# sealed/store.py
+def load_drawn_cases(run_id: Id) -> SealedCaseSet: ...
+
+# ledger/reducer.py - pure
 class MissionFixtures(BaseModel):        # inspectable scenario rules (brief S5: weights must be inspectable)
     weights: dict[str, int]
     transitions: tuple[str, ...]         # symbolic transition rules resolved by the reducer
@@ -460,17 +508,6 @@ class CloseShiftFacts(BaseModel):
     unresolved_incident_ids: tuple[Id, ...]
     committed_contract: ContractParams
 
-def load_drawn_cases(run_id: Id) -> SealedCaseSet: ...
-
-def evaluate(
-    outputs: Sequence[RunOutput],
-    check_defs: Sequence[CheckDef],
-    visible_checks: Sequence[VisibleCheck],
-    sealed_cases: SealedCaseSet,
-    contract: ContractParams,
-) -> list[CheckResult]: ...
-
-# ledger/reducer.py — pure
 def reduce(
     fixtures: MissionFixtures,
     raw_outputs: Sequence[RunOutput],
@@ -483,6 +520,16 @@ def reduce_close(
     facts: CloseShiftFacts,
 ) -> list[LedgerEventDraft]: ...
 ```
+
+`orchestrator.finalize_run` calls `sealed.store.load_drawn_cases`, which resolves
+the already reserved case identities; it does not make a new draw. The loader may
+read controller files and persisted draw records. It imports `SealedCase` and
+`SealedCaseSet` from `evaluator.evaluator`; the scorer does not import the loader.
+Orchestration also prepares `public_records` from the run's frozen
+`shop_snapshot_ref` (S5.3) before calling `evaluate`. The scorer receives data,
+not filesystem paths or a database connection, and performs no file/database,
+network or LLM access. This specifies the target per-run binding, not evidence
+that the current global-snapshot implementation already provides it.
 
 The architecture's `reduce(...) -> events` is realized as: the reducer returns
 **unchained drafts**; `reduce_close` does the same for shift-close facts without
@@ -671,6 +718,7 @@ class CheckResultView(BaseModel):
     public_check_id: Id | None
     verdict: Literal["pass", "fail", "error"]
     observed_ref: Id
+    expected_ref: str | None             # only the opaque sealed: content digest, never an expectation
     reason_code: ReasonCode | None
 
 class IncidentView(BaseModel):
@@ -728,17 +776,26 @@ class AssistEventView(BaseModel):
 `customer_answer` exists only after structured validation; malformed or contradictory
 fields produce a failed check and no customer-facing sentence. `DraftView` is the sole
 browser path for editable file contents. Durable `storage_ref`, `request_ref`,
-`response_ref`, `shop_snapshot_ref`, `sandbox_ref` and sealed refs never appear in a
-public projection.
+`response_ref`, `shop_snapshot_ref`, `sandbox_ref`, sealed-store keys and sealed
+file paths never appear in a public projection. The sole sealed-reference exception
+is `CheckResultView.expected_ref`: when present, its content-digest form is `sealed:`
+followed by exactly 64 lowercase hexadecimal characters, never an expected scalar,
+JSON block, case identifier or resolvable storage path.
 `request_text` is read from this run's frozen request batch at `request_ordinal`, only
 for an executed request; no future batch lookup is exposed. `public_check_id` links
 only a learner-visible check definition (the builder's `VisibleCheck.id` is retained
 when creating its `CheckDef`); it is null for sealed results. Thus the client can show
 the current customer request and "Visible check passed" without a sealed check id.
-Public refs resolve only to permitted evidence, never filesystem paths or sealed
-store keys. `CheckResult.expected_ref`, rotation identities and expectations have no
-fields in these projections. Ledger payloads and cause refs must also pass the same
-outbound allowlist; wrapping an internal row does not make its nested fields safe.
+Public evidence refs resolve only to permitted evidence, never filesystem paths or
+sealed store keys. Sealed `SealedCase.id`, `SealedCase.check_id`, internal
+`CheckResult.check_id`, rotation identities and renderable expectations are not
+projected. `CheckResult.id` is a separate public result ID, safe for ledger cause
+refs, derivations and incident links; a link named `check_id` must refer to that
+public ID, never to the sealed case/check identity. The opaque expected digest is
+stable across repeated use of the same case: correlation is possible, but the
+value itself is not an inventory count or ordering guarantee. Ledger payloads,
+nested incident comparisons and cause refs must pass the same outbound allowlist;
+wrapping an internal row does not make its nested fields safe.
 
 A mismatch pair may use an independently published shop record, with its own
 provenance, never a value copied from the sealed store. When no public record exists,
@@ -777,7 +834,8 @@ must visibly render "Synthetic scenario", not just carry a JSON boolean.
 
 Errors are typed: every non-2xx maps to a `domain/errors.py` kind rendered with a
 stable `error_code` string. View models (`BoardView`, `LedgerView`, …) are response-only
-projections so no sealed ref or internal row shape leaks by accident.
+projections: internal store refs and row shapes are excluded, with only the opaque
+`CheckResultView.expected_ref` exception defined in S3.9.
 
 ## 5. Call stack
 
@@ -821,8 +879,9 @@ Reservation uses durable exposure history across **all shifts and cycles** for t
 engagement. Uniqueness covers `(shift_id, attempt_number)`, `(run_id, family)` and
 `(engagement_slug, variant_ref)`. A committed reservation consumes its attempt and
 variants even if provisioning fails or the controller crashes. A retry needs a new
-reservation; the evaluator loads exactly the persisted draws, not a fresh draw or
-an entire group. Inventory and exhaustion rules are specified in S7.1.
+reservation; orchestration calls `sealed.store.load_drawn_cases` to load exactly
+the persisted draws and supplies them to the evaluator, not a fresh draw or an
+entire group. Inventory and exhaustion rules are specified in S7.1.
 
 ### 5.4 Execute run (async)
 `orchestrator.execute_run → executor adapter .execute(RunRequest)` → local process /
@@ -831,9 +890,11 @@ recorded / tokenfactory (Gate 4) → **raw bytes only** → `normalize_captures`
 Failure → state=FAILED + `failure_kind`; outputs stay as evidence; no checks, no events.
 
 ### 5.5 Finalize: evaluate → reduce → chain (one transaction)
-`orchestrator.finalize_run → evaluator.load_drawn_cases(run_id) →
-evaluator.evaluate(outputs, checks, visible_checks, drawn_cases, contract)` →
-`CheckResult[]` → `repo.insert_check_results`
+`orchestrator.finalize_run → sealed.store.load_drawn_cases(run_id)` → orchestration
+loads public records from the run's frozen `shop_snapshot_ref` →
+`evaluator.evaluate(outputs, check_defs, visible_checks, drawn_cases, contract, public_records)` →
+`CheckResult[]` → orchestration assigns public result IDs independent of sealed
+case/check identities → `repo.insert_check_results`
 → `reducer.reduce(fixtures, outputs, results, contract)` → drafts → `chain.append(drafts,
 prev_hash, start_seq)` → `repo.insert_ledger_events` → open/resolve incidents →
 `repo.set_run_state(FINALIZED)`. All of it commits together; a failure anywhere writes
@@ -926,12 +987,20 @@ conformance gate and rendered client assertions run in their Gate 4 browser slic
     `replay(events)` after every scenario; inheritance seeds match.
 
 ### C. Evaluator (`tests/evaluator/`)
-11. `test_evaluator_import_closure_no_network_no_llm` — transitive imports contain no
-    HTTP client, no assist module, no socket use; full evaluation passes with sockets blocked.
+11. `test_evaluator_import_closure_no_network_no_llm` - evaluator and sealed-loader
+    transitive imports contain no HTTP client, assist module or socket use. After
+    inputs are prepared, full `evaluate` passes with file/database access and sockets
+    blocked. Loader file/database I/O is permitted outside that scoring phase; the
+    scorer never imports or calls the loader. Injected scoring I/O must fail this test.
 12. `test_evaluator_negative_control` — a deliberately broken artifact transcript yields
     failing verdicts (protects against an always-pass evaluator).
-13. `test_check_results_never_contain_expected_values` — results and API payloads contain
-    only reason codes and opaque refs.
+13. `test_check_results_never_contain_expected_values` - sealed results carry only
+    an opaque expected digest, never a copied expected value. A non-null
+    `expected_ref` in a result or API projection matches `sealed:[0-9a-f]{64}` and
+    the case's computed content digest. API payloads omit sealed case/check IDs,
+    including nested incident and ledger links, while retaining independent public
+    CheckResult IDs. A raw expected block, prefixed raw block or sealed identity in
+    a public link must fail; internal check-to-case linkage is not itself projected.
 14. `test_contract_parameterized_checks` — the same transcript passes or fails depending
     on committed catalog options exactly where the contract legitimately allows both;
     the evaluator checks consistency with the chosen stance rather than rewarding one
@@ -943,8 +1012,17 @@ conformance gate and rendered client assertions run in their Gate 4 browser slic
 16. `test_sentinel_sealed_string_never_leaves_controller` — a unique sentinel value placed
     in a sealed case appears in no sandbox payload, no prompt, no API response, no log
     (scan of every serialized outbound surface).
-17. `test_sealed_import_graph` — `executor/`, `assist/`, `api/`, `client` never import
-    `shiftwork.sealed`; only `evaluator` does.
+17. `test_sealed_import_graph` - within the `shiftwork` application package, the
+    only importer of `shiftwork.sealed` or its submodules outside `sealed/` is
+    `orchestrator.py`. Executor, assist, API, client, persistence, ledger, domain,
+    curation and evaluator modules never directly import or call the sealed store.
+    Resolve absolute/relative imports and literal dynamic-import targets; reject
+    computed targets for `__import__` and `importlib.import_module`, including
+    explicit import aliases, rather than assume they are safe. Scan client source
+    for sealed-store references. Independent forbidden-importer, exact-allowlist,
+    relative-import, computed-target and client-reference mutations must each fail.
+    Operator-only tools and tests outside the runtime package remain separate from
+    learner/model interfaces; their authorized case inspection is not a runtime edge.
 18. `test_sandbox_payload_manifest_exact` — provisioning file list equals the allowlist
     (artifact snapshot, current request batch, harness, frozen shop snapshot). Sealed
     specs/expectations are absent from the manifest, every API response and every prompt

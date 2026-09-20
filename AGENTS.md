@@ -51,18 +51,31 @@ summaries when a time-sensitive external claim is being made.
 - Current gate state: Gate 1 — Product RE-APPROVED 2026-09-18 (first approved
   2026-09-15; backtracked and revised the same day for the explicit junior applied
   AI engineer role framing and the selected isometric operational-room visual
-  direction); Gate 2 — Architecture APPROVED 2026-09-15; Gate 3 — Program Design
-  APPROVED 2026-09-17 (re-approved a second time after the S2 packaging backtrack —
+  direction); Gate 2 - Architecture RE-APPROVED 2026-09-19 after the scoped
+  backtrack (originally APPROVED 2026-09-15; orchestration-owned sealed loading
+  and pure evaluator inputs explicitly approved); Gate 3 - Program Design
+  RE-APPROVED 2026-09-19 after the scoped fourth backtrack for
+  loader/signature/call-stack, purity/import checks and opaque-ref/public-identity
+  projection reconciliation; the user approved the revised document in chat. Prior
+  Gate 3 approval history: APPROVED
+  2026-09-17 (re-approved a second time after the S2 packaging backtrack -
   `pyproject.toml`, `requirements.lock`, `demos/`, test 51; history: first backtrack
   re-approved 2026-09-17, originally approved 2026-09-16; BACKTRACKED a third time
   2026-09-18, scoped to one S5.6 sentence: the independent Slice 5 review found
   "never `expected_ref`" contradicted test 13's opaque-ref assertion, and the
   reconciled wording permits `expected_ref` only as the opaque `sealed:` digest
   with no behavior change; RE-APPROVED a third time 2026-09-18; the plain
-  HTML/CSS/vanilla-JS client baseline is unchanged, so a framework or rendering
-  engine for the isometric room would reopen Gate 3); Gate 4 — Slice Plan
-  RE-APPROVED 2026-09-18 (first approved 2026-09-17 after three review rounds; the
-  reopen was scoped to the rewritten Slice 9 to 11 requirements.
+  HTML/CSS/vanilla-JS client baseline is unchanged, and framework or rendering
+  engine changes are outside this Gate 3 backtrack); Gate 4 - Slice Plan
+  RE-APPROVED 2026-09-19 after the scoped reconciliation revision (first approved
+  2026-09-17 after three review rounds; the 2026-09-18 reopen was scoped to the
+  rewritten Slice 9 to 11 requirements; the 2026-09-19 revision re-homed the revised
+  test 11/13/17 runtime checks and the audit's Slice 6 gaps, added snapshot pairing to
+  Slice 7, restart recovery to Slice 8, prompt/real-provisioning mapping to Slices
+  12/14 and the affected-ADR check to slice completion; the user approved it in chat
+  on 2026-09-19; a same-day follow-up revision (Slice 7 leak-response invalidation;
+  Slice 10 scoring-input alignment; Slice 6 repair scope unchanged) was approved by
+  the user in chat on 2026-09-19.
   Slice work proceeds one slice at a time under `04-slices.md` S10; installs,
   credentials, external services, spike runs, deployment, outreach and ADR #4 remain
   separately authorized). Slices 1 (tracer bullet, 2026-09-17),
@@ -75,10 +88,41 @@ summaries when a time-sensitive external claim is being made.
   (reducer + hash chain + idempotent finalization, 2026-09-18) is
   implemented and demonstrated; its independent review's fixes (a failing-capable
   chain-linkage test, route-level BROKEN 409 tests, corrected deferral and
-  snapshot wording) landed the same day; slices 6-17 are not implemented.
-  Test 50 is partial
-  (offline environment clauses only); test 29 is explicitly skipped until Slice 14.
-  This is a trusted-fixture execution guard, not hostile-code isolation.
+  snapshot wording) landed the same day. Slice 6 (isolation and leakage
+  hardening) was repaired 2026-09-19: its four previously invisible injected faults
+  and two probes now each fail the suite, and the same-day adversarial review round
+  reproduced those rows and resolved its MAJOR-1 (error responses scanned),
+  MINOR-1/2/3 items (containment normalization, import-guard forms plus a
+  sealed-path rule, scanner decoder coverage) and the NITs, each with a
+  failing-capable proof (evidence in the 00-status Slice 6 repair and review-round
+  sections); a fresh-session independent re-review returned PASS on 2026-09-19
+  (fourteen probes each failing the named guard and restored content-identically;
+  suites and demos reproduced verbatim; evidence in the 00-status Slice 6 re-review
+  and acceptance section), and the user's same-day instruction accepted the slice.
+  Test 19's pinned map is supported; the tests 16-18, 20 and 45 gaps are closed and
+  re-verified.
+  Prompt/assist and real-sandbox surfaces remain deferred to Slices 12/14; future
+  stimuli require Slice 7. Exact remaining clause ownership was reconciled and
+  re-approved at Gate 4 (2026-09-19), not silently treated as delivered. The removal of the sealed
+  `CheckResultView.check_id` is retained; ledger `check_id` values are public result
+  IDs, not sealed identities. Numbered sealed IDs expose identity/numbering, not
+  necessarily the entire inventory size. Slices 8-17 are not implemented; Slice 7
+  (budget + rotation + incidents + repair) started 2026-09-19 on
+  `shiftwork/slice-7` and is in progress.
+  Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
+  Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
+  leak-response invalidation; Slice 10 scoring-input alignment) was approved by the
+  user in chat on 2026-09-19. Slice 6 is repaired, re-reviewed PASS and accepted
+  (2026-09-19); the review round's findings were resolved the same day. The revised
+  test 11/13/17 clauses are specifications, not new passing evidence; Gate 4 mapped
+  their current-runtime checks into the Slice 6 repair and preserved later
+  prerequisites (re-approved 2026-09-19). ADR reconciliation is recorded (2026-09-19; see `docs/adr/`); ADR #4 still
+  requires Slice 13 evidence and separate authorization. Test 50 is partial (offline
+  environment clauses only); test 29 is explicitly skipped until Slice 14. The
+  2026-09-19 audit excluded packaging test 51 because installs were prohibited;
+  its full-suite claim remains unverified. This is a trusted-fixture execution
+  guard, not hostile-code isolation. Current evidence is in `00-status.md` under
+  "Slice 6 independent re-review and acceptance: 2026-09-19".
 - On 2026-09-15 the user explicitly scrapped Hatchery as the active project and
   selected Shiftwork for software-factory planning. Do not resume Hatchery or
   general idea shopping unless the user explicitly reopens it.
@@ -174,8 +218,10 @@ Rules:
   explicit re-approval.
 - After Gate 4 approval, implement one vertical slice at a time. Each slice must end
   in a visible, working, testable result; record the evidence before continuing.
-- After each slice, show the actual result, update `00-status.md`, and ask whether
-  to continue or re-steer. Do not build horizontal layers that cannot run end to end.
+- After each slice, show the actual result, update `00-status.md`, then invoke the
+  `architect-reviewer` skill (post-slice cleanup mode) to scan for stale or redundant
+  files before asking whether to continue or re-steer. Do not build horizontal layers
+  that cannot run end to end.
 - Documentation-only maintenance, instruction consolidation and other small changes
   that do not alter product behavior do not create a new product gate.
 
@@ -212,6 +258,11 @@ Rules:
   assume `rtk` exists or that PowerShell permits `.ps1` npm shims.
 - Do not create branches, commits, tags or pushes unless the user has authorized
   that Git operation. Never stage everything implicitly.
+- Before starting work on each slice, check the current branch with
+  `git branch --show-current`. If the branch name does not match the slice being
+  started, create and switch to a branch named `shiftwork/slice-N` where N is the
+  slice number. Do not begin slice implementation on main or on a branch for a
+  different slice.
 - Commit in coherent batches, never one bulk snapshot. When committing or
   publishing a branch, stage one concern at a time (roughly a few related files
   per commit, for example five files out of thirty) and give each commit a
@@ -230,7 +281,8 @@ Rules:
 - Before starting work, scan `MISTAKES.md` for entries relevant to the current task
   and follow their prevention rules.
 - When a failure pattern repeats 4+ times, graduate it from `MISTAKES.md` into a
-  permanent rule in this file and remove the log entry.
+  permanent rule in this file. Graduated entries stay in `MISTAKES.md` as incident
+  history unless the user asks for their removal.
 
 ### Verification
 
@@ -239,6 +291,16 @@ Rules:
   to the change's risk.
 - Tests must be capable of failing against the broken or pre-change behavior. Never
   delete, skip, weaken or silence a check merely to obtain green output.
+- Prove coverage, do not count it. A check that names every input it tries is not
+  evidence that every guard branch fires: mutate each branch independently and
+  require one real failure per branch, and treat a fault two checks can both catch
+  as proof of neither.
+- For every absence or leak assertion, prove the needle can match the surface as
+  serialized, not as held in memory. Add a scanner self-test that injects the needle
+  into a representative serialized surface and requires detection. A count of
+  surfaces scanned is not evidence that any individual needle is capable of failing.
+  On Windows a JSON response backslash-escapes absolute paths, so path needles must
+  be checked in raw, unescaped and forward-slash forms.
 - If a test is invalid, explain why and preserve the evidence. If it fails once and
   passes on rerun, report it as flaky; do not treat one rerun as clean proof.
 - For implementation, run focused checks while iterating and the relevant full suite

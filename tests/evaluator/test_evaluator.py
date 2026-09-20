@@ -126,7 +126,9 @@ def _records() -> dict:
 
 
 def _cases():
-    return sealed_store.load_drawn_cases("run-0001")
+    # The evaluator-level tests score a full family directly; run-scoped draw
+    # resolution lives in the orchestrator tests.
+    return sealed_store.load_family(sealed_store.STALE_INFORMATION)
 
 
 def _by_check(results):
@@ -329,10 +331,11 @@ def test_check_results_never_contain_expected_values():
             started = client.post(f"/api/shifts/{shift['id']}/runs")
             assert started.status_code == 202
             checks = client.get(f"/api/runs/{started.json()['id']}/checks").json()
-    assert len(checks) == 1
-    assert checks[0]["reason_code"] == "STALE_BEYOND_RULE"
-    ref = checks[0].pop("expected_ref")
-    assert ref.startswith("sealed:") and len(ref) == len("sealed:") + 64
+    assert len(checks) == len(config.BOOKSHOP_FAMILIES)
+    for check in checks:
+        assert check["reason_code"] == "STALE_BEYOND_RULE"
+        ref = check.pop("expected_ref")
+        assert ref.startswith("sealed:") and len(ref) == len("sealed:") + 64
     serialized = json.dumps(checks, sort_keys=True)
     for value in sealed_values:
         assert value not in serialized
@@ -397,17 +400,17 @@ def test_unknown_sealed_schema_version_alarms(tmp_path, monkeypatch):
     family["cases"][0]["schema_version"] = 2
     _write_family(tmp_path, family)
     with pytest.raises(UnsupportedSealedSchema):
-        sealed_store.load_drawn_cases("run-0001")
+        sealed_store.load_family(sealed_store.STALE_INFORMATION)
 
     family = _family_copy()
     family["schema_version"] = 2
     _write_family(tmp_path, family)
     with pytest.raises(UnsupportedSealedSchema):
-        sealed_store.load_drawn_cases("run-0001")
+        sealed_store.load_family(sealed_store.STALE_INFORMATION)
 
     # A valid family still loads from the patched directory.
     _write_family(tmp_path, _family_copy())
-    cases = sealed_store.load_drawn_cases("run-0001")
+    cases = sealed_store.load_family(sealed_store.STALE_INFORMATION)
     assert len(cases.cases) == 6
 
 
@@ -421,7 +424,7 @@ def test_sealed_case_ordinals_must_be_usable(tmp_path, monkeypatch):
         family["cases"][0]["request_ordinals"] = broken
         _write_family(tmp_path, family)
         with pytest.raises(InvalidSealedCase):
-            sealed_store.load_drawn_cases("run-0001")
+            sealed_store.load_family(sealed_store.STALE_INFORMATION)
 
 
 def test_validation_failure_through_evaluate_is_malformed_response():
