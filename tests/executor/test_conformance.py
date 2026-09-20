@@ -43,7 +43,11 @@ def request_for(executor, case_name="happy_path", deadline_s=5):
             path_ref="bookshop.jsonl",
             content_hash=canonical.content_hash(base64.b64encode(batch.read_bytes()).decode("ascii")),
         ),
-        shop_snapshot_ref=str(config.BOOKSHOP_SNAPSHOT),
+        # The checked-in recorded transcripts this suite compares against are
+        # authored for the thin snapshot; local_process answers from the request
+        # alone, so this shared request is snapshot-pairing-pinned, not a binding
+        # default (the controller's default run binding is tested in tests/api).
+        shop_snapshot_ref=str(config.THIN_SNAPSHOT),
         harness_ref="stdlib-loopback-v1",
         image_ref="local-python-stdlib",
         deadline_s=deadline_s,
@@ -316,7 +320,7 @@ def test_controller_normalizes_once_and_retains_failed_capture(executor, monkeyp
     def observed(raw, deadline_s):
         normalized.append(tuple(raw))
         return original(normalized[-1], deadline_s)
-    monkeypatch.setattr(orchestrator, "_adapter", lambda: FailedAdapter())
+    monkeypatch.setattr(orchestrator, "_adapter_for", lambda run: FailedAdapter())
     monkeypatch.setattr(executor.base, "normalize_captures", observed)
     path = tmp_path / "executor.db"
     contract = json.loads((config.FIXTURE_DIR / "artifacts" / "bookshop" / "contract.json").read_bytes())
@@ -507,11 +511,10 @@ def test_recorded_preserves_termination_after_partial_response(executor, tmp_pat
 @pytest.mark.parametrize("change", ["missing_status", "unmarked_non_utf8"])
 def test_recorded_failure_cannot_finalize_and_retains_valid_evidence(executor, monkeypatch, tmp_path, change):
     from fastapi.testclient import TestClient
-    from shiftwork import orchestrator
     from shiftwork.app import create_app
     from shiftwork.store import db, repo
 
-    transcript = json.loads(config.THIN_TRANSCRIPT.read_bytes())
+    transcript = json.loads((config.FIXTURE_DIR / "runs" / "thin_stale.json").read_bytes())
     capture = transcript["captures"][0]
     capture["log_base64"] = base64.b64encode(b"log").decode("ascii")
     if change == "missing_status":
@@ -520,10 +523,16 @@ def test_recorded_failure_cannot_finalize_and_retains_valid_evidence(executor, m
         capture["body_base64"] = base64.b64encode(b"partial\xff").decode("ascii")
     transcript_path = tmp_path / "transcript.json"
     transcript_path.write_text(json.dumps(transcript), encoding="utf-8")
-    monkeypatch.setattr(orchestrator, "_adapter", lambda: executor.recorded.RecordedAdapter(transcript_path))
+    # The malformed replay stands in for the thin profile's batch-1 pairing, so the
+    # run is bound to the thin snapshot and that one authored pairing is redirected.
+    monkeypatch.setitem(
+        config.RECORDED_TRANSCRIPTS,
+        ("bookshop_attempt_01.jsonl", config.THIN_SNAPSHOT_HASH),
+        str(transcript_path),
+    )
     path = tmp_path / "replay.db"
     contract = json.loads((config.FIXTURE_DIR / "artifacts" / "bookshop" / "contract.json").read_bytes())
-    with TestClient(create_app(str(path))) as client:
+    with TestClient(create_app(str(path), shop_snapshot=config.THIN_SNAPSHOT)) as client:
         shift = client.post("/api/engagements/bookshop/shifts").json()
         frozen = client.post(f"/api/shifts/{shift['id']}/artifact/versions", json={"contract": contract})
         assert frozen.status_code == 201

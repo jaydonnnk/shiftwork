@@ -322,7 +322,9 @@ def test_check_results_never_contain_expected_values():
     import tempfile
 
     with tempfile.TemporaryDirectory(prefix="shiftwork-eval-") as workdir:
-        with TestClient(create_app(str(Path(workdir) / "eval.db"))) as client:
+        with TestClient(
+            create_app(str(Path(workdir) / "eval.db"), shop_snapshot=config.THIN_SNAPSHOT)
+        ) as client:
             shift = client.post("/api/engagements/bookshop/shifts").json()
             contract = json.loads(CONTRACT_FIXTURE.read_text(encoding="utf-8"))
             assert client.post(

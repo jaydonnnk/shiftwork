@@ -82,11 +82,10 @@ def _results() -> list[CheckResult]:
 def _invented_output(run_id: str) -> RunOutput:
     """One captured answer whose stock claim contradicts the runtime snapshot.
 
-    Finalization evaluates against the global ``config.BOOKSHOP_SNAPSHOT`` (the
-    thin-path bookshop snapshot; no per-run pairing mechanism exists yet), so
-    test inputs must cite that snapshot's records. This claim is contradicted by
-    the cited record and scores INVENTED_FACT, which the mission transitions map
-    to INCIDENT_OPENED.
+    Finalization evaluates against the snapshot the run consumed (Slice 7), which
+    under the shipped binding is the fuller bookshop snapshot; this claim is
+    contradicted by the cited record and scores INVENTED_FACT, which the mission
+    transitions map to INCIDENT_OPENED.
     """
     body = json.dumps(
         {

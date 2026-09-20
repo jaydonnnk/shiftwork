@@ -41,7 +41,10 @@ def local_request():
                 path_ref="bookshop.jsonl",
                 content_hash=canonical.content_hash(base64.b64encode(batch.read_bytes()).decode("ascii")),
             ),
-            shop_snapshot_ref=str(config.BOOKSHOP_SNAPSHOT),
+            # Pinned to pair with the checked-in recorded transcripts this suite
+            # replays (authored against the thin snapshot); the controller's own
+            # default run binding is covered by the api and orchestrator suites.
+            shop_snapshot_ref=str(config.THIN_SNAPSHOT),
             harness_ref="stdlib-loopback-v1",
             image_ref="local-python-stdlib",
             deadline_s=5,
