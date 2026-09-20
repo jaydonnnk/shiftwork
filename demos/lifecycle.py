@@ -1,8 +1,10 @@
 """Full-route walkthrough: drive the whole HTTP lifecycle and print every record.
 
 Walks the broader route surface (board, draft read/write, freeze, run, outputs,
-checks, ledger, board, close) against the real Slice 2 thin path. The focused
-Slice 2 evidence demo is demos.thin_path.
+checks, ledger, board, close) against the shipped controller default. Under the
+shipped run binding (Slice 8) the recorded adapter replays the repair arc's first
+attempt, so the run opens one incident per enabled family; the focused thin-path
+evidence demo is demos.thin_path.
 
 Run from the repository root: python -m demos.lifecycle
 """
@@ -122,7 +124,8 @@ def main() -> int:
             print(
                 f"lifecycle evidence complete: run {run_id} FINALIZED, ledger chain "
                 f"{ledger['chain_status']} with {len(ledger['events'])} events, "
-                f"{len(board['open_incidents'])} open incidents (no failing check maps to INCIDENT_OPENED)"
+                f"{len(board['open_incidents'])} open incidents from the shipped "
+                f"repair-arc replay"
             )
     return 0
 

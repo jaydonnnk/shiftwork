@@ -60,7 +60,10 @@ def _poll_run(client: TestClient, run_id: str) -> dict:
 
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="shiftwork-thin-") as workdir:
-        app = create_app(str(Path(workdir) / "thin.db"))
+        # The shipped controller default serves the repair arc (Slice 8); this
+        # thin-path evidence demo binds the thin profile explicitly. Nothing here
+        # reassigns config: the thin snapshot is controller configuration.
+        app = create_app(str(Path(workdir) / "thin.db"), shop_snapshot=config.THIN_SNAPSHOT)
         with TestClient(app) as client:
             status, shift = _call(client, "POST", "/api/engagements/bookshop/shifts")
             _show(f"POST shift -> {status}", shift)

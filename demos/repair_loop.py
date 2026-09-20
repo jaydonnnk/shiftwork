@@ -13,9 +13,10 @@ real controller and database:
   attempt 3  a third distinct attempt draws the third variant per family.
 
 Prints the draw table (family, variant ref, cycle), the incident states and the
-final chain status. Offline and deterministic: the recorded adapter replays one
-checked-in transcript per attempt, and the run scores the stale-family snapshot
-each attempt consumed.
+final chain status. Offline and deterministic: the controller's shipped run
+binding resolves each attempt's authored transcript from the batch and snapshot
+that run persisted (Slice 8), with no config or environment mutation anywhere in
+this demo.
 
 Run from the repository root: python -m demos.repair_loop
 """
@@ -37,8 +38,6 @@ from shiftwork.app import create_app  # noqa: E402
 from shiftwork.store import db, repo  # noqa: E402
 
 TERMINAL_RUN_STATES = {"FINALIZED", "FAILED"}
-RUNS_DIR = config.FIXTURE_DIR / "runs"
-STALE_SNAPSHOT = config.FIXTURE_DIR / "shop" / "bookshop_stale_snapshot.json"
 CONTRACT = {
     "catalog_version": 2,
     "must_never": ["NEVER_INVENT_PRICE_STOCK_POLICY"],
@@ -46,11 +45,6 @@ CONTRACT = {
     "response_time_limit_ms": 3000,
     "declared_limits": [],
 }
-ATTEMPTS = (
-    "bookshop_repair_01_incident.json",
-    "bookshop_repair_02.json",
-    "bookshop_repair_03.json",
-)
 
 
 def _call(client: TestClient, method: str, path: str, **kwargs):
@@ -70,11 +64,6 @@ def _poll_run(client: TestClient, run_id: str) -> dict:
 
 
 def main() -> int:
-    # The recorded adapter is transcript replay: each attempt is paired with the
-    # fixture transcript authored for its stimulus prefix, and every attempt
-    # scores against the stale-family snapshot (selected before the first run and
-    # persisted on each run row).
-    config.BOOKSHOP_SNAPSHOT = STALE_SNAPSHOT
     with tempfile.TemporaryDirectory(prefix="shiftwork-repair-") as workdir:
         db_file = str(Path(workdir) / "repair.db")
         with TestClient(create_app(db_file)) as client:
@@ -88,7 +77,6 @@ def main() -> int:
             )
 
             # Attempt 1: the shipped version fails every family's first variant.
-            config.THIN_TRANSCRIPT = RUNS_DIR / ATTEMPTS[0]
             _, started = _call(client, "POST", f"/api/shifts/{shift_id}/runs")
             run_one = _poll_run(client, started["id"])
             assert run_one["state"] == "FINALIZED", run_one
@@ -112,7 +100,6 @@ def main() -> int:
             assert status == 201, version
 
             # Attempt 2: regressions and the drawn second variants all pass.
-            config.THIN_TRANSCRIPT = RUNS_DIR / ATTEMPTS[1]
             _, started = _call(client, "POST", f"/api/shifts/{shift_id}/runs")
             run_two = _poll_run(client, started["id"])
             assert run_two["state"] == "FINALIZED", run_two
@@ -120,7 +107,6 @@ def main() -> int:
             assert board["open_incidents"] == [], f"incidents did not resolve: {board['open_incidents']}"
 
             # Attempt 3: a third distinct attempt draws a third variant per family.
-            config.THIN_TRANSCRIPT = RUNS_DIR / ATTEMPTS[2]
             _, started = _call(client, "POST", f"/api/shifts/{shift_id}/runs")
             run_three = _poll_run(client, started["id"])
             assert run_three["state"] == "FINALIZED", run_three

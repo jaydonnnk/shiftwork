@@ -7,9 +7,11 @@ chain -> events -> incidents -> FINALIZED). Reads the ledger and outputs back
 over HTTP to show derivation links and catalog-version references resolving to
 raw records, and demonstrates that a second finalize nets zero new events.
 
-The captured answer cites the thin-path bookshop snapshot because finalization
-evaluates against the snapshot the run consumed; the stale-family transcript
-belongs to a different snapshot and is scored by demos.evaluate_transcript.
+The captured answer cites the bookshop snapshot's records because finalization
+evaluates against the snapshot the run consumed (Slice 7); under the shipped run
+binding (Slice 8) that is the fuller engagement snapshot. The stale-family
+transcripts belong to that same snapshot and are scored by
+demos.evaluate_transcript.
 
 Run from the repository root:
   python -m demos.finalize_run
