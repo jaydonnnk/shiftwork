@@ -1,7 +1,8 @@
-"""FastAPI factory. The tracer opens the DB, ensures the schema, seeds the
+"""FastAPI factory. The controller opens the DB, ensures the schema, seeds the
 bookshop engagement and mounts the static client."""
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -37,9 +38,23 @@ async def lifespan(app: FastAPI):
     yield
 
 
-def create_app(db_path: str | None = None) -> FastAPI:
+def create_app(
+    db_path: str | None = None,
+    *,
+    executor: str | None = None,
+    shop_snapshot: str | Path | None = None,
+) -> FastAPI:
+    """Build the controller app; ``executor`` and ``shop_snapshot`` are the
+    controller-side run binding new runs persist (program design 2: adapter
+    selection). Both default to the shipped constants at call time; the learner
+    never selects an executor or a snapshot through the API.
+    """
     app = FastAPI(title="Shiftwork", version="0.2.0-thin", lifespan=lifespan)
     app.state.db_path = db_path or config.db_path()
+    app.state.executor = executor or config.EXECUTOR_ADAPTER
+    app.state.shop_snapshot = (
+        Path(shop_snapshot) if shop_snapshot is not None else config.BOOKSHOP_SNAPSHOT
+    )
     app.add_exception_handler(LifecycleError, lifecycle_error_handler)
     app.add_exception_handler(ShiftworkDomainError, domain_error_handler)
     app.include_router(router)

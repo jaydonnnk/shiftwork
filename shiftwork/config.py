@@ -11,6 +11,12 @@ Slice 6 adds the two pinned isolation constants: the learner-visible reason-code
 render map (Gate 3 S7.2) and the sandbox payload allowlist. Both live here rather
 than in the client or an adapter because they are leak boundaries the tests lint
 against, and the client that consumes the render map lands in Slices 9 to 11.
+
+Slice 8 adds the controller-side run binding: the configured executor adapter, the
+default shop snapshot (the fuller engagement data; the thin-path demos bind the
+minimal fixture instead), and the authored recorded-run pairings keyed by request
+batch plus snapshot content hash, so `execute_run` resolves a transcript from the
+run row alone and fails closed on an absent pairing.
 """
 
 import os
@@ -25,7 +31,10 @@ BOOKSHOP_SLUG = "bookshop"
 BOOKSHOP_BUSINESS_KIND = "bookshop"
 BOOKSHOP_DISPLAY_NAME = "The Ironbridge Bookshop"
 INCIDENT_PREFIX = "BWB"
-TRACER_ADAPTER = "recorded"
+# The controller-configured executor persisted on every new run row. The learner
+# never selects an executor through the API; `create_app(executor=...)` configures
+# the controller, and `execute_run` resolves the adapter from the run row.
+EXECUTOR_ADAPTER = "recorded"
 GENESIS_HASH = "0" * 64
 
 # Bookshop engagement_config seed (S7.1 defaults, user-accepted 2026-09-17).
@@ -79,13 +88,35 @@ SANDBOX_PAYLOAD_ALLOWLIST: tuple[str, ...] = (
 
 FIXTURE_DIR = PACKAGE_DIR / "fixtures"
 CATALOG_DIR = FIXTURE_DIR / "catalogs"
-THIN_TRANSCRIPT = FIXTURE_DIR / "runs" / "thin_stale.json"
-BOOKSHOP_SNAPSHOT = FIXTURE_DIR / "shop" / "bookshop_snapshot.json"
+# The shop snapshot the controller binds to new runs by default: the fuller
+# engagement data, which supports every authored variant. The thin-path evidence
+# demos bind THIN_SNAPSHOT instead via `create_app(shop_snapshot=...)`.
+BOOKSHOP_SNAPSHOT = FIXTURE_DIR / "shop" / "bookshop_stale_snapshot.json"
+THIN_SNAPSHOT = FIXTURE_DIR / "shop" / "bookshop_snapshot.json"
 BOOKSHOP_MISSION = FIXTURE_DIR / "mission" / "bookshop_mission_v2.json"
 SEALED_CASES_DIR = PACKAGE_DIR / "sealed" / "cases"
 CLIENT_DIR = PACKAGE_DIR / "client"
 ARTIFACT_TEMPLATE_DIR = PACKAGE_DIR / "templates" / "artifact"
 THIN_BATCH_HASH = "a16e1895f1f5d21aeb01fdf73759712c16bb63fcddfce1638213a29e9c00757c"
+
+# Pinned content hashes of the two shop snapshots, re-verified against the fixture
+# files by a guard test. They key the recorded pairings below, so edited snapshot
+# bytes leave those pairings unmapped and their recorded runs fail closed instead
+# of replaying a transcript authored for different data.
+BOOKSHOP_SNAPSHOT_HASH = "230d6f8aeb3eff61cb5d68ebaafe1fa5ce365aba4c9a9c0b96b85b8541cc0131"
+THIN_SNAPSHOT_HASH = "bd66a4136c8dc1156ff50645195d437328cb3ea18206be9eba976d3ea168933f"
+
+# Authored recorded-run pairings: the run's persisted request batch plus the
+# content hash of the snapshot it consumed select the transcript fixture (program
+# design 3.3). An absent pairing fails closed with PROVISION_FAILED and never
+# substitutes another pair's transcript; the recorded adapter's own hash check
+# re-validates the selected transcript against the run on replay.
+RECORDED_TRANSCRIPTS: dict[tuple[str, str], str] = {
+    ("bookshop_attempt_01.jsonl", BOOKSHOP_SNAPSHOT_HASH): "bookshop_repair_01_incident.json",
+    ("bookshop_attempt_02.jsonl", BOOKSHOP_SNAPSHOT_HASH): "bookshop_repair_02.json",
+    ("bookshop_attempt_03.jsonl", BOOKSHOP_SNAPSHOT_HASH): "bookshop_repair_03.json",
+    ("bookshop_attempt_01.jsonl", THIN_SNAPSHOT_HASH): "thin_stale.json",
+}
 
 # The manifest alone is caller-supplied, so exact file bytes have a separate pin.
 TRUSTED_LOCAL_FIXTURES = {

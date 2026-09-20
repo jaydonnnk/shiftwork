@@ -85,7 +85,14 @@ def start_run(
     request: Request,
     conn: sqlite3.Connection = Depends(get_conn),
 ) -> schemas.RunView:
-    run = orchestrator.start_run(conn, shift_id)
+    # The controller's configured executor and shop snapshot are persisted on the
+    # run row; the request body carries neither, so the learner cannot select them.
+    run = orchestrator.start_run(
+        conn,
+        shift_id,
+        executor=request.app.state.executor,
+        shop_snapshot=request.app.state.shop_snapshot,
+    )
     background.add_task(orchestrator.execute_run_task, request.app.state.db_path, run.id)
     return schemas.RunView.of(run)
 

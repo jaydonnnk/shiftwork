@@ -7,6 +7,10 @@ the reducer plus hash chain producing one real LedgerEvent. Slice 7 adds budget
 enforcement with per-attempt rotation draws, binds each run to the request batch and
 shop snapshot it consumed, and resolves incidents only when a later run of a new
 version passes the linked regression and that family's current unseen variant.
+Slice 8 makes the run row the single source of execution identity: ``start_run``
+persists the controller-configured executor and shop snapshot, and ``execute_run``
+resolves the adapter from those persisted values, with an unmapped recorded pairing
+or an unimplemented adapter failing closed as a typed PROVISION_FAILED.
 """
 
 import asyncio
@@ -40,6 +44,7 @@ from shiftwork.domain.models import (
 )
 from shiftwork.evaluator import evaluator
 from shiftwork.executor import base as executor
+from shiftwork.executor.local_process import LocalProcessAdapter
 from shiftwork.executor.recorded import RecordedAdapter
 from shiftwork.ledger import chain, reducer
 from shiftwork.sealed import rotation
@@ -107,8 +112,31 @@ def _attempt_batch(ordinal: int) -> executor.BatchRef:
     return executor.BatchRef(path_ref=path_ref, content_hash=content_hash)
 
 
-def _adapter() -> RecordedAdapter:
-    return RecordedAdapter(config.THIN_TRANSCRIPT)
+def _adapter_for(run: Run) -> executor.ExecutorAdapter | None:
+    """Resolve the executor the run row names, or None to fail closed.
+
+    Recorded runs replay the transcript the authored map pairs with the run's own
+    frozen batch and the snapshot it consumed. An absent pairing, an unreadable
+    snapshot, and an adapter with no implementation here (tokenfactory before
+    Slice 14) all resolve to None, which ``execute_run`` records as a typed
+    PROVISION_FAILED failure. No other pair's transcript is ever substituted.
+    """
+    if run.adapter == "local_process":
+        return LocalProcessAdapter()
+    if run.adapter != "recorded":
+        return None
+    try:
+        snapshot = Path(run.shop_snapshot_ref).read_bytes()
+    except OSError:
+        return None
+    snapshot_hash = canonical.content_hash(base64.b64encode(snapshot).decode("ascii"))
+    ref = config.RECORDED_TRANSCRIPTS.get((run.request_batch_ref, snapshot_hash))
+    if ref is None:
+        return None
+    transcript = Path(ref)
+    if not transcript.is_absolute():
+        transcript = config.FIXTURE_DIR / "runs" / transcript
+    return RecordedAdapter(transcript)
 
 
 def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -> Shift:
@@ -190,13 +218,24 @@ def freeze_version(
     return version
 
 
-def start_run(conn: sqlite3.Connection, shift_id: str) -> Run:
+def start_run(
+    conn: sqlite3.Connection,
+    shift_id: str,
+    *,
+    executor: str | None = None,
+    shop_snapshot: str | Path | None = None,
+) -> Run:
     """Reserve one attempt: budget check, one never-exposed draw per family, atomically.
 
     The whole reservation - run row, its frozen batch and snapshot refs, and one
     draw per enabled family - commits in one transaction, so a concurrent boundary
     POST cannot produce two runs and a fault between the run row and the draws
     rolls the entire reservation back (program design S5.3, tests 24 and 25).
+
+    The run persists the controller-configured adapter and the shop snapshot it
+    consumes (Slice 8); the learner never supplies either through the API, and
+    ``execute_run`` resolves the adapter from these persisted values. Callers that
+    pass nothing get the shipped controller defaults.
     """
     shift = _require_open_shift(conn, shift_id)
     version = repo.get_latest_version(conn, shift_id)
@@ -222,10 +261,10 @@ def start_run(conn: sqlite3.Connection, shift_id: str) -> Run:
             shift_id=shift_id,
             artifact_version_id=version.id,
             request_batch_ref=request_batch.path_ref,
-            shop_snapshot_ref=str(config.BOOKSHOP_SNAPSHOT),
+            shop_snapshot_ref=str(shop_snapshot or config.BOOKSHOP_SNAPSHOT),
             attempt_number=used + 1,
             state=RunState.QUEUED,
-            adapter=config.TRACER_ADAPTER,
+            adapter=executor or config.EXECUTOR_ADAPTER,
             started_at=_now(),
         )
         repo.insert_run(conn, run)
@@ -255,6 +294,13 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
         raise LifecycleError("not_found", f"unknown run: {run_id}")
     if run.state is not RunState.QUEUED:
         return run
+    adapter = _adapter_for(run)
+    if adapter is None:
+        # Fail closed, typed: an unmapped recorded pairing or an adapter with no
+        # implementation here never replays something else and writes no captures.
+        repo.update_run(conn, run_id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
+        conn.commit()
+        return repo.get_run(conn, run_id)
     repo.update_run(conn, run_id, RunState.RUNNING)
     conn.commit()
     try:
@@ -276,7 +322,7 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
             inference_grant=None,
         )
         batch = {entry.ordinal: entry for entry in executor.load_batch(request.request_batch)}
-        result = asyncio.run(_adapter().execute(request))
+        result = asyncio.run(adapter.execute(request))
         outputs = []
         for output in executor.normalize_captures(result.captures, request.deadline_s):
             output = output.model_copy(update={
