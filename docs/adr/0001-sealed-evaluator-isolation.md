@@ -73,3 +73,13 @@ affected group and invalidating dependent attempts is a design target, not built
 behavior. No operator workflow or attempt-invalidation mechanism exists, and no
 refill proves invalidation; Slice 7 owns the requirement under the Gate 4 follow-up
 revision (2026-09-19, RE-APPROVED by the user in chat).
+
+Recovery-mechanism update (2026-09-20): Slice 7 landed the state-change half. A
+compromised group is retired by setting its draws to `DrawState.INVALIDATED`
+(`repo.invalidate_rotation_group`), the dependent attempts read back through
+`repo.invalidated_run_ids`, rows and captures are retained, and a refill cannot
+clear the state or reuse an exposed identity (`sealed.rotation.validate_refill`;
+`tests/orchestrator/test_budget_rotation.py`). No operator surface was added, which
+the Slice 7 requirement states explicitly; nothing in the runtime consumes the
+invalidated state beyond that read-back. The 2026-09-19 "no attempt-invalidation
+mechanism exists" sentence is superseded; the rest of the recovery target stands.

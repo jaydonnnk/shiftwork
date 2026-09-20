@@ -46,3 +46,11 @@ not FULL). Pending: attempt budgets counted from durable `runs` rows land in Sli
 7; close and inheritance restoration, plus interrupted-run handling on restart,
 land in Slice 8. The Gate 4 re-approval (2026-09-19) keeps these mappings in
 `04-slices.md`.
+
+Update 2026-09-20: the attempt-budget limb landed in Slice 7. `start_run` counts
+prior runs from the durable `runs` rows, refuses the over-limit reservation, and
+commits the run row, its batch and snapshot refs and one draw per enabled family in
+one `BEGIN IMMEDIATE` transaction (`tests/orchestrator/test_budget_rotation.py`; the
+route maps the refusal to 409). The 2026-09-19 sentence listing budgets as pending
+is superseded. Close and inheritance restoration, plus interrupted-run
+reconciliation on restart, remain Slice 8 as stated.
