@@ -38,6 +38,9 @@ a fresh-session independent re-review returned PASS on 2026-09-19 (fourteen prob
 each failing the named guard with content-identical restores; suites and demos
 reproduced verbatim), and the user's same-day instruction accepted the slice.
 Slice 7 is implemented and demonstrated, with its evidence recorded in `00-status.md` (2026-09-20).
+Slice 8 is implemented, demonstrated and merged to main (`8032aaf`, 2026-09-20), with evidence
+in `00-status.md`; Slice 9 is implemented on `shiftwork/slice-9` (2026-09-21), its review round
+repaired and its cleanup scan recorded, awaiting the user's visual acceptance.
 The approved ownership split is controller orchestration -> sealed loader ->
 cases passed to pure evaluation, not evaluator-owned file loading. ADR 0001
 supersession and the ADR 0002/0003 implementation-status notes were recorded
@@ -77,7 +80,10 @@ families on 2026-09-20; further agent-authored acceptance cases still require us
 review. Slice 5 ledger
 hardening is implemented; Slice 6 is repaired, re-reviewed PASS and accepted
 (2026-09-19; fourteen-probe re-review with suites and demos reproduced), and
-Slice 7 is implemented and demonstrated (evidence in `00-status.md`, 2026-09-20). The 2026-09-19
+Slice 7 is implemented and demonstrated (evidence in `00-status.md`, 2026-09-20). Slice 8
+is implemented, demonstrated and merged to main (`8032aaf`, 2026-09-20); Slice 9 is implemented
+on `shiftwork/slice-9` (2026-09-21), its review round repaired and its cleanup scan recorded,
+awaiting the user's visual acceptance. The 2026-09-19
 audit verified 133 passing tests and one skip with packaging excluded because
 installation was prohibited, not a full-suite result. No Token Factory Sandbox
 execution, learner study, transfer result, Tavily ablation, prize merit or score
