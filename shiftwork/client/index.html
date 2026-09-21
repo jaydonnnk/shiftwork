@@ -1,164 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Shiftwork tracer board</title>
-<style>
-  :root { color-scheme: dark; }
-  body { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 0; padding: 24px; background: #101216; color: #d7dae0; }
-  h1 { font-size: 18px; margin: 0 0 4px; }
-  .sub { color: #8d949e; font-size: 12px; margin-bottom: 12px; }
-  .synthetic { display: inline-block; border: 1px solid #6b5b2a; background: #2a2413; color: #e2c56d; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 16px; }
-  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-  button { font: inherit; font-size: 12px; padding: 6px 12px; border-radius: 6px; border: 1px solid #3a3f47; background: #1a1e24; color: #d7dae0; cursor: pointer; }
-  button:hover { background: #22272e; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px; }
-  .card { border: 1px solid #2a2f36; border-radius: 8px; padding: 12px; background: #14171c; }
-  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #8d949e; margin: 0 0 8px; }
-  .kv { font-size: 12px; line-height: 1.7; }
-  .kv b { color: #8d949e; font-weight: normal; display: inline-block; min-width: 150px; }
-  pre { font-size: 11px; line-height: 1.5; overflow: auto; max-height: 260px; background: #0c0e12; border: 1px solid #22262c; border-radius: 6px; padding: 8px; margin: 0; }
-  #status { font-size: 12px; min-height: 18px; margin: 4px 0; color: #7fb3ff; white-space: pre-wrap; }
-  #status.error { color: #ff8080; }
-  .empty { color: #6d747d; }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#202c40">
+  <title>Bellwether Books · Shiftwork</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23edbd68' d='M16 2 29 9v14L16 30 3 23V9zm0 3L6 10l10 6 10-6zm-11 8v9l10 6V18zm22 0-10 5v10l10-6z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
 </head>
-<body>
-  <h1>Shiftwork: tracer shift board</h1>
-  <div class="sub">Slice 1 tracer. Everything below the label is scenario state, not production data.</div>
-  <div class="synthetic">Synthetic scenario state. Not real revenue, trust or employer proof.</div>
-
-  <div class="actions">
-    <button id="btn-open">Open shift</button>
-    <button id="btn-save">Save draft (append note)</button>
-    <button id="btn-freeze">Freeze version</button>
-    <button id="btn-run">Run shift</button>
-    <button id="btn-close">Close shift</button>
-    <button id="btn-refresh">Refresh</button>
-  </div>
-
-  <div id="status"></div>
-
-  <div class="grid">
-    <div class="card"><h2>Shift</h2><div id="shift" class="kv"></div></div>
-    <div class="card"><h2>Artifact version</h2><div id="version" class="kv"></div></div>
-    <div class="card"><h2>Latest run</h2><div id="run" class="kv"></div></div>
-    <div class="card"><h2>Incidents</h2><div id="incidents" class="kv"></div></div>
-    <div class="card"><h2>Ledger totals</h2><div id="ledger" class="kv"></div></div>
-    <div class="card"><h2>Board payload (raw)</h2><pre id="raw"></pre></div>
-  </div>
-
-<script>
-const SLUG = "bookshop";
-let shiftId = null;
-
-const status = (message, isError = false) => {
-  const el = document.getElementById("status");
-  el.textContent = message;
-  el.className = isError ? "error" : "";
-};
-
-const api = async (path, options = {}) => {
-  const response = await fetch(path, { headers: { "Content-Type": "application/json" }, ...options });
-  const payload = await response.json().catch(() => null);
-  if (!response.ok) {
-    throw new Error(response.status + " " + (payload ? JSON.stringify(payload) : path));
-  }
-  return payload;
-};
-
-const line = (label, value) =>
-  "<div><b>" + label + "</b>" +
-  (value === null || value === undefined || value === "" ? "<span class='empty'>none</span>" : value) +
-  "</div>";
-
-const render = (board) => {
-  const shift = board.latest_shift;
-  const version = board.latest_version;
-  const run = board.latest_run;
-  document.getElementById("shift").innerHTML =
-    line("id", shift && shift.id) +
-    line("seq", shift && shift.seq) +
-    line("state", shift && shift.state) +
-    line("attempts used", board.attempts_used + " of " + board.attempt_limit) +
-    line("attempts remaining", board.attempts_remaining);
-  document.getElementById("version").innerHTML =
-    line("id", version && version.id) +
-    line("content hash", version && version.content_hash) +
-    line("created by", version && version.created_by);
-  document.getElementById("run").innerHTML =
-    line("id", run && run.id) +
-    line("state", run && run.state) +
-    line("adapter", run && run.adapter) +
-    line("requests executed", board.requests_run);
-  document.getElementById("incidents").innerHTML = board.incidents.length
-    ? board.incidents.map((incident) =>
-        line(incident.id, incident.reason_code + " (" + incident.state + ")")).join("")
-    : "<span class='empty'>no unresolved incidents</span>";
-  document.getElementById("ledger").innerHTML =
-    line("events", board.ledger_event_count) +
-    line("chain status", board.chain_status) +
-    Object.entries(board.ledger_totals)
-      .map(([type, count]) => line(type.toLowerCase(), count)).join("");
-  document.getElementById("raw").textContent = JSON.stringify(board, null, 2);
-  if (shift && shift.state === "open") { shiftId = shift.id; }
-};
-
-const refresh = async () => {
-  const board = await api("/api/engagements/" + SLUG + "/board");
-  render(board);
-};
-
-const runAction = async (label, action) => {
-  try {
-    status(label + "...");
-    await action();
-    await refresh();
-    status(label + ": done");
-  } catch (error) {
-    status(label + " failed: " + error.message, true);
-  }
-};
-
-document.getElementById("btn-open").onclick = () =>
-  runAction("open shift", async () => {
-    const shift = await api("/api/engagements/" + SLUG + "/shifts", { method: "POST" });
-    shiftId = shift.id;
-  });
-
-document.getElementById("btn-save").onclick = () =>
-  runAction("save draft", async () => {
-    const draft = await api("/api/shifts/" + shiftId + "/artifact");
-    const files = draft.files;
-    files["service.py"] += "\n# learner note at " + new Date().toISOString() + "\n";
-    await api("/api/shifts/" + shiftId + "/artifact", { method: "PUT", body: JSON.stringify({ files }) });
-  });
-
-document.getElementById("btn-freeze").onclick = () =>
-  runAction("freeze version", async () => {
-    await api("/api/shifts/" + shiftId + "/artifact/versions", { method: "POST" });
-  });
-
-document.getElementById("btn-run").onclick = () =>
-  runAction("run shift", async () => {
-    const started = await api("/api/shifts/" + shiftId + "/runs", { method: "POST" });
-    for (let attempt = 0; attempt < 40; attempt += 1) {
-      const run = await api("/api/runs/" + started.id);
-      if (run.state === "FINALIZED" || run.state === "FAILED") { return; }
-      await new Promise((resolve) => setTimeout(resolve, 250));
-    }
-    throw new Error("run did not finish");
-  });
-
-document.getElementById("btn-close").onclick = () =>
-  runAction("close shift", async () => {
-    await api("/api/shifts/" + shiftId + "/close", { method: "POST" });
-  });
-
-document.getElementById("btn-refresh").onclick = () => runAction("refresh", async () => {});
-
-refresh().catch((error) => status("board load failed: " + error.message, true));
-</script>
+<body data-load-state="loading">
+  <a class="skip-link" href="#station-panel">Skip to selected station</a>
+  <header class="topbar">
+    <a class="brand" href="#board" aria-label="Shiftwork shift board"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 3 12 7v13l-12 7-12-7V10Zm0 13L4 10m12 6 12-6M16 16v14"/></svg>Shiftwork<span class="brand-divider"></span><span class="workspace-label">THE WORKPLACE</span></a>
+    <nav class="journey" aria-label="Shift journey">
+      <a href="#board" data-view="board" aria-current="page"><span>01</span>Shift board</a>
+      <a href="#contract" data-view="contract"><span>02</span>Contract <small>Next slice</small></a>
+      <a href="#customers" data-view="customers"><span>03</span>Customer shift</a>
+      <a href="#repair" data-view="repair"><span>04</span>Repair <small>Next slice</small></a>
+      <a href="#return" data-view="return"><span>05</span>Return <small>Later</small></a>
+      <a href="#away" data-view="away"><span>06</span>Away shift <small>Later</small></a>
+    </nav>
+    <div class="session-label"><span class="status-dot"></span><span id="session-state">Connecting to your shift</span></div>
+    <button class="icon-button" id="refresh" aria-label="Refresh shift and evidence" title="Refresh shift and evidence">↻</button>
+  </header>
+  <main>
+    <section class="workplace" aria-labelledby="room-title">
+      <div class="room-heading">
+        <div><p class="eyebrow">YOUR CLIENT / BELLWETHER BOOKS</p><h1 id="room-title">You keep this service running.</h1><p class="room-subtitle">Your role: junior applied AI engineer. Your service. Your decisions.</p></div>
+        <div class="shift-stamp"><span>ON THE BOARD</span><strong id="shift-number">No shift loaded</strong><span>Fictional client · simulated role</span></div>
+      </div>
+      <div class="room" aria-label="Bellwether operational room">
+        <div class="room-bookplate" aria-hidden="true">Bellwether <em>Books</em><span>THE SERVICE ROOM</span></div>
+        <img class="room-art" src="room.svg" alt="" width="1000" height="720">
+        <svg class="evidence-path" viewBox="0 0 1000 720" aria-hidden="true"><path d="M225 443 340 503 489 422 660 332 791 407"/><circle cx="225" cy="443" r="6"/><circle cx="489" cy="422" r="6"/><circle cx="660" cy="332" r="6"/><circle cx="791" cy="407" r="6"/></svg>
+        <div class="room-hotspots" aria-label="Room stations">
+          <button class="station station-owner" data-station="owner"><span class="station-marker">02</span><span>Owner desk<small>Contract · read only</small></span></button>
+          <button class="station station-service" data-station="service" aria-pressed="true"><span class="station-marker">01</span><span>Your service<small id="service-tag">Not loaded</small></span></button>
+          <button class="station station-customers" data-station="customers"><span class="station-marker">03</span><span>Customer queue<small id="queue-tag">Not loaded</small></span></button>
+          <button class="station station-pipeline" data-station="pipeline"><span class="station-marker">→</span><span>Evidence path<small>Follow the record</small></span></button>
+          <button class="station station-evaluator" data-station="evaluator"><span class="station-marker lock-mark" aria-hidden="true">▣</span><span>Independent evaluator<small>Locked · not editable</small></span></button>
+          <button class="station station-ledger" data-station="ledger"><span class="station-marker">≡</span><span>Incident &amp; ledger wall<small id="incident-tag">Not loaded · Synthetic scenario</small></span></button>
+          <button class="station station-repair" data-station="repair"><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small></span></button>
+        </div>
+        <div class="room-caption"><span class="tiny-square"></span>A real output. An independent check. A recorded consequence.</div>
+      </div>
+      <div class="station-context" id="station-context" role="status">Select a station to inspect your work.</div>
+      <section class="board-strip" data-synthetic-region="board" aria-label="Shift board summary">
+        <div class="strip-heading"><h2>Your shift, at a glance</h2><span class="synthetic">Synthetic scenario</span></div>
+        <div class="board-metrics">
+          <div><span>Requests run</span><strong id="metric-requests">…</strong><small>Latest attempt</small></div>
+          <div><span>Unresolved incidents</span><strong id="metric-incidents">…</strong><small>Carried until resolved</small></div>
+          <div><span>Attempts remaining</span><strong id="metric-attempts">…</strong><small id="attempt-detail">Not loaded</small></div>
+          <div><span>Ledger</span><strong id="metric-chain">Not loaded</strong><small id="event-detail">Verified on every read</small></div>
+        </div>
+      </section>
+      <p class="evidence-boundary" id="execution-note">Offline client. No live model or sandbox connection. The simulated role is not a credential.</p>
+    </section>
+    <aside class="detail-panel" id="station-panel" tabindex="-1" aria-labelledby="panel-title">
+      <div class="panel-heading"><div><p class="eyebrow" id="panel-kicker">YOUR WORKING ARTIFACT</p><h2 id="panel-title">Service workbench</h2></div><span class="panel-symbol" aria-hidden="true">⌑</span></div>
+      <div id="load-message" class="load-message" role="status">Loading your shift…</div>
+      <section id="board-view">
+        <div class="service-card"><div class="service-card-heading"><span class="service-icon" aria-hidden="true">⌘</span><div><strong>Bellwether service</strong><span id="version-state">Waiting for the board</span></div><span class="owner-label">Owned by you</span></div><p id="version-hash" class="mono hash"></p></div>
+        <div class="file-tabs" role="group" aria-label="Artifact details"><button data-file="contract" aria-pressed="true">Contract</button><button data-file="checks">Visible checks</button><button data-file="files">Files</button><button data-file="history">Change log</button></div>
+        <div id="artifact-detail" class="artifact-detail"></div>
+        <section class="panel-section" data-synthetic-region="incidents"><div class="section-heading"><h3>Unresolved incidents</h3><span class="synthetic">Synthetic scenario</span></div><div id="incident-list"></div></section>
+        <section class="panel-section"><h3>Known limits</h3><div id="limit-list"></div></section>
+        <section class="panel-section" data-synthetic-region="ledger"><div class="section-heading"><h3>Ledger totals</h3><span class="synthetic">Synthetic scenario</span></div><div id="ledger-totals"></div></section>
+        <div class="panel-actions"><button id="open-shift" class="button secondary" disabled>Open shift</button><button id="run-shift" class="button primary" disabled>Run customer shift <span aria-hidden="true">→</span></button></div>
+        <p id="run-help" class="help-text">Load the board to see available actions.</p>
+      </section>
+      <section id="customer-view" data-synthetic-region="run" hidden>
+        <div class="run-topline"><span class="synthetic">Synthetic scenario</span><span id="run-state" class="mono">No run</span></div>
+        <p id="evidence-attempts" class="help-text">Attempts not loaded.</p>
+        <div id="customer-list" class="customer-list" role="group" aria-label="Executed customer requests"></div>
+        <div id="selected-evidence" class="selected-evidence"><p class="empty">No executed customer request selected.</p></div>
+      </section>
+      <section id="deferred-view" hidden><div class="deferred-symbol" aria-hidden="true">◇</div><h3 id="deferred-title"></h3><p id="deferred-copy"></p><button id="back-board" class="button secondary">Back to your service</button></section>
+      <footer class="panel-footer"><span class="tiny-square"></span>Evidence, not a narrated outcome.</footer>
+    </aside>
+  </main>
+  <noscript><p class="noscript">JavaScript is required to load your shift. No scenario values are shown without the API.</p></noscript>
 </body>
 </html>

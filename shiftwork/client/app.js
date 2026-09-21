@@ -1,0 +1,349 @@
+import { bodyBytes, selectEvidence } from './evidence.js';
+
+const $ = id => document.getElementById(id);
+const state = { board: null, draft: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false };
+let downloadUrl = null;
+let pollTimer = null;
+const terminal = run => !run || ['FINALIZED', 'FAILED'].includes(run.state);
+const humanize = value => value.toLowerCase().replaceAll('_', ' ');
+
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined && text !== null) node.textContent = text;
+  if (className) node.className = className;
+  return node;
+}
+function empty(target, text) { target.replaceChildren(element('p', text, 'empty')); }
+function text(id, value) { $(id).textContent = value; }
+async function api(path, options = {}) {
+  const response = await fetch('/api' + path, { ...options, headers: { 'Content-Type': 'application/json' } });
+  if (!response.ok) throw new Error(`Request failed (${response.status}). Refresh to load verified state.`);
+  return response.json();
+}
+function clearEvidence() {
+  if (downloadUrl) URL.revokeObjectURL(downloadUrl);
+  downloadUrl = null;
+  delete document.body.dataset.evidence;
+  $('selected-evidence').removeAttribute('data-run-id');
+  $('selected-evidence').removeAttribute('data-request-ordinal');
+  empty($('selected-evidence'), 'No executed customer request selected.');
+}
+function clearData(message) {
+  state.board = null; state.draft = null; state.run = null;
+  state.outputs = []; state.checks = []; state.events = []; state.selected = null;
+  clearEvidence();
+  text('load-message', message);
+  text('session-state', 'Not connected');
+  text('shift-number', 'No shift loaded');
+  text('version-state', 'No verified version loaded');
+  text('version-hash', '');
+  text('run-state', 'No run loaded');
+  text('evidence-attempts', 'Attempts not loaded.');
+  document.querySelector('[data-station="repair"]').setAttribute('aria-disabled', 'true');
+  for (const id of ['metric-requests', 'metric-incidents', 'metric-attempts']) text(id, '…');
+  for (const id of ['metric-chain', 'service-tag', 'queue-tag', 'repair-tag', 'attempt-detail', 'event-detail']) text(id, 'Not loaded');
+  text('incident-tag', 'Not loaded · Synthetic scenario');
+  for (const id of ['artifact-detail', 'incident-list', 'limit-list', 'ledger-totals', 'customer-list']) empty($(id), 'No verified data loaded.');
+  $('open-shift').disabled = true; $('run-shift').disabled = true;
+  text('run-help', 'Refresh to load available actions.');
+}
+
+async function refresh(runId = null) {
+  const generation = ++state.generation;
+  const selected = state.selected;
+  clearTimeout(pollTimer);
+  document.body.dataset.loadState = 'loading';
+  clearData('Loading your shift…');
+  try {
+    const board = await api('/engagements/bookshop/board');
+    const run = runId ? await api(`/runs/${encodeURIComponent(runId)}`) : board.latest_run;
+    const [draft, ledger, outputs, checks] = await Promise.all([
+      board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/artifact`) : null,
+      api('/engagements/bookshop/ledger'),
+      run ? api(`/runs/${encodeURIComponent(run.id)}/outputs`) : [],
+      run ? api(`/runs/${encodeURIComponent(run.id)}/checks`) : [],
+    ]);
+    if (generation !== state.generation) return;
+    Object.assign(state, { board, draft, run, outputs, checks, events: ledger.events });
+    state.selected = outputs.some(output => output.id === selected) ? selected : outputs[0]?.id ?? null;
+    document.body.dataset.loadState = board.latest_shift ? 'ready' : 'empty';
+    text('load-message', board.latest_shift ? '' : 'No shift yet. Open one to begin your service history.');
+    renderBoard();
+    if (['return', 'away'].includes(state.view)) navigate(state.view, false);
+    else activateStation(state.station, false);
+    if (!terminal(run)) pollTimer = setTimeout(() => refresh(run.id), 1000);
+    return true;
+  } catch (error) {
+    if (generation !== state.generation) return;
+    clearData(error.message);
+    document.body.dataset.loadState = 'error';
+  }
+}
+
+function renderBoard() {
+  const board = state.board;
+  const version = board.latest_version;
+  const shift = board.latest_shift;
+  text('session-state', shift ? `Shift ${shift.seq} · ${shift.state}` : 'Ready for your first shift');
+  text('shift-number', shift ? `Shift ${String(shift.seq).padStart(2, '0')}` : 'Not started');
+  text('metric-requests', board.requests_run);
+  text('metric-incidents', board.incidents.length);
+  text('metric-attempts', board.attempts_remaining);
+  text('metric-chain', board.chain_status === 'VALID' ? 'Verified' : 'Not verified');
+  text('attempt-detail', `${board.attempts_used} of ${board.attempt_limit} attempts used`);
+  text('evidence-attempts', `${board.attempts_remaining} attempt${board.attempts_remaining === 1 ? '' : 's'} remaining in the current shift · ${board.attempts_used} of ${board.attempt_limit} used`);
+  document.querySelector('[data-station="repair"]').setAttribute('aria-disabled', String(!board.incidents.length));
+  text('event-detail', `${board.ledger_event_count} recorded events`);
+  text('service-tag', version ? `${version.id} · yours` : 'Draft · not frozen');
+  text('queue-tag', `${state.outputs.length} executed requests`);
+  text('incident-tag', `${board.incidents.length} unresolved · Synthetic scenario`);
+  text('repair-tag', board.incidents.length ? 'Incident available · read only' : 'No unresolved incident');
+  text('version-state', version ? `${version.id} · frozen` : 'Draft · no frozen version');
+  text('version-hash', version ? `Content hash ${version.content_hash}` : '');
+  const adapter = state.run?.adapter;
+  text('execution-note', adapter === 'local_process'
+    ? 'Offline trusted-fixture execution. Not hostile-code isolation. No live model or sandbox. The simulated role is not a credential.'
+    : adapter === 'recorded' ? 'Recorded replay: captured bytes, not execution of your current artifact. No live model or sandbox. The simulated role is not a credential.'
+    : 'Offline client. No live model or sandbox connection. The simulated role is not a credential.');
+  const incidents = $('incident-list');
+  if (!board.incidents.length) empty(incidents, 'No unresolved incidents. The room reflects the recorded state.');
+  else incidents.replaceChildren(...board.incidents.map(incident => {
+    const button = element('button', null, 'incident-row');
+    button.append(element('strong', `${incident.id} · ${humanize(incident.state)}`), element('span', incident.reason_code));
+    button.addEventListener('click', async () => {
+      const intent = ++state.intent;
+      const accepted = await refresh(incident.opening_run_id);
+      if (!accepted || intent !== state.intent || state.run?.id !== incident.opening_run_id) return;
+      state.selected = state.outputs.find(output => output.id === incident.failing_output_ref)?.id ?? null;
+      activateStation('customers');
+      const target = [...document.querySelectorAll('.customer-button')].find(node => node.dataset.outputId === state.selected);
+      if (target) target.focus(); else $('station-panel').focus();
+    });
+    return button;
+  }));
+  const limits = [...new Set([...(version?.contract.declared_limits ?? []), ...board.unresolved_limits])];
+  if (!limits.length) empty($('limit-list'), 'No limits declared.');
+  else {
+    const list = element('ul');
+    list.append(...limits.map(limit => element('li', limit, 'limit-item')));
+    $('limit-list').replaceChildren(list);
+  }
+  const totals = Object.entries(board.ledger_totals);
+  if (!totals.length) empty($('ledger-totals'), 'No ledger events yet.');
+  else $('ledger-totals').replaceChildren(...totals.map(([name, count]) => {
+    const row = element('div', null, 'total-row');
+    row.append(element('span', humanize(name)), element('strong', count));
+    return row;
+  }));
+  $('open-shift').disabled = state.pending || shift?.state === 'open';
+  $('run-shift').disabled = state.pending || !version || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run);
+  text('run-help', !version ? 'Contract authoring and freezing arrive in Slice 10. This view does not choose a contract for you.'
+    : !terminal(board.latest_run) ? 'Your run is in progress. Results appear only after the controller records them.'
+    : shift?.state !== 'open' ? 'This shift is closed. Its recorded evidence stays available.'
+    : board.attempts_remaining === 0 ? 'Attempt budget exhausted. The controller will not accept another run.'
+    : 'Runs the frozen version. A started attempt consumes one reservation, even if it fails.');
+  renderArtifact();
+}
+
+function renderArtifact() {
+  const target = $('artifact-detail');
+  if (!state.board) return empty(target, 'No verified artifact loaded.');
+  const files = state.draft?.files ?? {};
+  target.replaceChildren();
+  if (state.file === 'contract') {
+    const contract = state.board.latest_version?.contract;
+    if (!contract) return empty(target, 'No committed contract. Authoring arrives in Slice 10; no stance is preselected.');
+    for (const [label, value] of [
+      ['Committed constraint', contract.must_never.map(humanize).join(', ')],
+      ['Your operating stance', Object.values(contract.selections).map(humanize).join(', ')],
+      ['Response time limit', `${contract.response_time_limit_ms} ms`],
+      ['Contract catalog', `Version ${contract.catalog_version}`],
+    ]) {
+      const row = element('div', null, 'contract-line');
+      row.append(element('span', label), element('strong', value)); target.append(row);
+    }
+  } else if (state.file === 'files') {
+    target.append(element('p', 'Files in the frozen version', 'empty'));
+    const frozen = element('ul');
+    frozen.append(...state.board.artifact_files.map(name => element('li', name)));
+    target.append(frozen);
+    target.append(element('p', 'Current draft files · read only here. The hash above identifies the frozen version, not this editable draft.', 'empty'));
+    for (const [name, content] of Object.entries(files)) {
+      const detail = element('details'); detail.append(element('summary', name), element('pre', content)); target.append(detail);
+    }
+  } else {
+    const name = state.file === 'checks' ? 'checks.json' : 'change_log.md';
+    target.append(element('p', state.file === 'checks' ? 'Current draft checks. Visible-check scoring arrives in Slice 10.' : 'Current draft change log. Decisions are not inferred from saves or runs.', 'empty'));
+    target.append(files[name] ? element('pre', files[name]) : element('p', `No ${name} file in the draft.`, 'empty'));
+  }
+}
+
+function evidenceStep(number, label) {
+  const section = element('section', null, 'evidence-step');
+  const heading = element('h3', null, 'step-label');
+  heading.append(element('b', number), document.createTextNode(label));
+  section.append(heading); return section;
+}
+function renderCustomers() {
+  const focusedOutput = document.activeElement?.dataset.outputId;
+  clearEvidence();
+  const run = state.run;
+  text('run-state', run ? `${run.id} · ${run.state}` : 'No run yet');
+  const list = $('customer-list');
+  if (!state.outputs.length) {
+    empty(list, !run ? 'Requests stay hidden until they execute.' : run.state === 'FAILED' ? 'Run failed. No customer output was captured.' : 'No customer outputs captured yet.');
+    return;
+  }
+  list.replaceChildren(...state.outputs.map(output => {
+    const button = element('button', null, 'customer-button');
+    button.dataset.outputId = output.id;
+    button.setAttribute('aria-pressed', String(state.selected === output.id));
+    button.append(element('span', String(output.request_ordinal).padStart(2, '0')), element('span', output.request_text));
+    button.addEventListener('click', () => { state.intent += 1; state.selected = output.id; renderCustomers(); });
+    return button;
+  }));
+  if (focusedOutput) [...list.children].find(button => button.dataset.outputId === focusedOutput)?.focus({ preventScroll: true });
+  const output = state.outputs.find(item => item.id === state.selected);
+  if (!output) return;
+  const selected = $('selected-evidence');
+  selected.dataset.runId = output.run_id;
+  selected.dataset.requestOrdinal = output.request_ordinal;
+  selected.replaceChildren();
+  const request = evidenceStep(1, 'Executed customer request');
+  request.append(element('p', output.request_text, 'evidence-text request-quote'), element('p', `${output.run_id} · request ${output.request_ordinal} · artifact ${run.artifact_version_id}`, 'evidence-meta'));
+  const answer = evidenceStep(2, 'Exact service output');
+  answer.append(element('p', output.customer_answer?.display_text ?? 'No validated customer answer. Inspect the captured bytes below.', 'evidence-text'));
+  answer.append(element('p', `HTTP ${output.http_status ?? 'not received'} · ${output.elapsed_ms ?? 'unknown'} ms${output.transport_error ? ` · ${output.transport_error}` : ''}`, 'evidence-meta'));
+  const bytes = bodyBytes(output.body_base64);
+  const raw = element('details'); raw.append(element('summary', `Captured body · ${bytes.length} bytes`));
+  try { raw.append(element('pre', new TextDecoder('utf-8', { fatal: true }).decode(bytes))); }
+  catch { raw.append(element('p', 'The body is not valid UTF-8. Base64 and download preserve every byte.', 'empty')); }
+  const base64 = element('pre', output.body_base64); base64.dataset.bodyBase64 = output.body_base64;
+  raw.append(element('p', 'Original bytes encoded as base64', 'evidence-meta'), base64);
+  downloadUrl = URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' }));
+  const download = element('a', 'Download original bytes', 'download');
+  download.href = downloadUrl; download.download = `${output.id}.bin`; raw.append(download); answer.append(raw);
+  const record = evidenceStep(3, 'Supporting public record');
+  if (output.public_shop_record) {
+    const publicRecord = output.public_shop_record;
+    record.append(element('p', [publicRecord.title, publicRecord.edition].filter(Boolean).join(' · ') || publicRecord.record_id, 'evidence-text'));
+    const value = typeof publicRecord.value === 'string' ? humanize(publicRecord.value) : JSON.stringify(publicRecord.value);
+    record.append(element('p', `${humanize(publicRecord.kind)}: ${value}`, 'public-value'));
+    record.append(element('p', `Record age ${publicRecord.record_age_ms} ms`, 'evidence-meta'));
+    const source = element('details');
+    source.append(element('summary', 'Inspect the public record'), element('pre', JSON.stringify(publicRecord, null, 2)));
+    record.append(source, element('p', `Public record ${output.public_shop_record_ref}\nRun snapshot ${output.public_shop_snapshot_hash}`, 'evidence-meta'));
+  } else record.append(element('p', 'No public comparison record. Sealed expectations are not shown.', 'empty'));
+  const comparison = evidenceStep(4, 'Independent check result');
+  const linked = selectEvidence(output, state.checks, state.events);
+  if (!linked.checks.length) comparison.append(element('p', 'No independent result recorded for this output.', 'empty'));
+  for (const check of linked.checks) {
+    const row = element('div', null, 'result-row'); row.dataset.verdict = check.verdict; row.dataset.checkId = check.id;
+    row.append(element('strong', `${humanize(check.verdict)}${check.reason_code ? ` · ${check.reason_code}` : ''}`), element('small', check.public_check_id ? `Visible check ${check.public_check_id}` : 'Independent sealed check · expectation withheld'));
+    comparison.append(row);
+  }
+  const ledger = evidenceStep(5, 'Recorded ledger consequence');
+  ledger.dataset.syntheticRegion = 'event'; ledger.append(element('span', 'Synthetic scenario', 'synthetic'));
+  if (!linked.events.length) ledger.append(element('p', 'No linked ledger event recorded. No outcome is implied.', 'empty'));
+  for (const event of linked.events) {
+    const row = element('div', null, 'event-row'); row.dataset.eventSeq = event.seq;
+    row.append(element('strong', humanize(event.event_type)), element('small', `Event ${event.seq} · result ${event.derivation.check_id}`)); ledger.append(row);
+  }
+  selected.append(request, answer, record, comparison, ledger);
+  if (run.state === 'FINALIZED' && ['customers', 'pipeline'].includes(state.station)) document.body.dataset.evidence = 'finalized';
+  if (['customers', 'pipeline'].includes(state.station)) text('service-tag', `Output from ${run.artifact_version_id}`);
+}
+
+const stations = {
+  service: ['Service workbench', 'YOUR WORKING ARTIFACT', 'Your version, contract and files belong to you. Independent scoring stays separate.'],
+  owner: ['Committed contract', 'OWNER DESK', 'Inspect your committed contract. Contract editing and visible-check authoring arrive in Slice 10.'],
+  customers: ['Customer evidence', 'FOLLOW AN EXECUTED REQUEST', 'Select a customer. Every output, public record, check and event below belongs to that request.'],
+  pipeline: ['Evidence trail', 'OUTPUT → CHECK → LEDGER', 'This path traces recorded evidence, not a prediction of success.'],
+  ledger: ['Incident & ledger wall', 'RECORDED CONSEQUENCES', 'Synthetic scenario. Select an incident to inspect the output and result that opened it.'],
+  repair: ['Repair review', 'REPAIR BENCH · READ ONLY', 'Inspect an actual incident below. Repair authoring and rerunning a new version arrive in Slice 10.'],
+  evaluator: ['Independent evaluator', 'LOCKED · NOT EDITABLE', 'Neither the learner nor an assistant can edit the scoring rules or see sealed expected values.'],
+};
+function bringStationPanelIntoReach() {
+  // Narrow layouts stack the panel below the room, so a station selection can
+  // leave its content entirely below the viewport. Move focus and scroll to the
+  // selected station's panel so the authoritative view is immediately reachable.
+  // Skipped before the first load paints, so a page open still starts at the room.
+  if (!state.board) return;
+  if (!window.matchMedia('(max-width: 760px)').matches) return;
+  const panel = $('station-panel');
+  panel.focus({ preventScroll: true });
+  panel.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+function activateStation(name, userIntent = true) {
+  if (userIntent) state.intent += 1;
+  if (name === 'repair' && !state.board?.incidents.length) {
+    text('station-context', 'No unresolved incident is loaded. The repair bench becomes available for an actual incident.');
+    return;
+  }
+  state.station = name;
+  document.querySelectorAll('[data-station]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.station === name)));
+  const [title, kicker, context] = stations[name];
+  text('panel-title', title); text('panel-kicker', kicker); text('station-context', context);
+  $('deferred-view').hidden = name !== 'evaluator';
+  $('customer-view').hidden = !['customers', 'pipeline'].includes(name);
+  $('board-view').hidden = !['service', 'owner', 'ledger', 'repair'].includes(name);
+  if (name === 'evaluator') {
+    text('deferred-title', 'Separate by design.');
+    text('deferred-copy', 'The controller scores captured service outputs against independent checks. You can inspect recorded results at the customer queue, but this booth has no editing controls and never displays sealed expected values.');
+  }
+  if (name === 'owner') { state.file = 'contract'; selectFile('contract'); }
+  if (state.board) text('service-tag', state.board.latest_version ? `${state.board.latest_version.id} · yours` : 'Draft · not frozen');
+  renderCustomers();
+  const view = name === 'owner' ? 'contract' : name === 'repair' ? 'repair' : ['customers', 'pipeline', 'evaluator'].includes(name) ? 'customers' : 'board';
+  state.view = view;
+  if (userIntent) history.replaceState(null, '', `#${view}`);
+  document.querySelectorAll('[data-view]').forEach(link => {
+    if (link.dataset.view === view) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+  });
+  if (userIntent) bringStationPanelIntoReach();
+}
+function selectFile(name) {
+  state.file = name;
+  document.querySelectorAll('[data-file]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.file === name)));
+  renderArtifact();
+}
+function navigate(view, userIntent = true) {
+  if (view === 'station-panel') return;
+  if (['return', 'away'].includes(view)) {
+    if (userIntent) { state.intent += 1; history.replaceState(null, '', `#${view}`); }
+    state.view = view;
+    document.querySelectorAll('[data-station]').forEach(button => button.setAttribute('aria-pressed', 'false'));
+    text('station-context', 'This journey view is planned for Slice 11; no later shift is started here.');
+    delete document.body.dataset.evidence;
+    $('board-view').hidden = true; $('customer-view').hidden = true; $('deferred-view').hidden = false;
+    text('panel-title', view === 'return' ? 'Return to your work' : 'Northline workshop');
+    text('panel-kicker', 'PLANNED FOR SLICE 11');
+    text('deferred-title', 'Not part of this client slice yet.');
+    text('deferred-copy', view === 'return' ? 'The inherited-room view arrives in Slice 11. This preview does not start a later shift or disclose its customer requests.' : 'The distinct bike-cooperative workshop arrives in Slice 11. No bookshop results are presented as away-shift work.');
+    document.querySelectorAll('[data-view]').forEach(link => {
+      if (link.dataset.view === view) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
+    });
+  } else activateStation({ board: 'service', contract: 'owner', customers: 'customers', repair: 'repair' }[view] ?? 'service', userIntent);
+}
+async function act(action) {
+  if (state.pending) return;
+  state.pending = true; renderBoard();
+  try { await action(); await refresh(); }
+  catch (error) { await refresh(); text('load-message', error.message); }
+  finally { state.pending = false; if (state.board) renderBoard(); }
+}
+$('open-shift').addEventListener('click', () => act(() => api('/engagements/bookshop/shifts', { method: 'POST' })));
+$('run-shift').addEventListener('click', () => {
+  const shiftId = state.board?.latest_shift?.id;
+  if (!shiftId) return;
+  activateStation('customers');
+  act(() => api(`/shifts/${encodeURIComponent(shiftId)}/runs`, { method: 'POST' }));
+});
+$('refresh').addEventListener('click', () => refresh());
+$('back-board').addEventListener('click', () => { location.hash = 'board'; navigate('board'); });
+document.querySelectorAll('[data-station]').forEach(button => button.addEventListener('click', () => activateStation(button.dataset.station)));
+document.querySelectorAll('[data-file]').forEach(button => button.addEventListener('click', () => selectFile(button.dataset.file)));
+window.addEventListener('hashchange', () => navigate(location.hash.slice(1)));
+window.addEventListener('pagehide', () => { clearTimeout(pollTimer); if (downloadUrl) URL.revokeObjectURL(downloadUrl); });
+navigate(location.hash.slice(1) || 'board');
+refresh();
