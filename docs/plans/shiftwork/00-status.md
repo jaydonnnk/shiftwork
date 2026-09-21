@@ -95,7 +95,7 @@ re-steer?"):
   the offline executor; two kill-condition limbs deferred to Slice 14) with the
   evidence file written to `docs/plans/shiftwork/evidence/test1-central-mechanism.md`
   (evidence below)
-- [ ] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03); implemented and browser-verified on `shiftwork/slice-9` 2026-09-21, its independent review round adjudicated and repaired the same day (evidence in its two sections below), awaiting the user's visual review. Preview/evidence below; not committed or merged.
+- [x] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03); implemented and browser-verified 2026-09-21, its independent review round adjudicated and repaired the same day (evidence in its two sections below), committed in nine reviewable batches on `shiftwork/slice-9` and merged to main (`4d5539a`) the same day, with the user marking that merge as the visual acceptance; pushed to origin. Preview/evidence below.
 - [ ] Slice 10: Client contract/repair stations (02, 04)
 - [ ] Slice 11: Client inherited room + distinct away-shift workshop (05, 06) + away config
 - [ ] Slice 12 — Nemotron assist gateway (+ model-feedback evidence pack)
@@ -125,9 +125,10 @@ verification section below supersedes its coverage and completion claims. Slices
 and 8 are implemented and demonstrated with their evidence recorded below (Slice 8
 is the run-binding seam plus close → inheritance, restart reconciliation and the
 Test 1 offline pre-proof; see its two sections and the evidence file). Slice 9 is
-implemented on `shiftwork/slice-9` and awaiting the user's visual review; its
-independent review round (2026-09-21) returned REVISE and all six findings were
-adjudicated and repaired the same day (see the two Slice 9 sections below).
+implemented and its independent review round (2026-09-21) returned REVISE with all
+six findings adjudicated and repaired the same day (see the two Slice 9 sections
+below); it was committed in nine reviewable batches, merged to main (`4d5539a`,
+2026-09-21) and pushed, with the user marking that merge as the visual acceptance.
 Slices 10-17 are not implemented. Gate 2's ownership revision, the Gate 3
 fourth-backtrack revision and the Gate 4 reconciliation revision are re-approved;
 a same-day Gate 4 follow-up revision (Slice 7 leak-response invalidation;
@@ -2889,6 +2890,25 @@ Test 51 was excluded because it performs installations; test 29 remains the
 existing Slice 14 skip. The two existing dependency deprecation warnings remain.
 No full packaging, learner study, impact, pixel-identical reference conformance
 or user design acceptance is claimed. Pause here for visual judgment.
+
+## Slice 9 merge, push and visual acceptance: 2026-09-21
+
+**State:** Slice 9 is accepted and on main. The change set was committed in nine
+reviewable batches on `shiftwork/slice-9`, fast-forward merged to main
+(`8032aaf..4d5539a`, 29 files, no conflicts) and pushed to `origin/main` the same
+day; the user marked that merge as the visual acceptance, which supersedes the
+"visual acceptance remains pending" state lines in the two Slice 9 sections above.
+The branch `shiftwork/slice-9` was not pushed separately and now sits at the same
+commit as main. No Slice 10 work, install, credential or external service was
+performed.
+
+Merge-gate checks on the exact committed content: `.venv/Scripts/python.exe -m
+pytest tests -q --ignore=tests/packaging` -> 213 passed, 1 skipped; `node --test
+tests/client/evidence.test.mjs` -> 1 pass; `node --check` on `app.js` and
+`evidence.js` -> exit 0. The 42/42 mutation run, the browser harness and the six
+render-fault rows were not re-run at merge time; their 2026-09-21 round evidence
+above stands. The 8009 preview was not consumed, stopped or otherwise touched by
+the merge.
 
 ## Gate 2 re-approval and Gate 3 revision: 2026-09-19
 

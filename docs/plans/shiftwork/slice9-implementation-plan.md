@@ -50,7 +50,7 @@ review's inherited evaluator-relevance limitation was recorded; no slice
 currently owns relevance checking and the gap awaits the user's decision. Details,
 commands and limits are in
 `00-status.md` under "Slice 9 independent review round and repairs: 2026-09-21";
-the user's visual acceptance remains the open decision.
+the user marked the merge to main (`4d5539a`, 2026-09-21) as the visual acceptance.
 
 ## Evidence limits
 

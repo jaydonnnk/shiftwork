@@ -114,8 +114,9 @@ summaries when a time-sensitive external claim is being made.
   main (`8032aaf`, 2026-09-20). Slice 9 (client isometric room shell plus board and
   customer-shift stations) is implemented on `shiftwork/slice-9` (2026-09-21), its
   independent review round adjudicated and repaired, its post-slice cleanup scan
-  recorded, and the user's visual acceptance pending. Slices 10-17 are not
-  implemented.
+  recorded, and it is merged to main (`4d5539a`, 2026-09-21, fast-forward) and
+  pushed, with the user's visual acceptance marked by that merge. Slices 10-17 are
+  not implemented.
   Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the
