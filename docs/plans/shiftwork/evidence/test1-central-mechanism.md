@@ -1,7 +1,7 @@
 # Test 1 offline pre-proof: central mechanism
 
 Command: `python -m demos.test1 --adapter local_process`
-Date: 2026-09-20
+Date: 2026-09-21
 Result: **PRE-PROOF PASS (conditional on the offline executor: kill condition 2 deferred to Slice 14)**
 
 This is the offline pre-proof, not the full Test 1 verdict: two of Test 1's kill

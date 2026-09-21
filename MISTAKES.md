@@ -402,3 +402,140 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   before trusting any test result verify all 38 row patterns are present exactly once
   (with the harness's CRLF fallback), and treat a row's `pattern not found` as a
   signal that the worktree, not the code under test, is wrong.
+
+## 2026-09-21 Slice 9: baseline used the unrelated PATH interpreter
+
+- **What happened:** the first baseline command used bare `python`, resolved to the
+  Hermes 3.11 environment and failed because pytest was absent. The project venv
+  baseline subsequently returned 192 passed, 1 skipped.
+- **Root cause:** resumed execution before recovering the environment constraint
+  from the interrupted required-context read.
+- **Prevention rule:** finish required-context recovery before issuing checks; use
+  `.venv/Scripts/python.exe` explicitly for repository commands.
+
+## 2026-09-21 Slice 9: nested labels hid a rendered-test blind spot
+
+- **What happened:** removing the run region's synthetic label survived the first
+  browser assertion because it found the nested ledger event's label instead.
+- **Root cause:** the selector searched all descendants without verifying ownership
+  of the matching label.
+- **Prevention rule:** require the label's closest synthetic region to equal the
+  region being checked; remove each owned label independently and require failure.
+
+## 2026-09-21 Slice 9: incomplete native Enter event in the browser harness
+
+- **What happened:** the first keyboard probe left the evaluator unselected even
+  though it was focused; a CDP Enter event without its character did not perform
+  native button activation.
+- **Root cause:** the harness sent only key metadata, omitting the Enter text.
+- **Prevention rule:** send a complete native key sequence and verify both focus
+  and the resulting application state instead of substituting a programmatic click.
+
+## 2026-09-21 Slice 9: repair activation and room drawing needed correction
+
+- **What happened:** browser inspection found the repair bench could activate
+  without an incident, and shelf slabs visually occluded the authored book spines.
+- **Root cause:** station selection lacked an incident-state guard; the SVG painter
+  order hid the front book faces behind later slabs.
+- **Prevention rule:** test incident-dependent controls against an empty real view;
+  inspect rendered artwork rather than assuming correct geometry from source.
+  The repair regression failed before the guard and passed after it; book fronts
+  were repainted in front of the slabs and inspected in fresh screenshots.
+
+## 2026-09-21 Slice 9: review exposed navigation, callback and focus regressions
+
+- **What happened:** five browser assertions reproduced three review findings:
+  station changes left journey hashes stale; skip links changed the selected view;
+  refresh lost the away placeholder; customer Enter removed the focused button;
+  and an obsolete incident callback overrode a newer selection.
+- **Root cause:** URL, station and deferred-view state were not synchronized;
+  request-generation protection stopped at the refresh function instead of its
+  caller; rebuilding the customer list discarded native focus.
+- **Prevention rule:** preserve one selected view during refresh, distinguish
+  navigation intent from request generation, require an accepted refresh before
+  applying async selection, and test native Enter followed by Tab after a rerender.
+  All five assertions failed against the pre-fix client before the corrections.
+
+## 2026-09-21 Slice 9: the browser harness asserted identity and counts, not rendered values
+
+- **What happened:** the independent review served mutated copies of `app.js` to
+  the browser, one production rendering change per run (customer answer text,
+  public-record value, check verdict, event type). All four faults rendered and
+  all four browser runs still exited 0: the rendered-evidence assertions checked
+  the request quote, metadata, byte equality, provenance-hash presence and element
+  counts, and the ordinal mutation only edited a DOM dataset, so no substantive
+  displayed value was ever compared against the API payload.
+- **Root cause:** the harness proved that the page bound the right RECORDS to the
+  panel but never that it displayed the right VALUES; a passing count of linked
+  rows was treated as evidence that the rendering was correct. Same class as the
+  graduated AGENTS.md verification rule (prove coverage, do not count it), now
+  applied to rendered evidence instead of leak scanners.
+- **Prevention rule:** every rendered evidence surface asserts its displayed value
+  and identity against an independently fetched payload (answer text, record
+  title/value/age, per-check verdict rows, per-event rows), and each assertion is
+  proven failing-capable by a served-source fault row
+  (`tests/client/render_faults.mjs`, `SHIFTWORK_FAULT` mode in
+  `tests/client/browser.mjs`): the baseline must be green and every fault row must
+  fail at the named assertion.
+
+## 2026-09-21 Slice 9: historical provenance was re-derived from the mutable source path
+
+- **What happened:** the independent review replaced a run's snapshot file at the
+  same pathname after finalization; the historical outputs endpoint then reported
+  the NEW record value, a NEW "run snapshot" hash and a NEW comparison while the
+  captures, checks and events stayed original, so the UI could show a historical
+  comparison that disagreed with what the run consumed. Deleting the source made
+  the whole outputs response 500 and lose the retained raw bytes.
+- **Root cause:** Slice 7/8 persisted the snapshot as a pathname
+  (`shop_snapshot_ref`) and every later read (transcript selection, scoring,
+  retrieval) re-read that path, so "the snapshot this run consumed" was only true
+  while the file stayed byte-identical. The Slice 5 note about inputs coinciding
+  by configuration was recorded as a latent-bug note but not fixed, and Slice 9's
+  public comparison made the consequence user-visible.
+- **Prevention rule:** a claim that a run consumed an input must persist the
+  consumed identity, not a locator: capture the bytes once at execution, store
+  them with the run, and resolve every later read from the capture (path reads
+  only for rows that predate the capture). Retrieval must degrade optional
+  enrichment to nulls when a source is unavailable and never fail the response
+  that carries the retained capture.
+
+## 2026-09-21 Slice 9: navigation checks covered the happy path only
+
+- **What happened:** the review found that activating an incident with native
+  Enter dropped keyboard focus to BODY, and that on narrow layouts a station
+  selection left its detail panel entirely below the viewport (390x900: panel top
+  around y=955) with focus still on the station control. The session's own
+  browser checks exercised customer focus and page overflow, not incident focus
+  or whether the selected content was actually reachable.
+- **Root cause:** the checks verified that navigation CHANGED the view, not that
+  the user could reach the changed content: no focus assertion for the
+  incident-to-evidence path and no viewport-reach assertion after a station tap.
+- **Prevention rule:** for each navigation action assert where focus lands and, at
+  narrow widths, that the selected panel is inside the viewport after a native
+  touch; drive the interaction with real key/touch events and require the
+  assertion to fail when the focus/scroll behavior is removed (both rows exist in
+  `tests/client/render_faults.mjs`).
+
+## 2026-09-21 Slice 9: the new degradation test exercised the capture branch, not the guard branch
+
+- **What happened:** the new mutation row for the retrieval-degradation guard
+  removed the `except (OSError, ValueError)` fallback and the named test still
+  passed (NOT_CAUGHT): the test deleted the source file for a run executed under
+  the current controller, which resolves the persisted capture and never reads
+  the path, so the fallback never fired. The replacement test (a legacy row with
+  no capture whose recorded path is gone) then failed INCIDENTAL, because an
+  unhandled route exception propagates through TestClient instead of returning
+  the 500 a real client sees; only with `raise_server_exceptions=False` did the
+  mutation produce an assertion-level "assert 500 == 200".
+- **Root cause:** the test was written for the user-visible scenario instead of
+  the guard branch's preconditions, so it proved the capture branch twice; and
+  the first replacement asserted through a harness whose failure shape
+  (propagated exception) is not the production failure shape (HTTP 500). The
+  mutation harness did its job both times and is the reason neither error
+  survived.
+- **Prevention rule:** a test for a new guard branch must construct that branch's
+  own preconditions (the legacy/no-capture state here), not the adjacent happy
+  path; when the guard protects an HTTP surface, assert through a client that
+  surfaces the crash as a status code so the removed guard fails with an
+  assertion, never an incidental exception. Run the mutation row for every new
+  guard before claiming it is covered.

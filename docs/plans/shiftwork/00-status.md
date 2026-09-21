@@ -95,7 +95,7 @@ re-steer?"):
   the offline executor; two kill-condition limbs deferred to Slice 14) with the
   evidence file written to `docs/plans/shiftwork/evidence/test1-central-mechanism.md`
   (evidence below)
-- [ ] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03)
+- [ ] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03); implemented and browser-verified on `shiftwork/slice-9` 2026-09-21, its independent review round adjudicated and repaired the same day (evidence in its two sections below), awaiting the user's visual review. Preview/evidence below; not committed or merged.
 - [ ] Slice 10: Client contract/repair stations (02, 04)
 - [ ] Slice 11: Client inherited room + distinct away-shift workshop (05, 06) + away config
 - [ ] Slice 12 — Nemotron assist gateway (+ model-feedback evidence pack)
@@ -124,8 +124,11 @@ The 2026-09-18 Slice 6 report is preserved verbatim as history; the 2026-09-19
 verification section below supersedes its coverage and completion claims. Slices 7
 and 8 are implemented and demonstrated with their evidence recorded below (Slice 8
 is the run-binding seam plus close → inheritance, restart reconciliation and the
-Test 1 offline pre-proof; see its two sections and the evidence file); Slices 9-17
-are not implemented. Gate 2's ownership revision, the Gate 3
+Test 1 offline pre-proof; see its two sections and the evidence file). Slice 9 is
+implemented on `shiftwork/slice-9` and awaiting the user's visual review; its
+independent review round (2026-09-21) returned REVISE and all six findings were
+adjudicated and repaired the same day (see the two Slice 9 sections below).
+Slices 10-17 are not implemented. Gate 2's ownership revision, the Gate 3
 fourth-backtrack revision and the Gate 4 reconciliation revision are re-approved;
 a same-day Gate 4 follow-up revision (Slice 7 leak-response invalidation;
 Slice 10 scoring-input alignment) was approved by the user in chat 2026-09-19.
@@ -2654,6 +2657,238 @@ the demo or the docs. Two unused imports in the new test files were removed
 and one pre-existing unused helper (`repo.last_ledger_event`, added by the Slice 1
 commit) were reported and left untouched pending user approval, since they predate
 this slice.
+
+## Slice 9 independent review round and repairs: 2026-09-21
+
+**State:** the independent review of the Slice 9 preview returned REVISE with six
+material findings, one status-record contradiction and one inherited scoring
+limitation. Each finding was adjudicated against the code and reproduced before
+repair; all six repairs landed with failing-capable proofs on `shiftwork/slice-9`.
+The user's visual acceptance remains pending and is the next decision. No Slice 10
+work, commit, merge, install, credential or external service was performed.
+
+Adjudication (finding → verdict):
+
+1. Browser harness accepted incorrect visible evidence (MAJOR) - CONFIRMED. The
+   harness checked the request quote, metadata, byte equality, provenance-hash
+   presence and element counts, never the displayed answer, public-record value,
+   check verdict or event type; four served-source rendering faults survived it
+   and the ordinal mutation only edited a DOM dataset.
+2. Historical provenance recomputed from mutable source files (MAJOR) -
+   CONFIRMED. Every read (transcript selection, scoring, retrieval) re-read
+   `run.shop_snapshot_ref`, so replacing the file at the same pathname changed
+   the historical comparison and its "run snapshot" hash.
+3. Missing comparison sources made retained raw bytes inaccessible (MEDIUM) -
+   CONFIRMED. The snapshot read ran before projection, so a missing source 500ed
+   the whole outputs response instead of only dropping optional comparison.
+4. Station selection did not bring narrow-screen content into reach (MEDIUM) -
+   CONFIRMED and reproduced: at 390x900 the detail panel began around y=955 with
+   focus still on the station control.
+5. Opening a historical incident lost keyboard focus (MEDIUM) - CONFIRMED and
+   reproduced: native Enter opened the run and `document.activeElement` became
+   BODY.
+6. Reference composition not established (MAJOR visual deviation) - CONFIRMED
+   against the supplied reference at its 1376x768 size.
+
+Inherited limitation, recorded and deliberately not "fixed" in Slice 9: the
+evaluator verifies that a factual claim is supported by a cited record, never
+that the claim answers the executed question, so a price answer to a stock
+question can pass its checks (`evaluator.py` `_first_violation` /
+`_invariant_violation`). Slice 9's comparison correctly follows the executed
+ordinal's record rather than service citations; making it follow citations would
+hide the limitation rather than repair it. No slice currently owns relevance
+checking; it is an unowned gap that awaits the user's decision.
+
+Repairs and their proofs:
+
+- Rendered evidence: `tests/client/browser.mjs` now asserts answer text, public
+  record title/value/age, per-check verdict rows and per-event rows by identity
+  against the independently fetched API payload. `SHIFTWORK_FAULT` mode serves a
+  single-needle mutated copy of the production `app.js` and requires the run to
+  fail at the named assertion; `tests/client/render_faults.mjs` observed the
+  baseline green and six of six fault rows caught (answer, record, verdict,
+  event, stationFocus, incidentFocus), the first four matching the review's own
+  injections.
+- Provenance: `execute_run` reads the configured snapshot once, persists the
+  exact bytes on the run row (schema v5; legacy rows stay NULL and keep the
+  best-effort path read) and provisions the adapter from a controller-owned copy
+  of those bytes, so transcript selection, scoring and retrieval all resolve the
+  capture. New tests observe red before the fix: same-pathname replacement leaves
+  the historical projection byte-identical; a deleted source keeps the outputs
+  response 200 with exact bytes and the execution-time comparison for FINALIZED
+  and FAILED runs.
+- Retrieval: `output_evidence_for` degrades only the optional comparison fields
+  when the snapshot or stimulus source is unavailable; it can no longer abort the
+  response that carries the retained capture. The degradation branch's test is a
+  legacy-row scenario (a run row with no capture whose recorded path is gone),
+  because runs executed under the current controller always resolve captured
+  bytes and never touch the path.
+- Narrow navigation: user-intent station selection at 760px or below focuses the
+  detail panel and scrolls it into view (reduced motion jumps instantly; the
+  pre-first-load navigation does not move the viewport). The harness proves a
+  native touch brings the panel into reach at 640 and 390.
+- Incident focus: accepted incident navigation focuses the selected request
+  button, guarded by the existing navigation-intent checks so stale callbacks
+  cannot take focus; proven with a native Enter sequence.
+- Composition: journey navigation merged into one compact header, the room
+  heading compacted, the room height-fitted to the desktop frame so its
+  foreground is fully visible at the reference size, the detail panel sticky with
+  independent scrolling at 761px and above, essential text sizes raised (station
+  status 8 → 10px, evidence metadata 9 → 11px, adjacent meta roles +1px), and the
+  evaluator booth retinted as a glass cabin with a translucent roof, lighter
+  panes and mullions. Fresh screenshots at 1376x768, 1280, 640 and 390 are in
+  `artifacts/slice9/`.
+
+Verification observed in this session (all on the repaired worktree):
+
+```text
+Baseline before repairs: .venv/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging
+209 passed, 1 skipped, 2 warnings
+Final: .venv/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging
+213 passed, 1 skipped, 2 warnings in 37.65s
+node --test tests/client/evidence.test.mjs -> pass
+node --check shiftwork/client/app.js -> exit 0
+git diff --check -> exit 0
+.venv/Scripts/python.exe tests/mutation_proofs.py
+42/42 assertion-level, every file restored byte-identically; the two new rows
+break the capture and degradation branches independently (the first version of
+the degradation test only exercised the capture branch and the harness returned
+NOT_CAUGHT, then INCIDENTAL until the test observed the HTTP 500 a real consumer
+sees; the strengthened test fails with "assert 500 == 200" under the mutation)
+node tests/client/render_faults.mjs --port 8137
+baseline PASS; fault rows: answer, record, verdict, event, stationFocus, incidentFocus
+all FAULT_CAUGHT at the named assertion (7 of 7 rows as expected)
+Fresh preview on 8141; node tests/client/browser.mjs http://127.0.0.1:8141 --exercise-run
+1280/640/390 PASS; rendered evidence exact; native-touch panel reach at 640/390;
+incident navigation focus PASS; real run finalized 3 outputs with attempts 1 -> 0;
+uncaught browser exceptions 0; exit 0
+.venv/Scripts/python.exe -m demos.finalize_run -> FINALIZED, chain VALID, 3 incidents,
+second finalize nets zero new events
+.venv/Scripts/python.exe -m demos.test1 --adapter local_process -> PRE-PROOF PASS;
+6 runs re-scored offline 36/36 identical
+```
+
+Recorded limits: browser coverage is installed Chromium with emulated touch, not
+physical devices or screen-reader certification; packaging test 51 remains
+excluded (installs) and test 29 remains the Slice 14 skip; the evaluator relevance
+limitation above is open; the 8009 preview was left running for the user and was
+not consumed; the review-owned previews on 8010-8012 were already stopped. The
+Slice 9 implementation section's earlier "five pre-fix browser failures" claim
+remains self-reported from that session and was not re-derived here; the review
+flagged it as UNVERIFIED independently.
+
+Post-slice cleanup scan (2026-09-21 independent verification round): no orphan
+files found; every new Slice 9 file is referenced by docs or tests (two API test
+files only by description: "shell and fixture preview tests"); `artifacts/`
+remains ignored with nothing generated tracked; `tests/client` stays
+dependency-free (node stdlib only). Every number quoted in the review-round
+evidence block reproduced: pytest with packaging excluded -> 213 passed,
+1 skipped; the node evidence test -> 1 pass; the client syntax check -> exit 0;
+`git diff --check` -> exit 0; the mutation harness -> 42/42 assertion-level with
+every file restored byte-identically (independently re-verified by checksum
+manifest); the render-fault rows -> baseline PASS plus six of six `FAULT_CAUGHT`
+at the named assertion. Drift found and being fixed by this change set: the
+`AGENTS.md` "Slices 8-17 are not implemented" sentence and the missing Slice 8/9
+status lines in `SHIFTWORK_PLAN.md`. Reported, not fixed (pre-existing style,
+user may decide): the `_ok` helper is duplicated across three API test files.
+
+## Slice 9 implementation and preview: 2026-09-21
+
+**State:** implemented and verified locally on `shiftwork/slice-9`; the user's
+visual review is pending. No Slice 10 work, commits, merges, installs, credentials
+or external services were authorized or performed. The approved gate decisions
+remain unchanged. Execution plan: `slice9-implementation-plan.md`.
+
+Delivered:
+- Original local SVG Bellwether room, seven keyboard-reachable HTML stations,
+  top journey navigation, board and customer evidence views. Artwork follows the
+  isometric composition but is a simpler vector rendition, not a photorealistic
+  reproduction of the supplied reference. Essential labels and values are HTML.
+- Board shows frozen identity/contract/filenames, explicitly labelled draft files,
+  visible-check file and change log, unresolved incidents/limits, attempts and
+  verified ledger totals. No decision counts are inferred from saves or runs.
+- `customer_answer` replaces the tracer `customer_text` projection. Public shop
+  comparison uses the executed ordinal's record in that run's snapshot, with an
+  explicit field allowlist and exact-byte snapshot hash. Missing public records
+  produce null comparison/provenance fields, never sealed expected values.
+- Customer selection joins all checks and events by run, output and ordinal;
+  raw body downloads preserve arbitrary bytes, including invalid UTF-8. Synthetic
+  labels remain visible in each rendered business-state region.
+- Contract and repair authoring remain Slice 10; return/away views remain Slice 11;
+  model assistance and sandbox execution remain Slices 12/14.
+
+Reproduce the preview from the repository root:
+
+```text
+.venv/Scripts/python.exe -m demos.client --port 8009
+http://127.0.0.1:8009/#customers
+```
+
+The command creates a separate temporary SQLite database, freezes the pinned
+Slice 8 pre-repair fixture and really executes two `local_process` attempts.
+The preview shows `run-0002`, two requests, nine unresolved incident rows and one
+remaining attempt. These are synthetic fixture results, not user-authored work,
+learner evidence, model use or hostile-code isolation. The 8009 preview was left
+running for review; stop its background task, or use Ctrl+C when launched in a
+terminal. `--empty` starts without seeded work. Existing databases are refused,
+never overwritten. A disposable second preview on 8010 was stopped after tests.
+
+Verification observed in this session:
+
+```text
+Baseline: .venv/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging
+192 passed, 1 skipped, 2 warnings in 47.26s
+
+Final: .venv/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging
+209 passed, 1 skipped, 2 warnings in 60.45s
+
+node --test tests/client/evidence.test.mjs
+1 passed
+node --check shiftwork/client/app.js
+exit 0
+git diff --check
+exit 0
+
+node tests/client/browser.mjs http://127.0.0.1:8010 --exercise-run
+1280 / 640 / 390: PASS; exact request/byte/provenance/check/event binding
+Native evaluator and customer Enter/Tab: PASS
+Reduced motion, loading, error, empty, no incidents: PASS
+Malformed binary body, absent public record, literal untrusted text: PASS
+Navigation and stale incident callback regressions: PASS
+Actual Run customer shift button: new finalized run, 3 outputs, budget 1 -> 0
+Uncaught browser exceptions: 0
+```
+
+The browser command requires an already installed Chrome and Node, installs
+nothing, and closes its isolated browser profile. `CHROME_PATH` overrides the
+Windows Chrome path. `--exercise-run` requires a fresh disposable preview with
+one remaining attempt. The selected main preview was not consumed by that proof.
+Screenshots and JSON report are local ignored artifacts under `artifacts/slice9/`.
+The in-app screenshot tool could not capture its hidden viewport; the actual
+viewport matrix was captured in installed headless Chromium and the PNGs were
+visually inspected. In-app console inspection also returned no warnings/errors.
+
+Failing-capable evidence: new API projection tests were observed RED before
+implementation; shell and fixture preview tests likewise failed before their
+features existed. Adversarial identity fixtures test separate run/output/ordinal/
+result joins. The browser removes each region's own synthetic label and requires
+its rendered assertion to fail, then restores it; an ordinal mutation also fails.
+The first label-removal probe exposed a nested-label borrowing bug in the test,
+which was fixed rather than waived. Rendered repair activation failed before its
+no-incident guard. No assertion was weakened to obtain passing output.
+
+Focused integration review returned three defects: competing navigation state,
+an obsolete incident callback, and lost customer keyboard focus. Five Chromium
+assertions reproduced their concrete symptoms before the fixes; all passed after
+view/hash synchronization, accepted-refresh plus intent checks, and focus
+restoration. This is a repaired review, not a fabricated independent re-review
+PASS. The review found no new ADR 0001-0003 contradiction or orphan changed file;
+keep the new assets, demo and tests. No cleanup deletion was performed.
+
+Test 51 was excluded because it performs installations; test 29 remains the
+existing Slice 14 skip. The two existing dependency deprecation warnings remain.
+No full packaging, learner study, impact, pixel-identical reference conformance
+or user design acceptance is claimed. Pause here for visual judgment.
 
 ## Gate 2 re-approval and Gate 3 revision: 2026-09-19
 
