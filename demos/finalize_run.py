@@ -101,7 +101,9 @@ def main() -> int:
         )
     for incident in incidents_once:
         print(f"  incident {incident.id} {incident.reason_code.value} state={incident.state.value}")
-    rendered = [item["customer_text"] for item in outputs if item["customer_text"]]
+    rendered = [
+        item["customer_answer"]["display_text"] for item in outputs if item["customer_answer"]
+    ]
     print(f"  rendered customer texts: {len(rendered)} of {len(outputs)}")
     print(f"  board incidents={len(board['incidents'])} chain={board['chain_status']}")
     print(

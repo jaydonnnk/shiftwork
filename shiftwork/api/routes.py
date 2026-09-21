@@ -108,9 +108,7 @@ def get_outputs(
 ) -> list[schemas.RunOutputView]:
     run = orchestrator.get_run(conn, run_id)
     return [
-        schemas.RunOutputView.of(
-            output, customer_text=orchestrator.customer_text_for(output, run.shop_snapshot_ref)
-        )
+        schemas.RunOutputView.of(output, **orchestrator.output_evidence_for(conn, output, run))
         for output in orchestrator.list_outputs(conn, run_id)
     ]
 

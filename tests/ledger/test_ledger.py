@@ -571,4 +571,7 @@ def test_ledger_view_resolves_derivation_and_catalog_links(finalized):
         assert event["catalog"]["catalog_record"]["version"] == 2
 
         outputs = client.get(f"/api/runs/{finalized['run_id']}/outputs").json()
-        assert any(item["customer_text"] for item in outputs)
+        assert any(
+            item["customer_answer"] and item["customer_answer"]["display_text"]
+            for item in outputs
+        )

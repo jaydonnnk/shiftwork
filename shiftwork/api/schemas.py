@@ -9,7 +9,9 @@ from pydantic import BaseModel, ConfigDict
 from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
+    Claim,
     Incident,
+    JsonValue,
     Run,
     RunOutput,
     Shift,
@@ -100,6 +102,29 @@ class RunView(BaseModel):
         return cls.model_validate(run)
 
 
+class CustomerAnswerView(BaseModel):
+    model_config = _FROZEN
+
+    action: Literal["answer", "ask", "decline", "escalate"]
+    display_text: str
+    claims: tuple[Claim, ...]
+    evidence_refs: tuple[str, ...]
+    verified_record_age_ms: int | None
+
+
+class PublicShopRecordView(BaseModel):
+    """Only independently published record fields, never snapshot metadata."""
+
+    model_config = _FROZEN
+
+    record_id: str
+    kind: str
+    title: str | None
+    edition: str | None
+    value: JsonValue
+    record_age_ms: int
+
+
 class RunOutputView(BaseModel):
     model_config = _FROZEN
 
@@ -112,10 +137,21 @@ class RunOutputView(BaseModel):
     elapsed_ms: int | None = None
     transport_error: str | None = None
     log_base64: str | None = None
-    customer_text: str | None = None
+    customer_answer: CustomerAnswerView | None = None
+    public_shop_record: PublicShopRecordView | None = None
+    public_shop_record_ref: str | None = None
+    public_shop_snapshot_hash: str | None = None
 
     @classmethod
-    def of(cls, output: RunOutput, customer_text: str | None = None) -> "RunOutputView":
+    def of(
+        cls,
+        output: RunOutput,
+        *,
+        customer_answer: CustomerAnswerView | dict[str, Any] | None = None,
+        public_shop_record: PublicShopRecordView | dict[str, JsonValue] | None = None,
+        public_shop_record_ref: str | None = None,
+        public_shop_snapshot_hash: str | None = None,
+    ) -> "RunOutputView":
         return cls(
             id=output.id,
             run_id=output.run_id,
@@ -130,7 +166,10 @@ class RunOutputView(BaseModel):
                 if output.log_ref and output.log_ref.startswith("data:application/octet-stream;base64,")
                 else None
             ),
-            customer_text=customer_text,
+            customer_answer=customer_answer,
+            public_shop_record=public_shop_record,
+            public_shop_record_ref=public_shop_record_ref,
+            public_shop_snapshot_hash=public_shop_snapshot_hash,
         )
 
 
@@ -230,6 +269,7 @@ class BoardView(BaseModel):
     latest_shift: ShiftView | None = None
     latest_version: ArtifactVersionView | None = None
     latest_run: RunView | None = None
+    artifact_files: tuple[str, ...]
     requests_run: int
     attempts_used: int
     attempt_limit: int
