@@ -337,7 +337,7 @@ def test_controller_normalizes_once_and_retains_failed_capture(executor, monkeyp
     def observed(raw, deadline_s):
         normalized.append(tuple(raw))
         return original(normalized[-1], deadline_s)
-    monkeypatch.setattr(orchestrator, "_adapter_for", lambda run: FailedAdapter())
+    monkeypatch.setattr(orchestrator, "_adapter_for", lambda run, snapshot_bytes: FailedAdapter())
     monkeypatch.setattr(executor.base, "normalize_captures", observed)
     path = tmp_path / "executor.db"
     contract = json.loads((config.FIXTURE_DIR / "artifacts" / "bookshop" / "contract.json").read_bytes())
@@ -374,9 +374,10 @@ def _pre_rotation_schema(*, keep_log_ref: bool = False) -> str:
 
     The default strips ``log_ref`` as well and yields the v2 shape;
     ``keep_log_ref`` yields the genuine v3 shape that shipped before rotation
-    (log_ref present, rotation columns and table absent). Every strip is
-    asserted, so this helper cannot silently stop producing an older schema and
-    make the upgrade tests vacuous.
+    (log_ref present, rotation columns and table absent). The Slice 9 snapshot
+    capture column is stripped from both shapes so the upgrade must add it. Every
+    strip is asserted, so this helper cannot silently stop producing an older
+    schema and make the upgrade tests vacuous.
     """
     from shiftwork.store import db
 
@@ -384,6 +385,7 @@ def _pre_rotation_schema(*, keep_log_ref: bool = False) -> str:
     fragments = [
         "    request_batch_ref TEXT NOT NULL,\n",
         "    shop_snapshot_ref TEXT NOT NULL,\n",
+        "    shop_snapshot_bytes BLOB,\n",
     ]
     if not keep_log_ref:
         fragments.append("    log_ref TEXT,\n")
@@ -427,9 +429,13 @@ def test_existing_schema_two_gets_log_column_without_data_loss(executor, tmp_pat
         assert "log_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(run_outputs)")}
         assert conn.execute("SELECT display_name FROM engagements WHERE slug = 'retained'").fetchone()[0] == "Retained row"
         # The v3 to v4 half of the same upgrade: columns added, legacy rows
-        # backfilled with the refs the controller hardcoded before rotation.
+        # backfilled with the refs the controller hardcoded before rotation. The
+        # v5 capture column arrives with NULL for legacy rows: no fabricated
+        # snapshot bytes for runs the controller never captured.
         assert "request_batch_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
         assert conn.execute("SELECT request_batch_ref, shop_snapshot_ref FROM runs WHERE id = 'legacy-run'").fetchone()[:] == ("thin.jsonl", "bookshop_snapshot.json")
+        assert "shop_snapshot_bytes" in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
+        assert conn.execute("SELECT shop_snapshot_bytes FROM runs WHERE id = 'legacy-run'").fetchone()[0] is None
         db.ensure_schema(conn)
         assert conn.execute("PRAGMA user_version").fetchone()[0] == db.SCHEMA_VERSION
     finally:
@@ -453,6 +459,8 @@ def test_existing_schema_three_gets_rotation_columns_without_data_loss(tmp_path)
         assert "request_batch_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
         assert "log_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(run_outputs)")}
         assert conn.execute("SELECT request_batch_ref, shop_snapshot_ref FROM runs WHERE id = 'legacy-run'").fetchone()[:] == ("thin.jsonl", "bookshop_snapshot.json")
+        assert "shop_snapshot_bytes" in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
+        assert conn.execute("SELECT shop_snapshot_bytes FROM runs WHERE id = 'legacy-run'").fetchone()[0] is None
         assert "rotation_draws" in {
             row["name"] for row in conn.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
         }
@@ -620,6 +628,7 @@ def test_schema_two_upgrade_rolls_back_on_version_write_failure(tmp_path):
         assert conn.execute("PRAGMA user_version").fetchone()[0] == db.SCHEMA_VERSION
         assert "log_ref" in {row["name"] for row in conn.execute("PRAGMA table_info(run_outputs)")}
         assert conn.execute("SELECT request_batch_ref, shop_snapshot_ref FROM runs WHERE id = 'legacy-run'").fetchone()[:] == ("thin.jsonl", "bookshop_snapshot.json")
+        assert "shop_snapshot_bytes" in {row["name"] for row in conn.execute("PRAGMA table_info(runs)")}
         assert conn.execute("SELECT display_name FROM engagements WHERE slug = 'retained'").fetchone()[0] == "Retained row"
     finally:
         conn.close()

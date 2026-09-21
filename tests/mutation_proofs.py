@@ -464,6 +464,32 @@ MUTATIONS = [
         "tests": "tests/orchestrator/test_test1_preproof.py::test_next_shift_needs_the_six_variant_inventory",
         "expect": "test_next_shift_needs_the_six_variant_inventory",
     },
+    # Slice 9 review round: each row breaks one new provenance guard branch and
+    # names the test that must fail when the run consumes the mutable path again.
+    {
+        "name": "snapshot_capture_bypassed_for_the_mutable_path",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""    stored = repo.get_run_snapshot_bytes(conn, run.id)
+    if stored is not None:
+        return stored
+    return Path(run.shop_snapshot_ref).read_bytes()""",
+        "new": b"""    return Path(run.shop_snapshot_ref).read_bytes()""",
+        "tests": "tests/api/test_client_evidence.py::test_historical_projection_binds_the_bytes_the_run_consumed_not_the_current_file",
+        "expect": "test_historical_projection_binds_the_bytes_the_run_consumed_not_the_current_file",
+    },
+    {
+        "name": "retrieval_aborts_when_the_comparison_source_is_missing",
+        "file": "shiftwork/orchestrator.py",
+        "old": b"""    try:
+        snapshot_bytes = _snapshot_bytes_for_run(conn, run)
+        records = _public_records(snapshot_bytes)
+    except (OSError, ValueError):
+        snapshot_bytes = None""",
+        "new": b"""    snapshot_bytes = _snapshot_bytes_for_run(conn, run)
+    records = _public_records(snapshot_bytes)""",
+        "tests": "tests/api/test_client_evidence.py::test_legacy_run_without_capture_degrades_when_the_source_is_missing",
+        "expect": "test_legacy_run_without_capture_degrades_when_the_source_is_missing",
+    },
 ]
 
 
