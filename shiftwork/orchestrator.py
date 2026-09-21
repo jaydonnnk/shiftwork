@@ -22,6 +22,7 @@ import asyncio
 import base64
 import json
 import sqlite3
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -118,24 +119,22 @@ def _attempt_batch(ordinal: int) -> executor.BatchRef:
     return executor.BatchRef(path_ref=path_ref, content_hash=content_hash)
 
 
-def _adapter_for(run: Run) -> executor.ExecutorAdapter | None:
+def _adapter_for(run: Run, snapshot_bytes: bytes) -> executor.ExecutorAdapter | None:
     """Resolve the executor the run row names, or None to fail closed.
 
     Recorded runs replay the transcript the authored map pairs with the run's own
-    frozen batch and the snapshot it consumed. An absent pairing, an unreadable
-    snapshot, and an adapter with no implementation here (tokenfactory before
-    Slice 14) all resolve to None, which ``execute_run`` records as a typed
-    PROVISION_FAILED failure. No other pair's transcript is ever substituted.
+    frozen batch and the snapshot it consumed. The caller passes the captured
+    snapshot bytes, so transcript selection uses the same bytes the run executes
+    against, never a re-read of the mutable source path. An absent pairing and an
+    adapter with no implementation here (tokenfactory before Slice 14) resolve to
+    None, which ``execute_run`` records as a typed PROVISION_FAILED failure. No
+    other pair's transcript is ever substituted.
     """
     if run.adapter == "local_process":
         return LocalProcessAdapter()
     if run.adapter != "recorded":
         return None
-    try:
-        snapshot = Path(run.shop_snapshot_ref).read_bytes()
-    except OSError:
-        return None
-    snapshot_hash = canonical.content_hash(base64.b64encode(snapshot).decode("ascii"))
+    snapshot_hash = canonical.content_hash(base64.b64encode(snapshot_bytes).decode("ascii"))
     ref = config.RECORDED_TRANSCRIPTS.get((run.request_batch_ref, snapshot_hash))
     if ref is None:
         return None
@@ -314,12 +313,27 @@ def start_run(
 
 
 def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
+    """Execute a queued run against the snapshot bytes it captures here.
+
+    The controller reads the configured snapshot once, persists those exact bytes
+    on the run and provisions the adapter from a controller-owned copy, so
+    transcript selection, execution, scoring and the client's later comparison all
+    resolve the same bytes even if the source path is edited or removed (Slice 9).
+    """
     run = repo.get_run(conn, run_id)
     if run is None:
         raise LifecycleError("not_found", f"unknown run: {run_id}")
     if run.state is not RunState.QUEUED:
         return run
-    adapter = _adapter_for(run)
+    try:
+        snapshot_bytes = Path(run.shop_snapshot_ref).read_bytes()
+    except OSError:
+        # Fail closed, typed: an unreadable snapshot is a provisioning failure,
+        # never a reason to execute against a different snapshot.
+        repo.update_run(conn, run_id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
+        conn.commit()
+        return repo.get_run(conn, run_id)
+    adapter = _adapter_for(run, snapshot_bytes)
     if adapter is None:
         # Fail closed, typed: an unmapped recorded pairing or an adapter with no
         # implementation here never replays something else and writes no captures.
@@ -327,27 +341,31 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
         conn.commit()
         return repo.get_run(conn, run_id)
     repo.update_run(conn, run_id, RunState.RUNNING)
+    repo.set_run_snapshot_bytes(conn, run_id, snapshot_bytes)
     conn.commit()
     try:
         version = repo.get_version(conn, run.artifact_version_id)
         batch_path = config.FIXTURE_DIR / "requests" / run.request_batch_ref
-        request = executor.RunRequest(
-            artifact_snapshot=executor.ArtifactSnapshotRef(
-                files={path: text.encode("utf-8") for path, text in version.files.items()},
-                manifest_hash=version.content_hash,
-            ),
-            request_batch=executor.BatchRef(
-                path_ref=run.request_batch_ref,
-                content_hash=canonical.content_hash(base64.b64encode(batch_path.read_bytes()).decode("ascii")),
-            ),
-            shop_snapshot_ref=run.shop_snapshot_ref,
-            harness_ref="stdlib-loopback-v1",
-            image_ref="local-python-stdlib",
-            deadline_s=5,
-            inference_grant=None,
-        )
-        batch = {entry.ordinal: entry for entry in executor.load_batch(request.request_batch)}
-        result = asyncio.run(adapter.execute(request))
+        with tempfile.TemporaryDirectory(prefix="shiftwork-run-snapshot-") as snapshot_dir:
+            snapshot_path = Path(snapshot_dir) / "shop_snapshot.json"
+            snapshot_path.write_bytes(snapshot_bytes)
+            request = executor.RunRequest(
+                artifact_snapshot=executor.ArtifactSnapshotRef(
+                    files={path: text.encode("utf-8") for path, text in version.files.items()},
+                    manifest_hash=version.content_hash,
+                ),
+                request_batch=executor.BatchRef(
+                    path_ref=run.request_batch_ref,
+                    content_hash=canonical.content_hash(base64.b64encode(batch_path.read_bytes()).decode("ascii")),
+                ),
+                shop_snapshot_ref=str(snapshot_path),
+                harness_ref="stdlib-loopback-v1",
+                image_ref="local-python-stdlib",
+                deadline_s=5,
+                inference_grant=None,
+            )
+            batch = {entry.ordinal: entry for entry in executor.load_batch(request.request_batch)}
+            result = asyncio.run(adapter.execute(request))
         outputs = []
         for output in executor.normalize_captures(result.captures, request.deadline_s):
             output = output.model_copy(update={
@@ -380,9 +398,22 @@ def execute_run_task(db_path: str, run_id: str) -> None:
         conn.close()
 
 
-def _public_records(snapshot_path: Path) -> dict[str, JsonValue]:
-    data = json.loads(snapshot_path.read_text(encoding="utf-8"))
+def _public_records(snapshot_bytes: bytes) -> dict[str, JsonValue]:
+    data = json.loads(snapshot_bytes)
     return {record["record_id"]: record for record in data["records"]}
+
+
+def _snapshot_bytes_for_run(conn: sqlite3.Connection, run: Run) -> bytes:
+    """The shop snapshot bytes this run consumed (Slice 9 run binding).
+
+    Runs executed under the current controller carry their captured bytes; a run
+    that predates the capture falls back to reading the recorded path, which is
+    best effort and may raise OSError if that source no longer exists.
+    """
+    stored = repo.get_run_snapshot_bytes(conn, run.id)
+    if stored is not None:
+        return stored
+    return Path(run.shop_snapshot_ref).read_bytes()
 
 
 def _open_incidents(
@@ -505,9 +536,10 @@ def finalize_run(conn: sqlite3.Connection, run_id: str) -> Run:
         raise LifecycleError("not_found", f"unknown artifact version: {run.artifact_version_id}")
     outputs = repo.list_outputs(conn, run_id)
     cases = sealed_store.load_drawn_cases(conn, run_id)
-    # Score against the snapshot this run actually consumed, never the module
-    # default (the Slice 5 review's latent bug; program design S5.3/S5.5).
-    public_records = _public_records(Path(run.shop_snapshot_ref))
+    # Score against the snapshot this run actually consumed - its captured bytes,
+    # never the module default or a re-read of the mutable path (Slice 5 review's
+    # latent bug; program design S5.3/S5.5).
+    public_records = _public_records(_snapshot_bytes_for_run(conn, run))
     mission = reducer.load_mission(config.BOOKSHOP_MISSION)
 
     try:
@@ -660,22 +692,82 @@ def get_incident(conn: sqlite3.Connection, incident_id: str) -> Incident:
     return incident
 
 
-def customer_text_for(output: RunOutput, shop_snapshot_ref: str) -> str | None:
-    """Derive the customer-facing sentence from an output's raw body (S5.6).
+def _stimulus_record(run: Run, ordinal: int, records: dict[str, JsonValue]) -> JsonValue | None:
+    """The public record the executed request ordinal asked about, or None.
 
-    Returns None when the body does not parse, a cited ref resolves to no public
-    record, or the attested age is false; the exact raw bytes stay available as
-    ``body_base64`` on the view. Records come from the run's own snapshot, so the
-    rendered sentence matches the records the run was scored against.
+    The stimulus comes from the run's persisted request batch; any unavailable or
+    inconsistent source degrades to None instead of failing the caller.
     """
     try:
-        response = ServiceResponse.model_validate_json(output.body)
-        validated = customer_answer.validate_service_response(
-            response, _public_records(Path(shop_snapshot_ref))
-        )
-    except (ValueError, ServiceResponseInvalid):
+        batch_path = config.FIXTURE_DIR / "requests" / run.request_batch_ref
+        batch = executor.load_batch(executor.BatchRef(
+            path_ref=run.request_batch_ref,
+            content_hash=canonical.content_hash(base64.b64encode(batch_path.read_bytes()).decode("ascii")),
+        ))
+    except (OSError, ValueError, KeyError):
         return None
-    return customer_answer.render_customer_text(validated)
+    stimulus = next((entry for entry in batch if entry.ordinal == ordinal), None)
+    if stimulus is None:
+        return None
+    try:
+        body = json.loads(stimulus.body)
+    except ValueError:
+        return None
+    if not isinstance(body, dict):
+        return None
+    return records.get(body.get("record_id"))
+
+
+def output_evidence_for(conn: sqlite3.Connection, output: RunOutput, run: Run) -> dict[str, Any]:
+    """Public comparison follows the executed request, not service citations or sealed checks.
+
+    Records and hash come from the bytes this run captured at execution, so an
+    edited or deleted source path cannot change what the run is said to have
+    consumed. An unavailable snapshot or stimulus degrades only the optional
+    comparison fields; the stored answer and the raw captured bytes stay
+    retrievable (Slice 9 review, findings 2 and 3).
+    """
+    evidence: dict[str, Any] = {
+        "customer_answer": None,
+        "public_shop_record": None,
+        "public_shop_record_ref": None,
+        "public_shop_snapshot_hash": None,
+    }
+    records: dict[str, JsonValue] = {}
+    try:
+        snapshot_bytes = _snapshot_bytes_for_run(conn, run)
+        records = _public_records(snapshot_bytes)
+    except (OSError, ValueError):
+        snapshot_bytes = None
+    record = _stimulus_record(run, output.request_ordinal, records) if snapshot_bytes else None
+    if record is not None:
+        evidence.update({
+            "public_shop_record": {
+                "record_id": record["record_id"],
+                "kind": record["kind"],
+                "title": record.get("title"),
+                "edition": record.get("edition"),
+                "value": record["value"],
+                "record_age_ms": record["record_age_ms"],
+            },
+            "public_shop_record_ref": record["record_id"],
+            "public_shop_snapshot_hash": canonical.content_hash(
+                base64.b64encode(snapshot_bytes).decode("ascii")
+            ),
+        })
+    try:
+        response = ServiceResponse.model_validate_json(output.body)
+        validated = customer_answer.validate_service_response(response, records)
+    except (ValueError, ServiceResponseInvalid):
+        return evidence
+    evidence["customer_answer"] = {
+        "action": validated.action,
+        "display_text": customer_answer.render_customer_text(validated),
+        "claims": validated.claims,
+        "evidence_refs": validated.evidence_refs,
+        "verified_record_age_ms": validated.verified_record_age_ms,
+    }
+    return evidence
 
 
 def _resolve_derivation(conn: sqlite3.Connection, event) -> dict[str, Any] | None:
@@ -765,6 +857,7 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         "latest_shift": latest_shift,
         "latest_version": latest_version,
         "latest_run": latest_run,
+        "artifact_files": tuple(sorted(latest_version.files)) if latest_version else (),
         "requests_run": requests_run,
         "attempts_used": attempts_used,
         "attempt_limit": attempt_limit,

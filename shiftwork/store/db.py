@@ -4,7 +4,7 @@ import sqlite3
 from pathlib import Path
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 # Slice 7 backfills pre-rotation runs with the refs the controller hardcoded then.
 _LEGACY_RUN_BATCH = "thin.jsonl"
 _LEGACY_RUN_SNAPSHOT = "bookshop_snapshot.json"
@@ -21,7 +21,7 @@ def connect(db_path: str | Path) -> sqlite3.Connection:
 
 def ensure_schema(conn: sqlite3.Connection) -> None:
     current = int(conn.execute("PRAGMA user_version").fetchone()[0])
-    if current not in (0, 2, 3, SCHEMA_VERSION):
+    if current not in (0, 2, 3, 4, SCHEMA_VERSION):
         raise RuntimeError(
             f"database schema is at version {current}, this build expects {SCHEMA_VERSION}. "
             "This schema cannot be migrated in place; "
@@ -42,4 +42,9 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
                 "WHERE request_batch_ref IS NULL",
                 (_LEGACY_RUN_BATCH, _LEGACY_RUN_SNAPSHOT),
             )
+        if current in (2, 3, 4):
+            # Slice 9 evidence binding: legacy runs keep a NULL capture, so their
+            # historical projections fall back to the path (best effort) instead of
+            # claiming bytes the controller never recorded.
+            conn.execute("ALTER TABLE runs ADD COLUMN shop_snapshot_bytes BLOB")
         conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")

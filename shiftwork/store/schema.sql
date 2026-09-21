@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS runs (
     artifact_version_id TEXT NOT NULL REFERENCES artifact_versions(id),
     request_batch_ref TEXT NOT NULL,
     shop_snapshot_ref TEXT NOT NULL,
+    shop_snapshot_bytes BLOB,
     attempt_number INTEGER NOT NULL,
     state TEXT NOT NULL,
     adapter TEXT NOT NULL,

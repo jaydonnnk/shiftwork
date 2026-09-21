@@ -302,6 +302,22 @@ def get_run(conn: sqlite3.Connection, run_id: str) -> Run | None:
     return _run(row) if row else None
 
 
+def set_run_snapshot_bytes(conn: sqlite3.Connection, run_id: str, snapshot_bytes: bytes) -> None:
+    """Persist the shop snapshot bytes the run executes against (Slice 9).
+
+    Captured once, before the adapter runs, so every later read - transcript
+    selection, scoring and the client's historical comparison - resolves the same
+    bytes even if the configured source path is edited or removed afterwards.
+    """
+    conn.execute("UPDATE runs SET shop_snapshot_bytes = ? WHERE id = ?", (snapshot_bytes, run_id))
+
+
+def get_run_snapshot_bytes(conn: sqlite3.Connection, run_id: str) -> bytes | None:
+    """The run's captured snapshot bytes, or None for runs that predate the capture."""
+    row = conn.execute("SELECT shop_snapshot_bytes FROM runs WHERE id = ?", (run_id,)).fetchone()
+    return row["shop_snapshot_bytes"] if row else None
+
+
 def get_latest_run(conn: sqlite3.Connection, shift_id: str) -> Run | None:
     row = conn.execute(
         "SELECT * FROM runs WHERE shift_id = ? ORDER BY attempt_number DESC LIMIT 1", (shift_id,)

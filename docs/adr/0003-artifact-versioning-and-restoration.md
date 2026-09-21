@@ -70,3 +70,19 @@ written (`tests/ledger/test_ledger.py`,
 `tests/orchestrator/test_close_inheritance.py`, `tests/orchestrator/test_test1_preproof.py`).
 The 2026-09-19 "remain Slice 8 as stated" sentence is superseded; the decision body
 above is unchanged.
+
+Update 2026-09-21 (Slice 9 review round): the run's consumed shop snapshot is now
+durable execution identity, not a pathname. `execute_run` reads the configured
+snapshot once, persists the exact bytes on the run row (`shop_snapshot_bytes`,
+schema v5; legacy rows stay NULL and fall back to a best-effort path read) and
+provisions the adapter from a controller-owned copy of those bytes, so transcript
+selection, scoring and the client's historical comparison all resolve the bytes
+the run consumed even if the source file is later edited or removed. Run rows
+persisted before the capture keep the pathname behaviour. Failing-capable tests:
+`tests/api/test_client_evidence.py` (same-path replacement keeps the historical
+projection identical; a deleted source keeps the captured bytes retrievable for
+both FINALIZED and FAILED runs), `tests/executor/test_conformance.py` (the v2/v3/v4
+to v5 upgrades add the column without inventing bytes for legacy rows) and
+`tests/orchestrator/test_run_binding.py` (unchanged binding). The 2026-09-20
+sentence "commits the run row, its batch and snapshot refs" remains true for the
+reservation transaction; the capture is the execution-time addition.
