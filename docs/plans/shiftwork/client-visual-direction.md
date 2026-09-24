@@ -1,8 +1,8 @@
 # Client visual direction: operational diorama
 
 **Composition selected by the user:** 2026-09-18.
-**Journey revision:** proposed 2026-09-24 with the Gate 1 final-pivot backtrack;
-awaiting re-approval. The selected room composition is retained.
+**Journey revision:** RE-APPROVED 2026-09-24 with Gate 1 after the final-pivot
+backtrack. The selected room composition is retained; new runtime UI is not delivered.
 
 **Purpose:** visual acceptance brief for the revised product journey. The prior
 Slice 9 acceptance remains historical evidence. The new investigation, comparison,

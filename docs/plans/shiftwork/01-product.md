@@ -1,11 +1,12 @@
 # Product: Shiftwork
 
-**Gate state:** IN PROGRESS, backtracked 2026-09-24 at the user's request to
-revise Gate 1 around `shiftwork_final_pivot.md`. Awaiting explicit re-approval.
-The approvals of 2026-09-15 and 2026-09-18 remain historical; they do not approve
-this revision. This document and its six static mockups describe proposed product
-behavior, not new implementation or evidence. Later gates require separate revision
-and approval before implementation resumes.
+**Gate state:** RE-APPROVED 2026-09-24. After the same-day final-pivot backtrack,
+the user explicitly approved this product and its six static mockups and requested
+branch publication, merge to main and progression through Gates 2 to 4. The earlier
+approvals remain historical. Approval was given without human comprehension sessions;
+all unrun thresholds remain unmet. This is approved product behavior, not new
+implementation or evidence. Gates 2, 3 and 4 each require separate revision and
+explicit approval before implementation resumes.
 
 ## Problem
 
@@ -53,7 +54,7 @@ requirements and feasibility belong to the revised Gate 3, with execution planne
 at Gate 4 and outreach separately authorized. Existing study plans are not silently
 updated or treated as evidence for the pivot.
 
-## Product decisions proposed for re-approval
+## Approved product decisions
 
 ### S1. A continuing service, not a sequence of coding quizzes
 
@@ -240,4 +241,4 @@ help. Your work persists; the role is a simulation, not a credential.
 The differentiation is a guided, connected workflow, not a proven exclusive category.
 Technology selection, execution isolation, credential protection, persistence
 mechanisms, evaluators and study methods belong to separately revised Gates 2 and 3;
-slice sequencing belongs to Gate 4. This revision authorizes none of them.
+slice sequencing belongs to Gate 4. Gate 1 approval authorizes none of them.

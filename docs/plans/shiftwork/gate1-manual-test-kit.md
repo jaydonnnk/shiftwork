@@ -1,9 +1,10 @@
 # Gate 1 Manual Test Kit: Shiftwork
 
-**Status:** revised 2026-09-24 for the final-pivot Gate 1 draft; still unrun.
-The 2026-09-15 kit was not run, and its later gate approval supplied no human
-results. This revision has not been approved. Formative comprehension testing is
-not proof of learning improvement or a measurement of the 20-point north star.
+**Status:** revised 2026-09-24 for the final pivot; Gate 1 RE-APPROVED the same
+day without human sessions. This kit remains unrun and every unrun threshold unmet.
+The 2026-09-15 kit was also not run; neither approval supplies human results.
+Formative comprehension testing is not proof of learning improvement or a
+measurement of the 20-point north star.
 
 ## Purpose and limits
 
