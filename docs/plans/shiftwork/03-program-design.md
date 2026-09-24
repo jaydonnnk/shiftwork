@@ -1,5 +1,10 @@
 # Program Design: Shiftwork — first bookshop engagement (+ away-shift config)
 
+**Current authority, 2026-09-24:** historical pre-pivot design, queued for separate
+reconciliation next. Gates 1 and 2 are re-approved for the final pivot; the user
+requested Gate 3 next. The prior approvals below do not authorize pivot implementation.
+This notice changes status only; file maps, signatures and tests are not revised yet.
+
 Gate: 3 - Program Design (RE-APPROVED 2026-09-19 after the scoped fourth
 backtrack; the user approved the revised document in chat).
 

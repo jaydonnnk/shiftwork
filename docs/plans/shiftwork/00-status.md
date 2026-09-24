@@ -6,20 +6,25 @@
   explicitly approved the revised product, six plain HTML mockups and supporting
   visual brief and manual kit. Human sessions remain unrun; approval supplies no
   participant results or learning evidence.
-- **Gate 2: pending pivot reconciliation.** Draft architecture next, then ask for
-  explicit approval. The request to go through Gates 2 to 4 is not their approval.
+- **Gate 2: RE-APPROVED 2026-09-24 after pivot reconciliation.** The user
+  explicitly approved `02-architecture.md`, authorized committing the approved
+  records to main and requested Gate 3 next. No new push is authorized.
 - **Gates 3 and 4: queued for separate pivot reconciliation and re-approval**, in
-  that order after Gate 2. All three retain their old-design approval history;
-  none authorizes pivot implementation or continuation of old Slice 10.
+  that order. Their old-design approval history is retained; neither authorizes
+  pivot implementation or continuation of old Slice 10.
 - **Existing implementation:** Slices 1 through 9 remain completed as recorded;
   Slice 9's 2026-09-21 merge/push marks the user's visual acceptance. No completed
   implementation or historical evidence is discarded by this product backtrack.
-- **Scope:** record Gate 1 approval, publish `shiftwork/slice-10`, merge and push
-  main, then revise the later gates with a separate approval pause at each gate.
-  No runtime changes, installs, credentials, external AI calls, spike runs, outreach,
-  deployment or ADR #4 are authorized.
-- **Resume point:** complete the authorized Git integration, then draft Gate 2.
-  Gates 3 and 4 wait for the preceding gate's explicit approval.
+- **Scope:** record Gate 2 approval, commit the approved documentation to main,
+  then revise Gate 3 and pause for its explicit approval. Gate 1 publication and
+  merge/push are complete. No new push, runtime changes, installs, credentials,
+  external AI calls, spike runs, outreach, deployment or ADR #4 are authorized.
+- **Git integration:** approval records committed as `dc962d7` and `5c68711`,
+  published to `origin/shiftwork/slice-10`, then merged with `--no-ff` as `821a24c`
+  and pushed to `origin/main`. Post-push status was clean and matched origin.
+- **Resume point:** commit the approved Gate 2 records to main, then revise Gate 3
+  and ask exactly `Approve Gate 3, or what should change?` Gate 4 waits for Gate 3
+  approval. The later Gate 3 draft is outside this approval and commit scope.
 
 ### Revision scope and evidence boundaries
 
@@ -108,6 +113,48 @@ The user wrote: "i approve gate 1, publish rbanh, merge to main, and then go to 
 current branch and merging/pushing main. It does not pre-approve the later gates.
 The software-factory guide was loaded through its available skill in this session.
 Human comprehension testing, learning studies and live integrations remain unrun.
+
+### Gate 2 pivot architecture draft: 2026-09-24
+
+`02-architecture.md` is revised against the current lifecycle, evaluator, executor,
+source/version storage and schema v5. It proposes shared immutable comparison
+contexts, separate experiment/operation finalization, explicit tested-version
+selection, task-aware independent checks and controller-mediated service inference.
+The existing stack, room, captured evidence and completed slices are retained.
+
+Gates 3 and 4 have current-authority notices only; their decision bodies are unchanged.
+Their exact signatures, test clauses and slice sequencing await separate revision
+and approval. ADRs remain unchanged with their reconciliation queued in Gate 2 S19.
+At draft time the working brief and instructions mirrored that pending state.
+The Gate 2 draft and notices were local, uncommitted changes on main, not part
+of the published Gate 1 approval merge. The subsequent approval is recorded below.
+
+Checks run during drafting: `git diff --check`; a Node standard-library assertion
+check confirmed sections 1 to 20, the explicit Gate 2 approval pause, unchanged
+Gate 3/4 bodies after removing their status notices and normalizing checkout line
+endings, the six-file documentation-only diff, no new em dashes and an empty index.
+Source inspection is not execution proof. No runtime suite, browser session,
+installation, CodeRabbit upload, inference call, sandbox spike or human test ran
+for this documentation-only draft.
+
+A local second-reader architecture review read the product and architecture in full
+and inspected the executor manifest. It found no concrete blocking issue at Gate 2
+and flagged wording that could imply fallback to an older valid selection. The
+final draft explicitly resolves the latest choice and blocks operation if invalid;
+it never substitutes an older choice. This review is not approval or runtime proof.
+
+The draft ended at the Gate 2 approval pause. It was subsequently re-approved as
+recorded below; the draft itself supplied no approval.
+
+### Gate 2 re-approval: 2026-09-24
+
+The user wrote: "i approve gate 2, commit to main, and then go to gate 3".
+This re-approves the final-pivot `02-architecture.md` and authorizes committing
+its pending documentation and synchronized approval records directly to main.
+It also authorizes drafting Gate 3, not approving it. No push, implementation,
+installation, credential use, external call, spike, deployment or outreach is
+included. Gates 3 and 4 retain separate explicit approval pauses. No new runtime
+or human evidence is claimed. Prior approval and slice evidence remain intact.
 
 ## Previous gate status: historical through 2026-09-21
 
@@ -3146,6 +3193,13 @@ follow-up revision awaited explicit re-approval; the user approved it in chat on
 
 ## Approval history
 
+- Gate 2 - Architecture: RE-APPROVED by the user in chat on 2026-09-24 after the
+  final-pivot backtrack. Approval covers `02-architecture.md`; the same message
+  authorizes committing the approved records to main and drafting Gate 3, not
+  pushing, approving Gate 3/4 or implementing the pivot.
+- Gate 2 - Architecture: BACKTRACKED to IN PROGRESS earlier on 2026-09-24 for
+  final-pivot reconciliation after Gate 1 re-approval. Closed by the explicit
+  re-approval above; the draft supplied no implementation or later-gate authority.
 - Gate 1 - Product: RE-APPROVED by the user in chat on 2026-09-24 after the
   same-day final-pivot backtrack. Approval covers `01-product.md`, all six static
   mockups and the supporting visual brief/manual kit, without human sessions.

@@ -51,10 +51,13 @@ summaries when a time-sensitive external claim is being made.
 - **2026-09-24 current authority:** Gate 1 is RE-APPROVED after the final-pivot
   backtrack. The user approved the revised product and six plain HTML mockups
   without human sessions, and authorized publishing `shiftwork/slice-10`, merging
-  and pushing main, then proceeding through Gates 2 to 4. Draft Gate 2 next; Gates
-  2, 3 and 4 each require separate pivot reconciliation and explicit re-approval
-  in order. Their old-design approval history is retained, not implementation
-  authority. Do not resume old Slice 10 or implement pivot behavior yet.
+  and pushing main, then proceeding through Gates 2 to 4. Publication and merge
+  are complete (`821a24c` on main). Gate 2 is RE-APPROVED 2026-09-24 after pivot
+  reconciliation; the user authorized committing the approved records to main
+  and proceeding to Gate 3, not a new push. Gates 3 and 4 each require separate
+  revision and explicit re-approval in order. Their old-design approval history
+  is retained, not implementation authority. Do not resume old Slice 10 or
+  implement the pivot yet.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
   the exact tested version and inherited operational consequences. Experiments,

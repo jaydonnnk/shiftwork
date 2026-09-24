@@ -7,10 +7,12 @@ around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
 repairs fairly, explicitly choose one and maintain its later consequences.
 **Gate state:** Gate 1 RE-APPROVED 2026-09-24 after the same-day backtrack, without
 human comprehension sessions. Approval supplies no participant or learning evidence.
-**Later gates:** draft Gate 2 next. Prior Gates 2, 3 and 4 approvals remain historical
-for the old design. Each requires separate pivot revision and explicit approval,
-in order. The request to proceed through them is not their approval and authorizes
-no further implementation.
+**Later gates:** Gate 2 RE-APPROVED 2026-09-24 after pivot reconciliation.
+The user authorized committing the approved records to main and proceeding to
+Gate 3, not a new push. Gates 3 and 4 require separate revision and explicit
+approval in order; their old-design approvals remain historical. No further
+implementation is authorized. Gate 1 publication and merge/push are complete
+(`821a24c` on main).
 
 **Build baseline:** Slices 1 through 9 are recorded as implemented; Slice 9 was
 merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance.
@@ -68,7 +70,13 @@ claims of an exclusive category.
 - 2026-09-24: the user requested Gate 1 revision around the final pivot, then
   explicitly re-approved it in a later message without human sessions. That message
   also authorized branch publication, merge/push to main and progression through
-  Gates 2 to 4, with their separate approval pauses preserved.
+  Gates 2 to 4, with their separate approval pauses preserved. Approval records
+  landed in `dc962d7` and `5c68711`; merge `821a24c` was pushed to main.
+- 2026-09-24: Gate 2 reopened for architecture reconciliation against the approved
+  product and current source, then was explicitly re-approved by the user. The user
+  authorized committing the approved records to main and proceeding to Gate 3.
+  Gates 3 and 4 await their separate reconciliation and approval; no new runtime
+  evidence or permission to push or implement is supplied.
 
 The external software-factory guide at the recorded
 `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` path was unavailable during
@@ -149,10 +157,13 @@ Their repair belongs to revised Gates 2 through 4, not this document-only pass.
 | Independent assessment | Check observed outputs and reduce operational consequences under visible rules | Invent success from narrative or confidence |
 | Operator | Controlled execution, credential custody and reviewed scenario material | Silent changes to a learner's outcomes |
 
-The old bounded-assistant design does not by itself authorize inference inside
-learner code. Secure mediation, isolation and provenance require explicit Gate 2/3
-revision. Repeated probing, protected-case leakage, rotation and budgets remain
-constraints; filesystem hiding alone is insufficient.
+The approved Gate 2 specifies controller-side service-inference mediation with no
+provider credentials in learner code, immutable paired-comparison contexts,
+separate experimental/operational finalization and explicit selection history.
+It retains the existing controller, store, room and offline paths. These are
+approved architecture decisions, not implemented behavior; exact types, budgets,
+task rubrics and channel verification require Gate 3 and later authorized evidence.
+Repeated probing, protected-case leakage and isolation remain constraints.
 
 ## 7. Organiser technology and track hypothesis
 
@@ -251,8 +262,8 @@ format; the four official criteria remain equally weighted.
 
 ## 12. Immediate next action
 
-Publish the approved Gate 1 records and merge/push main as requested, then revise
-Gate 2, Gate 3 and Gate 4 in order, each with its own explicit approval pause. Only
-then consider the first authorized implementation slice. Preserve all completed
-code and evidence; do not resume old Slice 10 or treat the pivot as a new comparison
-panel alone.
+Commit the approved Gate 2 records to main, then revise
+`plans/shiftwork/03-program-design.md` and request explicit Gate 3 re-approval.
+Gate 4 remains queued for its own revision and approval. Preserve completed code
+and evidence; do not resume old Slice 10 or implement the pivot under historical
+approvals. No new push is authorized. This is a safe planning boundary for a fresh session.
