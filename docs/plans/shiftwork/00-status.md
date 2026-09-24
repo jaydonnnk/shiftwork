@@ -6,23 +6,28 @@
   explicitly approved the revised product, six plain HTML mockups and supporting
   visual brief and manual kit. Human sessions remain unrun; approval supplies no
   participant results or learning evidence.
-- **Gate 2: RE-APPROVED 2026-09-24 after pivot reconciliation.** The user
-  explicitly approved `02-architecture.md`, authorized committing the approved
-  records to main and requested Gate 3 next. No new push is authorized.
-- **Gate 3: RE-APPROVED 2026-09-24 after pivot reconciliation.** The approved
-  `03-program-design.md` defines the pivot contracts, migration, budgets, call
-  stacks and clause-level tests and is committed as `de250b9`.
-- **Gate 4: queued for separate pivot reconciliation and re-approval.** Its
-  old-design approval history is not authority to implement the pivot or
-  continue old Slice 10.
+- **Gate 2: RE-APPROVED 2026-09-24 after the legacy first-choice backtrack.**
+  `02-architecture.md` permits a non-operational first-choice shift for a closed
+  v5 engagement with no selection. The user approved this revision and requested
+  Gate 3. It is not implemented.
+- **Gate 3: RE-APPROVED 2026-09-24 after the legacy first-choice backtrack.**
+  Its prior approval and commit `de250b9` remain historical. The revised
+  `03-program-design.md` covers the legacy API, executable material,
+  paired-workload binding, gateway policy and clarification assessment. The
+  user approved this working tree and authorized committing and merging it to
+  main without a co-author footer. It is design, not implementation authority.
+- **Gate 4: IN PROGRESS; separate re-approval pending.** `04-slices.md` proposes
+  the pivot build order and clause map. Its old-design approval history is not
+  authority to implement the pivot or continue old Slice 10. Its current draft
+  requires reconciliation against the re-approved Gate 3.
 - **Existing implementation:** Slices 1 through 9 remain completed as recorded;
   Slice 9's 2026-09-21 merge/push marks the user's visual acceptance. No completed
   implementation or historical evidence is discarded by this product backtrack.
-- **Scope:** record and commit Gate 3 approval, then reconcile Gate 4 and pause
-  for its separate explicit re-approval. Gate 1 publication/merge/push and the
-  approved Gate 2 and Gate 3 design commits are complete. No new push, runtime
-  changes, installs, credentials,
-  external AI calls, spike runs, outreach, deployment or ADR #4 are authorized.
+- **Scope:** commit and merge the approved Gate 2 correction and Gate 3
+  reconciliation, then revise Gate 4 and pause for its separate explicit
+  re-approval. Gate 1 publication/merge/push and prior design commits are
+  historical. No new push, runtime changes, installs, credentials, external AI
+  calls, spike runs, outreach, deployment or ADR #4 are authorized.
 - **Git integration:** approval records committed as `dc962d7` and `5c68711`,
   published to `origin/shiftwork/slice-10`, then merged with `--no-ff` as `821a24c`
   and pushed to `origin/main`. Post-push status was clean and matched origin.
@@ -30,7 +35,7 @@
   `3799dfc`, both directly on main. Status immediately afterward was clean and
   two commits ahead. A later local check found `origin/main` at `3799dfc`, with
   remote-tracking reflog `update by push`; this session issued no push command.
-- **Resume point:** reconcile `04-slices.md` against the approved pivot design,
+- **Resume point:** reconcile `04-slices.md` against the re-approved Gate 3,
   then ask exactly `Approve Gate 4, or what should change?` No implementation
   begins before that separate approval.
 
@@ -190,12 +195,83 @@ implementation. It does not authorize a push, install, credential use, external
 call, capability spike, sealed-case authoring, outreach or deployment. No new
 runtime or human evidence is claimed.
 
+### Gate 2 legacy first-choice backtrack: 2026-09-24
+
+An adversarial review exposed a reachable dead end in the approved pivot design:
+`03-program-design.md` makes shift-open return 409 without a selection, while its
+v5 migration rules leave existing Bellwether and Northline engagements without
+one. A closed v5 shift therefore cannot open the shift needed to compare repairs
+and make the first explicit choice. Source inspection confirms the current
+`open_next_shift` seeds from the latest version and the current close path uses a
+latest-version contract; neither implements the pivot exception.
+
+`02-architecture.md` now proposes a controller-determined, non-operational
+requalification shift. It inherits historical evidence and an editable starting
+draft, but no selection or operating pointer. Investigation, candidate work and
+bounded experiments can lead to the learner's first explicit eligible choice.
+Run start and selected-contract close remain blocked before that choice. The
+migration preserves v5 bytes and never invents consent or a starter selection.
+Gate 3 must specify the exact route, state, budget recovery and failing-capable
+tests after this Gate 2 revision is approved. The current Gate 3 and proposed
+Gate 4 texts remain untouched by this backtrack; their conflicts are known work,
+not implicit approvals. Slices 1 to 9 retain their evidence; Slices 10 to 24 stay
+unchecked. This is documentation review, not a migration or runtime result.
+
+### Gate 2 legacy first-choice re-approval: 2026-09-24
+
+The user replied: "Yep i approve gate 2, start with gate 3 now". This explicitly
+re-approves the revised non-operational legacy first-choice architecture and
+authorizes Gate 3 reconciliation next. It does not approve Gate 3 or Gate 4,
+implementation, installs, credentials, external calls, commits or pushes.
+
+### Gate 3 adversarial-reconciliation draft: 2026-09-24
+
+The earlier Gate 3 text was checked against the approved Gate 2 and current
+source before revision. Its shift-open route returned 409 without a selection,
+while migration created none. It named three comparison request files but held
+one request batch in `ExecutionContext` and did not bind pair slots to batch
+bytes, hashes and counts. `InferenceRequest` let learner code supply tool names.
+`TaskResult` had `NEEDS_CLARIFICATION`, but `TaskAssessment` and metrics lacked a
+clarification category. The file map omitted an executable pivot starter/failure
+and Northline mission, requests, starting state and protected assessment owner.
+Current source still contains the older bookshop template/fixtures; no pivot or
+Northline runtime material exists.
+
+`03-program-design.md` now specifies the server-derived first-choice route and
+409 operation/close guards, three frozen workload records with A/B slot bindings,
+controller-owned tool grants, distinct clarification assessment and counters,
+and planned file/assessment ownership for Bellwether and Northline. It adds
+failing-capable clauses to existing numbered obligations without renumbering
+them. File names and ownership are plans: no transport, dependency, catalog
+version, sealed-case contents or learner selection was created. A failed legacy
+comparison remains blocked with retained exposure; any retake needs a separate
+Gate 2/3 policy decision. No executable Northline claim is made before reviewed
+mission, requests, state, compatible catalog and protected assessment exist.
+
+Read-only checks: `git status --short --branch`, `git branch --show-current`,
+`git rev-parse HEAD`, `git merge-base --is-ancestor main HEAD`, source/document
+inspection, `git diff --check`, 49 consecutive numbered Gate 3 obligations and
+balanced code fences. No runtime suite, install, credential, external service,
+branch, stage, commit or push was performed. Existing `.gitignore` and Gate 4
+draft edits were preserved; Slices 1 to 9 stay checked and Slices 10 to 24
+unchecked.
+
+### Gate 3 adversarial-reconciliation re-approval: 2026-09-24
+
+The user wrote: "I approve gate 3(working tree), commit and merge to main(no co
+author), and then start revising gate 4". This re-approves the revised Gate 3
+working tree and authorizes committing it, with the already approved uncommitted
+Gate 2 correction, then merging to main without a co-author footer. Gate 4 may
+now be revised but still requires separate approval. This does not authorize a
+push, implementation, installation, credentials, live calls, a spike, sealed-case
+contents, outreach or deployment. No runtime or human result is implied.
+
 ## Previous gate status: historical through 2026-09-21
 
 The approval and slice records below retain their original scopes and evidence.
 Statements that work can continue or backtracks are closed, including old fresh-
 session notes, describe that earlier state, not authority to bypass the pending
-Gates 2 to 4 pivot reconciliation.
+Gates 3 and 4 pivot reconciliation.
 
 - Gate 1 — Product: RE-APPROVED 2026-09-18 (first approved 2026-09-15; backtracked
   and revised the same day for two user-directed changes: the learner is explicitly
@@ -267,14 +343,12 @@ deferred to Slice 13 evidence and separate authorization.
 
 ## Slices
 
-Gate 4 APPROVED 2026-09-17, RE-APPROVED 2026-09-18 (reopen scoped to the Slice 9
-to 11 requirements) and RE-APPROVED 2026-09-19 (scoped reconciliation revision; a
-same-day follow-up revision was approved by the user in chat 2026-09-19). Build
-order (one slice
-at a time; after each slice: demo
-evidence run and shown, slice checked off here, architect-reviewer cleanup scan
-for stale or redundant files, then "Continue to slice N+1, or
-re-steer?"):
+The approvals from 2026-09-17 through 2026-09-19 apply to the pre-pivot plan.
+Slices 1 to 9 below keep their completed historical status and evidence. The
+2026-09-24 Slices 10 to 24 are a **proposed checklist only**; Gate 4 is IN
+PROGRESS and none of them may start until separate re-approval. After each
+authorized slice: show the actual demonstration, record evidence, check it off,
+review affected ADRs and stale files, then ask whether to continue or re-steer.
 
 - [x] Slice 1 — Tracer bullet: full lifecycle, all mocked (`python -m demos.lifecycle` + browser); implemented and demonstrated 2026-09-17 (evidence in Notes for a fresh session)
 - [x] Slice 2 — Thin real vertical path: artifact → request → sealed case → evaluator result → ledger event; implemented and demonstrated 2026-09-18 (`python -m demos.thin_path`; evidence in Notes)
@@ -3227,6 +3301,13 @@ follow-up revision awaited explicit re-approval; the user approved it in chat on
 
 ## Approval history
 
+- Gate 3 - Program Design: RE-APPROVED by the user in chat on 2026-09-24 after
+  the legacy first-choice Gate 2 backtrack. The same message authorizes a
+  focused commit and merge to main without a co-author footer, followed by
+  Gate 4 revision. Gate 4 approval, runtime work and push remain separate.
+- Gate 2 - Architecture: RE-APPROVED by the user in chat on 2026-09-24 after
+  the legacy first-choice backtrack. Its approved correction remained in the
+  working tree for the focused documentation commit.
 - Gate 2 - Architecture: RE-APPROVED by the user in chat on 2026-09-24 after the
   final-pivot backtrack. Approval covers `02-architecture.md`; the same message
   authorizes committing the approved records to main and drafting Gate 3, not

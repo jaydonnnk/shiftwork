@@ -1,10 +1,12 @@
 # Architecture: Shiftwork final pivot
 
-**Gate 2: RE-APPROVED 2026-09-24 after the final-pivot backtrack.**
-The user explicitly approved this revision, authorized committing it to main and
-requested Gate 3 next. Gate 1's records were merged/pushed as `821a24c`.
-This is approved architecture, not implemented behavior. Gates 3 and 4 require
-separate reconciliation and approval afterward; old Slice 10 remains suspended.
+**Gate 2: RE-APPROVED 2026-09-24 after the legacy first-choice backtrack.**
+The earlier final-pivot approval and commits remain historical. An adversarial
+review found that a closed v5 shift with no learner selection could not open the
+shift needed for its first comparison. The user explicitly approved this revised
+path and requested Gate 3 next. It is architecture, not implemented behavior or
+approval of Gates 3 and 4.
+Gate 1's records were merged/pushed as `821a24c`. Old Slice 10 remains suspended.
 
 Prior approvals: 2026-09-15, then 2026-09-19 for orchestration-owned sealed loading
 and pure evaluator inputs. Those decisions and their evidence retain their original
@@ -58,8 +60,9 @@ authoritative for assessment, selection or business history.
 Retain the controller-owned request-driver boundary in the implemented executor
 manifest (`shiftwork/executor/base.py:111`). Stream only the current permitted
 request to the service; do not provision a future workload or protected expectations.
-Real transport and hostile-code isolation remain subject to S16, not assumed from
-the trusted local adapter. These are module boundaries, not new hosted services.
+Real transport and hostile-code isolation remain subject to a separately
+authorized capability spike and live-adapter proof, not assumed from the trusted
+local adapter. These are module boundaries, not new hosted services.
 
 ## 3. Endpoints
 
@@ -70,7 +73,7 @@ changed semantics are below; request/response schemas belong to Gate 3.
 | --- | --- | --- |
 | `/` | GET | Existing static client and room |
 | `/api/engagements/{slug}/board` | GET | Existing; project operating selection separately from draft/candidates and latest experiments |
-| `/api/engagements/{slug}/shifts` | POST | Existing; inherit the selected version, not latest saved version |
+| `/api/engagements/{slug}/shifts` | POST | Existing; normally inherit the selected version. For an existing engagement whose latest v5 shift is closed and which has no selection, the controller instead opens a labelled non-operational requalification shift for first-choice work. The caller cannot request this exception or turn it into operation. |
 | `/api/shifts/{id}/artifact` | GET/PUT | Existing mutable draft; saving cannot select or operate |
 | `/api/shifts/{id}/artifact/versions` | POST | Existing freeze; record explicit parent/version ancestry, not promotion |
 | `/api/artifact-versions/{id}` | GET | New: retrieve owned candidate source/contract with safe logical filenames, never host paths |
@@ -80,7 +83,7 @@ changed semantics are below; request/response schemas belong to Gate 3.
 | `/api/experiments/{id}` | GET | New: public conditions, every trial, comparability, eligibility and missing evidence |
 | `/api/shifts/{id}/selections` | POST | New: explicitly select a tested version from a completed eligible comparison; retain rationale and alternative |
 | `/api/engagements/{slug}/selections` | GET | New: selection history and current validity, including original decision context |
-| `/api/shifts/{id}/runs` | POST | Existing, narrowed to operation of the current operating selection or labelled initial starter |
+| `/api/shifts/{id}/runs` | POST | Existing, narrowed to operation of the current operating selection or a labelled initial starter on a newly seeded engagement; no operation in a no-choice requalification shift |
 | `/api/runs/{id}` | GET | Existing; include immutable purpose, execution mode, version and experiment/selection linkage |
 | `/api/runs/{id}/outputs` | GET | Existing; retain bytes and add observed interpretation, tool/inference events and input provenance |
 | `/api/runs/{id}/checks` | GET | Existing safe check projection; no protected expected content |
@@ -101,7 +104,7 @@ DDL or a migration implementation. Gate 3 owns fields, constraints and signature
 
 | Record | Data retained | Main reads/writes |
 | --- | --- | --- |
-| Existing engagements/config/shifts | Scenario identity, active requirements, separate execution/exposure/assist ceilings | Resolve active policy; atomically open/close shifts |
+| Existing engagements/config/shifts | Scenario identity, active requirements, separate execution/exposure/assist ceilings, and an explicit non-operational requalification state for legacy no-choice shifts | Resolve active policy; atomically open/close shifts and lift the operation block only with a valid explicit choice, never from a draft |
 | Existing drafts/artifact versions | Exact source, explicit parent, committed contract/catalog, attributable authorship | Save draft; freeze; retrieve by ID/hash, not latest for operation |
 | `investigations` | Cause, falsifier, public test, source run/request, revision parent and author/time | Append original/revision; gate diagnostic assistance |
 | `experiments` | Diagnostic vs comparison intent; candidate IDs; immutable shared context; declared treatment; complete trial schedule; optional observed-later-context ref | Reserve once; fetch all scheduled/completed/failed slots; derive status |
@@ -131,10 +134,39 @@ Old runs are labelled legacy operational/replay evidence, not invented experimen
 or selections. Missing historical inputs remain unknown. Legacy engagements without
 a recorded choice require a fresh qualifying comparison and explicit selection
 before pivot operation resumes; migration must not manufacture learner consent.
-New engagements explicitly install a labelled starter operating version. Northline
-retains its separate engagement and blank learner artifact, not bookshop inheritance.
+Opening the requalification shift records its limited purpose, not a selection or
+an operating version. It uses the last owned immutable version only as the draft's
+starting source and ancestry; the historical version and closed shift are not
+rewritten. New engagements explicitly install a labelled starter operating version.
+That starter exception never applies to migrated engagements. Northline retains its
+separate engagement and blank learner artifact, not bookshop inheritance.
 
 ## 5. Flow
+
+### Legacy first-choice bootstrap
+
+1. After migration, a closed v5 shift and absent selection leave the board in a
+   labelled `Needs first choice` state. Existing captures, incidents and ledger
+   remain inspectable with their original evidence labels; missing inputs stay
+   unknown. There is no implied starter, learner choice or operating pointer.
+2. The existing shift-open route atomically checks that this is an existing
+   engagement with no open shift and no selection, then opens one non-operational
+   requalification shift. It seeds an editable draft from the last owned immutable
+   version, if present, solely for repair work. If no such version exists, only
+   that engagement's approved initial draft may seed editing (Northline remains
+   blank), still without operation.
+   This server-derived branch is not a caller-supplied mode or consent flag.
+3. In that shift the learner can inspect inherited evidence, record a cause and
+   falsifier, edit/freeze candidates, run permitted experiments and append an
+   explicit eligible first selection. Those activities cannot write operational
+   events or resolve incidents. They retain the same protected-case, trial and
+   assistance limits; opening a shift does not refund prior exposure.
+4. Until the first selection is durably appended and revalidated, run start and
+   selected-contract close refuse. The selection transaction lifts the shift's
+   operation block; the same shift may then operate only the chosen exact version
+   under the ordinary operation rules. A failed or
+   incomplete comparison leaves the path non-operational; Gate 3 must specify
+   bounded recovery without inventing consent or recycling exposure.
 
 ### Investigate and experiment
 
@@ -165,8 +197,9 @@ retains its separate engagement and blank learner artifact, not bookshop inherit
 2. Append the selection and retain the other candidate and original evidence. Saving,
    freezing, passing tests or closing the shift never performs this action implicitly.
 3. Operation binds the current selection/version and starting business state before
-   execution; a later save cannot change either. The initial starter is labelled
-   as an unqualified baseline, not a learner-selected passing repair.
+   execution; a later save cannot change either. The initial starter on a newly
+   seeded engagement is labelled as an unqualified baseline, not a learner-selected
+   passing repair. A migrated engagement has no such operating starter.
 4. Execute the operating version against the current shift's controller-selected
    workload. Independently assess the captures and atomically derive operational
    events and incident changes. Selection alone cannot resolve an incident.
@@ -197,6 +230,8 @@ Serialize operational starts per engagement. Selection and close refuse while an
 operation is in flight; selection checks the expected prior selection to reject a
 stale browser action. Experiments remain isolated from the current operational state.
 Repeated requests cannot allocate duplicate trial slots, selections or consequences.
+The requalification shift is explicitly non-operational until the first valid
+choice. An incomplete comparison never promotes its draft or a historical version.
 
 Restart marks interrupted runs failed, retains partial evidence, exposure and usage,
 and performs no automatic paid retry. Incomplete comparisons cannot be selected.
@@ -451,8 +486,9 @@ these are engineering/evidence questions, not automatic product-score changes.
 
 ## 19. ADR reconciliation
 
-Gate 2 is approved; reconcile the affected records with dated superseding decisions
-in the appropriate later-gate work. Preserve original ADRs and their evidence:
+Gate 2 is re-approved; reconcile the affected records with dated superseding
+decisions in the appropriate later-gate work. Preserve original ADRs and their
+evidence:
 
 - ADR 0001: preserve loader ownership/purity; reconcile comparison-scoped exposure,
   gateway isolation and enforcement of invalidated evidence.
@@ -469,8 +505,11 @@ response contracts, task-aware envelope/evaluator, two finalization call stacks,
 immutable context and historical replay format, migration from schema v5, trial/
 exposure/inference budgets, idempotency/concurrency, safe gateway channel and trust
 probes, reason/metric vocabulary, ancestry/authorship, revised learner-study rubric
-and clause-level tests. New curriculum cases require review/sealing; old evidence
-and catalog semantics are not silently repurposed.
+and clause-level tests. Specify the requalification shift state, legacy route and
+board projection, first-choice transition, bounded failed-comparison recovery and
+failing-capable tests that a closed v5 engagement can reach its first choice while
+every no-choice operation and implicit promotion is rejected. New curriculum cases
+require review/sealing; old evidence and catalog semantics are not silently repurposed.
 
 **Gate 4, only after Gate 3 approval:** sequence visible vertical changes over the
 completed Slices 1 to 9; map every old outstanding and new test clause to a real
@@ -480,5 +519,7 @@ without reconciliation. Preserve submission, transfer, curation and packaging
 obligations, with separate authorization for installs, credentials, external runs,
 outreach and deployment.
 
-The user explicitly re-approved Gate 2 on 2026-09-24: "i approve gate 2, commit to
-main, and then go to gate 3". Proceed to Gate 3; its approval remains separate.
+The user explicitly re-approved the earlier Gate 2 revision on 2026-09-24:
+"i approve gate 2, commit to main, and then go to gate 3". After the legacy
+first-choice backtrack, the user separately replied "Yep i approve gate 2,
+start with gate 3 now". Gate 3 is next and requires its own approval.
