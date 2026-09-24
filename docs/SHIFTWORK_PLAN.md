@@ -2,15 +2,15 @@
 
 Updated: 2026-09-24.
 
-**Direction:** Shiftwork remains the sole active project. The user requested Gate 1
-revision around `../shiftwork_final_pivot.md`: diagnose a real AI service, compare
+**Direction:** Shiftwork remains the sole active project. The approved final pivot
+around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
 repairs fairly, explicitly choose one and maintain its later consequences.
-**Gate state:** Gate 1 IN PROGRESS, backtracked 2026-09-24; revised product and
-mockups await explicit re-approval. The request to revise is not approval.
-**Later gates:** prior Gates 2, 3 and 4 approvals remain historical for the old
-design. Their pivot-affected decisions require separate revision and approval,
-in order, after Gate 1. No further implementation is authorized by those old
-approvals while the product backtrack is open.
+**Gate state:** Gate 1 RE-APPROVED 2026-09-24 after the same-day backtrack, without
+human comprehension sessions. Approval supplies no participant or learning evidence.
+**Later gates:** draft Gate 2 next. Prior Gates 2, 3 and 4 approvals remain historical
+for the old design. Each requires separate pivot revision and explicit approval,
+in order. The request to proceed through them is not their approval and authorizes
+no further implementation.
 
 **Build baseline:** Slices 1 through 9 are recorded as implemented; Slice 9 was
 merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance.
@@ -27,11 +27,11 @@ or achieved scores. No human learning/transfer result, qualifying live integrati
 Tavily ablation or prize merit is established by this planning revision.
 
 This brief supports the gate documents; it does not replace or approve them.
-The draft `plans/shiftwork/01-product.md` expresses the proposed product. Approved
-gate decisions remain authoritative within their original scope, not as permission
-to implement conflicting pivot behavior. No installs, credentials, external calls,
-spike runs, purchases, outreach, deployment, branches, commits, tags, pushes or
-ADR #4 are authorized by this revision.
+The approved `plans/shiftwork/01-product.md` defines the pivot. Earlier later-gate
+decisions retain their original scope, not permission to implement conflicting
+behavior. The user authorized publication of the current branch and merge/push to
+main. No installs, credentials, external AI calls, spike runs, purchases, outreach,
+deployment, implementation or ADR #4 are authorized.
 
 ## 1. Product thesis
 
@@ -65,15 +65,15 @@ claims of an exclusive category.
   not acceptance of later work or the subsequent pivot.
 - 2026-09-23: `SHIFTWORK_PIVOT2.md` recorded an unapproved product-direction review;
   `shiftwork_final_pivot.md` consolidated the recommended final direction.
-- 2026-09-24: the user requested reading the repository rules and starting Gate 1
-  revision. Scope is revised product, static mockups and supporting gate records,
-  followed by explicit re-approval. It does not approve Gate 1 or later gates.
+- 2026-09-24: the user requested Gate 1 revision around the final pivot, then
+  explicitly re-approved it in a later message without human sessions. That message
+  also authorized branch publication, merge/push to main and progression through
+  Gates 2 to 4, with their separate approval pauses preserved.
 
 The external software-factory guide at the recorded
 `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` path was unavailable during
-this revision, including a bounded lookup in local resource locations. The explicit
-repository gate rules are being followed; full compliance with an unread guide is
-not claimed. No tool or skill was installed to replace it.
+the initial revision. It was subsequently loaded through the `software-factory`
+skill in the same-day approval session. No tool or skill was installed to replace it.
 
 ## 3. Revised learning loop
 
@@ -251,8 +251,8 @@ format; the four official criteria remain equally weighted.
 
 ## 12. Immediate next action
 
-Finish and review Gate 1's product, six static screens, visual requirements and
-manual test kit, then request explicit re-approval. After approval, revise Gate 2,
-then Gate 3, then Gate 4, each with its own approval pause. Only then consider the
-first authorized implementation slice. Preserve all completed code and evidence;
-do not resume old Slice 10 or treat the pivot as a new comparison panel alone.
+Publish the approved Gate 1 records and merge/push main as requested, then revise
+Gate 2, Gate 3 and Gate 4 in order, each with its own explicit approval pause. Only
+then consider the first authorized implementation slice. Preserve all completed
+code and evidence; do not resume old Slice 10 or treat the pivot as a new comparison
+panel alone.

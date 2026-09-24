@@ -48,13 +48,14 @@ summaries when a time-sensitive external claim is being made.
 
 ## 3. Current direction and authorization
 
-- **2026-09-24 current authority:** the user requested Gate 1 revision around
-  `shiftwork_final_pivot.md`. Gate 1 is IN PROGRESS, backtracked and awaiting
-  explicit re-approval. Revise the product, six plain HTML mockups and supporting
-  records only. Gates 2, 3 and 4 retain their old-design approval history but need
-  separate pivot reconciliation and re-approval after Gate 1, in order. Do not
-  resume old Slice 10 or implement pivot behavior under those earlier approvals.
-- Proposed focus: evidence-led diagnosis of a real AI service, a short cause and
+- **2026-09-24 current authority:** Gate 1 is RE-APPROVED after the final-pivot
+  backtrack. The user approved the revised product and six plain HTML mockups
+  without human sessions, and authorized publishing `shiftwork/slice-10`, merging
+  and pushing main, then proceeding through Gates 2 to 4. Draft Gate 2 next; Gates
+  2, 3 and 4 each require separate pivot reconciliation and explicit re-approval
+  in order. Their old-design approval history is retained, not implementation
+  authority. Do not resume old Slice 10 or implement pivot behavior yet.
+- Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
   the exact tested version and inherited operational consequences. Experiments,
   selection and operation are separate; later testing of the retained alternative
@@ -62,12 +63,12 @@ summaries when a time-sensitive external claim is being made.
 - Current pivot forecast: 32/40 assuming competent delivery, not today's build,
   measured learning or predicted judging. Verdict: revise, then pursue. No automatic
   score increase for refinements and no claim of a proven exclusive category.
-- The external software-factory guide was unavailable at its recorded path and
-  local resource lookup on 2026-09-24. Follow the explicit gate rules here, record
-  the limitation and do not claim the unavailable guide was read or install a
-  replacement without authorization.
+- The external software-factory guide was unavailable during the initial
+  2026-09-24 revision. It was subsequently loaded through the `software-factory`
+  skill in the same-day approval session; no replacement was installed. Follow
+  that guide and the explicit repository gate rules.
 - The following pre-pivot approval history retains its original scope. Any statement
-  below that slice work can proceed is suspended by the current Gate 1 backtrack.
+  below that slice work can proceed is suspended pending Gates 2 to 4 reconciliation.
 - Pre-pivot gate state: Gate 1 - Product RE-APPROVED 2026-09-18 (first approved
   2026-09-15; backtracked and revised the same day for the explicit junior applied
   AI engineer role framing and the selected isometric operational-room visual
@@ -192,7 +193,7 @@ summaries when a time-sensitive external claim is being made.
   engineer, GTM engineer) are recorded as future scope only. Do not expand to
   multiple careers, a large town or an employer marketplace before the central
   mechanism survives its tests.
-- Proposed central mechanic under the Gate 1 revision: the learner explains an
+- Approved central mechanic under the Gate 1 revision: the learner explains an
   AI-service failure, tests a falsifiable prediction, compares code repairs under
   shared requirements and conditions, and explicitly selects an eligible tested
   version. Only operating that version creates independently checked synthetic
