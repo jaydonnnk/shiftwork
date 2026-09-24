@@ -7,10 +7,11 @@ around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
 repairs fairly, explicitly choose one and maintain its later consequences.
 **Gate state:** Gate 1 RE-APPROVED 2026-09-24 after the same-day backtrack, without
 human comprehension sessions. Approval supplies no participant or learning evidence.
-**Later gates:** Gate 2 RE-APPROVED 2026-09-24 after pivot reconciliation.
-The user authorized committing the approved records to main and proceeding to
-Gate 3, not a new push. Gates 3 and 4 require separate revision and explicit
-approval in order; their old-design approvals remain historical. No further
+**Later gates:** Gate 2 RE-APPROVED 2026-09-24 after pivot reconciliation;
+committed on main as `f048949` and `3799dfc`. Gate 3 was RE-APPROVED 2026-09-24
+after pivot reconciliation and its design is committed as `de250b9`. Gate 4 remains
+queued for separate reconciliation and explicit re-approval. Its old-design approval
+remains historical. No further
 implementation is authorized. Gate 1 publication and merge/push are complete
 (`821a24c` on main).
 
@@ -262,8 +263,7 @@ format; the four official criteria remain equally weighted.
 
 ## 12. Immediate next action
 
-Commit the approved Gate 2 records to main, then revise
-`plans/shiftwork/03-program-design.md` and request explicit Gate 3 re-approval.
-Gate 4 remains queued for its own revision and approval. Preserve completed code
-and evidence; do not resume old Slice 10 or implement the pivot under historical
-approvals. No new push is authorized. This is a safe planning boundary for a fresh session.
+Reconcile `plans/shiftwork/04-slices.md` against the approved final-pivot program
+design, then request explicit Gate 4 re-approval. Preserve completed code and
+evidence; do not resume old Slice 10 or implement the pivot under historical
+approvals.

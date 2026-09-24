@@ -53,11 +53,12 @@ summaries when a time-sensitive external claim is being made.
   without human sessions, and authorized publishing `shiftwork/slice-10`, merging
   and pushing main, then proceeding through Gates 2 to 4. Publication and merge
   are complete (`821a24c` on main). Gate 2 is RE-APPROVED 2026-09-24 after pivot
-  reconciliation; the user authorized committing the approved records to main
-  and proceeding to Gate 3, not a new push. Gates 3 and 4 each require separate
-  revision and explicit re-approval in order. Their old-design approval history
-  is retained, not implementation authority. Do not resume old Slice 10 or
-  implement the pivot yet.
+  reconciliation; the approved architecture and records were committed directly
+  to main as `f048949` and `3799dfc`. Gate 3 is RE-APPROVED 2026-09-24 after pivot
+  reconciliation; the approved design and ADR 0005 are committed as `de250b9`.
+  Gate 4 remains queued for separate reconciliation and explicit re-approval. Its
+  old-design approval history is retained, not implementation authority. Do not
+  resume old Slice 10 or implement the pivot yet.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
   the exact tested version and inherited operational consequences. Experiments,

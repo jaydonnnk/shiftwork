@@ -1,9 +1,9 @@
 # Vertical Slice Plan: Shiftwork
 
 **Current authority, 2026-09-24:** historical pre-pivot plan, queued for separate
-reconciliation after Gate 3 re-approval. Gates 1 and 2 are re-approved for the pivot;
-Gate 3 is next. Slices 1 to 9 retain their evidence. Do not resume old Slice
-10 or implement the pivot. This notice does not revise the slice order or test map.
+reconciliation next. Gates 1 to 3 are re-approved for the pivot. Slices 1 to 9
+retain their evidence. Do not resume old Slice 10 or implement the pivot. This
+notice does not revise the slice order or test map.
 
 Gate: 4 — Vertical Slices (RE-APPROVED 2026-09-19 after the scoped reconciliation
 revision; first APPROVED 2026-09-17; the 2026-09-18 reopen was scoped to the

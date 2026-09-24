@@ -9,22 +9,30 @@
 - **Gate 2: RE-APPROVED 2026-09-24 after pivot reconciliation.** The user
   explicitly approved `02-architecture.md`, authorized committing the approved
   records to main and requested Gate 3 next. No new push is authorized.
-- **Gates 3 and 4: queued for separate pivot reconciliation and re-approval**, in
-  that order. Their old-design approval history is retained; neither authorizes
-  pivot implementation or continuation of old Slice 10.
+- **Gate 3: RE-APPROVED 2026-09-24 after pivot reconciliation.** The approved
+  `03-program-design.md` defines the pivot contracts, migration, budgets, call
+  stacks and clause-level tests and is committed as `de250b9`.
+- **Gate 4: queued for separate pivot reconciliation and re-approval.** Its
+  old-design approval history is not authority to implement the pivot or
+  continue old Slice 10.
 - **Existing implementation:** Slices 1 through 9 remain completed as recorded;
   Slice 9's 2026-09-21 merge/push marks the user's visual acceptance. No completed
   implementation or historical evidence is discarded by this product backtrack.
-- **Scope:** record Gate 2 approval, commit the approved documentation to main,
-  then revise Gate 3 and pause for its explicit approval. Gate 1 publication and
-  merge/push are complete. No new push, runtime changes, installs, credentials,
+- **Scope:** record and commit Gate 3 approval, then reconcile Gate 4 and pause
+  for its separate explicit re-approval. Gate 1 publication/merge/push and the
+  approved Gate 2 and Gate 3 design commits are complete. No new push, runtime
+  changes, installs, credentials,
   external AI calls, spike runs, outreach, deployment or ADR #4 are authorized.
 - **Git integration:** approval records committed as `dc962d7` and `5c68711`,
   published to `origin/shiftwork/slice-10`, then merged with `--no-ff` as `821a24c`
   and pushed to `origin/main`. Post-push status was clean and matched origin.
-- **Resume point:** commit the approved Gate 2 records to main, then revise Gate 3
-  and ask exactly `Approve Gate 3, or what should change?` Gate 4 waits for Gate 3
-  approval. The later Gate 3 draft is outside this approval and commit scope.
+- **Gate 2 commits:** architecture `f048949`, synchronized approval records
+  `3799dfc`, both directly on main. Status immediately afterward was clean and
+  two commits ahead. A later local check found `origin/main` at `3799dfc`, with
+  remote-tracking reflog `update by push`; this session issued no push command.
+- **Resume point:** reconcile `04-slices.md` against the approved pivot design,
+  then ask exactly `Approve Gate 4, or what should change?` No implementation
+  begins before that separate approval.
 
 ### Revision scope and evidence boundaries
 
@@ -155,6 +163,32 @@ It also authorizes drafting Gate 3, not approving it. No push, implementation,
 installation, credential use, external call, spike, deployment or outreach is
 included. Gates 3 and 4 retain separate explicit approval pauses. No new runtime
 or human evidence is claimed. Prior approval and slice evidence remain intact.
+
+### Gate 3 pivot program-design draft: 2026-09-24
+
+`03-program-design.md` now replaces the pre-pivot decision body while retaining
+that history in Git. The draft fixes the exact file ownership, domain and public
+contracts, v5 to v6 migration, separate experiment and operational finalizers,
+paired comparison schedule, explicit selection, inheritance, inference mediation,
+budgets, replay rules, learner-study rubric and 49 clause-level test obligations.
+
+The draft deliberately stops at the Gate 3 approval boundary. Gate 4 remains
+queued and its old Slice 10 to 17 body remains historical. Documentation checks
+confirmed balanced code fences, required sections, no new em dashes and a clean
+`git diff --check`. Source was inspected; no runtime suite, install, credential,
+live inference, sandbox spike, human session, branch, commit or push was performed.
+
+### Gate 3 re-approval: 2026-09-24
+
+The user wrote: "Yep i approve help me to commit(no co auhtor)". This explicitly
+re-approves the reconciled `03-program-design.md` and authorizes committing the
+Gate 3 design and synchronized approval records without a co-author footer. The
+design and ADR 0005 are committed on main as `de250b9`.
+
+This approval authorizes Gate 4 reconciliation next, not Gate 4 approval or
+implementation. It does not authorize a push, install, credential use, external
+call, capability spike, sealed-case authoring, outreach or deployment. No new
+runtime or human evidence is claimed.
 
 ## Previous gate status: historical through 2026-09-21
 
