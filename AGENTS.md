@@ -52,13 +52,15 @@ summaries when a time-sensitive external claim is being made.
   backtrack. The user approved the revised product and six plain HTML mockups
   without human sessions, and authorized publishing `shiftwork/slice-10`, merging
   and pushing main, then proceeding through Gates 2 to 4. Publication and merge
-  are complete (`821a24c` on main). Gate 2 is RE-APPROVED 2026-09-24 after pivot
-  reconciliation; the approved architecture and records were committed directly
-  to main as `f048949` and `3799dfc`. Gate 3 is RE-APPROVED 2026-09-24 after pivot
-  reconciliation; the approved design and ADR 0005 are committed as `de250b9`.
-  Gate 4 remains queued for separate reconciliation and explicit re-approval. Its
-  old-design approval history is retained, not implementation authority. Do not
-  resume old Slice 10 or implement the pivot yet.
+  are complete (`821a24c` on main). Gate 2 was re-approved and committed as
+  `f048949` and `3799dfc`, then backtracked on 2026-09-24: a closed v5 shift
+  with no selection had no path to make its first choice. The user explicitly
+  re-approved the revised Gate 2 architecture and requested Gate 3. Gate 3's
+  prior re-approval and commit `de250b9` remain historical. The user separately
+  re-approved the reconciled Gate 3 working tree and authorized committing and
+  merging it to main without a co-author footer. Gate 4's draft remains
+  unapproved and is next for revision. Do not resume old Slice 10 or implement
+  the pivot yet.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
   the exact tested version and inherited operational consequences. Experiments,

@@ -7,13 +7,13 @@ around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
 repairs fairly, explicitly choose one and maintain its later consequences.
 **Gate state:** Gate 1 RE-APPROVED 2026-09-24 after the same-day backtrack, without
 human comprehension sessions. Approval supplies no participant or learning evidence.
-**Later gates:** Gate 2 RE-APPROVED 2026-09-24 after pivot reconciliation;
-committed on main as `f048949` and `3799dfc`. Gate 3 was RE-APPROVED 2026-09-24
-after pivot reconciliation and its design is committed as `de250b9`. Gate 4 remains
-queued for separate reconciliation and explicit re-approval. Its old-design approval
-remains historical. No further
-implementation is authorized. Gate 1 publication and merge/push are complete
-(`821a24c` on main).
+**Later gates:** Gate 2 was re-approved and committed on main as `f048949` and
+`3799dfc`, then backtracked on 2026-09-24 for the legacy first-choice dead end.
+The user re-approved that revised architecture and separately re-approved the
+reconciled Gate 3 working tree, authorizing its commit and merge to main without
+a co-author footer. The earlier Gate 3 commit `de250b9` remains historical.
+Gate 4 is being revised and remains unapproved. No implementation is authorized.
+Gate 1 publication and merge/push are complete (`821a24c` on main).
 
 **Build baseline:** Slices 1 through 9 are recorded as implemented; Slice 9 was
 merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance.
@@ -76,7 +76,15 @@ claims of an exclusive category.
 - 2026-09-24: Gate 2 reopened for architecture reconciliation against the approved
   product and current source, then was explicitly re-approved by the user. The user
   authorized committing the approved records to main and proceeding to Gate 3.
-  Gates 3 and 4 await their separate reconciliation and approval; no new runtime
+- 2026-09-24: Gate 3 was separately re-approved and committed as `de250b9`.
+  During later adversarial review, its no-selection shift-open rule was found to
+  strand a closed v5 engagement before its first comparison. Gate 2 is backtracked
+  and revised for a non-operational first-choice shift.
+- 2026-09-24: the user explicitly re-approved that Gate 2 revision and requested
+  Gate 3 next. Gate 3's current draft reconciles the legacy route, executable
+  Bellwether and Northline ownership, three workload-to-slot bindings,
+  controller-owned tool policy and clarification outcomes. The user separately
+  re-approved this Gate 3 revision. Gate 4 remains unapproved. No new runtime
   evidence or permission to push or implement is supplied.
 
 The external software-factory guide at the recorded
@@ -146,7 +154,8 @@ choice materially changed behavior; it cannot erase the chosen version's history
 The review in `SHIFTWORK_PIVOT2.md:82` identified source-level mismatches involving
 request relevance, changing operational workloads, latest-version inheritance and
 experiment side effects. These are review findings, not new runtime reproductions.
-Their repair belongs to revised Gates 2 through 4, not this document-only pass.
+Their repair belongs to the gated design and later implementation. This brief
+does not turn a proposed contract into runtime evidence.
 
 ## 6. Authority boundary for subsequent gate revision
 
@@ -158,12 +167,16 @@ Their repair belongs to revised Gates 2 through 4, not this document-only pass.
 | Independent assessment | Check observed outputs and reduce operational consequences under visible rules | Invent success from narrative or confidence |
 | Operator | Controlled execution, credential custody and reviewed scenario material | Silent changes to a learner's outcomes |
 
-The approved Gate 2 specifies controller-side service-inference mediation with no
+Gate 2 specifies controller-side service-inference mediation with no
 provider credentials in learner code, immutable paired-comparison contexts,
 separate experimental/operational finalization and explicit selection history.
-It retains the existing controller, store, room and offline paths. These are
-approved architecture decisions, not implemented behavior; exact types, budgets,
-task rubrics and channel verification require Gate 3 and later authorized evidence.
+The current Gate 2 revision also permits a legacy engagement whose v5 shift is
+closed and whose selection is absent to open a labelled non-operational shift for
+investigation, repair comparison and its first explicit choice. It seeds only an
+editable draft, not an operating version or invented consent; operation stays
+blocked until a valid learner choice. The controller, store, room and offline
+paths remain the baseline. Gates 2 and 3 are re-approved. Actual task rubrics,
+reviewed fixtures and channel verification require later authorization and evidence.
 Repeated probing, protected-case leakage and isolation remain constraints.
 
 ## 7. Organiser technology and track hypothesis
@@ -263,7 +276,6 @@ format; the four official criteria remain equally weighted.
 
 ## 12. Immediate next action
 
-Reconcile `plans/shiftwork/04-slices.md` against the approved final-pivot program
-design, then request explicit Gate 4 re-approval. Preserve completed code and
-evidence; do not resume old Slice 10 or implement the pivot under historical
+Revise and seek separate approval for the Gate 4 draft. Preserve completed code
+and evidence; do not resume old Slice 10 or implement the pivot under historical
 approvals.
