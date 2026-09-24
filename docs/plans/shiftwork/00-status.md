@@ -1,27 +1,29 @@
 # Status: Shiftwork
 
-## Current authority: 2026-09-24 final-pivot revision
+## Current authority: 2026-09-24 final-pivot approval
 
-- **Gate 1: IN PROGRESS, BACKTRACKED 2026-09-24.** The user requested revising
-  Gate 1 around `../../../shiftwork_final_pivot.md`, after reading the repository
-  rules. Drafting is authorized; re-approval has not been given.
-- **Gates 2, 3 and 4: prior approvals retained for the old design only.** Their
-  pivot-affected decisions are queued for separate revision and re-approval in
-  order after Gate 1. Those documents are unchanged in this pass; they do not
-  authorize implementing the new workflow or continuing old Slice 10 now.
+- **Gate 1: RE-APPROVED 2026-09-24.** After the same-day backtrack, the user
+  explicitly approved the revised product, six plain HTML mockups and supporting
+  visual brief and manual kit. Human sessions remain unrun; approval supplies no
+  participant results or learning evidence.
+- **Gate 2: pending pivot reconciliation.** Draft architecture next, then ask for
+  explicit approval. The request to go through Gates 2 to 4 is not their approval.
+- **Gates 3 and 4: queued for separate pivot reconciliation and re-approval**, in
+  that order after Gate 2. All three retain their old-design approval history;
+  none authorizes pivot implementation or continuation of old Slice 10.
 - **Existing implementation:** Slices 1 through 9 remain completed as recorded;
   Slice 9's 2026-09-21 merge/push marks the user's visual acceptance. No completed
   implementation or historical evidence is discarded by this product backtrack.
-- **Scope:** revise the product, six plain HTML mockups, visual brief, manual kit
-  and supporting current-status records. No runtime changes, installs, credentials,
-  external service calls, spike runs, outreach, deployment, branches, commits, tags,
-  pushes or ADR #4.
-- **Resume point:** review the revised Gate 1 artifacts and ask exactly
-  `Approve Gate 1, or what should change?` No approval is inferred from this request.
+- **Scope:** record Gate 1 approval, publish `shiftwork/slice-10`, merge and push
+  main, then revise the later gates with a separate approval pause at each gate.
+  No runtime changes, installs, credentials, external AI calls, spike runs, outreach,
+  deployment or ADR #4 are authorized.
+- **Resume point:** complete the authorized Git integration, then draft Gate 2.
+  Gates 3 and 4 wait for the preceding gate's explicit approval.
 
 ### Revision scope and evidence boundaries
 
-The proposed loop is inspect a real AI-service failure, state a cause and falsifier,
+The approved product loop is inspect a real AI-service failure, state a cause and falsifier,
 compare candidate code under shared requirements and conditions, explicitly retain
 an eligible tested version, and operate that version in a later shift. A subsequent
 experiment with the retained alternative must not rewrite operational history.
@@ -31,18 +33,19 @@ not fresh inference, and later surprises do not retroactively grade earlier choi
 
 `01-product.md`, `mockups/`, `client-visual-direction.md` and
 `gate1-manual-test-kit.md` are the revision artifacts. `../../SHIFTWORK_PLAN.md`
-and the current notice in `../../../AGENTS.md` reflect the pending state. The
+and the current notice in `../../../AGENTS.md` reflect the approved product state. The
 selected room, fictional role, one-role/two-client boundary and existing foundation
 are retained. The mockups' numbers and A/B histories are illustrative, not measured
 results, new sealed fixtures or evidence that the pivot works.
 
-The required external guide at
+During the initial revision, the required external guide at
 `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` was not found at the recorded
-path or in a bounded lookup of local resource locations. The explicit `agents.md`
-gate rules govern this pass; full compliance with the unavailable guide is not
-claimed. The project `.venv/Scripts/python.exe` was also absent in this environment;
-no dependencies were installed. Static preview verification uses installed Node and
-Chrome rather than claiming a runtime suite run.
+path or in a bounded local lookup. The explicit `agents.md` gate rules governed
+that pass. The guide was subsequently loaded through the `software-factory` skill
+in the same-day approval session, without installing a replacement. The project
+`.venv/Scripts/python.exe` was absent during the initial preview verification;
+no dependencies were installed. That static verification used installed Node and
+Chrome, not a runtime suite.
 
 Human comprehension tests, learner studies and live integrations remain unrun in
 this revision. The browser evidence below does not establish product comprehension,
@@ -95,13 +98,23 @@ learning improvement or approval.
 
 This is a browser/layout sanity check, not a screen-reader audit, a 200% zoom test,
 a participant session, service execution or proof that either illustrative repair
-works. Gate 1 remains IN PROGRESS and awaits explicit re-approval.
+works. Gate 1 awaited re-approval at the end of that verification; the user has
+since explicitly re-approved it without human sessions.
+
+### Gate 1 re-approval: 2026-09-24
+
+The user wrote: "i approve gate 1, publish rbanh, merge to main, and then go to gate
+2-4". This approves the revised product and mockups and authorizes publishing the
+current branch and merging/pushing main. It does not pre-approve the later gates.
+The software-factory guide was loaded through its available skill in this session.
+Human comprehension testing, learning studies and live integrations remain unrun.
 
 ## Previous gate status: historical through 2026-09-21
 
 The approval and slice records below retain their original scopes and evidence.
-Statements that work can continue or backtracks are closed describe that earlier
-state, not authority to bypass the current Gate 1 backtrack.
+Statements that work can continue or backtracks are closed, including old fresh-
+session notes, describe that earlier state, not authority to bypass the pending
+Gates 2 to 4 pivot reconciliation.
 
 - Gate 1 — Product: RE-APPROVED 2026-09-18 (first approved 2026-09-15; backtracked
   and revised the same day for two user-directed changes: the learner is explicitly
@@ -3133,10 +3146,15 @@ follow-up revision awaited explicit re-approval; the user approved it in chat on
 
 ## Approval history
 
-- Gate 1 - Product: BACKTRACKED to IN PROGRESS on 2026-09-24 at the user's
-  explicit request to revise the product around the final pivot. Prior Gate 1
-  approvals remain historical; this revision has NOT been re-approved. Later-gate
-  reconciliation is queued, not approved, and runtime implementation is paused.
+- Gate 1 - Product: RE-APPROVED by the user in chat on 2026-09-24 after the
+  same-day final-pivot backtrack. Approval covers `01-product.md`, all six static
+  mockups and the supporting visual brief/manual kit, without human sessions.
+  Branch publication and merge/push to main are separately authorized by the same
+  message. Gates 2, 3 and 4 require their own revision and explicit re-approval;
+  runtime implementation remains paused.
+- Gate 1 - Product: BACKTRACKED to IN PROGRESS earlier on 2026-09-24 at the user's
+  request to revise the product around the final pivot. This backtrack was closed
+  by the subsequent explicit re-approval recorded above.
 - Gate 4 - Vertical Slices follow-up revision: approved by the user in chat on
   2026-09-19 (Slice 7 leak-response invalidation; Slice 10 scoring-input alignment;
   the Slice 6 repair scope and the earlier 2026-09-19 reconciliation approval
