@@ -3,76 +3,75 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Shiftwork Gate 1 — shift board</title>
-  <link rel="stylesheet" href="wireframe.css?v=3">
+  <title>Shiftwork Gate 1 | Shift board</title>
+  <link rel="stylesheet" href="wireframe.css?v=4">
 </head>
 <body>
-  <div class="prototype">Interactive concept with sample data. Nothing shown here has run or been measured.</div>
+  <a class="skip-link" href="#main">Skip to the shift board</a>
+  <div class="prototype">Gate 1 concept storyboard. Illustrative only; nothing runs or saves.</div>
   <header class="topbar">
     <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
-    <div class="engagement">Applied AI engineer on shift · Bellwether Books, your first client</div>
-    <div class="state">Planning preview</div>
+    <div class="engagement">Junior applied AI engineer · Fictional client: Bellwether Books</div>
+    <div class="state">Shift board preview</div>
   </header>
-  <nav class="journey" aria-label="Shiftwork journey"><div class="journey-track">
-    <a class="active" href="01-shift-board.html" aria-current="page"><span class="step-no">1</span>Shift board</a>
-    <a href="02-owner-brief.html"><span class="step-no">2</span>Set the contract</a>
-    <a href="03-customer-shift.html"><span class="step-no">3</span>Run the shift</a>
-    <a href="04-incident-review.html"><span class="step-no">4</span>Repair</a>
-    <a href="05-inherited-shift.html"><span class="step-no">5</span>Return</a>
-    <a href="06-away-shift.html"><span class="step-no">6</span>Away shift</a>
+  <nav class="journey" aria-label="Story previews, navigation only"><div class="journey-track">
+    <a class="active" href="01-shift-board.html" aria-current="page"><span class="step-no">1</span><span>Shift board<small>Preview</small></span></a>
+    <a href="02-owner-brief.html"><span class="step-no">2</span><span>Requirements<small>Preview</small></span></a>
+    <a href="03-customer-shift.html"><span class="step-no">3</span><span>Investigate<small>Preview</small></span></a>
+    <a href="04-incident-review.html"><span class="step-no">4</span><span>Compare &amp; choose<small>Preview</small></span></a>
+    <a href="05-inherited-shift.html"><span class="step-no">5</span><span>Next shift<small>Preview</small></span></a>
+    <a href="06-away-shift.html"><span class="step-no">6</span><span>Away shift<small>Preview</small></span></a>
   </div></nav>
-
-  <main class="page">
-    <section class="page-head">
-      <div>
-        <p class="stage-kicker">Day one as Bellwether Books' applied AI engineer</p>
-        <h1>You keep this service running.</h1>
-        <p class="lead">Build one customer-information service, watch it meet real-looking shop requests, and return to the same work after things change.</p>
-      </div>
-      <aside class="phase-card"><strong>Your responsibility as the engineer</strong>The contract, visible checks, service logic, repair choices, and known limits are yours.</aside>
-    </section>
-
-    <section class="workspace">
-      <article class="paper-note">
-        <span class="tag">Shift brief</span>
-        <p class="note-quote">“Help customers find books and understand our policies without inventing certainty.”</p>
-        <ul class="rule-list">
-          <li><strong>First:</strong> decide what a safe, useful answer means.</li>
-          <li><strong>Then:</strong> write one check a customer answer must pass.</li>
-          <li><strong>During the shift:</strong> run your service against the customer queue.</li>
-          <li><strong>After an incident:</strong> change the artifact and keep the decision on record.</li>
-        </ul>
-        <div class="stat-line">
-          <div><strong>0</strong><span>decisions recorded</span></div>
-          <div><strong>0</strong><span>requests run</span></div>
-          <div><strong>1</strong><span>service you own</span></div>
-        </div>
-      </article>
-
-      <aside class="workbench" aria-label="Learner-owned service preview">
-        <div class="workbench-head">
-          <div><small>Your working artifact</small><strong>Bellwether service</strong></div>
-          <span class="owner-stamp">Owned by you</span>
-        </div>
-        <div class="artifact-body">
-          <div class="file-strip"><span class="active">contract</span><span>visible checks</span><span>service logic</span><span>change log</span></div>
-          <div class="code-window"><pre><span class="code-dim"># You will define this behavior</span>
-<span class="code-key">when</span> a customer asks a question:
-  find the shop evidence
-  decide if it is enough
-  <span class="code-good">answer, ask, or decline</span>
-  attach the evidence used</pre></div>
-          <div class="artifact-foot"><span>Version 0 · not started</span><span>Persists into later shifts</span></div>
-        </div>
+  <main class="page" id="main" tabindex="-1">
+    <div class="page-head">
+      <div><p class="stage-kicker">Shift board · Inherit, investigate, decide</p><h1>A service to maintain. A decision to own.</h1><p class="lead">Bellwether's starter service v1 is already here. Investigate its unanswered customer request, compare code repairs, and carry your exact choice into a later shift.</p></div>
+      <aside class="phase-card"><strong>Your role is fictional</strong>Practise engineering judgment, not a correctness quiz. This is not a credential or evidence of job-readiness.</aside>
+    </div>
+    <div class="room-layout">
+      <aside class="room-overview" aria-label="Bellwether operational room">
+        <figure>
+          <svg viewBox="0 0 600 370" aria-hidden="true" focusable="false">
+            <path class="room-floor" d="M35 235 300 90 565 235 300 365Z"/>
+            <path class="room-wall" d="M35 235V95L300 15V90Z"/><path class="room-wall-right" d="M300 15 565 95V235L300 90Z"/>
+            <path class="room-shelf" d="M64 107 230 57V142L64 209Z"/><path class="room-books" d="M81 111V143M98 105V137M115 100V131M146 90V120M163 85V115M180 80V109M205 72V102M81 161V190M111 150V178M135 140V169M165 129V155M199 116V142"/>
+            <path class="room-board" d="m347 53 126 39v66l-126-48Z"/><path class="room-paper" d="m365 72 32 10v30l-32-11Zm49 16 40 12v30l-40-13Z"/>
+            <path class="room-counter" d="m424 168 46-23 60 30v29l-46 24-60-30Z"/><path class="room-desk" d="m424 168 46-23 60 30-46 24Z"/>
+            <path class="room-desk-side" d="m220 198 95-48 105 54v48l-95 52-105-55Z"/><path class="room-desk" d="m220 198 95-48 105 54-95 53Z"/>
+            <path class="room-monitor" d="m299 161 47 23v35l-47-23Z"/><path class="room-screen" d="m305 170 34 17v19l-34-17Z"/>
+            <path class="room-counter" d="m78 244 72-36 75 38v37l-73 39-74-39Z"/><path class="room-desk" d="m78 244 72-36 75 38-73 37Z"/>
+            <path class="room-archive" d="m433 244 57-29 42 23v47l-57 30-42-25Z"/><path class="room-paper" d="m441 245 48-23 24 14-48 24Z"/>
+            <g class="room-numbers"><text x="402" y="145">1</text><text x="486" y="185">2</text><text x="143" y="268">3</text><text x="280" y="230">4</text><text x="473" y="281">5</text></g>
+          </svg>
+          <figcaption><strong>Bellwether Books</strong>One operational room. Linked station previews below; no live state.</figcaption>
+        </figure>
+        <nav class="station-links" aria-label="Bellwether station previews">
+          <a class="active" href="01-shift-board.html" aria-current="page"><b>1</b><span>Incident wall<small>Shift board preview</small></span></a>
+          <a href="02-owner-brief.html"><b>2</b><span>Owner desk<small>Requirements preview</small></span></a>
+          <a href="03-customer-shift.html"><b>3</b><span>Evidence counter<small>Investigation preview</small></span></a>
+          <a href="04-incident-review.html"><b>4</b><span>Service &amp; repair bench<small>Comparison preview</small></span></a>
+          <a href="05-inherited-shift.html"><b>5</b><span>Handover shelf<small>Next shift preview</small></span></a>
+        </nav>
       </aside>
-
-      <section class="surface green span-all">
-        <h2>What makes a later shift different</h2>
-        <p>The next shift inherits this exact artifact, your decisions, the incidents it caused, and its unresolved limits. Progress comes from changing the working service—not from points or badges.</p>
-      </section>
-    </section>
-
-    <div class="actions"><a class="button primary" href="02-owner-brief.html">Define how the service should behave</a><small>The controls illustrate the intended product; they do not save.</small></div>
+      <div class="station-content">
+        <section class="paper-note">
+          <span class="tag">Inherited starter · Invented illustration</span>
+          <h2>Incident BWB-01 is still open</h2>
+          <p class="note-quote">The customer asked about collection and an alternative. Service v1 returned only a price.</p>
+          <dl class="record-list"><div><dt>Working service</dt><dd>Bellwether starter v1, ready for you to inspect and change.</dd></div><div><dt>Learner repair</dt><dd>None chosen. No A/B result belongs to you yet.</dd></div><div><dt>Open question</dt><dd>What explains the missing tasks, and what evidence would rule that explanation out?</dd></div></dl>
+        </section>
+        <section class="workbench" aria-label="Inherited service preview">
+          <div class="workbench-head"><div><small>Conceptual artifact inventory</small><strong>Bellwether service · v1</strong></div><span class="owner-stamp">Your responsibility</span></div>
+          <div class="artifact-body"><div class="file-strip"><span class="active">service code</span><span>public records</span><span>visible tests</span><span>incident history</span></div><p>Inspect the request, its recorded interpretation and tools, the public records, and the actual output represented in the capture. Then write code repairs you can explain.</p><div class="artifact-foot"><span>Starter exists in this story</span><span>Nothing executed in this mockup</span></div></div>
+        </section>
+        <section class="surface" aria-labelledby="activities">
+          <h2 id="activities">Three different activities</h2>
+          <ol class="activity-list"><li><strong>Experiment</strong>Predict and try to falsify your explanation. Compare candidate code under the same conditions. No operational history changes.</li><li><strong>Choose</strong>Explicitly retain one exact tested version, with your reason. Saving a newer file is not a choice.</li><li><strong>Operate</strong>Use that chosen version later. Only operation records synthetic consequences in the incident history and ledger.</li></ol>
+        </section>
+        <section class="surface green"><h2>Judgment, not a prescribed fix</h2><p>A supported fact can still fail to answer the customer. Your job is to explain the failure, test that explanation, and decide which tradeoff is worth maintaining.</p><details><summary>What carries forward in the proposed product?</summary><p>The chosen code version, original requirements, visible tests, predictions and revisions, choice rationale, retained alternatives, and unresolved incidents. An assistant's opinion cannot declare a pass.</p></details></section>
+      </div>
+    </div>
+    <p class="honesty">Illustrative only; nothing runs or saves. All incidents and business consequences are invented synthetic scenario content, not commercial or learning evidence.</p>
+    <div class="actions"><a class="button primary" href="02-owner-brief.html">Preview requirements</a><small>Navigation only. No service starts.</small></div>
   </main>
 </body>
 </html>

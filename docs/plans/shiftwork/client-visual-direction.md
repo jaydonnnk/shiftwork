@@ -1,11 +1,14 @@
 # Client visual direction: operational diorama
 
-**Selected by the user:** 2026-09-18.
+**Composition selected by the user:** 2026-09-18.
+**Journey revision:** proposed 2026-09-24 with the Gate 1 final-pivot backtrack;
+awaiting re-approval. The selected room composition is retained.
 
-**Purpose:** implementation acceptance brief for Slices 9 through 11. This
-direction changes the client composition, not the approved learner journey,
-authority boundaries, evidence rules or slice order. It does not authorize client
-implementation before Slice 9.
+**Purpose:** visual acceptance brief for the revised product journey. The prior
+Slice 9 acceptance remains historical evidence. The new investigation, comparison,
+choice and later-experiment requirements are not delivered by that slice and are
+not assigned to old Slices 10 or 11 here. Future mapping requires Gate 4 revision.
+This brief does not authorize implementation or change the rendering baseline.
 
 ## Reference
 
@@ -19,8 +22,9 @@ implementation before Slice 9.
 - The target is a 3D-looking operational space. Real-time WebGL, a walkable avatar
   and a free camera are not required. The approved baseline remains plain HTML,
   CSS and vanilla JavaScript. DOM, SVG, CSS transforms or canvas may produce the
-  scene. Adding a framework, rendering engine or package requires a Gate 3
-  backtrack and explicit re-approval before Slice 9.
+  scene. Any proposed framework, rendering engine or package change belongs to the
+  pending Gate 3 reconciliation and requires explicit approval before future
+  implementation. Slice 9's historical acceptance is unchanged.
 
 ## Product intent
 
@@ -30,7 +34,12 @@ business reads as a fictional client rather than the learner's own shop. The rol
 fiction, never a credential or job-readiness claim. The learner selects stations
 rather than opening unrelated dashboard cards. The room must make this chain legible:
 
-`customer request -> learner service output -> independent comparison -> synthetic ledger consequence -> repair`
+`request -> interpretation and information/tool use -> output -> independent task and correctness checks -> synthetic operational consequence`
+
+Investigation follows that evidence into a prediction and a controlled repair
+comparison. Only an explicit choice changes the operating version; only operation
+produces business consequences. The experiment path must not visually flow into the
+operational ledger as though every trial changes the shop.
 
 The room is not an open-world game. Movement, characters and environmental detail
 must never hide the learner-owned artifact or replace recorded evidence with
@@ -40,31 +49,39 @@ narrative animation.
 
 | Station | Product responsibility | Required state |
 | --- | --- | --- |
-| Owner desk | Contract choices, declared limits and visible check authoring | Shows committed versus draft state; nothing preselected |
-| Service workbench | Learner-owned files, version, contract, visible checks and change log | Central visual focus; exact version and ownership visible |
-| Customer queue | Current executed request batch | Selected customer maps to the exact executed request ordinal |
-| Evidence pipeline | Output to public comparison to ledger derivation | Every step resolves to real evidence; no invented connector |
-| Independent evaluator booth | Separation of learner work from scoring | Visually locked and non-editable; never reveals sealed values |
-| Incident and ledger wall | Open incidents and synthetic scenario consequences | Shows reason code, incident state and explicit `Synthetic scenario` label |
-| Repair bench | Evidence inspection, repair direction, artifact edit and rerun | Becomes active only for an actual incident |
+| Owner desk | Shared mandatory requirements, learner priorities and visible tests | Distinguishes fixed obligations from learner choices; no repair preselected |
+| Service workbench | Learner-owned code, tested candidates and operating version | Shows starter, candidate, explicitly chosen and changed-since-test states separately |
+| Customer queue | Executed operational requests | Selected customer maps to the exact executed request and operating version |
+| Evidence pipeline | Interpretation, tool use, records, output and independent checks | Shows task relevance as well as factual support; observations separate from hypotheses |
+| Independent evaluator booth | Separation of learner work from assessment | Non-editable; no protected answers or model-declared passes |
+| Incident and ledger wall | Operational incidents and synthetic consequences | Experiment results never masquerade as incidents resolved or sales completed |
+| Repair bench | Prediction, falsifier, learner code, fair experiment and explicit choice | Shows shared conditions, repetition/variation, eligibility, tradeoffs and selected version |
 
-Slice 12 may add an assist terminal, but it must remain visibly separate from the
-evaluator and must show role, attribution and remaining shared assist budget.
+Optional assistance stays visibly separate from the service under investigation
+and the evaluator. Show attribution and the applicable shared assistance limit;
+diagnostic help follows the learner's initial prediction. Future slice ownership
+is deferred to the revised Gate 4.
 
 ## Interaction rules
 
-- The top journey navigation remains available: Shift board, Contract, Customer
-  shift, Repair, Return and Away shift.
+- The top journey navigation remains available: Shift board, Requirements,
+  Investigate, Compare and choose, Next shift and Away shift.
 - Selecting a journey step activates the matching station while keeping the same
-  room visible. Selecting a station updates the evidence or work panel.
+  room identity visible. Selecting a station exposes its evidence or work panel.
 - Essential labels, controls and values are HTML overlays, not baked into the room
   artwork. They must be selectable, keyboard reachable and exposed to assistive
   technology.
-- The right evidence panel is the authoritative detail view. It shows the current
-  request, exact service output, supporting public record when permitted,
-  independent result, synthetic ledger consequence and attempts remaining.
+- The evidence panel shows the selected request, interpretation, tool use, consumed
+  public records, output and independent result. Operational views additionally
+  show the synthetic consequence; experiment views explicitly say history is unchanged.
 - The selected customer, workbench output, evidence path and evidence panel must
-  always refer to the same run and request ordinal.
+  always refer to the same run, request and version. A paired comparison names both
+  candidates and its shared conditions rather than merging their evidence.
+- Label recorded inspection, fresh trials, experiment and operation in text.
+  Show eligibility and Not comparable states before efficiency metrics. Mandatory
+  failures cannot disappear behind a collapsed detail or a green summary score.
+- Keep initial prediction and later reflection distinct. Use short inputs and
+  optional details; no prefilled diagnosis, repair winner or automatic selection.
 - Animation may trace the evidence path after a run, but reduced-motion mode must
   show the final state without animation. Animation cannot imply success before
   finalization.
@@ -73,17 +90,19 @@ evaluator and must show role, attribution and remaining shared assist budget.
 
 ## State changes across the journey
 
-1. **Shift board:** the room is calm. The service workbench is central and displays
-   the current artifact, open incidents, unresolved limits and attempts remaining.
-2. **Contract:** the owner desk becomes active. Contract choices and the visible
-   check builder appear as editable HTML beside the room.
-3. **Customer shift:** customer requests enter the service workbench. The selected
-   request illuminates the evidence pipeline into the evaluator and ledger wall.
-4. **Repair:** the actual incident activates the incident wall and repair bench.
-   The mismatch and repair controls remain tied to the selected evidence.
-5. **Return:** the same Bellwether room and service workbench return with the new
-   artifact version, prior incident history and unresolved limits. The next case
-   remains visually sealed until execution.
+1. **Shift board:** centre the inherited service, open incident, unresolved limits
+   and operating version. Explain experiment, choose and operate as separate actions.
+2. **Requirements:** the owner desk shows the shared obligations, learner priorities
+   and a visible test. A weaker contract cannot manufacture a winning repair.
+3. **Investigate:** show the complete request-to-consequence evidence path. Ask for
+   a cause and disconfirming test before revealing optional diagnostic help.
+4. **Compare and choose:** the repair bench shows two code candidates, comparable
+   trials, repetition/variation, correctness eligibility and cost/completion tradeoffs.
+   Explicit selection is distinct from running, saving and ending a shift.
+5. **Next shift:** restore the selected version and original reasoning, with prior
+   incidents and limits. Keep future requests hidden before operation. After the
+   changed condition occurs, separate its operational consequences from a later
+   experiment against the retained alternative; that experiment cannot rewrite history.
 6. **Away shift:** preserve the spatial grammar but create a genuinely different
    Northline Bike Cooperative workshop. Start with a blank artifact, fewer assist
    affordances and stations for future commitments, safety escalation and
@@ -103,16 +122,19 @@ evaluator and must show role, attribution and remaining shared assist budget.
 - Background art has empty, loading, error and no-incident treatments. It must not
   display stale sample values while real data is unavailable.
 
-## Slice 11 acceptance test
+## Product comprehension acceptance
 
-By the end of Slice 11, a viewer should understand within five seconds:
+A viewer should identify the learner's service and current activity within five
+seconds. After walking the six screens, they should explain without coaching:
 
-1. this is the learner's service;
-2. a customer request entered it;
-3. its recorded output caused the shown result;
-4. a separate evaluator produced the check result;
-5. the consequence is synthetic and recorded; and
-6. the same service and history return in the next shift.
+1. why a supported fact can still fail to answer the customer's question;
+2. how the learner's prediction affects the experiment;
+3. which comparison conditions are shared and which repair tradeoff is accepted;
+4. why experiments do not change operational history;
+5. which exact version was explicitly chosen and will return;
+6. why consequences are independently checked, synthetic and recorded; and
+7. why a later alternative experiment cannot erase what the chosen version did.
 
-If the room is attractive but any of those statements depends on explanatory prose
-outside the product, the visual direction has not landed.
+These are proposed comprehension criteria, not observed human results. Gate 1
+mockups label all evidence as illustrative; future runtime views must use captured
+evidence. An attractive room alone does not satisfy these requirements.

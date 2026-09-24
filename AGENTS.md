@@ -48,7 +48,27 @@ summaries when a time-sensitive external claim is being made.
 
 ## 3. Current direction and authorization
 
-- Current gate state: Gate 1 — Product RE-APPROVED 2026-09-18 (first approved
+- **2026-09-24 current authority:** the user requested Gate 1 revision around
+  `shiftwork_final_pivot.md`. Gate 1 is IN PROGRESS, backtracked and awaiting
+  explicit re-approval. Revise the product, six plain HTML mockups and supporting
+  records only. Gates 2, 3 and 4 retain their old-design approval history but need
+  separate pivot reconciliation and re-approval after Gate 1, in order. Do not
+  resume old Slice 10 or implement pivot behavior under those earlier approvals.
+- Proposed focus: evidence-led diagnosis of a real AI service, a short cause and
+  falsifier before diagnostic help, fair repair comparisons, explicit selection of
+  the exact tested version and inherited operational consequences. Experiments,
+  selection and operation are separate; later testing of the retained alternative
+  must not rewrite history. Keep the selected room and completed foundation.
+- Current pivot forecast: 32/40 assuming competent delivery, not today's build,
+  measured learning or predicted judging. Verdict: revise, then pursue. No automatic
+  score increase for refinements and no claim of a proven exclusive category.
+- The external software-factory guide was unavailable at its recorded path and
+  local resource lookup on 2026-09-24. Follow the explicit gate rules here, record
+  the limitation and do not claim the unavailable guide was read or install a
+  replacement without authorization.
+- The following pre-pivot approval history retains its original scope. Any statement
+  below that slice work can proceed is suspended by the current Gate 1 backtrack.
+- Pre-pivot gate state: Gate 1 - Product RE-APPROVED 2026-09-18 (first approved
   2026-09-15; backtracked and revised the same day for the explicit junior applied
   AI engineer role framing and the selected isometric operational-room visual
   direction); Gate 2 - Architecture RE-APPROVED 2026-09-19 after the scoped
@@ -149,10 +169,10 @@ summaries when a time-sensitive external claim is being made.
 - The latest independent verdict before selection was `REVISE SHIFTWORK BEFORE
   ADOPTION`. Selection did not prove the technical, learning, Tavily or organiser-
   dependence claims.
-- Current forecast: 27/40; defensible pre-evidence cap: 31/40; conditional best
-  case: 35/40. These are subjective forecasts, not achieved scores. No capability,
-  learning gain, prize merit or working central mechanism has been demonstrated.
-  Potential Impact remains capped at 4.0 without stronger evidence.
+- Historical pre-pivot forecast: 27/40; pre-evidence cap: 31/40; conditional best
+  case: 35/40, with Potential Impact capped at 4.0 without stronger evidence.
+  These are prior subjective forecasts, not current caps or achieved scores; the
+  final-pivot forecast above does not establish learning gain or prize merit.
 
 ## 4. Product definition and scope filters
 
@@ -172,9 +192,16 @@ summaries when a time-sensitive external claim is being made.
   engineer, GTM engineer) are recorded as future scope only. Do not expand to
   multiple careers, a large town or an employer marketplace before the central
   mechanism survives its tests.
-- Central mechanic: a learner's versioned service receives fixed customer requests;
-  independently authored checks reduce its real outputs into an append-only,
-  transparent business ledger that the next shift must inherit.
+- Proposed central mechanic under the Gate 1 revision: the learner explains an
+  AI-service failure, tests a falsifiable prediction, compares code repairs under
+  shared requirements and conditions, and explicitly selects an eligible tested
+  version. Only operating that version creates independently checked synthetic
+  ledger consequences; neither experiments nor later alternative trials rewrite
+  operational history. Saving another candidate does not change inheritance.
+- Require answers to address the customer's task, not just cite true facts. Reject
+  mandatory correctness/safety failures before efficiency comparisons; distinguish
+  useful completion from refusals and human referrals. Recorded inspection is not
+  fresh AI execution, and repeated trials must show variation and missing evidence.
 - Build a whole product with persistent objects, repeat usefulness and a visible
   before/after. Do not ship a developer console disguised as a learning product.
 - The town is an explanatory layer, not the differentiator. Progress must be caused
@@ -374,9 +401,13 @@ watching. Do not create `PROGRESS.md` for short interactive work or small edits.
 - Best Apps and Agents is the current safer primary-track hypothesis. Claim Coding
   and Agentic Engineering only if a Nemotron-powered agent meaningfully writes,
   runs and tests code in Token Factory Sandboxes without erasing learner authorship.
-- Nemotron may provide bounded stakeholder dialogue, scaffolding after the learner
-  commits to an approach, requested hints, failure diagnosis and labelled patch
-  proposals. The learner owns requirements, tradeoffs, visible tests and repair direction.
+- The final pivot proposes meaningful Nemotron behavior inside the service, such
+  as request interpretation and information/tool selection, not merely stakeholder
+  dialogue. That change needs Gate 2/3 reconciliation; it is not runtime or
+  credential authorization. Ordinary code may replace unnecessary AI subtasks.
+- Optional diagnostic help follows the learner's initial cause and falsifier;
+  hints and labelled patch proposals stay attributable. The learner owns hypotheses,
+  experiment design, code, visible tests, requirements and the final repair choice.
 - Nemotron and learner code must not control or read sealed cases, credentials,
   evaluator logic, ledger rules or promotion. A second LLM is not an independent oracle.
 - Repeated probing can leak hidden contracts. Plan isolation, holdout rotation,

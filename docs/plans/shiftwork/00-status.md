@@ -1,5 +1,108 @@
 # Status: Shiftwork
 
+## Current authority: 2026-09-24 final-pivot revision
+
+- **Gate 1: IN PROGRESS, BACKTRACKED 2026-09-24.** The user requested revising
+  Gate 1 around `../../../shiftwork_final_pivot.md`, after reading the repository
+  rules. Drafting is authorized; re-approval has not been given.
+- **Gates 2, 3 and 4: prior approvals retained for the old design only.** Their
+  pivot-affected decisions are queued for separate revision and re-approval in
+  order after Gate 1. Those documents are unchanged in this pass; they do not
+  authorize implementing the new workflow or continuing old Slice 10 now.
+- **Existing implementation:** Slices 1 through 9 remain completed as recorded;
+  Slice 9's 2026-09-21 merge/push marks the user's visual acceptance. No completed
+  implementation or historical evidence is discarded by this product backtrack.
+- **Scope:** revise the product, six plain HTML mockups, visual brief, manual kit
+  and supporting current-status records. No runtime changes, installs, credentials,
+  external service calls, spike runs, outreach, deployment, branches, commits, tags,
+  pushes or ADR #4.
+- **Resume point:** review the revised Gate 1 artifacts and ask exactly
+  `Approve Gate 1, or what should change?` No approval is inferred from this request.
+
+### Revision scope and evidence boundaries
+
+The proposed loop is inspect a real AI-service failure, state a cause and falsifier,
+compare candidate code under shared requirements and conditions, explicitly retain
+an eligible tested version, and operate that version in a later shift. A subsequent
+experiment with the retained alternative must not rewrite operational history.
+Mandatory task/correctness/safety checks precede efficiency comparisons; helpful
+completion, refusals and human referrals remain distinct. Recorded inspection is
+not fresh inference, and later surprises do not retroactively grade earlier choices.
+
+`01-product.md`, `mockups/`, `client-visual-direction.md` and
+`gate1-manual-test-kit.md` are the revision artifacts. `../../SHIFTWORK_PLAN.md`
+and the current notice in `../../../AGENTS.md` reflect the pending state. The
+selected room, fictional role, one-role/two-client boundary and existing foundation
+are retained. The mockups' numbers and A/B histories are illustrative, not measured
+results, new sealed fixtures or evidence that the pivot works.
+
+The required external guide at
+`C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` was not found at the recorded
+path or in a bounded lookup of local resource locations. The explicit `agents.md`
+gate rules govern this pass; full compliance with the unavailable guide is not
+claimed. The project `.venv/Scripts/python.exe` was also absent in this environment;
+no dependencies were installed. Static preview verification uses installed Node and
+Chrome rather than claiming a runtime suite run.
+
+Human comprehension tests, learner studies and live integrations remain unrun in
+this revision. The browser evidence below does not establish product comprehension,
+learning improvement or approval.
+
+### Gate 1 artifact verification: 2026-09-24
+
+- Served only the six mockups and `wireframe.css` from an allow-listed, loopback-only
+  Node server. Review URL: `http://127.0.0.1:60341/01-shift-board.html`. It remains
+  available in this session; stop it with `previewServer.close()` in the Node REPL.
+  This is a static storyboard preview, not the application or an external deployment.
+- Installed Chrome, controlled through its debugging protocol, checked every page
+  at 1280, 640, 390 and 320 CSS pixels: 24 page/viewport combinations, each with
+  disclosures closed and expanded. All passed the horizontal-overflow checks.
+  These are desktop-browser viewport tests, not physical-device tests.
+- Each page had one main heading and main landmark, labelled form controls, unique
+  IDs, an illustrative/no-execution disclaimer, no scripts or inline handlers, no
+  preselected choice and no broken images. All 85 local links and fragment targets
+  resolved; referenced description and heading IDs existed.
+- Native keyboard input reached the skip link first on all six pages, showed focus
+  and moved focus to main. Typed investigation notes, tabbed through cause/falsifier/
+  test fields and opened the hint with Enter. Typed a prediction and opened comparison
+  results with Enter. Requirements and Northline reasoning fields were also exercised.
+- Selected A and B, confirmed radio exclusivity, and typed a rationale. Following
+  the A preview after selecting B still showed the independent A history; the B
+  preview after selecting A showed B. A fresh page load had no choice preselected.
+  The links did not claim to save or operate the chosen radio value.
+- Opened the incompatible, incomplete, changed-after-testing and all-refusal previews
+  with native clicks; none selected a candidate. Opened the later outage and separate
+  experiment, checked the authored table values, entered reconsideration notes and
+  followed all four Northline station anchors.
+- Captured and visually inspected seven screenshots: board desktop/mobile, expanded
+  comparison desktop/mobile, later consequence mobile, later experiment mobile and
+  Northline desktop. Text, tables and controls were readable without observed clipping
+  in those views. Temporary captures are in
+  `C:/Users/jayd0/AppData/Local/Temp/shiftwork-gate1-GLXM97`; they are not committed
+  evidence and may disappear. The in-app browser screenshot was unavailable because
+  its view was hidden; the inspected screenshots came from headless Chrome instead.
+- No runtime exceptions or console entries were observed in the instrumented checks.
+  Recorded interaction requests were local GETs only, with no external or write request.
+  The owned verification Chrome and protocol-transport process both exited with code 0;
+  only the restricted static preview server remains running for review.
+- Read-only document review found no concrete blocker and identified one stale
+  rendering-change reference to Slice 9. It now points to future Gate 3 reconciliation.
+  Review is not approval or an independent learning oracle. Harness setup/type errors
+  and their corrections are recorded in `../../../MISTAKES.md`, not treated as UI failures.
+- `git diff --check` passed. Scope checks found no changes to official requirements,
+  Gates 2 through 4, runtime, tests, demos, package metadata or lockfile. No installation,
+  branch, staging, commit or push was performed.
+
+This is a browser/layout sanity check, not a screen-reader audit, a 200% zoom test,
+a participant session, service execution or proof that either illustrative repair
+works. Gate 1 remains IN PROGRESS and awaits explicit re-approval.
+
+## Previous gate status: historical through 2026-09-21
+
+The approval and slice records below retain their original scopes and evidence.
+Statements that work can continue or backtracks are closed describe that earlier
+state, not authority to bypass the current Gate 1 backtrack.
+
 - Gate 1 — Product: RE-APPROVED 2026-09-18 (first approved 2026-09-15; backtracked
   and revised the same day for two user-directed changes: the learner is explicitly
   cast as a junior applied AI engineer on shift with fictional clients, Bellwether
@@ -3030,6 +3133,10 @@ follow-up revision awaited explicit re-approval; the user approved it in chat on
 
 ## Approval history
 
+- Gate 1 - Product: BACKTRACKED to IN PROGRESS on 2026-09-24 at the user's
+  explicit request to revise the product around the final pivot. Prior Gate 1
+  approvals remain historical; this revision has NOT been re-approved. Later-gate
+  reconciliation is queued, not approved, and runtime implementation is paused.
 - Gate 4 - Vertical Slices follow-up revision: approved by the user in chat on
   2026-09-19 (Slice 7 leak-response invalidation; Slice 10 scoring-input alignment;
   the Slice 6 repair scope and the earlier 2026-09-19 reconciliation approval

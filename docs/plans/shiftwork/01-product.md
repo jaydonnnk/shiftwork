@@ -1,166 +1,243 @@
 # Product: Shiftwork
 
-**Gate state:** RE-APPROVED 2026-09-18. First approved 2026-09-15; backtracked and
-revised the same day for the explicit junior applied AI engineer role framing with
-Bellwether Books as the first client, and for the selected isometric
-operational-room visual direction for Slices 9 through 11. Approval covers this
-product definition and the six mockups; it is not a measured result or production
-capability.
+**Gate state:** IN PROGRESS, backtracked 2026-09-24 at the user's request to
+revise Gate 1 around `shiftwork_final_pivot.md`. Awaiting explicit re-approval.
+The approvals of 2026-09-15 and 2026-09-18 remain historical; they do not approve
+this revision. This document and its six static mockups describe proposed product
+behavior, not new implementation or evidence. Later gates require separate revision
+and approval before implementation resumes.
 
 ## Problem
 
-> "I can follow an AI tutorial and produce a demo, but I do not know whether I can
-> keep a real system dependable when its information, users and expectations change.
-> I want work that continues across sessions, makes me own the important decisions,
-> and shows whether one correction actually prevents the next mistake."
+Proposed learner need, not a participant quote:
 
-The proposed first learner has basic coding knowledge and wants applied-AI experience,
-not another sequence of disconnected lessons. Their work should persist long enough
-to accumulate decisions, incidents and consequences. The learner is cast explicitly
-as a **junior applied AI engineer on shift**, and the first engagement is maintaining
-a customer-information service for one fictional client, Bellwether Books.
+> I can follow an AI tutorial, but when the program fails I do not know which
+> explanation to trust, how to compare repairs fairly, or whether my chosen repair
+> will still make sense when conditions change.
 
-The role is fictional framing, not a credential. Employer proof is not part of the
-first product promise: holding the engineer title inside the simulation is never
-presented as job-readiness or employability evidence. The first question is whether
-persistent responsibility inside an explicit role improves learning and motivation
-compared with a strong ordinary tutorial.
+The learner knows basic coding and wants practice diagnosing and maintaining an
+actual AI program, not just completing prescribed fixes. They play a **junior
+applied AI engineer** responsible for a fictional client's service. Bellwether
+Books is the first client; the same service, decisions and unresolved incidents
+return across shifts.
 
-The role framing is also the scalability seam. One applied-AI-engineer engagement
-ships first. Later, additional emerging roles that people rarely see simulated
-(for example forward deployed engineer or GTM engineer) can become new engagement
-packs on the same shift loop. That expansion is out of shipped scope until the
-central mechanism survives its tests.
+The job is engineering judgment: explain a failure, try to disprove the explanation,
+compare real code changes and maintain the selected solution. The fictional role
+is not a credential, certification, job-readiness or employer-validation claim.
+The room makes the work understandable; it is not the reason the product is useful.
 
 ## Success metric
 
-**Retained north star, not a claim:** at least a **20 percentage-point increase
-in independently completed transfer tasks** against a matched static tutorial,
-without increasing the median time or hint budget.
+**Retained north star, not an achieved result:** at least a **20 percentage-point
+increase in independently completed transfer tasks** against a strong matched
+static tutorial, without increasing median time or the hint budget.
 
-No impact claim will be made unless a sufficiently powered study is run. The
-required sample size and the study's feasibility are decided at Gate 3, and the
-comparison remains a proof slice after Gate 4. The transfer task uses a new
-fictional business with new information and policies. Record which important
-decisions and repairs the learner made, whether generated patches caused success,
-and whether the learner voluntarily wants another engagement.
+Completion alone does not establish sound reasoning. The comparison must separately
+record whether the learner can:
 
-## Product decisions approved at Gate 1
+- link a suspected cause to the actual request, information, tool use and output;
+- name a result that would disprove that explanation and design a test for it;
+- compare eligible repairs under the same requirements and starting conditions;
+- justify a choice using completion, mistakes, human referrals, cost and delay;
+- explain what changed later without judging the original decision by hindsight.
 
-- The primary job is applied-AI-engineering education for people with basic coding
-  knowledge. The learner plays the role explicitly: a junior applied AI engineer on
-  shift serving fictional clients. The role is framing, not a credential; employer
-  validation is excluded.
-- The first engagement is one client, the Bellwether Books shop. The learner defines
-  what the service must never get wrong, what uncertainty looks like and when it
-  should decline an answer.
-- The learner's work persists across shifts. Later work inherits the same system,
-  decisions, incidents, unresolved limitations and transparent business state.
-- Customer outcomes must follow from what the learner's system actually did. The
-  product may explain a consequence, but it cannot invent one independently.
-- A correction becomes meaningful only when it prevents a related unseen failure.
-- The learner owns requirements, tradeoffs, examples and repair direction. Optional
-  AI assistance is visible, bounded and attributable; it must not silently finish
-  the important work.
-- Correctness stances and repairs are chosen from genuinely competing directions
-  with visible tradeoffs; nothing is preselected and no option is presented as the
-  obvious quiz answer.
-- Progress is shown through working service history, incidents resolved and limits
-  understood—not XP, pets, cosmetic building upgrades or a competence meter.
-- Orders, refunds, backlog and shop state are explicitly fictional scenario outcomes.
-  They are not presented as real revenue, trust or employer proof.
-- The first transfer case is a second client: the learner moves to the Northline
-  Bike Cooperative with less assistance and question families the bookshop did not
-  have, covering future commitments, safety escalation and a state-changing booking
-  that must survive request retries. It tests whether the learner re-derives
-  judgement rather than replays bookshop-specific answers.
-- Additional engineer roles are future scope only. Shipped scope is one role and two
-  client engagements; new roles require the central mechanism to survive its tests
-  first and then a new gate decision.
+Retain learner-authored explanations, visible tests, code changes and choices;
+distinguish optional assistance and accepted generated patches. Record voluntary
+return and whether the workflow feels like useful investigation or paperwork.
+Passing service tests alone is not a measure of diagnosis quality. A model's opinion
+is not authoritative evidence of learning.
 
-## Client visual direction selected after Gate 1
+A small manual mockup test is formative only. No learning-improvement claim is
+allowed without a sufficiently powered study. Rubric, sample size, repetition
+requirements and feasibility belong to the revised Gate 3, with execution planned
+at Gate 4 and outreach separately authorized. Existing study plans are not silently
+updated or treated as evidence for the pivot.
 
-On 2026-09-18 the user selected the fixed isometric operational-room composition
-in [`client-visual-direction.md`](client-visual-direction.md) as the Phase B visual
-target. This is a composition refinement, not a change to the approved product
-journey or authority split.
+## Product decisions proposed for re-approval
 
-- Bellwether Books appears as one persistent 3D-looking room with functional
-  stations: owner desk, service workbench, customer queue, evidence pipeline,
-  independent evaluator booth, incident and ledger wall, and repair bench.
-- The learner-owned service remains the visual centre. The room must expose the
-  causal chain from recorded customer request through service output and independent
-  comparison to a visibly synthetic ledger consequence.
-- The space is station-based, not a free-roam game. It adds no avatar progression,
-  XP, cosmetic upgrades or other substitute for working-system progress.
-- The same Bellwether room must visibly retain artifact and incident state on
-  return. The away shift keeps the spatial grammar but becomes a genuinely
-  different bike-cooperative workshop with a blank artifact and reduced help.
-- The supplied generated image is a reference for composition only. Its embedded
-  text is not approved copy or evidence.
+### S1. A continuing service, not a sequence of coding quizzes
+
+- Start Bellwether with an inspectable starter AI service and a concrete incident.
+  The learner owns subsequent code, tests, explanations and repair choices.
+- AI performs meaningful work inside the service, such as interpreting varied
+  requests and identifying the information needed. It is not merely a fictional
+  shopkeeper or an assistant telling the learner the answer.
+- Exact prices, stock and commitment rules must remain enforceable independently
+  of model confidence. Replacing unnecessary AI behavior with ordinary code is a
+  valid engineering choice, not a penalty.
+- Keep service versions, execution evidence, incidents, synthetic business history
+  and the operational-room interface. This is substantial steering, not a restart
+  or a cosmetic comparison screen.
+
+### S2. Explain and test before accepting a diagnosis
+
+- Show the customer's complete request, the service's recorded interpretation and
+  information/tool use, the records it consumed and its exact output.
+- Ask two short questions before diagnostic hints: "What do you think caused this?"
+  and "What result would show that explanation is wrong?" Let the learner choose a
+  distinguishing test. Do not demand polished prose or grade writing style.
+- Separate observations from explanations. Do not title the incident with an
+  unproven root cause or let a confident assistant settle it.
+- Preserve the original prediction and later correction. A passing repair does not
+  prove the proposed diagnosis, and changing one's explanation in response to
+  evidence is legitimate progress.
+- Offer basic orientation without supplying a diagnosis. Requested diagnostic
+  help and labelled patch proposals follow the initial learner prediction; record
+  their use. The learner chooses experiments and the final repair.
+
+### S3. Separate experiment, choose and operate
+
+| Activity | Learner action | Effect on ongoing history |
+| --- | --- | --- |
+| Experiment | Edit and test candidate repairs against comparable requests. | Keep experiment evidence, but do not create operational sales, resolve incidents or alter the inherited version. |
+| Choose | Explicitly select an eligible tested version and explain the tradeoff. | Bind that exact version and retain the alternative and reasoning; selection itself creates no business result. |
+| Operate | Run the chosen version against the shift's requests. | Record independently checked, explicitly synthetic consequences and carry them forward. |
+
+Saving, freezing or testing another candidate never silently replaces the chosen
+version. Before the first choice, identify the starter service as the operating
+version. If a candidate changes after testing, the older results do not establish
+that the changed version is eligible. Operational incidents remain open until
+operational evidence satisfies their resolution rule; an experimental pass cannot
+resolve them.
+
+### S4. Make a comparison fair and useful
+
+- Both candidates obey the same visible mandatory task, correctness and safety
+  requirements. Learner preferences can add constraints, not waive those rules.
+  Changing the contract requires a new comparison of both candidates.
+- Check whether the answer addresses the actual request, not merely whether it
+  contains true facts. Correctly quoting a price does not answer a collection query.
+- Match workloads, public information, starting business state, relevant model
+  settings and resource limits. State the intended difference between candidates;
+  label uncontrolled or incompatible results **Not comparable**.
+- Distinguish inspecting a recorded run from freshly executing changed code or AI
+  behavior. Replaying yesterday's output is not a measurement of a new repair.
+- Show repetition counts, individual trial outcomes and variation where fresh AI
+  execution matters. Do not select one lucky trial or silently discard failures.
+  Incomplete evidence is incomplete, not a pass; unavailable cost is not zero.
+- Reject mandatory correctness or safety failures before considering efficiency.
+  Compare useful answers, wrong answers, justified refusals and human referrals
+  separately, with the same denominator. Refusing everything is not success.
+- Show cost and delay alongside completion and mistakes, without an aggregate score
+  that hides forbidden behavior or automatically picks a winner.
+- Independent checks own assessment; neither learner code nor assistance may alter
+  expected answers, grading rules or promotion eligibility. Protected assessment
+  content remains unavailable to either actor. Product feedback must remain useful
+  without revealing protected answers.
+
+### S5. Make later consequences causal without hindsight grading
+
+- The next shift inherits the explicitly selected code, decision rationale, tests,
+  incidents and unresolved limits, not whichever file was saved last.
+- Introduce understandable changes such as a data update or unavailable dependency.
+  State known dependency risks during the original choice, but do not reveal future
+  protected requests or expected answers while repairing.
+- Assess the original decision against the requirements and evidence available at
+  that time. A later outage does not retroactively make a reasonable choice wrong.
+- Once a later condition has occurred, let the learner test the retained alternative
+  under that same condition as a separate experiment. Use comparable fresh trials
+  where needed, not replay dressed up as a measured alternative outcome.
+- The later experiment cannot rewrite the operational ledger, original choice or
+  incident history. Choosing a different operating version is a new explicit action.
+- Show the resulting difference and ask whether the tradeoff is still acceptable.
+  Narrative can explain an observed consequence, never substitute for execution.
+
+### S6. Keep the scope narrow
+
+One role and two fictional clients remain the product boundary: Bellwether first,
+then a reduced-assistance Northline Bike Cooperative engagement. The first proof
+should cover one complete Bellwether diagnosis, fair repair comparison, explicit
+choice and inherited consequence, including the retained alternative experiment.
+Northline tests fresh reasoning about future commitments, safety escalation and
+retry-safe bookings, not memorized bookshop answers. It starts with a blank learner
+artifact and a new brief, not copied bookshop solutions.
+
+No arbitrary personal projects, multi-agent teams, autonomy school, marketplaces,
+AI-generated challenges, automatic permission growth or extra careers. Additional
+roles remain future scope requiring a new decision. No XP, competence meters, pets
+or cosmetic upgrades as substitutes for engineering progress. Synthetic orders,
+refunds and backlog never establish real revenue, customer trust or learning impact.
+
+## Concrete Bellwether example
+
+**Illustration, not a measured run or an approved executable curriculum fixture.**
+
+A customer asks: "Can I collect the Salt Roads paperback tomorrow? If not, suggest
+something similar under £20." The service replies only that the paperback costs
+£18. That price may be supported while the requested collection and alternative
+questions remain unanswered. The learner inspects interpretation, selected tools,
+records and output to distinguish a routing problem from a data or response problem.
+
+A distinguishing experiment could provide current inventory information while
+holding the request and other conditions fixed. If the reply still gives only a
+price, stale information alone does not explain the failure. This is a testable
+prediction, not an assistant-declared diagnosis.
+
+Two repairs can both respect "never promise unconfirmed stock":
+
+- **A:** broad verification for every request. Simpler coverage and fewer ambiguous
+  cases referred to staff, but more calls, delay and dependence on inventory access.
+- **B:** request-specific verification with conservative referral for ambiguous
+  requests. Fewer calls and less delay, but more referrals and a routing boundary
+  the learner must maintain.
+
+Neither name denotes the right answer. Later, inventory access becomes unavailable.
+The learner sees the chosen version's observed consequences and compares the
+retained alternative separately. The original choice is judged using what was
+knowable then, not the later event.
+
+## Visual direction and screen journey
+
+Retain the selected fixed isometric operational room and station-based interaction
+in `client-visual-direction.md`. The service remains central; requests, inspected
+evidence and operational consequences stay linked. Add an unmistakable distinction
+between experiment results, a chosen version and actual operational history.
+
+The six plain HTML mockups are navigable storyboards, not a working service. Native
+inputs and disclosure controls illustrate interaction but do not save, test or
+select an operating version. Every sample run, number and later history is labelled
+illustrative. Three-trial examples show how variation could be displayed; they are
+not an approved trial count, measured benchmark or study design. Separate A/B
+history previews must not pretend to reflect an unsaved radio choice.
+
+| Screen | Product question and primary work |
+| --- | --- |
+| [Shift board](mockups/01-shift-board.html) | What service and unfinished responsibility am I inheriting? |
+| [Requirements](mockups/02-owner-brief.html) | What must both repairs satisfy, and which test and tradeoff matter to me? |
+| [Investigate](mockups/03-customer-shift.html) | What happened, what might explain it, and what test could disprove that explanation? |
+| [Compare and choose](mockups/04-incident-review.html) | Are these trials comparable and eligible, and which exact repair will I retain? |
+| [Next shift](mockups/05-inherited-shift.html) | What did my chosen version cause, and how does the retained alternative behave now? |
+| [Away shift](mockups/06-away-shift.html) | Can I apply the reasoning to new commitments and failure modes with less help? |
+
+Use the same room for Bellwether returns, a distinct Northline workshop, keyboard
+reachable stations and readable desktop/mobile evidence. Progressive disclosure
+should reduce initial load without hiding comparison validity or mandatory failures.
 
 ## Announcement: the blog post before the feature
 
-**Aspirational launch copy; these capabilities are not built or demonstrated.**
+**Aspirational launch copy; the revised workflow is not built or demonstrated.**
 
-Meet Shiftwork, an applied-AI learning world where your work does not disappear when
-the lesson ends. Clock in as a junior applied AI engineer. Your first client is a
-bookshop: decide what its customer-information service must get right, and watch the
-shop's customer requests expose the consequences of your choices. Fix an incident
-once, then return for a later shift that inherits your system, decisions and
-unresolved problems. When you are ready, take an away shift for a new client with
-less help and find out what you can actually transfer. This is a simulation, not a
-credential, and more engineering roles are planned as the world grows.
-
-## Screen journey
-
-The six journey steps share the operational-room shell. Each step activates a
-station and its authoritative work or evidence panel instead of replacing the
-product with an unrelated dashboard page.
-
-1. **Shift board:** see the learner-owned artifact before anything else: its
-   contract, visible checks, service logic and change log, plus the engineer's
-   responsibility that will survive later shifts.
-2. **Set the contract:** choose a correctness stance from competing tradeoffs,
-   fill the remaining boundaries and write one visible check before the shift.
-3. **Run the shift:** see the customer queue, the learner's exact sample output,
-   its supporting record and the complete output-to-ledger evidence chain.
-4. **Repair:** trace an incident back to the customer request, choose among
-   balanced repair directions and see where the learner changes the artifact.
-5. **Return:** restore the same learner-owned artifact and history while keeping
-   the later customer case and independent check hidden until the shift starts.
-6. **Away shift:** begin a blank bike-cooperative artifact with less assistance and
-   new reasoning about future commitments, safety escalation and retried actions.
-   Study design remains outside the learner-facing screen.
-
-## Screens
-
-- [`mockups/01-shift-board.html`](mockups/01-shift-board.html) — the active bookshop
-  responsibility and the learner-owned service workbench.
-- [`mockups/02-owner-brief.html`](mockups/02-owner-brief.html) — competing
-  correctness stances, editable boundaries and a learner-written visible check.
-- [`mockups/03-customer-shift.html`](mockups/03-customer-shift.html) — an illustrative
-  queue, exact service output and transparent output-to-ledger evidence chain.
-- [`mockups/04-incident-review.html`](mockups/04-incident-review.html) — linked
-  evidence, competing repair directions and the learner's repair workspace.
-- [`mockups/05-inherited-shift.html`](mockups/05-inherited-shift.html) — the restored
-  artifact and history, with the later case still sealed until execution.
-- [`mockups/06-away-shift.html`](mockups/06-away-shift.html) — a learner-facing,
-  reduced-assistance transfer brief without study-design language.
+Meet Shiftwork, a place to practice engineering judgment on a continuing AI service.
+As a junior applied AI engineer for a fictional bookshop, inspect what a customer
+asked and what your program actually did. Test your explanation, compare repairs
+fairly and choose the code you will maintain. Return when conditions change to see
+what your choice caused, then test whether the alternative would behave differently
+without rewriting history. Take what you can explain to a new client with less
+help. Your work persists; the role is a simulation, not a credential.
 
 ## Open product hypotheses and evidence questions
 
-1. Do target learners want continuing responsibility, or does persistence feel like
-   maintenance overhead added to a normal lab?
-2. Which bookshop decisions are important enough to belong to the learner without
-   turning the product into an expert-only developer console?
-3. What amount of optional assistance preserves momentum without destroying authorship?
-4. Can fictional business consequences feel meaningful while remaining visibly synthetic?
-5. Is a 20-point transfer target both ambitious and measurable with the participants
-   available before the deadline?
-6. Does the away shift test transferable judgement or merely repeat the same pattern
-   with renamed data?
-7. Is the bookshop strong enough to make learners voluntarily return for another shift?
+1. Does a short prediction change the learner's experiment, or become paperwork?
+2. Are competing explanations and repairs plausible enough to require judgment,
+   rather than an obvious "refresh the data" quiz?
+3. Can a beginner distinguish experiments, version selection and operational history?
+4. Can they distinguish safe refusal from useful completion and cite the tradeoff?
+5. Does the retained-alternative comparison teach anything beyond a saved project?
+6. Does the room help evidence comprehension rather than hide it?
+7. Does the integrated workflow improve on a strong course plus an existing debugger?
+8. Does Northline test fresh reasoning, and is the retained transfer target feasible?
 
-Track selection, technical architecture, execution environment, model choice,
-evaluation isolation and external services remain Gate 2 and Gate 3 decisions.
+The differentiation is a guided, connected workflow, not a proven exclusive category.
+Technology selection, execution isolation, credential protection, persistence
+mechanisms, evaluators and study methods belong to separately revised Gates 2 and 3;
+slice sequencing belongs to Gate 4. This revision authorizes none of them.

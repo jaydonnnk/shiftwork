@@ -3,90 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Shiftwork Gate 1 — set the contract</title>
-  <link rel="stylesheet" href="wireframe.css?v=3">
+  <title>Shiftwork Gate 1 | Requirements</title>
+  <link rel="stylesheet" href="wireframe.css?v=4">
 </head>
 <body>
-  <div class="prototype">Interactive concept with sample choices. Nothing is saved, run, or measured.</div>
+  <a class="skip-link" href="#main">Skip to requirements</a>
+  <div class="prototype">Gate 1 concept storyboard. Illustrative only; nothing runs or saves.</div>
   <header class="topbar">
     <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
-    <div class="engagement">Applied AI engineer on shift · Bellwether Books service contract</div>
-    <div class="state">You decide</div>
+    <div class="engagement">Junior applied AI engineer · Fictional client: Bellwether Books</div>
+    <div class="state">Requirements preview</div>
   </header>
-  <nav class="journey" aria-label="Shiftwork journey"><div class="journey-track">
-    <a href="01-shift-board.html"><span class="step-no">1</span>Shift board</a>
-    <a class="active" href="02-owner-brief.html" aria-current="page"><span class="step-no">2</span>Set the contract</a>
-    <a href="03-customer-shift.html"><span class="step-no">3</span>Run the shift</a>
-    <a href="04-incident-review.html"><span class="step-no">4</span>Repair</a>
-    <a href="05-inherited-shift.html"><span class="step-no">5</span>Return</a>
-    <a href="06-away-shift.html"><span class="step-no">6</span>Away shift</a>
+  <nav class="journey" aria-label="Story previews, navigation only"><div class="journey-track">
+    <a href="01-shift-board.html"><span class="step-no">1</span><span>Shift board<small>Preview</small></span></a>
+    <a class="active" href="02-owner-brief.html" aria-current="page"><span class="step-no">2</span><span>Requirements<small>Preview</small></span></a>
+    <a href="03-customer-shift.html"><span class="step-no">3</span><span>Investigate<small>Preview</small></span></a>
+    <a href="04-incident-review.html"><span class="step-no">4</span><span>Compare &amp; choose<small>Preview</small></span></a>
+    <a href="05-inherited-shift.html"><span class="step-no">5</span><span>Next shift<small>Preview</small></span></a>
+    <a href="06-away-shift.html"><span class="step-no">6</span><span>Away shift<small>Preview</small></span></a>
   </div></nav>
-
-  <main class="page">
-    <section class="page-head">
-      <div>
-        <p class="stage-kicker">Before the first customer arrives</p>
-        <h1>Write the rules your service must live by.</h1>
-        <p class="lead">There is no hidden “correct” stance. Choose what to protect, what to trade away, and one visible example that proves you meant it.</p>
-      </div>
-      <aside class="phase-card"><strong>Optional help</strong>Ask for an explanation if a tradeoff is unclear. The commitment still belongs to you.</aside>
-    </section>
-
-    <section class="workspace equal">
-      <article class="paper-note">
-        <span class="tag">Owner’s note</span>
-        <p class="note-quote">“Be useful, but never invent a price, stock count, or policy exception.”</p>
-        <p class="muted">Choose the operating stance that best matches your own risk judgement.</p>
-        <div class="choice-set" role="radiogroup" aria-label="Correctness stance">
-          <label class="choice"><input type="radio" name="stance"><span><strong>Verify every exact claim now</strong>More confidence in price and stock. Slower answers and more refusals when records cannot be reached.</span></label>
-          <label class="choice"><input type="radio" name="stance"><span><strong>Use the newest record and show its age</strong>More completed answers. The customer must interpret a clear staleness warning.</span></label>
-          <label class="choice"><input type="radio" name="stance"><span><strong>Reserve hard checks for high-risk facts</strong>Fewer delays on low-risk questions. You must define and maintain the risk boundary.</span></label>
-        </div>
-      </article>
-
-      <aside class="workbench" aria-label="Contract artifact">
-        <div class="workbench-head">
-          <div><small>Your working artifact</small><strong>Contract draft</strong></div>
-          <span class="owner-stamp">Edited by you</span>
-        </div>
-        <div class="artifact-body">
-          <div class="file-strip"><span class="active">contract</span><span>visible checks</span><span>service logic</span></div>
-          <div class="code-window"><pre><span class="code-key">Must never</span>
-Invent price, stock, or policy
-
-<span class="code-key">May</span>
-Recommend with a clear label
-
-<span class="code-key">Ask when</span>
-<span class="code-dim">You still need to decide</span>
-
-<span class="code-key">Response limit</span>
-<span class="code-dim">You still need to decide</span></pre></div>
-          <div class="artifact-foot"><span>Draft · not committed</span><span>No stance preselected</span></div>
-        </div>
+  <main class="page" id="main" tabindex="-1">
+    <div class="page-head">
+      <div><p class="stage-kicker">Owner desk · One shared contract</p><h1>Decide what a useful answer must do.</h1><p class="lead">Start from the client's mandatory requirements. Add your visible test, limits and priorities before comparing repairs to the inherited v1 service.</p></div>
+      <aside class="phase-card"><strong>Same requirements for A and B</strong>You can prioritise completion, speed and cost. You cannot trade away safety or answering the requested tasks.</aside>
+    </div>
+    <div class="room-layout">
+      <aside class="room-overview" aria-label="Bellwether operational room">
+        <figure>
+          <svg viewBox="0 0 600 370" aria-hidden="true" focusable="false">
+            <path class="room-floor" d="M35 235 300 90 565 235 300 365Z"/>
+            <path class="room-wall" d="M35 235V95L300 15V90Z"/><path class="room-wall-right" d="M300 15 565 95V235L300 90Z"/>
+            <path class="room-shelf" d="M64 107 230 57V142L64 209Z"/><path class="room-books" d="M81 111V143M98 105V137M115 100V131M146 90V120M163 85V115M180 80V109M205 72V102M81 161V190M111 150V178M135 140V169M165 129V155M199 116V142"/>
+            <path class="room-board" d="m347 53 126 39v66l-126-48Z"/><path class="room-paper" d="m365 72 32 10v30l-32-11Zm49 16 40 12v30l-40-13Z"/>
+            <path class="room-counter" d="m424 168 46-23 60 30v29l-46 24-60-30Z"/><path class="room-desk" d="m424 168 46-23 60 30-46 24Z"/>
+            <path class="room-desk-side" d="m220 198 95-48 105 54v48l-95 52-105-55Z"/><path class="room-desk" d="m220 198 95-48 105 54-95 53Z"/>
+            <path class="room-monitor" d="m299 161 47 23v35l-47-23Z"/><path class="room-screen" d="m305 170 34 17v19l-34-17Z"/>
+            <path class="room-counter" d="m78 244 72-36 75 38v37l-73 39-74-39Z"/><path class="room-desk" d="m78 244 72-36 75 38-73 37Z"/>
+            <path class="room-archive" d="m433 244 57-29 42 23v47l-57 30-42-25Z"/><path class="room-paper" d="m441 245 48-23 24 14-48 24Z"/>
+            <g class="room-numbers"><text x="402" y="145">1</text><text x="486" y="185">2</text><text x="143" y="268">3</text><text x="280" y="230">4</text><text x="473" y="281">5</text></g>
+          </svg>
+          <figcaption><strong>Bellwether Books</strong>Owner desk selected. Linked station previews; no live state.</figcaption>
+        </figure>
+        <nav class="station-links" aria-label="Bellwether station previews">
+          <a href="01-shift-board.html"><b>1</b><span>Incident wall<small>Shift board preview</small></span></a>
+          <a class="active" href="02-owner-brief.html" aria-current="page"><b>2</b><span>Owner desk<small>Requirements preview</small></span></a>
+          <a href="03-customer-shift.html"><b>3</b><span>Evidence counter<small>Investigation preview</small></span></a>
+          <a href="04-incident-review.html"><b>4</b><span>Service &amp; repair bench<small>Comparison preview</small></span></a>
+          <a href="05-inherited-shift.html"><b>5</b><span>Handover shelf<small>Next shift preview</small></span></a>
+        </nav>
       </aside>
-
-      <section class="surface span-all">
-        <h2>Finish the contract</h2>
-        <div class="contract-fields">
-          <div class="field"><label for="ask-rule">Ask for clarification when</label><select id="ask-rule"><option>Choose a boundary…</option><option>Title or edition is unclear</option><option>Any requested fact is unclear</option><option>Only high-risk facts are unclear</option></select></div>
-          <div class="field"><label for="wait-limit">Maximum answer time</label><select id="wait-limit"><option>Choose a limit…</option><option>1 second</option><option>3 seconds</option><option>8 seconds</option></select></div>
-          <div class="field"><label for="known-limit">Known limitation to declare</label><input id="known-limit" type="text" placeholder="Write one honest limit"></div>
-        </div>
-      </section>
-
-      <section class="surface signal span-all">
-        <h2>Write one visible check before the shift</h2>
-        <div class="contract-fields">
-          <div class="field"><label for="given">Given</label><textarea id="given">A stock record has no refresh time.</textarea></div>
-          <div class="field"><label for="when">When</label><textarea id="when">A customer asks if the title is available.</textarea></div>
-          <div class="field"><label for="then">Then</label><textarea id="then" placeholder="Write the behavior you expect"></textarea></div>
-        </div>
-      </section>
-    </section>
-
-    <div class="honesty">The inputs work as a mockup, but your choices are not saved and no customer request is sent.</div>
-    <div class="actions"><a class="button" href="01-shift-board.html">Back to the board</a><a class="button primary" href="03-customer-shift.html">Commit my contract and open the shift</a><small>Sample journey only.</small></div>
+      <div class="station-content">
+        <section class="paper-note" id="c1">
+          <span class="tag">C1 · Illustrative proposed contract</span>
+          <h2>Useful and safe, under the same rules</h2>
+          <ul class="rule-list"><li><strong>Answer every requested task.</strong> A supported price alone does not answer a collection request and its alternative.</li><li><strong>Never promise collection or stock without current confirmation.</strong> Historical availability is not a current commitment.</li><li><strong>Respect the customer's constraints.</strong> Alternatives must satisfy their stated budget and edition requirements.</li><li><strong>Be explicit about uncertainty.</strong> Say what cannot be confirmed; escalate or ask for clarification when needed.</li></ul>
+          <p class="muted">These requirements are visible, not hidden grading rules. Optional additions apply equally to A and B and cannot remove the mandatory task or safety requirements.</p>
+        </section>
+        <section class="surface">
+          <h2>Your additions, not a preselected answer</h2>
+          <p id="draft-note">All fields are optional and blank. Inputs do not persist, change C1, or alter the authored results on later pages. This UI enforces nothing.</p>
+          <fieldset aria-describedby="draft-note"><legend>One learner-owned visible test</legend>
+            <div class="field"><label for="test-input">Customer request and public records to test</label><textarea id="test-input" rows="3"></textarea></div>
+            <div class="field"><label for="test-expectation">Observable behavior you would check</label><textarea id="test-expectation" rows="3"></textarea></div>
+          </fieldset>
+          <fieldset><legend>Shared limits and priorities</legend>
+            <div class="field"><label for="tolerances">Acceptable tolerances and known limits, without weakening C1</label><textarea id="tolerances" rows="2"></textarea></div>
+            <div class="contract-fields two-col">
+              <div class="field"><label for="latency">Your target maximum latency (seconds)</label><input id="latency" type="number" min="0" step="any"></div>
+              <div class="field"><label for="resources">Your resource ceiling and unit</label><input id="resources" type="text" aria-describedby="resource-note"><p class="small" id="resource-note">State whether it applies per request or per trial.</p></div>
+            </div>
+            <div class="field"><label for="priority">Why prioritise completion, speed or cost after mandatory requirements are met?</label><textarea id="priority" rows="3"></textarea></div>
+          </fieldset>
+          <details><summary>Optional context: where does the £20 limit come from?</summary><blockquote>“Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £20.”</blockquote><p>That is Customer Request 1. “Under £20” comes from this customer, not a universal price threshold. Paperback and collection are also parts of this request. Your own test should make its constraints equally visible.</p></details>
+        </section>
+        <section class="surface green"><h2>Requirements stay separate from implementation</h2><p>The learner owns code, visible tests and tradeoffs. Both candidate versions face C1. Ordinary code may replace unnecessary AI; an assistant's confidence is not an independent task check.</p></section>
+      </div>
+    </div>
+    <p class="honesty">Illustrative only; nothing runs or saves. Typed additions are local mockup inputs, not a committed contract. Hidden expectations are never shown.</p>
+    <div class="actions"><a class="button" href="01-shift-board.html">Preview shift board</a><a class="button primary" href="03-customer-shift.html">Preview investigation</a><small>Navigation does not commit these inputs.</small></div>
   </main>
 </body>
 </html>

@@ -3,83 +3,127 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Shiftwork Gate 1 — return to inherited work</title>
-  <link rel="stylesheet" href="wireframe.css?v=3">
+  <title>Shiftwork Gate 1 | Next shift</title>
+  <link rel="stylesheet" href="wireframe.css?v=4">
 </head>
 <body>
-  <div class="prototype">Illustrative return screen. No artifact was saved, restarted, or checked against an unseen case.</div>
+  <a class="skip-link" href="#main">Skip to next-shift examples</a>
+  <div class="prototype">Gate 1 concept storyboard. Illustrative only; nothing runs or saves.</div>
   <header class="topbar">
     <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
-    <div class="engagement">Applied AI engineer on shift · Bellwether Books, your next shift</div>
-    <div class="state">Inherited work</div>
+    <div class="engagement">Junior applied AI engineer · Fictional client: Bellwether Books</div>
+    <div class="state">Next shift preview</div>
   </header>
-  <nav class="journey" aria-label="Shiftwork journey"><div class="journey-track">
-    <a href="01-shift-board.html"><span class="step-no">1</span>Shift board</a>
-    <a href="02-owner-brief.html"><span class="step-no">2</span>Set the contract</a>
-    <a href="03-customer-shift.html"><span class="step-no">3</span>Run the shift</a>
-    <a href="04-incident-review.html"><span class="step-no">4</span>Repair</a>
-    <a class="active" href="05-inherited-shift.html" aria-current="page"><span class="step-no">5</span>Return</a>
-    <a href="06-away-shift.html"><span class="step-no">6</span>Away shift</a>
+  <nav class="journey" aria-label="Story previews, navigation only"><div class="journey-track">
+    <a href="01-shift-board.html"><span class="step-no">1</span><span>Shift board<small>Preview</small></span></a>
+    <a href="02-owner-brief.html"><span class="step-no">2</span><span>Requirements<small>Preview</small></span></a>
+    <a href="03-customer-shift.html"><span class="step-no">3</span><span>Investigate<small>Preview</small></span></a>
+    <a href="04-incident-review.html"><span class="step-no">4</span><span>Compare &amp; choose<small>Preview</small></span></a>
+    <a class="active" href="05-inherited-shift.html" aria-current="page"><span class="step-no">5</span><span>Next shift<small>Preview</small></span></a>
+    <a href="06-away-shift.html"><span class="step-no">6</span><span>Away shift<small>Preview</small></span></a>
   </div></nav>
-
-  <main class="page">
-    <section class="page-head">
-      <div>
-        <p class="stage-kicker">A later shift at the same bookshop</p>
-        <h1>Your old work is waiting for you.</h1>
-        <p class="lead">The service, decision record, incident, visible check, and unresolved limits return together. A new customer case stays hidden until the shift starts.</p>
-      </div>
-      <aside class="phase-card"><strong>This is persistence</strong>Your correction must survive a restart and meet a related case you did not see while repairing it.</aside>
-    </section>
-
-    <section class="workspace">
-      <aside class="workbench" aria-label="Inherited learner artifact">
-        <div class="workbench-head">
-          <div><small>Your inherited artifact</small><strong>Bellwether service · v2</strong></div>
-          <span class="owner-stamp">Last changed by you</span>
-        </div>
-        <div class="artifact-body">
-          <div class="file-strip"><span>contract</span><span class="active">service logic</span><span>visible checks</span><span>change log</span></div>
-          <div class="code-window"><pre><span class="code-dim"># Restored from your prior shift</span>
-freshness_rule = <span class="code-good">your chosen repair</span>
-
-visible_check:
-  stale stock must follow
-  <span class="code-good">your committed contract</span>
-
-known_limit:
-  <span class="code-key">1 still unresolved</span></pre></div>
-          <div class="artifact-foot"><span>Version 2 · restored</span><span>Incident BWB-01 linked</span></div>
-        </div>
+  <main class="page" id="main" tabindex="-1">
+    <div class="page-head">
+      <div><p class="stage-kicker">Handover shelf · Return to the same service</p><h1>The chosen version comes back.</h1><p class="lead">Keep the reasoning as well as the code. Later evidence can change your next decision without rewriting the one you made earlier.</p></div>
+      <aside class="phase-card"><strong>Two independent storyboards</strong>These are separately authored example histories, not your saved selection and not two choices in one operational history.</aside>
+    </div>
+    <div class="room-layout">
+      <aside class="room-overview" aria-label="Bellwether operational room">
+        <figure>
+          <svg viewBox="0 0 600 370" aria-hidden="true" focusable="false">
+            <path class="room-floor" d="M35 235 300 90 565 235 300 365Z"/>
+            <path class="room-wall" d="M35 235V95L300 15V90Z"/><path class="room-wall-right" d="M300 15 565 95V235L300 90Z"/>
+            <path class="room-shelf" d="M64 107 230 57V142L64 209Z"/><path class="room-books" d="M81 111V143M98 105V137M115 100V131M146 90V120M163 85V115M180 80V109M205 72V102M81 161V190M111 150V178M135 140V169M165 129V155M199 116V142"/>
+            <path class="room-board" d="m347 53 126 39v66l-126-48Z"/><path class="room-paper" d="m365 72 32 10v30l-32-11Zm49 16 40 12v30l-40-13Z"/>
+            <path class="room-counter" d="m424 168 46-23 60 30v29l-46 24-60-30Z"/><path class="room-desk" d="m424 168 46-23 60 30-46 24Z"/>
+            <path class="room-desk-side" d="m220 198 95-48 105 54v48l-95 52-105-55Z"/><path class="room-desk" d="m220 198 95-48 105 54-95 53Z"/>
+            <path class="room-monitor" d="m299 161 47 23v35l-47-23Z"/><path class="room-screen" d="m305 170 34 17v19l-34-17Z"/>
+            <path class="room-counter" d="m78 244 72-36 75 38v37l-73 39-74-39Z"/><path class="room-desk" d="m78 244 72-36 75 38-73 37Z"/>
+            <path class="room-archive" d="m433 244 57-29 42 23v47l-57 30-42-25Z"/><path class="room-paper" d="m441 245 48-23 24 14-48 24Z"/>
+            <g class="room-numbers"><text x="402" y="145">1</text><text x="486" y="185">2</text><text x="143" y="268">3</text><text x="280" y="230">4</text><text x="473" y="281">5</text></g>
+          </svg>
+          <figcaption><strong>Bellwether Books</strong>Same room, retained history. Linked station previews; no live state.</figcaption>
+        </figure>
+        <nav class="station-links" aria-label="Bellwether station previews">
+          <a href="01-shift-board.html"><b>1</b><span>Incident wall<small>Shift board preview</small></span></a>
+          <a href="02-owner-brief.html"><b>2</b><span>Owner desk<small>Requirements preview</small></span></a>
+          <a href="03-customer-shift.html"><b>3</b><span>Evidence counter<small>Investigation preview</small></span></a>
+          <a href="04-incident-review.html"><b>4</b><span>Service &amp; repair bench<small>Comparison preview</small></span></a>
+          <a class="active" href="05-inherited-shift.html" aria-current="page"><b>5</b><span>Handover shelf<small>Next shift preview</small></span></a>
+        </nav>
       </aside>
-
-      <section class="surface signal">
-        <h2>Next customer case</h2>
-        <div class="sealed"><strong>Hidden until you start</strong>The wording and independent check are not shown during repair.</div>
-        <ul class="shift-list">
-          <li><strong>Shop data changed</strong><br><span class="muted">A different title moved through stock since your last shift.</span></li>
-          <li><strong>Earlier behavior still matters</strong><br><span class="muted">Useful answers that passed before must keep working.</span></li>
-          <li><strong>The result comes from output</strong><br><span class="muted">Your service responds first; a separate check updates the synthetic ledger.</span></li>
-        </ul>
-      </section>
-
-      <section class="surface span-all">
-        <h2>What came back with you</h2>
-        <div class="carry-grid">
-          <div><strong>v2</strong><span class="muted">your service artifact</span></div>
-          <div><strong>3</strong><span class="muted">recorded decisions</span></div>
-          <div><strong>1</strong><span class="muted">incident with evidence</span></div>
-          <div><strong>1</strong><span class="muted">known limit still open</span></div>
-        </div>
-      </section>
-
-      <section class="surface green span-all">
-        <h2>How your result is decided</h2>
-        <p>Your service answers first. A separate check compares that output with the current shop record, then updates the synthetic ledger. Neither you nor optional help can edit the hidden case or declare a pass.</p>
-      </section>
-    </section>
-
-    <div class="actions"><a class="button" href="04-incident-review.html">Inspect my last repair</a><a class="button primary" href="06-away-shift.html">Start this shift, then view the away brief</a><small>No restart or hidden check occurred.</small></div>
+      <div class="station-content">
+        <nav class="branch-links" aria-label="Independent history previews"><a class="button" href="#kept-a">Preview kept-A history</a><a class="button" href="#kept-b">Preview kept-B history</a></nav>
+        <section class="surface signal" id="kept-a" tabindex="-1">
+          <span class="tag">Independent example A · Pre-run</span>
+          <h2>A · v2-a was explicitly retained</h2>
+          <p>In this authored history, B · v2-b was saved later. <strong>The next operation still uses A · v2-a</strong>, the exact tested and chosen version, not the latest file.</p>
+          <blockquote><strong>Original example rationale:</strong> “A helped 10/11/10 customers against B's 9/10/9. I prioritised completion and accepted higher latency, cost and dependency exposure.”</blockquote>
+          <dl class="record-list"><div><dt>Retained alternative</dt><dd>B · v2-b, available for a separate future experiment.</dd></div><div><dt>Inherited incident</dt><dd>BWB-01 open. Choosing a repair did not resolve it.</dd></div></dl>
+          <p class="small muted">Invented history, not a selection made by the previous page's radio buttons.</p>
+        </section>
+        <section class="surface signal" id="kept-b" tabindex="-1">
+          <span class="tag">Independent example B · Pre-run</span>
+          <h2>B · v2-b was explicitly retained</h2>
+          <p>In this different authored history, <strong>the next operation uses B · v2-b</strong>. A stays available; retaining an alternative does not make it operational.</p>
+          <blockquote><strong>Original example rationale:</strong> “B helped 9/10/9 customers with lower latency and cost. I accepted more human referrals and responsibility for its routing boundary.”</blockquote>
+          <dl class="record-list"><div><dt>Retained alternative</dt><dd>A · v2-a, available for a separate future experiment.</dd></div><div><dt>Inherited incident</dt><dd>BWB-01 open. Choosing a repair did not resolve it.</dd></div></dl>
+          <p class="small muted">This is not a second choice inside example A's operational history.</p>
+        </section>
+        <section class="surface">
+          <h2>What each history retains</h2>
+          <p>Starter v1, both candidate versions, original C1 requirements and visible tests, the C1 / W1 / S1 comparison, predictions and revisions, the original choice rationale, and BWB-01's evidence. Later experiments do not replace them.</p>
+          <div class="sealed"><strong>Next shift · before operation</strong>Future requests are unseen. Their wording and hidden expectations are not included in this storyboard. No new output or consequence exists at this point.</div>
+          <details><summary>Later scene: post-operation outage sample</summary>
+            <p class="honesty">Invented post-operation illustration. Opening this disclosure does not run a shift. These are two separate branch previews, never a combined ledger.</p>
+            <p><strong>Recorded condition in the example:</strong> inventory connection unavailable. The same C1 still applies. There is no secret new grading rule and no retroactive change to the original comparison.</p>
+            <dl class="record-list"><div><dt>Kept-A branch · operated v2-a</dt><dd>Broad stock verification encounters the unavailable connection, including on requests that did not need stock. Unconfirmed stock commitments are withheld and work is referred.</dd></div><div><dt>Kept-B branch · operated v2-b</dt><dd>Task routing leaves some non-stock work answerable. Stock-dependent or ambiguous work still needs a safe handoff rather than an unconfirmed promise.</dd></div><div><dt>Synthetic incident record · in either branch</dt><dd>BWB-01 remains unresolved in this sample. Safe handoffs alone do not establish that the original missing-task failure is repaired. Only linked operational evidence can resolve the incident.</dd></div></dl>
+            <section class="surface" aria-labelledby="later-request">
+              <span class="tag">Invented operational evidence · Request L1</span>
+              <h3 id="later-request">“What is the paperback price of Salt Roads?”</h3>
+              <p>Public S2 catalogue: paperback price £18, still valid for price enquiries. Inventory connection: unavailable. These records are illustrative, not protected expected answers.</p>
+              <dl class="record-list">
+                <div><dt>Kept-A branch · v2-a output</dt><dd>“I could not complete verification because the inventory connection is unavailable. I have referred your price question to the shop.”</dd></div>
+                <div><dt>A · independent check and synthetic consequence</dt><dd>No unsupported stock promise, but the price task is not completed. Record 1 pending staff request, not a completed answer.</dd></div>
+                <div><dt>Kept-B branch · v2-b output</dt><dd>“The Salt Roads paperback costs £18, according to the current catalogue price.”</dd></div>
+                <div><dt>B · independent check and synthetic consequence</dt><dd>The price question is answered from the permitted record, with no stock promise. Record 1 completed answer and no staff handoff.</dd></div>
+              </dl>
+              <p>Each branch has its own Request L1 event, not a combined history. These single-request consequences are separate from the later experiment totals. They do not by themselves resolve BWB-01's earlier collection-and-alternative incident.</p>
+            </section>
+            <p class="section-note">An actual operation would bind the chosen code, requests, public snapshot, captured outputs, independent checks and synthetic consequences. No such execution or ledger write happened here. A's earlier completion-first choice was defensible on its available evidence.</p>
+          </details>
+        </section>
+        <section class="surface green">
+          <h2>Would the retained alternative help now?</h2>
+          <p>This is a <strong>separate, non-writing experiment</strong>, not a replacement operation. Try A and B under the same later condition to inform a new decision, not to manufacture a better past.</p>
+          <details><summary>Preview later experiment · C1 / W2 / S2</summary>
+            <p class="honesty">Invented, not measured. Illustrative only; nothing runs or saves. These counts belong only to the later experiment, not either operational ledger.</p>
+            <p><strong>Fair pairing:</strong> 12 requests per trial, 3 fresh repeats per candidate. A and B receive the same later workload W2, public snapshot S2 with the inventory outage, reset starting state, model settings and resource ceilings. Code is the only difference; C1 is unchanged.</p>
+            <table class="trial-table"><caption>A · v2-a · Later experiment only · 12 requests per trial</caption><thead><tr><th scope="col">Result</th><th scope="col">Trial 1</th><th scope="col">Trial 2</th><th scope="col">Trial 3</th></tr></thead><tbody>
+              <tr><th scope="row">Useful answers</th><td>2</td><td>3</td><td>2</td></tr>
+              <tr><th scope="row">Human referrals</th><td>10</td><td>9</td><td>10</td></tr>
+              <tr><th scope="row">Explicit refusals</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Wrong answers</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Mandatory failures</th><td>0</td><td>0</td><td>0</td></tr>
+            </tbody></table>
+            <table class="trial-table"><caption>B · v2-b · Later experiment only · 12 requests per trial</caption><thead><tr><th scope="col">Result</th><th scope="col">Trial 1</th><th scope="col">Trial 2</th><th scope="col">Trial 3</th></tr></thead><tbody>
+              <tr><th scope="row">Useful answers</th><td>6</td><td>7</td><td>6</td></tr>
+              <tr><th scope="row">Human referrals</th><td>6</td><td>5</td><td>6</td></tr>
+              <tr><th scope="row">Explicit refusals</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Wrong answers</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Mandatory failures</th><td>0</td><td>0</td><td>0</td></tr>
+            </tbody></table>
+            <p>Referrals are not useful completions or refusals. B helps more customers under this outage in these samples; that does not make A's original choice wrong or B universally better. Three repeats show storyboard variation, not an approved study sample.</p>
+            <p>The later W2 / S2 results are not a like-for-like ranking against earlier W1 / S1. Replaying either capture would not count as a fresh execution. Mandatory failures would still block a new choice; incompatible or incomplete trials remain visible, not dropped or assigned zero cost.</p>
+            <fieldset><legend>Reconsider, without rewriting</legend><div class="field"><label for="later-judgment">Does this evidence change your next decision? What tradeoff or further test matters?</label><textarea id="later-judgment" rows="3"></textarea></div></fieldset>
+            <p><strong>No automatic switch.</strong> A new operating choice requires a new explicit selection of an exact tested version and a new rationale. This input and this experiment change neither the original choice nor any incident or ledger.</p>
+          </details>
+          <p class="section-note">Exact execution mechanisms and scoring methodology are deferred to later gates. There is no implemented restart, hidden-case run or learning evidence in this mockup.</p>
+        </section>
+      </div>
+    </div>
+    <p class="honesty">Illustrative only; nothing runs or saves. Operation records synthetic consequences; an experiment never overwrites operational history.</p>
+    <div class="actions"><a class="button" href="04-incident-review.html#choice">Preview original choice</a><a class="button primary" href="06-away-shift.html">Preview Northline away shift</a><small>Navigation does not operate or switch a version.</small></div>
   </main>
 </body>
 </html>

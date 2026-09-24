@@ -539,3 +539,29 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   surfaces the crash as a status code so the removed guard fails with an
   assertion, never an incidental exception. Run the mutation row for every new
   guard before claiming it is covered.
+
+## 2026-09-24 Gate 1 preview: assumed WebSocket existed in the REPL
+
+- **What happened:** the browser verification setup raised `ReferenceError: WebSocket
+  is not defined` after launching its isolated Chrome process; no mockup test ran.
+- **Root cause:** the REPL's exposed globals were assumed to match the installed Node
+  executable used by the existing browser harness.
+- **Prevention rule:** check required globals in the actual execution context; use
+  the installed Node process for protocol transport when the REPL lacks WebSocket.
+  Reuse and close the already-started browser rather than leaving duplicate processes.
+
+## 2026-09-24 Gate 1 preview: assumed the allowlist was an array
+
+- **What happened:** resumed browser verification called `.filter` on a Set, stopping
+  the check before any page was tested. Converting it with `Array.from` repaired the harness.
+- **Root cause:** the resumed session relied on a variable name without checking its type.
+- **Prevention rule:** inspect persistent helper types before reusing them after context
+  recovery; do not infer collection methods from a summary.
+
+## 2026-09-24 Gate 1 preview: compared cross-context prototypes
+
+- **What happened:** `deepStrictEqual` rejected equal browser-result arrays in the
+  REPL before the choice checks ran; serialized value comparison passed.
+- **Root cause:** a value check also compared prototypes from different execution contexts.
+- **Prevention rule:** normalize browser protocol values before comparing nested data;
+  report harness failures separately from product failures.

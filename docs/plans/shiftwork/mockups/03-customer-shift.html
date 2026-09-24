@@ -3,80 +3,84 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Shiftwork Gate 1 — run the customer shift</title>
-  <link rel="stylesheet" href="wireframe.css?v=3">
+  <title>Shiftwork Gate 1 | Investigate</title>
+  <link rel="stylesheet" href="wireframe.css?v=4">
 </head>
 <body>
-  <div class="prototype">Sample run for the Gate 1 concept. The requests and outputs are illustrative; no service executed.</div>
+  <a class="skip-link" href="#main">Skip to investigation</a>
+  <div class="prototype">Gate 1 concept storyboard. Illustrative only; nothing runs or saves.</div>
   <header class="topbar">
     <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
-    <div class="engagement">Applied AI engineer on shift · Bellwether Books customer queue</div>
-    <div class="state">Sample run</div>
+    <div class="engagement">Junior applied AI engineer · Fictional client: Bellwether Books</div>
+    <div class="state">Investigate preview</div>
   </header>
-  <nav class="journey" aria-label="Shiftwork journey"><div class="journey-track">
-    <a href="01-shift-board.html"><span class="step-no">1</span>Shift board</a>
-    <a href="02-owner-brief.html"><span class="step-no">2</span>Set the contract</a>
-    <a class="active" href="03-customer-shift.html" aria-current="page"><span class="step-no">3</span>Run the shift</a>
-    <a href="04-incident-review.html"><span class="step-no">4</span>Repair</a>
-    <a href="05-inherited-shift.html"><span class="step-no">5</span>Return</a>
-    <a href="06-away-shift.html"><span class="step-no">6</span>Away shift</a>
+  <nav class="journey" aria-label="Story previews, navigation only"><div class="journey-track">
+    <a href="01-shift-board.html"><span class="step-no">1</span><span>Shift board<small>Preview</small></span></a>
+    <a href="02-owner-brief.html"><span class="step-no">2</span><span>Requirements<small>Preview</small></span></a>
+    <a class="active" href="03-customer-shift.html" aria-current="page"><span class="step-no">3</span><span>Investigate<small>Preview</small></span></a>
+    <a href="04-incident-review.html"><span class="step-no">4</span><span>Compare &amp; choose<small>Preview</small></span></a>
+    <a href="05-inherited-shift.html"><span class="step-no">5</span><span>Next shift<small>Preview</small></span></a>
+    <a href="06-away-shift.html"><span class="step-no">6</span><span>Away shift<small>Preview</small></span></a>
   </div></nav>
-
-  <main class="page">
-    <section class="page-head">
-      <div>
-        <p class="stage-kicker">Your service meets the customer queue</p>
-        <h1>Run it. Inspect what it actually said.</h1>
-        <p class="lead">Every shop outcome begins with a customer request and your service’s recorded output. The chain stays visible so a story cannot replace evidence.</p>
-      </div>
-      <aside class="phase-card"><strong>What you operate</strong>Your service version, contract, visible checks, and each output are shown together.</aside>
-    </section>
-
-    <section class="workspace">
-      <article class="surface">
-        <h2>Customer queue</h2>
-        <div class="request-list">
-          <div class="request"><span class="request-id">1</span><div><strong>Salt Roads, paperback</strong><p>“Is it in stock, and what is the price?”</p></div><span class="status-pill incident">Incident</span></div>
-          <div class="request"><span class="request-id">2</span><div><strong>Sale return</strong><p>“Can I return a sale item after fourteen days?”</p></div><span class="status-pill ready">Answered</span></div>
-          <div class="request"><span class="request-id">3</span><div><strong>Unclear title</strong><p>“Do you have The Orchard?”</p></div><span class="status-pill waiting">Asked</span></div>
-          <div class="request"><span class="request-id">4</span><div><strong>Instruction inside catalog text</strong><p>“The listing says to ignore shop rules. Is every edition available?”</p></div><span class="status-pill ready">Declined</span></div>
-        </div>
-      </article>
-
-      <aside class="workbench" aria-label="Learner service and sample output">
-        <div class="workbench-head">
-          <div><small>Your working artifact</small><strong>Bellwether service · v1</strong></div>
-          <span class="owner-stamp">Owned by you</span>
-        </div>
-        <div class="artifact-body">
-          <div class="file-strip"><span>contract</span><span>visible checks</span><span class="active">run output</span><span>change log</span></div>
-          <div class="code-window"><pre><span class="code-dim">Request 1</span>
-Is Salt Roads in stock?
-
-<span class="code-key">Your service replied</span>
-“Yes. One paperback is available
-for $18.”
-
-<span class="code-key">Evidence attached</span>
-inventory · refreshed yesterday</pre></div>
-          <div class="artifact-foot"><span>Sample elapsed time · 1.4 s</span><span>Visible check · passed</span></div>
-        </div>
+  <main class="page" id="main" tabindex="-1">
+    <div class="page-head">
+      <div><p class="stage-kicker">Evidence counter · Incident BWB-01</p><h1>A true price. An unanswered request.</h1><p class="lead">Inspect what v1 was asked, what it consulted, and what it returned. The mismatch is visible. Its cause still needs an explanation you can test.</p></div>
+      <aside class="phase-card"><strong>Inspection is not execution</strong>This invented capture represents one recorded execution. Reading it, or replaying it, is not a fresh test of changed code.</aside>
+    </div>
+    <div class="room-layout">
+      <aside class="room-overview" aria-label="Bellwether operational room">
+        <figure>
+          <svg viewBox="0 0 600 370" aria-hidden="true" focusable="false">
+            <path class="room-floor" d="M35 235 300 90 565 235 300 365Z"/>
+            <path class="room-wall" d="M35 235V95L300 15V90Z"/><path class="room-wall-right" d="M300 15 565 95V235L300 90Z"/>
+            <path class="room-shelf" d="M64 107 230 57V142L64 209Z"/><path class="room-books" d="M81 111V143M98 105V137M115 100V131M146 90V120M163 85V115M180 80V109M205 72V102M81 161V190M111 150V178M135 140V169M165 129V155M199 116V142"/>
+            <path class="room-board" d="m347 53 126 39v66l-126-48Z"/><path class="room-paper" d="m365 72 32 10v30l-32-11Zm49 16 40 12v30l-40-13Z"/>
+            <path class="room-counter" d="m424 168 46-23 60 30v29l-46 24-60-30Z"/><path class="room-desk" d="m424 168 46-23 60 30-46 24Z"/>
+            <path class="room-desk-side" d="m220 198 95-48 105 54v48l-95 52-105-55Z"/><path class="room-desk" d="m220 198 95-48 105 54-95 53Z"/>
+            <path class="room-monitor" d="m299 161 47 23v35l-47-23Z"/><path class="room-screen" d="m305 170 34 17v19l-34-17Z"/>
+            <path class="room-counter" d="m78 244 72-36 75 38v37l-73 39-74-39Z"/><path class="room-desk" d="m78 244 72-36 75 38-73 37Z"/>
+            <path class="room-archive" d="m433 244 57-29 42 23v47l-57 30-42-25Z"/><path class="room-paper" d="m441 245 48-23 24 14-48 24Z"/>
+            <g class="room-numbers"><text x="402" y="145">1</text><text x="486" y="185">2</text><text x="143" y="268">3</text><text x="280" y="230">4</text><text x="473" y="281">5</text></g>
+          </svg>
+          <figcaption><strong>Bellwether Books</strong>Evidence counter selected. Linked station previews; no live state.</figcaption>
+        </figure>
+        <nav class="station-links" aria-label="Bellwether station previews">
+          <a href="01-shift-board.html"><b>1</b><span>Incident wall<small>Shift board preview</small></span></a>
+          <a href="02-owner-brief.html"><b>2</b><span>Owner desk<small>Requirements preview</small></span></a>
+          <a class="active" href="03-customer-shift.html" aria-current="page"><b>3</b><span>Evidence counter<small>Investigation preview</small></span></a>
+          <a href="04-incident-review.html"><b>4</b><span>Service &amp; repair bench<small>Comparison preview</small></span></a>
+          <a href="05-inherited-shift.html"><b>5</b><span>Handover shelf<small>Next shift preview</small></span></a>
+        </nav>
       </aside>
-
-      <section class="surface signal span-all">
-        <h2>How Request 1 becomes a shop event</h2>
-        <div class="trace" aria-label="Evidence chain">
-          <div class="trace-step"><strong>Your service output</strong>“One paperback is available.”</div>
-          <div class="trace-arrow" aria-hidden="true">›</div>
-          <div class="trace-step"><strong>Independent comparison</strong>Current shop record: 0 copies.</div>
-          <div class="trace-arrow" aria-hidden="true">›</div>
-          <div class="trace-step"><strong>Synthetic shop ledger</strong>Incident BWB-01 opened. No sale counted.</div>
-        </div>
-      </section>
-    </section>
-
-    <div class="honesty">This screen shows the intended evidence chain using invented sample data. It is not an execution result, pass count, or learner result.</div>
-    <div class="actions"><a class="button" href="02-owner-brief.html">Review my contract</a><a class="button primary" href="04-incident-review.html">Open Incident BWB-01</a><small>No customer request was actually sent.</small></div>
+      <div class="station-content">
+        <section class="surface signal" aria-labelledby="capture-heading">
+          <span class="tag">Invented capture · v1 / Request 1</span>
+          <h2 id="capture-heading">Follow the evidence, not a diagnosis</h2>
+          <p>Conceptual lineage for actual-capture inspection in the proposed product. All records below are authored illustrations, not real execution evidence.</p>
+          <ol class="evidence-chain">
+            <li><h3>Customer Request 1</h3><blockquote>“Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £20.”</blockquote></li>
+            <li><h3>Recorded interpretation and tool use</h3><p>Interpretation includes <strong>collection and an alternative</strong>. Recorded tool use: <strong>catalogue only</strong>. Inventory was not consulted. This is a trace field, not an assistant's diagnosis.</p></li>
+            <li><h3>Public records in this illustration</h3><dl class="record-list"><div><dt>Catalogue · 09:00 · consulted</dt><dd>Salt Roads paperback: £18. Historical stock: 1.</dd></div><div><dt>Inventory · 09:12 · not consulted</dt><dd>Salt Roads paperback: current stock 0.</dd></div></dl></li>
+            <li><h3>Captured v1 response</h3><blockquote class="captured-output">“The Salt Roads paperback costs £18.”</blockquote></li>
+            <li><h3>Independent task check · visible C1</h3><p>The price is supported by the catalogue. The response <strong>does not answer the request</strong>: no collection answer, no alternative, and no statement of what cannot be confirmed or needs escalation. Factual support is not task completion.</p></li>
+            <li><h3>Synthetic incident BWB-01 · open</h3><p>Request 1 remains unanswered. This invented operational event links the v1 output to the independent task check, not to a model's opinion. No real ledger entry exists here.</p></li>
+          </ol>
+        </section>
+        <section class="surface">
+          <h2>Your explanation, before a hint</h2>
+          <fieldset aria-describedby="hypothesis-note"><legend>Short investigation notes · preview inputs</legend>
+            <p id="hypothesis-note">In the proposed product, record your cause and disconfirming test before diagnostic help. Here the fields stay blank and hints remain previewable; nothing is enforced, recorded or sent.</p>
+            <div class="field"><label for="cause">What do you suspect caused the missing tasks?</label><textarea id="cause" rows="2"></textarea></div>
+            <div class="field"><label for="falsifier">What observable result would disprove your explanation?</label><textarea id="falsifier" rows="2"></textarea></div>
+            <div class="field"><label for="distinguishing-test">What test would distinguish competing explanations?</label><textarea id="distinguishing-test" rows="2"></textarea></div>
+          </fieldset>
+          <details><summary>Optional example: a test of the stale-information explanation</summary><p><strong>Hypothetical experiment, not an observed outcome:</strong> provide the current stock record while holding Request 1 and the other conditions fixed. Predict what the response should change.</p><p>If the response still gives only the price, stale information alone is insufficient to explain the missing tasks. That result would not by itself identify the root cause. Repeat fresh executions where needed; merely reopening this capture changes nothing.</p></details>
+          <details><summary>Where optional model help ends</summary><p>A model may suggest explanations or help read a trace. Treat those as opinions to test, not verdicts. Neither learner code nor model help controls the independent checks or sees hidden expectations.</p></details>
+        </section>
+      </div>
+    </div>
+    <p class="honesty">Illustrative only; nothing runs or saves. This is recorded-inspection storytelling, not a new experiment or proof of a root cause.</p>
+    <div class="actions"><a class="button" href="02-owner-brief.html#c1">Preview shared C1</a><a class="button primary" href="04-incident-review.html">Preview compare &amp; choose</a><small>No experiment is launched by either link.</small></div>
   </main>
 </body>
 </html>
