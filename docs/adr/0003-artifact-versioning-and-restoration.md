@@ -86,3 +86,16 @@ to v5 upgrades add the column without inventing bytes for legacy rows) and
 `tests/orchestrator/test_run_binding.py` (unchanged binding). The 2026-09-20
 sentence "commits the run row, its batch and snapshot refs" remains true for the
 reservation transaction; the capture is the execution-time addition.
+
+Update 2026-09-25 (Slice 10): the live schema is now v6 and this ADR's decision
+body is unchanged. Two evidence pointers above move with it. First, the
+`shop_snapshot_bytes` column and its NULL legacy fallback are now v5 rows read
+under v6, not the current schema version. Second, the v2/v3/v4 upgrade tests in
+`tests/executor/test_conformance.py` no longer derive their old table shapes from
+the live `schema.sql`, because that file now carries v6 columns and the derived
+fixture inserted positional v5 rows into them. They read a frozen
+`tests/store/schema_v5.sql` snapshot instead, and their fragment-strip assertions
+are retained verbatim, so they still fail if the snapshot stops being an older
+shape. ADR 0005 owns the v6 additions (`opening_mode`, `operating_selections`,
+`experiments`, run purpose and evidence mode) and supersedes this file's
+latest-version inheritance semantics.

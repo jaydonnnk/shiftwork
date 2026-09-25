@@ -565,3 +565,42 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **Root cause:** a value check also compared prototypes from different execution contexts.
 - **Prevention rule:** normalize browser protocol values before comparing nested data;
   report harness failures separately from product failures.
+
+## 2026-09-25 Slice 10: fresh v6 schema broke historical migration fixture setup
+
+- **What happened:** three existing v2/v3 migration tests failed before migration
+  because their fixture derives old table shapes from the current `schema.sql`,
+  then inserts positional v5 rows into tables that now have v6 columns.
+- **Root cause:** I changed the fresh schema without checking that historical test
+  fixtures treated it as a template for older schema versions.
+- **Prevention rule:** when adding schema columns, find every fixture derived from
+  the live schema first. Pin historical fixtures to their actual old schema shape
+  and retain their original assertions before treating upgrade tests as green.
+
+## 2026-09-25 Slice 10: starter draft exposed a protected phrase
+
+- **What happened:** the first starter draft copied the Slice 8 repair-arc pre
+  artifact, and the serialized draft API contained text also present in a sealed
+  case note. The existing API leak scanner caught it; the starter was changed to
+  the safe three-file scaffold before completion.
+- **Root cause:** an internal trusted-fixture artifact was reused as public
+  learner-editable source without first scanning its serialized API projection.
+- **Prevention rule:** when seeding public draft/source material, run the serialized
+  leak scanner on GET and PUT surfaces before calling the starter safe.
+
+## 2026-09-25 Slice 10: reported a run state without its evidence mode
+
+- **What happened:** extending the migration demo to show the new-engagement
+  `STARTER_BASELINE`, the first version printed `starter_run_state: FINALIZED` on
+  its own. That reads as "the starter ran and worked". It did not run at all:
+  `config.EXECUTOR_ADAPTER` defaults to `recorded`, so the run replayed a pinned
+  transcript. The same starter under `executor="local_process"` fails closed as
+  `PROVISION_FAILED` because the scaffold is not in `TRUSTED_LOCAL_FIXTURES`.
+- **Root cause:** I treated a terminal run state as the whole claim and read the
+  demo's default adapter as the one I had been testing with, after my own repro had
+  explicitly passed `local_process`. Two different adapters, one label.
+- **Prevention rule:** never record or display a run's `state` as evidence without
+  its `adapter`, `evidence_mode` and `purpose` beside it. A FINALIZED recorded
+  replay proves the transcript is readable, not that any artifact executes. When a
+  result contradicts an earlier repro, isolate the differing parameter before
+  reasoning about either one.

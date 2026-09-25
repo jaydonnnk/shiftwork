@@ -3277,6 +3277,328 @@ render-fault rows were not re-run at merge time; their 2026-09-21 round evidence
 above stands. The 8009 preview was not consumed, stopped or otherwise touched by
 the merge.
 
+## Slice 10 implementation and verification: 2026-09-25
+
+**State: ACCEPTED by the user 2026-09-25**, who authorized committing and
+publishing to main. S10 is implemented and demonstrated on `shiftwork/slice-10`
+and merged to main by fast-forward; the exact commit range is added by the
+follow-up record after the merge. No install ran, no external service was called,
+the user's live database was not migrated, and S11 was not started. The one
+integrity question this verification raised was put to the user, decided on
+2026-09-25, and is resolved below.
+
+The post-slice cleanup scan ran before committing and found no orphans, dead
+fixtures, stray files or leftover scaffolding: all six new S10 files have
+referrers, every `demos/*.py` has referrers, no S10-touched file carries a
+TODO/FIXME, and the only untracked files are the six intended additions. Two
+notes were kept rather than deleted. `DrawState` at
+`shiftwork/orchestrator.py:33` is unused but is present at HEAD too, so it is
+pre-existing and out of S10 scope. `PROGRESS.md` is gitignored, untracked and
+Slice 8 era, so it cannot be committed. `tests/pivot_mutation_proofs.py` has no
+code referrers by design: it is a `python -m` evidence runner following the
+existing `tests/mutation_proofs.py` pattern. No linter is installed and installs
+are not authorized, so the unused-import scan ran on stdlib `ast`.
+
+### Named tests and full suite (verbatim)
+
+```
+$ .venv/Scripts/python.exe -m pytest tests/store/test_pivot_migration.py tests/api/test_pivot_routes.py -q
+16 passed, 2 warnings in 1.97s
+
+$ .venv/Scripts/python.exe -m pytest tests -q
+230 passed, 1 skipped, 2 warnings in 47.36s
+```
+
+That is the final run, taken after the preview resolution below. The run that
+first exposed the regression was `1 failed, 228 passed, 1 skipped`; the run after
+the deterministic atomicity test was added was `230 passed, 1 skipped, 2 warnings
+in 73.30s (0:01:13)`.
+
+The single skip is the pre-existing historical one, not an S10 artifact:
+`tests/executor/test_conformance.py:94`, "Test 29: tokenfactory conformance
+requires the real adapter and authorized sandbox access in Slice 14".
+
+Client checks, re-run because S10 edits `shiftwork/client/app.js`:
+`node --check shiftwork/client/app.js` exit 0;
+`node --test tests/client/evidence.test.mjs` 1 pass, 0 fail.
+
+### One real regression found, root-caused, not papered over
+
+The first full-suite run was **1 failed, 228 passed, 1 skipped**. The failure was
+`tests/api/test_client_preview.py::test_preview_uses_executed_slice8_fixture_in_an_isolated_database`,
+accepted Slice 9 work, raising `RuntimeError: Trusted preview fixture did not
+finalize: FAILED`.
+
+Baseline check: a throwaway `git worktree` at `f0a1e81` (pre-S10) ran that test to
+**1 passed**, so this was an S10 regression and not a historical test needing new
+setup. Cause, from the run row rather than inference: S10 changed `start_run` to
+execute the exact selected version, so the preview's run bound to `ver-0001`
+(the new `STARTER_BASELINE` scaffold) instead of the `ver-0002` repair-arc
+artifact the harness freezes. Under `executor="local_process"` that scaffold is
+not in `config.TRUSTED_LOCAL_FIXTURES`, so `local_process.py:81` fails it closed
+as `PROVISION_FAILED`.
+
+An interim fix was already in the tree when this review reached it:
+`demos/client.py` had gained `_record_preview_selection`, writing one
+`LEARNER_CHOICE` operating selection straight to the database so the preview
+operated the frozen repair-arc version again. It made the suite green, but it was
+not acceptable as shipped, and the user was asked rather than shown a green run.
+
+### Decided and resolved: the fabricated choice moved to the test layer
+
+The objection to the interim fix, recorded because the reasoning outlives the
+fix. It wrote `kind="LEARNER_CHOICE"`, `state="VALID"`, `comparison_id=NULL`,
+`prior_selection_id=<starter>`. `schema.sql` places no CHECK requiring a
+comparison for `LEARNER_CHOICE`, so the row was schema-valid and structurally
+indistinguishable from a real S17 choice; only a `rationale` string said
+otherwise. S10's own invariant is "no fictional selection", and
+`test_first_choice_prechoice_run_guard_is_controller_enforced` exists to prove
+the controller is the only writer, which made this a second one. It also
+pre-empted S17: once the real `POST /api/shifts/{id}/selections` lands, a shim
+like this becomes dead code that can mask whether the production path works. The
+distinction that decided it is that the slice's `select_version_for_test` conftest
+fixture does the same thing but is test-only, while this one lived in a shippable
+demo entry point (`python -m demos.client`).
+
+**User decision 2026-09-25: move it into the test layer.** Implemented as chosen:
+
+- `_record_preview_selection` is deleted. `demos/client.py` no longer imports
+  `canonical`, `OperatingSelection`, `db` or `repo`, and contains no writer of any
+  kind.
+- `create_preview` gained `selection_factory=None`, documented as a test-layer
+  hook. It runs the two operational attempts only when a factory is supplied.
+- `tests/api/test_client_preview.py` passes the existing `select_version_for_test`
+  fixture. All eight Slice 9 assertion lines are **byte-identical to HEAD**,
+  verified by diff; only the signature and setup changed. Nothing was skipped,
+  xfailed, deleted or weakened.
+
+Verified on the shipped path, `create_preview(path)` with no factory: the database
+holds exactly one selection, the product's own `('sel-0001', 'STARTER_BASELINE',
+'Existing Bellwether offline scaffold; not a qualified repair or live service.')`,
+**zero** runs, and two versions (`ver-0001` template, `ver-0002` learner). No
+`LEARNER_CHOICE` row exists anywhere outside a test.
+
+**Cost, stated plainly:** the shipped `python -m demos.client` preview no longer
+shows an executed run, which was its Slice 9 purpose. That is a real reduction and
+a direct consequence of S10's approved exact-selection semantics meeting a
+starter that is not a pinned trusted fixture. Its startup output now says so
+instead of implying otherwise. S11's reviewed failing starter and S17's selection
+route are what restore it; the test-layer hook is the seam to remove then.
+
+### A second finding: the atomicity proof was flaky, so it was replaced
+
+The spec requires "one atomic shift-open" and that every fault "fail a named
+assertion". The checked-in proof set had five rows covering the orchestrator
+guards and **none** covering the migration guards of obligations 1, 3 and 4.
+
+Probing each uncovered guard with the existing runner gave 7 of 8 `FAIL_CAUGHT`,
+but removing `BEGIN IMMEDIATE` from `open_next_shift` measured **6 `FAIL_CAUGHT`
+and 2 `NOT_CAUGHT` over 8 runs**: the concurrent-open assertion only detects the
+fault when the two requests actually overlap, and when it does detect it, it
+fails as an escaping `sqlite3.IntegrityError` rather than at an assertion. That
+violates the logged MISTAKES.md rule about asserting through a client that
+surfaces a crash as a status code. Reported as flaky, not treated as proof.
+
+Two fixes, both verified:
+
+- `_migrated_client` now builds its `TestClient` with
+  `raise_server_exceptions=False`, so a removed guard fails the named status-code
+  assertion instead of escaping as an incidental exception.
+- New `test_failed_first_shift_open_leaves_no_partial_state` faults the same
+  transaction **deterministically**: an engagement with no reviewed starter
+  raises at `orchestrator.py:207` after its shift row is inserted, so the
+  rollback guard is proved without a race. Its mutation
+  (`s10_partial_shift_open_committed`) is `FAIL_CAUGHT` 3 of 3 at `assert 1 == 0`.
+
+The concurrent-open test is kept as a behavior test but is **not** claimed as the
+atomicity proof. `tests/pivot_mutation_proofs.py` records that exclusion and the
+two incidental-only catches (dropping v5 from the upgrade list, dropping the
+`current == SCHEMA_VERSION` early return) in its docstring rather than listing
+them as proofs.
+
+### Mutation proof table (verbatim)
+
+```
+$ .venv/Scripts/python.exe -m tests.pivot_mutation_proofs
+s10_legacy_starter_insertion            FAIL_CAUGHT restored=True AssertionError: assert 1 == 0
+s10_legacy_shift_open_rejected          FAIL_CAUGHT restored=True AssertionError: assert 409 == 201
+s10_latest_saved_promoted_for_operation FAIL_CAUGHT restored=True AssertionError: assert 'ver-0002' == 'ver-0001'
+s10_legacy_run_guard_removed            FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError
+s10_legacy_close_guard_removed          FAIL_CAUGHT restored=True AssertionError: ...state":"closed"...
+s10_partial_shift_open_committed        FAIL_CAUGHT restored=True assert 1 == 0
+s10_caller_controls_opening_mode        FAIL_CAUGHT restored=True AssertionError: ...opening_mode":"STANDARD"...
+s10_unknown_schema_version_accepted     FAIL_CAUGHT restored=True Failed: DID NOT RAISE RuntimeError
+s10_migration_transaction_removed       FAIL_CAUGHT restored=True assert 'opening_mode' not in {...}
+s10_version_marker_not_written          FAIL_CAUGHT restored=True assert 5 == 6
+s10_rerun_reapplies_v6_ddl              FAIL_CAUGHT restored=True assert (sqlite3.Row...) == (sqlite3.Row...)
+s10_legacy_adapter_column_rewritten     FAIL_CAUGHT restored=True AssertionError: historical runs bytes changed
+s10_trusted_local_labelled_isolated_live FAIL_CAUGHT restored=True assert 'ISOLATED_LIVE' == 'TRUSTED_LOCAL'
+s10_tokenfactory_gains_evidence_mode    FAIL_CAUGHT restored=True assert 'RECORDED_INSPECTION' == None
+exit code 0
+```
+
+14 of 14 `FAIL_CAUGHT`, every target restored byte-identically (`sha256` asserted
+by the runner). `git diff --check` clean; `git status` after probing matched the
+pre-probe set plus this review's own edits.
+
+### Migration demo (verbatim, exit 0)
+
+`$ .venv/Scripts/python.exe -m demos.final_pivot --stage migration`
+
+```json
+{
+  "after_open": "NEEDS_FIRST_CHOICE",
+  "before_open": "NEEDS_FIRST_CHOICE",
+  "close_status": 409,
+  "historical_row_counts": {
+    "artifact_versions": 1, "check_results": 1, "draft_artifacts": 1,
+    "engagement_config": 1, "engagements": 1, "incidents": 1,
+    "ledger_events": 1, "rotation_draws": 1, "run_outputs": 1, "runs": 1,
+    "shifts": 1
+  },
+  "historical_rows_preserved": true,
+  "historical_serialized_sha256": "725dee166e6830834f9e0cdfc5a4737048607e8ab15fd50566fb4ce5a695351a",
+  "migration_rerun_noop": true,
+  "new_engagement_starter": {
+    "is_eligible_repair_evidence": false,
+    "opening_mode": "STANDARD",
+    "operating_status": "STARTER_BASELINE",
+    "selected_version_id": "ver-0001",
+    "selection_kind": "STARTER_BASELINE",
+    "starter_run_adapter": "recorded",
+    "starter_run_evidence_mode": "RECORDED_INSPECTION",
+    "starter_run_failure_kind": null,
+    "starter_run_purpose": "OPERATION",
+    "starter_run_state": "FINALIZED",
+    "starter_run_status_code": 202
+  },
+  "old_context": "unknown: original request and execution context bytes were not captured",
+  "old_run": {
+    "evidence_mode": "RECORDED_INSPECTION",
+    "ledger_hash": "607eff20031a4ff90e4a320b54b3970ea7b5e4c58ad0f39eafb3d42d0f5ea807",
+    "output_body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOltdLCJldmlkZW5jZV9yZWZzIjpbXX0=",
+    "purpose": "LEGACY_OPERATION"
+  },
+  "operation_status": 409,
+  "original_file_unchanged": true,
+  "schema_version": 6,
+  "selection": null,
+  "shift": {
+    "id": "bookshop-shift-02",
+    "opening_mode": "LEGACY_FIRST_CHOICE",
+    "operation_allowed": false
+  },
+  "source": "synthetic v5 sample; only a temporary copy migrated",
+  "stage": "migration"
+}
+```
+
+Its `limits` array, verbatim: recorded inspection and trusted local foundation
+only; no semantic replay or live AI execution; the new-engagement starter is a
+labelled baseline, not eligible repair evidence; the starter run above used the
+shipped default recorded adapter, so it replayed a pinned transcript and never
+executed the starter artifact, and its FINALIZED state is RECORDED_INSPECTION,
+not evidence that the starter works; under the local_process adapter the same
+starter fails closed as PROVISION_FAILED because the offline scaffold is not a
+pinned trusted fixture, and S11 supplies the reviewed failing starter; no
+selection route exists yet, so S10 cannot operate a frozen candidate and S17 owns
+the first valid explicit choice.
+
+Two demo gaps this review closed. The stage did not report the new-engagement
+`STARTER_BASELINE` result the exit contract names, and its first version of that
+addition printed `starter_run_state: FINALIZED` bare. That FINALIZED comes from
+`config.EXECUTOR_ADAPTER = "recorded"`, a transcript replay that never executes
+the artifact; reporting it without `adapter` and `evidence_mode` would have
+implied the starter works. Both fields are now printed, and the limits state the
+replay explicitly.
+
+The demo migrates a **synthetic** v5 sample in a temp directory and asserts the
+original file's sha256 is unchanged. It does not touch the user's live database.
+Its `migration_rerun_noop` flag is weaker than the test's: the demo re-calls
+`ensure_schema` and re-checks only `user_version`, while
+`test_v6_migration_is_atomic_and_idempotent` compares the whole `sqlite_master`
+projection and is the row `s10_rerun_reapplies_v6_ddl` proves failing-capable.
+
+### Room verification at a real URL
+
+Served from a migrated copy at **http://127.0.0.1:8010/** via
+`SHIFTWORK_DB_PATH=<temp copy> python -m uvicorn shiftwork.app:create_app
+--factory --host 127.0.0.1 --port 8010`. Server stopped and the temp database
+deleted afterward; port 8010 confirmed closed. Labels read from the live DOM in a
+real browser, not inferred from CSS or source:
+
+| Element | Observed text |
+| --- | --- |
+| `session-state` | `Shift 1 · needs first choice` |
+| `execution-note` | `Legacy operation · RECORDED_INSPECTION. Missing historical inputs remain unknown; old captures are not a fresh test. No live model or sandbox is established.` |
+| `service-tag` | `version-v5-0001 · candidate only` |
+| `version-state` | `version-v5-0001 · saved, not selected` |
+| `run-help` | `Operation is blocked. Compare qualifying repairs and explicitly choose an eligible tested version; saving or freezing a draft does not choose it.` |
+| `run-shift` button | `disabled = true` |
+| customer evidence, legacy output | `Historical public context unknown. The original output and checks remain available; current files cannot fill missing old inputs.` |
+
+Clicking Open shift in the room then produced `bookshop-shift-02` with
+`opening_mode: LEGACY_FIRST_CHOICE`, `operation_allowed: false`, state `open`,
+`operating_selection: null`, `operating_status: NEEDS_FIRST_CHOICE`, an
+inherited editable draft of five files, `session-state` `Shift 2 · needs first
+choice`, and `run-shift` still disabled.
+
+**Not visually screenshotted.** The in-app browser returned
+`NATIVE_BROWSER_VIEWPORT_UNAVAILABLE`, so there is no pixel evidence for the
+isometric room under S10. The verification above is DOM text and state read in a
+real browser at a real URL, which does evidence the label clauses but not layout,
+contrast or responsive behavior.
+
+### Stale client copy corrected
+
+S10 made four shipped room strings false: they promised contract authoring,
+visible-check scoring and repair authoring "arrive in Slice 10", and S10 delivers
+none of them. Changed to "not available in this build" in
+`shiftwork/client/app.js` (the `contract` empty state, the draft `checks` empty
+state, and the `owner` and `repair` station headers). No test pinned that copy.
+The two "Slice 11" strings were left alone because S11 has not run. Verified in
+the live DOM at 8010: owner and repair both render the new copy and
+`/arriv(e|es) in Slice 10/` matches nowhere on the page.
+
+### Historical fixture re-pinned, assertions retained
+
+The three v2/v3/v4 upgrade tests in `tests/executor/test_conformance.py` derived
+their old table shapes from the live `schema.sql`, so v6 columns made them insert
+positional v5 rows into v6 tables and fail before migrating. They now read a
+frozen `tests/store/schema_v5.sql` snapshot. Their fragment-strip assertions are
+retained verbatim, so they still fail if the snapshot stops being an older shape.
+This is the MISTAKES.md prevention rule applied, not a weakening.
+
+### ADR check
+
+`docs/adr/0003-artifact-versioning-and-restoration.md` gained a dated
+2026-09-25 update: its decision body is unchanged, but its `schema v5` wording
+and its evidence pointer to the conformance upgrade tests both moved, and ADR
+0005 owns the v6 additions. ADRs 0001, 0002 and 0005 need no change; 0005 already
+supersedes 0003's latest-version inheritance semantics, which is exactly what S10
+implemented. ADR 0004 remains reserved and untouched.
+
+### Remaining limits
+
+- No new task assessment, experiment, service AI or learner-code isolation.
+  Historical `tokenfactory` labels gained no new proof; the migrated
+  `tokenfactory` row keeps `evidence_mode = NULL`, proven failing-capable by
+  `s10_tokenfactory_gains_evidence_mode`.
+- A fresh engagement's `STARTER_BASELINE` cannot execute under `local_process`
+  and only replays under the default `recorded` adapter. S10 therefore leaves a
+  new learner unable to operate anything meaningful until S11 supplies the
+  reviewed failing starter, and unable to select anything until S17.
+- The shipped `python -m demos.client` preview consequently shows no executed run,
+  which was its Slice 9 purpose. Only the test layer installs that precondition
+  now. Restore the shipped demo when S11 and S17 land, and delete the
+  `selection_factory` hook at the same time.
+- The legacy replay `UNKNOWN_MISSING_INPUTS` assertion still completes at S19.
+- The closed-v5-no-source-run bootstrap stays unreserved; S13 owns its public-only
+  budget and investigation linkage.
+- Concurrent-open detection is timing-dependent and is not claimed as proof.
+- Isolation and leakage surfaces were not re-probed by this review; the Slice 6
+  re-review evidence stands on its own and S10 did not touch the sealed loader.
+
 ## Gate 2 re-approval and Gate 3 revision: 2026-09-19
 
 The user explicitly approved the scoped Gate 2 revision and instructed proceeding
