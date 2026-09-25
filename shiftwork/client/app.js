@@ -84,7 +84,8 @@ function renderBoard() {
   const board = state.board;
   const version = board.latest_version;
   const shift = board.latest_shift;
-  text('session-state', shift ? `Shift ${shift.seq} · ${shift.state}` : 'Ready for your first shift');
+  const needsChoice = board.operating_status === 'NEEDS_FIRST_CHOICE';
+  text('session-state', shift ? `Shift ${shift.seq} · ${needsChoice ? 'needs first choice' : shift.state}` : needsChoice ? 'Needs first choice' : 'Ready for your first shift');
   text('shift-number', shift ? `Shift ${String(shift.seq).padStart(2, '0')}` : 'Not started');
   text('metric-requests', board.requests_run);
   text('metric-incidents', board.incidents.length);
@@ -94,14 +95,16 @@ function renderBoard() {
   text('evidence-attempts', `${board.attempts_remaining} attempt${board.attempts_remaining === 1 ? '' : 's'} remaining in the current shift · ${board.attempts_used} of ${board.attempt_limit} used`);
   document.querySelector('[data-station="repair"]').setAttribute('aria-disabled', String(!board.incidents.length));
   text('event-detail', `${board.ledger_event_count} recorded events`);
-  text('service-tag', version ? `${version.id} · yours` : 'Draft · not frozen');
+  text('service-tag', version ? `${version.id} · ${needsChoice ? 'candidate only' : 'selected baseline'}` : 'Draft · not frozen');
   text('queue-tag', `${state.outputs.length} executed requests`);
   text('incident-tag', `${board.incidents.length} unresolved · Synthetic scenario`);
   text('repair-tag', board.incidents.length ? 'Incident available · read only' : 'No unresolved incident');
-  text('version-state', version ? `${version.id} · frozen` : 'Draft · no frozen version');
+  text('version-state', version ? `${version.id} · ${needsChoice ? 'saved, not selected' : 'frozen'}` : 'Draft · no frozen version');
   text('version-hash', version ? `Content hash ${version.content_hash}` : '');
   const adapter = state.run?.adapter;
-  text('execution-note', adapter === 'local_process'
+  text('execution-note', state.run?.purpose === 'LEGACY_OPERATION'
+    ? `Legacy operation · ${state.run.evidence_mode ?? 'evidence mode unknown'}. Missing historical inputs remain unknown; old captures are not a fresh test. No live model or sandbox is established.`
+    : adapter === 'local_process'
     ? 'Offline trusted-fixture execution. Not hostile-code isolation. No live model or sandbox. The simulated role is not a credential.'
     : adapter === 'recorded' ? 'Recorded replay: captured bytes, not execution of your current artifact. No live model or sandbox. The simulated role is not a credential.'
     : 'Offline client. No live model or sandbox connection. The simulated role is not a credential.');
@@ -136,12 +139,13 @@ function renderBoard() {
     return row;
   }));
   $('open-shift').disabled = state.pending || shift?.state === 'open';
-  $('run-shift').disabled = state.pending || !version || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run);
-  text('run-help', !version ? 'Contract authoring and freezing arrive in Slice 10. This view does not choose a contract for you.'
+  $('run-shift').disabled = state.pending || !version || !shift?.operation_allowed || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run);
+  text('run-help', needsChoice ? 'Operation is blocked. Compare qualifying repairs and explicitly choose an eligible tested version; saving or freezing a draft does not choose it.'
+    : !version ? 'No frozen version is available to operate.'
     : !terminal(board.latest_run) ? 'Your run is in progress. Results appear only after the controller records them.'
     : shift?.state !== 'open' ? 'This shift is closed. Its recorded evidence stays available.'
     : board.attempts_remaining === 0 ? 'Attempt budget exhausted. The controller will not accept another run.'
-    : 'Runs the frozen version. A started attempt consumes one reservation, even if it fails.');
+    : 'Runs the selected version. A started attempt consumes one reservation, even if it fails.');
   renderArtifact();
 }
 
@@ -152,10 +156,10 @@ function renderArtifact() {
   target.replaceChildren();
   if (state.file === 'contract') {
     const contract = state.board.latest_version?.contract;
-    if (!contract) return empty(target, 'No committed contract. Authoring arrives in Slice 10; no stance is preselected.');
+    if (!contract) return empty(target, 'No committed contract. Authoring is not available in this build; no stance is preselected.');
     for (const [label, value] of [
       ['Committed constraint', contract.must_never.map(humanize).join(', ')],
-      ['Your operating stance', Object.values(contract.selections).map(humanize).join(', ')],
+      [state.board.operating_status === 'NEEDS_FIRST_CHOICE' ? 'Saved candidate stance' : 'Operating stance', Object.values(contract.selections).map(humanize).join(', ')],
       ['Response time limit', `${contract.response_time_limit_ms} ms`],
       ['Contract catalog', `Version ${contract.catalog_version}`],
     ]) {
@@ -173,7 +177,7 @@ function renderArtifact() {
     }
   } else {
     const name = state.file === 'checks' ? 'checks.json' : 'change_log.md';
-    target.append(element('p', state.file === 'checks' ? 'Current draft checks. Visible-check scoring arrives in Slice 10.' : 'Current draft change log. Decisions are not inferred from saves or runs.', 'empty'));
+    target.append(element('p', state.file === 'checks' ? 'Current draft checks. Visible-check scoring is not available in this build.' : 'Current draft change log. Decisions are not inferred from saves or runs.', 'empty'));
     target.append(files[name] ? element('pre', files[name]) : element('p', `No ${name} file in the draft.`, 'empty'));
   }
 }
@@ -233,7 +237,9 @@ function renderCustomers() {
     const source = element('details');
     source.append(element('summary', 'Inspect the public record'), element('pre', JSON.stringify(publicRecord, null, 2)));
     record.append(source, element('p', `Public record ${output.public_shop_record_ref}\nRun snapshot ${output.public_shop_snapshot_hash}`, 'evidence-meta'));
-  } else record.append(element('p', 'No public comparison record. Sealed expectations are not shown.', 'empty'));
+  } else record.append(element('p', run.purpose === 'LEGACY_OPERATION'
+    ? 'Historical public context unknown. The original output and checks remain available; current files cannot fill missing old inputs.'
+    : 'No public comparison record. Sealed expectations are not shown.', 'empty'));
   const comparison = evidenceStep(4, 'Independent check result');
   const linked = selectEvidence(output, state.checks, state.events);
   if (!linked.checks.length) comparison.append(element('p', 'No independent result recorded for this output.', 'empty'));
@@ -256,11 +262,11 @@ function renderCustomers() {
 
 const stations = {
   service: ['Service workbench', 'YOUR WORKING ARTIFACT', 'Your version, contract and files belong to you. Independent scoring stays separate.'],
-  owner: ['Committed contract', 'OWNER DESK', 'Inspect your committed contract. Contract editing and visible-check authoring arrive in Slice 10.'],
+  owner: ['Committed contract', 'OWNER DESK', 'Inspect your committed contract. Contract editing and visible-check authoring are not available in this build.'],
   customers: ['Customer evidence', 'FOLLOW AN EXECUTED REQUEST', 'Select a customer. Every output, public record, check and event below belongs to that request.'],
   pipeline: ['Evidence trail', 'OUTPUT → CHECK → LEDGER', 'This path traces recorded evidence, not a prediction of success.'],
   ledger: ['Incident & ledger wall', 'RECORDED CONSEQUENCES', 'Synthetic scenario. Select an incident to inspect the output and result that opened it.'],
-  repair: ['Repair review', 'REPAIR BENCH · READ ONLY', 'Inspect an actual incident below. Repair authoring and rerunning a new version arrive in Slice 10.'],
+  repair: ['Repair review', 'REPAIR BENCH · READ ONLY', 'Inspect an actual incident below. Repair authoring and rerunning a new version are not available in this build.'],
   evaluator: ['Independent evaluator', 'LOCKED · NOT EDITABLE', 'Neither the learner nor an assistant can edit the scoring rules or see sealed expected values.'],
 };
 function bringStationPanelIntoReach() {
@@ -292,7 +298,7 @@ function activateStation(name, userIntent = true) {
     text('deferred-copy', 'The controller scores captured service outputs against independent checks. You can inspect recorded results at the customer queue, but this booth has no editing controls and never displays sealed expected values.');
   }
   if (name === 'owner') { state.file = 'contract'; selectFile('contract'); }
-  if (state.board) text('service-tag', state.board.latest_version ? `${state.board.latest_version.id} · yours` : 'Draft · not frozen');
+  if (state.board) text('service-tag', state.board.latest_version ? `${state.board.latest_version.id} · ${state.board.operating_status === 'NEEDS_FIRST_CHOICE' ? 'candidate only' : 'selected baseline'}` : 'Draft · not frozen');
   renderCustomers();
   const view = name === 'owner' ? 'contract' : name === 'repair' ? 'repair' : ['customers', 'pipeline', 'evaluator'].includes(name) ? 'customers' : 'board';
   state.view = view;
