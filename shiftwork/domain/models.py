@@ -27,6 +27,23 @@ class RunState(StrEnum):
     FAILED = "FAILED"
 
 
+class RunPurpose(StrEnum):
+    EXPERIMENT = "EXPERIMENT"
+    OPERATION = "OPERATION"
+    LEGACY_OPERATION = "LEGACY_OPERATION"
+
+
+class EvidenceMode(StrEnum):
+    RECORDED_INSPECTION = "RECORDED_INSPECTION"
+    TRUSTED_LOCAL = "TRUSTED_LOCAL"
+    ISOLATED_LIVE = "ISOLATED_LIVE"
+
+
+class ShiftOpeningMode(StrEnum):
+    STANDARD = "STANDARD"
+    LEGACY_FIRST_CHOICE = "LEGACY_FIRST_CHOICE"
+
+
 class DrawState(StrEnum):
     """Rotation-draw lifecycle. A compromised group is retired by this state change,
     never by deletion (ADR 0001); a refill cannot clear it (program design S7.1)."""
@@ -160,6 +177,8 @@ class Shift(BaseModel):
     state: Literal["open", "closed"]
     opened_at: datetime
     closed_at: datetime | None = None
+    opening_mode: ShiftOpeningMode | None = None
+    operation_allowed: bool = False
 
 
 class ArtifactVersion(BaseModel):
@@ -198,6 +217,28 @@ class Run(BaseModel):
     failure_kind: ExecutorFailure | None = None
     started_at: datetime
     ended_at: datetime | None = None
+    purpose: RunPurpose = RunPurpose.OPERATION
+    evidence_mode: EvidenceMode | None = None
+    selection_id: Id | None = None
+
+
+class OperatingSelection(BaseModel):
+    model_config = _FROZEN
+
+    id: Id
+    engagement_slug: Slug
+    shift_id: Id
+    kind: Literal["STARTER_BASELINE", "LEARNER_CHOICE"]
+    selected_version_id: Id
+    selected_content_hash: str
+    comparison_id: Id | None = None
+    retained_alternative_version_id: Id | None = None
+    rationale: str
+    requirement_set_hash: str
+    prior_selection_id: Id | None = None
+    state: Literal["VALID", "INVALIDATED"]
+    client_request_id: str
+    created_at: datetime
 
 
 class RunOutput(BaseModel):

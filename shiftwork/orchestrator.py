@@ -36,18 +36,22 @@ from shiftwork.domain.models import (
     CloseShiftFacts,
     ContractParams,
     DrawState,
+    EvidenceMode,
     ExecutorFailure,
     Incident,
     IncidentState,
     JsonValue,
     LedgerEventDraft,
     LedgerEventType,
+    OperatingSelection,
     RotationDraw,
     Run,
     RunOutput,
+    RunPurpose,
     RunState,
     ServiceResponse,
     Shift,
+    ShiftOpeningMode,
 )
 from shiftwork.evaluator import evaluator
 from shiftwork.executor import base as executor
@@ -90,6 +94,24 @@ def _require_open_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
     if shift.state != "open":
         raise LifecycleError("conflict", f"shift is closed: {shift_id}")
     return shift
+
+
+def _selected_operating_version(
+    conn: sqlite3.Connection, shift: Shift
+) -> tuple[OperatingSelection, ArtifactVersion]:
+    selection = repo.get_latest_operating_selection(conn, shift.engagement_slug)
+    if selection is None or selection.state != "VALID":
+        raise LifecycleError("conflict", "explicit valid selection required before operation")
+    version = repo.get_version(conn, selection.selected_version_id)
+    owner = repo.get_shift(conn, version.shift_id) if version else None
+    if (
+        version is None
+        or owner is None
+        or owner.engagement_slug != shift.engagement_slug
+        or version.content_hash != selection.selected_content_hash
+    ):
+        raise LifecycleError("conflict", "selected version is missing or changed")
+    return selection, version
 
 
 def _attempt_limit(conn: sqlite3.Connection, slug: str) -> int:
@@ -145,34 +167,109 @@ def _adapter_for(run: Run, snapshot_bytes: bytes) -> executor.ExecutorAdapter | 
 
 
 def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -> Shift:
-    """Open the next shift, seeded from the engagement's inheritance (S5.1).
+    """Open a selected shift or a non-operational first-choice shift atomically."""
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        if repo.get_engagement(conn, slug) is None:
+            raise LifecycleError("not_found", f"unknown engagement: {slug}")
+        current = repo.get_latest_shift(conn, slug)
+        if current is not None and current.state == "open":
+            raise LifecycleError("conflict", f"shift {current.id} is still open; close it first")
+        selection = repo.get_latest_operating_selection(conn, slug)
+        if selection is not None and selection.state != "VALID":
+            raise LifecycleError("conflict", "operating selection is invalidated")
 
-    The seed is the latest artifact version: its files become the new draft, so
-    the learner continues from the inherited artifact (the shipped template
-    applies only when no version exists yet). Unresolved incidents (OPEN and
-    CLOSED_UNRESOLVED), declared limits and the ledger summary are engagement
-    rows read live by the board, so they carry forward without a copy. A shift
-    that is still open refuses a second open with a conflict.
-    """
-    if repo.get_engagement(conn, slug) is None:
-        raise LifecycleError("not_found", f"unknown engagement: {slug}")
-    current = repo.get_latest_shift(conn, slug)
-    if current is not None and current.state == "open":
-        raise LifecycleError("conflict", f"shift {current.id} is still open; close it first")
-    seq = repo.max_shift_seq(conn, slug) + 1
-    shift = Shift(
-        id=f"{slug}-shift-{seq:02d}",
-        engagement_slug=slug,
-        seq=seq,
-        state="open",
-        opened_at=_now(),
-    )
-    repo.insert_shift(conn, shift)
-    inherited = repo.get_latest_version_for_engagement(conn, slug)
-    files = dict(inherited.files) if inherited is not None else BOOKSHOP_DRAFT_FILES
-    repo.upsert_draft(conn, shift.id, files, shift.opened_at)
-    conn.commit()
-    return shift
+        seq = repo.max_shift_seq(conn, slug) + 1
+        is_first_shift = current is None
+        if is_first_shift and selection is not None:
+            raise LifecycleError("conflict", "starter selection has no owning shift")
+        is_legacy_first_choice = (
+            current is not None and current.opening_mode is None and selection is None
+        )
+        if not is_first_shift and not is_legacy_first_choice and selection is None:
+            raise LifecycleError("conflict", "an explicit operating selection is required")
+        shift = Shift(
+            id=f"{slug}-shift-{seq:02d}",
+            engagement_slug=slug,
+            seq=seq,
+            state="open",
+            opened_at=_now(),
+            opening_mode=(
+                ShiftOpeningMode.LEGACY_FIRST_CHOICE
+                if is_legacy_first_choice
+                else ShiftOpeningMode.STANDARD
+            ),
+        )
+        repo.insert_shift(conn, shift)
+
+        if is_first_shift:
+            if slug != config.BOOKSHOP_SLUG:
+                raise LifecycleError("conflict", "reviewed initial starter is unavailable")
+            # The existing public scaffold is safe to expose as an editable draft.
+            # It is not the future Bellwether pivot failure fixture.
+            files = dict(BOOKSHOP_DRAFT_FILES)
+            contract = ContractParams.model_validate(config.REPAIR_ARC_CONTRACT_JSON)
+            catalog = contract_catalog.load_catalog(slug, contract.catalog_version)
+            contract_catalog.validate_contract(catalog, contract)
+            content_hash = canonical.artifact_content_hash(
+                files, canonical.contract_params_json(contract), catalog.content_hash
+            )
+            starter = ArtifactVersion(
+                id=f"ver-{repo.count_versions(conn) + 1:04d}",
+                shift_id=shift.id,
+                parent_id=None,
+                content_hash=content_hash,
+                storage_ref=f"inline:{content_hash}",
+                files=dict(files),
+                contract=contract,
+                contract_catalog_hash=catalog.content_hash,
+                created_by="template",
+                created_at=shift.opened_at,
+            )
+            repo.insert_version(conn, starter)
+            repo.upsert_draft(conn, shift.id, files, shift.opened_at, starter.id)
+            repo.insert_operating_selection(
+                conn,
+                OperatingSelection(
+                    id=f"sel-{repo.count_operating_selections(conn) + 1:04d}",
+                    engagement_slug=slug,
+                    shift_id=shift.id,
+                    kind="STARTER_BASELINE",
+                    selected_version_id=starter.id,
+                    selected_content_hash=starter.content_hash,
+                    rationale="Existing Bellwether offline scaffold; not a qualified repair or live service.",
+                    requirement_set_hash=canonical.content_hash(
+                        {
+                            "catalog_hash": catalog.content_hash,
+                            "contract": canonical.contract_params_json(contract),
+                        }
+                    ),
+                    state="VALID",
+                    client_request_id=f"starter:{slug}",
+                    created_at=shift.opened_at,
+                ),
+            )
+        else:
+            inherited = (
+                repo.get_latest_version_for_engagement(conn, slug)
+                if is_legacy_first_choice
+                else repo.get_version(conn, selection.selected_version_id)
+            )
+            if selection is not None and (
+                inherited is None or inherited.content_hash != selection.selected_content_hash
+            ):
+                raise LifecycleError("conflict", "selected version is missing or changed")
+            if inherited is None and slug != config.BOOKSHOP_SLUG:
+                raise LifecycleError("conflict", "reviewed initial draft is unavailable")
+            files = dict(inherited.files) if inherited is not None else dict(BOOKSHOP_DRAFT_FILES)
+            repo.upsert_draft(
+                conn, shift.id, files, shift.opened_at, inherited.id if inherited else None
+            )
+        conn.commit()
+        return repo.get_shift(conn, shift.id)
+    except Exception:
+        conn.rollback()
+        raise
 
 
 def get_draft(conn: sqlite3.Connection, shift_id: str) -> dict[str, Any]:
@@ -254,20 +351,13 @@ def start_run(
     ``execute_run`` resolves the adapter from these persisted values. Callers that
     pass nothing get the shipped controller defaults.
 
-    The artifact version in force is this shift's own latest version, or the
-    inherited one before the learner freezes their own: a shift that opens from
-    inheritance can run the system it inherited without re-freezing identical
-    bytes (program design S5.1/S5.3).
+    Operation uses the exact selected version. Saving or freezing another
+    candidate leaves the operating pointer unchanged.
     """
-    shift = _require_open_shift(conn, shift_id)
-    version = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
-        conn, shift.engagement_slug
-    )
-    if version is None:
-        raise LifecycleError("conflict", "freeze a version before starting a run")
-
     conn.execute("BEGIN IMMEDIATE")
     try:
+        shift = _require_open_shift(conn, shift_id)
+        selection, version = _selected_operating_version(conn, shift)
         used = repo.count_runs(conn, shift_id)
         limit = _attempt_limit(conn, shift.engagement_slug)
         if used >= limit:
@@ -280,6 +370,7 @@ def start_run(
         request_batch = _attempt_batch(rotation.shared_ordinal(drawn))
 
         ordinal = repo.count_runs_all(conn) + 1
+        adapter = executor or config.EXECUTOR_ADAPTER
         run = Run(
             id=f"run-{ordinal:04d}",
             shift_id=shift_id,
@@ -288,8 +379,15 @@ def start_run(
             shop_snapshot_ref=str(shop_snapshot or config.BOOKSHOP_SNAPSHOT),
             attempt_number=used + 1,
             state=RunState.QUEUED,
-            adapter=executor or config.EXECUTOR_ADAPTER,
+            adapter=adapter,
             started_at=_now(),
+            purpose=RunPurpose.OPERATION,
+            selection_id=selection.id,
+            evidence_mode=(
+                EvidenceMode.RECORDED_INSPECTION
+                if adapter == "recorded"
+                else EvidenceMode.TRUSTED_LOCAL if adapter == "local_process" else None
+            ),
         )
         repo.insert_run(conn, run)
         for family, case in drawn.items():
@@ -406,13 +504,14 @@ def _public_records(snapshot_bytes: bytes) -> dict[str, JsonValue]:
 def _snapshot_bytes_for_run(conn: sqlite3.Connection, run: Run) -> bytes:
     """The shop snapshot bytes this run consumed (Slice 9 run binding).
 
-    Runs executed under the current controller carry their captured bytes; a run
-    that predates the capture falls back to reading the recorded path, which is
-    best effort and may raise OSError if that source no longer exists.
+    Captured bytes are authoritative. A legacy run without them has unknown
+    historical input; reading today's file would fabricate evidence for that run.
     """
     stored = repo.get_run_snapshot_bytes(conn, run.id)
     if stored is not None:
         return stored
+    if run.purpose is RunPurpose.LEGACY_OPERATION:
+        raise OSError("legacy run has no captured shop snapshot")
     return Path(run.shop_snapshot_ref).read_bytes()
 
 
@@ -588,8 +687,7 @@ def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
     """Close the shift atomically and idempotently (program design S5.8).
 
     One transaction: refuse while a run of this shift is nonterminal; capture
-    ``CloseShiftFacts`` from the artifact version in force (this shift's own
-    latest version, or the inherited one when the shift never froze its own);
+    ``CloseShiftFacts`` from the exact selected version;
     append the hash-chained LIMIT_DECLARED events for its declared limits exactly
     once; retire the engagement's unresolved OPEN incidents as CLOSED_UNRESOLVED
     rows (inherited as incidents, never as LIMIT_DECLARED events); mark the shift
@@ -604,6 +702,7 @@ def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
         if shift.state == "closed":
             conn.rollback()
             return shift
+        _, version = _selected_operating_version(conn, shift)
         in_flight = [
             run.id
             for run in repo.list_runs_for_shift(conn, shift_id)
@@ -611,9 +710,6 @@ def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
         ]
         if in_flight:
             raise LifecycleError("conflict", "run in flight; close refused: " + ", ".join(in_flight))
-        version = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
-            conn, shift.engagement_slug
-        )
         drafts: list[LedgerEventDraft] = []
         if version is not None:
             facts = CloseShiftFacts(
@@ -698,6 +794,8 @@ def _stimulus_record(run: Run, ordinal: int, records: dict[str, JsonValue]) -> J
     The stimulus comes from the run's persisted request batch; any unavailable or
     inconsistent source degrades to None instead of failing the caller.
     """
+    if run.purpose is RunPurpose.LEGACY_OPERATION:
+        return None
     try:
         batch_path = config.FIXTURE_DIR / "requests" / run.request_batch_ref
         batch = executor.load_batch(executor.BatchRef(
@@ -834,12 +932,24 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
     if engagement is None:
         raise LifecycleError("not_found", f"unknown engagement: {slug}")
     latest_shift = repo.get_latest_shift(conn, slug)
-    latest_version = repo.get_latest_version(conn, latest_shift.id) if latest_shift else None
+    latest_saved = repo.get_latest_version(conn, latest_shift.id) if latest_shift else None
+    latest_version = latest_saved
     if latest_version is None and latest_shift is not None:
         # A freshly opened shift has no version of its own yet; the board shows
         # the inherited one until the learner freezes their own (Slice 8).
         latest_version = repo.get_latest_version_for_engagement(conn, slug)
     latest_run = repo.get_latest_run(conn, latest_shift.id) if latest_shift else None
+    selection = repo.get_latest_operating_selection(conn, slug)
+    if latest_shift is None:
+        operating_status = None
+    elif selection is None:
+        operating_status = "NEEDS_FIRST_CHOICE"
+    elif selection.state == "INVALIDATED":
+        operating_status = "INVALIDATED"
+    elif selection.kind == "STARTER_BASELINE":
+        operating_status = "STARTER_BASELINE"
+    else:
+        operating_status = "SELECTED"
     requests_run = len(repo.list_outputs(conn, latest_run.id)) if latest_run else 0
     attempts_used = repo.count_runs(conn, latest_shift.id) if latest_shift else 0
     attempt_limit = _attempt_limit(conn, slug)
@@ -857,6 +967,12 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         "latest_shift": latest_shift,
         "latest_version": latest_version,
         "latest_run": latest_run,
+        "operating_status": operating_status,
+        "draft_base_version_id": (
+            repo.get_draft_base_version_id(conn, latest_shift.id) if latest_shift else None
+        ),
+        "latest_saved_version_id": latest_saved.id if latest_saved else None,
+        "operating_selection": selection,
         "artifact_files": tuple(sorted(latest_version.files)) if latest_version else (),
         "requests_run": requests_run,
         "attempts_used": attempts_used,
