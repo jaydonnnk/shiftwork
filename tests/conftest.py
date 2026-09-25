@@ -8,6 +8,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 import base64  # noqa: E402  (import order follows the sys.path bootstrap above)
+from datetime import datetime, timezone  # noqa: E402
 
 import pytest  # noqa: E402
 
@@ -15,6 +16,8 @@ from shiftwork import config  # noqa: E402
 from shiftwork.domain import canonical  # noqa: E402
 from shiftwork.executor import base as executor_base  # noqa: E402
 from shiftwork.executor import local_process  # noqa: E402
+from shiftwork.domain.models import OperatingSelection  # noqa: E402
+from shiftwork.store import db, repo  # noqa: E402
 
 
 @pytest.fixture()
@@ -55,6 +58,49 @@ def local_request():
 
 
 WORKSPACE_PREFIX = "shiftwork-fixture-"
+
+
+@pytest.fixture()
+def select_version_for_test():
+    """Install a test-only choice so pre-pivot execution checks keep their subject.
+
+    This bypasses comparison eligibility on purpose: S17 owns the production
+    selection transaction. These older tests assert executor/ledger behavior for
+    a chosen version, not that a learner can make a qualifying choice today.
+    """
+
+    def select(db_path, shift_id: str, version_id: str):
+        conn = db.connect(db_path)
+        try:
+            shift = repo.get_shift(conn, shift_id)
+            version = repo.get_version(conn, version_id)
+            assert shift is not None and version is not None
+            prior = repo.get_latest_operating_selection(conn, shift.engagement_slug)
+            ordinal = repo.count_operating_selections(conn) + 1
+            repo.insert_operating_selection(
+                conn,
+                OperatingSelection(
+                    id=f"test-selection-{ordinal:04d}",
+                    engagement_slug=shift.engagement_slug,
+                    shift_id=shift_id,
+                    kind="LEARNER_CHOICE",
+                    selected_version_id=version_id,
+                    selected_content_hash=version.content_hash,
+                    rationale="Test-only selected-version prerequisite; eligibility is not asserted.",
+                    requirement_set_hash=canonical.content_hash(
+                        {"version": version.content_hash}
+                    ),
+                    prior_selection_id=prior.id if prior else None,
+                    state="VALID",
+                    client_request_id=f"test-selection:{shift_id}:{version_id}:{ordinal}",
+                    created_at=datetime.now(timezone.utc),
+                ),
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
+    return select
 
 
 @pytest.fixture()
