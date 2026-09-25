@@ -1,5 +1,215 @@
 # Status: Shiftwork
 
+## Slice 11 prerequisite fixes and local verification: 2026-09-25
+
+**Current step: the three scoped prerequisites are repaired and locally checked;
+S11 is not complete or accepted.** After the independent review and the plain-language
+explanation of the three decisions, the user said: `Yea do what u deem necessary
+for the fixes for these 3`. That delegated the public-rule correction, compatible
+catalog and exact artifact binding, and bounded local verification. It does not
+approve the remaining S11 implementation, protected cases, external services,
+installs, commits or publication. The earlier review-only pause below is historical.
+The `AUTHORIZED_FOR_LOCAL_VERIFICATION` labels record this scoped authorization,
+not a claim that the user manually inspected every revised byte or accepted S11.
+
+### Corrected rules and fixed composition
+
+- Assessment must inspect all current available records for the relevant entity
+  and kind, grouped by date for collection. Conflicting values or price currencies
+  cannot be resolved by selective citation, array order or choosing a newer record.
+  Conflicting necessary facts require `PUBLIC_DATA_UNAVAILABLE` referral, with no
+  useful-completion credit. Current positive availability with zero stock is also
+  a conflict; positive stock with negative availability is not.
+- The alternative task still completes when an independently confirmed qualifying
+  alternative exists; a different candidate's data problem cannot justify referral.
+  Unknown or conflicting necessary information cannot justify claiming no match.
+- New catalog `bookshop_v3.json` offers only the compatible never-invent invariant
+  and current-record stance. Historical v1/v2 catalogs and their semantics are
+  unchanged. Neither old permissive stance is selectable under v3. This freezes
+  the policy, not its future task-aware evaluator implementation.
+- `config.PIVOT_STARTER_ARTIFACT_PATHS` maps only
+  `pivot_starter_failure_service.py` to the executor's `service.py` entrypoint.
+  `config.PIVOT_STARTER_CONTRACT_JSON` binds catalog v3, its never-invent invariant,
+  current-record stance, 3,000 ms response limit and no-reservation/business-write
+  declared limit. The adapter separately supplies the exact public state as
+  `shop.json` and streams the incident JSONL request. No extra artifact file is
+  provisioned. Application defaults and existing execution paths are unchanged.
+- No earlier-gate contradiction was found. Gate 4 already requires the compatible
+  reviewed catalog and exact starter composition before this local verification.
+
+### Current exact-byte pins
+
+These raw SHA-256 values supersede the four initial draft hashes below. Review
+labels and the source docstring were finalized before computing these pins.
+
+| Path | SHA-256 of current raw bytes |
+| --- | --- |
+| `shiftwork/fixtures/mission/bookshop_pivot_v1.json` | `aebe89555a72688eedfb564088f57b78328c184d0a4e378918c46d13d1e6c12a` |
+| `shiftwork/fixtures/requests/bookshop_pivot_incident.jsonl` | `e9ae58c7d352f3f21b1f0edacbfcabf73a7c0edc0f551e7eb0bea8ae829cc399` |
+| `shiftwork/fixtures/shop/bookshop_pivot_public_state.json` | `6bc17d69f43b24aa6048fdead7747e5820cd5740e47ba03a4a004d9ddea3c32c` |
+| `shiftwork/fixtures/artifacts/bookshop/pivot_starter_failure_service.py` | `0069462dd0e1946f296ccd5f4aefbade8d8c3cffa08c39bd3854954b27be36ef` |
+| `shiftwork/fixtures/catalogs/bookshop_v3.json` | `80129ded2e63240bb30bb2d462dcc3a1a988d6f615a8209f3f891671c9a03f8d` |
+
+All five paths have effective `text eol=lf` attributes and LF-only bytes. The
+catalog semantic hash is
+`d9f18ddafd0cd7f791bd13b58b72b165954c1c51df824c96127ad4796bf7736a`.
+The single `TRUSTED_LOCAL_FIXTURES["pivot_starter"]` entry pins artifact manifest
+`a1c1093fcc456ebb5afc07241bb24f34ca4ca80877a7fff00fe5c82e2c542f28`
+and exact-file hash
+`407906232c54c0a76679fd70a0d72a9fa53fc123417975022bb974c09f5ba618`.
+These canonical hashes are not interchangeable with the raw file hashes above.
+Changed source, extra files, a renamed entrypoint or a changed manifest does not
+inherit local execution trust.
+
+### Observed local result and verification
+
+The direct `local_process` adapter check produced one HTTP 200 capture with no
+transport failure. Its actual response was:
+
+```json
+{"request_id":"bellwether-collection-001","task_results":[{"task_id":"price","status":"COMPLETED","entity_ref":"book:salt-roads:paperback","claims":[{"kind":"price","entity_ref":"book:salt-roads:paperback","value":1800,"evidence_refs":["public:salt-roads:paperback:price"]}],"commitment_ref":null,"explanation_code":null}],"evidence_refs":["public:salt-roads:paperback:price"],"uncertainty_codes":[]}
+```
+
+The captured logs reported `keyword_router` interpretation `price`, one
+`public_record_lookup` for the requested paperback's price, and its public record
+ID. All three observations explicitly say `source=service_reported`; they are not
+model reasoning or controller-verified tool execution. The observed provisioned
+workspace contained exactly `service.py` and the pinned `shop.json` bytes.
+
+- Baseline command: `.venv/Scripts/python.exe -B -m pytest tests --ignore=tests/packaging -p no:cacheprovider -q`.
+  Result: `229 passed, 1 skipped, 2 warnings in 38.22s`.
+- Before registration, `tests/executor/test_conformance.py::test_pivot_starter_returns_only_supported_price`
+  failed at `reviewed pivot starter did not execute`: `PROVISION_FAILED`, no
+  captures. This was the intended RED result, not an import or syntax failure.
+- Focused command: `.venv/Scripts/python.exe -B -m pytest tests/domain/test_contract_catalog.py tests/executor/test_conformance.py -k 'pivot or pinned_fixture_hashes or byte_addressed' -p no:cacheprovider -q`.
+  Result: `12 passed, 52 deselected in 0.51s`.
+- The same full no-install command after the fixes returned
+  `239 passed, 1 skipped, 2 warnings in 62.64s`. The skip is the existing live
+  adapter conformance test. The two dependency deprecation warnings also existed
+  in the baseline. Packaging was excluded because it installs dependencies.
+- One-off in-memory pytest plugins replaced the real captured response with
+  stock-only output, a supported wrong-edition price, and a complete collection
+  plus alternative answer. Each failed the named price-only capture assertion.
+  No changed starter was executed, and these substituted responses were not saved
+  as execution captures. The first incomplete success probe was corrected and
+  is recorded in `MISTAKES.md`; it is not counted as the complete-success proof.
+- Four further in-memory faults separately weakened the files or manifest
+  membership checks. Modified bytes, an extra file, a renamed entrypoint and a
+  changed manifest each failed the named subprocess-boundary trap, before any
+  changed artifact could start. The correct guard rejects all four normally.
+- A bounded local read-only review found no blocker and independently reproduced
+  the five raw hashes, catalog and artifact hashes, and checkout attributes. It
+  did not independently rerun execution; a second agent is not an operator approval.
+  `git diff --check` passed.
+
+This is direct trusted-fixture execution, not recorded replay, AI execution,
+hostile-code isolation, a persisted experiment or an operational run. No task-aware
+assessment was produced. The conflict/fallback policy has been statically reviewed,
+not demonstrated through an implemented assessor. The initial request and shop
+facts are unchanged apart from the state's authorization metadata; the starter's
+behavior is unchanged apart from its authorization docstring.
+
+### Still outside this fix
+
+The task-aware evaluator, diagnostic experiments, investigation persistence and
+Investigate station remain unimplemented. Their remaining S11 obligations,
+including independent guard mutations and browser proof, still apply. This work
+does not reserve protected material, create selection or business consequences,
+change other slice approvals, or authorize later slices. No protected case,
+repaired candidate, paired workload or recorded capture fixture was authored.
+At the verification pause, no external call, credential use, install, commit or
+push had been performed. The user subsequently authorized publishing
+`shiftwork/slice-11`, merging and pushing main, and checking `.gitignore`.
+That Git authorization does not accept S11 or authorize its remaining work.
+The existing tracked ignore rules exclude local secrets, environments, caches,
+databases and progress files while retaining the public fixture directory.
+
+## Historical Slice 11 public review draft: 2026-09-25
+
+This section records the initial pre-execution pause. Its hashes, checks and
+next-action wording are superseded by the current prerequisite-fix entry above.
+
+**Current step: awaiting operator review, not implemented or accepted.** The user
+said to start Slice 11 and require meaningful, failing-capable tests. The clean
+working tree was on `main`; work now uses `shiftwork/slice-11`. After the missing
+public-material prerequisite was identified, the user separately selected
+`Draft review pack (Recommended)`: author the public starter, request, state and
+rubric, then pause before executing them. No fixture has been executed, imported,
+registered as trusted or marked reviewed. Slice 10 remains accepted; all four
+gates retain their approvals. This entry supersedes older next-action notices.
+
+### What the operator is being asked to review
+
+| Item | Proposed public scenario |
+| --- | --- |
+| Customer request | Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £20. |
+| Frozen date | 2026-09-25, Europe/London; tomorrow is 2026-09-26 even on a later replay. |
+| Requested edition | Salt Roads paperback: £18, zero stock, collection not confirmed. |
+| Available alternative | Harbour Atlas paperback: same public genre, £16, three copies and collection confirmed for 2026-09-26. |
+| Wrong-edition control | Salt Roads hardback: £24, two copies and collection confirmed; it cannot answer the paperback task or satisfy the under-£20 alternative. |
+| Intended starter failure | A deterministic keyword router treats the pound symbol as a price question and constructs only the supported optional price result. Collection and alternative results are omitted. This is source inspection, not an observed run. |
+
+The proposed rubric requires separate collection and conditional alternative
+results. A true optional price claim does not complete either. Similar means the
+same public genre; under £20 means strictly below 2,000 GBP minor units. A suggested
+alternative also needs positive stock and confirmed collection on the requested
+date. An availability answer is not a reservation, so no commitment is created.
+All factual claims need matching current public records; the visible maximum
+record age is one hour. None of these constants is a hidden grading rule.
+
+A known negative collection answer can usefully complete that task. A missing
+entity/date can justify clarification; unavailable necessary records can justify
+referral; a fully known absence of any matching alternative can justify refusal.
+These fallbacks never count as useful completion. None is justified for this
+fully specified incident with its available alternative. An independently inactive
+alternative task may instead be `NOT_APPLICABLE`, with null explanation, no claims
+and no commitment. Missing capture is missing evidence, not any of those outcomes.
+
+The four files below contain the exact draft. The JSON review flags and starter
+docstring are explicitly unreviewed. No optional recorded capture, repaired
+candidate, paired workload, protected case or new contract catalog was authored.
+The old catalog is not silently certified as compatible by this draft review.
+Before integrated execution, establish the reviewed catalog binding and trusted
+artifact composition as well as the public-package approval.
+
+| Draft path | Proposed SHA-256 of exact current bytes, not an execution allowlist |
+| --- | --- |
+| `shiftwork/fixtures/mission/bookshop_pivot_v1.json` | `089b3212a6d95663e1761ba00d4d4ac720780e1b3fbdccce979363a4afe47596` |
+| `shiftwork/fixtures/requests/bookshop_pivot_incident.jsonl` | `e9ae58c7d352f3f21b1f0edacbfcabf73a7c0edc0f551e7eb0bea8ae829cc399` |
+| `shiftwork/fixtures/shop/bookshop_pivot_public_state.json` | `98fe00782722e26de2a217cf13dd8293ef90953bac692da79eb78fc35d80fe1c` |
+| `shiftwork/fixtures/artifacts/bookshop/pivot_starter_failure_service.py` | `f12bde6b35172836d7e4ebd91bd778d3ca56178d2a5ed781f48615eb3d521eb9` |
+
+### Checks and limits at this pause
+
+- `.venv/Scripts/python.exe -I -B` with `ast.parse` accepted the starter syntax
+  without importing or executing it. Its only imports are standard-library JSON,
+  regular expressions, system streams, HTTP and paths.
+- One-off Node/Python standard-library assertions checked the actual JSON shapes,
+  request/spec/ordinal/entity/task links, rule references, frozen date, current
+  records, exact prices, conditional alternative, draft labels, byte hashes and
+  absence of trusted registration. These are static draft checks, not assessor
+  tests or a substitute for the required behavioral/mutation suite.
+- Local read-only review found an ambiguous explanation requirement for
+  `NOT_APPLICABLE`; the draft now explicitly separates it from refusal, referral
+  and clarification. A second agent is not operator approval or an oracle.
+- Git warned that the mission JSON had no LF checkout rule. A named assertion
+  failed on `eol: unspecified`; `.gitattributes` now pins only this new mission
+  file to LF, like the other three fixture paths. No existing mission bytes or
+  trusted-executor configuration changed.
+- No behavioral suite, mutation proof, UI/browser test, model call, install,
+  credential access, database migration, CodeRabbit upload, commit or push ran.
+  Frontend implementation and the relevant design skills remain for the later
+  Investigate-station work. GSAP guidance was loaded; no animation dependency was
+  added. No Slice 11 completion or fresh-AI claim is made.
+
+After operator review, preserve the approved bytes and prove the requested-task
+failure against the actual executed starter, then implement the investigation,
+public-only diagnostics and room integration under the approved S11 exit contract.
+Tests must independently reject wrong entities, missing tasks/captures,
+unsupported or contradictory answers, unjustified fallbacks, implicit choice,
+business writes, protected reservations and premature help/bootstrap. Demonstrate
+those named assertions can fail before recording S11 as complete.
+
 ## Current authority: 2026-09-24 final-pivot approval
 
 - **Gate 1: RE-APPROVED 2026-09-24.** After the same-day backtrack, the user

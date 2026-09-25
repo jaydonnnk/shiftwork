@@ -604,3 +604,23 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   replay proves the transcript is readable, not that any artifact executes. When a
   result contradicts an earlier repro, isolate the differing parameter before
   reasoning about either one.
+
+## 2026-09-25 Slice 11 public draft: incomplete review-hash transcription
+
+- **What happened:** the first status-table edit contained two incomplete hash
+  strings. The first correction also mismatched its search text; the next exact
+  edit replaced both with the actual computed digests before presentation.
+- **Root cause:** manual transcription of byte evidence without an immediate
+  file-to-record equality check.
+- **Prevention rule:** verify every recorded hash against its file bytes and
+  require a full 64-character digest before presenting a fixture review pack.
+
+## 2026-09-25 Slice 11 verification: incomplete success substitution
+
+- **What happened:** the first in-memory capture fault labelled as success added
+  collection but omitted the alternative. It was not a complete-success probe;
+  the corrected probe completed both required tasks and failed the named capture assertion.
+- **Root cause:** the probe checked its changed task without checking the complete
+  required-task set.
+- **Prevention rule:** before counting a success-substitution proof, assert that
+  every required task is present and complete in the injected response.
