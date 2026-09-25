@@ -5,6 +5,7 @@ from pathlib import Path
 
 SCHEMA_PATH = Path(__file__).with_name("schema.sql")
 MIGRATION_V6_PATH = Path(__file__).with_name("migrations") / "v6.sql"
+MIGRATION_V6_TABLES_PATH = Path(__file__).with_name("migrations") / "v6_tables.sql"
 SCHEMA_VERSION = 6
 # Slice 7 backfills pre-rotation runs with the refs the controller hardcoded then.
 _LEGACY_RUN_BATCH = "thin.jsonl"
@@ -32,6 +33,30 @@ def _execute_statements(conn: sqlite3.Connection, script: str) -> None:
         raise RuntimeError("incomplete schema migration SQL")
 
 
+def _complete_v6_tables(conn: sqlite3.Connection) -> None:
+    """Add the v6 tables an already-migrated database is missing.
+
+    Gate 3 S4 assigns every pivot table to schema version 6, but the slices that
+    first need them land later, so a database migrated by an earlier build
+    reports version 6 while lacking them. ``v6_tables.sql`` holds only
+    ``IF NOT EXISTS`` DDL, so re-applying it changes no historical byte and no
+    existing row. Column changes and backfills stay in ``v6.sql``, which never
+    runs on this path.
+    """
+    script = MIGRATION_V6_TABLES_PATH.read_text(encoding="utf-8")
+    if conn.in_transaction:
+        _execute_statements(conn, script)
+        return
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        _execute_statements(conn, script)
+    except BaseException:
+        conn.rollback()
+        raise
+    else:
+        conn.commit()
+
+
 def ensure_schema(conn: sqlite3.Connection) -> None:
     current = int(conn.execute("PRAGMA user_version").fetchone()[0])
     if current not in (0, 2, 3, 4, 5, SCHEMA_VERSION):
@@ -41,6 +66,7 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             "point SHIFTWORK_DB_PATH at a fresh file."
         )
     if current == SCHEMA_VERSION:
+        _complete_v6_tables(conn)
         return
     if conn.in_transaction:
         raise RuntimeError("commit pending writes before migrating the database schema")
@@ -74,6 +100,7 @@ def ensure_schema(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE runs ADD COLUMN shop_snapshot_bytes BLOB")
         if current in (2, 3, 4, 5):
             _execute_statements(conn, MIGRATION_V6_PATH.read_text(encoding="utf-8"))
+        _execute_statements(conn, MIGRATION_V6_TABLES_PATH.read_text(encoding="utf-8"))
         conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
     except BaseException:
         conn.rollback()

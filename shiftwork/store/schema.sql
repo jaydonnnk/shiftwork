@@ -1,11 +1,18 @@
 -- Shiftwork fresh schema, version 6. Existing version 5 databases use
 -- migrations/v6.sql instead; their historical columns are never re-created.
 --
--- Slice 2 replaces the tracer's inline stub schema with this real DDL. Tables
--- whose owning slice has not landed yet are intentionally absent and are added
--- by that slice without renumbering: assist_events (Slice 12), mission_sources
--- (Slice 15). The incidents table exists from the tracer and is read by the
--- board, but Slice 2 opens no incidents (Slice 5/7).
+-- Slice 2 replaces the tracer's inline stub schema with this real DDL. Gate 3 S4
+-- assigns every pivot table to version 6, but a table's DDL lands with the slice
+-- that first uses it, in migrations/v6_tables.sql. db.ensure_schema applies that
+-- script on every open, including an already-v6 database, so a database migrated
+-- by an earlier build gains the tables a later slice added. Keep the pivot tables
+-- there rather than duplicating them here: two copies of one constraint drift
+-- silently, and only the migration copy is exercised against real v5 evidence.
+--
+-- The incidents table exists from the tracer and is read by the board, but
+-- Slice 2 opens no incidents (Slice 5/7). Still awaiting their owning slice:
+-- trial_slots, exposure_reservations, exposure_items, assist_events and
+-- idempotency_records.
 
 CREATE TABLE IF NOT EXISTS engagements (
     slug TEXT PRIMARY KEY,

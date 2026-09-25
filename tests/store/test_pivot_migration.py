@@ -153,3 +153,230 @@ def test_legacy_adapter_label_does_not_claim_fresh_live_execution(
         assert run["evidence_mode"] == expected_mode
     finally:
         conn.close()
+
+
+# Slice 11: Gate 3 S4 assigns every pivot table to schema version 6, but a table's
+# DDL lands with the slice that first uses it. These tests pin the completion and
+# the reopen reconciliation that keeps an already-v6 database from staying
+# silently incomplete.
+
+S11_V6_TABLES = (
+    "execution_contexts",
+    "execution_observations",
+    "investigations",
+    "run_assessments",
+    "task_assessments",
+)
+
+S11_V6_TRIGGERS = (
+    "execution_observations_no_delete",
+    "execution_observations_no_update",
+    "investigations_no_delete",
+    "investigations_no_update",
+    "investigations_revision_same_shift",
+    "run_assessments_no_delete",
+    "run_assessments_no_update",
+)
+
+
+def _object_names(conn, object_type):
+    return {
+        row[0]
+        for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = ?", (object_type,)
+        )
+    }
+
+
+def _ddl_by_name(conn, names):
+    return dict(
+        conn.execute(
+            "SELECT name, sql FROM sqlite_master WHERE name IN ({})".format(
+                ",".join("?" for _ in names)
+            ),
+            tuple(names),
+        ).fetchall()
+    )
+
+
+def _migrated_v6(tmp_path):
+    _, copied, before = _copy_v5(tmp_path)
+    conn = db.connect(copied)
+    db.ensure_schema(conn)
+    return conn, before
+
+
+def _insert_investigation(conn, inv_id, shift_id, run_id, revision_of_id=None):
+    conn.execute(
+        "INSERT INTO investigations (id, shift_id, source_run_id, source_request_ordinal,"
+        " cause, falsifier, public_test, revision_of_id, created_at)"
+        " VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?)",
+        (
+            inv_id,
+            shift_id,
+            run_id,
+            "the keyword router treats the pound symbol as a price question",
+            "a request with no currency symbol still omits the collection task",
+            "assert a result exists for every required task",
+            revision_of_id,
+            "2026-09-25T09:00:00+00:00",
+        ),
+    )
+
+
+def test_v6_migration_creates_the_slice_11_pivot_tables(tmp_path):
+    conn, before = _migrated_v6(tmp_path)
+    try:
+        tables = _object_names(conn, "table")
+        assert [name for name in S11_V6_TABLES if name not in tables] == []
+        assert_v5_rows_preserved(conn, before)
+    finally:
+        conn.close()
+
+
+def test_already_v6_database_gains_missing_tables_without_touching_history(tmp_path):
+    """Reopening an older v6 database completes it instead of returning early.
+
+    Dropping the five tables models a database migrated by the Slice 10 build,
+    which reported user_version 6 while lacking them. Before the reconciliation,
+    ensure_schema returned at once and the tables never arrived.
+    """
+    conn, before = _migrated_v6(tmp_path)
+    try:
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == 6
+        for name in S11_V6_TABLES:
+            conn.execute(f"DROP TABLE {name}")
+        conn.commit()
+        assert _object_names(conn, "table").isdisjoint(S11_V6_TABLES)
+
+        db.ensure_schema(conn)
+
+        assert conn.execute("PRAGMA user_version").fetchone()[0] == 6
+        tables = _object_names(conn, "table")
+        assert [name for name in S11_V6_TABLES if name not in tables] == []
+        assert_v5_rows_preserved(conn, before)
+    finally:
+        conn.close()
+
+
+def test_reconcile_completes_tables_without_rerunning_v6_backfills(tmp_path):
+    """The reopen path is table DDL only; it must not re-apply v6.sql.
+
+    v6.sql carries ALTER TABLE and an evidence_mode backfill, neither of which is
+    idempotent. Clearing the backfilled column and reopening proves the
+    reconciliation left it cleared rather than silently restoring it.
+    """
+    conn, _ = _migrated_v6(tmp_path)
+    try:
+        assert conn.execute("SELECT evidence_mode FROM runs").fetchone()[0] is not None
+        conn.execute("UPDATE runs SET evidence_mode = NULL")
+        conn.commit()
+
+        db.ensure_schema(conn)
+
+        assert conn.execute("SELECT evidence_mode FROM runs").fetchone()[0] is None
+    finally:
+        conn.close()
+
+
+def test_fresh_and_migrated_paths_define_the_s11_objects_identically(tmp_path):
+    fresh_conn = db.connect(tmp_path / "fresh-v6.db")
+    try:
+        db.ensure_schema(fresh_conn)
+        fresh = _ddl_by_name(fresh_conn, S11_V6_TABLES + S11_V6_TRIGGERS)
+    finally:
+        fresh_conn.close()
+
+    migrated_conn, _ = _migrated_v6(tmp_path)
+    try:
+        migrated = _ddl_by_name(migrated_conn, S11_V6_TABLES + S11_V6_TRIGGERS)
+    finally:
+        migrated_conn.close()
+
+    assert sorted(fresh) == sorted(S11_V6_TABLES + S11_V6_TRIGGERS)
+    assert fresh == migrated, "the two schema paths drifted for a v6 object"
+
+
+def test_investigations_reject_update_and_delete(tmp_path):
+    conn, _ = _migrated_v6(tmp_path)
+    try:
+        shift_id = conn.execute("SELECT id FROM shifts ORDER BY seq LIMIT 1").fetchone()[0]
+        run_id = conn.execute("SELECT id FROM runs LIMIT 1").fetchone()[0]
+        _insert_investigation(conn, "inv-1", shift_id, run_id)
+        conn.commit()
+
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            conn.execute("UPDATE investigations SET cause = 'rewritten history'")
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            conn.execute("DELETE FROM investigations WHERE id = 'inv-1'")
+
+        row = conn.execute("SELECT cause FROM investigations WHERE id = 'inv-1'").fetchone()
+        assert row[0] == "the keyword router treats the pound symbol as a price question"
+    finally:
+        conn.close()
+
+
+def test_investigation_revision_must_reference_the_same_shift(tmp_path):
+    conn, _ = _migrated_v6(tmp_path)
+    try:
+        shift_id = conn.execute("SELECT id FROM shifts ORDER BY seq LIMIT 1").fetchone()[0]
+        run_id = conn.execute("SELECT id FROM runs LIMIT 1").fetchone()[0]
+        slug = conn.execute("SELECT engagement_slug FROM shifts WHERE id = ?", (shift_id,)).fetchone()[0]
+        conn.execute(
+            "INSERT INTO shifts (id, engagement_slug, seq, state, opened_at, opening_mode)"
+            " VALUES ('shift-other', ?, 2, 'open', '2026-09-25T10:00:00+00:00', 'STANDARD')",
+            (slug,),
+        )
+        _insert_investigation(conn, "inv-1", shift_id, run_id)
+        conn.commit()
+
+        with pytest.raises(sqlite3.IntegrityError, match="same shift"):
+            _insert_investigation(conn, "inv-stolen", "shift-other", run_id, revision_of_id="inv-1")
+
+        _insert_investigation(conn, "inv-2", shift_id, run_id, revision_of_id="inv-1")
+        conn.commit()
+        rows = dict(
+            conn.execute("SELECT id, revision_of_id FROM investigations ORDER BY id").fetchall()
+        )
+        assert rows == {"inv-1": None, "inv-2": "inv-1"}, "a revision must keep its parent row"
+    finally:
+        conn.close()
+
+
+def test_observations_and_run_assessments_reject_mutation(tmp_path):
+    conn, _ = _migrated_v6(tmp_path)
+    try:
+        run_id = conn.execute("SELECT id FROM runs LIMIT 1").fetchone()[0]
+        conn.execute(
+            "INSERT INTO execution_observations (id, run_id, request_ordinal, ordinal, kind,"
+            " public_payload_json, raw_payload_ref, measured_at)"
+            " VALUES ('obs-1', ?, 1, 1, 'INTERPRETATION', '{}', 'raw:obs-1',"
+            " '2026-09-25T09:00:00+00:00')",
+            (run_id,),
+        )
+        conn.execute(
+            "INSERT INTO run_assessments (run_id, context_hash, complete_request_count,"
+            " expected_request_count, mandatory_pass, rule_version, assessed_at)"
+            " VALUES (?, 'ctx-hash', 0, 1, 0, 'evaluator-v1', '2026-09-25T09:00:00+00:00')",
+            (run_id,),
+        )
+        conn.commit()
+
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            conn.execute("UPDATE execution_observations SET kind = 'USAGE'")
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            conn.execute("DELETE FROM execution_observations")
+        with pytest.raises(sqlite3.IntegrityError, match="immutable"):
+            conn.execute("UPDATE run_assessments SET mandatory_pass = 1")
+        with pytest.raises(sqlite3.IntegrityError, match="immutable"):
+            conn.execute("DELETE FROM run_assessments")
+        with pytest.raises(sqlite3.IntegrityError):
+            conn.execute(
+                "INSERT INTO execution_observations (id, run_id, request_ordinal, ordinal, kind,"
+                " public_payload_json, raw_payload_ref, measured_at)"
+                " VALUES ('obs-2', ?, 1, 1, 'USAGE', '{}', 'raw:obs-2',"
+                " '2026-09-25T09:00:00+00:00')",
+                (run_id,),
+            )
+    finally:
+        conn.close()
