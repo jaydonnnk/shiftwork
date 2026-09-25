@@ -5,6 +5,7 @@ import importlib.util
 import itertools
 import json
 import sqlite3
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -314,7 +315,7 @@ def test_local_process_reaps_child_after_timeout_and_cancellation(executor, monk
     assert len(children) == 2 and children[-1].returncode is not None
 
 
-def test_controller_normalizes_once_and_retains_failed_capture(executor, monkeypatch, tmp_path):
+def test_controller_normalizes_once_and_retains_failed_capture(executor, monkeypatch, tmp_path, select_version_for_test):
     from fastapi.testclient import TestClient
     from shiftwork import orchestrator
     from shiftwork.app import create_app
@@ -344,6 +345,7 @@ def test_controller_normalizes_once_and_retains_failed_capture(executor, monkeyp
     with TestClient(create_app(str(path))) as client:
         shift = client.post("/api/engagements/bookshop/shifts").json()
         version = client.post(f"/api/shifts/{shift['id']}/artifact/versions", json={"contract": contract}).json()
+        select_version_for_test(path, shift["id"], version["id"])
         started = client.post(f"/api/shifts/{shift['id']}/runs")
         assert started.status_code == 202
         run_id = started.json()["id"]
@@ -370,7 +372,7 @@ def test_controller_normalizes_once_and_retains_failed_capture(executor, monkeyp
 
 
 def _pre_rotation_schema(*, keep_log_ref: bool = False) -> str:
-    """``schema.sql`` with the later additions stripped: the v2 or v3 shape.
+    """The frozen v5 schema with later additions stripped: the v2 or v3 shape.
 
     The default strips ``log_ref`` as well and yields the v2 shape;
     ``keep_log_ref`` yields the genuine v3 shape that shipped before rotation
@@ -379,9 +381,8 @@ def _pre_rotation_schema(*, keep_log_ref: bool = False) -> str:
     strip is asserted, so this helper cannot silently stop producing an older
     schema and make the upgrade tests vacuous.
     """
-    from shiftwork.store import db
-
-    sql = db.SCHEMA_PATH.read_text(encoding="utf-8")
+    schema_v5 = Path(__file__).resolve().parents[1] / "store" / "schema_v5.sql"
+    sql = schema_v5.read_text(encoding="utf-8")
     fragments = [
         "    request_batch_ref TEXT NOT NULL,\n",
         "    shop_snapshot_ref TEXT NOT NULL,\n",
@@ -390,7 +391,7 @@ def _pre_rotation_schema(*, keep_log_ref: bool = False) -> str:
     if not keep_log_ref:
         fragments.append("    log_ref TEXT,\n")
     for fragment in fragments:
-        assert fragment in sql, f"schema.sql no longer contains {fragment!r}"
+        assert fragment in sql, f"v5 snapshot no longer contains {fragment!r}"
         sql = sql.replace(fragment, "")
     marker = "CREATE TABLE IF NOT EXISTS rotation_draws ("
     start = sql.index(marker)

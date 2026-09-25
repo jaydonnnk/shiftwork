@@ -70,7 +70,7 @@ def test_freeze_refuses_a_must_never_option_from_the_wrong_dimension(conn, shift
     bad = make_contract(must_never=(ContractOptionId.USE_NEWEST_RECORD_WITH_AGE,))
     with pytest.raises(InvalidContract):
         orchestrator.freeze_version(conn, shift.id, bad)
-    assert repo.count_versions(conn) == 0
+    assert repo.count_versions(conn) == 1  # only the immutable starter baseline
 
 
 def test_freeze_refuses_a_selection_bound_to_the_wrong_dimension(conn, shift, make_contract):
@@ -79,14 +79,14 @@ def test_freeze_refuses_a_selection_bound_to_the_wrong_dimension(conn, shift, ma
     )
     with pytest.raises(InvalidContract):
         orchestrator.freeze_version(conn, shift.id, bad)
-    assert repo.count_versions(conn) == 0
+    assert repo.count_versions(conn) == 1  # rejected freeze added no learner version
 
 
 def test_freeze_refuses_a_contract_missing_a_required_dimension(conn, shift, make_contract):
     bad = make_contract(selections={})
     with pytest.raises(InvalidContract):
         orchestrator.freeze_version(conn, shift.id, bad)
-    assert repo.count_versions(conn) == 0
+    assert repo.count_versions(conn) == 1  # rejected freeze added no learner version
 
 
 def test_freeze_refuses_an_option_that_is_not_in_this_catalog(conn, shift, make_contract):
@@ -100,4 +100,4 @@ def test_freeze_refuses_an_option_that_is_not_in_this_catalog(conn, shift, make_
     )
     with pytest.raises(InvalidContract):
         orchestrator.freeze_version(conn, shift.id, bad)
-    assert repo.count_versions(conn) == 0
+    assert repo.count_versions(conn) == 1  # rejected freeze added no learner version
