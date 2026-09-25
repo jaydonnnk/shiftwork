@@ -14,14 +14,17 @@ from shiftwork.domain.models import (
     CheckResult,
     ContractParams,
     DrawState,
+    EvidenceMode,
     Incident,
     IncidentState,
     LedgerEvent,
     LedgerEventType,
+    OperatingSelection,
     ReasonCode,
     RotationDraw,
     Run,
     RunOutput,
+    RunPurpose,
     RunState,
     Shift,
 )
@@ -90,7 +93,8 @@ def get_engagement_config(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | 
 # --- shifts ----------------------------------------------------------------
 
 
-def _shift(row: sqlite3.Row) -> Shift:
+def _shift(conn: sqlite3.Connection, row: sqlite3.Row) -> Shift:
+    selection = get_latest_operating_selection(conn, row["engagement_slug"])
     return Shift(
         id=row["id"],
         engagement_slug=row["engagement_slug"],
@@ -98,12 +102,17 @@ def _shift(row: sqlite3.Row) -> Shift:
         state=row["state"],
         opened_at=row["opened_at"],
         closed_at=row["closed_at"],
+        opening_mode=row["opening_mode"],
+        operation_allowed=(
+            row["state"] == "open" and selection is not None and selection.state == "VALID"
+        ),
     )
 
 
 def insert_shift(conn: sqlite3.Connection, shift: Shift) -> None:
     conn.execute(
-        "INSERT INTO shifts (id, engagement_slug, seq, state, opened_at, closed_at) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO shifts (id, engagement_slug, seq, state, opened_at, closed_at, opening_mode) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
         (
             shift.id,
             shift.engagement_slug,
@@ -111,20 +120,21 @@ def insert_shift(conn: sqlite3.Connection, shift: Shift) -> None:
             shift.state,
             shift.opened_at.isoformat(),
             shift.closed_at.isoformat() if shift.closed_at else None,
+            shift.opening_mode.value if shift.opening_mode else None,
         ),
     )
 
 
 def get_shift(conn: sqlite3.Connection, shift_id: str) -> Shift | None:
     row = conn.execute("SELECT * FROM shifts WHERE id = ?", (shift_id,)).fetchone()
-    return _shift(row) if row else None
+    return _shift(conn, row) if row else None
 
 
 def get_latest_shift(conn: sqlite3.Connection, slug: str) -> Shift | None:
     row = conn.execute(
         "SELECT * FROM shifts WHERE engagement_slug = ? ORDER BY seq DESC LIMIT 1", (slug,)
     ).fetchone()
-    return _shift(row) if row else None
+    return _shift(conn, row) if row else None
 
 
 def max_shift_seq(conn: sqlite3.Connection, slug: str) -> int:
@@ -144,11 +154,18 @@ def close_shift(conn: sqlite3.Connection, shift_id: str, closed_at: datetime) ->
 # --- draft_artifacts -------------------------------------------------------
 
 
-def upsert_draft(conn: sqlite3.Connection, shift_id: str, files: dict[str, str], updated_at: datetime) -> None:
+def upsert_draft(
+    conn: sqlite3.Connection,
+    shift_id: str,
+    files: dict[str, str],
+    updated_at: datetime,
+    base_version_id: str | None = None,
+) -> None:
     conn.execute(
-        "INSERT INTO draft_artifacts (shift_id, files_json, updated_at) VALUES (?, ?, ?) "
+        "INSERT INTO draft_artifacts (shift_id, files_json, updated_at, base_version_id) "
+        "VALUES (?, ?, ?, ?) "
         "ON CONFLICT(shift_id) DO UPDATE SET files_json = excluded.files_json, updated_at = excluded.updated_at",
-        (shift_id, _dump(files), updated_at.isoformat()),
+        (shift_id, _dump(files), updated_at.isoformat(), base_version_id),
     )
 
 
@@ -159,6 +176,13 @@ def get_draft(conn: sqlite3.Connection, shift_id: str) -> tuple[dict[str, str], 
     if row is None:
         return None
     return _load(row["files_json"]), row["updated_at"]
+
+
+def get_draft_base_version_id(conn: sqlite3.Connection, shift_id: str) -> str | None:
+    row = conn.execute(
+        "SELECT base_version_id FROM draft_artifacts WHERE shift_id = ?", (shift_id,)
+    ).fetchone()
+    return row["base_version_id"] if row else None
 
 
 # --- artifact_versions -----------------------------------------------------
@@ -239,6 +263,70 @@ def count_versions(conn: sqlite3.Connection) -> int:
     return int(conn.execute("SELECT COUNT(*) AS n FROM artifact_versions").fetchone()["n"])
 
 
+# --- operating selections --------------------------------------------------
+
+
+def _operating_selection(row: sqlite3.Row) -> OperatingSelection:
+    return OperatingSelection(
+        id=row["id"],
+        engagement_slug=row["engagement_slug"],
+        shift_id=row["shift_id"],
+        kind=row["kind"],
+        selected_version_id=row["selected_version_id"],
+        selected_content_hash=row["selected_content_hash"],
+        comparison_id=row["comparison_id"],
+        retained_alternative_version_id=row["retained_alternative_version_id"],
+        rationale=row["rationale"],
+        requirement_set_hash=row["requirement_set_hash"],
+        prior_selection_id=row["prior_selection_id"],
+        state=row["state"],
+        client_request_id=row["client_request_id"],
+        created_at=row["created_at"],
+    )
+
+
+def get_latest_operating_selection(
+    conn: sqlite3.Connection, slug: str
+) -> OperatingSelection | None:
+    row = conn.execute(
+        "SELECT * FROM operating_selections WHERE engagement_slug = ? "
+        "ORDER BY rowid DESC LIMIT 1",
+        (slug,),
+    ).fetchone()
+    return _operating_selection(row) if row else None
+
+
+def count_operating_selections(conn: sqlite3.Connection) -> int:
+    return int(conn.execute("SELECT COUNT(*) AS n FROM operating_selections").fetchone()["n"])
+
+
+def insert_operating_selection(conn: sqlite3.Connection, selection: OperatingSelection) -> None:
+    conn.execute(
+        "INSERT INTO operating_selections "
+        "(id, engagement_slug, shift_id, kind, selected_version_id, "
+        "selected_content_hash, comparison_id, retained_alternative_version_id, "
+        "rationale, requirement_set_hash, prior_selection_id, state, "
+        "client_request_id, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            selection.id,
+            selection.engagement_slug,
+            selection.shift_id,
+            selection.kind,
+            selection.selected_version_id,
+            selection.selected_content_hash,
+            selection.comparison_id,
+            selection.retained_alternative_version_id,
+            selection.rationale,
+            selection.requirement_set_hash,
+            selection.prior_selection_id,
+            selection.state,
+            selection.client_request_id,
+            selection.created_at.isoformat(),
+        ),
+    )
+
+
 # --- runs ------------------------------------------------------------------
 
 
@@ -255,14 +343,18 @@ def _run(row: sqlite3.Row) -> Run:
         failure_kind=row["failure_kind"],
         started_at=row["started_at"],
         ended_at=row["ended_at"],
+        purpose=RunPurpose(row["purpose"]),
+        evidence_mode=EvidenceMode(row["evidence_mode"]) if row["evidence_mode"] else None,
+        selection_id=row["selection_id"],
     )
 
 
 def insert_run(conn: sqlite3.Connection, run: Run) -> None:
     conn.execute(
         "INSERT INTO runs (id, shift_id, artifact_version_id, request_batch_ref, shop_snapshot_ref, "
-        "attempt_number, state, adapter, failure_kind, started_at, ended_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "attempt_number, state, adapter, failure_kind, started_at, ended_at, purpose, "
+        "evidence_mode, selection_id) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             run.id,
             run.shift_id,
@@ -275,6 +367,9 @@ def insert_run(conn: sqlite3.Connection, run: Run) -> None:
             run.failure_kind.value if run.failure_kind else None,
             run.started_at.isoformat(),
             run.ended_at.isoformat() if run.ended_at else None,
+            run.purpose.value,
+            run.evidence_mode.value if run.evidence_mode else None,
+            run.selection_id,
         ),
     )
 

@@ -1,4 +1,5 @@
--- Shiftwork schema (program design S2, architecture S4 tables + engagement_config).
+-- Shiftwork fresh schema, version 6. Existing version 5 databases use
+-- migrations/v6.sql instead; their historical columns are never re-created.
 --
 -- Slice 2 replaces the tracer's inline stub schema with this real DDL. Tables
 -- whose owning slice has not landed yet are intentionally absent and are added
@@ -30,13 +31,15 @@ CREATE TABLE IF NOT EXISTS shifts (
     state TEXT NOT NULL,
     opened_at TEXT NOT NULL,
     closed_at TEXT,
+    opening_mode TEXT CHECK (opening_mode IN ('STANDARD', 'LEGACY_FIRST_CHOICE')),
     UNIQUE (engagement_slug, seq)
 );
 
 CREATE TABLE IF NOT EXISTS draft_artifacts (
     shift_id TEXT PRIMARY KEY REFERENCES shifts(id),
     files_json TEXT NOT NULL,
-    updated_at TEXT NOT NULL
+    updated_at TEXT NOT NULL,
+    base_version_id TEXT REFERENCES artifact_versions(id)
 );
 
 CREATE TABLE IF NOT EXISTS artifact_versions (
@@ -49,7 +52,9 @@ CREATE TABLE IF NOT EXISTS artifact_versions (
     contract_json TEXT NOT NULL,
     contract_catalog_hash TEXT NOT NULL,
     created_by TEXT NOT NULL,
-    created_at TEXT NOT NULL
+    created_at TEXT NOT NULL,
+    restored_from_id TEXT REFERENCES artifact_versions(id),
+    authorship_json TEXT
 );
 
 CREATE TABLE IF NOT EXISTS runs (
@@ -65,7 +70,54 @@ CREATE TABLE IF NOT EXISTS runs (
     failure_kind TEXT,
     started_at TEXT NOT NULL,
     ended_at TEXT,
+    purpose TEXT NOT NULL DEFAULT 'OPERATION'
+        CHECK (purpose IN ('EXPERIMENT', 'OPERATION', 'LEGACY_OPERATION')),
+    evidence_mode TEXT
+        CHECK (evidence_mode IN ('RECORDED_INSPECTION', 'TRUSTED_LOCAL', 'ISOLATED_LIVE')),
+    context_id TEXT,
+    experiment_id TEXT,
+    trial_slot_id TEXT,
+    selection_id TEXT REFERENCES operating_selections(id),
+    client_request_id TEXT,
     UNIQUE (shift_id, attempt_number)
+);
+
+CREATE TABLE IF NOT EXISTS experiments (
+    id TEXT PRIMARY KEY,
+    shift_id TEXT NOT NULL REFERENCES shifts(id),
+    kind TEXT NOT NULL CHECK (
+        kind IN ('DIAGNOSTIC', 'QUALIFYING_COMPARISON', 'LATER_CONDITION_COMPARISON')
+    ),
+    investigation_id TEXT,
+    candidates_json TEXT NOT NULL CHECK (
+        json_valid(candidates_json) AND
+        ((kind = 'DIAGNOSTIC' AND json_array_length(candidates_json) = 1) OR
+         (kind != 'DIAGNOSTIC' AND json_array_length(candidates_json) = 2))
+    ),
+    declared_treatment TEXT NOT NULL,
+    context_id TEXT NOT NULL,
+    content_hash TEXT NOT NULL,
+    trial_count_per_candidate INTEGER NOT NULL CHECK (trial_count_per_candidate IN (1, 3)),
+    state TEXT NOT NULL CHECK (state IN ('PLANNED', 'RUNNING', 'FINALIZED', 'FAILED', 'INVALIDATED')),
+    client_request_id TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS operating_selections (
+    id TEXT PRIMARY KEY,
+    engagement_slug TEXT NOT NULL REFERENCES engagements(slug),
+    shift_id TEXT NOT NULL REFERENCES shifts(id),
+    kind TEXT NOT NULL CHECK (kind IN ('STARTER_BASELINE', 'LEARNER_CHOICE')),
+    selected_version_id TEXT NOT NULL REFERENCES artifact_versions(id),
+    selected_content_hash TEXT NOT NULL,
+    comparison_id TEXT REFERENCES experiments(id),
+    retained_alternative_version_id TEXT REFERENCES artifact_versions(id),
+    rationale TEXT NOT NULL,
+    requirement_set_hash TEXT NOT NULL,
+    prior_selection_id TEXT REFERENCES operating_selections(id),
+    state TEXT NOT NULL CHECK (state IN ('VALID', 'INVALIDATED')),
+    client_request_id TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS run_outputs (
