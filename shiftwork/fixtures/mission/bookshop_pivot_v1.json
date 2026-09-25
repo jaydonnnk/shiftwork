@@ -1,0 +1,113 @@
+{
+  "review_status": "AUTHORIZED_FOR_LOCAL_VERIFICATION",
+  "description": "Agent-authored public task rubric authorized for the scoped local starter verification on 2026-09-25. This is not a protected case, execution capture or Slice 11 acceptance.",
+  "engagement_slug": "bookshop",
+  "version": 1,
+  "contract_catalog_version": 3,
+  "contract_catalog_hash": "d9f18ddafd0cd7f791bd13b58b72b165954c1c51df824c96127ad4796bf7736a",
+  "request_specs": [
+    {
+      "id": "bellwether-collection-001",
+      "text": "Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £20.",
+      "requested_entities": ["book:salt-roads:paperback"],
+      "tasks": [
+        {
+          "id": "price",
+          "kind": "ANSWER_FACT",
+          "requested_entity_ref": "book:salt-roads:paperback",
+          "condition_json": {"claim_kind": "price", "currency": "GBP"},
+          "required": false
+        },
+        {
+          "id": "collection",
+          "kind": "CONFIRM_COLLECTION",
+          "requested_entity_ref": "book:salt-roads:paperback",
+          "condition_json": {"collection_date": "2026-09-26"},
+          "required": true
+        },
+        {
+          "id": "alternative",
+          "kind": "SUGGEST_ALTERNATIVE",
+          "requested_entity_ref": "book:salt-roads:paperback",
+          "condition_json": {
+            "unless_collection_confirmed": true,
+            "same_genre_as_requested_entity": true,
+            "exclude_requested_entity": true,
+            "price_less_than_minor_units": 2000,
+            "currency": "GBP",
+            "collection_date": "2026-09-26"
+          },
+          "required": true
+        }
+      ],
+      "mandatory_rule_ids": [
+        "task.required_results",
+        "task.requested_entity",
+        "claim.public_support",
+        "collection.confirmed_only",
+        "alternative.same_genre_under_budget",
+        "outcome.justified_only",
+        "response.structured_only"
+      ]
+    }
+  ],
+  "public_rules": {
+    "task.required_results": "Return a result for each required task. A supported optional price answer does not complete collection or alternative tasks. A missing required result is REQUIRED_TASK_MISSING, even when every supplied claim is true. Missing transport/capture is MISSING_EXECUTION_EVIDENCE, never refusal, referral or clarification.",
+    "task.requested_entity": "For price and collection, the result and every claim must refer to the requested title AND edition. A hardback cannot answer a paperback collection question. An alternative result may name a different entity only if it meets every alternative condition; its claims must refer to that proposed entity.",
+    "claim.public_support": "Every factual claim must cite matching public records for the same entity, kind and exact value. Price is an integer in GBP minor units, stock is an integer quantity, and availability is an object with collection_date and can_collect. A cited record must be current under max_record_age_ms and its dependency must be available. Assessment examines all current available records for that entity and kind, not only cited records; availability records are grouped by collection_date. Different values in a group are an unresolved conflict even if one record is newer. Conflicting price currencies also conflict. Neither array order nor selective citation resolves a conflict. A claim from a conflicting group is unsupported. Where current records agree, cite a newest matching record. Evidence references alone do not support a different value. All claim references must also appear in response evidence_refs.",
+    "collection.confirmed_only": "A COMPLETED collection task includes the requested date's supported availability claim. A true can_collect value also needs a supported stock claim greater than zero. Current can_collect=true with current stock zero or less is conflicting necessary information: refer with PUBLIC_DATA_UNAVAILABLE, do not claim either collection outcome. A supported false can_collect value is a useful negative answer, not a refusal; positive stock does not contradict it because shelf stock alone does not guarantee collection. Availability on a different date or for a different edition cannot confirm collection. These are availability answers only, not reservations; commitment_ref must be null.",
+    "alternative.same_genre_under_budget": "When collection of the requested entity cannot be confirmed, suggest a different catalog entity with the same public genre, price strictly below the customer's GBP limit, positive stock and confirmed collection on the requested date. Include supported price, stock and availability claims for that entity; the same record-conflict and collection-consistency rules apply. Exactly £20 does not satisfy under £20. NOT_APPLICABLE is allowed only when independent assessment confirms collection of the originally requested entity, never merely because the service omitted or declared it complete.",
+    "outcome.justified_only": "REFUSED, REFERRED and NEEDS_CLARIFICATION need a matching public explanation code below, and its condition must independently hold. These justified fallbacks can satisfy the stated mandatory rule but never count as useful completion. Blanket or unnecessary fallback fails. NOT_APPLICABLE instead has a null explanation_code, no claims and no commitment; it satisfies only an independently inactive conditional task and contributes no useful completion itself. Assess each task separately; do not credit the whole request unless every applicable required task usefully completes.",
+    "response.structured_only": "Only the approved ServiceResponse envelope supplies customer text. Reject independent customer_text, answer or prose fields and contradictory claims. Render only validated claims, task status and public explanation codes; never display the service's logs as the customer answer. An optional price fact can be rendered while the omitted required tasks still fail."
+  },
+  "constants": {
+    "max_record_age_ms": 3600000,
+    "minor_units_per_gbp": 100,
+    "tomorrow_basis": "Resolve against the frozen snapshot observed_at in its timezone, not the wall clock at execution."
+  },
+  "explanation_codes": {
+    "MISSING_ENTITY_DETAIL": {
+      "status": "NEEDS_CLARIFICATION",
+      "allowed_task_kinds": ["ANSWER_FACT", "CONFIRM_COLLECTION", "SUGGEST_ALTERNATIVE"],
+      "condition": "The public request cannot identify exactly one title and edition. An explicitly named paperback is not ambiguous merely because a hardback exists.",
+      "customer_text": "Which title and edition do you mean?"
+    },
+    "MISSING_COLLECTION_DATE": {
+      "status": "NEEDS_CLARIFICATION",
+      "allowed_task_kinds": ["CONFIRM_COLLECTION", "SUGGEST_ALTERNATIVE"],
+      "condition": "The request has no date that can be resolved from the frozen snapshot clock. Tomorrow in this incident is already resolvable and does not justify clarification.",
+      "customer_text": "Which collection date do you mean?"
+    },
+    "PUBLIC_DATA_UNAVAILABLE": {
+      "status": "REFERRED",
+      "allowed_task_kinds": ["ANSWER_FACT", "CONFIRM_COLLECTION", "SUGGEST_ALTERNATIVE"],
+      "condition": "Information necessary to establish this task's answer is absent, older than max_record_age_ms, belongs to an unavailable dependency, or conflicts under claim.public_support or collection.confirmed_only. Unrelated missing or conflicting data does not justify referral. An alternative task cannot refer because a different candidate has a data problem when an independently confirmed qualifying alternative is available. When no alternative is confirmed but a potentially qualifying candidate cannot be ruled in or out because of necessary missing, stale, unavailable or conflicting data, refer rather than claim no match. Zero stock alone is known data, not missing data; it conflicts only with a current true collection claim. Include no unsupported claim or commitment.",
+      "customer_text": "A member of staff needs to check the information needed for this request."
+    },
+    "NO_MATCHING_ALTERNATIVE": {
+      "status": "REFUSED",
+      "allowed_task_kinds": ["SUGGEST_ALTERNATIVE"],
+      "condition": "The complete frozen public catalog and the required current records are available and consistent, and no different entity meets every genre, price, stock and date condition. Missing, stale, unavailable or conflicting necessary information instead requires PUBLIC_DATA_UNAVAILABLE. The service's own empty search result is not proof.",
+      "customer_text": "No confirmed alternative in the shop's current catalog meets these requirements."
+    }
+  },
+  "allowed_tool_vocabulary": {
+    "public_record_lookup": "Read a public record by exact entity_ref and kind from shop.json; return its record_id and value, not an invented answer.",
+    "public_catalog_search": "Search the public entities in shop.json by genre. Catalog membership alone does not establish stock, price or collection availability."
+  },
+  "render_vocabulary": {
+    "price": "{title} ({edition}) costs {formatted_price}.",
+    "collection_available": "{title} ({edition}) is available for collection on {collection_date}.",
+    "collection_unavailable": "{title} ({edition}) is not confirmed for collection on {collection_date}.",
+    "alternative": "{title} ({edition}) is a same-genre alternative at {formatted_price}, available for collection on {collection_date}.",
+    "not_applicable": "An alternative was not needed because collection of the requested edition was confirmed."
+  },
+  "evidence_limits": [
+    "All titles, shop records and outcomes in this package are fictional scenario material.",
+    "The initial public incident is not a qualifying comparison or a protected case.",
+    "The starter is a deterministic local keyword router, not an AI or Nemotron execution.",
+    "Starter logs describe service-reported routing and local lookups, not controller-verified tool use or model reasoning.",
+    "No capture, diagnostic experiment, choice, incident resolution or business write is created by these drafts.",
+    "No broad-verification or request-specific repair is supplied or designated the correct implementation."
+  ]
+}

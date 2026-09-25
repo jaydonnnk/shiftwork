@@ -1,0 +1,21 @@
+{
+  "engagement_slug": "bookshop",
+  "version": 3,
+  "frozen_at": "2026-09-25T00:00:00+00:00",
+  "content_hash": "d9f18ddafd0cd7f791bd13b58b72b165954c1c51df824c96127ad4796bf7736a",
+  "required_dimensions": ["MUST_NEVER", "STANCE"],
+  "options": [
+    {
+      "id": "NEVER_INVENT_PRICE_STOCK_POLICY",
+      "dimension": "MUST_NEVER",
+      "learner_label": "Never state a price, stock level or policy the shop records do not support",
+      "evaluator_rule_id": "invariant.never_invent_fact"
+    },
+    {
+      "id": "USE_NEWEST_RECORD_WITH_AGE",
+      "dimension": "STANCE",
+      "learner_label": "Use the newest matching stock, price and availability records only when they are no older than one hour and all current relevant records agree. Refer missing, stale, unavailable or conflicting necessary information to staff under the public task rules. Asking, refusing or referring never counts as useful completion.",
+      "evaluator_rule_id": "freshness.use_newest_with_age"
+    }
+  ]
+}

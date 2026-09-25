@@ -1,0 +1,109 @@
+{
+  "review_status": "AUTHORIZED_FOR_LOCAL_VERIFICATION",
+  "description": "Agent-authored fictional public shop state authorized for the scoped local starter verification on 2026-09-25. No execution or business outcome is recorded here.",
+  "engagement_slug": "bookshop",
+  "display_name": "Bellwether Books",
+  "snapshot_version": 1,
+  "observed_at": "2026-09-25T09:00:00Z",
+  "timezone": "Europe/London",
+  "currency": "GBP",
+  "dependencies": {
+    "catalog": "available",
+    "inventory": "available",
+    "collection": "available"
+  },
+  "entities": {
+    "book:salt-roads:paperback": {
+      "title": "Salt Roads",
+      "edition": "paperback",
+      "genre": "coastal_travel"
+    },
+    "book:harbour-atlas:paperback": {
+      "title": "Harbour Atlas",
+      "edition": "paperback",
+      "genre": "coastal_travel"
+    },
+    "book:salt-roads:hardback": {
+      "title": "Salt Roads",
+      "edition": "hardback",
+      "genre": "coastal_travel"
+    }
+  },
+  "records": [
+    {
+      "record_id": "public:salt-roads:paperback:price",
+      "entity_ref": "book:salt-roads:paperback",
+      "kind": "price",
+      "value": 1800,
+      "currency": "GBP",
+      "record_age_ms": 0,
+      "dependency": "catalog"
+    },
+    {
+      "record_id": "public:salt-roads:paperback:stock",
+      "entity_ref": "book:salt-roads:paperback",
+      "kind": "stock",
+      "value": 0,
+      "record_age_ms": 0,
+      "dependency": "inventory"
+    },
+    {
+      "record_id": "public:salt-roads:paperback:collection",
+      "entity_ref": "book:salt-roads:paperback",
+      "kind": "availability",
+      "value": {"collection_date": "2026-09-26", "can_collect": false},
+      "record_age_ms": 0,
+      "dependency": "collection"
+    },
+    {
+      "record_id": "public:harbour-atlas:paperback:price",
+      "entity_ref": "book:harbour-atlas:paperback",
+      "kind": "price",
+      "value": 1600,
+      "currency": "GBP",
+      "record_age_ms": 0,
+      "dependency": "catalog"
+    },
+    {
+      "record_id": "public:harbour-atlas:paperback:stock",
+      "entity_ref": "book:harbour-atlas:paperback",
+      "kind": "stock",
+      "value": 3,
+      "record_age_ms": 0,
+      "dependency": "inventory"
+    },
+    {
+      "record_id": "public:harbour-atlas:paperback:collection",
+      "entity_ref": "book:harbour-atlas:paperback",
+      "kind": "availability",
+      "value": {"collection_date": "2026-09-26", "can_collect": true},
+      "record_age_ms": 0,
+      "dependency": "collection"
+    },
+    {
+      "record_id": "public:salt-roads:hardback:price",
+      "entity_ref": "book:salt-roads:hardback",
+      "kind": "price",
+      "value": 2400,
+      "currency": "GBP",
+      "record_age_ms": 0,
+      "dependency": "catalog"
+    },
+    {
+      "record_id": "public:salt-roads:hardback:stock",
+      "entity_ref": "book:salt-roads:hardback",
+      "kind": "stock",
+      "value": 2,
+      "record_age_ms": 0,
+      "dependency": "inventory"
+    },
+    {
+      "record_id": "public:salt-roads:hardback:collection",
+      "entity_ref": "book:salt-roads:hardback",
+      "kind": "availability",
+      "value": {"collection_date": "2026-09-26", "can_collect": true},
+      "record_age_ms": 0,
+      "dependency": "collection"
+    }
+  ]
+}
