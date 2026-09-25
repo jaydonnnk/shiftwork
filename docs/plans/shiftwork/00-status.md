@@ -10,24 +10,32 @@
   `02-architecture.md` permits a non-operational first-choice shift for a closed
   v5 engagement with no selection. The user approved this revision and requested
   Gate 3. It is not implemented.
-- **Gate 3: RE-APPROVED 2026-09-24 after the legacy first-choice backtrack.**
-  Its prior approval and commit `de250b9` remain historical. The revised
-  `03-program-design.md` covers the legacy API, executable material,
-  paired-workload binding, gateway policy and clarification assessment. The
-  user approved this working tree and authorized committing and merging it to
-  main without a co-author footer. It is design, not implementation authority.
-- **Gate 4: IN PROGRESS; separate re-approval pending.** `04-slices.md` proposes
-  the pivot build order and clause map. Its old-design approval history is not
-  authority to implement the pivot or continue old Slice 10. Its current draft
-  requires reconciliation against the re-approved Gate 3.
+- **Gate 3: RE-APPROVED 2026-09-24 after the scoped Northline backtrack.**
+  Gate 4 review found no Northline path from learner-edited code to an eligible
+  comparison, explicit choice and operation, because the comparison loader named
+  only Bellwether workloads. The approved `03-program-design.md` correction
+  specifies per-engagement reviewed workloads and manifests, reviewed seeding and
+  the first-shift starter branch, selection against the labelled starter ID,
+  pinned mission bytes in execution context, one public no-run source bootstrap
+  and failing-capable cross-engagement tests. The user's prior approval and local
+  merge as `aedc97f` and `ab5ab9c` remain historical. The approved correction is
+  committed as `f4ba057`. This is design, not
+  implementation authority.
+- **Gate 4: APPROVED 2026-09-24 for the final pivot.** `04-slices.md` maps
+  Slices 10 to 25, traces all 49 Gate 3 obligations to a completing slice and
+  keeps the capability spike before any live-dependent work. Its 2026-09-19
+  approval of the old design is historical. Approval is committed as `5a4f00f` and
+  authorizes planning one
+  slice at a time; no slice is implemented and none is checked off.
 - **Existing implementation:** Slices 1 through 9 remain completed as recorded;
   Slice 9's 2026-09-21 merge/push marks the user's visual acceptance. No completed
   implementation or historical evidence is discarded by this product backtrack.
-- **Scope:** commit and merge the approved Gate 2 correction and Gate 3
-  reconciliation, then revise Gate 4 and pause for its separate explicit
-  re-approval. Gate 1 publication/merge/push and prior design commits are
-  historical. No new push, runtime changes, installs, credentials, external AI
-  calls, spike runs, outreach, deployment or ADR #4 are authorized.
+- **Scope:** the user approved Gates 3 and 4, asked for a final gap check, and
+  authorized committing and pushing both to main without a co-author footer. That
+  authorization covers these documents only. Runtime changes, installs,
+  credentials, external AI calls, spike runs, fixture authoring, sealed-case
+  contents, outreach, deployment, publication, submission and ADR #4 remain
+  separately authorized. Each slice still needs its own explicit go-ahead.
 - **Git integration:** approval records committed as `dc962d7` and `5c68711`,
   published to `origin/shiftwork/slice-10`, then merged with `--no-ff` as `821a24c`
   and pushed to `origin/main`. Post-push status was clean and matched origin.
@@ -35,9 +43,13 @@
   `3799dfc`, both directly on main. Status immediately afterward was clean and
   two commits ahead. A later local check found `origin/main` at `3799dfc`, with
   remote-tracking reflog `update by push`; this session issued no push command.
-- **Resume point:** reconcile `04-slices.md` against the re-approved Gate 3,
-  then ask exactly `Approve Gate 4, or what should change?` No implementation
-  begins before that separate approval.
+- **Gate 3 merge:** `aedc97f` and `ab5ab9c` fast-forwarded local main without
+  a co-author footer and reached `origin/main` in this session's push. The
+  unrelated `.gitignore` edit stayed unstaged throughout.
+- **Resume point:** Slice 10 under `04-slices.md` section 3, on a branch named
+  `shiftwork/slice-10`, once the user gives that slice's go-ahead. Stop and
+  backtrack the affected gate if a slice falsifies an approved Gate 2 or Gate 3
+  decision.
 
 ### Revision scope and evidence boundaries
 
@@ -266,12 +278,86 @@ now be revised but still requires separate approval. This does not authorize a
 push, implementation, installation, credentials, live calls, a spike, sealed-case
 contents, outreach or deployment. No runtime or human result is implied.
 
+### Gate 3 local merge and scoped Northline backtrack: 2026-09-24
+
+The approved Gate 2 correction and Gate 3 design were committed as `aedc97f`
+and `ab5ab9c`, then fast-forwarded to local main. Both commit bodies have no
+co-author footer. Main is two commits ahead of `origin/main`; no push occurred.
+The unrelated `.gitignore` edit and unapproved Gate 4 draft remained unstaged.
+
+During Gate 4 review, the Northline transfer slice exposed a missing route from
+learner-edited code to selected operation: Gate 3 section 6.3 loaded only the
+three Bellwether comparison batches, diagnostics could not earn eligibility,
+and current startup seeded only Bellwether. Gate 2's per-engagement comparison
+and new-engagement starter boundaries are generic; this is a scoped Gate 3
+backtrack. The revised Gate 3 draft assigns Northline three reviewed pair
+batches and a pinned manifest, specifies reviewed seeding of the blank starter,
+reuses six-slot comparison and explicit selection, and places selected-version
+operation in the next shift after the starter run. It adds failing-capable
+cross-engagement, review, selection and business-write tests. It also defines a
+single public diagnostic source bootstrap for closed v5 shifts with no run,
+using a reviewed engagement request and a verified isolated executor. It pins
+reviewed mission bytes in execution context for replay and gives a new Northline
+engagement its own first-shift branch. The Gate 4 draft mapped this path and was
+placed on hold for this approval. No Northline fixture or catalog content was
+authored or sealed, and no runtime, live service or human test ran.
+
+### Gate 3 and Gate 4 approval, gap check and push: 2026-09-24
+
+The user wrote: "I approve gate 3 and 4. FInal checks for any gaps please and
+then commit and push both to main(no co author) if u have not yet". This
+re-approves the scoped Gate 3 Northline correction and separately approves the
+Gate 4 slice plan, and authorizes committing and pushing both to main without a
+co-author footer. It authorizes nothing else.
+
+A static gap check ran before the approval record was written. It confirmed:
+Gate 3 section 9 holds exactly 49 consecutive numbered obligations and the Gate 4
+clause trace holds exactly 49 rows mapping one to one onto them; the Gate 4
+dependency table and exit contracts each cover Slices 10 to 25 and match this
+file's checklist; `investigation_id: Id | None` reaches `Experiment`,
+`ExperimentRequest`, `ExperimentView` and the `experiments` storage constraint
+while `AssistEvent` and `AssistRequest` correctly stay non-null, because the
+bootstrap grants no help; frozen mission bytes and hash reach `ExecutionContext`,
+the context hash, the `execution_contexts` constraint, sections 6.6 and 6.8 and
+obligations 19, 29 and 42; `seed_reviewed_northline` and `open_next_shift` sit in
+the section 3.6 orchestration block, matching section 6.9's use of the existing
+`repo.seed_engagement` and `repo.seed_engagement_config`; the Northline one-hint
+ceiling appears in Gate 3 section 7 and Gate 4 S14; code fences balance; no added
+line contains an em dash or a bare `S` slice abbreviation; and `git diff --check`
+is clean.
+
+Four defects were found and repaired as documentation maintenance, with no
+decision change. Gate 3 section 6.3 opened its call stack with a stray two-space
+indent that no sibling section has. Gate 3 section 6.9 said "the first
+`/api/engagements/northline/shifts` call" creates a `STARTER_BASELINE` without
+scoping it to a newly seeded engagement, which read as granting a starter to a
+migrated v5 Northline engagement contrary to the preceding paragraph, section 6.7
+and Gate 4 obligation 45; the sentence now names the newly seeded branch and
+points a migrated engagement at section 6.0. `docs/SHIFTWORK_PLAN.md` still said
+"Slices 10 through 17 are not implemented" against a 10 to 25 plan. ADR 0005's
+status line still said program contracts remain unapproved.
+
+Gate 2 needed no change: its per-engagement comparison and new-engagement starter
+boundaries are engagement-generic, which is why this was a scoped Gate 3
+backtrack. No test, migration, install, credential, external call or human
+session was run; this remains a static document review.
+
+The approved Gate 3 correction is committed as `f4ba057` and the approved Gate 4
+plan as `5a4f00f`, both directly on main with no co-author footer. The first
+push advanced `origin/main` from `5d61a48` to `5a4f00f`, which also carried the
+previously unpushed `aedc97f` and `ab5ab9c`. `git rev-parse HEAD origin/main`
+returned the same SHA and `git status -sb` reported no ahead/behind. The
+unrelated `.gitignore` edit adding `/.workbuddy-ai/memory/` was left unstaged and
+unpushed as the user's own work. This approval record and the synchronized
+briefs follow in the same session.
+
 ## Previous gate status: historical through 2026-09-21
 
 The approval and slice records below retain their original scopes and evidence.
-Statements that work can continue or backtracks are closed, including old fresh-
-session notes, describe that earlier state, not authority to bypass the pending
-Gates 3 and 4 pivot reconciliation.
+Statements that work can continue, or that backtracks are closed, including old
+fresh-session notes, describe that earlier state. The 2026-09-24 pivot
+reconciliation of Gates 2, 3 and 4 supersedes them; nothing below is authority
+to bypass the approved pivot gates or the per-slice go-ahead.
 
 - Gate 1 — Product: RE-APPROVED 2026-09-18 (first approved 2026-09-15; backtracked
   and revised the same day for two user-directed changes: the learner is explicitly
@@ -345,8 +431,10 @@ deferred to Slice 13 evidence and separate authorization.
 
 The approvals from 2026-09-17 through 2026-09-19 apply to the pre-pivot plan.
 Slices 1 to 9 below keep their completed historical status and evidence. The
-2026-09-24 Slices 10 to 24 are a **proposed checklist only**; Gate 4 is IN
-PROGRESS and none of them may start until separate re-approval. After each
+2026-09-24 Slices 10 to 25 are the approved Gate 4 build order; none is
+implemented and none may be checked before its own demonstration. Each slice
+needs its own explicit go-ahead, and the separately authorized items in its Gate
+4 Authorization line stay separate. After each
 authorized slice: show the actual demonstration, record evidence, check it off,
 review affected ADRs and stale files, then ask whether to continue or re-steer.
 
@@ -367,14 +455,22 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
   evidence file written to `docs/plans/shiftwork/evidence/test1-central-mechanism.md`
   (evidence below)
 - [x] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03); implemented and browser-verified 2026-09-21, its independent review round adjudicated and repaired the same day (evidence in its two sections below), committed in nine reviewable batches on `shiftwork/slice-9` and merged to main (`4d5539a`) the same day, with the user marking that merge as the visual acceptance; pushed to origin. Preview/evidence below.
-- [ ] Slice 10: Client contract/repair stations (02, 04)
-- [ ] Slice 11: Client inherited room + distinct away-shift workshop (05, 06) + away config
-- [ ] Slice 12 — Nemotron assist gateway (+ model-feedback evidence pack)
-- [ ] Slice 13 — Token Factory capability spike (credential-gated)
-- [ ] Slice 14 — Real tokenfactory adapter + full Test 1 verdict (depends on Slice 13)
-- [ ] Slice 15 — Tavily curation + ablation (prize-conditional)
-- [ ] Slice 16 — Submission packaging: test build + demo video
-- [ ] Slice 17 — Hosted deployment (conditional: only if Option B selected at the Slice 13 exit)
+- [ ] Slice 10: byte-preserving v5-to-v6 migration and non-operational first-choice shift
+- [ ] Slice 11: executable task-relevant Bellwether failure, investigation and public diagnostic test
+- [ ] Slice 12: bounded Token Factory capability spike, separately authorized
+- [ ] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap
+- [ ] Slice 14: prediction-gated attributable assist gateway
+- [ ] Slice 15: reviewed A/B workloads and six frozen paired trial slots
+- [ ] Slice 16: fair comparison, exposure invalidation and restart recovery
+- [ ] Slice 17: explicit eligible exact-version selection
+- [ ] Slice 18: selected-version operation and operation-only consequences
+- [ ] Slice 19: read-only semantic replay and legacy unknown handling
+- [ ] Slice 20: selected-version inheritance and later alternative experiment
+- [ ] Slice 21: complete five-station Bellwether room journey
+- [ ] Slice 22: execute distinct Northline transfer and complete the six-station journey
+- [ ] Slice 23: optional Tavily curation and ablation
+- [ ] Slice 24: full-pivot package and judge evidence
+- [ ] Slice 25: conditional hosted demo
 
 Slices 1, 2 and 3 are implemented, reviewed and merged to main (2026-09-17 and
 2026-09-18; Slice 3 published as commit `8df3d6b`, `--no-ff` merge `1f38220`);
