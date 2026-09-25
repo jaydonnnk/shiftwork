@@ -12,6 +12,7 @@ from shiftwork.domain.models import (
     Claim,
     Incident,
     JsonValue,
+    OperatingSelection,
     Run,
     RunOutput,
     Shift,
@@ -61,6 +62,8 @@ class ShiftView(BaseModel):
     state: Literal["open", "closed"]
     opened_at: datetime
     closed_at: datetime | None = None
+    opening_mode: Literal["STANDARD", "LEGACY_FIRST_CHOICE"] | None = None
+    operation_allowed: bool
 
     @classmethod
     def of(cls, shift: Shift) -> "ShiftView":
@@ -96,6 +99,9 @@ class RunView(BaseModel):
     failure_kind: str | None = None
     started_at: datetime
     ended_at: datetime | None = None
+    purpose: Literal["EXPERIMENT", "OPERATION", "LEGACY_OPERATION"]
+    evidence_mode: Literal["RECORDED_INSPECTION", "TRUSTED_LOCAL", "ISOLATED_LIVE"] | None
+    selection_id: str | None
 
     @classmethod
     def of(cls, run: Run) -> "RunView":
@@ -261,6 +267,24 @@ class LedgerView(BaseModel):
     events: tuple[LedgerEventView, ...]
 
 
+class SelectionView(BaseModel):
+    model_config = _FROZEN
+
+    id: str
+    kind: Literal["STARTER_BASELINE", "LEARNER_CHOICE"]
+    selected_version_id: str
+    selected_content_hash: str
+    comparison_id: str | None
+    retained_alternative_version_id: str | None
+    rationale: str
+    state: Literal["VALID", "INVALIDATED"]
+    created_at: datetime
+
+    @classmethod
+    def of(cls, selection: OperatingSelection) -> "SelectionView":
+        return cls.model_validate(selection)
+
+
 class BoardView(BaseModel):
     model_config = _FROZEN
 
@@ -269,6 +293,10 @@ class BoardView(BaseModel):
     latest_shift: ShiftView | None = None
     latest_version: ArtifactVersionView | None = None
     latest_run: RunView | None = None
+    operating_status: Literal["NEEDS_FIRST_CHOICE", "STARTER_BASELINE", "SELECTED", "INVALIDATED"] | None
+    draft_base_version_id: str | None
+    latest_saved_version_id: str | None
+    operating_selection: SelectionView | None
     artifact_files: tuple[str, ...]
     requests_run: int
     attempts_used: int

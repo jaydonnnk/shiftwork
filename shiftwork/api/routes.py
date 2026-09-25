@@ -3,7 +3,7 @@
 import sqlite3
 from collections.abc import Iterator
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, Request
 from fastapi.responses import JSONResponse
 
 from shiftwork import orchestrator
@@ -40,7 +40,11 @@ def get_board(slug: str, conn: sqlite3.Connection = Depends(get_conn)) -> schema
 
 
 @router.post("/engagements/{slug}/shifts", response_model=schemas.ShiftView, status_code=201)
-def open_shift(slug: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.ShiftView:
+def open_shift(
+    slug: str,
+    body: None = Body(default=None),
+    conn: sqlite3.Connection = Depends(get_conn),
+) -> schemas.ShiftView:
     return schemas.ShiftView.of(orchestrator.open_next_shift(conn, slug))
 
 
