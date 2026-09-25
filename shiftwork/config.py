@@ -168,6 +168,18 @@ def repair_arc_artifact_files(stage: str) -> dict[str, str]:
     }
 
 
+PIVOT_STARTER_ARTIFACT_PATHS = {
+    "service.py": FIXTURE_DIR / "artifacts" / "bookshop" / "pivot_starter_failure_service.py",
+}
+PIVOT_STARTER_CONTRACT_JSON = {
+    "catalog_version": 3,
+    "must_never": ["NEVER_INVENT_PRICE_STOCK_POLICY"],
+    "selections": {"STANCE": "USE_NEWEST_RECORD_WITH_AGE"},
+    "response_time_limit_ms": 3000,
+    "declared_limits": ["Public collection and alternative answers only; no reservations or business writes."],
+}
+
+
 # The manifest alone is caller-supplied, so exact file bytes have a separate pin.
 # The `repair_arc_*` entries are the Test 1 pre-proof's artifact stages: their
 # manifest hash is the frozen artifact version's content hash under
@@ -185,6 +197,7 @@ TRUSTED_LOCAL_FIXTURES = {
     "env_probe": ("42b7be0ed72373478f205b3793066da8ebffb2c536b8e8779362b01f65f9a33a", "860018c4c94ef50a929ddc1f799e45427832b24b731123e1ad09ff99e2287d42"),
     "repair_arc_pre": ("36c485fdd777913fc8c0034f7509d9f28a03a06b91c72e2f1e463b42bba7f8fd", "2b103de1c6b95bdecb2eac786034a11ead12040d0abcbc744d5e1db10cc97359"),
     "repair_arc_post": ("390d8bad95c00cd7b8a9e7aebeb632930ba2146ec72a464e6d6b0a3021ef9f64", "651a825fe4b76f7aff52a08b62c7ab455fd805f9d1ed9bbb124ee6d03698f2ff"),
+    "pivot_starter": ("a1c1093fcc456ebb5afc07241bb24f34ca4ca80877a7fff00fe5c82e2c542f28", "407906232c54c0a76679fd70a0d72a9fa53fc123417975022bb974c09f5ba618"),
 }
 
 

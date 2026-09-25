@@ -15,8 +15,9 @@ import json
 import pytest
 
 from shiftwork import config
-from shiftwork.domain.contract_catalog import compute_catalog_hash, load_catalog
-from shiftwork.domain.errors import CatalogNotFound, CatalogTampered
+from shiftwork.domain.contract_catalog import compute_catalog_hash, load_catalog, validate_contract
+from shiftwork.domain.errors import CatalogNotFound, CatalogTampered, InvalidContract
+from shiftwork.domain.models import ContractParams
 
 
 def _write_catalog(dirpath, data):
@@ -79,3 +80,34 @@ def test_missing_catalog_version_is_not_found(tmp_path, monkeypatch):
     monkeypatch.setattr(config, "CATALOG_DIR", tmp_path)
     with pytest.raises(CatalogNotFound):
         load_catalog("bookshop", 99)
+
+
+@pytest.mark.parametrize("stance", ["VERIFY_EXACT_CLAIMS_NOW", "HARD_CHECK_HIGH_RISK_ONLY"])
+def test_pivot_catalog_rejects_incompatible_legacy_stances(stance):
+    params = ContractParams.model_validate({
+        **config.PIVOT_STARTER_CONTRACT_JSON,
+        "selections": {"STANCE": stance},
+    })
+    validate_contract(load_catalog("bookshop", 2), params.model_copy(update={"catalog_version": 2}))
+    with pytest.raises(InvalidContract, match="not in catalog"):
+        validate_contract(load_catalog("bookshop", 3), params)
+
+
+def test_pivot_catalog_accepts_bound_contract_and_preserves_historical_catalogs():
+    catalog = load_catalog("bookshop", 3)
+    validate_contract(catalog, ContractParams.model_validate(config.PIVOT_STARTER_CONTRACT_JSON))
+    assert {option.id.value for option in catalog.options} == {
+        "NEVER_INVENT_PRICE_STOCK_POLICY", "USE_NEWEST_RECORD_WITH_AGE",
+    }
+    assert catalog.content_hash == "d9f18ddafd0cd7f791bd13b58b72b165954c1c51df824c96127ad4796bf7736a"
+    assert load_catalog("bookshop", 1).content_hash == "d3df268cc83863a75f465543de26ab712efd7be193200a5e82710093d235ced6"
+    assert load_catalog("bookshop", 2).content_hash == "8fa29ef4a46f34b541370873caf09967445075f805fcc25200c3738f3ac36a37"
+
+
+def test_pivot_catalog_policy_tampering_is_rejected(tmp_path, monkeypatch):
+    data = json.loads((config.CATALOG_DIR / "bookshop_v3.json").read_bytes())
+    data["options"][1]["learner_label"] = "Answer stale stock without checking."
+    _write_catalog(tmp_path, data)
+    monkeypatch.setattr(config, "CATALOG_DIR", tmp_path)
+    with pytest.raises(CatalogTampered):
+        load_catalog("bookshop", 3)

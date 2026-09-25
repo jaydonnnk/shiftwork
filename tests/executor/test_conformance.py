@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import hashlib
 import importlib
 import importlib.util
 import itertools
@@ -63,6 +64,110 @@ def execute(adapter, request):
 def log_bytes(result):
     refs = {capture.log_ref for capture in result.captures if capture.log_ref is not None}
     return b"".join(base64.b64decode(ref.removeprefix("data:application/octet-stream;base64,"), validate=True) for ref in sorted(refs))
+
+
+def pivot_request(executor):
+    files = {
+        "service.py": (config.FIXTURE_DIR / "artifacts" / "bookshop" / "pivot_starter_failure_service.py").read_bytes(),
+    }
+    contract = ContractParams.model_validate({
+        "catalog_version": 3,
+        "must_never": ["NEVER_INVENT_PRICE_STOCK_POLICY"],
+        "selections": {"STANCE": "USE_NEWEST_RECORD_WITH_AGE"},
+        "response_time_limit_ms": 3000,
+        "declared_limits": ["Public collection and alternative answers only; no reservations or business writes."],
+    })
+    catalog = contract_catalog.load_catalog("bookshop", 3)
+    contract_catalog.validate_contract(catalog, contract)
+    batch = config.FIXTURE_DIR / "requests" / "bookshop_pivot_incident.jsonl"
+    return executor.base.RunRequest(
+        artifact_snapshot=executor.base.ArtifactSnapshotRef(
+            files=files,
+            manifest_hash=canonical.artifact_content_hash(
+                {name: body.decode("utf-8") for name, body in files.items()},
+                canonical.contract_params_json(contract), catalog.content_hash,
+            ),
+        ),
+        request_batch=executor.base.BatchRef(
+            path_ref="bookshop_pivot_incident.jsonl",
+            content_hash=canonical.content_hash(base64.b64encode(batch.read_bytes()).decode("ascii")),
+        ),
+        shop_snapshot_ref=str(config.FIXTURE_DIR / "shop" / "bookshop_pivot_public_state.json"),
+        harness_ref="stdlib-loopback-v1",
+        image_ref="local-python-stdlib",
+        deadline_s=5,
+        inference_grant=None,
+    )
+
+
+def test_pivot_starter_returns_only_supported_price(executor, sandbox_only, capsys):
+    request = pivot_request(executor)
+    result = execute(executor.local.LocalProcessAdapter(), request)
+    assert result.failure is None, "reviewed pivot starter did not execute"
+    assert len(result.captures) == 1
+    capture = result.captures[0]
+    assert capture.request_ordinal == 1
+    assert capture.http_status == 200 and capture.transport_error is None
+    assert capture.elapsed_ms is not None
+    assert json.loads(capture.body) == {
+        "request_id": "bellwether-collection-001",
+        "task_results": [{
+            "task_id": "price",
+            "status": "COMPLETED",
+            "entity_ref": "book:salt-roads:paperback",
+            "claims": [{
+                "kind": "price", "entity_ref": "book:salt-roads:paperback", "value": 1800,
+                "evidence_refs": ["public:salt-roads:paperback:price"],
+            }],
+            "commitment_ref": None,
+            "explanation_code": None,
+        }],
+        "evidence_refs": ["public:salt-roads:paperback:price"],
+        "uncertainty_codes": [],
+    }, "starter must expose the price-only failure, not stock-only output or completed customer tasks"
+    assert [json.loads(line) for line in log_bytes(result).splitlines()] == [
+        {"source": "service_reported", "kind": "interpretation", "request_id": "bellwether-collection-001", "intent": "price", "method": "keyword_router"},
+        {"source": "service_reported", "kind": "tool_call", "tool": "public_record_lookup", "entity_ref": "book:salt-roads:paperback", "record_kind": "price"},
+        {"source": "service_reported", "kind": "tool_result", "tool": "public_record_lookup", "record_ids": ["public:salt-roads:paperback:price"]},
+    ]
+    _, inventory = sandbox_only()
+    assert inventory == {
+        "service.py": request.artifact_snapshot.files["service.py"],
+        "shop.json": Path(request.shop_snapshot_ref).read_bytes(),
+    }
+    with capsys.disabled():
+        print("pivot-starter: adapter=local_process; local verification only; no task-assessor result")
+        print(capture.body.decode("utf-8"))
+        print(log_bytes(result).decode("utf-8"))
+
+
+@pytest.mark.parametrize("change", ["modified_bytes", "extra_file", "entrypoint", "manifest"])
+def test_pivot_starter_changed_artifact_never_starts(executor, monkeypatch, change):
+    request = pivot_request(executor)
+    files = dict(request.artifact_snapshot.files)
+    manifest = request.artifact_snapshot.manifest_hash
+    if change == "modified_bytes":
+        files["service.py"] += b"\n"
+    elif change == "extra_file":
+        files["extra.py"] = b""
+    elif change == "entrypoint":
+        files["learner_service.py"] = files.pop("service.py")
+    else:
+        manifest = "0" * 64
+    request = request.model_copy(update={
+        "artifact_snapshot": executor.base.ArtifactSnapshotRef(files=files, manifest_hash=manifest),
+    })
+    starts = []
+
+    async def forbidden_start(*args, **kwargs):
+        starts.append(args)
+        raise AssertionError("changed pivot artifact reached subprocess start")
+
+    monkeypatch.setattr(executor.local.asyncio, "create_subprocess_exec", forbidden_start)
+    result = execute(executor.local.LocalProcessAdapter(), request)
+    assert result.failure is ExecutorFailure.PROVISION_FAILED
+    assert result.captures == ()
+    assert starts == []
 
 
 @pytest.mark.parametrize("case", CASES, ids=lambda case: case.name)
@@ -193,12 +298,12 @@ def test_pinned_fixture_hashes_match_exact_bytes(executor):
     root = config.FIXTURE_DIR / "artifacts" / "bookshop"
     contract = ContractParams.model_validate_json((root / "contract.json").read_bytes())
     catalog = contract_catalog.load_catalog("bookshop", 1)
-    assert set(config.TRUSTED_LOCAL_FIXTURES) == {c.name for c in CASES} | {"env_probe"} | {
+    assert set(config.TRUSTED_LOCAL_FIXTURES) == {c.name for c in CASES} | {"env_probe", "pivot_starter"} | {
         f"repair_arc_{stage}" for stage in config.REPAIR_ARC_STAGES
     }, "a trusted fixture was added or removed without updating this guard"
     for name, (manifest_hash, files_hash) in config.TRUSTED_LOCAL_FIXTURES.items():
-        if name.startswith("repair_arc_"):
-            continue  # the pre-proof's stages are pinned under their own contract, below
+        if name.startswith("repair_arc_") or name == "pivot_starter":
+            continue
         request = request_for(executor, name)
         files = request.artifact_snapshot.files
         assert canonical.content_hash({path: base64.b64encode(body).decode("ascii") for path, body in files.items()}) == files_hash
@@ -216,6 +321,38 @@ def test_pinned_fixture_hashes_match_exact_bytes(executor):
         assert canonical.artifact_content_hash(
             files, canonical.contract_params_json(arc_contract), arc_catalog.content_hash
         ) == manifest_hash, f"repair_arc_{stage} manifest no longer matches its pin"
+    pivot = pivot_request(executor)
+    pivot_files = {name: path.read_bytes() for name, path in config.PIVOT_STARTER_ARTIFACT_PATHS.items()}
+    assert pivot_files == pivot.artifact_snapshot.files
+    pivot_contract = ContractParams.model_validate(config.PIVOT_STARTER_CONTRACT_JSON)
+    pivot_catalog = contract_catalog.load_catalog("bookshop", 3)
+    contract_catalog.validate_contract(pivot_catalog, pivot_contract)
+    manifest_hash, files_hash = config.TRUSTED_LOCAL_FIXTURES["pivot_starter"]
+    assert canonical.artifact_content_hash(
+        {name: body.decode("utf-8") for name, body in pivot_files.items()},
+        canonical.contract_params_json(pivot_contract), pivot_catalog.content_hash,
+    ) == pivot.artifact_snapshot.manifest_hash == manifest_hash
+    assert canonical.content_hash(
+        {name: base64.b64encode(body).decode("ascii") for name, body in pivot_files.items()}
+    ) == files_hash
+
+
+def test_pivot_review_bytes_and_catalog_binding():
+    expected = {
+        "mission/bookshop_pivot_v1.json": "aebe89555a72688eedfb564088f57b78328c184d0a4e378918c46d13d1e6c12a",
+        "requests/bookshop_pivot_incident.jsonl": "e9ae58c7d352f3f21b1f0edacbfcabf73a7c0edc0f551e7eb0bea8ae829cc399",
+        "shop/bookshop_pivot_public_state.json": "6bc17d69f43b24aa6048fdead7747e5820cd5740e47ba03a4a004d9ddea3c32c",
+        "artifacts/bookshop/pivot_starter_failure_service.py": "0069462dd0e1946f296ccd5f4aefbade8d8c3cffa08c39bd3854954b27be36ef",
+        "catalogs/bookshop_v3.json": "80129ded2e63240bb30bb2d462dcc3a1a988d6f615a8209f3f891671c9a03f8d",
+    }
+    for name, digest in expected.items():
+        raw = (config.FIXTURE_DIR / name).read_bytes()
+        assert hashlib.sha256(raw).hexdigest() == digest, f"public verification bytes changed: {name}"
+        assert b"\r" not in raw
+    mission = json.loads((config.FIXTURE_DIR / "mission" / "bookshop_pivot_v1.json").read_bytes())
+    catalog = contract_catalog.load_catalog("bookshop", 3)
+    assert mission["contract_catalog_version"] == catalog.version == 3
+    assert mission["contract_catalog_hash"] == catalog.content_hash
 
 
 @pytest.mark.parametrize("adapter_name", ["recorded", "local_process"])
