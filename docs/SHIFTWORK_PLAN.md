@@ -10,14 +10,19 @@ human comprehension sessions. Approval supplies no participant or learning evide
 **Later gates:** Gate 2 was re-approved and committed on main as `f048949` and
 `3799dfc`, then backtracked on 2026-09-24 for the legacy first-choice dead end.
 The user re-approved that revised architecture and separately re-approved the
-reconciled Gate 3 working tree, authorizing its commit and merge to main without
-a co-author footer. The earlier Gate 3 commit `de250b9` remains historical.
-Gate 4 is being revised and remains unapproved. No implementation is authorized.
+reconciled Gate 3 working tree, locally merged as `aedc97f` and `ab5ab9c` without
+co-author footers. The earlier Gate 3 commit `de250b9` remains historical. Gate 4
+review then exposed a missing Northline qualifying-comparison path, so Gate 3 was
+backtracked for a scoped revision. The user approved that correction and Gate 4
+together on 2026-09-24 and authorized committing and pushing both to main without
+a co-author footer. All four gates are approved. No implementation is authorized;
+each slice still needs its own go-ahead.
 Gate 1 publication and merge/push are complete (`821a24c` on main).
 
 **Build baseline:** Slices 1 through 9 are recorded as implemented; Slice 9 was
 merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance.
-Slices 10 through 17 are not implemented. Preserve that foundation and its evidence;
+Slices 10 through 25 are the approved Gate 4 build order and are not implemented.
+Preserve that foundation and its evidence;
 it does not demonstrate the new prediction, comparison or selection workflow.
 The full approval history and verbatim evidence remain in
 `plans/shiftwork/00-status.md`. This summary does not re-run or re-certify them.
@@ -84,8 +89,18 @@ claims of an exclusive category.
   Gate 3 next. Gate 3's current draft reconciles the legacy route, executable
   Bellwether and Northline ownership, three workload-to-slot bindings,
   controller-owned tool policy and clarification outcomes. The user separately
-  re-approved this Gate 3 revision. Gate 4 remains unapproved. No new runtime
-  evidence or permission to push or implement is supplied.
+  re-approved that Gate 3 revision and it was locally merged. Gate 4 review
+  exposed a Northline selection-path gap; the scoped Gate 3 correction now
+  awaits re-approval. Gate 4 remains unapproved. No new runtime evidence or
+  permission to push or implement is supplied.
+- 2026-09-24: the user approved the scoped Gate 3 Northline correction and Gate 4
+  together, asked for a final gap check, and authorized committing and pushing
+  both to main without a co-author footer. This supersedes the pending-approval
+  state in the previous entry. The gap check was static only and repaired four
+  documentation defects, including an unscoped Gate 3 sentence that read as
+  giving a migrated v5 Northline engagement a `STARTER_BASELINE` starter. No
+  runtime evidence, install, credential, external call or human session followed,
+  and no slice is authorized by these approvals alone.
 
 The external software-factory guide at the recorded
 `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` path was unavailable during
@@ -175,7 +190,7 @@ closed and whose selection is absent to open a labelled non-operational shift fo
 investigation, repair comparison and its first explicit choice. It seeds only an
 editable draft, not an operating version or invented consent; operation stays
 blocked until a valid learner choice. The controller, store, room and offline
-paths remain the baseline. Gates 2 and 3 are re-approved. Actual task rubrics,
+paths remain the baseline. Gates 2, 3 and 4 are approved. Actual task rubrics,
 reviewed fixtures and channel verification require later authorization and evidence.
 Repeated probing, protected-case leakage and isolation remain constraints.
 
@@ -276,6 +291,9 @@ format; the four official criteria remain equally weighted.
 
 ## 12. Immediate next action
 
-Revise and seek separate approval for the Gate 4 draft. Preserve completed code
-and evidence; do not resume old Slice 10 or implement the pivot under historical
-approvals.
+Start Slice 10 on a branch named `shiftwork/slice-10`, once the user gives that
+slice's go-ahead, and follow `plans/shiftwork/04-slices.md` section 3. Preserve
+completed code and evidence; do not resume old Slice 10 or implement the pivot
+under historical approvals. Installs, credentials, external calls, the capability
+spike, fixture authoring, sealed-case contents, outreach, deployment,
+publication, submission and ADR #4 each remain separately authorized.

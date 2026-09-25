@@ -1,7 +1,10 @@
 # ADR 0005: Experiments, operating selection and retained evidence
 
 - Status: Accepted architecture, approved in Gate 2 on 2026-09-24; recorded during
-  Gate 3 reconciliation. Program contracts and implementation remain unapproved.
+  Gate 3 reconciliation. Gate 3 program contracts and the Gate 4 slice plan were
+  approved on 2026-09-24, including Gate 3's scoped Northline selection
+  correction. Implementation remains unauthorized; each slice needs its own
+  go-ahead.
 - Authority: `docs/plans/shiftwork/02-architecture.md` S4 to S10 and S19.
 - Supersedes the conflicting pre-pivot semantics identified below in ADRs 0001 to
   0003. Those files and their dated implementation evidence remain historical.
@@ -58,7 +61,8 @@ latest-version inheritance and shared run finalization do not make those distinc
 
 The existing controller, store, room, recorded adapter and pinned trusted-local
 fixtures remain the foundation. Their historical evidence does not prove the new
-workflow. Gates 3 and 4 must specify and approve the exact contracts and vertical
-changes before implementation resumes. No live integration, learning result,
-installation, credential use, deployment, publication or new gate approval is
+workflow. Gates 3 and 4 have since specified and approved the exact contracts and
+vertical changes, so implementation may resume one approved slice at a time under
+its own go-ahead. No live integration, learning result,
+installation, credential use, deployment or publication is
 established by this record.

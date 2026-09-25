@@ -57,10 +57,22 @@ summaries when a time-sensitive external claim is being made.
   with no selection had no path to make its first choice. The user explicitly
   re-approved the revised Gate 2 architecture and requested Gate 3. Gate 3's
   prior re-approval and commit `de250b9` remain historical. The user separately
-  re-approved the reconciled Gate 3 working tree and authorized committing and
-  merging it to main without a co-author footer. Gate 4's draft remains
-  unapproved and is next for revision. Do not resume old Slice 10 or implement
-  the pivot yet.
+  re-approved the reconciled Gate 3 working tree; `aedc97f` and `ab5ab9c` were
+  committed without co-author footers and fast-forwarded to local main, without
+  a push. Gate 4 review then found that Northline could not qualify an edited
+  version for selection or operation because Gate 3 loaded Bellwether-only
+  comparison workloads. Gate 3 was backtracked for that scoped correction, and the
+  user then approved Gate 3 and Gate 4 together, asked for a final gap check and
+  authorized committing and pushing both to main without a co-author footer. All
+  four gates are now approved. The gap check was static only and repaired four
+  documentation defects; no runtime, install, credential, external call or human
+  session followed. Gate 4 approval authorizes planning one slice at a time, not
+  implementation: each slice still needs its own explicit go-ahead, and installs,
+  credentials, external calls, the capability spike, fixture authoring,
+  sealed-case contents, outreach, deployment, publication, submission and ADR #4
+  each remain separately authorized. The next action is Slice 10 under
+  `04-slices.md` section 3 on a branch named `shiftwork/slice-10`. Do not resume
+  old Slice 10 or implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
   the exact tested version and inherited operational consequences. Experiments,
@@ -73,8 +85,9 @@ summaries when a time-sensitive external claim is being made.
   2026-09-24 revision. It was subsequently loaded through the `software-factory`
   skill in the same-day approval session; no replacement was installed. Follow
   that guide and the explicit repository gate rules.
-- The following pre-pivot approval history retains its original scope. Any statement
-  below that slice work can proceed is suspended pending Gates 2 to 4 reconciliation.
+- The following pre-pivot approval history retains its original scope. The Gates 2
+  to 4 pivot reconciliation is complete, so nothing below authorizes pivot slice
+  work; that follows the approved `04-slices.md` and its per-slice go-ahead.
 - Pre-pivot gate state: Gate 1 - Product RE-APPROVED 2026-09-18 (first approved
   2026-09-15; backtracked and revised the same day for the explicit junior applied
   AI engineer role framing and the selected isometric operational-room visual
