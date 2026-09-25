@@ -240,7 +240,9 @@ def test_error_details_carry_no_host_path(env_markers, marker_db) -> None:
     with TestClient(create_app(str(marker_db))) as client:
         shift = client.post("/api/engagements/bookshop/shifts")
         shift_id = shift.json()["id"]
-        # No frozen version yet: starting a run is refused with a typed conflict.
+        # A closed shift refuses a run with a typed conflict, even with a starter.
+        closed = client.post(f"/api/shifts/{shift_id}/close")
+        assert closed.status_code == 200, closed.text
         refused = client.post(f"/api/shifts/{shift_id}/runs")
         assert refused.status_code == 409, refused.text
         for surface in decoded_surfaces(refused.text):

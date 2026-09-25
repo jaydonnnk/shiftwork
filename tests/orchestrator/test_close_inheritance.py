@@ -87,7 +87,7 @@ def _events_of(db_file, event_type: str) -> list:
 
 
 @pytest.fixture()
-def driven(tmp_path):
+def driven(tmp_path, select_version_for_test):
     """One open shift, one frozen version, one failing attempt: three unresolved incidents."""
     db_file = tmp_path / "close.db"
     with TestClient(create_app(str(db_file))) as client:
@@ -104,7 +104,9 @@ def driven(tmp_path):
             "the frozen version must differ from the shipped template, or seeding "
             "from inheritance cannot be told apart from seeding the template"
         )
-        _freeze(client, shift_id)
+        frozen = _freeze(client, shift_id)
+        # Historical executor assertions require this exact test-only choice.
+        select_version_for_test(db_file, shift_id, frozen["id"])
         failing = _attempt(client, shift_id)
         assert failing["state"] == "FINALIZED", failing
         board = _board(client)
@@ -114,7 +116,7 @@ def driven(tmp_path):
         yield {"client": client, "db_file": db_file, "shift_id": shift_id}
 
 
-def test_unresolved_limits_follow_the_latest_close(driven):
+def test_unresolved_limits_follow_the_latest_close(driven, select_version_for_test):
     # A declared limit stays in force until a later close stops declaring it: the
     # projection is the most recent close's set, so a learner who removes the
     # limitation sees it leave the board while the ledger keeps every event.
@@ -124,7 +126,8 @@ def test_unresolved_limits_follow_the_latest_close(driven):
     assert _board(client)["unresolved_limits"] == list(DECLARED)
 
     dropped = DECLARED[:1]
-    _freeze(client, second, {**CONTRACT, "declared_limits": list(dropped)})
+    reduced = _freeze(client, second, {**CONTRACT, "declared_limits": list(dropped)})
+    select_version_for_test(db_file, second, reduced["id"])
     _call(client, "POST", f"/api/shifts/{second}/close")
     third = _open(client)
     board = _board(client)
@@ -314,11 +317,12 @@ def test_close_refuses_while_a_run_is_in_flight(driven):
         conn.close()
 
 
-def test_concurrent_closes_write_one_event_set(tmp_path):
+def test_concurrent_closes_write_one_event_set(tmp_path, select_version_for_test):
     db_file = tmp_path / "concurrent.db"
     with TestClient(create_app(str(db_file))) as client:
         shift_id = _open(client)
-        _freeze(client, shift_id)
+        frozen = _freeze(client, shift_id)
+        select_version_for_test(db_file, shift_id, frozen["id"])
         _attempt(client, shift_id)
         barrier = threading.Barrier(2)
         results: list = []
@@ -391,7 +395,9 @@ def test_close_fault_leaves_neither_partial_close_nor_partial_events(driven, mon
         assert _ledger(client)["events"] == original_events, f"a fault in {victim} appended events"
 
 
-def test_inherited_unresolved_incident_resolves_on_a_later_passing_run(driven):
+def test_inherited_unresolved_incident_resolves_on_a_later_passing_run(
+    driven, select_version_for_test
+):
     # A close retires unresolved incidents as CLOSED_UNRESOLVED; the next shift
     # inherits them and a later passing run of a new version resolves them
     # (program design S3.9, S5.7). Without that path the inherited incident would
@@ -407,6 +413,7 @@ def test_inherited_unresolved_incident_resolves_on_a_later_passing_run(driven):
     files["service.py"] = files["service.py"] + "\n# repair: cite evidence with every claim\n"
     _call(client, "PUT", f"/api/shifts/{next_shift}/artifact", json={"files": files})
     version = _freeze(client, next_shift)
+    select_version_for_test(db_file, next_shift, version["id"])
 
     run = _attempt(client, next_shift)
     assert run["state"] == "FINALIZED", run

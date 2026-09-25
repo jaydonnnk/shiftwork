@@ -20,13 +20,13 @@ from shiftwork.domain import canonical
 from shiftwork.store import db
 
 
-def _drive_to_frozen(client: TestClient) -> str:
+def _drive_to_frozen(client: TestClient) -> tuple[str, str]:
     shift = client.post("/api/engagements/bookshop/shifts").json()
     frozen = client.post(
         f"/api/shifts/{shift['id']}/artifact/versions", json={"contract": CONTRACT}
     )
     assert frozen.status_code == 201, frozen.text
-    return shift["id"]
+    return shift["id"], frozen.json()["id"]
 
 
 def _wait(client: TestClient, run_id: str) -> dict:
@@ -66,13 +66,14 @@ def test_snapshot_pins_and_authored_pairings_match_the_fixtures():
         )
 
 
-def test_run_row_adapter_is_load_bearing(session):
+def test_run_row_adapter_is_load_bearing(session, select_version_for_test):
     # A run persisted as local_process must be executed by the local_process
     # adapter, which refuses a learner artifact that is not a pinned trusted
     # fixture: FAILED with a typed PROVISION_FAILED and no captures. The run's own
     # (batch, snapshot) pairing exists in the authored map, so a resolution that
     # ignored run.adapter and used the configured recorded default would have
     # replayed a transcript and FINALIZED this run instead.
+    select_version_for_test(session.db_file, session.shift_id, session.versions[-1])
     conn = db.connect(session.db_file)
     try:
         run = orchestrator.start_run(conn, session.shift_id, executor="local_process")
@@ -92,11 +93,14 @@ def test_run_row_adapter_is_load_bearing(session):
     assert session.board()["attempts_used"] == 1, "a failed run must still consume its reservation"
 
 
-def test_unmapped_pairing_fails_closed_without_invoking_an_adapter(session, monkeypatch):
+def test_unmapped_pairing_fails_closed_without_invoking_an_adapter(
+    session, monkeypatch, select_version_for_test
+):
     # With this attempt's pairing removed from the authored map, the run must fail
     # closed and never reach an adapter. A fallback that picked any other
     # transcript would invoke the recording below; a fallback that happened to
     # pair would finalize the run.
+    select_version_for_test(session.db_file, session.shift_id, session.versions[-1])
     invoked: list = []
     recorded_adapter = orchestrator.RecordedAdapter
 
@@ -121,10 +125,11 @@ def test_unmapped_pairing_fails_closed_without_invoking_an_adapter(session, monk
     assert session.board()["attempts_used"] == 1, "a failed run must still consume its reservation"
 
 
-def test_unimplemented_adapter_fails_closed_before_execution(session):
+def test_unimplemented_adapter_fails_closed_before_execution(session, select_version_for_test):
     # tokenfactory is a valid persisted adapter name but has no implementation
     # before Slice 14: resolving it must fail closed with a typed PROVISION_FAILED
     # and write no captures, never fall back to another adapter.
+    select_version_for_test(session.db_file, session.shift_id, session.versions[-1])
     conn = db.connect(session.db_file)
     try:
         run = orchestrator.start_run(conn, session.shift_id, executor="tokenfactory")
@@ -142,7 +147,7 @@ def test_unimplemented_adapter_fails_closed_before_execution(session):
     assert session.client.get("/api/engagements/bookshop/ledger").json()["events"] == []
 
 
-def test_route_persists_the_controller_configured_adapter(tmp_path):
+def test_route_persists_the_controller_configured_adapter(tmp_path, select_version_for_test):
     # The route takes the executor from the app's controller configuration, never
     # from the request body. Configured for local_process, the run row persists
     # local_process and is executed by it (failing closed on the untrusted learner
@@ -150,7 +155,8 @@ def test_route_persists_the_controller_configured_adapter(tmp_path):
     # 'recorded', pair batch 1 with its transcript and FINALIZE.
     db_file = tmp_path / "binding.db"
     with TestClient(create_app(str(db_file), executor="local_process")) as client:
-        shift_id = _drive_to_frozen(client)
+        shift_id, version_id = _drive_to_frozen(client)
+        select_version_for_test(db_file, shift_id, version_id)
         started = client.post(f"/api/shifts/{shift_id}/runs")
         assert started.status_code == 202, started.text
         run_id = started.json()["id"]

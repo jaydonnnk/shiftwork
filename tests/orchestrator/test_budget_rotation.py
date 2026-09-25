@@ -23,6 +23,16 @@ from shiftwork.sealed import store as sealed_store
 from shiftwork.store import db, repo
 
 
+@pytest.fixture(name="session")
+def selected_session(session, select_version_for_test):
+    """Run historical budget checks against their frozen learner version.
+
+    The test-only choice supplies the S10 prerequisite; S17 owns eligibility.
+    """
+    select_version_for_test(session.db_file, session.shift_id, session.versions[-1])
+    return session
+
+
 def _rows(db_file, sql: str) -> list[sqlite3.Row]:
     conn = sqlite3.connect(db_file)
     conn.row_factory = sqlite3.Row
@@ -396,7 +406,9 @@ def test_repair_resolution_same_version_never_resolves(session):
     assert run_two["artifact_version_id"] == run_one["artifact_version_id"]
 
 
-def test_repair_resolution_failing_acceptance_never_resolves(session, tmp_path):
+def test_repair_resolution_failing_acceptance_never_resolves(
+    session, tmp_path, select_version_for_test
+):
     # Test 34 negative 2: a new version that passes the linked regression but
     # FAILS the drawn (never-exposed) acceptance case never resolves the incident.
     run_one = session.attempt()
@@ -405,7 +417,8 @@ def test_repair_resolution_failing_acceptance_never_resolves(session, tmp_path):
 
     # Freeze a new version (the repair).
     session.edit()
-    session.freeze()
+    repaired = session.freeze()
+    select_version_for_test(session.db_file, session.shift_id, repaired["id"])
 
     # Attempt 2 with a transcript where ordinal 1 passes (regression) but
     # ordinal 2 fails (the drawn acceptance case): MISSING_EVIDENCE on ordinal 2.
@@ -540,7 +553,9 @@ def test_select_variant_excludes_exposed_variants():
     assert rotation.select_variant("test_family", [case_a, case_b], exposed).id == "exposed-b"
 
 
-def test_repair_resolution_failing_regression_never_resolves(session, tmp_path):
+def test_repair_resolution_failing_regression_never_resolves(
+    session, tmp_path, select_version_for_test
+):
     # Test 34 negative 3: a new version whose drawn acceptance passes but whose
     # linked REGRESSION fails never resolves the incident. The resolution gate
     # requires both to pass (program design S5.7).
@@ -550,7 +565,8 @@ def test_repair_resolution_failing_regression_never_resolves(session, tmp_path):
 
     # Freeze a new version (the repair).
     session.edit()
-    session.freeze()
+    repaired = session.freeze()
+    select_version_for_test(session.db_file, session.shift_id, repaired["id"])
 
     # Attempt 2 with a transcript where ordinal 1 FAILS (the regression) but
     # ordinal 2 passes (the drawn acceptance): the regression gate blocks.
@@ -624,7 +640,9 @@ def test_shared_ordinal_rejects_multi_ordinal_variant():
     assert "binds several request ordinals" in str(raised)
 
 
-def test_resolved_incident_regression_excluded_from_later_run(session):
+def test_resolved_incident_regression_excluded_from_later_run(
+    session, select_version_for_test
+):
     # load_drawn_cases includes open-incident regressions but EXCLUDES resolved
     # ones: once an incident resolves, repeating its old stimulus is not part of
     # a later run's evidence (program design S5.3).
@@ -634,7 +652,8 @@ def test_resolved_incident_regression_excluded_from_later_run(session):
 
     # Repair: new version, attempt 2 resolves all incidents.
     session.edit()
-    session.freeze()
+    repaired = session.freeze()
+    select_version_for_test(session.db_file, session.shift_id, repaired["id"])
     run_two = session.attempt()
     assert run_two["state"] == "FINALIZED"
     assert session.board()["incidents"] == []

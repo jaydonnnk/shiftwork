@@ -28,6 +28,7 @@ from shiftwork.domain.models import (
     CheckResult,
     ContractParams,
     ExecutorFailure,
+    LedgerEventType,
     ReasonCode,
     RunOutput,
     RunState,
@@ -438,6 +439,8 @@ def test_restart_reconciles_nonterminal_runs_keeping_captures_and_draws(tmp_path
         assert orchestrator.reconcile_interrupted(conn) == [], "reconciliation is not idempotent"
         # The close is no longer blocked by the failed runs.
         assert orchestrator.close_shift(conn, shift.id).state == "closed"
+        close_events = repo.list_ledger_events(conn, config.BOOKSHOP_SLUG)
+        assert all(event.event_type is LedgerEventType.LIMIT_DECLARED for event in close_events)
     finally:
         conn.close()
 
@@ -447,7 +450,7 @@ def test_restart_reconciles_nonterminal_runs_keeping_captures_and_draws(tmp_path
     try:
         for run in (queued, running, captured):
             assert repo.get_run(reopened, run.id).state is RunState.FAILED
-        assert repo.list_ledger_events(reopened, config.BOOKSHOP_SLUG) == []
+        assert repo.list_ledger_events(reopened, config.BOOKSHOP_SLUG) == close_events
     finally:
         reopened.close()
 

@@ -46,7 +46,7 @@ def _ok(response, expected: int = 200):
 
 
 @pytest.fixture()
-def driven(tmp_path):
+def driven(tmp_path, select_version_for_test):
     db_file = tmp_path / "thin.db"
     with TestClient(create_app(str(db_file), shop_snapshot=config.THIN_SNAPSHOT)) as client:
         shift = _ok(client.post("/api/engagements/bookshop/shifts"), 201)
@@ -56,6 +56,7 @@ def driven(tmp_path):
             ),
             201,
         )
+        select_version_for_test(db_file, shift["id"], version["id"])
         started = _ok(client.post(f"/api/shifts/{shift['id']}/runs"), 202)
         run = _ok(client.get(f"/api/runs/{started['id']}"))
         yield {

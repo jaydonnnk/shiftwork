@@ -164,7 +164,7 @@ def test_lifecycle_persists_and_returns_real_rows(client):
         }
         assert counts == {
             "shifts": 1,
-            "artifact_versions": 1,
+            "artifact_versions": 2,  # immutable starter plus the learner freeze
             "runs": 1,
             "run_outputs": 1,
             "check_results": families,

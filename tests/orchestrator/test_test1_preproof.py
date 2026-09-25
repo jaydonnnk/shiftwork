@@ -86,11 +86,12 @@ def _sweep(client: TestClient, shift_id: str, run_ids: list[str], incident_ids: 
     return surfaces
 
 
-def test_full_budget_preserves_unseen_inherited_case(tmp_path):
+def test_full_budget_preserves_unseen_inherited_case(tmp_path, select_version_for_test):
     db_file = tmp_path / "preproof.db"
     with TestClient(create_app(str(db_file), executor="local_process")) as client:
         shift_one = _open(client)
         version_one = _freeze_stage(client, shift_one, "pre")
+        select_version_for_test(db_file, shift_one, version_one["id"])
 
         run_ids = []
         for attempt in range(1, len(HELD_OUT) + 1):
@@ -121,6 +122,7 @@ def test_full_budget_preserves_unseen_inherited_case(tmp_path):
         # The repair, then the close: the version, the decisions and checks files
         # and every unresolved incident carry forward; limits are declared once.
         version_two = _freeze_stage(client, shift_one, "post")
+        select_version_for_test(db_file, shift_one, version_two["id"])
         closed = _call(client, "POST", f"/api/shifts/{shift_one}/close")
         assert closed["state"] == "closed"
         board = _call(client, "GET", "/api/engagements/bookshop/board")
@@ -220,7 +222,9 @@ def test_full_budget_preserves_unseen_inherited_case(tmp_path):
     assert executed == {1, 2, 3}, f"shift 1 executed later stimuli than its attempts: {executed}"
 
 
-def test_next_shift_needs_the_six_variant_inventory(tmp_path, sealed_inventory):
+def test_next_shift_needs_the_six_variant_inventory(
+    tmp_path, sealed_inventory, select_version_for_test
+):
     # Test 40's inventory clause: with the old three-variant families, shift 1
     # consumes every variant and the next shift's first run is refused whole, so
     # the pre-proof's shift-2 assertion is failing-capable against that inventory.
@@ -232,7 +236,7 @@ def test_next_shift_needs_the_six_variant_inventory(tmp_path, sealed_inventory):
     db_file = tmp_path / "three-variant.db"
     with TestClient(create_app(str(db_file))) as client:
         shift_one = _open(client)
-        _call(
+        frozen = _call(
             client,
             "POST",
             f"/api/shifts/{shift_one}/artifact/versions",
@@ -246,6 +250,7 @@ def test_next_shift_needs_the_six_variant_inventory(tmp_path, sealed_inventory):
                 }
             },
         )
+        select_version_for_test(db_file, shift_one, frozen["id"])
         for _ in range(3):
             assert _attempt(client, shift_one)["state"] == "FINALIZED"
         _call(client, "POST", f"/api/shifts/{shift_one}/close")
