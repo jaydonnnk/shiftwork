@@ -70,9 +70,10 @@ summaries when a time-sensitive external claim is being made.
   implementation: each slice still needs its own explicit go-ahead, and installs,
   credentials, external calls, the capability spike, fixture authoring,
   sealed-case contents, outreach, deployment, publication, submission and ADR #4
-  each remain separately authorized. The next action is Slice 10 under
-  `04-slices.md` section 3 on a branch named `shiftwork/slice-10`. Do not resume
-  old Slice 10 or implement the pivot under historical approvals.
+  each remain separately authorized. Slice 10 is accepted and merged to main as
+  `f0a1e81..0432cbd`, pushed 2026-09-25. The next action is Slice 11 under
+  `04-slices.md` section 3 on a branch named `shiftwork/slice-11`, and it needs
+  its own go-ahead. Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
   the exact tested version and inherited operational consequences. Experiments,
@@ -155,8 +156,12 @@ summaries when a time-sensitive external claim is being made.
   customer-shift stations) is implemented on `shiftwork/slice-9` (2026-09-21), its
   independent review round adjudicated and repaired, its post-slice cleanup scan
   recorded, and it is merged to main (`4d5539a`, 2026-09-21, fast-forward) and
-  pushed, with the user's visual acceptance marked by that merge. Slices 10-17 are
-  not implemented.
+  pushed, with the user's visual acceptance marked by that merge. Under this
+  pre-pivot numbering Slices 10-17 were not implemented, and that numbering is
+  historical. Under the approved pivot, Slice 10 (v5 history to v6 with no
+  invented choice) is implemented, was accepted by the user on 2026-09-25 and is
+  merged to main as `f0a1e81..0432cbd` and pushed; Slices 11-25 are not
+  implemented.
   Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the

@@ -19,9 +19,11 @@ a co-author footer. All four gates are approved. No implementation is authorized
 each slice still needs its own go-ahead.
 Gate 1 publication and merge/push are complete (`821a24c` on main).
 
-**Build baseline:** Slices 1 through 9 are recorded as implemented; Slice 9 was
-merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance.
-Slices 10 through 25 are the approved Gate 4 build order and are not implemented.
+**Build baseline:** Slices 1 through 10 are recorded as implemented; Slice 9 was
+merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance,
+and Slice 10 was accepted by the user on 2026-09-25, then merged to main as
+`f0a1e81..0432cbd` and pushed the same day. Slices 11 through 25 are the approved
+Gate 4 build order and are not implemented.
 Preserve that foundation and its evidence;
 it does not demonstrate the new prediction, comparison or selection workflow.
 The full approval history and verbatim evidence remain in
@@ -291,9 +293,10 @@ format; the four official criteria remain equally weighted.
 
 ## 12. Immediate next action
 
-Start Slice 10 on a branch named `shiftwork/slice-10`, once the user gives that
-slice's go-ahead, and follow `plans/shiftwork/04-slices.md` section 3. Preserve
-completed code and evidence; do not resume old Slice 10 or implement the pivot
-under historical approvals. Installs, credentials, external calls, the capability
+Slice 10 is accepted, merged to main as `f0a1e81..0432cbd` and pushed. The next
+action is Slice 11 on a branch named `shiftwork/slice-11`, once the user gives
+that slice's go-ahead, following `plans/shiftwork/04-slices.md` section 3.
+Preserve completed code and evidence; do not implement the pivot under historical
+approvals. Installs, credentials, external calls, the capability
 spike, fixture authoring, sealed-case contents, outreach, deployment,
 publication, submission and ADR #4 each remain separately authorized.

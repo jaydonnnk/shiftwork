@@ -3280,12 +3280,27 @@ the merge.
 ## Slice 10 implementation and verification: 2026-09-25
 
 **State: ACCEPTED by the user 2026-09-25**, who authorized committing and
-publishing to main. S10 is implemented and demonstrated on `shiftwork/slice-10`
-and merged to main by fast-forward; the exact commit range is added by the
-follow-up record after the merge. No install ran, no external service was called,
-the user's live database was not migrated, and S11 was not started. The one
-integrity question this verification raised was put to the user, decided on
-2026-09-25, and is resolved below.
+publishing to main. S10 is implemented and demonstrated on `shiftwork/slice-10`,
+committed there in eight focused batches, fast-forward merged to main as
+**`f0a1e81..0432cbd`** and pushed to `origin/main` the same day. Post-push
+`main` and `origin/main` were both `0432cbd` and the working tree was clean. No
+co-author trailer was used. `origin/shiftwork/slice-10` was **not** pushed and
+sits 20 commits behind, following the Slice 9 precedent that the slice branch is
+not published separately. No install ran, no external service was called, the
+user's live database was not migrated, and S11 was not started. The one integrity
+question this verification raised was put to the user, decided on 2026-09-25, and
+is resolved below.
+
+The eight batches, in order: `972b3f8` store layer and the transactional v6
+migration; `ec25bc1` domain models and the orchestrator's exact-selection policy;
+`98d9cb7` API projections and the server-decided opening mode; `e683bbe` the
+migration and route test suites with their mutation proofs; `7c25ff3` the frozen
+v5 schema snapshot that re-pins the historical upgrade fixtures; `79dba6c` the
+explicit-selection prerequisite for the historical executor tests; `586fe8f` the
+migration demo, the room labels and the preview relocation; `0432cbd` this
+evidence record, the ADR 0003 note and the MISTAKES entry. The suite was re-run on
+the committed state before the merge: `230 passed, 1 skipped, 2 warnings in
+71.84s`.
 
 The post-slice cleanup scan ran before committing and found no orphans, dead
 fixtures, stray files or leftover scaffolding: all six new S10 files have
@@ -3719,6 +3734,16 @@ follow-up revision awaited explicit re-approval; the user approved it in chat on
 
 ## Approval history
 
+- Slice 10 - v5 history to v6 without invented choice: ACCEPTED by the user in
+  chat on 2026-09-25 after the verification report, which disclosed the preview
+  regression, the fabricated-choice shim, the flaky atomicity proof and the
+  missing room screenshot rather than presenting a green run. The same message
+  authorized committing and publishing to main. The interim shim question was put
+  to the user separately and decided first: move it into the test layer. Merged to
+  main as `f0a1e81..0432cbd` and pushed, no co-author footer. This acceptance
+  covers S10 only; S11 and every install, credential, external call, spike run,
+  fixture authoring, sealed-case decision, outreach, deployment, publication,
+  submission and ADR #4 remain separately authorized.
 - Gate 3 - Program Design: RE-APPROVED by the user in chat on 2026-09-24 after
   the legacy first-choice Gate 2 backtrack. The same message authorizes a
   focused commit and merge to main without a co-author footer, followed by
