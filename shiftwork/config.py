@@ -75,6 +75,17 @@ REASON_CODE_RENDER_MAP: dict[ReasonCode, str] = {
     ReasonCode.LATENCY_BUDGET: "The answer took longer than the limit you set.",
     ReasonCode.MALFORMED_RESPONSE: "The response contract was not produced correctly.",
     ReasonCode.REGRESSION: "A behavior that passed before now fails.",
+    # Slice 11 task-aware vocabulary (Gate 3 S3.3). Wording changes revise the
+    # Gate 3 design, not this map; the pin in tests/sealed/test_render_map.py
+    # fails on either side.
+    ReasonCode.WRONG_ENTITY: "The answer was about a different title or edition than the customer asked for.",
+    ReasonCode.REQUIRED_TASK_MISSING: "The answer left out part of what the customer asked for.",
+    ReasonCode.UNSUPPORTED_CLAIM: "The answer stated a fact the current shop records do not agree on.",
+    ReasonCode.INVALID_COMMITMENT: "The answer promised a reservation the task does not allow.",
+    ReasonCode.UNJUSTIFIED_REFUSAL: "The service declined to answer when the shop records could have answered.",
+    ReasonCode.UNJUSTIFIED_REFERRAL: "The service handed the customer to staff when the records were sufficient.",
+    ReasonCode.UNJUSTIFIED_CLARIFICATION: "The service asked for a detail the request already gave.",
+    ReasonCode.MISSING_EXECUTION_EVIDENCE: "The service did not run to completion, so there is no answer to judge.",
 }
 
 # The only categories an adapter may provision into a sandbox (program design S6
@@ -178,6 +189,15 @@ PIVOT_STARTER_CONTRACT_JSON = {
     "response_time_limit_ms": 3000,
     "declared_limits": ["Public collection and alternative answers only; no reservations or business writes."],
 }
+
+# The reviewed public material the first Bellwether investigation runs against
+# (Slice 11). These are public by design: the learner reads the same rubric,
+# request and shop state the assessor uses, so nothing here is a hidden rule.
+# Raw SHA-256 pins for all five pivot fixtures are recorded in
+# docs/plans/shiftwork/00-status.md and re-verified by a guard test.
+PIVOT_MISSION = FIXTURE_DIR / "mission" / "bookshop_pivot_v1.json"
+PIVOT_PUBLIC_STATE = FIXTURE_DIR / "shop" / "bookshop_pivot_public_state.json"
+PIVOT_INCIDENT_REQUESTS = FIXTURE_DIR / "requests" / "bookshop_pivot_incident.jsonl"
 
 
 # The manifest alone is caller-supplied, so exact file bytes have a separate pin.

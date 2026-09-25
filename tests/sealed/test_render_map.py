@@ -7,6 +7,11 @@ change that pastes sealed scenario data into a learner-facing string fails here.
 
 Slice 6 scope: the map lives in ``config.py`` (Gate 3 S2) and the client that renders
 it lands in Slices 9 to 11, so nothing consumes it yet. The pin is the deliverable.
+
+Slice 11 extends the pin with the eight task-aware codes Gate 3 S3.3 adds to the
+vocabulary, and the Investigate station now renders them. The pin is extended, not
+relaxed: exact text and one-to-one coverage are still asserted, so a wording change
+on either side still fails here.
 """
 
 import re
@@ -16,8 +21,9 @@ from shiftwork import config
 from shiftwork.domain.models import ContractOptionId, ReasonCode
 from shiftwork.evaluator import evaluator
 
-# Pinned independently of config.py: this is the Gate 3 S7.2 list, so a change to
-# either side is a design change that must be made deliberately in both places.
+# Pinned independently of config.py: this is the Gate 3 S7.2 list plus the Gate 3
+# S3.3 task-aware additions, so a change to either side is a design change that
+# must be made deliberately in both places.
 PINNED_RENDER_MAP = {
     ReasonCode.INVENTED_FACT: "The service stated something the shop records did not support.",
     ReasonCode.STALE_BEYOND_RULE: "The answer used a record older than the rule you committed to.",
@@ -28,7 +34,17 @@ PINNED_RENDER_MAP = {
     ReasonCode.LATENCY_BUDGET: "The answer took longer than the limit you set.",
     ReasonCode.MALFORMED_RESPONSE: "The response contract was not produced correctly.",
     ReasonCode.REGRESSION: "A behavior that passed before now fails.",
+    ReasonCode.WRONG_ENTITY: "The answer was about a different title or edition than the customer asked for.",
+    ReasonCode.REQUIRED_TASK_MISSING: "The answer left out part of what the customer asked for.",
+    ReasonCode.UNSUPPORTED_CLAIM: "The answer stated a fact the current shop records do not agree on.",
+    ReasonCode.INVALID_COMMITMENT: "The answer promised a reservation the task does not allow.",
+    ReasonCode.UNJUSTIFIED_REFUSAL: "The service declined to answer when the shop records could have answered.",
+    ReasonCode.UNJUSTIFIED_REFERRAL: "The service handed the customer to staff when the records were sufficient.",
+    ReasonCode.UNJUSTIFIED_CLARIFICATION: "The service asked for a detail the request already gave.",
+    ReasonCode.MISSING_EXECUTION_EVIDENCE: "The service did not run to completion, so there is no answer to judge.",
 }
+
+PINNED_RENDER_MAP_SIZE = 17
 
 
 def test_reason_code_render_map_pinned() -> None:
@@ -37,7 +53,7 @@ def test_reason_code_render_map_pinned() -> None:
 
 def test_render_map_is_one_to_one_with_reason_codes() -> None:
     assert set(config.REASON_CODE_RENDER_MAP) == set(ReasonCode)
-    assert len(config.REASON_CODE_RENDER_MAP) == len(ReasonCode) == 9
+    assert len(config.REASON_CODE_RENDER_MAP) == len(ReasonCode) == PINNED_RENDER_MAP_SIZE
     assert all(isinstance(code, ReasonCode) for code in config.REASON_CODE_RENDER_MAP)
     assert all(
         isinstance(text, str) and text and text == text.strip()

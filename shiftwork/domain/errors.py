@@ -97,3 +97,69 @@ class RotationMisconfigured(ShiftworkDomainError):
     """
 
     kind = "conflict"
+
+
+class TaskEnvelopeInvalid(ShiftworkDomainError):
+    """A captured service response is not a valid task-aware envelope (S11).
+
+    Raised for unparseable bytes, an unknown or extra field, a request id that
+    does not match the frozen request, an unknown or duplicated task id, a
+    status whose explanation code is absent when the public rules require one or
+    present when they forbid one, and a claim citing evidence the response did
+    not list. Whether a well-formed envelope answers the customer correctly is
+    an assessment question, never a validation one.
+    """
+
+    kind = "conflict"
+
+
+class MissionSpecInvalid(ShiftworkDomainError):
+    """A public mission rubric is not usable as frozen task specifications.
+
+    Fail-closed like the catalog loader: a rubric that silently lost a required
+    task or an explanation code would let an incomplete answer pass, so a
+    malformed mission is refused rather than partially interpreted.
+    """
+
+    kind = "conflict"
+
+
+class PublicStateInvalid(ShiftworkDomainError):
+    """The frozen public shop state cannot supply the records a task needs."""
+
+    kind = "conflict"
+
+
+class InvestigationIncomplete(ShiftworkDomainError):
+    """Diagnostic help was requested before the learner committed a diagnosis.
+
+    The prediction gate: cause, falsifier and public test must all be present and
+    owned by this shift before any hint, diagnosis or patch proposal exists.
+    Deterministic orientation is not help and never takes this path.
+    """
+
+    kind = "conflict"
+
+
+class AssistGatewayUnavailable(ShiftworkDomainError):
+    """No assist gateway exists yet, so no diagnostic help can be produced.
+
+    Slice 11 records the denial; Slice 14 replaces the raise with the
+    prediction-gated attributable gateway. Keeping it a typed error rather than
+    an absent route means removing the guard fails a named assertion instead of
+    silently changing a status code.
+    """
+
+    kind = "conflict"
+
+
+class BootstrapBlocked(ShiftworkDomainError):
+    """A diagnostic bootstrap was requested without its prerequisites.
+
+    A legacy first-choice shift with no inherited source run may use exactly one
+    public bootstrap diagnostic, and only once a safely isolated executor and a
+    reviewed initial request exist. Slice 11 constructs and denies the state;
+    Slice 13 supplies the safe executor that permits it.
+    """
+
+    kind = "conflict"

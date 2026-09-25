@@ -72,6 +72,17 @@ class ReasonCode(StrEnum):
     LATENCY_BUDGET = "LATENCY_BUDGET"
     MALFORMED_RESPONSE = "MALFORMED_RESPONSE"
     REGRESSION = "REGRESSION"
+    # Gate 3 S3.3 task-aware vocabulary, added by Slice 11. CONTEXT_DRIFT,
+    # EXPOSURE_INVALIDATED and GATEWAY_LIMIT_EXCEEDED from the same list arrive
+    # with the slices that can produce them.
+    WRONG_ENTITY = "WRONG_ENTITY"
+    REQUIRED_TASK_MISSING = "REQUIRED_TASK_MISSING"
+    UNSUPPORTED_CLAIM = "UNSUPPORTED_CLAIM"
+    INVALID_COMMITMENT = "INVALID_COMMITMENT"
+    UNJUSTIFIED_REFUSAL = "UNJUSTIFIED_REFUSAL"
+    UNJUSTIFIED_REFERRAL = "UNJUSTIFIED_REFERRAL"
+    UNJUSTIFIED_CLARIFICATION = "UNJUSTIFIED_CLARIFICATION"
+    MISSING_EXECUTION_EVIDENCE = "MISSING_EXECUTION_EVIDENCE"
 
 
 class LedgerEventType(StrEnum):
@@ -239,6 +250,46 @@ class OperatingSelection(BaseModel):
     state: Literal["VALID", "INVALIDATED"]
     client_request_id: str
     created_at: datetime
+
+
+class Investigation(BaseModel):
+    """The learner's own diagnosis, appended before any diagnostic help (S3.2).
+
+    Append-only: a revision writes a new row carrying ``revision_of_id`` and
+    leaves the parent intact, so the original cause and falsifier stay readable
+    as the history of what the learner actually believed.
+    """
+
+    model_config = _FROZEN
+
+    id: Id
+    shift_id: Id
+    source_run_id: Id
+    source_request_ordinal: int
+    cause: str
+    falsifier: str
+    public_test: str
+    revision_of_id: Id | None = None
+    authored_by: Literal["learner"] = "learner"
+    created_at: datetime
+
+
+class InvestigationRequest(BaseModel):
+    model_config = _FROZEN
+
+    source_run_id: Id
+    source_request_ordinal: int
+    cause: str
+    falsifier: str
+    public_test: str
+    revision_of_id: Id | None = None
+    client_request_id: str
+
+
+class AssistRole(StrEnum):
+    HINT = "HINT"
+    DIAGNOSIS = "DIAGNOSIS"
+    PATCH_PROPOSAL = "PATCH_PROPOSAL"
 
 
 class RunOutput(BaseModel):
