@@ -1,15 +1,20 @@
 # Program Design: Shiftwork final pivot
 
-**Gate 3: RE-APPROVED 2026-09-24 after the legacy first-choice backtrack.**
+**Gate 3: RE-APPROVED 2026-09-24 after the scoped Northline selection backtrack.**
 
-Gates 1 and 2 are re-approved. This document replaces the pre-pivot program
+Gates 1, 2 and 4 are approved. This document replaces the pre-pivot program
 design with exact contracts for investigation, fair experiments, explicit
 operating selection and operational consequences. The previous design remains
 available in Git at `e1a3a91`. The earlier pivot design was approved and
 committed as `de250b9`; that approval is historical after the legacy first-choice
-Gate 2 backtrack. The user separately approved this reconciled working-tree
-revision and authorized committing and merging it to main without a co-author
-footer. Gate 4 remains unapproved and implementation remains blocked.
+Gate 2 backtrack. The user separately approved the reconciled working-tree
+revision, which was committed and merged locally as `aedc97f` and `ab5ab9c`
+without a co-author footer. Gate 4 review then exposed a further gap: the
+comparison loader named only Bellwether workloads, leaving no qualifying
+selection path for edited Northline code. The user approved this scoped
+correction and authorized committing and pushing it to main without a co-author
+footer. Gate 4 is separately approved. Neither approval is implementation
+authority.
 
 This is design, not runtime evidence. No package was installed, no migration or
 test was run, no credential was used and no live model or sandbox was called.
@@ -35,7 +40,7 @@ Existing Slices 1 to 9 and their historical evidence remain intact.
 | Workload binding | The controller freezes three reviewed request batches with exact bytes, hashes and parsed request counts. Each pair's A and B slots reference the same batch; there is no generic six-slot batch. |
 | Gateway tool policy | The controller derives a run-scoped tool allowlist from frozen policy. Learner code cannot widen it by request field or prompt text. |
 | Clarification | A captured clarification is assessed and reported separately from completion, refusal, referral and missing output. Its acceptability follows a public task rule, not the service's own label. |
-| Curriculum ownership | Bellwether has an executable failing starter plus reviewed incident/workload data. Northline has a distinct blank learner scaffold, mission, requests, state and protected assessment owned outside learner code. File contents and catalog identity require review before use. |
+| Curriculum ownership | Bellwether has an executable failing starter plus reviewed incident/workload data. Northline has a distinct blank learner scaffold, mission, incident requests, three paired workloads with a reviewed manifest, state and protected assessment owned outside learner code. File contents and catalog identity require review before use. |
 | UI | The operational room remains the shell. The client must visibly separate investigation, experiment, selected version and operational history. |
 
 The three comparison pairs are the smallest approved product demonstration that
@@ -52,8 +57,8 @@ vertical slices, but it may not silently change their ownership.
 
 | File | Responsibility after reconciliation |
 | --- | --- |
-| `shiftwork/app.py` | Wire the revised configuration, gateway boundary, schema migration and startup reconciliation. |
-| `shiftwork/config.py` | Named experiment, operation, inference and assist ceilings; model/image config names; controller-owned tool policy and reason render map. No secret values. |
+| `shiftwork/app.py` | Wire the revised configuration, gateway boundary, schema migration, reviewed Northline engagement seeding and startup reconciliation. |
+| `shiftwork/config.py` | Named experiment, operation, inference and assist ceilings; model/image config names; controller-owned per-engagement fixture and tool policy and reason render map. No secret values. |
 | `shiftwork/domain/models.py` | Durable shift opening mode, investigation, context, experiment, trial, gateway-event, selection and revised run types. |
 | `shiftwork/domain/canonical.py` | Versioned canonical hashes for complete execution contexts and assessment snapshots, while retaining old artifact hashes. |
 | `shiftwork/domain/customer_answer.py` | Render customer text only from the validated task-aware envelope and public records. |
@@ -63,7 +68,7 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/api/routes.py` | Final routes in section 5; handlers only validate, delegate and map typed failures. |
 | `shiftwork/store/schema.sql` | Fresh-database schema including the new pivot records and constraints. |
 | `shiftwork/store/db.py` | Transactional v5 to v6 migration and refusal of unknown versions. |
-| `shiftwork/store/repo.py` | Parameterized reads/writes for every new record; no policy decisions. |
+| `shiftwork/store/repo.py` | Parameterized reads/writes for every new record and idempotent engagement seeding; no policy decisions. |
 | `shiftwork/evaluator/evaluator.py` | Pure assessment from explicit captured inputs, including entity and required-task checks. No loader or model access. |
 | `shiftwork/ledger/reducer.py` | Accept only an `OperationalAssessment`; reject experimental inputs by type and runtime guard. |
 | `shiftwork/executor/base.py` | Purpose/context-bound execution request, slot-selected workload and trusted request/tool driver, observation stream and trusted measurement fields. |
@@ -102,12 +107,16 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/fixtures/requests/bookshop_compare_pair_01.jsonl` | First paired public workload. Exact contents require review and sealing. |
 | `shiftwork/fixtures/requests/bookshop_compare_pair_02.jsonl` | Second paired public workload. Exact contents require review and sealing. |
 | `shiftwork/fixtures/requests/bookshop_compare_pair_03.jsonl` | Third paired public workload. Exact contents require review and sealing. |
-| `shiftwork/fixtures/requests/bookshop_compare_manifest.json` | Operator-reviewed ordinal 1/2/3 mapping with independently pinned file hashes and parsed request counts; created only after the three actual batches are reviewed. |
+| `shiftwork/fixtures/requests/bookshop_compare_manifest.json` | Operator-reviewed ordinal 1/2/3 mapping with independently pinned file hashes, parsed request counts and task-spec hashes; created only after the three actual batches are reviewed. |
 | `shiftwork/sealed/cases/bookshop_task_completion.json` | Protected task/entity/completion cases with at least six variants. Exact cases require a separate sealing review. |
 | `shiftwork/templates/artifact/northline_blank_service.py` | Executable minimal service scaffold with no authored transfer solution; the away learner owns its logic and starts from a blank artifact. |
 | `shiftwork/fixtures/mission/northline_transfer.json` | Operator-reviewed public future-commitment, safety-escalation and retry-safe booking rules, allowed information/tool vocabulary and deterministic synthetic transitions. No Bellwether rules are borrowed. |
 | `shiftwork/fixtures/requests/northline_transfer.jsonl` | Operator-reviewed public away requests and required-task specifications, captured as exact bytes for execution. |
 | `shiftwork/fixtures/state/northline_start.json` | Reviewed public starting booking/dependency state, restored between trials. |
+| `shiftwork/fixtures/requests/northline_compare_pair_01.jsonl` | First reviewed public Northline qualifying workload, distinct from the initial transfer request. |
+| `shiftwork/fixtures/requests/northline_compare_pair_02.jsonl` | Second reviewed public Northline qualifying workload. |
+| `shiftwork/fixtures/requests/northline_compare_pair_03.jsonl` | Third reviewed public Northline qualifying workload. |
+| `shiftwork/fixtures/requests/northline_compare_manifest.json` | Operator-reviewed ordinal 1/2/3 mapping with independently pinned file hashes, parsed request counts and task-spec hashes. |
 | `shiftwork/sealed/cases/northline_transfer.json` | Operator-authored protected transfer acceptance cases, loaded only by orchestration and passed as explicit inputs to the pure evaluator; no case contents are set here. |
 | `demos/final_pivot.py` | Canonical offline walkthrough: inspect, predict, compare, choose, operate, inherit and test retained alternative. |
 | `demos/gateway_spike.py` | Separately authorized capability-spike driver. It is not part of normal offline verification. |
@@ -123,7 +132,7 @@ vertical slices, but it may not silently change their ownership.
 | `tests/orchestrator/test_investigation_assist.py` | Prediction gate, revisions, attribution and assist budget. |
 | `tests/orchestrator/test_experiment_lifecycle.py` | Frozen context, paired schedule, exposure, drift, failure and idempotency. |
 | `tests/orchestrator/test_selection_operation.py` | Exact selection, operation-only consequences, retry rules, inheritance and invalidation. |
-| `tests/orchestrator/test_northline_transfer.py` | Blank-scaffold ownership, reviewed mission/request/state prerequisites, reduced help and protected assessment isolation. |
+| `tests/orchestrator/test_northline_transfer.py` | Blank-scaffold ownership, reviewed mission/request/state/catalog/paired-workload/protected prerequisites, reduced help, cross-engagement substitution rejection and the qualifying comparison to explicit selection and selected-version operation path. |
 | `tests/orchestrator/test_replay.py` | Historical semantic replay, unknown legacy inputs and zero mutation. |
 | `tests/executor/conformance.py` | Revised adapter contract shared by recorded, trusted-local and live adapters. |
 | `tests/executor/test_gateway_isolation.py` | Run binding, expiry, model allowlist, network boundary, credential absence and redaction probes. |
@@ -163,6 +172,11 @@ The Northline catalog must be reviewed and frozen through the existing loader's
 assigns no version or case content. If no compatible catalog is approved, Northline
 execution and any transfer claim stop. The same review and byte pins apply to the
 new Bellwether starter, incident request, public state and three paired workloads.
+Northline's three separate comparison batches and manifest also require review,
+byte pins and enough protected variants under the same reservation policy before
+its learner-edited version can qualify. The initial `northline_transfer.jsonl`
+request supports the starter and later operational run, never comparison
+eligibility by itself.
 No placeholder hash or request count is treated as approved fixture data.
 
 ## 3. Types and signatures
@@ -217,6 +231,8 @@ class ExecutionContext(BaseModel):
     schema_version: Literal[1]
     engagement_slug: Slug
     workloads: tuple[FrozenWorkload, ...]
+    mission_bytes_base64: str
+    mission_hash: Sha256
     public_data_bytes_base64: str
     public_data_hash: Sha256
     starting_business_state_json: dict[str, JsonValue]
@@ -240,14 +256,16 @@ class ExecutionContext(BaseModel):
 def context_hash(context: ExecutionContext) -> Sha256: ...
 ```
 
-Reconstructible public inputs are stored as bytes plus hashes. The protected
-reservation points to controller-only material and is never projected. A mutable
+Reconstructible public mission rules and inputs are stored as bytes plus hashes.
+The protected reservation points to controller-only material and is never
+projected. A mutable
 path, current fixture or current incident state cannot reconstruct old evidence.
 The controller parses each frozen request batch once and requires a nonzero count
 of at most four requests, matching the same number of frozen public task specs.
 A qualifying comparison has exactly three ordered workloads; a diagnostic or
-operational context has one. The context hash covers each workload's exact bytes,
-hashes, count and order. Future workload bytes remain controller-held and are not
+operational context has one. The context hash covers the frozen mission bytes/hash
+and each workload's exact bytes, hashes, count and order. Future workload bytes
+remain controller-held and are not
 provisioned to a learner service before each permitted request is streamed.
 
 ### 3.2 Investigation and assistance
@@ -509,7 +527,7 @@ class Experiment(BaseModel):
     id: Id
     shift_id: Id
     kind: ExperimentKind
-    investigation_id: Id
+    investigation_id: Id | None
     candidates: tuple[CandidateRef, ...]
     declared_treatment: str
     context_id: Id
@@ -535,7 +553,7 @@ class TrialSlot(BaseModel):
 
 class ExperimentRequest(BaseModel):
     kind: ExperimentKind
-    investigation_id: Id
+    investigation_id: Id | None
     candidate_a_version_id: Id
     candidate_b_version_id: Id | None
     declared_treatment: str
@@ -675,6 +693,8 @@ class ReplayReport(BaseModel):
     wrote_rows: Literal[False]
 
 def append_investigation(conn, shift_id: Id, request: InvestigationRequest) -> Investigation: ...
+def seed_reviewed_northline(conn) -> None: ...
+def open_next_shift(conn, slug: Slug) -> Shift: ...
 def freeze_version(conn, shift_id: Id, request: FreezeVersionRequest) -> ArtifactVersion: ...
 def create_experiment(conn, shift_id: Id, request: ExperimentRequest) -> Experiment: ...
 async def execute_experiment(db_path: str, experiment_id: Id) -> None: ...
@@ -748,7 +768,7 @@ class TrialView(BaseModel):
 class ExperimentView(BaseModel):
     id: Id
     kind: ExperimentKind
-    investigation_id: Id
+    investigation_id: Id | None
     declared_treatment: str
     context_hash: Sha256
     workloads: tuple[FrozenWorkloadView, ...]
@@ -855,8 +875,8 @@ version marker changes only in the same successful transaction.
 | Table | Required constraints |
 | --- | --- |
 | `investigations` | Append-only; `revision_of_id` references the same shift; source run/request must exist. |
-| `execution_contexts` | Immutable `content_hash UNIQUE`; exact public and request-spec bytes retained for one or three ordered `FrozenWorkload` records; protected reservation remains an internal ref. |
-| `experiments` | `client_request_id UNIQUE`; exactly one or two candidates according to kind; immutable after reservation except terminal state. |
+| `execution_contexts` | Immutable `content_hash UNIQUE`; reviewed mission bytes/hash plus exact public and request-spec bytes retained for one or three ordered `FrozenWorkload` records; protected reservation remains an internal ref. |
+| `experiments` | `client_request_id UNIQUE`; exactly one or two candidates according to kind; immutable after reservation except terminal state. `investigation_id` may be null only for one public bootstrap diagnostic in a `LEGACY_FIRST_CHOICE` shift with no owned source run. |
 | `trial_slots` | `UNIQUE(experiment_id, pair_ordinal, candidate_label)` and `UNIQUE(run_id)` when assigned; each slot pins a workload ID, request-batch hash and parsed request count matching its context. |
 | `exposure_reservations` | One comparison or operation scope; invalidation is a state change, never deletion. |
 | `exposure_items` | `UNIQUE(engagement_slug, family, cycle, variant_ref)`; one item can bind both candidate slots in the same pair only. |
@@ -907,14 +927,14 @@ content returns 409. Reusing it with identical content returns the original resu
 | Route | Verb | Request to response | Rules |
 | --- | --- | --- | --- |
 | `/api/engagements/{slug}/board` | GET | none to `BoardView` | Separates latest saved, selected and latest experiment; a legacy no-choice engagement says `NEEDS_FIRST_CHOICE`. |
-| `/api/engagements/{slug}/shifts` | POST | key to `ShiftView` | With a valid selection, inherits it. With a closed v5 shift and no selection, atomically opens one server-labelled non-operational first-choice shift. Caller cannot choose mode. Existing open shift or invalid selection returns 409. |
+| `/api/engagements/{slug}/shifts` | POST | key to `ShiftView` | For a reviewed newly seeded engagement with no shift, atomically open a standard initial shift with its own immutable starter and labelled `STARTER_BASELINE`; Northline's starter is the blank scaffold. With a valid prior selection, inherit it. With a closed v5 shift and no selection, open one non-operational first-choice shift. Caller cannot choose mode. Existing open shift or invalid selection returns 409. |
 | `/api/shifts/{id}/artifact` | GET/PUT | existing draft models | Save never selects. |
 | `/api/shifts/{id}/artifact/restorations` | POST | version ID + key to `DraftView` | Restores owned exact source and records ancestry. |
 | `/api/shifts/{id}/artifact/versions` | POST | frozen contract/authorship disclosure to `ArtifactVersionView` | New evidence required after any content change. |
 | `/api/artifact-versions/{id}` | GET | none to `ArtifactSourceView` | Learner-owned safe logical files only. |
 | `/api/shifts/{id}/investigations` | POST | cause/falsifier/test to `InvestigationView` | Append original or explicit revision. |
 | `/api/investigations/{id}` | GET | none to `InvestigationView` | Includes links, not assistant-authored cause. |
-| `/api/shifts/{id}/experiments` | POST | `ExperimentRequest` to `ExperimentView` (202) | First-choice shifts may compare. The controller freezes three reviewed workload bytes/hashes/counts and all A/B slot bindings before protected results; queues execution. |
+| `/api/shifts/{id}/experiments` | POST | `ExperimentRequest` to `ExperimentView` (202) | First-choice shifts may compare. Only a no-source-run `LEGACY_FIRST_CHOICE` shift may start one public bootstrap diagnostic with null investigation; it consumes the ordinary diagnostic budget, creates no eligibility and cannot grant help. A qualifying comparison still requires an investigation. The controller freezes three reviewed workload bytes/hashes/counts and all A/B slot bindings before protected results; queues execution. |
 | `/api/experiments/{id}` | GET | none to `ExperimentView` | Shows every slot, missing evidence, drift and eligibility. |
 | `/api/shifts/{id}/selections` | POST | `SelectionRequest` to `SelectionView` (201) | Atomic revalidation and append; a first valid choice lifts a legacy shift's operation block without changing its historical opening mode. |
 | `/api/engagements/{slug}/selections` | GET | none to `SelectionView[]` | History includes invalidated choices, never fallback. |
@@ -952,6 +972,28 @@ return 409 before then, including after a save, freeze, diagnostic pass or
 incomplete comparison. An invalidated first choice blocks operation without
 falling back to the legacy draft or a new-engagement starter.
 
+If the closed v5 history contains no owned source run/request, the learner first
+freezes the seeded editable draft and may reserve exactly one public bootstrap
+`DIAGNOSTIC` experiment with `investigation_id=None`. It consumes one of the two
+diagnostic slots, uses no protected cases, cannot establish eligibility, cannot
+create business consequences and does not unlock diagnostic help. Its captured
+request/run supplies an owned source for the learner's cause, falsifier and public
+test. A missing source, exhausted budget or failed bootstrap leaves the shift
+non-operational; no automatic retry, starter selection or exposure refund occurs.
+This exception is not available to ordinary or already evidenced shifts and
+does not permit a qualifying comparison without an investigation.
+
+For this one bootstrap, orchestration selects the engagement's separately
+reviewed initial incident request, mission and public starting state. It freezes
+that request's exact bytes/hash, public task spec, mission bytes/hash and state in
+a one-workload `ExecutionContext`; the caller cannot supply a path or substitute
+another engagement's request. Missing review or compatible catalog blocks
+reservation. The frozen draft may contain arbitrary learner code: execute it
+only after the isolated live adapter passes section 8. `TRUSTED_LOCAL` and
+`RECORDED_INSPECTION` cannot create the missing run. The bootstrap's
+public `ExperimentView` shows `investigation_id=null` and no eligibility.
+No bootstrap is reserved while the required safe executor is unavailable.
+
 Only one qualifying comparison is reserved in that shift. Missing or failed
 slots keep it non-operational and retain exposure; no automatic retake, new
 shift, refund or administrative choice exists in this design. A later retake
@@ -981,10 +1023,12 @@ change selection, experiments, incidents or the ledger.
 
 `routes.create_experiment -> BEGIN IMMEDIATE -> require open shift + investigation
 -> load exact A/B versions -> reject equal content hashes -> validate shared current
-requirements -> load the three reviewed Bellwether workload files in ordinal order
--> verify the reviewed ordinal/hash/count manifest -> validate and capture each
-batch's exact bytes, hash, public task-spec bytes/hash
-and parsed request count -> freeze the public context inputs -> reserve three
+requirements -> select the controller-owned reviewed comparison manifest by the
+engagement slug, never by caller input -> load that engagement's three reviewed
+workload files in ordinal order -> verify the reviewed ordinal/hash/count/task-spec
+manifest -> validate and capture each batch's exact bytes, hash, public task-spec
+bytes/hash and parsed request count -> capture the engagement's reviewed mission
+bytes/hash and freeze the other public context inputs -> reserve three
 unexposed protected variants per enabled family -> finish and hash the
 ExecutionContext with the internal reservation ID -> create six TrialSlots with
 pair 1 bound to workload 1, pair 2 to workload 2 and pair 3 to workload 3, each
@@ -992,16 +1036,18 @@ with one A and one B slot sharing that workload ID/hash/count and protected pair
 refs -> insert experiment/context/reservation/slots -> commit -> queue
 execute_experiment`.
 
-| Pair | Reviewed public request source | Slots bound to the same frozen bytes/hash/count |
-| --- | --- | --- |
-| 1 | `bookshop_compare_pair_01.jsonl` | 1/A and 1/B |
-| 2 | `bookshop_compare_pair_02.jsonl` | 2/A and 2/B |
-| 3 | `bookshop_compare_pair_03.jsonl` | 3/A and 3/B |
+| Pair | Bellwether reviewed source | Northline reviewed source | Slots bound to the same frozen bytes/hash/count/task spec |
+| --- | --- | --- | --- |
+| 1 | `bookshop_compare_pair_01.jsonl` | `northline_compare_pair_01.jsonl` | 1/A and 1/B |
+| 2 | `bookshop_compare_pair_02.jsonl` | `northline_compare_pair_02.jsonl` | 2/A and 2/B |
+| 3 | `bookshop_compare_pair_03.jsonl` | `northline_compare_pair_03.jsonl` | 3/A and 3/B |
 
-The bytes, hashes and request counts are checked against the independently
-reviewed manifest at reservation; no value is invented in this document. The
-resulting context and slot records, not these pathnames, govern execution and
-replay.
+The controller selects only the manifest belonging to the shift's engagement.
+Missing review, cross-engagement fallback or a Bellwether source in a Northline
+context fails before exposure reservation. The bytes, hashes, task-spec hashes
+and request counts are checked against that independently reviewed manifest;
+no value is invented in this document. The resulting context and slot records,
+not these pathnames, govern execution and replay.
 
 Pair 1 runs A then B, pair 2 runs B then A, and pair 3 order is derived before any
 result from the low bit of a decision hash over the context hash and the two candidate
@@ -1015,7 +1061,11 @@ the frozen batch fails closed. Each candidate's denominator is the sum of the
 three pair request counts, including failed and missing responses.
 
 Diagnostic experiments use one candidate, public tests only and one trial. They
-cannot reserve protected cases or produce eligibility.
+cannot reserve protected cases or produce eligibility. The only null-investigation
+exception is the single public source bootstrap in section 6.0; all other
+diagnostics and every comparison require an owned investigation. That exception
+uses its pinned initial incident request and public task spec as the test input;
+it does not infer a test from an absent investigation.
 
 ### 6.4 Execute and finalize an experimental trial
 
@@ -1046,13 +1096,17 @@ blocks on that invalid choice and never falls back to an older valid selection.
 
 `routes.start_run -> BEGIN IMMEDIATE -> require latest selection VALID -> require no
 in-flight operation -> bind selected exact version, current conditions, requirements
-and starting business state -> reserve separate operational exposure -> insert Run
+and starting business state, including reviewed mission bytes/hash -> reserve
+separate operational exposure -> insert Run
 purpose OPERATION -> commit -> execute_run`.
 
 `execute_run -> adapter.execute -> append captures/observations -> evaluator.evaluate
 -> require OperationalAssessment -> BEGIN IMMEDIATE -> recheck selection, context,
 exposure and idempotency -> insert checks -> reducer.reduce -> chain.append -> insert
 events -> open/resolve incidents -> terminalize run -> commit`.
+
+Evaluation and reduction use the captured mission from that run's context; neither
+re-reads a mutable mission pathname or today's engagement rules at finalization.
 
 No experimental assessment can construct `OperationalAssessment`. The reducer also
 checks purpose at runtime. Incident resolution requires a passing operational check
@@ -1065,10 +1119,13 @@ explicit selection and selected contract -> require selection VALID -> reduce_cl
 for declared limits only -> append chain -> mark unresolved incidents closed-unresolved
 -> close shift -> commit`.
 
-`open_next_shift -> load latest explicit selection -> if latest is a closed v5
-no-choice shift, use section 6.0; otherwise block if absent/invalid -> copy
+`open_next_shift -> if a reviewed newly seeded engagement has no shift, atomically
+insert its STANDARD initial shift, immutable starter version and labelled
+STARTER_BASELINE; otherwise load latest explicit selection -> if latest is a closed
+v5 no-choice shift, use section 6.0; otherwise block if absent/invalid -> copy
 selected source to draft with base_version_id -> project rationale, retained
 alternative, tests, incidents and limits -> insert next shift -> commit`.
+The initial branch never applies to an existing v5 engagement.
 
 Later testing of the retained alternative creates a new experiment with the observed
 later condition. It does not update the earlier selection, operation or ledger. A
@@ -1080,25 +1137,58 @@ Startup marks interrupted runs and trial slots failed, retains outputs, observat
 usage and exposure, and performs no retry. A comparison with any failed slot remains
 incomplete. A failed operation writes no invented consequence.
 
-`replay_assessment` loads the exact captured context, outputs, rule versions and
-protected refs, re-runs pure assessment/reduction in memory and returns differences.
+`replay_assessment` loads the exact captured context, including mission bytes/hash,
+outputs, rule versions and protected refs, re-runs pure assessment/reduction in
+memory and returns differences. It never reads the current mission file or
+current engagement rules in place of the capture.
 It writes nothing. Legacy runs missing required context return
 `UNKNOWN_MISSING_INPUTS`. `chain.verify_chain` remains a separate byte-integrity
 check; neither proof substitutes for the other.
 
 ### 6.9 Northline transfer ownership
 
-The Northline away shift starts from its executable blank scaffold and its own
-reviewed mission, public requests and starting state, not Bellwether source or
-bookshop inventory. A reviewed compatible Northline contract catalog is a
-precondition for freeze; no catalog version is assigned here. Orchestration owns
-the sealed-case loader and passes the approved protected cases as explicit inputs
-to the same pure evaluator. The mission owns deterministic synthetic booking,
-commitment and escalation transitions, reduced assistance remains controller
-policy, and learner code owns the response and retry-safe behavior. A human,
-blinded to study condition, owns the learning-transfer rubric in section 10;
-service output or a model never grades that rubric. Missing mission, request,
-state, catalog or sealed review blocks execution and any transfer claim.
+Startup asks orchestration to idempotently seed a Northline engagement and its
+one-hint config only after an operator has reviewed its mission, initial and
+three paired public request files, ordinal manifest, starting state, catalog, blank
+scaffold and protected inventory. The existing `repo.seed_engagement` and
+`repo.seed_engagement_config` calls are used with Northline values; no public
+engagement-creation route or caller-selected fixture is added. Missing review
+leaves Northline unavailable while Bellwether remains usable. If a previously
+seeded Northline package later goes missing or changes, new execution fails
+closed without rewriting its history. Only orchestration checks the sealed
+inventory; startup and persistence do not import the sealed loader. Existing
+v5 Northline engagements keep the no-choice migration path and never receive
+a new `STARTER_BASELINE` from this seed step.
+
+For that newly seeded engagement only, its first
+`/api/engagements/northline/shifts` call atomically creates a standard shift,
+immutable blank starter version and labelled `STARTER_BASELINE` selection. An
+engagement that arrived through v5 migration takes the section 6.0 first-choice
+branch instead and receives no starter.
+The scaffold has no solution code and is not eligible repair evidence. Run that
+starter once against the reviewed initial request to capture a task-relevant
+failure; the learner then records a cause, falsifier and public test against
+that source run. Edit and freeze two distinct learner-owned
+versions, compare them in six A/B slots using only Northline's reviewed batches
+and protected reservation, then explicitly select an eligible exact version with
+`expected_prior_selection_id` set to the labelled starter selection's ID.
+No diagnostic trial or experimental pass selects it or writes business history.
+The starter's one successful operational finalization uses that shift's operation
+allowance; close and open the next shift before operating the chosen version.
+The next shift inherits only the explicit choice, not the latest saved source.
+Only operational runs of the labelled starter or later exact learner selection
+may derive Northline's deterministic synthetic booking, commitment and
+escalation consequences. Experiments cannot.
+
+The Northline away shift uses its own reviewed mission, public requests, starting
+state and compatible contract catalog, not Bellwether source or inventory. No
+catalog version is assigned here. Orchestration owns the sealed-case loader and
+passes approved protected cases as explicit inputs to the pure evaluator.
+Reduced assistance remains controller policy; learner code owns the response
+and retry-safe behavior. A human, blinded to study condition, owns the learning-
+transfer rubric in section 10; service output or a model never grades that
+rubric. Missing mission, request, state, catalog, manifest or sealed review
+blocks execution and any transfer claim.
 
 ## 7. Budgets and fixed limits
 
@@ -1106,7 +1196,7 @@ These are product ceilings, not measured vendor performance.
 
 | Limit | Value | Enforcement |
 | --- | --- | --- |
-| Diagnostic public experiments per shift | 2 | Reserved durably; no protected cases; failures consume the slot. |
+| Diagnostic public experiments per shift | 2 | Reserved durably; no protected cases; failures consume the slot. A no-source-run legacy bootstrap consumes one and cannot be repeated automatically. |
 | Qualifying comparisons per shift | 1 | Two candidates x three pairs = six trial slots. |
 | Protected variants consumed per family/comparison | 3 | One variant per pair shared by A/B; minimum inventory is 6 variants per family per cycle. |
 | Unplanned comparison retries | 0 | Any missing/failed slot makes evidence incomplete; create a new shift/comparison only under a new reservation. |
@@ -1199,8 +1289,13 @@ not count as proof.
    assert null selection/operating pointer, preserved old bytes, and 409 for
    operation and selected-contract close. Faults that insert a starter choice,
    copy the latest draft into an operating pointer, or reject shift-open must
-   each fail at a named assertion. A normal new engagement keeps its separately
-   labelled starter path.
+   each fail at a named assertion. For a closed no-run v5 shift, one budgeted
+   public bootstrap diagnostic, after safe execution is available, yields an
+   owned source for investigation but still no selection, eligibility or
+   operation. Its response has `investigation_id=null`; a missing or
+   cross-engagement initial request fails before reservation. A fault that permits a
+   comparison without investigation must fail. A normal new engagement keeps
+   its separately labelled starter path.
 3. `test_v6_migration_is_atomic_and_idempotent` injects a mid-migration fault and
    requires `user_version=5`, then succeeds once and no-ops on rerun.
 4. `test_unknown_schema_version_fails_closed` prevents destructive guessing.
@@ -1242,20 +1337,28 @@ not count as proof.
    faults after each write and requires all-or-nothing reservation. It freezes
    exactly three reviewed request batches with raw bytes, parsed counts and
    request-spec hashes before any result; a mutable-path substitution or missing
-   workload must fail a content assertion.
+   workload must fail a content assertion for either engagement. The controller
+   chooses the reviewed manifest by engagement, never from caller input.
 17. `test_each_pair_shares_workload_and_resets_state` compares raw bytes, hashes,
    request counts, task-spec hashes and protected pair refs for A/B in each of
    pairs 1 to 3 against independently pinned reviewed files, plus sentinel
-   state. Pair 1 maps to file 01, pair 2 to file 02 and pair 3 to file 03;
+   state for both Bellwether and Northline. Pair 1 maps to that engagement's
+   file 01, pair 2 to file 02 and pair 3 to file 03;
    swapping whole pair assignments, swapping only pair 2's B batch or count,
-   dropping a request, or leaking cache/booking state must each fail a named
-   assertion against the frozen context.
+   dropping a request, substituting Bellwether files/manifest in Northline, or
+   leaking cache/booking state must each fail a named assertion against the
+   frozen context.
 18. `test_predeclared_order_cannot_change_after_first_result` mutates order ownership.
 19. `test_candidate_or_context_drift_is_not_comparable` mutates every context field
-   separately, including model settings, requirements and starting state.
+   separately, including frozen mission bytes/hash, model settings, requirements
+   and starting state.
 20. `test_failed_or_missing_slot_blocks_completion_without_refund` covers all six slots.
 21. `test_diagnostic_experiment_cannot_reserve_protected_cases_or_be_eligible` proves
-   the public-test boundary.
+   the public-test boundary. Its no-source legacy bootstrap has null
+   investigation only once, consumes a diagnostic slot and cannot release
+   protected material, open assist access, write business state or qualify a
+   version; ordinary and repeated null-investigation requests fail. The POST and
+   GET projections preserve the null investigation ID without validation error.
 22. `test_recorded_inspection_cannot_supply_fresh_eligibility` rejects replay labels.
 23. `test_metrics_share_one_denominator_and_unknown_is_not_zero` mutates denominator,
    missing output, usage and cost independently. It also asserts per-candidate
@@ -1275,16 +1378,22 @@ not count as proof.
    `expected_prior_selection_id=None` plus a complete eligible comparison makes
    the first explicit choice atomically; only then does operation become allowed.
    Mutating that path to select on open/freeze or to leave it blocked after a
-   valid choice must fail.
+   valid choice must fail. In Northline, a labelled blank starter cannot
+   promote edited code: only a complete Northline comparison and the learner's
+   explicit choice with the starter selection's ID as expected prior may do so.
 26. `test_save_freeze_test_and_close_never_select` asserts unchanged selection history
    after each action, including the closed v5 bootstrap and all no-choice
    requalification actions. An incomplete comparison leaves the shift blocked
    with exposure retained and no automatic retake or refund.
 27. `test_invalid_latest_selection_blocks_without_fallback` keeps older choices historical.
 28. `test_experimental_finalization_cannot_write_ledger_or_incidents` injects a reducer
-   call and requires the purpose/type guard to fail.
+   call and requires the purpose/type guard to fail for Bellwether and Northline.
 29. `test_operational_finalization_is_atomic_and_idempotent` faults at checks, events,
-   incidents and terminal state, then retries the same request key.
+   incidents and terminal state, then retries the same request key. The Northline
+   starter failure and subsequent selected-version operation occupy different
+   shifts and have distinct, correctly linked synthetic events. Change the current
+   mission file after run start but before finalization; checks and events still
+   derive from captured mission bytes. A mutable-path reread must fail.
 30. `test_operation_uses_selected_version_not_latest_saved_version` saves a newer
    unselected candidate before start.
 31. `test_second_operation_is_only_zero_output_retry` covers partial output, existing
@@ -1324,17 +1433,28 @@ not count as proof.
 41. `test_restart_fails_interrupted_slots_without_retry_or_refund` covers experiment
    and operation states independently.
 42. `test_semantic_replay_uses_original_inputs_and_writes_nothing` mutates current
-   fixtures and current incident state after capture.
+   fixtures, including the current mission file, and current incident state after
+   capture; replay still uses the frozen mission and writes nothing.
 43. `test_legacy_replay_reports_unknown_missing_inputs` forbids reconstruction claims.
 44. `test_chain_verification_and_semantic_replay_fail_independently` proves neither
    substitutes for the other.
 45. `pivot-browser.mjs` exercises the six-station journey with native keyboard and
    touch at representative desktop and 390px mobile viewports, including focus and
    selected-panel reachability. `test_northline_transfer.py` independently refuses
-   execution without reviewed Northline mission, public requests, starting state,
-   compatible catalog and orchestration-owned protected assessment. A fault that
-   substitutes Bellwether mission/source or lets a missing review pass must fail
-   a named assertion; the Northline learner artifact starts without solution code.
+   execution without reviewed Northline mission, initial and three paired public
+   requests, ordinal manifest, starting state, compatible catalog and
+   orchestration-owned protected inventory. It proves idempotent reviewed seeding,
+   a blank `STARTER_BASELINE`, initial failure/investigation, six Northline A/B
+   slots, explicit eligible selection and next-shift operation of the exact
+   learner-edited version. It rejects a second successful operation in the
+   starter's first shift after selection, then permits the selected-version
+   operation in the next shift. Fault missing review, Bellwether mission/source or
+   manifest substitution, unselected edited operation, implicit choice and
+   experimental business writes separately at named assertions. The Northline
+   learner artifact starts without solution code. A separate existing v5
+   Northline no-run fixture must open a non-operational first-choice shift,
+   receive no starter, and bootstrap only from Northline's reviewed initial
+   request through the isolated adapter before investigation.
 46. `pivot-render-faults.mjs` removes or swaps purpose labels, context hashes, trial
    values, eligibility blockers, selected version, evidence mode and synthetic labels
    one at a time; each named assertion must fail against independently fetched API data.
@@ -1416,9 +1536,10 @@ authorized work. No session has run.
    exposure bounded but may strand a learner after a transport failure. Preserve
    the evidence and stop operation; any retake policy needs a Gate 2/3 backtrack
    with reviewed inventory and budget rather than an invisible reset.
-8. **Northline material.** Its mission, catalog, request workload, starting state
-   and protected cases are not authored or reviewed by this document. The file map
-   fixes ownership, not their contents or an executable transfer claim.
+8. **Northline material.** Its mission, catalog, initial request, three paired
+   workloads and manifest, starting state and protected cases are not authored
+   or reviewed by this document. The file map fixes ownership, not their
+   contents or an executable transfer claim.
 
 Hard no-go conditions before dependent live claims:
 
@@ -1431,6 +1552,8 @@ Hard no-go conditions before dependent live claims:
   invented selection or an operational run before consent;
 - any A/B pair executes different request bytes/counts, or a slot takes its
   workload from a mutable path instead of the frozen context;
+- Northline seeding bypasses reviewed material, uses a Bellwether manifest or
+  operates edited code without its own qualifying comparison and explicit choice;
 - learner input can widen a controller-owned gateway tool allowlist, or an
   unlisted model proposal reaches tool execution;
 - clarification is counted as useful completion, refusal, referral or missing
@@ -1441,19 +1564,24 @@ Hard no-go conditions before dependent live claims:
   and mobile; or
 - the curriculum has one obviously correct repair rather than a real tradeoff.
 
-Northline transfer also stops before execution if its reviewed mission, requests,
-state, compatible catalog or protected assessment is missing. This is an unmet
-prerequisite, not a reason to invent a catalog version or sealed case.
+Northline transfer also stops before execution if its reviewed mission, initial
+and three paired requests, manifest, state, compatible catalog or protected
+assessment is missing. This is an unmet prerequisite, not a reason to invent a
+catalog version or sealed case.
 
 ## 12. Gate boundary
 
-Gate 3 approval covers these file responsibilities, contracts, budgets,
-transactions, migration rules and test obligations. The user's separate instruction
-authorizes committing and merging this approved documentation to main without a
-co-author footer. It does not approve Gate 4, implementation, installs,
-credentials, live calls, sealed-case contents, outreach, deployment or pushing.
+The prior Gate 3 revision was approved, committed and merged locally as
+`aedc97f` and `ab5ab9c` without a co-author footer. The user then approved this
+scoped Northline correction and authorized committing and pushing it to main,
+also without a co-author footer. Gate 3 covers these file responsibilities,
+contracts, budgets, transactions, migration rules and test obligations. It does
+not approve implementation, installs, credentials, live calls, sealed-case
+contents, fixture authoring, outreach, deployment, publication or submission.
+That authorization is limited to these documents.
 
-Gate 4 must next re-sequence the remaining work over completed Slices 1
-to 9, map every test clause above to one prerequisite slice and place the capability
-spike before any live-dependent implementation or claim. The old Slice 10 to 17
-instructions remain historical until that separate reconciliation is approved.
+Gate 4 was separately approved on the same date over completed Slices 1 to 9.
+Its clause trace maps every numbered obligation above to one prerequisite slice
+and keeps the capability spike before any live-dependent implementation or
+claim. The old Slice 10 to 17 instructions remain historical. Slice work
+proceeds one slice at a time and each slice still needs its own go-ahead.
