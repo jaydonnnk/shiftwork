@@ -47,3 +47,6 @@ venv/
 
 # Operational memory (AGENTS.md S7): local run state, never committed
 PROGRESS.md
+
+# Workbuddy local memory
+/.workbuddy-ai/memory/
