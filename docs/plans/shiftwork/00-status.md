@@ -256,10 +256,12 @@ those named assertions can fail before recording S11 as complete.
 - **Gate 3 merge:** `aedc97f` and `ab5ab9c` fast-forwarded local main without
   a co-author footer and reached `origin/main` in this session's push. The
   unrelated `.gitignore` edit stayed unstaged throughout.
-- **Resume point:** Slice 10 under `04-slices.md` section 3, on a branch named
-  `shiftwork/slice-10`, once the user gives that slice's go-ahead. Stop and
-  backtrack the affected gate if a slice falsifies an approved Gate 2 or Gate 3
-  decision.
+- **Resume point:** the remaining Slice 11 implementation under `04-slices.md`
+  section 3, on a branch named `shiftwork/slice-11`. Slice 10 was accepted on
+  2026-09-25 and is merged to main as `f0a1e81..0432cbd`; Slice 11's three scoped
+  prerequisites are repaired and locally verified, but S11 itself is not complete
+  or accepted. Stop and backtrack the affected gate if a slice falsifies an
+  approved Gate 2 or Gate 3 decision.
 
 ### Revision scope and evidence boundaries
 
@@ -665,7 +667,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
   evidence file written to `docs/plans/shiftwork/evidence/test1-central-mechanism.md`
   (evidence below)
 - [x] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03); implemented and browser-verified 2026-09-21, its independent review round adjudicated and repaired the same day (evidence in its two sections below), committed in nine reviewable batches on `shiftwork/slice-9` and merged to main (`4d5539a`) the same day, with the user marking that merge as the visual acceptance; pushed to origin. Preview/evidence below.
-- [ ] Slice 10: byte-preserving v5-to-v6 migration and non-operational first-choice shift
+- [x] Slice 10: byte-preserving v5-to-v6 migration and non-operational first-choice shift; implemented and verified 2026-09-25, ACCEPTED by the user in chat the same day after the verification report disclosed the preview regression, the fabricated-choice shim, the flaky atomicity proof and the missing room screenshot. Committed in eight focused batches, merged to main as `f0a1e81..0432cbd` and pushed, no co-author footer. Acceptance covers S10 only (evidence in the Slice 10 implementation section and Approval history below)
 - [ ] Slice 11: executable task-relevant Bellwether failure, investigation and public diagnostic test
 - [ ] Slice 12: bounded Token Factory capability spike, separately authorized
 - [ ] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap

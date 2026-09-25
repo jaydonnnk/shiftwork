@@ -5,8 +5,8 @@ Gates 1, 2 and 3 are approved for `shiftwork_final_pivot.md`. Gate 3 was approve
 and locally merged, then backtracked when this Gate 4 review found no qualifying
 Northline selection path; that scoped correction is now re-approved and the
 dependency order below reflects it. The 2026-09-19 Gate 4 approval
-applies to the old design only and is historical. No Slice 10 or later has been
-implemented.
+applies to the old design only and is historical. Slice 10 was implemented and
+accepted by the user on 2026-09-25; no later slice has been implemented.
 
 This is a build order, not new runtime evidence. Approval authorizes planning one
 slice at a time under the repository process. Each slice still needs its own
@@ -629,5 +629,7 @@ deployment, publication, submission or any further commit or push. Each slice
 still needs its own explicit go-ahead, and Slice 12, 13, 14, 22, 23, 24 and 25
 keep the separate authorizations named in their own Authorization lines.
 
-The next action is Slice 10 under section 3, on a branch named
-`shiftwork/slice-10`, after the user gives that slice's go-ahead.
+The next action is the remaining Slice 11 implementation under section 3, on a
+branch named `shiftwork/slice-11`, after the user gives that slice's go-ahead.
+Slice 10 is accepted and merged to main as `f0a1e81..0432cbd`; Slice 11's three
+scoped prerequisites are repaired and locally verified, but S11 is not complete.
