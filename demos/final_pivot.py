@@ -1,18 +1,26 @@
-"""Offline final-pivot stages. S10 currently implements only ``migration``.
+"""Offline final-pivot stages: ``migration`` (S10) and ``investigation`` (S11).
 
 The migration stage creates a synthetic schema-v5 sample, copies it, and opens
 only the copy with the current controller. It never reads SHIFTWORK_DB_PATH.
 Historical rows are compared using their original columns and SQLite values.
+
+The investigation stage runs the reviewed failing starter as a public diagnostic
+against the pinned incident request and public state, then prints the exact
+request, the exact output, the independently assessed required tasks and the
+customer text rendered from the validated envelope. Every run is a temporary
+database of its own; no runtime file and no protected case is touched.
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import shutil
 import sqlite3
 import tempfile
+import time
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -311,9 +319,8 @@ def migration_stage() -> int:
                 "the starter run above used the shipped default recorded adapter, so it replayed a "
                 "pinned transcript and never executed the starter artifact; its FINALIZED state is "
                 "RECORDED_INSPECTION, not evidence that the starter works",
-                "under the local_process adapter the same starter fails closed as PROVISION_FAILED "
-                "because the offline scaffold is not a pinned trusted fixture; S11 supplies the "
-                "reviewed failing starter",
+                "Slice 11 ships the reviewed failing starter as the new engagement's draft and as a "
+                "pinned trusted fixture, so --stage investigation executes it under local_process",
                 "no selection route exists yet, so S10 cannot operate a frozen candidate; "
                 "S17 owns the first valid explicit choice",
             ],
@@ -321,12 +328,164 @@ def migration_stage() -> int:
     return 0
 
 
+def investigation_stage() -> int:
+    """Run the reviewed failing starter as one public diagnostic, offline.
+
+    A real database over the shipped controller: the learner's own run sources the
+    investigation, the controller freezes the reviewed public bytes, and the
+    diagnostic executes the pinned starter through the local_process adapter. The
+    printed numbers are read back from the same stored rows a public projection
+    reads; nothing here is a live model call or a customer consequence.
+    """
+    with tempfile.TemporaryDirectory(prefix="shiftwork-s11-") as directory:
+        db_file = Path(directory) / "investigation.db"
+        with TestClient(create_app(str(db_file))) as client:
+            shift = client.post("/api/engagements/bookshop/shifts")
+            assert shift.status_code == 201, shift.text
+            shift_id = shift.json()["id"]
+
+            version = client.post(
+                f"/api/shifts/{shift_id}/artifact/versions",
+                json={"contract": config.PIVOT_STARTER_CONTRACT_JSON},
+            )
+            assert version.status_code == 201, version.text
+            candidate = version.json()
+            assert candidate["content_hash"] == config.TRUSTED_LOCAL_FIXTURES["pivot_starter"][0], (
+                "the shipped draft is not the pinned reviewed starter"
+            )
+
+            operation = client.post(f"/api/shifts/{shift_id}/runs")
+            assert operation.status_code == 202, operation.text
+            operation_id = operation.json()["id"]
+            deadline = time.monotonic() + 30
+            while time.monotonic() < deadline:
+                operation_run = client.get(f"/api/runs/{operation_id}").json()
+                if operation_run["state"] in ("FINALIZED", "FAILED"):
+                    break
+                time.sleep(0.05)
+
+            investigation = client.post(
+                f"/api/shifts/{shift_id}/investigations",
+                json={
+                    "source_run_id": operation_id,
+                    "source_request_ordinal": 1,
+                    "cause": "the router answers only the optional price task and never reads collection records",
+                    "falsifier": "a request with no currency symbol still omits the collection task",
+                    "public_test": "assert a result exists for every required task in the frozen request",
+                    "revision_of_id": None,
+                    "client_request_id": "demo-investigation-1",
+                },
+            )
+            assert investigation.status_code == 201, investigation.text
+
+            before = client.get("/api/engagements/bookshop/board").json()
+            created = client.post(
+                f"/api/shifts/{shift_id}/experiments",
+                json={
+                    "kind": "DIAGNOSTIC",
+                    "investigation_id": investigation.json()["id"],
+                    "candidate_a_version_id": candidate["id"],
+                    "client_request_id": "demo-diagnostic-1",
+                },
+            )
+            assert created.status_code == 202, created.text
+            experiment_id = created.json()["id"]
+            experiment = created.json()
+            while time.monotonic() < deadline:
+                experiment = client.get(f"/api/experiments/{experiment_id}").json()
+                if experiment["trials"][0]["state"] in ("COMPLETE", "FAILED"):
+                    break
+                time.sleep(0.05)
+            after = client.get("/api/engagements/bookshop/board").json()
+
+        trial = experiment["trials"][0]
+        assessment_rows = {
+            entry["task_id"]: entry for entry in trial["task_assessments"]
+        }
+        required_failures = sorted(
+            task_id
+            for task_id, entry in assessment_rows.items()
+            if entry["mandatory_pass"] is False
+        )
+        output = trial["outputs"][0]
+        print(json.dumps({
+            "stage": "investigation",
+            "source": "temporary database; the pinned reviewed starter executed under local_process",
+            "shift_id": shift_id,
+            "candidate": {
+                "artifact_version_id": candidate["id"],
+                "content_hash": candidate["content_hash"],
+                "matches_pinned_starter": True,
+                "frozen_contract_catalog_version": config.PIVOT_STARTER_CONTRACT_JSON["catalog_version"],
+            },
+            "context": {
+                "content_hash": experiment["context_hash"],
+                "evidence_class": experiment["context_evidence_class"],
+                "workloads": experiment["workloads"],
+                "protected_reservation": None,
+            },
+            "request": {
+                "ordinal": output["request_ordinal"],
+                "text": output["request_text"],
+            },
+            "observed": {
+                "http_status": output["http_status"],
+                "exact_output": base64.b64decode(output["body_base64"]).decode("utf-8"),
+                "elapsed_ms": output["elapsed_ms"],
+                "transport_error": output["transport_error"],
+                "interpretation_or_tool_observations": trial["observations"],
+                "observations_note": (
+                    "the trusted local starter reports no interpretation or tool events; "
+                    "the station shows observations only when a service produces them"
+                ),
+            },
+            "customer_text": trial["customer_text"],
+            "assessed_tasks": [
+                {
+                    "task_id": task_id,
+                    "outcome": entry["outcome"],
+                    "mandatory_pass": entry["mandatory_pass"],
+                    "reason_codes": entry["reason_codes"],
+                }
+                for task_id, entry in sorted(assessment_rows.items())
+            ],
+            "request_usefully_completed": all(
+                entry["outcome"] == "USEFUL_COMPLETION" for entry in assessment_rows.values()
+            ),
+            "required_tasks_unanswered": required_failures,
+            "candidate_eligible": experiment["eligible"],
+            "eligibility_reason": experiment["eligibility_reason"],
+            "experiment_state": experiment["state"],
+            "operation_budget": {
+                "attempts_used_before": before["attempts_used"],
+                "attempts_used_after": after["attempts_used"],
+                "attempts_remaining_after": after["attempts_remaining"],
+            },
+            "business_state_unchanged": {
+                "ledger_events_before": before["ledger_event_count"],
+                "ledger_events_after": after["ledger_event_count"],
+                "incidents_before": before["total_incidents"],
+                "incidents_after": after["total_incidents"],
+            },
+            "limits": [
+                "TRUSTED_LOCAL offline fixture execution, never a live model or hostile-code proof",
+                "the diagnostic reserves no protected case and can never qualify a version",
+                "the reviewed starter, incident request, public state and rubric are pinned and "
+                "authorized for local verification only; this stage is not Slice 11 acceptance",
+                "diagnostic help stays denied until Slice 14 supplies the assist gateway",
+            ],
+        }, indent=2, sort_keys=True))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=("migration",), required=True)
+    parser.add_argument("--stage", choices=("migration", "investigation"), required=True)
     args = parser.parse_args()
     if args.stage == "migration":
         return migration_stage()
+    if args.stage == "investigation":
+        return investigation_stage()
     raise AssertionError(args.stage)
 
 
