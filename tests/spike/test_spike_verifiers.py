@@ -141,9 +141,9 @@ def test_missing_check_key_is_inconclusive_rather_than_absent():
 
 def test_every_record_carries_a_utc_stamp_and_the_producing_source_hash():
     record = spike.build_record("unit_probe", {"value": 1})
-    assert record["probe"] == "unit_probe"
-    assert record["source_sha256"] == spike.SOURCE_SHA256
-    stamp = record["recorded_utc"]
+    assert record.get("probe") == "unit_probe"
+    assert record.get("source_sha256") == spike.SOURCE_SHA256
+    stamp = record.get("recorded_utc")
     assert isinstance(stamp, str) and stamp.endswith("+00:00") and "T" in stamp
 
 
@@ -158,10 +158,11 @@ def test_emit_writes_the_stamped_record_to_the_configured_sink():
     lines = sink.read_text(encoding="utf-8").splitlines()
     assert len(lines) == 1
     record = json.loads(lines[0])
-    assert record["probe"] == "unit_probe"
-    assert record["value"] == 7
-    assert record["source_sha256"] == spike.SOURCE_SHA256
-    assert record["recorded_utc"].endswith("+00:00")
+    assert record.get("probe") == "unit_probe"
+    assert record.get("value") == 7
+    assert record.get("source_sha256") == spike.SOURCE_SHA256
+    stamp = record.get("recorded_utc")
+    assert isinstance(stamp, str) and stamp.endswith("+00:00")
 
 
 def test_emit_refuses_to_write_without_a_run_sink():

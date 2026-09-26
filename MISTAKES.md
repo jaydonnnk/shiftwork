@@ -776,3 +776,35 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   new runs write to a new file with stamped records rather than appending to an
   unversioned one.
 
+## 2026-09-26 Spike mutation rows were proven by crashes, not by assertions
+
+- **What happened:** the first run of `tests/spike/mutation_proofs_spike.py`
+  reported `assertion-level catches: 20/23` and exit 1. Three stamping rows
+  (`record_utc_stamp_removed`, `record_source_hash_removed`,
+  `emit_stamp_bypass`) failed with `KeyError`: the tests indexed
+  `record["source_sha256"]` and `record["recorded_utc"]` directly, so removing
+  the stamp raised before any assertion could run. The harness classified them
+  `CAUGHT_INCIDENTAL`, which is not a proof.
+- **Root cause:** an assertion that reads a required key raises instead of
+  failing, so a deleted field looks like a crash and the guard stays unproven
+  even though every test reports red.
+- **Prevention rule:** in mutation-proven checks, read the field with `.get()`
+  and compare it explicitly, so a missing or altered value fails as an
+  assertion. Before citing a harness count, require `FAIL_CAUGHT` per row; a
+  crash, a collection error or a timeout proves nothing about the guard.
+
+## 2026-09-26 An appended MISTAKES block was written with literal escape sequences
+
+- **What happened:** the new Slice 12 mutation-proof entry was appended to this file
+  through an edit whose new text carried the characters backslash-r-backslash-n and
+  backslash-double-quote as escape sequences. The file received them literally, so the
+  whole entry landed on one unreadable line. The corruption was caught while verifying
+  the appended block before the commit and repaired in place with a byte-level script;
+  only the appended text changed, and the prefix stayed byte-identical.
+- **Root cause:** this file is CRLF, and the edit argument encoded newlines as escapes
+  instead of real line breaks, which made the escaping ambiguous between the tool, the
+  shell and the file.
+- **Prevention rule:** append to a CRLF file with a byte-level write that sets the line
+  endings explicitly, then read the region back with `Read` and confirm the block renders
+  as separate lines before committing. Never encode line breaks as escape sequences in a
+  tool argument.
