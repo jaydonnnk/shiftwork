@@ -316,6 +316,10 @@ Rules:
   login flow or confirmation prompt during an unattended run.
 - On Windows/PowerShell, prefer `rg`, `Get-Content`, `npm.cmd` and `npx.cmd`. Do not
   assume `rtk` exists or that PowerShell permits `.ps1` npm shims.
+- Run repository checks with `.venv313/Scripts/python.exe`. The `.venv` trampoline
+  is blocked by Windows Application Control on this machine, and installs into a
+  fresh venv need `uv pip install --link-mode=copy` because the tree is OneDrive-synced
+  (see `MISTAKES.md`, 2026-09-26).
 - Do not create branches, commits, tags or pushes unless the user has authorized
   that Git operation. Never stage everything implicitly.
 - Before starting work on each slice, check the current branch with
@@ -332,6 +336,25 @@ Rules:
 - Do not modify CI, lint configuration or lockfiles unless the task requires it.
 - Never store secrets, tokens or credentials in repository notes or logs.
 - Do not use em dashes whatsover, or S. It should be S1 for example instead of S
+
+### Context budget and handoff
+
+- Treat half of this session's context window as the working limit (for example
+  200k of a 400k-token window). Use the reported usage indicator when the runtime
+  shows one, and a conservative estimate otherwise. When usage reaches about that
+  point, stop starting new work even if the task is unfinished.
+- Do not run the session on to automatic compaction. Finish only the current step
+  and leave it at a safe point: the tree consistent, no half-applied edits and no
+  unrecorded failing results.
+- In the same reply, give the user one copy-pasteable continuation prompt in chat
+  for a fresh session. Invoke the `transfer-context` skill when it is available;
+  otherwise write an equivalent single fenced block headed `Prompt for New Chat`
+  that carries the task and its constraints, what is done and verified, the exact
+  files touched, decisions and rejected alternatives, traps and open questions,
+  and the next concrete step.
+- Report the halt and the approximate usage in one line, then stop until the user
+  runs that prompt in a new session. Only an explicit user instruction extends a
+  session past this limit.
 
 ### Mistake logging
 
@@ -411,6 +434,9 @@ watching. Do not create `PROGRESS.md` for short interactive work or small edits.
 
 - Treat files as durable context. Update progress after each verified step and before
   a likely compaction so a fresh session can continue without chat history.
+- The context budget and handoff rule in Execution discipline applies here as well:
+  halt at half the window, update `PROGRESS.md`, and close the final reply with the
+  continuation prompt.
 - The mandatory read order still applies. After that, prefer targeted line ranges,
   `rg`, quiet test output and tailed logs. Avoid dependency trees, binary dumps,
   lockfile output and redundant full-file reads.
