@@ -73,14 +73,23 @@ summaries when a time-sensitive external claim is being made.
   each remain separately authorized. Slice 10 is accepted and merged to main as
   `f0a1e81..0432cbd`, pushed 2026-09-25. Slice 11 is accepted (2026-09-26), pushed
   on `shiftwork/slice-11` as `add85b1..6832486`, and merged to main as
-  `36adbf4..973f5ce` on 2026-09-26. The branch `shiftwork/slice-12` exists from
-  that merge with no slice work on it. Gate 2 and Gate 3 carry a documentation-only
+  `36adbf4..973f5ce` on 2026-09-26. Gate 2 and Gate 3 carry a documentation-only
   credential-name correction that the user re-approved on 2026-09-26: the stale
   `CONTREE_SESSION` name is replaced by the documented `CONTREE_TOKEN`,
   `CONTREE_PROJECT` and `NEBIUS_AI_PROJECT` aliases, with `NEBIUS_PROJECT_ID` in
-  the Gate 3 configuration list. The next action is
-  Slice 12 under `04-slices.md` on a branch named `shiftwork/slice-12`, and it
-  needs its own go-ahead. Do not implement the pivot under historical approvals.
+  the Gate 3 configuration list. Slice 12 received its own go-ahead on 2026-09-26
+  on `shiftwork/slice-12`. Its live entitlement preflight initially used the
+  wrong `Project` header; the support-provided AI project ID now returns all
+  Sandbox permissions true. The partial live matrix then stopped on a successful
+  operation whose checkpoint silently lacked a reported file write. Slice 12 is
+  unchecked; Gate 2's scoped file-readback rule and Gate 3's matching
+  program-design correction were separately re-approved 2026-09-26. S13 onward
+  stays stopped. One separately authorized no-inference Sandbox diagnostic then
+  read back a 14-byte checkpoint file exactly under the normal 16 MiB cap, but
+  the earlier 2 MiB loss under a 1 MiB cap remains unexplained. Neither gate
+  approval nor that one-pass result establishes a live capability verdict or
+  authorizes further probes.
+  Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
   the exact tested version and inherited operational consequences. Experiments,

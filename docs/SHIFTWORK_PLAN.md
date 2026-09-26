@@ -15,7 +15,10 @@ co-author footers. The earlier Gate 3 commit `de250b9` remains historical. Gate 
 review then exposed a missing Northline qualifying-comparison path, so Gate 3 was
 backtracked for a scoped revision. The user approved that correction and Gate 4
 together on 2026-09-24 and authorized committing and pushing both to main without
-a co-author footer. All four gates are approved. No implementation is authorized;
+a co-author footer. All four gates were approved at that point. Gate 2 was
+re-approved on 2026-09-26 for the scoped file-readback rule after the live
+snapshot/capture failure. Gate 3's corresponding program-design correction was
+separately re-approved the same day. No further implementation is authorized;
 each slice still needs its own go-ahead.
 Gate 1 publication and merge/push are complete (`821a24c` on main). Gate 2
 section 12 and the Gate 3 section 7 configuration list carry a documentation-only
@@ -27,7 +30,16 @@ merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptanc
 and Slice 10 was accepted by the user on 2026-09-25, then merged to main as
 `f0a1e81..0432cbd` and pushed the same day. Slice 11 was accepted on 2026-09-26,
 pushed on `shiftwork/slice-11`, and merged to main as `36adbf4..973f5ce`. Slices 12
-through 25 are the approved Gate 4 build order and are not implemented.
+  through 25 are the approved Gate 4 build order and are not implemented. Slice 12's
+  2026-09-26 entitlement preflight initially used the wrong project header;
+  the support-provided AI project ID now returns all Sandbox permissions true.
+  Its partial live matrix stopped when a successful Sandbox operation failed to
+  retain a reported file write in its checkpoint under a layer cap. Slice 12
+  remains unchecked and dependent slices are stopped. Gate 2's scoped capture
+  correction and Gate 3's matching program-design correction are re-approved.
+  One separately authorized no-inference diagnostic then read back a 14-byte
+  checkpoint file exactly under the normal 16 MiB cap. The earlier 2 MiB loss
+  under a 1 MiB cap remains unexplained; one small-file pass is not S12 acceptance.
 Preserve that foundation and its evidence;
 it does not demonstrate the new prediction, comparison or selection workflow.
 The full approval history and verbatim evidence remain in
@@ -205,7 +217,9 @@ closed and whose selection is absent to open a labelled non-operational shift fo
 investigation, repair comparison and its first explicit choice. It seeds only an
 editable draft, not an operating version or invented consent; operation stays
 blocked until a valid learner choice. The controller, store, room and offline
-paths remain the baseline. Gates 2, 3 and 4 are approved. Actual task rubrics,
+paths remain the baseline. Gate 2's scoped capture correction and Gate 3's
+matching correction are re-approved. Gate 4's approved slice order
+is retained. Actual task rubrics,
 reviewed fixtures and channel verification require later authorization and evidence.
 Repeated probing, protected-case leakage and isolation remain constraints.
 
@@ -306,10 +320,14 @@ format; the four official criteria remain equally weighted.
 
 ## 12. Immediate next action
 
-Slice 10 is accepted, merged to main as `f0a1e81..0432cbd` and pushed. The next
-action is Slice 11 on a branch named `shiftwork/slice-11`, once the user gives
-that slice's go-ahead, following `plans/shiftwork/04-slices.md` section 3.
-Preserve completed code and evidence; do not implement the pivot under historical
-approvals. Installs, credentials, external calls, the capability
-spike, fixture authoring, sealed-case contents, outreach, deployment,
-publication, submission and ADR #4 each remain separately authorized.
+Slice 11 is accepted and merged to main. Slice 12's authorized live spike has a
+STOP verdict after a successful Sandbox operation produced a checkpoint missing
+its reported file content. A separately authorized small-file readback under the
+normal cap passed, but did not resolve that STOP. The immediate next action is
+review of both observations and a bounded plan to establish a trustworthy
+capture and reset route.
+Gate 2 and Gate 3 capture corrections were separately re-approved on
+2026-09-26. Slice 12 stays unchecked; those approvals and the single follow-up
+do not authorize further live probes or Slice 13 work. Commits, pushes,
+fixture authoring, sealed-case contents, outreach, deployment, publication,
+submission and ADR #4 remain separately authorized.
