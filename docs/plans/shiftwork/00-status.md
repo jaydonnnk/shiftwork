@@ -73,11 +73,13 @@ digest per run and a comparison verdict. The F4 probes carry positive controls
 and record `UNPROVEN_POSITIVE_CONTROL_UNAVAILABLE` rather than passing when a
 control does not fire. F2's stamping rule is implemented: per-record UTC time and
 source SHA-256, one new evidence file per run, and an inference reservation that
-sums every `slice12-*.jsonl` file. `tests/spike/test_spike_verifiers.py` holds the
-offline guards, one per branch with a mutation proof (23 of 23 caught). The full
-suite passes at 386 passed, 1 skipped, 2 warnings, against 363 passed and 1 skip
-before the repair. No live run, Sandbox operation or inference call followed. The
-controlled pair and the
+sums every `slice12-*.jsonl` file. `tests/spike/test_spike_verifiers.py` holds 23
+offline guards, one per branch, and
+`.venv313/Scripts/python.exe -B tests/spike/mutation_proofs_spike.py` proves each
+of them independently: `assertion-level catches: 23/23`, every mutated target
+restored byte-identically. The full suite passes at 386 passed, 1 skipped, 2
+warnings, against 363 passed and 1 skip before the repair. No live run, Sandbox
+operation or inference call followed. The controlled pair and the
 repaired controls phase stay unrun and need their own explicit spend
 authorization; Slice 12 stays unchecked and S13 onward stays blocked.
 

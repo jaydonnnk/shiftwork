@@ -144,7 +144,12 @@ refuses to reuse an existing one, and the inference reservation sums every
 The archived `slice12-live-2026-09-26.jsonl` is untouched.
 
 Offline verification: `tests/spike/test_spike_verifiers.py` holds 23 checks, one
-per classifier branch, each mutation-proven (23 of 23 mutations caught). The full
+per classifier branch, and `tests/spike/mutation_proofs_spike.py` proves each of
+them independently. Run
+`.venv313/Scripts/python.exe -B tests/spike/mutation_proofs_spike.py` for
+`assertion-level catches: 23/23` with every mutated target restored
+byte-identically; it reuses the runner in `tests/mutation_proofs.py`, so a crash
+is reported as an incidental catch rather than a proof. The full
 suite passes at **386 passed, 1 skipped, 2 warnings**, against 363 passed and 1
 skip before the repair. Nothing in the module or the tests contacts the API, reads
 `.env` or needs credentials. **No live run, Sandbox operation or inference call
