@@ -1,6 +1,175 @@
 # Status: Shiftwork
 
-## Slice 11 prerequisite fixes and local verification: 2026-09-25
+## Slice 11 implementation and local verification: 2026-09-26
+
+**Current step: Slice 11 is implemented and locally verified against its approved
+exit contract; it awaits the user's acceptance.** Work is on `shiftwork/slice-11`.
+The three scoped prerequisite fixes stay in force; this entry supersedes their
+next-action wording. Nothing was pushed this session. No live model, credential,
+external service, deployment, protected-case reservation, business write or human
+session ran. The slice stays unchecked until the user accepts it.
+
+### What landed
+
+- Orchestrator and service: investigation entries (cause, falsifier, public test,
+  optional revision linkage and source request ordinal), the assist denial whose
+  reason names the Slice 14 boundary, and the public diagnostic experiment. The
+  diagnostic freezes the reviewed context at reservation (pinned starter bytes,
+  frozen incident request, public state, mission and rubric), executes only the
+  pinned reviewed starter under `local_process`, assesses each required task
+  independently, renders the customer answer only from the validated envelope,
+  can never be eligible, writes no business state and does not spend the operation
+  attempt budget. Budget: two diagnostics per shift
+  (`orchestrator.DIAGNOSTIC_EXPERIMENTS_PER_SHIFT`), idempotent by
+  `client_request_id`, and a failed diagnostic still consumes its slot.
+- Persistence: the v6 investigation, experiment, trial, task-assessment and
+  reservation tables are written on reopen-reconciled paths with no v5 data
+  rewrite (schema work committed as `6ee9cfb`).
+- API: `GET`/`POST /api/shifts/{id}/investigations`,
+  `GET /api/investigations/{id}`, `POST /api/experiments`,
+  `GET /api/experiments/{id}` and `POST /api/shifts/{id}/assist`, which always
+  returns a typed denial until Slice 14 supplies the gateway. Public projections
+  expose no host path, sealed identity or raw ref.
+- Client: the Investigate station (orientation list, entries, append form, source
+  picker, assist denial, public diagnostic with rendered assessment, eligibility
+  statement and evidence class), with labelled `source` and `diagnostic` regions.
+- Tests: `tests/orchestrator/test_experiment_lifecycle.py` (15 passed) and
+  `tests/orchestrator/test_investigation_assist.py` (23 passed), plus the updated
+  checks listed under the blast radius below.
+
+### Verbatim verification, 2026-09-26
+
+All commands ran from the repository root under `.venv313/Scripts/python.exe`,
+or under Node for the client harnesses. The `.venv` trampoline is blocked by
+Windows Application Control on this machine; the repair and its limits are
+recorded in `MISTAKES.md`.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Preview API test | `.venv313/Scripts/python.exe -B -m pytest tests/api/test_client_preview.py -p no:cacheprovider -q` | `1 passed, 2 warnings in 0.97s` |
+| Full suite (packaging excluded; it installs dependencies) | `.venv313/Scripts/python.exe -B -m pytest tests --ignore=tests/packaging -p no:cacheprovider -q` | `362 passed, 1 skipped, 2 warnings in 75.11s` |
+| Main mutation proofs | `.venv313/Scripts/python.exe -B tests/mutation_proofs.py` | `assertion-level catches: 42/42` |
+| Pivot mutation proofs | `.venv313/Scripts/python.exe -B tests/pivot_mutation_proofs.py` | exit 0; 42 rows; `42` rows `FAIL_CAUGHT restored=True`; `0 restored=False` |
+| Browser proof with a real run | `node tests/client/browser.mjs http://127.0.0.1:8020 --exercise-run` | exit 0; `realRunButton: PASS`, `uncaughtExceptions: 0`; matrix 1280/640/390 on `run-0002` with 2 rendered outputs, 1 investigation entry, a COMPLETE diagnostic with 3 assessed tasks; `narrowStationReach`, `incidentNavigationFocus`, `downloadedBytes: exact`, `labelRemovalMutations: caught in every visible region`, `ordinalMutation: caught` |
+| Render-fault rows | `node tests/client/render_faults.mjs` | `render-fault rows: 8 of 8 as expected` (baseline green plus the 7 named CAUGHT rows) |
+| Investigation stage demo | `.venv313/Scripts/python.exe -B -m demos.final_pivot --stage investigation` | exit 0 (below) |
+
+The browser proof ran against `python -m demos.client --port 8020`: an isolated
+temporary database whose seeded FINALIZED `run-0002` had one operation attempt
+remaining, so the exercise run consumed a real attempt and reached the exhausted
+state. It is a local preview, not a deployment. The pre-existing skip is the live
+adapter conformance test; the two warnings are the pre-existing FastAPI/starlette
+deprecation warnings that also appear in the baseline.
+
+The first full-suite run of the day returned
+`1 failed, 360 passed, 1 skipped, 2 warnings in 48.57s`: the new `investigate`
+station was absent from `tests/api/test_client_shell.py`'s expected station set.
+The test now asserts 8 stations and the `source`/`diagnostic` labelled regions;
+the green line above is the re-run after that fix.
+
+The investigation stage demo executed the pinned reviewed starter on the frozen
+incident and reported: `experiment_state: FINALIZED`, candidate
+`matches_pinned_starter: true` with content hash
+`a1c1093fcc456ebb5afc07241bb24f34ca4ca80877a7fff00fe5c82e2c542f28`,
+`candidate_eligible: false`, price `USEFUL_COMPLETION`, `collection` and
+`alternative` `MISSING_OUTPUT` with `REQUIRED_TASK_MISSING`,
+`request_usefully_completed: false`, `customer_text` "Salt Roads (paperback)
+costs 18.00 GBP", operation budget unchanged (`attempts_used 1` to `1`), and
+business state unchanged (`incidents 3` to `3`, `ledger_events 3` to `3`). Its
+written limits line states the execution is `TRUSTED_LOCAL` offline fixture
+execution and that the diagnostic reserves no protected case and can never
+qualify a version.
+
+### Re-anchored mutation proofs
+
+Three Slice 8 rows in `tests/mutation_proofs.py` had silently stopped matching
+when Slice 10 replaced the inherited-version fallbacks with
+`_selected_operating_version` and added a legacy branch inside
+`_snapshot_bytes_for_run`: the harness printed `SKIP: pattern not found`, and
+because the main harness was not re-run after that refactor, the loss went
+unnoticed until this session. Repaired on 2026-09-26:
+
+- `close_version_fallback_removed` is now
+  `close_declares_limits_only_from_the_version_in_force`;
+- `start_run_ignores_the_inherited_version` is now
+  `start_run_draws_one_variant_per_enabled_family`;
+- `snapshot_capture_bypassed_for_the_mutable_path` keeps its name and claim,
+  anchored on the capture-first read of the stored snapshot bytes.
+
+The two renamed rows are anchored onto branches the `s10_legacy_*` rows do not
+already fault, so the harness carries one distinct fault per row again. The
+harness now runs its subprocesses under `sys.executable` instead of a hardcoded
+`.venv` path.
+
+### Starter-change blast radius
+
+The seeded draft for the new engagement now ships the reviewed failing starter
+(`config.PIVOT_STARTER_ARTIFACT_PATHS` with `PIVOT_STARTER_CONTRACT_JSON`,
+catalog v3), not the old three-file scaffold. Four existing checks were updated
+to the shipped bytes: `tests/api/test_draft_round_trip.py` asserts the seeded
+file set equals the starter's; `tests/executor/test_conformance.py` asserts the
+run snapshot's `service.py` equals the starter bytes;
+`tests/orchestrator/test_close_inheritance.py` still proves the frozen version
+differs from the shipped starter (now compared against the starter map);
+`tests/ledger/test_ledger.py` resolves historical events against the shipped
+catalog version instead of a hardcoded v2.
+`tests/api/test_client_shell.py` now expects the 8 stations and the two new
+regions.
+
+### Post-slice cleanup scan (architect-reviewer, 2026-09-26)
+
+- No orphaned or unreferenced files: every function the slice added to
+  `orchestrator.py` has a call site, the new client render functions are all
+  called, the pivot fixtures are referenced through `config`, and both new test
+  files are collected by the suite.
+- Removed two imports the slice itself had added and never used,
+  `ExecutionObservation` and `ObservationKind` in `shiftwork/orchestrator.py`;
+  the focused tests and import check re-ran green after the removal.
+- Reported, not changed: `DrawState` in the same import block is unused and
+  predates the slice (present at `e0516e0`); left for the user's decision, as
+  earlier scans did for pre-existing unused imports.
+- Closed by this scan: the help path's foreign-shift ownership guard had no test
+  that reached it (the existing cases covered a missing investigation, the
+  learner's own shift and an unknown shift), and the experiment path's
+  foreign-shift guard and the absent assist gateway had tests but no mutation
+  row. Added `test_help_with_another_open_shifts_investigation_is_refused_before_the_gateway`
+  (asserts the conflict denial precedes the absent-gateway denial) and three rows
+  to `tests/pivot_mutation_proofs.py`
+  (`s11_help_accepts_a_foreign_shifts_investigation`,
+  `s11_diagnostic_accepts_a_foreign_shifts_investigation`,
+  `s11_absent_assist_gateway_claims_success`). The harness re-ran with 42 rows,
+  all `FAIL_CAUGHT` with `restored=True`; the first version of the help row did
+  not match its indentation (SKIP) and was corrected before the green run, and
+  the diagnostic row is caught by the candidate-ownership assertion rather than
+  the investigation one.
+- Reported for the user's decision, not changed: the git-ignored root
+  `PROGRESS.md` is a Slice 8 (2026-09-20) operational log that no longer matches
+  the active work, and `tests/client/browser.mjs:59` writes its screenshots to
+  the git-ignored `artifacts/slice9`/`slice9-faults` directories, so current runs
+  land in Slice 9-named folders. Both are cosmetic; neither affects the suite.
+
+### Limits
+
+- Direct trusted-fixture execution under `local_process`; never a live model,
+  never hostile-code isolation, and no persisted operational consequence. The
+  assessment is over the executed capture, not fresh inference.
+- The diagnostic reserves no protected case and can never qualify a version;
+  diagnostic help stays denied until Slice 14 supplies the assist gateway. No
+  repaired candidate, paired workload or operational/selection route was
+  authored or changed.
+- The client proofs ran headless against the local preview only; no hosted,
+  mobile-device or human-session result is claimed.
+- The main and pivot harnesses were re-run in full this session and restored
+  every mutated file byte-identically (`restored=True` per row); the worktree
+  diff after the runs is the session's own change set.
+- Packaging tests (test 51) remain excluded because they install dependencies;
+  their full-suite claim stays unverified.
+
+## Historical Slice 11 prerequisite fixes and local verification: 2026-09-25
+
+This section records the prerequisite-fix pause. Its next-action wording is
+superseded by the implementation entry above; the corrected rules, exact-byte
+pins and verification results it records remain in force.
 
 **Current step: the three scoped prerequisites are repaired and locally checked;
 S11 is not complete or accepted.** After the independent review and the plain-language
@@ -256,12 +425,13 @@ those named assertions can fail before recording S11 as complete.
 - **Gate 3 merge:** `aedc97f` and `ab5ab9c` fast-forwarded local main without
   a co-author footer and reached `origin/main` in this session's push. The
   unrelated `.gitignore` edit stayed unstaged throughout.
-- **Resume point:** the remaining Slice 11 implementation under `04-slices.md`
-  section 3, on a branch named `shiftwork/slice-11`. Slice 10 was accepted on
-  2026-09-25 and is merged to main as `f0a1e81..0432cbd`; Slice 11's three scoped
-  prerequisites are repaired and locally verified, but S11 itself is not complete
-  or accepted. Stop and backtrack the affected gate if a slice falsifies an
-  approved Gate 2 or Gate 3 decision.
+- **Resume point:** Slice 11 under `04-slices.md` section 3 is implemented and
+  locally verified on `shiftwork/slice-11` (evidence at the top of this file) and
+  awaits the user's acceptance; nothing was pushed this session. Slice 10 was
+  accepted on 2026-09-25 and is merged to main as `f0a1e81..0432cbd`. Slice 12
+  needs its own go-ahead and its own `shiftwork/slice-12` branch. Stop and
+  backtrack the affected gate if a slice falsifies an approved Gate 2 or Gate 3
+  decision.
 
 ### Revision scope and evidence boundaries
 

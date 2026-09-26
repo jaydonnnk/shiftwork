@@ -381,7 +381,9 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **Prevention rule:** always invoke this repository's checks with
   `.venv/Scripts/python.exe` (or an activated `.venv`); a command that reports a
   missing tool or module is treated as a harness error to diagnose before any
-  conclusion about the code.
+  conclusion about the code. **Superseded 2026-09-26:** the `.venv` trampoline is
+  blocked by Windows Application Control on this machine; use
+  `.venv313/Scripts/python.exe` (see the 2026-09-26 interpreter-block entry).
 
 ## 2026-09-20 Slice 8: a killed mutation run left a mutation applied (false regression)
 
@@ -411,7 +413,9 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **Root cause:** resumed execution before recovering the environment constraint
   from the interrupted required-context read.
 - **Prevention rule:** finish required-context recovery before issuing checks; use
-  `.venv/Scripts/python.exe` explicitly for repository commands.
+  `.venv/Scripts/python.exe` explicitly for repository commands. **Superseded
+  2026-09-26:** use `.venv313/Scripts/python.exe`; the `.venv` trampoline is
+  blocked by Windows Application Control on this machine.
 
 ## 2026-09-21 Slice 9: nested labels hid a rendered-test blind spot
 
@@ -624,3 +628,75 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   required-task set.
 - **Prevention rule:** before counting a success-substitution proof, assert that
   every required task is present and complete in the injected response.
+
+## 2026-09-26 Interpreter block cost the session's verification; the OneDrive hardlink install failed before the copy-mode fix
+
+- **What happened:** the project `.venv` trampoline raised
+  `OSError: [WinError 4551] An Application Control policy has blocked this file`
+  on every invocation, and the CPython 3.12 interpreter it points at returned
+  `Permission denied`; no retry cleared it. The system 3.11.9 cannot run the
+  suite (the models use PEP 695 type aliases) and the existing 3.13 interpreters
+  could not load the venv's cp312 compiled dependencies, so verification was
+  impossible until a fresh `.venv313` was built from the uv-managed CPython
+  3.13.14. Creating that venv succeeded, but the first dependency install with
+  `uv pip install -r requirements.lock` failed on this workspace because uv's
+  default hardlink strategy does not survive the OneDrive-synced tree; the same
+  install succeeded with `--link-mode=copy`, and `INSTALLER` in the resulting
+  `site-packages` records `uv`.
+- **Root cause:** the machine's Application Control policy is a recurring,
+  non-transient hazard for this checkout (second occurrence after 2026-09-17),
+  and the workspace lives under OneDrive, where hardlinked installs are not
+  reliable. The earlier note treated the first occurrence as transient and
+  planned no fallback interpreter, so a blocked 3.12 meant zero verification.
+- **Prevention rule:** verification commands run with
+  `.venv313/Scripts/python.exe` (git-ignored, built from the uv-managed 3.13
+  interpreter); when 4551 appears, do not retry the blocked interpreter and do
+  not run `uv run` as a probe (it tried to rebuild `.venv` on 2026-09-26 and
+  produced an untracked `uv.lock`). Install dependencies into a fresh venv with
+  `uv pip install --link-mode=copy -r requirements.lock`; never hardlink into
+  this OneDrive tree. Report a blocked interpreter plainly instead of reporting
+  post-block work as passing.
+
+## 2026-09-26 Slice 11: three mutation rows had been silently skipped since the Slice 10 refactor
+
+- **What happened:** the main harness, `tests/mutation_proofs.py`, carried three
+  Slice 8 rows whose byte patterns no longer existed:
+  `close_version_fallback_removed`, `start_run_ignores_the_inherited_version` and
+  `snapshot_capture_bypassed_for_the_mutable_path`. Slice 10 replaced the
+  inherited-version fallbacks with `_selected_operating_version` and grew a
+  legacy branch inside `_snapshot_bytes_for_run`, so each row printed
+  `SKIP: pattern not found` and proved nothing. The loss went unnoticed because
+  the main harness was not re-run after the Slice 10 refactor; the pivot harness
+  was re-run, and its output was read as the whole story.
+- **Root cause:** a mutation row is an anchor into exact source bytes; a refactor
+  silently breaks the anchor, and the harness reports the miss as SKIP rather
+  than as a failure, so a run that nobody re-executed cannot correct it. The
+  Slice 10 verification recorded the pivot harness counts without re-running
+  the main harness.
+- **Prevention rule:** after any refactor of a function a mutation row anchors
+  onto, re-run that harness and treat every `SKIP` as a coverage loss that must
+  be re-anchored or explicitly retired, never as a neutral result. A harness run
+  is evidence only when every row reports `FAIL_CAUGHT` with `restored=True`.
+  Re-anchored rows must fault branches the other rows do not already fault; two
+  rows that fault the same branch prove neither. Repaired 2026-09-26 as recorded
+  in `00-status.md`; the harness now runs subprocesses under `sys.executable`
+  instead of a hardcoded interpreter path.
+
+## 2026-09-26 Slice 11 client: the new station was added without its served-shell contract test
+
+- **What happened:** the Slice 11 client work added the `investigate` station and
+  the `source` and `diagnostic` labelled regions, but
+  `tests/api/test_client_shell.py` still pinned the old 7-station set. The first
+  full-suite run of 2026-09-26 returned
+  `1 failed, 360 passed, 1 skipped, 2 warnings in 48.57s` with
+  `Extra items in the left set: 'investigate'`; the test was updated to the
+  shipped contract and the re-run returned
+  `361 passed, 1 skipped, 2 warnings in 45.75s`.
+- **Root cause:** the client change was verified in the browser harness (which
+  asserts 8 stations) and in the preview test, but the smaller shell contract
+  test was not run or updated in the same pass, so the suite was left red.
+- **Prevention rule:** when a client change alters the served shell (stations,
+  labelled regions, assets), update and run the shell contract test in the same
+  change, not only the browser harness; before reporting a slice's suite as
+  green, run the full suite, not the focused files.
+
