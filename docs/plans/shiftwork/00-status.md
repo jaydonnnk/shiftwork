@@ -49,10 +49,14 @@ executed evidence.
 stop-and-report if any part projects above it, against $25 of credits that must also
 cover judging through 2026-12-03. The user reported the keys as valid.
 
+**Git state.** The seven corrected files (two gate documents, two leak-guard test
+files and the three mirrors) were committed as `bc18561`, `06fb190` and `973f5ce`.
+Slice 11 was fast-forwarded into main as `36adbf4..973f5ce` and pushed to
+`origin/main` on 2026-09-26. The branch `shiftwork/slice-12` exists from that
+merge and holds no slice work.
+
 **Not run:** the Sandboxes enablement check (`GET /sandboxes/v1/whoami`), any
-inference call, image import, externally visible command, commit or push. The five
-corrected files are uncommitted. Slice 11 is accepted and pushed but still
-unmerged: main can fast-forward to `shiftwork/slice-11`, which is 19 commits ahead.
+inference call, image import or externally visible command.
 
 ## Slice 11 acceptance: 2026-09-26
 
@@ -503,8 +507,8 @@ those named assertions can fail before recording S11 as complete.
   (2026-09-26) and pushed on `shiftwork/slice-11` as `add85b1..6832486`
   (evidence and limits in the Slice 11 entries at the top of this file). Slice 10
   was accepted on 2026-09-25 and is merged to main as `f0a1e81..0432cbd`. The
-  next action is Slice 12 under `04-slices.md`, which needs its own go-ahead and
-  its own `shiftwork/slice-12` branch, with its sandbox-scoped Nebius key
+  next action is Slice 12 under `04-slices.md`, which needs its own go-ahead on the
+  existing `shiftwork/slice-12` branch, with its sandbox-scoped Nebius key
   precondition still unverified. The two documentation-only credential-name
   corrections were re-approved on 2026-09-26 and change no behavior. Stop and
   backtrack the affected gate if a slice falsifies an approved Gate 2 or Gate 3

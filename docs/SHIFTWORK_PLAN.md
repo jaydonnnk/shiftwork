@@ -25,9 +25,9 @@ behavior, interface or budget.
 **Build baseline:** Slices 1 through 10 are recorded as implemented; Slice 9 was
 merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance,
 and Slice 10 was accepted by the user on 2026-09-25, then merged to main as
-`f0a1e81..0432cbd` and pushed the same day. Slice 11 was accepted on 2026-09-26 and
-is pushed on `shiftwork/slice-11`, not yet merged to main. Slices 12 through 25 are
-the approved Gate 4 build order and are not implemented.
+`f0a1e81..0432cbd` and pushed the same day. Slice 11 was accepted on 2026-09-26,
+pushed on `shiftwork/slice-11`, and merged to main as `36adbf4..973f5ce`. Slices 12
+through 25 are the approved Gate 4 build order and are not implemented.
 Preserve that foundation and its evidence;
 it does not demonstrate the new prediction, comparison or selection workflow.
 The full approval history and verbatim evidence remain in
