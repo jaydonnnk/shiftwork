@@ -295,6 +295,31 @@ skipped, 2 warnings, against 386 and 1 before this authoring. All five phases
 remain unrun live and each needs its own spend authorization; Slice 12 stays
 unchecked and Slice 13 onward stays blocked.
 
+### Outage phase live run: 2026-09-26 (one authorized live step)
+
+The user authorized the outage phase only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase outage` and exited 0.
+Raw records: `evidence/slice12-outage-20260926T135627Z.jsonl`, stamped with
+source SHA-256
+`929963db4cedbda1b6cbd6e78cd8fd27b11dde154b3a839d54cd64efb20321ae`.
+
+- Transport failure: the request to `api.tokenfactory.nebius.com.invalid`
+  raised `ConnectError`.
+- Provider failure: the request with the model name `slice12-model-does-not-exist`
+  returned HTTP 404 with a body stating that model does not exist. No usage
+  fields were returned, so no tokens were billed by this call.
+- No Sandbox operation ran and no checkpoint image was created. The serialized
+  secret scan on the recorded error text passed.
+- Verdict `PASS_OUTAGE_FAILURES_RECORDED`; `business_effect_writes` is 0, which is
+  structural in a spike with no business layer. No account balance or currency
+  was inspected.
+
+This is the first recorded evidence that a provider and a transport failure are
+retained as typed failures rather than an accepted call or an unhandled crash.
+It does not test a timeout, a partial stream, or a failure inside a service
+request. The escape, reuse and trials phases stay unrun, and Slice 12 remains
+unchecked with Slice 13 onward blocked.
+
 ## Stopped or unmeasured
 
 The stop rule prevented the planned reset/branch readback, terminated grant

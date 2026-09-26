@@ -1,5 +1,21 @@
 # Status: Shiftwork
 
+## Slice 12 outage phase live run: 2026-09-26
+
+The user authorized the outage phase only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase outage` and exited 0.
+Two failures were recorded with no Sandbox operation and no inference call: the
+request to an unreachable host raised `ConnectError`, and the provider rejected
+an invalid model name with HTTP 404 and a body saying that model does not exist.
+The provider rejection consumed no tokens, `business_effect_writes` stayed 0
+(structural: the spike has no business layer), the serialized secret scan passed,
+and the verdict is `PASS_OUTAGE_FAILURES_RECORDED`. Raw records:
+`evidence/slice12-outage-20260926T135627Z.jsonl`, stamped with source SHA-256
+`929963db4cedbda1b6cbd6e78cd8fd27b11dde154b3a839d54cd64efb20321ae`, which differs
+from the earlier runs because the harness source changed. No account charge was
+inspected. The escape, reuse and trials phases stay unrun and each needs its own
+spend authorization; Slice 12 stays unchecked and Slice 13 onward stays blocked.
+
 ## Slice 12 remaining probes authored offline: 2026-09-26
 
 The user authorized authoring the remaining F5 probe code with no live calls.
