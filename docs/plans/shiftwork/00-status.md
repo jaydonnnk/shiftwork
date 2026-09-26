@@ -1,5 +1,27 @@
 # Status: Shiftwork
 
+## Slice 12 controls phase live run: 2026-09-26
+
+The user authorized the controls phase only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase controls` and exited
+0. All three positive controls fired, so the absence checks are no longer
+vacuous: the host-only canary sat in the spawning environment
+(`host_canary_in_spawn_environment: true`) yet was absent from the Sandbox by
+name and by value, no provider environment variable was visible, no controller
+path existed, and connections to `example.com:443`, `169.254.169.254:80` and
+`127.0.0.1:8000` all failed under the disabled networking flag. Verdict
+`PASS_ABSENCE_CONTROLS_FIRED`; the egress clause measures only that the flag is
+honoured and is not a host isolation proof. The crash probe retained
+`CAPTURE_BEFORE_CRASH` with inner exit code 7, and the deadline probe reported
+`timed_out` with signal 9. All three operations were disposable with
+`result_image_uuid` null, so no new checkpoint image exists. The three operations
+reported `resources.cost` 0.00075627, 0.00017274 and 0.00017386 in the same
+currency-less field as before, and no inference call ran. Raw records:
+`evidence/slice12-controls-20260926T132140Z.jsonl`. F4 is now live-verified (the
+pair section's "until the controls phase" note is superseded for it); the seven
+F5 probes stay unrun and each needs its own spend authorization, and Slice 12
+stays unchecked.
+
 ## Slice 12 controlled pair live run: 2026-09-26
 
 The user authorized only the `--phase pair` live step. It ran once and exited 2.
@@ -19,6 +41,18 @@ The earlier zero-byte observation stays unexplained, the repaired `controls`
 phase and the remaining probes stay unrun and separately authorized, and
 Slice 12 stays unchecked with Slice 13 onward blocked. Full detail is in the
 capability report.
+
+**User adjudication of the capture clause: 2026-09-26.** The user read the Gate 2
+section 13 rule, the Gate 3 section 8 readback rule and test 38 against the pair
+result and accepted the control run as establishing the transport/capture route.
+The treatment is classified as a visible failed run with incomplete evidence,
+not a capture mismatch, so it is not a test 38 STOP. No further capture runs
+follow under this adjudication. The gate documents are unchanged; this is a
+scoped interpretation by the gate owner, and the earlier zero-byte observation
+remains unexplained with unverifiable provenance. F3's readback-and-digest
+verifier is now live-verified; F4 stays unverified until the controls phase. The
+controls phase and the seven F5 probes remain unrun and each needs its own spend
+authorization.
 
 ## Slice 12 live matrix hard stop: 2026-09-26
 

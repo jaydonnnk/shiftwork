@@ -210,6 +210,47 @@ What this establishes, and what it does not:
 The repaired `controls` phase stays unrun and needs its own explicit
 authorization. Slice 12 remains unchecked and Slice 13 onward stays blocked.
 
+**User adjudication: 2026-09-26.** The user accepted the control run as
+establishing the transport/capture route and classified the treatment as a
+visible failed run with incomplete evidence rather than a capture mismatch, so
+test 38's mismatch clause is not triggered. No further capture runs follow. F3's
+readback-and-digest verifier is live-verified by the control run; F4 stays
+unverified until the controls phase, and the F5 probes stay unrun.
+
+### Controls phase live run: 2026-09-26 (one authorized live step)
+
+The user authorized the controls phase only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase controls` and exited
+0. Raw records: `evidence/slice12-controls-20260926T132140Z.jsonl`, twelve
+records, each stamped with a UTC time and source SHA-256
+`2d1e0ea39ce00213e54b62d44e548613b48d77abccc739edee436a067729cdba`.
+
+- Access/egress probe: all three positive controls returned true
+  (`positive_control_env_lookup`, `positive_control_sentinel_present` with the
+  mounted sentinel digest `1289bf28...0a9fa`, and
+  `positive_control_loopback_connect`), so each absence check has a proven
+  detector. The host-only canary was present in the spawning environment and
+  absent from the Sandbox by name and value; no `NEBIUS_API_KEY`,
+  `CONTREE_TOKEN` or `NEBIUS_PROJECT_ID` variable and no controller path
+  (`/work/.env`, `/work/shiftwork.db`, `/work/protected.json`,
+  `/run/secrets/NEBIUS_API_KEY`) was visible; connections to `example.com:443`,
+  `169.254.169.254:80` and `127.0.0.1:8000` all failed. Verdict
+  `PASS_ABSENCE_CONTROLS_FIRED`. Scope stays as labelled: this shows the
+  disabled networking flag is honoured and that the canary check can fail; it is
+  not a host isolation proof.
+- Crash retention: stdout `CAPTURE_BEFORE_CRASH` was retained with inner exit
+  code 7.
+- Deadline: `timed_out` true with signal 9.
+- All three operations were disposable with `result_image_uuid` null, so no new
+  checkpoint image exists. The three operations reported `resources.cost`
+  0.00075627, 0.00017274 and 0.00017386 in the same currency-less field as
+  before. No inference call ran, so archived inference spend is unchanged.
+
+F4 is now live-verified: the repaired absence probes fired their controls and
+returned real negative results rather than passing vacuously. F3's readback
+verifier was already live-verified by the pair control run. The seven F5 probes
+stay unrun, and Slice 12 remains unchecked with Slice 13 onward blocked.
+
 ## Stopped or unmeasured
 
 The stop rule prevented the planned reset/branch readback, terminated grant
