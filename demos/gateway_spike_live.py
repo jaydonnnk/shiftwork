@@ -1,10 +1,20 @@
-"""Bounded Slice 12 live capability probes. Credentials stay in this process."""
+"""Bounded Slice 12 live capability probes. Credentials stay in this process.
+
+The F3 repair: a captured checkpoint is accepted only after its file is
+downloaded and its SHA-256 compared, so a stdout marker alone can never pass or
+fail a write. The F4 repair: every absence assertion carries a positive control,
+and a control that did not fire records `unproven` rather than passing. Each run
+writes its own timestamped evidence file and stamps every record with a UTC time
+and the producing source hash, so a later revision cannot silently inherit an
+earlier run's records.
+"""
 
 from __future__ import annotations
 
 import asyncio
 import base64
 import dataclasses
+from datetime import datetime, timezone
 import hashlib
 import json
 import os
@@ -25,16 +35,128 @@ MAX_OUTPUT_TOKENS = 256  # below the Gate 3 ceiling of 1,024
 MODEL_INPUT_USD_PER_MILLION = 0.06
 MODEL_OUTPUT_USD_PER_MILLION = 0.24
 MAX_SPIKE_USD = 3.00
-EVIDENCE = Path("docs/plans/shiftwork/evidence/slice12-live-2026-09-26.jsonl")
+EVIDENCE_DIR = Path("docs/plans/shiftwork/evidence")
+EVIDENCE_SINK: Path | None = None
+SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+
+CAPTURE_PASS = "PASS_CAPTURE_INTACT"
+CAPTURE_EMPTY = "STOP_CAPTURE_EMPTY"
+CAPTURE_TRUNCATED = "STOP_CAPTURE_TRUNCATED"
+CAPTURE_DIGEST_MISMATCH = "STOP_CAPTURE_DIGEST_MISMATCH"
+CAPTURE_UNAVAILABLE = "STOP_CAPTURE_UNAVAILABLE"
+CAPTURE_WRITE_UNACKNOWLEDGED = "STOP_CAPTURE_WRITE_NOT_ACKNOWLEDGED"
+
+PAIR_STABLE = "PASS_PAIR_CAPTURE_STABLE"
+PAIR_LOSS_UNDER_CAP = "STOP_PAIR_LOSS_REPRODUCED_UNDER_CAP"
+PAIR_CONTROL_UNRELIABLE = "STOP_PAIR_CONTROL_UNRELIABLE"
+PAIR_EVIDENCE_UNAVAILABLE = "STOP_PAIR_EVIDENCE_UNAVAILABLE"
+PAIR_TREATMENT_UNACKNOWLEDGED = "INCONCLUSIVE_PAIR_TREATMENT_NOT_ACKNOWLEDGED"
+
+ABSENCE_PASS = "PASS_ABSENCE_CONTROLS_FIRED"
+ABSENCE_LEAK = "STOP_ABSENCE_LEAK_DETECTED"
+ABSENCE_UNPROVEN = "UNPROVEN_POSITIVE_CONTROL_UNAVAILABLE"
+ABSENCE_INCONCLUSIVE = "STOP_ABSENCE_CHECK_INCONCLUSIVE"
+
+ABSENCE_CONTROL_KEYS = (
+    "positive_control_env_lookup",
+    "positive_control_sentinel_present",
+    "positive_control_loopback_connect",
+)
+ABSENCE_TARGET_KEYS = (
+    "canary_name_present",
+    "canary_value_present",
+    "provider_env_present",
+    "controller_file_present",
+    "arbitrary_https",
+    "metadata_ip",
+    "controller_loopback",
+)
+
+
+def classify_capture(*, expected_size: int, expected_sha256: str,
+                     downloaded: bytes | None, write_acknowledged: bool) -> str:
+    intact = (
+        downloaded is not None
+        and len(downloaded) == expected_size
+        and hashlib.sha256(downloaded).hexdigest() == expected_sha256
+    )
+    if intact:
+        return CAPTURE_PASS
+    if not write_acknowledged:
+        return CAPTURE_WRITE_UNACKNOWLEDGED
+    if downloaded is None:
+        return CAPTURE_UNAVAILABLE
+    if not downloaded:
+        return CAPTURE_EMPTY
+    if len(downloaded) != expected_size:
+        return CAPTURE_TRUNCATED
+    return CAPTURE_DIGEST_MISMATCH
+
+
+def classify_pair(*, control: str, treatment: str) -> str:
+    if control == CAPTURE_UNAVAILABLE or treatment == CAPTURE_UNAVAILABLE:
+        return PAIR_EVIDENCE_UNAVAILABLE
+    if control != CAPTURE_PASS:
+        return PAIR_CONTROL_UNRELIABLE
+    if treatment == CAPTURE_PASS:
+        return PAIR_STABLE
+    if treatment == CAPTURE_WRITE_UNACKNOWLEDGED:
+        return PAIR_TREATMENT_UNACKNOWLEDGED
+    return PAIR_LOSS_UNDER_CAP
+
+
+def classify_absence_controls(checks: dict[str, object]) -> str:
+    if any(checks.get(name) is True for name in ABSENCE_TARGET_KEYS):
+        return ABSENCE_LEAK
+    if any(checks.get(name) is not True for name in ABSENCE_CONTROL_KEYS):
+        return ABSENCE_UNPROVEN
+    if any(checks.get(name) is not False for name in ABSENCE_TARGET_KEYS):
+        return ABSENCE_INCONCLUSIVE
+    return ABSENCE_PASS
+
+
+def build_record(probe: str, fields: dict[str, object]) -> dict[str, object]:
+    return {
+        "probe": probe,
+        "recorded_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "source_sha256": SOURCE_SHA256,
+        **fields,
+    }
+
+
+def new_evidence_sink(phase: str, *, directory: Path = EVIDENCE_DIR,
+                      now: datetime | None = None) -> Path:
+    stamp = (now or datetime.now(timezone.utc)).strftime("%Y%m%dT%H%M%SZ")
+    path = directory / f"slice12-{phase}-{stamp}.jsonl"
+    if path.exists():
+        raise RuntimeError("evidence_run_file_exists: " + str(path))
+    return path
 
 
 def emit(probe: str, **fields: object) -> None:
-    record = {"probe": probe, **fields}
+    if EVIDENCE_SINK is None:
+        raise RuntimeError("evidence_sink_not_set")
+    record = build_record(probe, fields)
     line = json.dumps(record, default=str, sort_keys=True, ensure_ascii=False)
     print(line, flush=True)
-    EVIDENCE.parent.mkdir(parents=True, exist_ok=True)
-    with EVIDENCE.open("a", encoding="utf-8") as handle:
+    EVIDENCE_SINK.parent.mkdir(parents=True, exist_ok=True)
+    with EVIDENCE_SINK.open("a", encoding="utf-8") as handle:
         handle.write(line + "\n")
+
+
+def prior_inference_spend(directory: Path) -> float:
+    spent = 0.0
+    for path in sorted(directory.glob("slice12-*.jsonl")):
+        for line in path.read_text(encoding="utf-8").splitlines():
+            record = json.loads(line)
+            if record.get("probe") == "nemotron_inference":
+                cost = record.get("estimated_usd_from_displayed_rate")
+                if not isinstance(cost, (int, float)):
+                    raise RuntimeError("unknown_prior_inference_cost")
+                spent += cost
+            if record.get("probe") == "inference_budget_reservation":
+                spent += record["worst_case_usd"]
+    return spent
 
 
 def stream_text(data: Any) -> str:
@@ -64,17 +186,7 @@ def no_secret_leak(surface: object, token: str, canary: str) -> bool:
 async def infer(prompt: str, token: str) -> tuple[str, dict[str, object]]:
     if len(prompt.encode("utf-8")) > MAX_INPUT_BYTES:
         raise ValueError("gateway_input_exceeds_8192_bytes")
-    spent = 0.0
-    if EVIDENCE.exists():
-        for line in EVIDENCE.read_text(encoding="utf-8").splitlines():
-            record = json.loads(line)
-            if record.get("probe") == "nemotron_inference":
-                cost = record.get("estimated_usd_from_displayed_rate")
-                if not isinstance(cost, (int, float)):
-                    raise RuntimeError("unknown_prior_inference_cost")
-                spent += cost
-            if record.get("probe") == "inference_budget_reservation":
-                spent += record["worst_case_usd"]
+    spent = prior_inference_spend(EVIDENCE_DIR)
     worst_next = (
         MAX_INPUT_BYTES * MODEL_INPUT_USD_PER_MILLION / 1_000_000
         + MAX_OUTPUT_TOKENS * MODEL_OUTPUT_USD_PER_MILLION / 1_000_000
@@ -203,13 +315,15 @@ async def one_shot(
     disposable: bool = True,
     timeout: int = 8,
     max_layer_bytes: int = 16 * 1024 * 1024,
+    files: dict[str, FileSpec] | None = None,
 ) -> tuple[Any, str]:
     started = time.monotonic()
+    spawn_files = {"files": files} if files else {}
     instance = await client.spawn_instance(
         command="/usr/local/bin/python", image=image, args=["-u", "-c", code],
         disposable=disposable, networking=InstanceNetworking(enabled=False),
         resources_limits=InstanceResourcesLimits(max_layer_bytes=max_layer_bytes),
-        timeout=timeout, truncate_output_at=4096,
+        timeout=timeout, truncate_output_at=4096, **spawn_files,
     )
     operation_id = instance.uuid
     emit(name + "_spawn", operation_id=operation_id, image=image, disposable=disposable,
@@ -241,6 +355,12 @@ async def one_shot(
 
 
 async def controls_probe(client: ContreeAsyncClient, token: str, canary: str) -> int:
+    sentinel_path = "/work/slice12-sentinel.txt"
+    sentinel_content = "SLICE12_SENTINEL_PRESENT"
+    sentinel = await client.upload_file(sentinel_content.encode("ascii"))
+    # The canary sits only in this process's environment: if the runtime passes
+    # the spawning environment into the Sandbox, the in-Sandbox check sees it.
+    os.environ["SLICE12_HOST_ONLY_CANARY"] = canary
     access_code = "\n".join((
         "import json, os, socket",
         "def connect(host, port):",
@@ -249,19 +369,47 @@ async def controls_probe(client: ContreeAsyncClient, token: str, canary: str) ->
         "        return True",
         "    except OSError:",
         "        return False",
+        "def loopback_control():",
+        "    server = socket.socket()",
+        "    try:",
+        "        server.bind(('127.0.0.1', 0))",
+        "        server.listen(1)",
+        "        return connect('127.0.0.1', server.getsockname()[1])",
+        "    except OSError:",
+        "        return False",
+        "    finally:",
+        "        server.close()",
+        "def sentinel_present():",
+        "    try:",
+        f"        return open({sentinel_path!r}).read().strip() == {sentinel_content!r}",
+        "    except OSError:",
+        "        return False",
         "checks = {",
-        " 'provider_env_present': any(k in os.environ for k in ('NEBIUS_API_KEY', 'CONTREE_TOKEN', 'NEBIUS_PROJECT_ID')) ,",
-        " 'controller_file_present': any(os.path.exists(p) for p in ('/work/.env','/work/shiftwork.db','/work/protected.json','/run/secrets/NEBIUS_API_KEY')) ,",
+        " 'positive_control_env_lookup': 'PATH' in os.environ,",
+        " 'positive_control_sentinel_present': sentinel_present(),",
+        " 'positive_control_loopback_connect': loopback_control(),",
+        " 'canary_name_present': any('CANARY' in key.upper() for key in os.environ),",
+        " 'canary_value_present': any('SLICE12_HOST' in value for value in os.environ.values()),",
+        " 'provider_env_present': any(k in os.environ for k in ('NEBIUS_API_KEY', 'CONTREE_TOKEN', 'NEBIUS_PROJECT_ID')),",
+        " 'controller_file_present': any(os.path.exists(p) for p in ('/work/.env','/work/shiftwork.db','/work/protected.json','/run/secrets/NEBIUS_API_KEY')),",
         " 'arbitrary_https': connect('example.com', 443),",
         " 'metadata_ip': connect('169.254.169.254', 80),",
         " 'controller_loopback': connect('127.0.0.1', 8000),",
         "}",
         "print(json.dumps(checks))",
     ))
-    _, stdout = await one_shot(client, token, canary, "access_egress", access_code)
+    _, stdout = await one_shot(
+        client, token, canary, "access_egress", access_code,
+        files={sentinel_path: FileSpec(uuid=sentinel.uuid, mode="0644")},
+    )
     checks = json.loads(stdout)
-    if any(checks.values()):
-        emit("hard_stop", reason="access_or_egress_probe_succeeded", checks=checks)
+    verdict = classify_absence_controls(checks)
+    emit("access_egress_verdict", checks=checks, verdict=verdict,
+         host_canary_in_spawn_environment=os.environ.get("SLICE12_HOST_ONLY_CANARY") == canary,
+         sentinel_mounted=sentinel_path, sentinel_sha256=sentinel.sha256,
+         scope_note="connect results show whether the disabled networking flag is honoured; they are not a host isolation proof")
+    if verdict != ABSENCE_PASS:
+        emit("hard_stop", reason="credential_or_egress_controls_failed", verdict=verdict, checks=checks)
         return 2
     crash_code = "import os; print('CAPTURE_BEFORE_CRASH', flush=True); os._exit(7)"
     crash_status, crash_stdout = await one_shot(client, token, canary, "crash_retention", crash_code)
@@ -276,23 +424,86 @@ async def controls_probe(client: ContreeAsyncClient, token: str, canary: str) ->
     return 0
 
 
-async def reset_probe(client: ContreeAsyncClient, token: str, canary: str) -> int:
-    cap_status, cap_stdout = await one_shot(
-        client, token, canary, "layer_cap",
-        "import os; open('/tmp/slice12-large.bin','wb').write(os.urandom(2097152)); print('WROTE_2MB_RANDOM',flush=True)",
-        disposable=False, max_layer_bytes=1024 * 1024,
+PAIR_PATH = "/tmp/slice12-large.bin"
+PAIR_PAYLOAD = bytes(range(256)) * 8192  # 2 MiB, identical on any machine
+PAIR_CAPS: tuple[tuple[str, int], ...] = (
+    ("control", 16 * 1024 * 1024),
+    ("treatment", 1024 * 1024),
+)
+
+
+async def inspect_listing(client: ContreeAsyncClient, checkpoint: object,
+                          path: str) -> tuple[int | None, str | None]:
+    if not isinstance(checkpoint, str):
+        return None, "no_checkpoint"
+    try:
+        listing = await client.inspect_image_list(checkpoint, str(Path(path).parent))
+    except Exception as exc:
+        return None, type(exc).__name__
+    expected_name = Path(path).name
+    for listed in listing.files:
+        if Path(str(listed.path)).name == expected_name:
+            return listed.size, None
+    return None, "path_not_listed"
+
+
+async def pair_probe(client: ContreeAsyncClient, token: str, canary: str) -> int:
+    expected_sha256 = hashlib.sha256(PAIR_PAYLOAD).hexdigest()
+    uploaded = await client.upload_file(PAIR_PAYLOAD)
+    emit("pair_payload", payload_path=PAIR_PATH, generator="bytes(range(256)) * 8192",
+         expected_bytes=len(PAIR_PAYLOAD), expected_sha256=expected_sha256,
+         upload_uuid=uploaded.uuid, upload_sha256=uploaded.sha256, upload_size=uploaded.size)
+    code = (
+        "import shutil; "
+        f"shutil.copyfile('/work/pair_payload.bin', {PAIR_PATH!r}); "
+        "print('WROTE_2MB_DETERMINISTIC', flush=True)"
     )
-    if str(cap_status.status) == "SUCCESS" and "WROTE_2MB_RANDOM" in cap_stdout:
-        checkpoint = cap_status.result_image_uuid
-        listing = await client.inspect_image_list(checkpoint, "/tmp")
-        file_size = next(
-            (file.size for file in listing.files if file.path == "slice12-large.bin"), None
+    verdicts: dict[str, str] = {}
+    for label, cap in PAIR_CAPS:
+        status, stdout = await one_shot(
+            client, token, canary, "pair_" + label, code,
+            disposable=False, max_layer_bytes=cap,
+            files={"/work/pair_payload.bin": FileSpec(uuid=uploaded.uuid, mode="0644")},
         )
-        emit("layer_cap_readback", operation_id=cap_status.uuid,
-             reported_image_size=cap_status.image_size, snapshot_file_size=file_size,
-             expected_file_size=2097152, configured_max_layer_bytes=1024 * 1024)
-        emit("hard_stop", reason="successful_run_snapshot_lost_written_bytes")
-        return 2
+        checkpoint = getattr(status, "result_image_uuid", None)
+        result = getattr(status.metadata, "result", None)
+        state = getattr(result, "state", None)
+        downloaded: bytes | None = None
+        readback_error: str | None = None
+        if str(status.status) == "SUCCESS" and isinstance(checkpoint, str):
+            try:
+                downloaded = await client.inspect_image_download(checkpoint, PAIR_PATH)
+            except Exception as exc:
+                readback_error = type(exc).__name__
+        else:
+            readback_error = "operation_not_success_or_missing_checkpoint"
+        listing_size, listing_error = await inspect_listing(client, checkpoint, PAIR_PATH)
+        exit_code = getattr(state, "exit_code", None)
+        write_acknowledged = "WROTE_2MB_DETERMINISTIC" in stdout and exit_code == 0
+        verdict = classify_capture(
+            expected_size=len(PAIR_PAYLOAD), expected_sha256=expected_sha256,
+            downloaded=downloaded, write_acknowledged=write_acknowledged,
+        )
+        verdicts[label] = verdict
+        emit("pair_run", label=label, configured_max_layer_bytes=cap,
+             operation_id=status.uuid, outer_status=str(status.status),
+             inner_exit_code=exit_code, write_acknowledged=write_acknowledged,
+             stdout_reported_write="WROTE_2MB_DETERMINISTIC" in stdout,
+             checkpoint=checkpoint, snapshot_file_size=listing_size,
+             listing_error=listing_error, expected_bytes=len(PAIR_PAYLOAD),
+             expected_sha256=expected_sha256,
+             actual_bytes=len(downloaded) if downloaded is not None else None,
+             actual_sha256=hashlib.sha256(downloaded).hexdigest() if downloaded is not None else None,
+             readback_error=readback_error, verdict=verdict)
+    pair_verdict = classify_pair(control=verdicts["control"], treatment=verdicts["treatment"])
+    emit("pair_verdict", control=verdicts["control"], treatment=verdicts["treatment"],
+         verdict=pair_verdict, configured_max_layer_bytes=dict(PAIR_CAPS),
+         cap_exceeded_without_capture_loss=verdicts["treatment"] == CAPTURE_PASS,
+         note="cap_exceeded_without_capture_loss true means the 1 MiB cap did not limit a 2 MiB captured write, a capability finding rather than a capture failure; INCONCLUSIVE_PAIR_TREATMENT_NOT_ACKNOWLEDGED means the treatment process never reported a completed write, so its missing bytes are not a reproduced loss")
+    return 0 if pair_verdict == PAIR_STABLE else 2
+
+
+async def reset_probe(client: ContreeAsyncClient, token: str, canary: str) -> int:
     marker_path = "/tmp/slice12-reset-marker.txt"
     seed_status, _ = await one_shot(
         client, token, canary, "reset_seed",
@@ -380,9 +591,12 @@ async def readback_probe(client: ContreeAsyncClient, token: str, canary: str) ->
 
 
 async def run(phase: str, token: str, project: str) -> int:
+    global EVIDENCE_SINK
     canary = "SLICE12_HOST_ONLY_CANARY_20260926"
+    EVIDENCE_SINK = new_evidence_sink(phase)
     client = ContreeAsyncClient(token, project=project, timeout=20)
     try:
+        emit("run_start", phase=phase, evidence_sink=str(EVIDENCE_SINK))
         started = time.monotonic()
         whoami = dataclasses.asdict(await client.whoami())
         permissions = whoami.get("permissions", {})
@@ -398,6 +612,8 @@ async def run(phase: str, token: str, project: str) -> int:
             return await service_probe(client, token, canary)
         if phase == "controls":
             return await controls_probe(client, token, canary)
+        if phase == "pair":
+            return await pair_probe(client, token, canary)
         if phase == "reset":
             return await reset_probe(client, token, canary)
         if phase == "readback":

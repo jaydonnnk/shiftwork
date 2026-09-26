@@ -53,7 +53,7 @@ async def _preflight(token: str, project: str) -> tuple[dict[str, object], int]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--phase", choices=("preflight", "service", "controls", "reset", "readback"), default="service")
+    parser.add_argument("--phase", choices=("preflight", "service", "controls", "pair", "reset", "readback"), default="service")
     args = parser.parse_args()
     token = os.environ.get("NEBIUS_API_KEY", "")
     project = os.environ.get("NEBIUS_PROJECT_ID", "")
