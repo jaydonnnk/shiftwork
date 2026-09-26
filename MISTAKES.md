@@ -700,3 +700,79 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   change, not only the browser harness; before reporting a slice's suite as
   green, run the full suite, not the focused files.
 
+## 2026-09-26 Slice 12 preflight shell loader attempted an empty variable
+
+- **What happened:** the first PowerShell `.env` loader passed a blank line to
+  `SetEnvironmentVariable`, which emitted an exception before the preflight
+  still ran. A corrected command filtered to the two expected variable names
+  and produced clean output with the same denied-entitlement result.
+- **Root cause:** the loader assumed every `.env` line contained `name=value`.
+- **Prevention rule:** filter `.env` input to expected variable names before
+  setting process environment variables; keep the credential values out of
+  command output and evidence files.
+
+## 2026-09-26 Slice 12 entitlement misdiagnosis from wrong project header
+
+- **What happened:** `whoami` authenticated under the local `project-...`
+  header but returned every Sandbox permission false. I reported missing
+  entitlement. A Nebius Support reply supplied the correct `aiproject-...`
+  header; with the same key, all six permissions were true and image listing
+  succeeded.
+- **Root cause:** I treated an authenticated token's denied permissions as a
+  project-wide entitlement verdict without verifying the exact `Project`
+  header against the support-provided AI project ID.
+- **Prevention rule:** before concluding access is unavailable, verify the
+  token and project-header pairing against the provider's exact project ID;
+  retain both responses when a corrected header changes the verdict.
+
+## 2026-09-26 Slice 12 first live probe produced a false leak alarm and no model answer
+
+- **What happened:** the first live service run completed, but the 64-token
+  Nemotron limit ended with `finish_reason=length` and empty content. The leak
+  scanner returned false even though a read-only rescan of the saved operation
+  found no token, canary or host path.
+- **Root cause:** the scanner's positive control searched for a Windows path in
+  JSON without accounting for escaped backslashes. The output limit also left
+  too little room for this reasoning model to emit its answer.
+- **Prevention rule:** validate needles against the serialized form, including
+  escaped and forward-slash path forms. Inspect `finish_reason`, content and usage
+  before treating an inference request as meaningful service behavior; stay below
+  Gate 3's 1,024-token ceiling when adjusting the spike limit.
+
+## 2026-09-26 Slice 12 layer-cap result was diagnosed before checkpoint readback
+
+- **What happened:** a 2 MiB file filled with repeated `x` bytes completed under
+  a 1 MiB `max_layer_bytes` setting. I first called it a cap bypass, then
+  attributed the 26,866-byte image to compression. A second run wrote random
+  bytes and also reported success with the same image size. Read-only inspection
+  found the supposedly written file had zero bytes in both checkpoints.
+- **Root cause:** the probe trusted process stdout and image size without reading
+  the saved file. Neither showed whether the checkpoint retained the written bytes.
+- **Prevention rule:** check the checkpoint file's exact size and contents before
+  diagnosing compression or limit enforcement. Treat successful execution with
+  silently lost state as a stop condition for snapshot-dependent comparison.
+
+## 2026-09-26 Slice 12 checkpoint verdict rested on an unarchived readback and a verifier that could not distinguish its cases
+
+- **What happened:** the STOP verdict's decisive observation (a checkpoint
+  listing `/tmp/slice12-large.bin` at zero bytes) appeared only in prose. The
+  redacted JSONL held no listing or download record, no timestamp and no code
+  revision, and its records cannot be emitted by any current script revision
+  (`layer_cap_did_not_block_large_write` appears in no `.py` file; `WROTE_2MB`
+  versus the current `WROTE_2MB_RANDOM`). The current cap check hard-stops on
+  outer `SUCCESS` plus the stdout marker without downloading bytes or
+  comparing a digest, so an intact 2 MiB listing would still emit
+  `successful_run_snapshot_lost_written_bytes`. An independent review found
+  both; a separately authorized read-only re-inspection then confirmed the
+  zero-byte file in both recorded images and archived the raw records.
+- **Root cause:** the probe trusted process stdout and image size without
+  retrieving the saved file, the archive was appended across evolving script
+  revisions without per-record revision or timestamp stamps, and the readback
+  that produced the quoted observation ran outside the archived record set.
+- **Prevention rule:** archive the raw record of any observation a verdict
+  depends on, in the artifact set it is quoted from, with a UTC timestamp and
+  source revision per record; a checker must download the artifact and compare
+  a digest, and never branch on a success marker alone; after a script changes,
+  new runs write to a new file with stamped records rather than appending to an
+  unversioned one.
+

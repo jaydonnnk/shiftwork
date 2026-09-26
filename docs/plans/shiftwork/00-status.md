@@ -1,11 +1,96 @@
 # Status: Shiftwork
 
+## Slice 12 live matrix hard stop: 2026-09-26
+
+**Current gate state:** Gate 2 is RE-APPROVED 2026-09-26 for the scoped live
+snapshot/capture rule in `02-architecture.md` section 13. The user explicitly
+approved that draft in chat. Gate 3 is also RE-APPROVED 2026-09-26: the user
+separately approved its section 8, file responsibilities, test 38 and hard no-go
+correction in chat. Earlier approvals remain historical. Gate 4's approved slice
+order remains recorded, but Slice 12's STOP verdict and the dependent-work hold
+remain. Neither approval is a live capability verdict or a new live-run go-ahead.
+
+**One-run S12 diagnostic, separately authorized and completed 2026-09-26:**
+under the normal 16 MiB layer cap, one no-inference Sandbox operation wrote a
+14-byte deterministic marker. The saved checkpoint returned the exact bytes and
+matching SHA-256; outer status was `SUCCESS`, inner exit code was 0, and the
+post-run `whoami` reported zero running instances. This passes one small-file
+readback only. It does not explain the prior zero-byte 2 MiB readback under the
+1 MiB cap, establish a generally reliable capture/reset route, complete S12 or
+release S13. See the capability evidence report and appended raw JSONL.
+
+The authorized initial live spike proceeded after the corrected entitlement
+preflight. It ran seven Sandbox operations and two bounded Nemotron requests;
+the separately authorized small-file follow-up brought the Sandbox total to
+eight without another inference call. One service
+request produced a real `STOCK` tool choice; credential, selected egress, crash
+capture and timeout probes gave the expected narrow observations. The decisive
+checkpoint probe did not: after a process reported writing 2 MiB of random
+bytes under a 1 MiB layer cap, the operation reported `SUCCESS` with no size-cap
+event/error, yet its saved checkpoint listed and returned the file at zero bytes.
+The cause is unproven. **Stop verdict:** the tested snapshot/capture path is not
+trustworthy enough for Slice 12 acceptance. Later probes were stopped under the
+approved stop rule, and Slice 13 onward remains blocked. Gate 2/3 trust-boundary
+review and Gate 3 re-approval were required before a revised live path could be
+considered; both scoped approvals are now recorded above. They do not resolve
+the checkpoint loss or complete the matrix.
+The [Slice 12 capability evidence](evidence/slice12-capability-2026-09-26.md)
+and its redacted JSONL record give actual observations, costs, unrun probes and
+limits. No commit, push or Slice 13 work followed.
+
+## Slice 12 independent review and checkpoint re-inspection: 2026-09-26
+
+An independent read-only review (no edits) held Slice 12 not accepted and
+Slice 13 blocked. It confirmed the STOP direction and found the decisive
+observation lacked archived raw evidence (F1), the archived JSONL cannot be
+reproduced from any current script revision and carries no timestamps or code
+revisions (F2), the cap check hard-stops on the stdout marker without
+downloading or digesting (F3), the credential and canary probes cannot fail
+for the reason they exist (F4), and seven approved probes remain unrun (F5).
+A separately authorized read-only re-inspection then used only
+`inspect_image_list` and `inspect_image_download`, with no spawn and no
+inference, on both recorded checkpoints
+(`c043c2cc-f830-4948-8296-1b5093376789` and
+`9d3eb2d2-219f-4bf6-9ced-2ac495ccab38`): each lists `/tmp/slice12-large.bin`
+as a 0-byte regular file and returns 0 bytes, whose SHA-256 is the
+empty-input digest
+`e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`.
+Raw records: `evidence/slice12-reinspection-2026-09-26.jsonl`; the append-only
+JSONL was not modified. The STOP is confirmed with archived evidence. F2, F3,
+F4 and F5 remain open; the cap check must download bytes and compare a digest
+before any further live run; S12 stays unchecked and S13 onward stays blocked.
+
+## Slice 12 entitlement correction: 2026-09-26
+
+Nebius Support's earlier reply identified the correct `aiproject-...` value for
+the Sandbox `Project` header. The existing local `.env` instead used a
+`project-...` value. With the same API key and corrected header, `whoami`
+returned all six listed permissions true; `list_images(limit=1)` succeeded.
+The gitignored `.env` now has the corrected project ID, and
+`python -m demos.gateway_spike` exits 0. This supersedes the blocked-entitlement
+interpretation below. The full Slice 12 matrix remains unrun, so Slice 12 stays
+unchecked and S13 onward remains gated by its real probe verdict.
+
+## Slice 12 preflight blocked: 2026-09-26
+
+The user gave Slice 12's explicit go-ahead in chat on 2026-09-26. The bounded
+live preflight authenticated against `GET /sandboxes/v1/whoami`, but the token
+has `spawn=false` and `spawn_disposable=false` (all returned permissions false).
+The local `.env` key's leading space first caused HTTP 401 and was corrected
+without exposing its value. The checked-in `python -m demos.gateway_spike`
+preflight now exits 2 on missing spawn permission. See
+`evidence/slice12-preflight-2026-09-26.md` for the redacted response and exact
+reproduction. No Sandbox instance, inference request or trial ran; spend and
+six-trial feasibility remain unknown. **Slice 12 stays unchecked, and S13 onward
+is stopped pending Sandbox entitlement and completion of the real matrix.**
+
 ## Credential-name correction, SDK installation and re-approval pause: 2026-09-26
 
 **Two approved gate documents carry a documentation-only credential-name
 correction, re-approved by the user in chat on 2026-09-26.** The correction
-changes no behavior, interface, budget, evidence claim or product decision, and
-no Slice 12 work has started. Gate 2 and Gate 3 were marked re-approval pending
+changes no behavior, interface, budget, evidence claim or product decision. At
+the time of that correction, no Slice 12 work had started. Gate 2 and Gate 3
+were marked re-approval pending
 when the correction was applied and are marked re-approved again here.
 
 - The vendor's current documentation names the Sandboxes credential `CONTREE_TOKEN`
@@ -450,20 +535,23 @@ unsupported or contradictory answers, unjustified fallbacks, implicit choice,
 business writes, protected reservations and premature help/bootstrap. Demonstrate
 those named assertions can fail before recording S11 as complete.
 
-## Current authority: 2026-09-24 final-pivot approval
+## Historical authority: 2026-09-24 final-pivot approval
 
 - **Gate 1: RE-APPROVED 2026-09-24.** After the same-day backtrack, the user
   explicitly approved the revised product, six plain HTML mockups and supporting
   visual brief and manual kit. Human sessions remain unrun; approval supplies no
   participant results or learning evidence.
-- **Gate 2: RE-APPROVED 2026-09-26 for the documentation-only credential-name
-  correction, first re-approved 2026-09-24 after the legacy first-choice
-  backtrack.** `02-architecture.md` permits a non-operational first-choice shift
+- **Gate 2: RE-APPROVED 2026-09-26 for the scoped live file-readback rule,
+  following the documentation-only credential-name correction and the 2026-09-24
+  legacy first-choice backtrack.** `02-architecture.md` permits a non-operational first-choice shift
   for a closed v5 engagement with no selection. The user approved this revision
   and requested Gate 3. It is not implemented. The approved correction replaces
   the stale `CONTREE_SESSION` name with the documented `CONTREE_TOKEN`,
   `CONTREE_PROJECT` and `NEBIUS_AI_PROJECT` aliases; it changes no behavior,
-  interface, budget or decision.
+  interface, budget or decision. The newly approved section 13 requires saved
+  file readback, byte count and digest before file-backed capture can support
+  comparison, selection or operation. It does not establish why the Slice 12
+  checkpoint lost bytes or authorize another live probe.
 - **Gate 3: RE-APPROVED 2026-09-26 for the documentation-only configuration-name
   correction, first re-approved 2026-09-24 after the scoped Northline backtrack.**
   Gate 4 review found no Northline path from learner-edited code to an eligible
@@ -478,6 +566,9 @@ those named assertions can fail before recording S11 as complete.
   implementation authority. The approved 2026-09-26 correction replaces
   `CONTREE_SESSION` with `NEBIUS_PROJECT_ID` in the section 7 configuration-name
   list and records the documented aliases; it changes no behavior, type or budget.
+  The later scoped file-capture correction in section 8 and test 38 was separately
+  RE-APPROVED by the user on 2026-09-26. It is a design rule, not a passing
+  checkpoint probe or Slice 12 acceptance.
 - **Gate 4: APPROVED 2026-09-24 for the final pivot.** `04-slices.md` maps
   Slices 10 to 25, traces all 49 Gate 3 obligations to a completing slice and
   keeps the capability spike before any live-dependent work. Its 2026-09-19
@@ -920,7 +1011,11 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
 - [x] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03); implemented and browser-verified 2026-09-21, its independent review round adjudicated and repaired the same day (evidence in its two sections below), committed in nine reviewable batches on `shiftwork/slice-9` and merged to main (`4d5539a`) the same day, with the user marking that merge as the visual acceptance; pushed to origin. Preview/evidence below.
 - [x] Slice 10: byte-preserving v5-to-v6 migration and non-operational first-choice shift; implemented and verified 2026-09-25, ACCEPTED by the user in chat the same day after the verification report disclosed the preview regression, the fabricated-choice shim, the flaky atomicity proof and the missing room screenshot. Committed in eight focused batches, merged to main as `f0a1e81..0432cbd` and pushed, no co-author footer. Acceptance covers S10 only (evidence in the Slice 10 implementation section and Approval history below)
 - [x] Slice 11: executable task-relevant Bellwether failure, investigation and public diagnostic test; implemented and locally verified 2026-09-26 and ACCEPTED by the user in chat the same day (evidence, numbers and limits in the Slice 11 entries at the top of this file). Committed in 13 focused batches on `shiftwork/slice-11`, pushed as `add85b1..6832486`, no co-author footer. Acceptance covers Slice 11 only
-- [ ] Slice 12: bounded Token Factory capability spike, separately authorized
+- [ ] Slice 12: bounded Token Factory capability spike; authorized 2026-09-26,
+  entitlement corrected, partial live matrix stopped on checkpoint loss;
+  Gate 2/3 capture corrections re-approved and one separately authorized
+  small-file checkpoint readback passed; original checkpoint cause and reliable
+  capture route remain unproven, with no slice completion recorded
 - [ ] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap
 - [ ] Slice 14: prediction-gated attributable assist gateway
 - [ ] Slice 15: reviewed A/B workloads and six frozen paired trial slots
