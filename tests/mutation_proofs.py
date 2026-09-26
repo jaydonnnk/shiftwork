@@ -8,6 +8,19 @@ collection error, an unexpected exception or a timeout is NOT a proof of the
 guard and is reported distinctly, so a crash can never masquerade as coverage.
 Every file is restored byte-identically (sha256 before == after). Windows
 trap: restoration uses raw bytes, never git checkout.
+
+Slice 11 re-anchoring (2026-09-26). Three Slice 8 rows silently stopped
+matching when Slice 10 replaced the inherited-version fallbacks with
+``_selected_operating_version`` and grew a legacy branch inside
+``_snapshot_bytes_for_run``: the harness reported SKIP, and the main harness was
+not re-run after that refactor, so the loss went unnoticed. All three were
+repaired here. ``snapshot_capture_bypassed_for_the_mutable_path`` keeps its name
+and claim; the other two faulted branches that no longer exist as code, and
+re-anchoring them onto the selection gate would duplicate the faults already
+carried by the ``s10_legacy_*_guard_removed`` rows in
+``tests/pivot_mutation_proofs.py``, which is evidence of neither. They are
+renamed onto uncovered branches in the same functions instead, keeping their
+original named tests covered.
 """
 
 import hashlib
@@ -19,7 +32,10 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-PYTHON = str(REPO / ".venv" / "Scripts" / "python.exe")
+# Subprocesses must run under the same interpreter as the harness. The previous
+# hardcoded .venv path is now blocked by Windows Smart App Control on this
+# machine, and a pinned path is not portable across machines anyway.
+PYTHON = sys.executable
 
 MUTATIONS = [
     {
@@ -307,14 +323,14 @@ MUTATIONS = [
     # Slice 8 close, inheritance, restart recovery and the pre-proof seam: each row
     # independently breaks one guard branch and names the test that must fail.
     {
-        "name": "close_version_fallback_removed",
+        "name": "close_declares_limits_only_from_the_version_in_force",
         "file": "shiftwork/orchestrator.py",
-        "old": b"""        version = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
-            conn, shift.engagement_slug
-        )
-        drafts: list[LedgerEventDraft] = []""",
-        "new": b"""        version = repo.get_latest_version(conn, shift_id)
-        drafts: list[LedgerEventDraft] = []""",
+        "old": b"""            facts = CloseShiftFacts(
+                shift_id=shift.id,
+                declared_limits=tuple(version.contract.declared_limits),""",
+        "new": b"""            facts = CloseShiftFacts(
+                shift_id=shift.id,
+                declared_limits=(),""",
         "tests": "tests/orchestrator/test_close_inheritance.py::test_close_declares_the_inherited_limits_when_a_shift_never_froze",
         "expect": "test_close_declares_the_inherited_limits_when_a_shift_never_froze",
     },
@@ -437,14 +453,10 @@ MUTATIONS = [
         "expect": "test_close_shift_records_unresolved_limits",
     },
     {
-        "name": "start_run_ignores_the_inherited_version",
+        "name": "start_run_draws_one_variant_per_enabled_family",
         "file": "shiftwork/orchestrator.py",
-        "old": b"""    version = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
-        conn, shift.engagement_slug
-    )
-    if version is None:""",
-        "new": b"""    version = repo.get_latest_version(conn, shift_id)
-    if version is None:""",
+        "old": b"        for family in _enabled_families(conn, shift.engagement_slug):\n",
+        "new": b"        for family in list(_enabled_families(conn, shift.engagement_slug))[:1]:\n",
         "tests": "tests/orchestrator/test_test1_preproof.py::test_full_budget_preserves_unseen_inherited_case",
         "expect": "test_full_budget_preserves_unseen_inherited_case",
     },
@@ -472,8 +484,8 @@ MUTATIONS = [
         "old": b"""    stored = repo.get_run_snapshot_bytes(conn, run.id)
     if stored is not None:
         return stored
-    return Path(run.shop_snapshot_ref).read_bytes()""",
-        "new": b"""    return Path(run.shop_snapshot_ref).read_bytes()""",
+""",
+        "new": b"",
         "tests": "tests/api/test_client_evidence.py::test_historical_projection_binds_the_bytes_the_run_consumed_not_the_current_file",
         "expect": "test_historical_projection_binds_the_bytes_the_run_consumed_not_the_current_file",
     },
