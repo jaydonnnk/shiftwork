@@ -14,6 +14,12 @@ scope. The pre-pivot architecture remains available in Git at `fb73c78`. This re
 retains its section numbers so dependent documents can be reconciled explicitly.
 No runtime code, fixtures, credentials, packages, deployment or ADR is changed here.
 
+**SCOPED BACKTRACK RE-APPROVED, 2026-09-26:** the user approved the section 13
+file readback rule after the Slice 12 checkpoint mismatch. Gate 3's matching
+correction was separately re-approved on 2026-09-26. Neither approval supplies
+a live capability verdict or implementation authority. See `00-status.md` for
+current authority.
+
 ## 1. Fit
 
 Keep the implemented Python/FastAPI controller, SQLite store, static HTML/CSS/
@@ -402,6 +408,18 @@ untrusted payload size/shape; render as text, never executable HTML. Keep provid
 transport headers, secrets, protected inputs and host paths out of all learner-facing
 logs/errors as well as normal responses. Gate 3 must specify and prove each serialized
 surface scanner can actually detect its needle.
+
+**Approved capture correction:** an outer Sandbox operation `SUCCESS` and process
+stdout are insufficient evidence that a checkpoint retained written artifacts.
+Before any file-backed capture is accepted, the controller must read the saved
+file, record its actual byte count and digest, and compare it with trusted
+expected bytes when the run manifest defines them. It may not substitute a
+process's claim about a file for the retrieved bytes. A missing file, failed
+readback or mismatch with a declared expected artifact marks the run incomplete
+and prevents comparison eligibility, selection and operation. A layer-limit or
+snapshot failure may not silently produce accepted evidence. The Slice 12 spike
+must establish a reliable transport/capture route before live learner code is
+admitted; otherwise stop.
 
 ## 14. Local development and delivery boundary
 

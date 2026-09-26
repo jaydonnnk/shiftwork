@@ -2,7 +2,10 @@
 
 **Gate 3: RE-APPROVED 2026-09-24 after the scoped Northline selection backtrack.**
 
-Gates 1, 2 and 4 are approved. This document replaces the pre-pivot program
+Gates 1, 2 and 4 are approved. Gate 2's scoped file-readback correction was
+re-approved on 2026-09-26; the user separately re-approved this Gate 3
+correction on 2026-09-26.
+This document replaces the pre-pivot program
 design with exact contracts for investigation, fair experiments, explicit
 operating selection and operational consequences. The previous design remains
 available in Git at `e1a3a91`. The earlier pivot design was approved and
@@ -16,9 +19,16 @@ correction and authorized committing and pushing it to main without a co-author
 footer. Gate 4 is separately approved. Neither approval is implementation
 authority.
 
-This is design, not runtime evidence. No package was installed, no migration or
-test was run, no credential was used and no live model or sandbox was called.
-Existing Slices 1 to 9 and their historical evidence remain intact.
+This is design, not runtime evidence. At the original 2026-09-24 Gate 3
+approval, no package was installed, no migration or test was run, no credential
+was used and no live model or sandbox was called. Later Slice 12 observations
+are recorded in `00-status.md` and its evidence report. Existing Slices 1 to 9
+and their historical evidence remain intact.
+
+**SCOPED BACKTRACK RE-APPROVED, 2026-09-26:** section 8 and the
+gateway/isolation test plan add file-capture verification after the Slice 12
+checkpoint mismatch. This approval does not establish a reliable live capture
+route or complete Slice 12. See `00-status.md` for current authority.
 
 ## 1. Decisions fixed at this gate
 
@@ -71,7 +81,7 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/store/repo.py` | Parameterized reads/writes for every new record and idempotent engagement seeding; no policy decisions. |
 | `shiftwork/evaluator/evaluator.py` | Pure assessment from explicit captured inputs, including entity and required-task checks. No loader or model access. |
 | `shiftwork/ledger/reducer.py` | Accept only an `OperationalAssessment`; reject experimental inputs by type and runtime guard. |
-| `shiftwork/executor/base.py` | Purpose/context-bound execution request, slot-selected workload and trusted request/tool driver, observation stream and trusted measurement fields. |
+| `shiftwork/executor/base.py` | Purpose/context-bound execution request, slot-selected workload and trusted request/tool driver, observation stream and trusted measurement fields. Required file-backed capture carries readback byte count/digest or an incomplete-evidence failure. |
 | `shiftwork/executor/local_process.py` | Retain byte-pinned trusted-fixture restriction and implement the revised adapter protocol. |
 | `shiftwork/executor/recorded.py` | Retain transcript inspection and label it `RECORDED_INSPECTION`; never emit fresh eligibility. |
 | `shiftwork/sealed/store.py` | Orchestration-only loader for exact reserved protected workload refs. |
@@ -95,7 +105,7 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/gateway/service_inference.py` | Controller-side Nemotron mediation with bounded model, calls, bytes, tokens, deadline, controller-owned tool allowlist and redaction. |
 | `shiftwork/assist/__init__.py` | Package boundary only. |
 | `shiftwork/assist/gateway.py` | Prediction-gated, attributable Nemotron help with a separate budget. |
-| `shiftwork/executor/tokenfactory.py` | Real isolated adapter behind the existing protocol, added only after the capability spike passes and credentials are separately authorized. |
+| `shiftwork/executor/tokenfactory.py` | Real isolated adapter behind the existing protocol, added only after the capability spike passes and credentials are separately authorized. Read saved checkpoint files before returning file-backed capture evidence; outer operation status and process stdout cannot supply file bytes. |
 | `shiftwork/curation/__init__.py` | Package boundary only; never imported by the runtime application. |
 | `shiftwork/curation/pipeline.py` | Operator-only Tavily discovery, human verification and frozen-fixture lifecycle. |
 | `shiftwork/curation/ablation.py` | Frozen, known-page polling and Tavily comparison with the retained DROP rule. |
@@ -1256,6 +1266,16 @@ configuration even if a client submits a hidden role value.
   only an application check.
 - Raw evidence is written before derived projections. Public views fail closed if
   allowlist or leak scanning fails.
+- A Sandbox outer `SUCCESS` does not prove that the inner process succeeded or
+  that a saved file contains its reported bytes. For every required file-backed
+  capture, read back the checkpoint file and record the actual byte count and
+  digest. Compare with trusted expected bytes when the manifest defines them;
+  otherwise validate required content and request count against the frozen
+  workload manifest. A zero-byte readback cannot satisfy a required nonempty
+  capture. Never accept a process's claim about file content as readback proof.
+  Missing files, failed readback, wrong bytes and missing required content remain
+  visible as incomplete evidence and cannot be repaired by reusing stdout,
+  granting a free retry or omitting the slot.
 - Recorded inspection and trusted-local fixtures can prove state-machine behavior
   and deterministic policy only. They cannot establish arbitrary learner-code
   isolation, fresh AI behavior, vendor availability or prize qualification.
@@ -1273,6 +1293,9 @@ these probes succeeds:
    durable reservation.
 5. Trial reset leaves candidate-visible cache, booking or process state from the
    other candidate.
+6. A required checkpoint file is absent, unreadable, empty when content is
+   required, or differs from its trusted expected bytes while the outer operation
+   reports success.
 
 Any success is a stop condition for live learner-code execution. Do not fall back to
 provider-key injection or arbitrary `local_process` execution.
@@ -1424,6 +1447,13 @@ not count as proof.
    against the real isolation class before live execution is accepted.
 38. `test_gateway_failure_retains_usage_and_raw_evidence_without_business_effect`
    injects provider and transport failures.
+   `test_adapter_checkpoint_readback_blocks_missing_or_wrong_bytes` separately
+   injects outer `SUCCESS` with zero-byte and wrong-byte checkpoint readbacks;
+   each must fail the readback byte-count/digest check and block slot eligibility.
+   The live spike repeats a deterministic artifact with a trusted expected
+   digest through a size-capped non-disposable Sandbox run; any mismatch is a
+   STOP result. A dynamic required output with no expected digest must still
+   pass frozen request-count and content checks.
 39. `test_every_public_surface_detects_each_secret_and_protected_needle` first injects
    raw, JSON-escaped and forward-slash path forms into representative serialized data,
    requires scanner detection, then scans success and error responses, logs, events,
@@ -1548,6 +1578,8 @@ authorized work. No session has run.
 Hard no-go conditions before dependent live claims:
 
 - any real-isolation or gateway probe in section 8 succeeds;
+- a required file-backed capture cannot be read back and validated against its
+  frozen manifest, even when the Sandbox operation reports `SUCCESS`;
 - the available model cannot perform meaningful in-service interpretation/tool
   selection within the fixed ceilings;
 - comparison cost/latency requires replay or hidden dropped trials;
