@@ -1225,9 +1225,13 @@ SHIFTWORK_ASSIST_MODEL
 SHIFTWORK_TOKEN_FACTORY_IMAGE
 SHIFTWORK_GATEWAY_AUDIENCE
 NEBIUS_API_KEY
-CONTREE_SESSION
+NEBIUS_PROJECT_ID
 TAVILY_API_KEY
 ```
+
+`NEBIUS_API_KEY` is the IAM token (the Sandboxes client also accepts `CONTREE_TOKEN`),
+and `NEBIUS_PROJECT_ID` is sent as the `Project` header (client aliases
+`CONTREE_PROJECT` and `NEBIUS_AI_PROJECT`).
 
 Secret values never enter repository config, prompts, sandboxes, captures or public
 errors. There is no `SHIFTWORK_LEARNER_INFERENCE_KEY`.

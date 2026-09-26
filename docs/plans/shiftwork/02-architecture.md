@@ -379,12 +379,13 @@ KEEP verdict; remove the claim if discovery adds only links/prose or fails its a
 Only proposed live dependencies: Nebius Token Factory inference/Sandboxes; optional
 Tavily in curation. No new external service, webhook or hosted deployment is introduced.
 
-Environment names only: existing `SHIFTWORK_DB_PATH`; provider-auth names recorded in
-earlier research are `NEBIUS_API_KEY`, `CONTREE_SESSION` and `TAVILY_API_KEY`. Exact
-SDK/auth wiring, service/assist model configuration, resource ceilings and image pins
-belong to Gate 3 plus verified capability evidence. Do not create or inject
-`SHIFTWORK_LEARNER_INFERENCE_KEY`. No actual key, current model availability or
-credential authorization is implied here.
+Environment names only: existing `SHIFTWORK_DB_PATH`; provider-auth names are
+`NEBIUS_API_KEY` (the IAM token, also accepted as `CONTREE_TOKEN`), `NEBIUS_PROJECT_ID`
+(sent as the `Project` header; client aliases `CONTREE_PROJECT` and `NEBIUS_AI_PROJECT`)
+and `TAVILY_API_KEY`. Exact SDK/auth wiring, service/assist model configuration,
+resource ceilings and image pins belong to Gate 3 plus verified capability evidence.
+Do not create or inject `SHIFTWORK_LEARNER_INFERENCE_KEY`. No actual key, current model
+availability or credential authorization is implied here.
 
 ## 13. Observability and execution evidence
 
