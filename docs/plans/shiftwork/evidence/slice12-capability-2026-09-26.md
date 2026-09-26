@@ -353,6 +353,54 @@ in-service work within the current 256-token ceiling; the earlier recorded STOCK
 decision remains the only positive service answer. The reuse and trials phases
 stay unrun, Slice 12 remains unchecked and Slice 13 onward stays blocked.
 
+### Reuse phase live run: 2026-09-26 (one authorized live step)
+
+The user authorized the reuse phase only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase reuse` and exited 0.
+Raw records: `evidence/slice12-reuse-20260926T171955Z.jsonl` (three records),
+stamped with source SHA-256
+`3b95ced65f764a017d526cf6f1e9845736cbec8af478a2f2362a14c6edcd1d11`, which differs
+from the escape run's stamp because the `infer()` emit repair landed after it. No
+tracked evidence file was rewritten.
+
+- Entitlement: `whoami` returned all six Sandbox permissions true
+  (`spawn`, `spawn_disposable`, `cancel`, `import`, `list`, `set_image_tag`),
+  `running_instances: 0`, `running_imports: 0`, and the same limits as prior runs
+  (`instance_max_concurrency: 50`, `instance_max_layer_bytes: 12884901888`,
+  `instance_max_timeout: 3600`).
+- Cross-run grant reuse: the probe took the newest prior terminal operation id
+  from the archived evidence, `01a0de02-4961-7782-a709-0006382fdd1b`, which is
+  the escape run's `escape_spawn` operation, and sent `reuse\n` to its subprocess
+  stdin with the stream closed. The API rejected it with HTTP **409**,
+  `succeeded: false`, verdict `PASS_PRIOR_OPERATION_REUSE_REJECTED`.
+- Spend and residue: this run created no Sandbox operation and made no inference
+  call, so there is no `resources.cost` value and no `nemotron_inference` record.
+  The only account activity was two read/write API calls. No checkpoint image was
+  created, so the non-deletable image total is unchanged by this run.
+- Leakage: the archived records were re-scanned offline with the harness's own
+  `no_secret_leak` against the credential, the host-only canary and the working
+  directory, and the project id was checked absent from the raw file text. Both
+  checks passed; the scanner self-tests that each needle is detectable in its
+  serialized form, so the pass is capable of failing.
+- Offline state after the run: full suite `414 passed, 1 skipped, 2 warnings`;
+  `tests/spike/mutation_proofs_spike.py` `assertion-level catches: 53/53` with
+  byte-identical restoration, exit 0. Neither changed from the pre-run baseline,
+  because this step added one evidence file and no source.
+
+What this run does and does not show: a prior run's terminal operation still
+exists and actively refuses new input from a later run, and it refuses with a 409
+conflict rather than a 404, so this is a rejection by the service and not merely a
+missing record. It does not show that image, credential or project grants are
+revoked between runs, and it says nothing about an operation that is still
+running. The trials, reset and readback phases stay unrun and each needs its own
+spend authorization; Slice 12 remains unchecked and Slice 13 onward stays blocked.
+
+Supersession: the "terminated grant reuse" item in `Stopped or unmeasured` below is
+now measured by this run. The reset probe carries its own terminated-stdin check
+and stays unrun, as do the six live trial slots and the reset/branch readback that
+paragraph lists. That paragraph is otherwise left as written about the original
+stopped run.
+
 ## Stopped or unmeasured
 
 The stop rule prevented the planned reset/branch readback, terminated grant

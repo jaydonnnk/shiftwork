@@ -1,5 +1,38 @@
 # Status: Shiftwork
 
+## Slice 12 reuse phase live run: 2026-09-26
+
+The user authorized the reuse phase only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase reuse` and exited 0.
+`whoami` returned all six Sandbox permissions true with `running_instances: 0`.
+The probe took the newest prior terminal operation id from the archived evidence,
+`01a0de02-4961-7782-a709-0006382fdd1b` (the escape run's `escape_spawn`
+operation), and wrote `reuse\n` to its subprocess stdin with the stream closed.
+The API rejected it with HTTP 409 and `succeeded: false`, so the verdict is
+`PASS_PRIOR_OPERATION_REUSE_REJECTED`: a prior run's terminal operation still
+exists and refuses new input from a later run, and it refuses with a conflict
+rather than a not-found, so the rejection comes from the service and not from a
+missing record.
+
+This run created no Sandbox operation and made no inference call, so it carries no
+`resources.cost` value, no new checkpoint image and no change to recorded
+inference spend; the only account activity was two API calls. Raw records:
+`evidence/slice12-reuse-20260926T171955Z.jsonl`, three records stamped with source
+SHA-256
+`3b95ced65f764a017d526cf6f1e9845736cbec8af478a2f2362a14c6edcd1d11`; no tracked
+evidence file was rewritten. The archived records were re-scanned offline with the
+harness's own `no_secret_leak` against the credential, the host-only canary and
+the working directory, and the project id was confirmed absent from the raw text.
+The full suite is unchanged at `414 passed, 1 skipped, 2 warnings` and the spike
+mutation table at `assertion-level catches: 53/53` with byte-identical
+restoration, since this step added one evidence file and no source.
+
+The probe shows only that a terminal operation refuses new stdin. It does not show
+that image, credential or project grants are revoked between runs, and it says
+nothing about an operation that is still running. The trials, reset and readback
+phases stay unrun and each needs its own spend authorization; Slice 12 stays
+unchecked and Slice 13 onward stays blocked.
+
 ## Slice 12 escape phase live run: 2026-09-26
 
 The user authorized the escape phase only. It ran once as
