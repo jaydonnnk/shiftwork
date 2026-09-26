@@ -11,6 +11,7 @@ import argparse
 import dataclasses
 import json
 import os
+from pathlib import Path
 import sys
 import time
 
@@ -53,8 +54,29 @@ async def _preflight(token: str, project: str) -> tuple[dict[str, object], int]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--phase", choices=("preflight", "service", "controls", "pair", "reset", "readback"), default="service")
+    parser.add_argument("--phase", choices=("preflight", "judge", "service", "controls", "pair",
+                                            "outage", "escape", "reuse", "trials",
+                                            "reset", "readback"), default="service")
     args = parser.parse_args()
+    if args.phase == "judge":
+        from demos.gateway_spike_live import collect_judge_route_checks, classify_judge_route, JUDGE_ROUTE_READY
+
+        checks = collect_judge_route_checks(Path.cwd())
+        verdict = classify_judge_route(checks)
+        print(json.dumps({
+            "probe": "judge_route", "checks": checks, "verdict": verdict,
+            "environment_names": ["NEBIUS_API_KEY", "NEBIUS_PROJECT_ID"],
+            "offline_commands": [
+                ".venv313/Scripts/python.exe -m pytest tests/spike -q",
+                ".venv313/Scripts/python.exe -B tests/spike/mutation_proofs_spike.py",
+            ],
+            "live_commands": [
+                f".venv313/Scripts/python.exe -m demos.gateway_spike --phase {phase}"
+                for phase in ("preflight", "service", "controls", "pair", "outage",
+                              "escape", "reuse", "trials", "reset", "readback")
+            ],
+        }, sort_keys=True))
+        return 0 if verdict == JUDGE_ROUTE_READY else 2
     token = os.environ.get("NEBIUS_API_KEY", "")
     project = os.environ.get("NEBIUS_PROJECT_ID", "")
     if not token or not project:
