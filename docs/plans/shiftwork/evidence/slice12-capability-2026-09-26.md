@@ -157,7 +157,58 @@ followed.** The
 repaired `controls` and `pair` phases are unrun, so F3 and F4 remain unverified
 live, the STOP stands, Slice 12 stays unchecked and S13 onward stays blocked. Any
 live run, including the controlled pair, needs its own explicit authorization and
-spend go-ahead.
+spend go-ahead. (The pair phase then ran once under that authorization on
+2026-09-26; see the controlled pair live run section below.)
+
+### Controlled pair live run: 2026-09-26 (one authorized live step)
+
+The user authorized the controlled pair only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase pair`, after the
+preflight reported `spawn` and `spawn_disposable` true. Raw records:
+`evidence/slice12-pair-20260926T131827Z.jsonl`, ten records, each stamped with a
+UTC time and source SHA-256
+`2d1e0ea39ce00213e54b62d44e548613b48d77abccc739edee436a067729cdba`. Exit code 2.
+
+- Payload: deterministic `bytes(range(256)) * 8192`, 2,097,152 bytes, SHA-256
+  `91d3beb88a9b2f778a6c44a1c53b63d3c79931845a9aef84b3fb414610bd1938`; the upload
+  returned the same size and digest before either run.
+- Control run, 16 MiB cap: the process printed `WROTE_2MB_DETERMINISTIC` and
+  exited 0. `inspect_image_download` returned 2,097,152 bytes whose SHA-256
+  equalled the expected digest. Verdict `PASS_CAPTURE_INTACT`.
+- Treatment run, 1 MiB cap: the copy failed inside `shutil.copyfile` with
+  `OSError: [Errno 5] Input/output error`, the process exited 1 and printed no
+  completion marker. The same download of the checkpoint returned 0 bytes
+  (SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855`).
+  Verdict `STOP_CAPTURE_WRITE_NOT_ACKNOWLEDGED`.
+- Pair verdict: `INCONCLUSIVE_PAIR_TREATMENT_NOT_ACKNOWLEDGED`.
+- Both runs: outer status `SUCCESS`, no size-cap event in either event list, and
+  `inspect_image_list` raised `NotFoundError` for both checkpoints, so the
+  download plus digest remained the decisive check.
+
+What this establishes, and what it does not:
+
+- First live confirmation under the repaired harness that a 2 MiB deterministic
+  artifact is captured and read back byte-exact under the normal layer cap, with
+  archived raw size and digest records rather than a quoted observation.
+- The earlier decisive observation (an operation reported success, its process
+  reported writing 2 MiB under a 1 MiB cap, and the checkpoint silently held 0
+  bytes) did not reproduce with this payload. The treatment refused the write
+  loudly instead. Whether that refusal came from the layer cap, and why the
+  earlier run behaved differently, are untested explanations rather than
+  findings; the earlier zero-byte result stays unexplained.
+- The pair does not establish stable capture under the 1 MiB treatment cap. The
+  harness labels it inconclusive by design because a write that never reported
+  completion is not a captured write.
+- No inference call ran, so the archived inference spend is unchanged. The two
+  operations reported `resources.cost` 0.0006853 and 0.00072067 in the same
+  currency-less field as the earlier eight, and no account balance or currency
+  was inspected.
+- Two more non-disposable checkpoint images exist
+  (`3b7a62f9-01f9-43e6-8d1c-8fe536e2c7bb`, `ff1d879e-7b6d-4556-8fb0-61d8b0ed6fe0`),
+  bringing the non-deletable total to five.
+
+The repaired `controls` phase stays unrun and needs its own explicit
+authorization. Slice 12 remains unchecked and Slice 13 onward stays blocked.
 
 ## Stopped or unmeasured
 

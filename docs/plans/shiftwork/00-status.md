@@ -1,5 +1,25 @@
 # Status: Shiftwork
 
+## Slice 12 controlled pair live run: 2026-09-26
+
+The user authorized only the `--phase pair` live step. It ran once and exited 2.
+The 16 MiB control captured the deterministic 2 MiB payload intact: the
+downloaded checkpoint file matched the expected size and SHA-256 exactly
+(`PASS_CAPTURE_INTACT`). The 1 MiB treatment did not reproduce the earlier silent
+loss: the copy failed loudly with `OSError: [Errno 5] Input/output error`, the
+process exited 1 without its completion marker, and its checkpoint held a 0-byte
+file. The verdict is `INCONCLUSIVE_PAIR_TREATMENT_NOT_ACKNOWLEDGED`, because a
+write that never reported completion is not a captured write. Raw records:
+`evidence/slice12-pair-20260926T131827Z.jsonl` (per-record UTC stamps and source
+SHA-256, one new file, the earlier JSONL untouched). No inference call ran, so
+prior inference spend is unchanged; the two operations reported `resources.cost`
+0.0006853 and 0.00072067 in the same currency-less field as before, and two more
+non-disposable checkpoint images exist, bringing the non-deletable total to five.
+The earlier zero-byte observation stays unexplained, the repaired `controls`
+phase and the remaining probes stay unrun and separately authorized, and
+Slice 12 stays unchecked with Slice 13 onward blocked. Full detail is in the
+capability report.
+
 ## Slice 12 live matrix hard stop: 2026-09-26
 
 **Current gate state:** Gate 2 is RE-APPROVED 2026-09-26 for the scoped live
@@ -81,7 +101,9 @@ restored byte-identically. The full suite passes at 386 passed, 1 skipped, 2
 warnings, against 363 passed and 1 skip before the repair. No live run, Sandbox
 operation or inference call followed. The controlled pair and the
 repaired controls phase stay unrun and need their own explicit spend
-authorization; Slice 12 stays unchecked and S13 onward stays blocked.
+authorization; Slice 12 stays unchecked and S13 onward stays blocked. (Superseded
+for the pair phase by the controlled pair live run above, which ran once on
+2026-09-26 with an inconclusive verdict.)
 
 ## Slice 12 entitlement correction: 2026-09-26
 
