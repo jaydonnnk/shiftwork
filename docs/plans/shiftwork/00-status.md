@@ -60,6 +60,27 @@ JSONL was not modified. The STOP is confirmed with archived evidence. F2, F3,
 F4 and F5 remain open; the cap check must download bytes and compare a digest
 before any further live run; S12 stays unchecked and S13 onward stays blocked.
 
+### F2, F3 and F4 repair status: 2026-09-26 (offline only)
+
+The verifier and probe defects are repaired in code with offline guards, and the
+STOP stands because nothing was re-run. `demos/gateway_spike_live.py` now
+downloads each checkpoint file and compares size and SHA-256 before any capture
+verdict, so a stdout marker can neither pass nor fail a write, and a write that
+never reported completion is recorded as unacknowledged instead of lost. The new
+`--phase pair` writes the same deterministic 2 MiB payload to the same path under
+a 16 MiB control cap and a 1 MiB treatment cap, with a mandatory readback and
+digest per run and a comparison verdict. The F4 probes carry positive controls
+and record `UNPROVEN_POSITIVE_CONTROL_UNAVAILABLE` rather than passing when a
+control does not fire. F2's stamping rule is implemented: per-record UTC time and
+source SHA-256, one new evidence file per run, and an inference reservation that
+sums every `slice12-*.jsonl` file. `tests/spike/test_spike_verifiers.py` holds the
+offline guards, one per branch with a mutation proof (23 of 23 caught). The full
+suite passes at 386 passed, 1 skipped, 2 warnings, against 363 passed and 1 skip
+before the repair. No live run, Sandbox operation or inference call followed. The
+controlled pair and the
+repaired controls phase stay unrun and need their own explicit spend
+authorization; Slice 12 stays unchecked and S13 onward stays blocked.
+
 ## Slice 12 entitlement correction: 2026-09-26
 
 Nebius Support's earlier reply identified the correct `aiproject-...` value for

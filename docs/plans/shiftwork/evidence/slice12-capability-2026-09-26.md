@@ -108,6 +108,52 @@ default does not blind-retry POSTs; the service artifact digest matches the
 archived file; the `SLICE12_MARKER` digests match; the suite reproduces at
 363 passed, 1 skipped, 2 warnings in 100.80 s.
 
+### F2, F3 and F4 repair status: 2026-09-26 (offline only, no live run)
+
+The verifier defects are repaired in code with offline guards, and nothing live
+ran. `demos/gateway_spike_live.py` now classifies a capture from the downloaded
+bytes first: an intact 2 MiB payload passes only on an exact size and SHA-256
+match, and a stdout marker can neither pass nor fail a write. Empty, truncated,
+digest-mismatch and unavailable downloads each record their own stop verdict. A
+loudly refused write (no completion marker plus a non-zero inner exit code) is
+recorded as `STOP_CAPTURE_WRITE_NOT_ACKNOWLEDGED` instead of being mislabelled as
+a lost capture, and a pair whose treatment was never acknowledged records
+`INCONCLUSIVE_PAIR_TREATMENT_NOT_ACKNOWLEDGED`.
+
+The marker-only hard stop is deleted. The new `--phase pair` writes one
+deterministic 2 MiB payload (`bytes(range(256)) * 8192`, digest known before the
+run) to the same path twice, under a 16 MiB control cap and a 1 MiB treatment
+cap, and downloads plus digests each checkpoint before the pair verdict. A
+treatment that survives the smaller cap is recorded as
+`cap_exceeded_without_capture_loss`, a cap-enforcement finding rather than a
+capture failure.
+
+The F4 probes now carry positive controls. The host-only canary sits in the
+spawning process environment and the Sandbox searches for it by name and by
+value, so host environment inheritance is detectable. A mounted sentinel file
+must be detected before the path-absence assertions count, and a loopback
+self-connection proves the socket check can return true. Any control that does
+not fire records `UNPROVEN_POSITIVE_CONTROL_UNAVAILABLE` and the phase exits
+non-zero. The egress clause is relabelled to what it measures, that the disabled
+networking flag is honoured, with host isolation explicitly outside its scope.
+
+F2's stamping rule is implemented: every record carries `recorded_utc` and
+`source_sha256`, each run writes a new `slice12-<phase>-<UTC>.jsonl` sink and
+refuses to reuse an existing one, and the inference reservation sums every
+`slice12-*.jsonl` in the evidence directory so the $3 cap cannot silently reset.
+The archived `slice12-live-2026-09-26.jsonl` is untouched.
+
+Offline verification: `tests/spike/test_spike_verifiers.py` holds 23 checks, one
+per classifier branch, each mutation-proven (23 of 23 mutations caught). The full
+suite passes at **386 passed, 1 skipped, 2 warnings**, against 363 passed and 1
+skip before the repair. Nothing in the module or the tests contacts the API, reads
+`.env` or needs credentials. **No live run, Sandbox operation or inference call
+followed.** The
+repaired `controls` and `pair` phases are unrun, so F3 and F4 remain unverified
+live, the STOP stands, Slice 12 stays unchecked and S13 onward stays blocked. Any
+live run, including the controlled pair, needs its own explicit authorization and
+spend go-ahead.
+
 ## Stopped or unmeasured
 
 The stop rule prevented the planned reset/branch readback, terminated grant
