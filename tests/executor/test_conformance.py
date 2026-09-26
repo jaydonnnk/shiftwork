@@ -359,7 +359,7 @@ def test_pivot_review_bytes_and_catalog_binding():
 def test_executor_env_exposes_no_controller_credentials(executor, monkeypatch, capsys, adapter_name):
     import os
     import subprocess
-    names = ("NEBIUS_API_KEY", "CONTREE_SESSION", "TAVILY_API_KEY", "SHIFTWORK_DB_PATH", "SHIFTWORK_SEALED_STORE_ACCESS", "UNLISTED_ENV", "PYTHONPATH", "HTTP_PROXY")
+    names = ("NEBIUS_API_KEY", "NEBIUS_PROJECT_ID", "TAVILY_API_KEY", "SHIFTWORK_DB_PATH", "SHIFTWORK_SEALED_STORE_ACCESS", "UNLISTED_ENV", "PYTHONPATH", "HTTP_PROXY")
     markers = {name: f"SLICE3_TEST_MARKER_{index}_NOT_A_CREDENTIAL" for index, name in enumerate(names)}
     for name, marker in markers.items():
         monkeypatch.setenv(name, marker)
