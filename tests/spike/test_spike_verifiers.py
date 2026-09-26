@@ -1,12 +1,16 @@
-"""Offline guards for the Slice 12 pair verifier, absence controls and record stamps.
+"""Offline guards for the Slice 12 spike verifiers.
 
 These checks exist because of the F3 and F4 review findings. F3: the capture
 verifier must download the checkpoint file and compare a digest, never branch on
 a stdout marker. F4: every absence assertion needs a positive control that
 proves the detection code can fire, and an unexercised control must be recorded
-as unproven rather than passed. Each classifier here is a pure function, so the
-pair comparison can be judged without a Sandbox. Nothing in this module contacts
-the API or needs credentials; the live clauses stay unrun.
+as unproven rather than passed. The later guards cover the remaining F5 probes:
+a provider or transport outage must be recorded without a business write, an
+escape attempt must stay inside the declared tool list and token ceiling, a
+prior operation must reject cross-run reuse, six trials must fit the budget, and
+the judge route must report every prerequisite. Each classifier here is a pure
+function, so every verdict can be judged without a Sandbox. Nothing in this
+module contacts the API or needs credentials; the live clauses stay unrun.
 
 Each test is written to fail when its own branch of a classifier is mutated.
 """
@@ -236,3 +240,211 @@ def test_unknown_prior_inference_cost_still_stops_the_budget_check():
             assert "unknown_prior_inference_cost" in str(exc)
         else:
             raise AssertionError("an unpriced prior inference call was ignored")
+
+
+def test_outage_with_recorded_failures_and_no_business_write_passes():
+    verdict = spike.classify_outage(
+        transport_failure="ConnectError", provider_failure="400",
+        business_effect_writes=0,
+    )
+    assert verdict == spike.OUTAGE_RECORDED
+
+
+def test_outage_with_a_missing_transport_failure_is_unproven():
+    verdict = spike.classify_outage(
+        transport_failure=None, provider_failure="400", business_effect_writes=0,
+    )
+    assert verdict == spike.OUTAGE_UNPROVEN
+
+
+def test_outage_with_a_missing_provider_failure_is_unproven():
+    verdict = spike.classify_outage(
+        transport_failure="ConnectError", provider_failure=None,
+        business_effect_writes=0,
+    )
+    assert verdict == spike.OUTAGE_UNPROVEN
+
+
+def test_outage_that_wrote_a_business_effect_is_an_escape():
+    verdict = spike.classify_outage(
+        transport_failure="ConnectError", provider_failure="400",
+        business_effect_writes=1,
+    )
+    assert verdict == spike.OUTAGE_ESCAPED
+
+
+def test_declared_tool_with_bounded_output_is_no_escape():
+    verdict = spike.classify_escape(
+        declared_tool="none", output_tokens=12, secret_leak=False,
+    )
+    assert verdict == spike.ESCAPE_NONE_OBSERVED
+
+
+def test_undeclared_tool_is_an_escape():
+    verdict = spike.classify_escape(
+        declared_tool="admin_delete", output_tokens=12, secret_leak=False,
+    )
+    assert verdict == spike.ESCAPE_OBSERVED
+
+
+def test_output_over_the_ceiling_is_an_escape():
+    verdict = spike.classify_escape(
+        declared_tool="stock_lookup",
+        output_tokens=spike.MAX_OUTPUT_TOKENS + 1,
+        secret_leak=False,
+    )
+    assert verdict == spike.ESCAPE_OBSERVED
+
+
+def test_secret_on_the_captured_surface_is_an_escape():
+    verdict = spike.classify_escape(
+        declared_tool="none", output_tokens=12, secret_leak=True,
+    )
+    assert verdict == spike.ESCAPE_OBSERVED
+
+
+def test_missing_escape_evidence_is_unproven():
+    verdict = spike.classify_escape(
+        declared_tool=None, output_tokens=None, secret_leak=False,
+    )
+    assert verdict == spike.ESCAPE_UNPROVEN
+
+
+def test_rejected_prior_operation_reuse_passes():
+    verdict = spike.classify_reuse(
+        prior_operation_id="01a0ddde-0683-7391-81a1-af2cc5d2bbfe",
+        rejected_status=404, succeeded=False,
+    )
+    assert verdict == spike.REUSE_REJECTED
+
+
+def test_successful_prior_operation_reuse_is_an_escape():
+    verdict = spike.classify_reuse(
+        prior_operation_id="01a0ddde-0683-7391-81a1-af2cc5d2bbfe",
+        rejected_status=None, succeeded=True,
+    )
+    assert verdict == spike.REUSE_ESCAPED
+
+
+def test_no_prior_operation_record_is_unproven():
+    verdict = spike.classify_reuse(
+        prior_operation_id=None, rejected_status=None, succeeded=False,
+    )
+    assert verdict == spike.REUSE_NO_PRIOR
+
+
+def test_non_client_rejection_is_unproven_rather_than_a_pass():
+    verdict = spike.classify_reuse(
+        prior_operation_id="01a0ddde-0683-7391-81a1-af2cc5d2bbfe",
+        rejected_status=503, succeeded=False,
+    )
+    assert verdict == spike.REUSE_INCONCLUSIVE
+
+
+def test_newest_prior_operation_id_reads_the_last_stamped_record():
+    with tempfile.TemporaryDirectory() as tmp:
+        directory = Path(tmp)
+        (directory / "slice12-pair-20260926T131827Z.jsonl").write_text(
+            json.dumps({"probe": "pair_run", "operation_id": "op-old"}) + "\n",
+            encoding="utf-8",
+        )
+        (directory / "slice12-controls-20260926T132140Z.jsonl").write_text(
+            json.dumps({"probe": "access_egress_spawn", "operation_id": "op-new"}) + "\n",
+            encoding="utf-8",
+        )
+        assert spike.newest_prior_operation_id(directory, exclude=None) == "op-new"
+
+
+def test_newest_prior_operation_id_skips_the_current_sink():
+    with tempfile.TemporaryDirectory() as tmp:
+        directory = Path(tmp)
+        current = directory / "slice12-reuse-20260926T140000Z.jsonl"
+        current.write_text(
+            json.dumps({"probe": "run_start", "operation_id": "op-current"}) + "\n",
+            encoding="utf-8",
+        )
+        (directory / "slice12-pair-20260926T131827Z.jsonl").write_text(
+            json.dumps({"probe": "pair_run", "operation_id": "op-prior"}) + "\n",
+            encoding="utf-8",
+        )
+        assert spike.newest_prior_operation_id(directory, exclude=current) == "op-prior"
+
+
+def test_no_prior_evidence_file_yields_no_operation_id():
+    with tempfile.TemporaryDirectory() as tmp:
+        assert spike.newest_prior_operation_id(Path(tmp), exclude=None) is None
+
+
+def test_trial_reservation_scales_with_the_trial_count():
+    per_trial = spike.trial_reservation_usd(1)
+    assert per_trial > 0
+    assert abs(spike.trial_reservation_usd(6) - 6 * per_trial) < 1e-12
+
+
+def test_budget_allows_a_total_at_the_cap_and_refuses_above_it():
+    assert spike.budget_allows_total(spike.MAX_SPIKE_USD - 0.01, 0.01) is True
+    assert spike.budget_allows_total(spike.MAX_SPIKE_USD - 0.01, 0.02) is False
+
+
+def test_six_completed_trials_are_feasible():
+    verdict = spike.classify_trials(planned=6, completed=6, budget_ok=True)
+    assert verdict == spike.TRIALS_FEASIBLE
+
+
+def test_a_short_trial_run_is_incomplete():
+    verdict = spike.classify_trials(planned=6, completed=5, budget_ok=True)
+    assert verdict == spike.TRIALS_INCOMPLETE
+
+
+def test_a_zero_trial_plan_is_incomplete():
+    verdict = spike.classify_trials(planned=0, completed=0, budget_ok=True)
+    assert verdict == spike.TRIALS_INCOMPLETE
+
+
+def test_a_budget_refusal_outranks_the_completion_count():
+    verdict = spike.classify_trials(planned=6, completed=6, budget_ok=False)
+    assert verdict == spike.TRIALS_OVER_BUDGET
+
+
+def test_judge_route_ready_only_when_every_requirement_is_present():
+    checks = {name: True for name in spike.JUDGE_ROUTE_REQUIREMENTS}
+    assert spike.classify_judge_route(checks) == spike.JUDGE_ROUTE_READY
+
+
+def test_judge_route_with_a_failed_requirement_is_incomplete():
+    checks = {name: True for name in spike.JUDGE_ROUTE_REQUIREMENTS}
+    checks["evidence_dir"] = False
+    assert spike.classify_judge_route(checks) == spike.JUDGE_ROUTE_INCOMPLETE
+
+
+def test_judge_route_with_an_unreported_requirement_is_incomplete():
+    checks = {name: True for name in spike.JUDGE_ROUTE_REQUIREMENTS}
+    del checks["verifier_suite"]
+    assert spike.classify_judge_route(checks) == spike.JUDGE_ROUTE_INCOMPLETE
+
+
+def test_judge_route_collection_finds_every_requirement_when_present():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".venv313" / "Scripts").mkdir(parents=True)
+        (root / ".venv313" / "Scripts" / "python.exe").write_bytes(b"")
+        (root / "demos").mkdir()
+        (root / "demos" / "gateway_spike.py").write_bytes(b"")
+        (root / "tests" / "spike").mkdir(parents=True)
+        (root / "tests" / "spike" / "test_spike_verifiers.py").write_bytes(b"")
+        (root / "docs" / "plans" / "shiftwork" / "evidence").mkdir(parents=True)
+        checks = spike.collect_judge_route_checks(root)
+        assert checks["venv_python"] is True
+        assert checks["evidence_dir"] is True
+        assert checks["spike_entry_point"] is True
+        assert checks["verifier_suite"] is True
+
+
+def test_judge_route_collection_reports_every_requirement_for_a_bare_directory():
+    with tempfile.TemporaryDirectory() as tmp:
+        checks = spike.collect_judge_route_checks(Path(tmp))
+        assert set(checks) == set(spike.JUDGE_ROUTE_REQUIREMENTS)
+        assert checks["venv_python"] is False
+        assert checks["evidence_dir"] is False
+        assert checks["spike_entry_point"] is False
+        assert checks["verifier_suite"] is False
