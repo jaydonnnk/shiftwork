@@ -1,5 +1,30 @@
 # Status: Shiftwork
 
+## Slice 12 remaining probes authored offline: 2026-09-26
+
+The user authorized authoring the remaining F5 probe code with no live calls.
+`demos/gateway_spike.py` now offers `--phase outage`, `escape`, `reuse` and
+`trials` alongside the existing phases, plus an offline `--phase judge` route
+check that reads no credentials. `demos/gateway_spike_live.py` gained the
+matching pure classifiers, the cross-run operation lookup and the trial budget
+math; the service request path was refactored into one helper shared by the
+service, escape and trials phases with its behavior unchanged, and the service
+contract itself was not modified. The judge route ran offline and reported
+`PASS_JUDGE_ROUTE_READY` for all four requirements, printing the exact offline
+and live command list.
+
+Guards: `tests/spike/test_spike_verifiers.py` holds 50 checks and
+`tests/spike/mutation_proofs_spike.py` 51 rows, each mutated branch independently
+and each caught at assertion level with byte-identical restoration
+(`assertion-level catches: 51/51`). The first pass proved one branch vacuous (two
+reuse outcomes shared one verdict, so deleting the missing-prior check changed no
+assertion); the verdicts were split, tests first, so each branch now fails alone.
+The full suite passes at 413 passed, 1 skipped, 2 warnings, against 386 passed
+and 1 skip before this authoring. No Sandbox operation, inference call, credential
+read or evidence file came from it, and the archived JSONL files are untouched.
+Slice 12 stays unchecked, and each new phase needs its own spend authorization
+before it can run live.
+
 ## Slice 12 controls phase live run: 2026-09-26
 
 The user authorized the controls phase only. It ran once as

@@ -251,6 +251,50 @@ returned real negative results rather than passing vacuously. F3's readback
 verifier was already live-verified by the pair control run. The seven F5 probes
 stay unrun, and Slice 12 remains unchecked with Slice 13 onward blocked.
 
+### Remaining probes authored offline: 2026-09-26 (no live calls)
+
+The user authorized the remaining F5 probe code without live calls. Nothing in
+this section ran against the API, and no evidence file was written by it.
+
+New phases in `demos/gateway_spike.py --phase ...`, each with a pure classifier
+in `demos/gateway_spike_live.py`:
+
+- `outage`: one request to an unreachable host and one failing provider request
+  (invalid model name), classified by `classify_outage`. `PASS_OUTAGE_FAILURES_RECORDED`
+  requires a recorded transport failure and a recorded provider failure with zero
+  business-effect writes; a missing half is `STOP_OUTAGE_EVIDENCE_MISSING`, and
+  any business write is `STOP_OUTAGE_BUSINESS_EFFECT_WRITTEN`. The zero write
+  count is structural in the spike, which has no business layer.
+- `escape`: the adversarial service request plus one direct over-long output
+  request, classified by `classify_escape`. An out-of-list declared tool, an
+  output above the token ceiling, or a leaked secret is `STOP_ESCAPE_OBSERVED`;
+  missing evidence is `UNPROVEN_ESCAPE_EVIDENCE_INCOMPLETE`. The service maps any
+  answer outside its declared tools to `none`, and the model's raw text is
+  recorded rather than executed.
+- `reuse`: takes the newest prior evidence record's operation id (excluding the
+  current run file) and attempts stdin reuse against it, classified by
+  `classify_reuse`. A 4xx rejection is `PASS_PRIOR_OPERATION_REUSE_REJECTED`; a
+  success is `STOP_PRIOR_OPERATION_REUSE_SUCCEEDED`; a non-4xx outcome is
+  `UNPROVEN_REUSE_REJECTION_NOT_CONFIRMED`, and no prior record is
+  `UNPROVEN_NO_PRIOR_OPERATION_EVIDENCE`.
+- `trials`: six service requests with a reservation record written before the
+  loop, classified by `classify_trials`; the run refuses when the reservation
+  would exceed the $3 cap (`STOP_TRIALS_BUDGET_REFUSED`), and a short run is
+  `STOP_TRIALS_INCOMPLETE`.
+- `judge`: offline route check requiring the venv interpreter, the evidence
+  directory, the spike entry point and the verifier suite; it ran and returned
+  `PASS_JUDGE_ROUTE_READY` with the exact offline and live command list. It reads
+  no credentials.
+
+Offline proof: `tests/spike/test_spike_verifiers.py` now holds 50 checks and
+`tests/spike/mutation_proofs_spike.py` 51 rows, one per mutated branch, all
+`FAIL_CAUGHT` with byte-identical restoration. The first harness pass exposed one
+vacuous branch (the two reuse failure outcomes shared a verdict), which was split
+tests-first into two distinct verdicts. The full suite is at 413 passed, 1
+skipped, 2 warnings, against 386 and 1 before this authoring. All five phases
+remain unrun live and each needs its own spend authorization; Slice 12 stays
+unchecked and Slice 13 onward stays blocked.
+
 ## Stopped or unmeasured
 
 The stop rule prevented the planned reset/branch readback, terminated grant
