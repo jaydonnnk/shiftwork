@@ -38,6 +38,8 @@ ROUTES = "tests/api/test_pivot_routes.py"
 TASKCONTRACT = "tests/domain/test_task_contract.py"
 CUSTOMER = "tests/domain/test_customer_answer.py"
 EVALUATOR = "tests/evaluator/test_evaluator.py"
+LIFECYCLE = "tests/orchestrator/test_experiment_lifecycle.py"
+ASSIST = "tests/orchestrator/test_investigation_assist.py"
 ATOMICITY = "test_v6_migration_is_atomic_and_idempotent"
 PRESERVED = "test_v5_to_v6_preserves_every_legacy_blob_hash_and_row_count"
 ADAPTER = "test_legacy_adapter_label_does_not_claim_fresh_live_execution"
@@ -306,6 +308,95 @@ CASES = [
         "new": "    if entity is None:\n        return ShopEntity(title=entity_ref, edition=\"unknown\", genre=\"unknown\")",
         "tests": f"{CUSTOMER}::test_an_unknown_entity_fails_closed_instead_of_leaking_its_ref",
         "expect": "test_an_unknown_entity_fails_closed_instead_of_leaking_its_ref",
+    },
+    # --- Slice 11: the public diagnostic experiment and its boundaries ---------
+    {
+        "name": "s11_diagnostic_reserves_a_protected_case",
+        "file": "shiftwork/orchestrator.py",
+        "old": "        protected_reservation_id=None,",
+        "new": "        protected_reservation_id=\"reservation-0001\",",
+        "tests": f"{LIFECYCLE}::test_the_frozen_context_pins_the_reviewed_bytes_and_reserves_nothing",
+        "expect": "test_the_frozen_context_pins_the_reviewed_bytes_and_reserves_nothing",
+    },
+    {
+        "name": "s11_diagnostic_candidate_pin_removed",
+        "file": "shiftwork/orchestrator.py",
+        "old": '        if version.content_hash != config.TRUSTED_LOCAL_FIXTURES["pivot_starter"][0]:',
+        "new": "        if False:",
+        "tests": f"{LIFECYCLE}::test_only_the_pinned_reviewed_starter_is_executable",
+        "expect": "test_only_the_pinned_reviewed_starter_is_executable",
+    },
+    {
+        "name": "s11_diagnostic_budget_ignored",
+        "file": "shiftwork/orchestrator.py",
+        "old": "        if used >= DIAGNOSTIC_EXPERIMENTS_PER_SHIFT:",
+        "new": "        if False:",
+        "tests": f"{LIFECYCLE}::test_the_diagnostic_budget_is_two_per_shift",
+        "expect": "test_the_diagnostic_budget_is_two_per_shift",
+    },
+    {
+        "name": "s11_null_investigation_bootstrap_allowed",
+        "file": "shiftwork/orchestrator.py",
+        "old": "        if investigation_id is None:\n            # The only null-investigation experiment is the no-source legacy",
+        "new": "        if False:\n            # The only null-investigation experiment is the no-source legacy",
+        "tests": f"{LIFECYCLE}::test_a_null_investigation_bootstrap_is_denied_and_reserves_nothing",
+        "expect": "test_a_null_investigation_bootstrap_is_denied_and_reserves_nothing",
+    },
+    {
+        "name": "s11_diagnostic_spends_the_operation_budget",
+        "file": "shiftwork/store/repo.py",
+        "old": '            "SELECT COUNT(*) AS n FROM runs WHERE shift_id = ? AND purpose != ?",',
+        "new": '            "SELECT COUNT(*) AS n FROM runs WHERE shift_id = ? AND purpose != ? OR 1 = 1",',
+        "tests": f"{LIFECYCLE}::test_the_diagnostic_does_not_spend_the_operation_budget",
+        "expect": "test_the_diagnostic_does_not_spend_the_operation_budget",
+    },
+    {
+        "name": "s11_diagnostic_claims_recorded_inspection",
+        "file": "shiftwork/orchestrator.py",
+        "old": "            evidence_mode=EvidenceMode.TRUSTED_LOCAL,",
+        "new": "            evidence_mode=EvidenceMode.RECORDED_INSPECTION,",
+        "tests": f"{LIFECYCLE}::test_the_pinned_starter_fails_the_request_where_it_actually_fails",
+        "expect": "test_the_pinned_starter_fails_the_request_where_it_actually_fails",
+    },
+    {
+        "name": "s11_completion_counted_without_the_required_tasks",
+        "file": "shiftwork/orchestrator.py",
+        "old": "            if evaluator.request_usefully_completed(spec, request_assessments):\n                completed += 1",
+        "new": "            completed += 1",
+        "tests": f"{LIFECYCLE}::test_the_pinned_starter_fails_the_request_where_it_actually_fails",
+        "expect": "test_the_pinned_starter_fails_the_request_where_it_actually_fails",
+    },
+    {
+        "name": "s11_assessment_reads_the_live_fixture",
+        "file": "shiftwork/orchestrator.py",
+        "old": "        snapshot_bytes = base64.b64decode(context.public_data_bytes_base64)\n        mission = task_contract.load_mission_bytes(base64.b64decode(context.mission_bytes_base64))",
+        "new": "        snapshot_bytes = base64.b64decode(context.public_data_bytes_base64)\n        mission = task_contract.load_mission(config.PIVOT_MISSION)",
+        "tests": f"{LIFECYCLE}::test_a_fixture_edit_after_reservation_cannot_rewrite_the_assessment",
+        "expect": "test_a_fixture_edit_after_reservation_cannot_rewrite_the_assessment",
+    },
+    {
+        "name": "s11_help_accepts_a_foreign_shifts_investigation",
+        "file": "shiftwork/orchestrator.py",
+        "old": '    if investigation.shift_id != shift.id:\n        raise LifecycleError(\n            "conflict", "diagnostic help must reference an investigation owned by this shift"\n        )',
+        "new": '    if False:\n        raise LifecycleError(\n            "conflict", "diagnostic help must reference an investigation owned by this shift"\n        )',
+        "tests": f"{ASSIST}::test_help_with_another_open_shifts_investigation_is_refused_before_the_gateway",
+        "expect": "test_help_with_another_open_shifts_investigation_is_refused_before_the_gateway",
+    },
+    {
+        "name": "s11_diagnostic_accepts_a_foreign_shifts_investigation",
+        "file": "shiftwork/orchestrator.py",
+        "old": '        if investigation.shift_id != shift.id:\n            raise LifecycleError(\n                "conflict", "a diagnostic must cite an investigation owned by this shift"\n            )',
+        "new": '        if False:\n            raise LifecycleError(\n                "conflict", "a diagnostic must cite an investigation owned by this shift"\n            )',
+        "tests": f"{LIFECYCLE}::test_an_investigation_from_another_shift_cannot_authorise_a_diagnostic",
+        "expect": "test_an_investigation_from_another_shift_cannot_authorise_a_diagnostic",
+    },
+    {
+        "name": "s11_absent_assist_gateway_claims_success",
+        "file": "shiftwork/orchestrator.py",
+        "old": '    raise AssistGatewayUnavailable(\n        f"no assist gateway exists yet, so a {role.value} cannot be produced; "\n        "diagnostic help arrives with Slice 14"\n    )',
+        "new": "    return None",
+        "tests": f"{ASSIST}::test_diagnostic_help_needs_an_investigation_and_is_denied_anyway",
+        "expect": "test_diagnostic_help_needs_an_investigation_and_is_denied_anyway",
     },
 ]
 
