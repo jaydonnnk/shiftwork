@@ -1,4 +1,4 @@
-"""S10 guard proofs: each source fault must fail one named assertion.
+"""S10 and S11 guard proofs: each source fault must fail one named assertion.
 
 Uses the existing mutation runner, which restores every target byte-identically
 and rejects collection errors, crashes, and timeouts as non-proof.
@@ -10,10 +10,17 @@ Deliberately excluded, with the measured reason:
   requests do not overlap. A proof that can pass by luck is not a proof, so
   ``s10_partial_shift_open_committed`` faults the same transaction
   deterministically instead and carries the atomic-shift-open clause.
-- Dropping version 5 from the accepted-upgrade list, and dropping the
-  ``current == SCHEMA_VERSION`` early return, both surface as ``RuntimeError``
-  and ``sqlite3.OperationalError`` rather than as assertion failures. They are
-  real fail-closed behavior but incidental catches, so they are not listed here.
+- Dropping version 5 from the accepted-upgrade list surfaces as ``RuntimeError``
+  rather than as an assertion failure. It is real fail-closed behavior but an
+  incidental catch, so it is not listed here.
+
+Slice 11 moved two S10 anchors without weakening either assertion. The
+``current == SCHEMA_VERSION`` early return became a reconciliation call, so
+``s10_migration_transaction_removed`` now anchors past ``try:`` to stay unique
+against ``_complete_v6_tables``'s own transaction, and
+``s10_rerun_reapplies_v6_ddl`` injects its marker table into the idempotent
+script instead of the removed early return. Both still fault
+``test_v6_migration_is_atomic_and_idempotent``.
 """
 
 import importlib.util
@@ -28,6 +35,8 @@ spec.loader.exec_module(runner)
 
 MIGRATION = "tests/store/test_pivot_migration.py"
 ROUTES = "tests/api/test_pivot_routes.py"
+TASKCONTRACT = "tests/domain/test_task_contract.py"
+EVALUATOR = "tests/evaluator/test_evaluator.py"
 ATOMICITY = "test_v6_migration_is_atomic_and_idempotent"
 PRESERVED = "test_v5_to_v6_preserves_every_legacy_blob_hash_and_row_count"
 ADAPTER = "test_legacy_adapter_label_does_not_claim_fresh_live_execution"
@@ -100,8 +109,12 @@ CASES = [
     {
         "name": "s10_migration_transaction_removed",
         "file": "shiftwork/store/db.py",
-        "old": "    conn.execute(\"BEGIN IMMEDIATE\")\n    try:\n",
-        "new": "    try:\n",
+        # Anchored past `try:` because Slice 11 gave _complete_v6_tables its own
+        # BEGIN IMMEDIATE. The shorter anchor matched both and the runner skipped
+        # the case as ambiguous, which would have silently dropped an accepted S10
+        # proof. The assertion this faults is unchanged.
+        "old": "    conn.execute(\"BEGIN IMMEDIATE\")\n    try:\n        if current == 0:\n",
+        "new": "    try:\n        if current == 0:\n",
         "tests": f"{MIGRATION}::{ATOMICITY}",
         "expect": ATOMICITY,
     },
@@ -116,8 +129,12 @@ CASES = [
     {
         "name": "s10_rerun_reapplies_v6_ddl",
         "file": "shiftwork/store/db.py",
-        "old": "    if current == SCHEMA_VERSION:\n        return\n",
-        "new": "    if current == SCHEMA_VERSION:\n        conn.execute(\"CREATE TABLE IF NOT EXISTS s10_rerun_marker (x TEXT)\")\n        return\n",
+        # Re-anchored for Slice 11: the `current == SCHEMA_VERSION` early return it
+        # faulted is now a reconciliation call, so the mutation injects a marker
+        # table into the idempotent script instead. Same proof: a rerun that
+        # changes sqlite_master fails the idempotency assertion.
+        "old": '    script = MIGRATION_V6_TABLES_PATH.read_text(encoding="utf-8")\n',
+        "new": '    script = MIGRATION_V6_TABLES_PATH.read_text(encoding="utf-8") + "CREATE TABLE IF NOT EXISTS s10_rerun_marker (x TEXT);"\n',
         "tests": f"{MIGRATION}::{ATOMICITY}",
         "expect": ATOMICITY,
     },
@@ -144,6 +161,126 @@ CASES = [
         "new": "UPDATE runs SET evidence_mode = 'RECORDED_INSPECTION' WHERE adapter IN ('recorded','tokenfactory');",
         "tests": f"{MIGRATION}::{ADAPTER}[tokenfactory-None]",
         "expect": f"{ADAPTER}[tokenfactory-None]",
+    },
+    # --- Slice 11: task-aware assessment, envelope and v6 reconciliation ------
+    {
+        "name": "s11_v6_reconcile_skipped",
+        "file": "shiftwork/store/db.py",
+        "old": "    if current == SCHEMA_VERSION:\n        _complete_v6_tables(conn)\n        return\n",
+        "new": "    if current == SCHEMA_VERSION:\n        return\n",
+        "tests": f"{MIGRATION}::test_already_v6_database_gains_missing_tables_without_touching_history",
+        "expect": "test_already_v6_database_gains_missing_tables_without_touching_history",
+    },
+    {
+        "name": "s11_envelope_accepts_independent_prose",
+        "file": "shiftwork/domain/task_contract.py",
+        "old": '_FROZEN = ConfigDict(frozen=True, extra="forbid")',
+        "new": '_FROZEN = ConfigDict(frozen=True, extra="ignore")',
+        "tests": f"{TASKCONTRACT}::test_independent_prose_field_is_rejected[customer_text]",
+        "expect": "test_independent_prose_field_is_rejected[customer_text]",
+    },
+    {
+        "name": "s11_record_conflict_treated_as_agreed",
+        "file": "shiftwork/domain/task_contract.py",
+        "old": "    if len(identities) > 1:",
+        "new": "    if False:",
+        "tests": f"{TASKCONTRACT}::test_conflicting_values_are_unsupported_even_when_the_newest_is_cited",
+        "expect": "test_conflicting_values_are_unsupported_even_when_the_newest_is_cited",
+    },
+    {
+        "name": "s11_collection_conflict_rule_removed",
+        "file": "shiftwork/domain/task_contract.py",
+        "old": "    return isinstance(quantity, int) and not isinstance(quantity, bool) and quantity <= 0",
+        "new": "    return False",
+        "tests": f"{TASKCONTRACT}::test_true_collection_with_zero_stock_is_conflicting_necessary_information",
+        "expect": "test_true_collection_with_zero_stock_is_conflicting_necessary_information",
+    },
+    {
+        "name": "s11_missing_required_task_accepted",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "old": "    codes = (ReasonCode.REQUIRED_TASK_MISSING,) if task.required else ()",
+        "new": "    codes = ()",
+        "tests": f"{EVALUATOR}::test_true_price_without_collection_or_alternative_fails_required_tasks",
+        "expect": "test_true_price_without_collection_or_alternative_fails_required_tasks",
+    },
+    {
+        "name": "s11_request_completion_ignores_required_tasks",
+        "file": "shiftwork/evaluator/evaluator.py",
+        # Pointed at the case where every mandatory rule passes. Against the
+        # price-only starter this mutation was NOT_CAUGHT, because a missing
+        # required task already trips the mandatory_pass short-circuit first and
+        # two checks catching one fault proves neither.
+        "old": "        for task in spec.tasks\n        if task.required\n    )",
+        "new": "        for task in spec.tasks\n        if False\n    )",
+        "tests": f"{EVALUATOR}::test_justified_fallbacks_on_every_required_task_do_not_complete_the_request",
+        "expect": "test_justified_fallbacks_on_every_required_task_do_not_complete_the_request",
+    },
+    {
+        "name": "s11_result_labelled_with_the_wrong_entity_accepted",
+        "file": "shiftwork/evaluator/evaluator.py",
+        # The result-level limb only. Against the hardback-collection case this was
+        # NOT_CAUGHT, because that case's claims are also mislabelled and the
+        # claim-level limb below caught the same fault.
+        "old": "    if result.entity_ref != task.requested_entity_ref:\n        return [ReasonCode.WRONG_ENTITY]",
+        "new": "    if False:\n        return [ReasonCode.WRONG_ENTITY]",
+        "tests": f"{EVALUATOR}::test_a_result_labelled_with_the_wrong_entity_fails_even_when_its_claims_are_right",
+        "expect": "test_a_result_labelled_with_the_wrong_entity_fails_even_when_its_claims_are_right",
+    },
+    {
+        "name": "s11_claim_about_the_wrong_entity_accepted",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "old": "        for claim in result.claims\n        if claim.entity_ref != task.requested_entity_ref\n    ]",
+        "new": "        for claim in result.claims\n        if False\n    ]",
+        "tests": f"{EVALUATOR}::test_a_true_price_for_the_wrong_edition_is_unsupported",
+        "expect": "test_a_true_price_for_the_wrong_edition_is_unsupported",
+    },
+    {
+        "name": "s11_unsupported_claim_value_accepted",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "old": "    if group.value != claim.value:\n        return False",
+        "new": "    if group.value != claim.value:\n        return True",
+        "tests": f"{EVALUATOR}::test_an_unsupported_claim_value_fails",
+        "expect": "test_an_unsupported_claim_value_fails",
+    },
+    {
+        "name": "s11_fallback_always_justified",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "old": '    if code == "MISSING_ENTITY_DETAIL":\n        return False',
+        "new": '    if code == "MISSING_ENTITY_DETAIL":\n        return True',
+        "tests": f"{EVALUATOR}::test_an_unneeded_clarification_is_unjustified",
+        "expect": "test_an_unneeded_clarification_is_unjustified",
+    },
+    {
+        "name": "s11_missing_capture_becomes_a_justified_refusal",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "old": "                outcome=TaskOutcome.MISSING_OUTPUT,\n                mandatory_pass=False,\n                reason_codes=(ReasonCode.MISSING_EXECUTION_EVIDENCE,),",
+        "new": "                outcome=TaskOutcome.JUSTIFIED_REFUSAL,\n                mandatory_pass=True,\n                reason_codes=(),",
+        "tests": f"{EVALUATOR}::test_missing_capture_is_missing_evidence_not_refusal",
+        "expect": "test_missing_capture_is_missing_evidence_not_refusal",
+    },
+    {
+        "name": "s11_not_applicable_self_declared_by_the_service",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "old": "    if date is None or not _collection_independently_confirmed(\n        snapshot, mission, task.requested_entity_ref, date\n    ):",
+        "new": "    if False:",
+        "tests": f"{EVALUATOR}::test_not_applicable_needs_independently_confirmed_collection",
+        "expect": "test_not_applicable_needs_independently_confirmed_collection",
+    },
+    {
+        "name": "s11_referral_borrows_another_candidates_data_problem",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "old": '    if "QUALIFIES" in classifications.values():\n        return False',
+        "new": '    if "QUALIFIES" in classifications.values():\n        return True',
+        "tests": f"{EVALUATOR}::test_a_referral_cannot_borrow_another_candidates_data_problem",
+        "expect": "test_a_referral_cannot_borrow_another_candidates_data_problem",
+    },
+    {
+        "name": "s11_availability_answer_creates_a_commitment",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "old": "    if result.commitment_ref is not None and task.kind in _AVAILABILITY_KINDS:",
+        "new": "    if False:",
+        "tests": f"{EVALUATOR}::test_a_collection_answer_may_not_create_a_commitment",
+        "expect": "test_a_collection_answer_may_not_create_a_commitment",
     },
 ]
 
