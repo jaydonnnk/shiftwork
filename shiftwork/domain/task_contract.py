@@ -294,11 +294,24 @@ def load_mission(path: Path) -> MissionSpec:
     pass, which is worse than refusing to run.
     """
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        raw = path.read_bytes()
+    except OSError as exc:
         raise MissionSpecInvalid(f"mission {path.name} is not readable JSON: {exc}") from exc
+    return load_mission_bytes(raw, label=path.name)
+
+
+def load_mission_bytes(raw: bytes, *, label: str = "frozen mission bytes") -> MissionSpec:
+    """The same fail-closed parse over bytes, for a context's frozen rubric.
+
+    A run assesses against the bytes it froze, so the loader that guards the
+    live file must also guard the frozen copy rather than a second, weaker parser.
+    """
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise MissionSpecInvalid(f"mission {label} is not readable JSON: {exc}") from exc
     if not isinstance(data, dict):
-        raise MissionSpecInvalid(f"mission {path.name} is not a JSON object")
+        raise MissionSpecInvalid(f"mission {label} is not a JSON object")
 
     try:
         specs = tuple(
@@ -328,27 +341,27 @@ def load_mission(path: Path) -> MissionSpec:
         )
     except ValidationError as exc:
         raise MissionSpecInvalid(
-            f"mission {path.name} is not a usable rubric: {_validation_summary(exc)}"
+            f"mission {label} is not a usable rubric: {_validation_summary(exc)}"
         ) from exc
     except (KeyError, TypeError) as exc:
-        raise MissionSpecInvalid(f"mission {path.name} is not a usable rubric: missing {exc}") from exc
+        raise MissionSpecInvalid(f"mission {label} is not a usable rubric: missing {exc}") from exc
 
-    _check_mission(path, mission)
+    _check_mission(label, mission)
     return mission
 
 
-def _check_mission(path: Path, mission: MissionSpec) -> None:
+def _check_mission(label: str, mission: MissionSpec) -> None:
     if not mission.request_specs:
-        raise MissionSpecInvalid(f"mission {path.name} declares no request specs")
+        raise MissionSpecInvalid(f"mission {label} declares no request specs")
     if mission.max_record_age_ms <= 0:
-        raise MissionSpecInvalid(f"mission {path.name} has a non-positive max_record_age_ms")
+        raise MissionSpecInvalid(f"mission {label} has a non-positive max_record_age_ms")
     if not mission.render_vocabulary:
-        raise MissionSpecInvalid(f"mission {path.name} has no render vocabulary")
+        raise MissionSpecInvalid(f"mission {label} has no render vocabulary")
 
     seen_request_ids: set[str] = set()
     for spec in mission.request_specs:
         if spec.id in seen_request_ids:
-            raise MissionSpecInvalid(f"mission {path.name} repeats request id {spec.id!r}")
+            raise MissionSpecInvalid(f"mission {label} repeats request id {spec.id!r}")
         seen_request_ids.add(spec.id)
         if not spec.tasks:
             raise MissionSpecInvalid(f"request {spec.id} declares no tasks")
@@ -372,17 +385,26 @@ def _check_mission(path: Path, mission: MissionSpec) -> None:
 
 def load_public_state(path: Path) -> ShopSnapshot:
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
+        raw = path.read_bytes()
+    except OSError as exc:
         raise PublicStateInvalid(f"public state {path.name} is not readable JSON: {exc}") from exc
+    return load_public_state_bytes(raw, label=path.name)
+
+
+def load_public_state_bytes(raw: bytes, *, label: str = "frozen public state bytes") -> ShopSnapshot:
+    """The same fail-closed parse over bytes, for a context's frozen public state."""
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise PublicStateInvalid(f"public state {label} is not readable JSON: {exc}") from exc
     try:
         snapshot = ShopSnapshot.model_validate(data)
     except ValidationError as exc:
         raise PublicStateInvalid(
-            f"public state {path.name} is not usable: {_validation_summary(exc)}"
+            f"public state {label} is not usable: {_validation_summary(exc)}"
         ) from exc
     if not snapshot.records:
-        raise PublicStateInvalid(f"public state {path.name} carries no records")
+        raise PublicStateInvalid(f"public state {label} carries no records")
     for record in snapshot.records:
         if record.entity_ref not in snapshot.entities:
             raise PublicStateInvalid(

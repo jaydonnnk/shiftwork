@@ -76,6 +76,11 @@ RULE_NEWEST_WITH_AGE = "freshness.use_newest_with_age"
 RULE_HARD_CHECK_HIGH_RISK = "stance.hard_check_high_risk"
 RULE_VERIFY_EXACT_NOW = "stance.verify_exact_now"
 
+# Names the task-aware rule set a RunAssessment was produced under, so a rule
+# change that alters an outcome invalidates comparability instead of silently
+# relabelling stored evidence (Gate 3 S3.4).
+RULE_VERSION = "task-contract.v1"
+
 # Fixed semantics of the committed options, mirrored from the bookshop catalog
 # v2 learner labels ("records older than one hour", "high-risk claims (price)").
 # tests/evaluator pins these constants against the v2 label text, so a label
