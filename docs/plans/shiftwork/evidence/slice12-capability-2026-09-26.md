@@ -392,14 +392,108 @@ exists and actively refuses new input from a later run, and it refuses with a 40
 conflict rather than a 404, so this is a rejection by the service and not merely a
 missing record. It does not show that image, credential or project grants are
 revoked between runs, and it says nothing about an operation that is still
-running. The trials, reset and readback phases stay unrun and each needs its own
-spend authorization; Slice 12 remains unchecked and Slice 13 onward stays blocked.
+running. The trials and reset phases stay unrun and each needs its own spend
+authorization; Slice 12 remains unchecked and Slice 13 onward stays blocked.
+
+Correction 2026-09-27: the paragraph above originally listed readback as unrun
+alongside trials and reset. That was wrong and contradicted this document's own
+"One-run small-file follow-up" section and its matrix row, which record the
+readback phase running on 2026-09-26 and returning `PASS_ONE_SMALL_FILE_ONLY`.
+`readback_probe` has not changed since `f5d37bc` and the archived expected and
+actual digests both equal `sha256(b"SLICE12_MARKER")` at 14 bytes, so a re-run
+would reproduce the same record and add a sixth non-deletable image. Readback is
+not a remaining gap; its scope limit stands as written there, namely PASS for one
+small file under the normal cap only.
 
 Supersession: the "terminated grant reuse" item in `Stopped or unmeasured` below is
 now measured by this run. The reset probe carries its own terminated-stdin check
-and stays unrun, as do the six live trial slots and the reset/branch readback that
-paragraph lists. That paragraph is otherwise left as written about the original
-stopped run.
+and stays unrun, as do the six live trial slots and reset's own branch readback
+(that paragraph's "reset/branch readback" item, which is the base-image-versus-
+checkpoint comparison inside `reset_probe`, not the standalone readback phase).
+That paragraph is otherwise left as written about the original stopped run.
+
+### Trials phase live run: 2026-09-27 (one authorized live step)
+
+The user authorized the trials phase only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase trials` and exited 0
+at `2026-09-26T17:45:21Z` UTC, which is 2026-09-27 local. Raw records:
+`evidence/slice12-trials-20260926T174521Z.jsonl`, 34 records stamped with source
+SHA-256
+`3b95ced65f764a017d526cf6f1e9845736cbec8af478a2f2362a14c6edcd1d11`, the same
+revision as the reuse run. No tracked evidence file was rewritten.
+
+- Verdict: `PASS_SIX_TRIALS_FEASIBLE`, planned 6, completed 6, `budget_ok` true.
+  Every trial recorded `complete: true` and `stock_decision: true`, so all six
+  disposable service runs ended with the service emitting `"tool": "stock_lookup"`
+  for the public request.
+- End-to-end latency per trial: 4,136 / 4,006 / 3,944 / 3,983 / 3,601 / 3,722 ms.
+  Sum 23,392 ms, mean 3,898.7 ms, min 3,601, max 4,136, spread 535 ms.
+- Inference HTTP latency alone: 1,932 / 1,618 / 1,977 / 2,110 / 1,727 / 1,824 ms,
+  mean 1,864.7 ms, so inference is about 48 percent of a trial and the remainder
+  is upload, spawn, event polling and capture.
+- Usage: `prompt_tokens` 45 on all six (sum 270); `completion_tokens`
+  127 / 103 / 126 / 143 / 103 / 104 (sum 706, mean 117.7). All six returned
+  `finish_reason: stop`, so none reached the 256-token ceiling.
+- Estimated inference cost at the displayed rates: 3.318e-05 / 2.742e-05 /
+  3.294e-05 / 3.702e-05 / 2.742e-05 / 2.766e-05 USD, sum **0.00018564**, which is
+  about 5.6 percent of the 0.00331776 worst-case reservation taken before the loop.
+- Sandbox `resources.cost` across the six operations sums to 0.00383704 at eight
+  decimal places. As in prior runs the API states no currency for that field, so
+  it is not counted as dollars.
+- Budget: `prior_inference_spend` over all `slice12-*.jsonl` is now
+  **0.00803670 USD** against the 3.00 USD cap, leaving 2.99196330 of headroom, and
+  another six trials would reserve 0.00331776 and still be allowed. This figure
+  remains a conservative bound rather than measured spend, because it sums
+  worst-case reservations alongside actual estimates and the escape run's second
+  call contributes only its reservation.
+- Residue: `service_request` spawns with `disposable=true`, so none of the six
+  operations left a checkpoint image and the non-deletable image total is
+  unchanged at five. `whoami` before the run reported `running_instances: 0` and
+  all six permissions true.
+- Leakage: the 34 records were re-scanned offline with the harness's own
+  `no_secret_leak` against the credential, the host-only canary and the working
+  directory, on both the parsed records and the raw file text, and the credential,
+  project id and canary were each confirmed absent from the raw text. The scanner
+  self-tests that every needle is detectable in serialized form, so the pass is
+  capable of failing.
+- Offline state after the run: full suite `414 passed, 1 skipped, 2 warnings`;
+  `tests/spike/mutation_proofs_spike.py` `assertion-level catches: 53/53` with
+  byte-identical restoration, exit 0. Neither changed from the pre-run baseline,
+  because this step added one evidence file and no source.
+
+**New defect this run exposed: the archived inference observation omits most of
+what the model produced.** Each trial's `completion_tokens` was 103 to 143 while
+the archived `content` was the six characters `\nSTOCK`. `infer()` records only
+`choices[0].message.content` and reads no other field the provider returns, so
+roughly 100 to 140 billed completion tokens per call are absent from the
+evidence. Whether they are `reasoning_content` or another field is **not
+established by this run**, since the field was never captured; establishing it
+would need another authorized call. This is the same class as the escape run's
+unarchived second observation but a different instance: that defect lost a whole
+record, this one keeps the record and drops part of its payload. It does not
+change the feasibility verdict, which rests on `finish_reason`, the service's
+`stock_lookup` output and the recorded usage, but the spike's raw inference
+observation is incomplete. See `MISTAKES.md`.
+
+What this run does and does not show: six trials of the public request are
+feasible inside the $3 cap and inside the 256-token ceiling, at a mean 3.9 s and a
+mean estimated $0.00003094 of inference each, and the model produced a usable
+in-service tool decision every time. It does not show workload coverage. All six
+trials used identical request text at `temperature=0`, so this measures
+repeatability, latency and cost for one request shape; the standing caveat that
+one task shape is not evidence the model works across the workload is unchanged in
+kind and only weakened from a single sample to six samples of the same one. It
+also does not re-test the escape run's two empty completions: those prompts were
+harder and exhausted the ceiling, and this run shows only that easier prompts do
+not.
+
+Supersession: the escape section's "the reuse and trials phases stay unrun" and
+its "the earlier recorded STOCK decision remains the only positive service answer"
+are both superseded here, which adds six more positive service answers. In
+`Stopped or unmeasured` below, the "six live trial slots" item is now measured,
+while the "four-request-per-trial estimate" remains a projection, because each
+trial made exactly one customer request rather than four. That paragraph is
+otherwise left as written about the original stopped run.
 
 ## Stopped or unmeasured
 

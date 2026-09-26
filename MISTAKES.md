@@ -822,3 +822,24 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   guard the one emit site with a source-level test plus a mutation that duplicates the
   emit at a call site. `test_inference_calls_are_archived_from_one_emit_site` now
   requires exactly one `nemotron_inference` emit and requires it inside `infer()`.
+
+## 2026-09-27 Slice 12 trials run archived the inference content but not the tokens that produced it
+
+- **What happened:** all six trials passed, but each reported 103 to 143
+  `completion_tokens` while the archived `content` was the six characters
+  `\nSTOCK`. `infer()` builds its observation from `choices[0].message.content`
+  plus `usage`, `finish_reason` and its own timing, and reads no other field the
+  provider returns, so roughly 100 to 140 billed completion tokens per call are
+  absent from the evidence and the run cannot say what they were. The same blind
+  spot is why the escape run's two empty completions at `finish_reason: length`
+  cannot be told apart from a purposeful refusal using archived data alone.
+- **Root cause:** the fix for the escape archiving defect moved the emit inside
+  `infer()` so that no caller could omit the record, but it archived a
+  hand-picked field list instead of the provider response. Its guard asserts the
+  emit count and its location, so proving that a record exists was mistaken for
+  proving that the observation is complete.
+- **Prevention rule:** when archiving an external observation, archive the whole
+  response payload minus an explicit redaction list, not an allow-list of fields
+  the author expected to matter. Every field counted in `usage` must be either
+  archived or explicitly recorded as deliberately dropped with a reason. A guard
+  on "the record was emitted" is not coverage of "the observation was captured".

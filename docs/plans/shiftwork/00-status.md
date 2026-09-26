@@ -1,5 +1,59 @@
 # Status: Shiftwork
 
+## Slice 12 trials phase live run: 2026-09-27
+
+The user authorized the trials phase only, after an offline matrix completeness
+check found that readback had already run and that trials and reset were the only
+two clauses still uncovered. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase trials` and exited 0 at
+`2026-09-26T17:45:21Z` UTC, which is 2026-09-27 local. Verdict
+`PASS_SIX_TRIALS_FEASIBLE`: planned 6, completed 6, `budget_ok` true, and every
+trial recorded `complete: true` with `stock_decision: true`, so all six disposable
+service runs ended with the service emitting `"tool": "stock_lookup"`.
+
+Measured: end-to-end latency 4,136 / 4,006 / 3,944 / 3,983 / 3,601 / 3,722 ms, mean
+3,898.7 ms, spread 535 ms, of which inference HTTP is mean 1,864.7 ms or about 48
+percent. `prompt_tokens` 45 on all six; `completion_tokens` 127 / 103 / 126 / 143 /
+103 / 104, mean 117.7, all with `finish_reason: stop`, so none reached the
+256-token ceiling. Estimated inference cost at the displayed rates sums to
+**0.00018564 USD**, about 5.6 percent of the 0.00331776 reservation taken before
+the loop. Sandbox `resources.cost` sums to 0.00383704, still with no currency
+stated by the API and so not counted as dollars. `prior_inference_spend` across all
+`slice12-*.jsonl` is now **0.00803670 USD** against the 3.00 USD cap, leaving
+2.99196330 of headroom; it remains a conservative bound, not measured spend.
+
+`service_request` spawns with `disposable=true`, so the six operations left no
+checkpoint image and the non-deletable image total is unchanged at five. Raw
+records: `evidence/slice12-trials-20260926T174521Z.jsonl`, 34 records stamped with
+source SHA-256
+`3b95ced65f764a017d526cf6f1e9845736cbec8af478a2f2362a14c6edcd1d11`; no tracked
+evidence file was rewritten. The records were re-scanned offline with the harness's
+own `no_secret_leak` against the credential, the host-only canary and the working
+directory, on both the parsed records and the raw text, and the credential, project
+id and canary were each confirmed absent from the raw text. The full suite is
+unchanged at `414 passed, 1 skipped, 2 warnings` and the spike mutation table at
+`assertion-level catches: 53/53` with byte-identical restoration, since this step
+added one evidence file and no source.
+
+**New defect:** each trial reported 103 to 143 `completion_tokens` while the
+archived `content` was the six characters `\nSTOCK`. `infer()` records only
+`choices[0].message.content` and reads no other returned field, so roughly 100 to
+140 billed completion tokens per call are absent from the evidence. Whether they
+are `reasoning_content` or another field is not established, because the field was
+never captured and establishing it would need another authorized call. This does
+not change the feasibility verdict, which rests on `finish_reason`, the service's
+`stock_lookup` output and the recorded usage, but the spike's raw inference
+observation is incomplete. Logged in `MISTAKES.md`.
+
+Limits: all six trials used identical request text at `temperature=0`, so this
+measures repeatability, latency and cost for one request shape and is not workload
+coverage; the caveat that one task shape does not prove the model works across the
+workload is only weakened from one sample to six of the same one. The run also does
+not re-test the escape phase's two empty completions, which exhausted the ceiling
+on harder prompts. The reset phase stays unrun and needs its own spend
+authorization; readback is not a remaining gap. Slice 12 stays unchecked and Slice
+13 onward stays blocked.
+
 ## Slice 12 reuse phase live run: 2026-09-26
 
 The user authorized the reuse phase only. It ran once as
@@ -29,9 +83,19 @@ restoration, since this step added one evidence file and no source.
 
 The probe shows only that a terminal operation refuses new stdin. It does not show
 that image, credential or project grants are revoked between runs, and it says
-nothing about an operation that is still running. The trials, reset and readback
-phases stay unrun and each needs its own spend authorization; Slice 12 stays
-unchecked and Slice 13 onward stays blocked.
+nothing about an operation that is still running. The trials and reset phases stay
+unrun and each needs its own spend authorization; Slice 12 stays unchecked and
+Slice 13 onward stays blocked.
+
+Correction 2026-09-27: the paragraph above originally listed readback as unrun
+alongside trials and reset. That was wrong. The readback phase ran on 2026-09-26 as
+the separately authorized no-inference small-file diagnostic and returned
+`PASS_ONE_SMALL_FILE_ONLY`; it is recorded in `evidence/slice12-capability-2026-09-26.md`
+under "One-run small-file follow-up" and in the `marker_readback_verdict` and
+`marker_readback_cleanup` records of `evidence/slice12-live-2026-09-26.jsonl`.
+`readback_probe` has not changed since `f5d37bc` and the archived digests equal
+`sha256(b"SLICE12_MARKER")` at 14 bytes, so a re-run would reproduce that record
+and add a sixth non-deletable image without adding capability evidence.
 
 ## Slice 12 escape phase live run: 2026-09-26
 
