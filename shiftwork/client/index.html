@@ -42,6 +42,7 @@
           <button class="station station-evaluator" data-station="evaluator"><span class="station-marker lock-mark" aria-hidden="true">▣</span><span>Independent evaluator<small>Locked · not editable</small></span></button>
           <button class="station station-ledger" data-station="ledger"><span class="station-marker">≡</span><span>Incident &amp; ledger wall<small id="incident-tag">Not loaded · Synthetic scenario</small></span></button>
           <button class="station station-repair" data-station="repair"><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small></span></button>
+          <button class="station station-investigate" data-station="investigate"><span class="station-marker" aria-hidden="true">◎</span><span>Investigate<small id="investigation-tag">Not loaded</small></span></button>
         </div>
         <div class="room-caption"><span class="tiny-square"></span>A real output. An independent check. A recorded consequence.</div>
       </div>
@@ -75,6 +76,36 @@
         <p id="evidence-attempts" class="help-text">Attempts not loaded.</p>
         <div id="customer-list" class="customer-list" role="group" aria-label="Executed customer requests"></div>
         <div id="selected-evidence" class="selected-evidence"><p class="empty">No executed customer request selected.</p></div>
+      </section>
+      <section id="investigate-view" hidden>
+        <p id="investigate-state" class="mono evidence-meta">No shift loaded</p>
+        <section class="panel-section"><h3>Before you write</h3><ol id="orientation-list" class="orientation-list"></ol></section>
+        <section class="panel-section"><h3>Your investigation entries</h3><div id="investigation-list"></div></section>
+        <section class="panel-section">
+          <h3>Append your entry</h3>
+          <div class="field"><label for="cause-input">Cause you believe explains the gap</label><textarea id="cause-input" rows="2"></textarea></div>
+          <div class="field"><label for="falsifier-input">Falsifier: an observation that would prove your cause wrong</label><textarea id="falsifier-input" rows="2"></textarea></div>
+          <div class="field"><label for="public-test-input">Public test that distinguishes your cause</label><textarea id="public-test-input" rows="2"></textarea></div>
+          <div class="field" data-synthetic-region="source">
+            <div class="section-heading"><label for="source-ordinal">Source request</label><span class="synthetic">Synthetic scenario</span></div>
+            <select id="source-ordinal"></select>
+            <p id="source-note" class="help-text"></p>
+          </div>
+          <div class="panel-actions"><button id="append-investigation" class="button secondary">Record entry</button></div>
+        </section>
+        <section class="panel-section">
+          <h3>Diagnostic help</h3>
+          <p id="assist-standing" class="help-text"></p>
+          <p id="assist-denial" class="denial" role="status"></p>
+          <div class="panel-actions"><button id="request-assist" class="button secondary">Request diagnostic help</button></div>
+        </section>
+        <section class="panel-section" data-synthetic-region="diagnostic">
+          <div class="section-heading"><h3>Public diagnostic</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p id="diagnostic-note" class="help-text"></p>
+          <div class="panel-actions"><button id="run-diagnostic" class="button secondary">Run public diagnostic</button></div>
+          <div id="diagnostic-result"></div>
+        </section>
+        <p id="investigate-error" class="denial" role="status"></p>
       </section>
       <section id="deferred-view" hidden><div class="deferred-symbol" aria-hidden="true">◇</div><h3 id="deferred-title"></h3><p id="deferred-copy"></p><button id="back-board" class="button secondary">Back to your service</button></section>
       <footer class="panel-footer"><span class="tiny-square"></span>Evidence, not a narrated outcome.</footer>

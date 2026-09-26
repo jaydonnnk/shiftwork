@@ -86,6 +86,7 @@ body[data-evidence="finalized"] .station-service { border-color: var(--amber); b
 .station-evaluator { left: 52%; top: 21%; }
 .station-ledger { right: 0; top: 35%; }
 .station-repair { left: 72%; top: 62%; }
+.station-investigate { left: 5%; top: 43%; }
 .room-caption { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 10px; color: #b2bcc7; }
 .tiny-square { display: inline-block; width: 5px; height: 5px; background: var(--amber); }
 .station-context { margin: 12px 0 14px; padding: 10px 13px; border-left: 2px solid var(--amber); background: #ffffff04; color: #bac7cd; font-size: 11px; min-height: 38px; }
@@ -179,6 +180,16 @@ summary { cursor: pointer; color: var(--green); padding: 5px 0; }
 .event-row small { display: block; font-size: 10px; color: var(--muted); }
 .deferred-symbol { margin: 25px 0 15px; color: var(--green); font-size: 40px; }
 #deferred-copy { margin: 13px 0 22px; color: var(--muted); font-size: 12px; }
+.orientation-list { margin: 0; padding-left: 17px; color: var(--muted); font-size: 11px; }
+.orientation-list li + li { margin-top: 4px; }
+.investigation-entry { padding: 9px 10px; margin-top: 6px; background: #486c5b0a; border-left: 2px solid var(--green); overflow-wrap: anywhere; }
+.investigation-entry strong { display: block; font-size: 10px; font-weight: 600; }
+.investigation-entry .evidence-meta { margin-top: 3px; }
+.field { margin-top: 10px; }
+.field label { display: block; color: var(--muted); font-size: 10px; margin-bottom: 4px; }
+.field textarea, .field select { display: block; width: 100%; border: 1px solid var(--line); background: var(--white); color: var(--ink); padding: 7px 8px; font-size: 11px; border-radius: 3px; resize: vertical; }
+.denial { color: #853e38; font-size: 11px; overflow-wrap: anywhere; margin-top: 8px; }
+.denial:empty { display: none; }
 .noscript { padding: 20px; background: var(--paper); }
 @media (min-width: 1550px) { main { grid-template-columns: minmax(0, 1fr) 410px; } .detail-panel { padding-inline: 30px; } .station { font-size: 12px; } .station small { font-size: 10px; } }
 @media (max-width: 1100px) and (min-width: 761px) { main { grid-template-columns: minmax(0, 1fr) 325px; } .workplace { padding: 16px; } .shift-stamp { display: none; } .station { font-size: 10px; padding: 5px; } .station small { font-size: 9px; } .station-marker { display: none; } .room-bookplate { font-size: 16px; } .room-bookplate em { font-size: 20px; } .station-ledger { right: -2%; } .board-metrics > div { padding: 0 7px; } .journey a { padding: 0 8px; } .journey small { display: none; } }

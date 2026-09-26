@@ -1,11 +1,12 @@
 import { bodyBytes, selectEvidence } from './evidence.js';
 
 const $ = id => document.getElementById(id);
-const state = { board: null, draft: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false };
+const state = { board: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null };
 let downloadUrl = null;
 let pollTimer = null;
 const terminal = run => !run || ['FINALIZED', 'FAILED'].includes(run.state);
 const humanize = value => value.toLowerCase().replaceAll('_', ' ');
+const requestId = prefix => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -17,7 +18,10 @@ function empty(target, text) { target.replaceChildren(element('p', text, 'empty'
 function text(id, value) { $(id).textContent = value; }
 async function api(path, options = {}) {
   const response = await fetch('/api' + path, { ...options, headers: { 'Content-Type': 'application/json' } });
-  if (!response.ok) throw new Error(`Request failed (${response.status}). Refresh to load verified state.`);
+  if (!response.ok) {
+    const payload = await response.json().catch(() => null);
+    throw new Error(payload?.detail ?? `Request failed (${response.status}). Refresh to load verified state.`);
+  }
   return response.json();
 }
 function clearEvidence() {
@@ -29,8 +33,8 @@ function clearEvidence() {
   empty($('selected-evidence'), 'No executed customer request selected.');
 }
 function clearData(message) {
-  state.board = null; state.draft = null; state.run = null;
-  state.outputs = []; state.checks = []; state.events = []; state.selected = null;
+  state.board = null; state.draft = null; state.stationView = null; state.run = null;
+  state.outputs = []; state.checks = []; state.events = []; state.selected = null; state.diagnostic = null;
   clearEvidence();
   text('load-message', message);
   text('session-state', 'Not connected');
@@ -41,9 +45,21 @@ function clearData(message) {
   text('evidence-attempts', 'Attempts not loaded.');
   document.querySelector('[data-station="repair"]').setAttribute('aria-disabled', 'true');
   for (const id of ['metric-requests', 'metric-incidents', 'metric-attempts']) text(id, '…');
-  for (const id of ['metric-chain', 'service-tag', 'queue-tag', 'repair-tag', 'attempt-detail', 'event-detail']) text(id, 'Not loaded');
+  for (const id of ['metric-chain', 'service-tag', 'queue-tag', 'repair-tag', 'attempt-detail', 'event-detail', 'investigation-tag']) text(id, 'Not loaded');
   text('incident-tag', 'Not loaded · Synthetic scenario');
   for (const id of ['artifact-detail', 'incident-list', 'limit-list', 'ledger-totals', 'customer-list']) empty($(id), 'No verified data loaded.');
+  empty($('orientation-list'), 'Orientation loads with your shift.');
+  empty($('investigation-list'), 'No verified entries loaded.');
+  empty($('diagnostic-result'), 'No verified diagnostic loaded.');
+  text('investigate-state', 'No shift loaded');
+  text('source-note', '');
+  text('diagnostic-note', '');
+  text('assist-standing', '');
+  text('assist-denial', '');
+  text('investigate-error', '');
+  $('source-ordinal').replaceChildren();
+  $('source-ordinal').disabled = true;
+  for (const id of ['append-investigation', 'request-assist', 'run-diagnostic']) $(id).disabled = true;
   $('open-shift').disabled = true; $('run-shift').disabled = true;
   text('run-help', 'Refresh to load available actions.');
 }
@@ -57,14 +73,15 @@ async function refresh(runId = null) {
   try {
     const board = await api('/engagements/bookshop/board');
     const run = runId ? await api(`/runs/${encodeURIComponent(runId)}`) : board.latest_run;
-    const [draft, ledger, outputs, checks] = await Promise.all([
+    const [draft, stationView, ledger, outputs, checks] = await Promise.all([
       board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/artifact`) : null,
+      board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/investigations`) : null,
       api('/engagements/bookshop/ledger'),
       run ? api(`/runs/${encodeURIComponent(run.id)}/outputs`) : [],
       run ? api(`/runs/${encodeURIComponent(run.id)}/checks`) : [],
     ]);
     if (generation !== state.generation) return;
-    Object.assign(state, { board, draft, run, outputs, checks, events: ledger.events });
+    Object.assign(state, { board, draft, stationView, run, outputs, checks, events: ledger.events });
     state.selected = outputs.some(output => output.id === selected) ? selected : outputs[0]?.id ?? null;
     document.body.dataset.loadState = board.latest_shift ? 'ready' : 'empty';
     text('load-message', board.latest_shift ? '' : 'No shift yet. Open one to begin your service history.');
@@ -99,6 +116,8 @@ function renderBoard() {
   text('queue-tag', `${state.outputs.length} executed requests`);
   text('incident-tag', `${board.incidents.length} unresolved · Synthetic scenario`);
   text('repair-tag', board.incidents.length ? 'Incident available · read only' : 'No unresolved incident');
+  const entries = state.stationView?.investigations ?? [];
+  text('investigation-tag', !state.stationView ? 'Not loaded' : entries.length ? `${entries.length} recorded` : 'Orientation only');
   text('version-state', version ? `${version.id} · ${needsChoice ? 'saved, not selected' : 'frozen'}` : 'Draft · no frozen version');
   text('version-hash', version ? `Content hash ${version.content_hash}` : '');
   const adapter = state.run?.adapter;
@@ -260,6 +279,208 @@ function renderCustomers() {
   if (['customers', 'pipeline'].includes(state.station)) text('service-tag', `Output from ${run.artifact_version_id}`);
 }
 
+function renderInvestigations(station) {
+  const list = $('investigation-list');
+  if (!station.investigations.length) return empty(list, 'No entry yet. Orientation stays available before your first entry.');
+  list.replaceChildren(...station.investigations.map(entry => {
+    const row = element('div', null, 'investigation-entry');
+    row.dataset.investigationId = entry.id;
+    row.dataset.authoredBy = entry.authored_by;
+    if (entry.revision_of_id) row.dataset.revisionOf = entry.revision_of_id;
+    row.append(element('strong', `${entry.id} · ${entry.authored_by === 'learner' ? 'your entry' : entry.authored_by}${entry.revision_of_id ? ` · revises ${entry.revision_of_id}` : ''}`));
+    row.append(element('p', `Source ${entry.source_run_id} · request ${entry.source_request_ordinal}`, 'evidence-meta'));
+    for (const [label, value] of [['Cause', entry.cause], ['Falsifier', entry.falsifier], ['Public test', entry.public_test]]) {
+      const line = element('div', null, 'contract-line');
+      line.append(element('span', label), element('strong', value));
+      row.append(line);
+    }
+    if (entry.revision_of_id) row.append(element('p', `The earlier entry ${entry.revision_of_id} stays in this list unchanged.`, 'evidence-meta'));
+    return row;
+  }));
+}
+function renderSource(station) {
+  const select = $('source-ordinal');
+  const run = state.run;
+  const previous = select.value;
+  select.replaceChildren(...state.outputs.map(output => {
+    const option = element('option', `Request ${output.request_ordinal}`);
+    option.value = String(output.request_ordinal);
+    return option;
+  }));
+  if (previous && [...select.options].some(option => option.value === previous)) select.value = previous;
+  const ready = Boolean(station && run && state.outputs.length);
+  select.disabled = !ready;
+  text('append-investigation', station?.latest_investigation_id ? 'Record revision of latest entry' : 'Record entry');
+  $('append-investigation').disabled = state.pending || !ready;
+  text('source-note', ready
+    ? `Source ${run.id} · ${run.state}${run.evidence_mode ? ` · ${run.evidence_mode}` : ''}. Your entry cites this executed request. A revision keeps every earlier entry.`
+    : run ? 'This run captured no request ordinal, so no entry can cite it.' : `No executed run is loaded, so no entry can cite a source request yet. ${station?.bootstrap_available ? '' : station?.bootstrap_reason ?? ''}`.trim());
+}
+function renderAssist(station) {
+  text('assist-standing', station ? (station.assist_available ? 'Diagnostic help is available.' : station.assist_reason) : '');
+  $('request-assist').disabled = state.pending || !station;
+}
+function renderDiagnostic(station) {
+  const experiment = state.diagnostic ?? station?.latest_experiment ?? null;
+  const trial = experiment?.trials?.[0] ?? null;
+  const output = trial?.outputs?.[0] ?? null;
+  const result = $('diagnostic-result');
+  $('run-diagnostic').disabled = state.pending || !station?.latest_investigation_id || !state.board?.latest_version;
+  if (!station) { text('diagnostic-note', ''); return empty(result, 'No shift loaded.'); }
+  if (!experiment) {
+    text('diagnostic-note', station.latest_investigation_id
+      ? 'Ready. The diagnostic runs the pinned reviewed starter once against its frozen incident request and public state, then assesses the required tasks.'
+      : 'Record your cause, falsifier and public test first. The diagnostic cites your entry and cannot run before it exists.');
+    return empty(result, 'No public diagnostic has run in this shift, and none can qualify a version.');
+  }
+  text('diagnostic-note', experiment.declared_treatment);
+  result.dataset.experimentId = experiment.id;
+  result.replaceChildren();
+  for (const [label, value] of [
+    ['Evidence class', `${experiment.context_evidence_class} · ${humanize(experiment.kind)}`],
+    ['Trial state', trial ? `${trial.state} · candidate ${trial.candidate_label}` : 'No trial reserved'],
+    ['Frozen context', `${experiment.context_hash} · workload ${trial?.workload_id ?? 'not reserved'}`],
+  ]) {
+    const line = element('div', null, 'contract-line');
+    line.append(element('span', label), element('strong', value));
+    result.append(line);
+  }
+  if (!trial || !['COMPLETE', 'FAILED'].includes(trial.state)) return;
+  let step = 0;
+  if (output) {
+    step += 1;
+    const request = evidenceStep(step, 'Frozen incident request');
+    request.append(element('p', output.request_text, 'evidence-text request-quote'));
+    result.append(request);
+    step += 1;
+    const answer = evidenceStep(step, 'Exact output the starter produced');
+    let decoded = null;
+    try { decoded = new TextDecoder('utf-8', { fatal: true }).decode(bodyBytes(output.body_base64)); } catch { decoded = null; }
+    answer.append(element('p', decoded ?? 'The captured body is not valid UTF-8. The base64 below preserves every byte.', 'evidence-text'));
+    answer.append(element('p', `HTTP ${output.http_status ?? 'not received'} · ${output.elapsed_ms ?? 'unknown'} ms${output.transport_error ? ` · ${output.transport_error}` : ''}`, 'evidence-meta'));
+    const raw = element('details');
+    raw.append(element('summary', `Captured body · ${bodyBytes(output.body_base64).length} bytes`));
+    const base64 = element('pre', output.body_base64);
+    base64.dataset.bodyBase64 = output.body_base64;
+    raw.append(element('p', 'Original bytes encoded as base64', 'evidence-meta'), base64);
+    answer.append(raw);
+    result.append(answer);
+  }
+  step += 1;
+  const customer = evidenceStep(step, 'Rendered customer answer');
+  customer.append(element('p', trial.customer_text ?? 'No customer answer was rendered for this trial.', 'evidence-text'));
+  result.append(customer);
+  step += 1;
+  const assessment = evidenceStep(step, 'Independently assessed required tasks');
+  if (!trial.task_assessments.length) assessment.append(element('p', 'No task assessment was recorded for this trial.', 'empty'));
+  for (const row of trial.task_assessments) {
+    const item = element('div', null, 'result-row');
+    item.dataset.taskId = row.task_id;
+    item.dataset.outcome = row.outcome;
+    item.dataset.verdict = row.mandatory_pass ? 'pass' : 'fail';
+    item.append(element('strong', `${row.task_id} · ${humanize(row.outcome)}${row.reason_codes.length ? ` · ${row.reason_codes.join(', ')}` : ''}`));
+    item.append(element('small', `${row.mandatory_pass ? 'Mandatory task passes' : 'Mandatory task fails'} · request ${row.request_ordinal}`));
+    assessment.append(item);
+  }
+  result.append(assessment);
+  step += 1;
+  const observations = evidenceStep(step, 'Observed interpretation and tool use');
+  if (!trial.observations.length) observations.append(element('p', 'The service reported no interpretation or tool events for this run. Nothing is inferred from their absence.', 'empty'));
+  for (const observation of trial.observations) {
+    const row = element('div', null, 'event-row');
+    row.append(element('strong', humanize(observation.kind)), element('pre', JSON.stringify(observation.public_payload_json, null, 2)));
+    observations.append(row);
+  }
+  result.append(observations);
+  step += 1;
+  const eligibility = evidenceStep(step, 'Eligibility');
+  const line = element('div', null, 'result-row');
+  line.dataset.verdict = experiment.eligible ? 'pass' : 'fail';
+  line.dataset.eligible = String(experiment.eligible);
+  line.append(element('strong', experiment.eligible ? 'Eligible' : 'Not eligible · this diagnostic cannot qualify a version'), element('small', experiment.eligibility_reason));
+  eligibility.append(line);
+  if (trial.missing_evidence.length) eligibility.append(element('p', `Missing evidence: ${trial.missing_evidence.join('; ')}`, 'denial'));
+  result.append(eligibility);
+}
+function renderInvestigate() {
+  const station = state.stationView;
+  text('investigate-state', station ? `${station.shift_id} · ${station.opening_mode ? humanize(station.opening_mode) : 'opening mode unknown'} · ${station.latest_investigation_id ?? 'no entry yet'}` : 'No shift loaded');
+  const orientation = $('orientation-list');
+  orientation.replaceChildren(...(station?.orientation?.steps ?? ['Orientation loads with your shift.']).map(step => element('li', step)));
+  if (station) renderInvestigations(station); else empty($('investigation-list'), 'No verified entries loaded.');
+  renderAssist(station);
+  renderSource(station);
+  renderDiagnostic(station);
+}
+async function appendInvestigation() {
+  const shiftId = state.board?.latest_shift?.id;
+  const ordinal = Number($('source-ordinal').value);
+  if (!shiftId || !state.run || !ordinal || state.pending) return;
+  state.pending = true; renderBoard(); renderInvestigate();
+  try {
+    await api(`/shifts/${encodeURIComponent(shiftId)}/investigations`, { method: 'POST', body: JSON.stringify({
+      source_run_id: state.run.id,
+      source_request_ordinal: ordinal,
+      cause: $('cause-input').value,
+      falsifier: $('falsifier-input').value,
+      public_test: $('public-test-input').value,
+      revision_of_id: state.stationView?.latest_investigation_id ?? null,
+      client_request_id: requestId('investigation'),
+    }) });
+    for (const id of ['cause-input', 'falsifier-input', 'public-test-input']) $(id).value = '';
+    await refresh();
+  } catch (error) {
+    await refresh();
+    text('investigate-error', error.message);
+  } finally {
+    state.pending = false;
+    if (state.board) { renderBoard(); renderInvestigate(); }
+  }
+}
+async function requestAssist() {
+  const shiftId = state.board?.latest_shift?.id;
+  if (!shiftId || state.pending) return;
+  state.pending = true; renderBoard(); renderInvestigate();
+  try {
+    await api(`/shifts/${encodeURIComponent(shiftId)}/assist`, { method: 'POST', body: JSON.stringify({ investigation_id: state.stationView?.latest_investigation_id ?? null, role: 'HINT', client_request_id: requestId('assist') }) });
+  } catch (error) {
+    text('assist-denial', error.message);
+  } finally {
+    state.pending = false;
+    if (state.board) { renderBoard(); renderInvestigate(); }
+  }
+}
+async function runDiagnostic() {
+  const shiftId = state.board?.latest_shift?.id;
+  const versionId = state.board?.latest_version?.id;
+  if (!shiftId || !versionId || state.pending) return;
+  state.pending = true; renderBoard(); renderInvestigate();
+  try {
+    let experiment = await api(`/shifts/${encodeURIComponent(shiftId)}/experiments`, { method: 'POST', body: JSON.stringify({
+      kind: 'DIAGNOSTIC',
+      investigation_id: state.stationView?.latest_investigation_id ?? null,
+      candidate_a_version_id: versionId,
+      client_request_id: requestId('diagnostic'),
+    }) });
+    state.diagnostic = experiment;
+    renderInvestigate();
+    const deadline = Date.now() + 30000;
+    while (!['COMPLETE', 'FAILED'].includes(experiment.trials[0]?.state) && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 400));
+      experiment = await api(`/experiments/${encodeURIComponent(experiment.id)}`);
+      state.diagnostic = experiment;
+      renderInvestigate();
+    }
+    await refresh();
+  } catch (error) {
+    await refresh();
+    text('investigate-error', error.message);
+  } finally {
+    state.pending = false;
+    if (state.board) { renderBoard(); renderInvestigate(); }
+  }
+}
+
 const stations = {
   service: ['Service workbench', 'YOUR WORKING ARTIFACT', 'Your version, contract and files belong to you. Independent scoring stays separate.'],
   owner: ['Committed contract', 'OWNER DESK', 'Inspect your committed contract. Contract editing and visible-check authoring are not available in this build.'],
@@ -268,6 +489,7 @@ const stations = {
   ledger: ['Incident & ledger wall', 'RECORDED CONSEQUENCES', 'Synthetic scenario. Select an incident to inspect the output and result that opened it.'],
   repair: ['Repair review', 'REPAIR BENCH · READ ONLY', 'Inspect an actual incident below. Repair authoring and rerunning a new version are not available in this build.'],
   evaluator: ['Independent evaluator', 'LOCKED · NOT EDITABLE', 'Neither the learner nor an assistant can edit the scoring rules or see sealed expected values.'],
+  investigate: ['Investigate a failure', 'REVIEW THE RECORDED RUN', 'Read the exact request and output, then write your cause, falsifier and public test. The public diagnostic runs the pinned reviewed starter and can never qualify a version.'],
 };
 function bringStationPanelIntoReach() {
   // Narrow layouts stack the panel below the room, so a station selection can
@@ -292,6 +514,7 @@ function activateStation(name, userIntent = true) {
   text('panel-title', title); text('panel-kicker', kicker); text('station-context', context);
   $('deferred-view').hidden = name !== 'evaluator';
   $('customer-view').hidden = !['customers', 'pipeline'].includes(name);
+  $('investigate-view').hidden = name !== 'investigate';
   $('board-view').hidden = !['service', 'owner', 'ledger', 'repair'].includes(name);
   if (name === 'evaluator') {
     text('deferred-title', 'Separate by design.');
@@ -300,6 +523,7 @@ function activateStation(name, userIntent = true) {
   if (name === 'owner') { state.file = 'contract'; selectFile('contract'); }
   if (state.board) text('service-tag', state.board.latest_version ? `${state.board.latest_version.id} · ${state.board.operating_status === 'NEEDS_FIRST_CHOICE' ? 'candidate only' : 'selected baseline'}` : 'Draft · not frozen');
   renderCustomers();
+  renderInvestigate();
   const view = name === 'owner' ? 'contract' : name === 'repair' ? 'repair' : ['customers', 'pipeline', 'evaluator'].includes(name) ? 'customers' : 'board';
   state.view = view;
   if (userIntent) history.replaceState(null, '', `#${view}`);
@@ -346,6 +570,9 @@ $('run-shift').addEventListener('click', () => {
   act(() => api(`/shifts/${encodeURIComponent(shiftId)}/runs`, { method: 'POST' }));
 });
 $('refresh').addEventListener('click', () => refresh());
+$('append-investigation').addEventListener('click', appendInvestigation);
+$('request-assist').addEventListener('click', requestAssist);
+$('run-diagnostic').addEventListener('click', runDiagnostic);
 $('back-board').addEventListener('click', () => { location.hash = 'board'; navigate('board'); });
 document.querySelectorAll('[data-station]').forEach(button => button.addEventListener('click', () => activateStation(button.dataset.station)));
 document.querySelectorAll('[data-file]').forEach(button => button.addEventListener('click', () => selectFile(button.dataset.file)));
