@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from shiftwork import orchestrator
 from shiftwork.api import schemas
 from shiftwork.domain.errors import ShiftworkDomainError
-from shiftwork.domain.models import ContractParams
+from shiftwork.domain.models import AssistRole, ContractParams, InvestigationRequest
 from shiftwork.orchestrator import LifecycleError
 from shiftwork.store import db
 
@@ -142,3 +142,96 @@ def get_incident(
 @router.post("/shifts/{shift_id}/close", response_model=schemas.ShiftView)
 def close_shift(shift_id: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.ShiftView:
     return schemas.ShiftView.of(orchestrator.close_shift(conn, shift_id))
+
+
+@router.get("/shifts/{shift_id}/investigations", response_model=schemas.InvestigateStationView)
+def get_investigate_station(
+    shift_id: str, conn: sqlite3.Connection = Depends(get_conn)
+) -> schemas.InvestigateStationView:
+    return schemas.InvestigateStationView.of(orchestrator.investigate_station(conn, shift_id))
+
+
+@router.post(
+    "/shifts/{shift_id}/investigations",
+    response_model=schemas.InvestigationView,
+    status_code=201,
+)
+def create_investigation(
+    shift_id: str,
+    body: schemas.InvestigationAppendRequest,
+    conn: sqlite3.Connection = Depends(get_conn),
+) -> schemas.InvestigationView:
+    return schemas.InvestigationView.model_validate(
+        orchestrator.append_investigation(
+            conn,
+            shift_id,
+            InvestigationRequest(
+                source_run_id=body.source_run_id,
+                source_request_ordinal=body.source_request_ordinal,
+                cause=body.cause,
+                falsifier=body.falsifier,
+                public_test=body.public_test,
+                revision_of_id=body.revision_of_id,
+                client_request_id=body.client_request_id,
+            ),
+        )
+    )
+
+
+@router.get("/investigations/{investigation_id}", response_model=schemas.InvestigationView)
+def get_investigation(
+    investigation_id: str, conn: sqlite3.Connection = Depends(get_conn)
+) -> schemas.InvestigationView:
+    return schemas.InvestigationView.model_validate(
+        orchestrator.investigation_entry(conn, investigation_id)
+    )
+
+
+@router.post(
+    "/shifts/{shift_id}/experiments",
+    response_model=schemas.ExperimentView,
+    status_code=202,
+)
+def create_experiment(
+    shift_id: str,
+    background: BackgroundTasks,
+    request: Request,
+    body: schemas.ExperimentRequest,
+    conn: sqlite3.Connection = Depends(get_conn),
+) -> schemas.ExperimentView:
+    # The controller chooses the workload, the adapter and the treatment; the body
+    # names only the candidate and the investigation it belongs to.
+    experiment = orchestrator.create_diagnostic_experiment(
+        conn,
+        shift_id,
+        candidate_version_id=body.candidate_a_version_id,
+        investigation_id=body.investigation_id,
+        client_request_id=body.client_request_id,
+    )
+    run = orchestrator.experiment_run(conn, experiment.id)
+    if run is not None:
+        background.add_task(
+            orchestrator.execute_experiment_task, request.app.state.db_path, run.id
+        )
+    return schemas.ExperimentView.of(orchestrator.experiment_view(conn, experiment.id))
+
+
+@router.get("/experiments/{experiment_id}", response_model=schemas.ExperimentView)
+def get_experiment(
+    experiment_id: str, conn: sqlite3.Connection = Depends(get_conn)
+) -> schemas.ExperimentView:
+    return schemas.ExperimentView.of(orchestrator.experiment_view(conn, experiment_id))
+
+
+@router.post("/shifts/{shift_id}/assist", response_model=None)
+def request_assist(
+    shift_id: str,
+    body: schemas.AssistRequest,
+    conn: sqlite3.Connection = Depends(get_conn),
+) -> None:
+    """Diagnostic help. S11 always denies it: the prediction gate first, then the
+    absent gateway. The typed denial carries which of the two applied; Slice 14
+    replaces the raise with the attributable gateway and this route's response."""
+    orchestrator.request_assist(
+        conn, shift_id, body.investigation_id, AssistRole(body.role)
+    )

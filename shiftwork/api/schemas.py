@@ -312,3 +312,164 @@ class BoardView(BaseModel):
     @classmethod
     def of(cls, snapshot: dict[str, Any]) -> "BoardView":
         return cls.model_validate(snapshot)
+
+
+class InvestigationAppendRequest(BaseModel):
+    """The learner's diagnosis. Identity is never caller-supplied."""
+
+    model_config = _FROZEN
+
+    source_run_id: str
+    source_request_ordinal: int
+    cause: str
+    falsifier: str
+    public_test: str
+    revision_of_id: str | None = None
+    client_request_id: str
+
+
+class InvestigationView(BaseModel):
+    model_config = _FROZEN
+
+    id: str
+    source_run_id: str
+    source_request_ordinal: int
+    cause: str
+    falsifier: str
+    public_test: str
+    revision_of_id: str | None
+    authored_by: Literal["learner"]
+    created_at: datetime
+
+
+class AssistRequest(BaseModel):
+    model_config = _FROZEN
+
+    investigation_id: str | None = None
+    role: Literal["HINT", "DIAGNOSIS", "PATCH_PROPOSAL"]
+    client_request_id: str
+
+
+class ExperimentRequest(BaseModel):
+    """S11 accepts diagnostics only; comparisons arrive with their own slice.
+
+    The controller chooses the workload, the adapter and the treatment, so this
+    body carries no candidate list, no context and no declared treatment.
+    """
+
+    model_config = _FROZEN
+
+    kind: Literal["DIAGNOSTIC"]
+    investigation_id: str | None = None
+    candidate_a_version_id: str
+    client_request_id: str
+
+
+class FrozenWorkloadView(BaseModel):
+    model_config = _FROZEN
+
+    id: str
+    ordinal: int
+    request_batch_hash: str
+    request_count: int
+
+
+class TrialAssessmentView(BaseModel):
+    model_config = _FROZEN
+
+    request_id: str
+    request_ordinal: int
+    task_id: str
+    outcome: str
+    mandatory_pass: bool
+    reason_codes: tuple[str, ...]
+
+
+class TrialOutputView(BaseModel):
+    """The exact capture the learner's own service produced, plus its request text."""
+
+    model_config = _FROZEN
+
+    request_ordinal: int
+    request_text: str
+    http_status: int | None
+    body_base64: str
+    elapsed_ms: int | None
+    transport_error: str | None
+
+
+class ObservationView(BaseModel):
+    """A sanitized observation. The raw payload ref stays internal."""
+
+    model_config = _FROZEN
+
+    kind: str
+    public_payload_json: dict[str, Any]
+
+
+class ExperimentTrialView(BaseModel):
+    model_config = _FROZEN
+
+    pair_ordinal: int
+    candidate_label: Literal["A", "B"]
+    workload_id: str
+    request_batch_hash: str
+    request_count: int
+    run_id: str | None
+    state: Literal["RESERVED", "RUNNING", "COMPLETE", "FAILED"]
+    evidence_mode: str | None
+    task_assessments: tuple[TrialAssessmentView, ...]
+    observations: tuple[ObservationView, ...]
+    outputs: tuple[TrialOutputView, ...]
+    customer_text: str | None
+    missing_evidence: tuple[str, ...]
+    metrics: dict[str, Any] | None
+
+
+class CandidateView(BaseModel):
+    model_config = _FROZEN
+
+    label: Literal["A", "B"]
+    artifact_version_id: str
+    artifact_content_hash: str
+
+
+class ExperimentView(BaseModel):
+    model_config = _FROZEN
+
+    id: str
+    shift_id: str
+    kind: str
+    investigation_id: str | None
+    declared_treatment: str
+    context_hash: str
+    context_evidence_class: str
+    workloads: tuple[FrozenWorkloadView, ...]
+    candidates: tuple[CandidateView, ...]
+    trials: tuple[ExperimentTrialView, ...]
+    eligible: bool
+    eligibility_reason: str
+    state: str
+
+    @classmethod
+    def of(cls, payload: dict[str, Any]) -> "ExperimentView":
+        return cls.model_validate(payload)
+
+
+class InvestigateStationView(BaseModel):
+    model_config = _FROZEN
+
+    shift_id: str
+    opening_mode: str | None
+    orientation: dict[str, Any]
+    investigations: tuple[InvestigationView, ...]
+    latest_investigation_id: str | None
+    assist_available: bool
+    assist_reason: str
+    bootstrap_available: bool
+    bootstrap_reason: str
+    latest_experiment: ExperimentView | None = None
+
+    @classmethod
+    def of(cls, payload: dict[str, Any]) -> "InvestigateStationView":
+        return cls.model_validate(payload)
