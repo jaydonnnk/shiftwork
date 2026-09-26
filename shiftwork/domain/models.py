@@ -231,6 +231,9 @@ class Run(BaseModel):
     purpose: RunPurpose = RunPurpose.OPERATION
     evidence_mode: EvidenceMode | None = None
     selection_id: Id | None = None
+    context_id: Id | None = None
+    experiment_id: Id | None = None
+    trial_slot_id: Id | None = None
 
 
 class OperatingSelection(BaseModel):
@@ -290,6 +293,151 @@ class AssistRole(StrEnum):
     HINT = "HINT"
     DIAGNOSIS = "DIAGNOSIS"
     PATCH_PROPOSAL = "PATCH_PROPOSAL"
+
+
+class ObservationKind(StrEnum):
+    INTERPRETATION = "INTERPRETATION"
+    TOOL_REQUEST = "TOOL_REQUEST"
+    TOOL_RESULT = "TOOL_RESULT"
+    INFERENCE_REQUEST = "INFERENCE_REQUEST"
+    INFERENCE_RESULT = "INFERENCE_RESULT"
+    USAGE = "USAGE"
+
+
+class ExecutionObservation(BaseModel):
+    """One sanitized observation from a run (program design S3.5).
+
+    ``raw_payload_ref`` is internal: only ``public_payload_json`` is projectable.
+    Observations describe what the service reported or what the controller
+    verified, and their ``source`` field keeps those two apart. They are never
+    model reasoning presented as fact.
+    """
+
+    model_config = _FROZEN
+
+    id: Id
+    run_id: Id
+    request_ordinal: int
+    ordinal: int
+    kind: ObservationKind
+    public_payload_json: dict[str, JsonValue]
+    raw_payload_ref: str
+    measured_at: datetime
+
+
+class ContextCondition(BaseModel):
+    model_config = _FROZEN
+
+    id: Id
+    kind: Literal["normal", "data_update", "dependency_unavailable"]
+    public_label: str
+    exact_bytes_base64: str
+    content_hash: str
+
+
+class FrozenWorkload(BaseModel):
+    """One reviewed request batch, frozen as exact bytes plus its parsed shape."""
+
+    model_config = _FROZEN
+
+    id: Id
+    ordinal: int
+    request_batch_bytes_base64: str
+    request_batch_hash: str
+    request_specs_bytes_base64: str
+    request_specs_hash: str
+    request_count: int
+
+
+class ExecutionContext(BaseModel):
+    """Everything an assessment depends on, frozen and content-hashed (S3.1).
+
+    A mutable path or a current fixture cannot reconstruct old evidence, so the
+    public mission, request batch and public state are retained as bytes with
+    their hashes. ``protected_reservation_id`` is an internal controller reference
+    and is never projected.
+    """
+
+    model_config = _FROZEN
+
+    id: Id
+    schema_version: Literal[1] = 1
+    engagement_slug: Slug
+    workloads: tuple[FrozenWorkload, ...]
+    mission_bytes_base64: str
+    mission_hash: str
+    public_data_bytes_base64: str
+    public_data_hash: str
+    starting_business_state_json: dict[str, JsonValue]
+    starting_business_state_hash: str
+    requirement_set_id: Id
+    requirement_set_hash: str
+    visible_check_set_hash: str
+    protected_reservation_id: Id | None = None
+    condition: ContextCondition
+    evaluator_version: str
+    reducer_version: str
+    executor_class: EvidenceMode
+    harness_hash: str
+    image_ref: str | None = None
+    service_model: str | None = None
+    service_model_settings_json: dict[str, JsonValue]
+    resource_limits_json: dict[str, JsonValue]
+    created_at: datetime
+    content_hash: str
+
+
+class RunAssessment(BaseModel):
+    """One immutable summary row per terminal assessed run (program design S3.4)."""
+
+    model_config = _FROZEN
+
+    run_id: Id
+    context_hash: str
+    complete_request_count: int
+    expected_request_count: int
+    mandatory_pass: bool
+    rule_version: str
+    assessed_at: datetime
+
+
+class ExperimentKind(StrEnum):
+    DIAGNOSTIC = "DIAGNOSTIC"
+    QUALIFYING_COMPARISON = "QUALIFYING_COMPARISON"
+    LATER_CONDITION_COMPARISON = "LATER_CONDITION_COMPARISON"
+
+
+class CandidateRef(BaseModel):
+    model_config = _FROZEN
+
+    label: Literal["A", "B"]
+    artifact_version_id: Id
+    artifact_content_hash: str
+
+
+class Experiment(BaseModel):
+    """One reserved experiment.
+
+    The row is the durable reservation: a diagnostic whose run fails still
+    consumed its slot, and nothing here can be edited afterwards. A diagnostic
+    carries exactly one candidate and never a protected reservation, so it can
+    never make a version eligible (program design S3.5 and section 7).
+    """
+
+    model_config = _FROZEN
+
+    id: Id
+    shift_id: Id
+    kind: ExperimentKind
+    investigation_id: Id | None
+    candidates: tuple[CandidateRef, ...]
+    declared_treatment: str
+    context_id: Id
+    content_hash: str
+    trial_count_per_candidate: Literal[1, 3]
+    state: Literal["PLANNED", "RUNNING", "FINALIZED", "FAILED", "INVALIDATED"]
+    client_request_id: str
+    created_at: datetime
 
 
 class RunOutput(BaseModel):
