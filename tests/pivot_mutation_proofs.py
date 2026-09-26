@@ -36,6 +36,7 @@ spec.loader.exec_module(runner)
 MIGRATION = "tests/store/test_pivot_migration.py"
 ROUTES = "tests/api/test_pivot_routes.py"
 TASKCONTRACT = "tests/domain/test_task_contract.py"
+CUSTOMER = "tests/domain/test_customer_answer.py"
 EVALUATOR = "tests/evaluator/test_evaluator.py"
 ATOMICITY = "test_v6_migration_is_atomic_and_idempotent"
 PRESERVED = "test_v5_to_v6_preserves_every_legacy_blob_hash_and_row_count"
@@ -281,6 +282,30 @@ CASES = [
         "new": "    if False:",
         "tests": f"{EVALUATOR}::test_a_collection_answer_may_not_create_a_commitment",
         "expect": "test_a_collection_answer_may_not_create_a_commitment",
+    },
+    {
+        "name": "s11_renderer_authors_its_own_fallback_sentence",
+        "file": "shiftwork/domain/customer_answer.py",
+        "old": "    return explanation.customer_text",
+        "new": "    return \"Your order is ready for collection.\"",
+        "tests": f"{CUSTOMER}::test_a_fallback_renders_the_missions_own_public_text",
+        "expect": "test_a_fallback_renders_the_missions_own_public_text",
+    },
+    {
+        "name": "s11_renderer_invents_a_price",
+        "file": "shiftwork/domain/customer_answer.py",
+        "old": "    return f\"{symbol}{units}.{remainder:02d}\"",
+        "new": "    return f\"{symbol}0.00\"",
+        "tests": f"{CUSTOMER}::test_the_recorded_starter_renders_only_the_price_it_answered",
+        "expect": "test_the_recorded_starter_renders_only_the_price_it_answered",
+    },
+    {
+        "name": "s11_renderer_leaks_an_unknown_entity_ref",
+        "file": "shiftwork/domain/customer_answer.py",
+        "old": "    if entity is None:\n        raise ServiceResponseInvalid(\n            f\"the response names entity {entity_ref!r}, which the frozen public state does not define\"\n        )",
+        "new": "    if entity is None:\n        return ShopEntity(title=entity_ref, edition=\"unknown\", genre=\"unknown\")",
+        "tests": f"{CUSTOMER}::test_an_unknown_entity_fails_closed_instead_of_leaking_its_ref",
+        "expect": "test_an_unknown_entity_fails_closed_instead_of_leaking_its_ref",
     },
 ]
 

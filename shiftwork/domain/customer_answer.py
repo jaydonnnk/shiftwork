@@ -15,6 +15,16 @@ from pydantic import BaseModel, ConfigDict
 
 from shiftwork.domain.errors import ServiceResponseInvalid
 from shiftwork.domain.models import Claim, JsonValue, ServiceResponse
+from shiftwork.domain.task_contract import (
+    CustomerRequestSpec,
+    MissionSpec,
+    ShopEntity,
+    ShopSnapshot,
+    TaskResult,
+    TaskStatus,
+)
+from shiftwork.domain.task_contract import Claim as TaskClaim
+from shiftwork.domain.task_contract import ServiceResponse as TaskServiceResponse
 
 _FROZEN = ConfigDict(frozen=True, extra="forbid")
 
@@ -103,3 +113,148 @@ def _render_value(value: JsonValue) -> str:
     if isinstance(value, str):
         return value
     return json.dumps(value, sort_keys=True, separators=(",", ":"))
+
+
+# ---------------------------------------------------------------------------
+# Task-aware rendering (Gate 3 S3.3, Slice 11)
+#
+# A second renderer for the pivot envelope, beside the sealed path's above. Gate 3
+# names both ``render_customer_text``; one module cannot export that name twice,
+# so the task-aware one is ``render_task_customer_text``. It also takes the mission
+# and the frozen public state rather than a bare record dict, because the render
+# vocabulary and currency divisor live in the mission and the title and edition
+# live in the state's entity table.
+# ---------------------------------------------------------------------------
+
+_CURRENCY_SYMBOLS = {"GBP": "\u00a3"}
+
+
+def render_task_customer_text(
+    *,
+    spec: CustomerRequestSpec,
+    mission: MissionSpec,
+    snapshot: ShopSnapshot,
+    response: TaskServiceResponse,
+) -> str:
+    """Render the customer-facing answer from a validated envelope alone.
+
+    Only task status, validated claims and the mission's public explanation text
+    and render vocabulary are consulted. The service's logs, its uncertainty codes
+    and any prose it tried to carry are not inputs, so unassessed text cannot
+    contradict the scored result.
+    """
+    requested = spec.requested_entities[0] if spec.requested_entities else None
+    sentences = [
+        _render_task_result(mission, snapshot, requested, result)
+        for result in response.task_results
+    ]
+    if not sentences:
+        return "The service returned no answer for this request."
+    return " ".join(sentences)
+
+
+def _render_task_result(
+    mission: MissionSpec,
+    snapshot: ShopSnapshot,
+    requested_entity: str | None,
+    result: TaskResult,
+) -> str:
+    if result.status is not TaskStatus.COMPLETED:
+        return _render_fallback(mission, result)
+
+    claims = {claim.kind: claim for claim in result.claims}
+    entity = _entity(snapshot, result.entity_ref)
+    availability = claims.get("availability")
+
+    if availability is not None:
+        value = availability.value
+        date = value.get("collection_date") if isinstance(value, dict) else None
+        if not isinstance(date, str):
+            raise ServiceResponseInvalid(
+                f"task {result.task_id!r} completed without a collection date to render"
+            )
+        if result.entity_ref != requested_entity:
+            return _fill(
+                mission.render_vocabulary["alternative"],
+                mission=mission,
+                snapshot=snapshot,
+                entity=entity,
+                collection_date=date,
+                price_claim=claims.get("price"),
+            )
+        template = (
+            mission.render_vocabulary["collection_available"]
+            if value.get("can_collect") is True
+            else mission.render_vocabulary["collection_unavailable"]
+        )
+        return _fill(
+            template, mission=mission, snapshot=snapshot, entity=entity, collection_date=date
+        )
+
+    price = claims.get("price")
+    if price is None:
+        raise ServiceResponseInvalid(
+            f"task {result.task_id!r} completed with no claim the vocabulary can render"
+        )
+    return _fill(
+        mission.render_vocabulary["price"],
+        mission=mission,
+        snapshot=snapshot,
+        entity=entity,
+        price_claim=price,
+    )
+
+
+def _render_fallback(mission: MissionSpec, result: TaskResult) -> str:
+    if result.status is TaskStatus.NOT_APPLICABLE:
+        return mission.render_vocabulary["not_applicable"]
+    explanation = mission.explanation_codes.get(result.explanation_code or "")
+    if explanation is None:
+        raise ServiceResponseInvalid(
+            f"task {result.task_id!r} cites explanation code {result.explanation_code!r} "
+            "the reviewed mission does not define"
+        )
+    return explanation.customer_text
+
+
+def _entity(snapshot: ShopSnapshot, entity_ref: str) -> ShopEntity:
+    entity = snapshot.entities.get(entity_ref)
+    if entity is None:
+        raise ServiceResponseInvalid(
+            f"the response names entity {entity_ref!r}, which the frozen public state does not define"
+        )
+    return entity
+
+
+def _fill(
+    template: str,
+    *,
+    mission: MissionSpec,
+    snapshot: ShopSnapshot,
+    entity: ShopEntity,
+    collection_date: str | None = None,
+    price_claim: TaskClaim | None = None,
+) -> str:
+    fields: dict[str, str] = {"title": entity.title, "edition": entity.edition}
+    if collection_date is not None:
+        fields["collection_date"] = collection_date
+    if price_claim is not None:
+        fields["formatted_price"] = _format_price(mission, snapshot, price_claim)
+    try:
+        return template.format(**fields)
+    except (KeyError, IndexError) as exc:
+        raise ServiceResponseInvalid(
+            f"the render vocabulary needs a field this response cannot supply: {exc}"
+        ) from exc
+
+
+def _format_price(mission: MissionSpec, snapshot: ShopSnapshot, claim: TaskClaim) -> str:
+    value = claim.value
+    if not isinstance(value, int) or isinstance(value, bool):
+        raise ServiceResponseInvalid("a price claim must carry an integer minor-unit value")
+    divisor = mission.minor_units_per_gbp
+    if divisor <= 0:
+        raise ServiceResponseInvalid("the mission declares a non-positive currency divisor")
+    symbol = _CURRENCY_SYMBOLS.get(snapshot.currency, "")
+    units, remainder = divmod(value, divisor)
+    return f"{symbol}{units}.{remainder:02d}"
