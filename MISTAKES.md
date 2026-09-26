@@ -808,3 +808,17 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   endings explicitly, then read the region back with `Read` and confirm the block renders
   as separate lines before committing. Never encode line breaks as escape sequences in a
   tool argument.
+## 2026-09-26 Slice 12 escape run archived only the service-path inference observation
+
+- **What happened:** the new `escape` phase calls `infer()` twice, once through the
+  service path and once directly for the token-ceiling probe. The live evidence file
+  held the first call's full observation but not the second's, because the
+  `nemotron_inference` emit sat in the service request loop rather than inside
+  `infer()`. The second call's cost, prompt tokens and latency were never archived;
+  only the derived `escape_limit_probe` fields survived.
+- **Root cause:** the measurement was archived at one call site instead of where it is
+  produced, so the first new caller silently omitted it.
+- **Prevention rule:** emit a measurement where it is produced, not at a caller, and
+  guard the one emit site with a source-level test plus a mutation that duplicates the
+  emit at a call site. `test_inference_calls_are_archived_from_one_emit_site` now
+  requires exactly one `nemotron_inference` emit and requires it inside `infer()`.
