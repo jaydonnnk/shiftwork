@@ -347,6 +347,7 @@ async def infer(prompt: str, token: str) -> tuple[str, dict[str, object]]:
         "finish_reason": (body.get("choices") or [{}])[0].get("finish_reason"),
     }
     content = (body.get("choices") or [{}])[0].get("message", {}).get("content") or ""
+    emit("nemotron_inference", **observation, content=content)
     return content, observation
 
 
@@ -397,7 +398,6 @@ async def service_request(
                 if first.get("kind") != "inference_request" or first.get("request_id") != request["request_id"]:
                     raise RuntimeError("unbound_or_malformed_service_request")
                 content, observation = await infer(first["prompt"], token)
-                emit("nemotron_inference", **observation, content=content)
                 await client.operation_subprocess_stdin(
                     operation_id, 1, json.dumps({"choice": content}) + "\n", close=True
                 )

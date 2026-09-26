@@ -238,6 +238,15 @@ MUTATIONS = [
         "    return prior_usd + next_usd < MAX_SPIKE_USD",
         "test_budget_allows_a_total_at_the_cap_and_refuses_above_it"),
     # F5: the judge route reports every prerequisite it claims.
+    row("inference_emit_removed_from_infer",
+        '    emit("nemotron_inference", **observation, content=content)\n',
+        "",
+        "test_inference_calls_are_archived_from_one_emit_site"),
+    row("inference_emit_duplicated_at_a_call_site",
+        "                content, observation = await infer(first[\"prompt\"], token)\n",
+        "                content, observation = await infer(first[\"prompt\"], token)\n"
+        "                emit(\"nemotron_inference\", **observation, content=content)\n",
+        "test_inference_calls_are_archived_from_one_emit_site"),
     row("judge_route_requirement_check_removed",
         "    if any(checks.get(name) is not True for name in JUDGE_ROUTE_REQUIREMENTS):\n"
         "        return JUDGE_ROUTE_INCOMPLETE\n",

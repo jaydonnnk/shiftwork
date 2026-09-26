@@ -242,6 +242,14 @@ def test_unknown_prior_inference_cost_still_stops_the_budget_check():
             raise AssertionError("an unpriced prior inference call was ignored")
 
 
+def test_inference_calls_are_archived_from_one_emit_site():
+    source = Path(spike.__file__).read_text(encoding="utf-8")
+    marker = 'emit("nemotron_inference"'
+    assert source.count(marker) == 1, "every inference call must be archived by exactly one emit site"
+    infer_body = source.split("async def infer(", 1)[1].split("\nasync def ", 1)[0]
+    assert marker in infer_body, "the single inference emit must live inside infer()"
+
+
 def test_outage_with_recorded_failures_and_no_business_write_passes():
     verdict = spike.classify_outage(
         transport_failure="ConnectError", provider_failure="400",
