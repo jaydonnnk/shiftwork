@@ -498,7 +498,7 @@ def test_controller_normalizes_once_and_retains_failed_capture(executor, monkeyp
         assert client.get("/api/engagements/bookshop/ledger").json()["events"] == []
     assert len(requests) == len(normalized) == 1
     assert requests[0].artifact_snapshot.manifest_hash == version["content_hash"]
-    assert requests[0].artifact_snapshot.files["service.py"] == (config.ARTIFACT_TEMPLATE_DIR / "service.py").read_bytes()
+    assert requests[0].artifact_snapshot.files["service.py"] == config.PIVOT_STARTER_ARTIFACT_PATHS["service.py"].read_bytes()
     conn = db.connect(path)
     try:
         stored = repo.list_outputs(conn, run_id)

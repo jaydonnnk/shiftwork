@@ -509,22 +509,27 @@ def test_old_ledger_entries_resolve_against_their_original_catalog_version(
 ):
     conn = finalized["conn"]
     events = repo.list_ledger_events(conn, config.BOOKSHOP_SLUG)
-    assert all(event.payload["catalog_version"] == 2 for event in events)
+    shipped = config.PIVOT_STARTER_CONTRACT_JSON["catalog_version"]
+    assert all(event.payload["catalog_version"] == shipped for event in events)
 
     catalog_dir = tmp_path / "catalogs"
     catalog_dir.mkdir()
-    v2_record = json.loads((config.CATALOG_DIR / "bookshop_v2.json").read_text(encoding="utf-8"))
-    (catalog_dir / "bookshop_v2.json").write_text(json.dumps(v2_record), encoding="utf-8")
-    v3_record = json.loads(json.dumps(v2_record))
-    v3_record["version"] = 3
-    for option in v3_record["options"]:
+    recorded = json.loads(
+        (config.CATALOG_DIR / f"bookshop_v{shipped}.json").read_text(encoding="utf-8")
+    )
+    (catalog_dir / f"bookshop_v{shipped}.json").write_text(json.dumps(recorded), encoding="utf-8")
+    newer_record = json.loads(json.dumps(recorded))
+    newer_record["version"] = shipped + 1
+    for option in newer_record["options"]:
         if option["id"] == "USE_NEWEST_RECORD_WITH_AGE":
-            option["learner_label"] = "REWRITTEN v3 LABEL"
-    (catalog_dir / "bookshop_v3.json").write_text(json.dumps(v3_record), encoding="utf-8")
+            option["learner_label"] = "REWRITTEN NEWER LABEL"
+    (catalog_dir / f"bookshop_v{shipped + 1}.json").write_text(
+        json.dumps(newer_record), encoding="utf-8"
+    )
     monkeypatch.setattr(config, "CATALOG_DIR", catalog_dir)
 
     resolved = orchestrator._resolve_catalog(config.BOOKSHOP_SLUG, events[0])
-    assert resolved["catalog_version"] == 2
+    assert resolved["catalog_version"] == shipped
     assert "REWRITTEN" not in json.dumps(resolved["catalog_record"])
 
 
@@ -570,8 +575,8 @@ def test_ledger_view_resolves_derivation_and_catalog_links(finalized):
         assert derivation["run_id"] == finalized["run_id"]
         assert base64.b64decode(derivation["output_body_base64"])
         assert derivation["verdict"] == "fail"
-        assert event["catalog"]["catalog_version"] == 2
-        assert event["catalog"]["catalog_record"]["version"] == 2
+        assert event["catalog"]["catalog_version"] == config.PIVOT_STARTER_CONTRACT_JSON["catalog_version"]
+        assert event["catalog"]["catalog_record"]["version"] == config.PIVOT_STARTER_CONTRACT_JSON["catalog_version"]
 
         outputs = client.get(f"/api/runs/{finalized['run_id']}/outputs").json()
         assert any(

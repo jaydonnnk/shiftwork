@@ -109,7 +109,9 @@ def test_draft_round_trip_preserves_filenames_and_text(injected_hosts) -> None:
 
         seeded = client.get(f"/api/shifts/{shift_id}/artifact")
         assert seeded.status_code == 200, seeded.text
-        assert set(seeded.json()["files"]) == {"service.py", "contract.json", "response_contract.json"}
+        # Slice 11 ships the reviewed failing starter as the new engagement's draft,
+        # so the seeded file set is the pinned starter's, not the old scaffold's.
+        assert set(seeded.json()["files"]) == set(config.PIVOT_STARTER_ARTIFACT_PATHS)
 
         written = client.put(f"/api/shifts/{shift_id}/artifact", json={"files": LEARNER_FILES})
         assert written.status_code == 200, written.text

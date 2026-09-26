@@ -100,9 +100,12 @@ def driven(tmp_path, select_version_for_test):
         files = dict(draft["files"])
         files["service.py"] = files["service.py"] + "\n# shift 1: learner-edited draft\n"
         _call(client, "PUT", f"/api/shifts/{shift_id}/artifact", json={"files": files})
-        assert files != orchestrator.BOOKSHOP_DRAFT_FILES, (
-            "the frozen version must differ from the shipped template, or seeding "
-            "from inheritance cannot be told apart from seeding the template"
+        assert files != {
+            name: path.read_text(encoding="utf-8")
+            for name, path in sorted(config.PIVOT_STARTER_ARTIFACT_PATHS.items())
+        }, (
+            "the frozen version must differ from the shipped starter, or seeding "
+            "from inheritance cannot be told apart from seeding that starter"
         )
         frozen = _freeze(client, shift_id)
         # Historical executor assertions require this exact test-only choice.
