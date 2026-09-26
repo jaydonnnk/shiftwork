@@ -71,9 +71,10 @@ summaries when a time-sensitive external claim is being made.
   credentials, external calls, the capability spike, fixture authoring,
   sealed-case contents, outreach, deployment, publication, submission and ADR #4
   each remain separately authorized. Slice 10 is accepted and merged to main as
-  `f0a1e81..0432cbd`, pushed 2026-09-25. The next action is Slice 11 under
-  `04-slices.md` section 3 on a branch named `shiftwork/slice-11`, and it needs
-  its own go-ahead. Do not implement the pivot under historical approvals.
+  `f0a1e81..0432cbd`, pushed 2026-09-25. Slice 11 is accepted (2026-09-26) and
+  pushed on `shiftwork/slice-11` as `add85b1..6832486`. The next action is
+  Slice 12 under `04-slices.md` on a branch named `shiftwork/slice-12`, and it
+  needs its own go-ahead. Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
   the exact tested version and inherited operational consequences. Experiments,

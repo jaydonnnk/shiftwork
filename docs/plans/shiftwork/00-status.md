@@ -1,13 +1,26 @@
 # Status: Shiftwork
 
+## Slice 11 acceptance: 2026-09-26
+
+**Current step: Slice 11 is ACCEPTED.** The user chose `Accept and push branch`
+in chat on 2026-09-26. The implementation commits `add85b1..6832486` are on
+`origin/shiftwork/slice-11` (`6832486` was pushed at 18:13 +0800 that day) and
+this acceptance record was pushed the same day. Acceptance covers Slice 11 only:
+it does not authorize Slice 12, installs, credentials, external calls, the
+capability spike, fixture authoring, sealed-case contents, outreach, deployment,
+publication, submission or ADR #4. The record below is the pre-acceptance
+snapshot; its "awaits the user's acceptance", "unchecked" and "nothing pushed"
+notes are superseded by this entry.
+
 ## Slice 11 implementation and local verification: 2026-09-26
 
-**Current step: Slice 11 is implemented and locally verified against its approved
-exit contract; it awaits the user's acceptance.** Work is on `shiftwork/slice-11`.
+**Pre-acceptance record: Slice 11 was implemented and locally verified against
+its approved exit contract and had not yet been accepted when this entry was
+written.** Work was on `shiftwork/slice-11`.
 The three scoped prerequisite fixes stay in force; this entry supersedes their
-next-action wording. Nothing was pushed this session. No live model, credential,
+next-action wording. No live model, credential,
 external service, deployment, protected-case reservation, business write or human
-session ran. The slice stays unchecked until the user accepts it.
+session ran.
 
 ### What landed
 
@@ -425,11 +438,13 @@ those named assertions can fail before recording S11 as complete.
 - **Gate 3 merge:** `aedc97f` and `ab5ab9c` fast-forwarded local main without
   a co-author footer and reached `origin/main` in this session's push. The
   unrelated `.gitignore` edit stayed unstaged throughout.
-- **Resume point:** Slice 11 under `04-slices.md` section 3 is implemented and
-  locally verified on `shiftwork/slice-11` (evidence at the top of this file) and
-  awaits the user's acceptance; nothing was pushed this session. Slice 10 was
-  accepted on 2026-09-25 and is merged to main as `f0a1e81..0432cbd`. Slice 12
-  needs its own go-ahead and its own `shiftwork/slice-12` branch. Stop and
+- **Resume point:** Slice 11 under `04-slices.md` section 3 is accepted
+  (2026-09-26) and pushed on `shiftwork/slice-11` as `add85b1..6832486`
+  (evidence and limits in the Slice 11 entries at the top of this file). Slice 10
+  was accepted on 2026-09-25 and is merged to main as `f0a1e81..0432cbd`. The
+  next action is Slice 12 under `04-slices.md`, which needs its own go-ahead and
+  its own `shiftwork/slice-12` branch, with its sandbox-scoped Nebius key
+  precondition still unverified. Stop and
   backtrack the affected gate if a slice falsifies an approved Gate 2 or Gate 3
   decision.
 
@@ -838,7 +853,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
   (evidence below)
 - [x] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03); implemented and browser-verified 2026-09-21, its independent review round adjudicated and repaired the same day (evidence in its two sections below), committed in nine reviewable batches on `shiftwork/slice-9` and merged to main (`4d5539a`) the same day, with the user marking that merge as the visual acceptance; pushed to origin. Preview/evidence below.
 - [x] Slice 10: byte-preserving v5-to-v6 migration and non-operational first-choice shift; implemented and verified 2026-09-25, ACCEPTED by the user in chat the same day after the verification report disclosed the preview regression, the fabricated-choice shim, the flaky atomicity proof and the missing room screenshot. Committed in eight focused batches, merged to main as `f0a1e81..0432cbd` and pushed, no co-author footer. Acceptance covers S10 only (evidence in the Slice 10 implementation section and Approval history below)
-- [ ] Slice 11: executable task-relevant Bellwether failure, investigation and public diagnostic test
+- [x] Slice 11: executable task-relevant Bellwether failure, investigation and public diagnostic test; implemented and locally verified 2026-09-26 and ACCEPTED by the user in chat the same day (evidence, numbers and limits in the Slice 11 entries at the top of this file). Committed in 13 focused batches on `shiftwork/slice-11`, pushed as `add85b1..6832486`, no co-author footer. Acceptance covers Slice 11 only
 - [ ] Slice 12: bounded Token Factory capability spike, separately authorized
 - [ ] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap
 - [ ] Slice 14: prediction-gated attributable assist gateway
