@@ -30,6 +30,11 @@ const FAULTS = {
     replacement: "'sale completed'",
     expect: 'Rendered event row does not match event',
   },
+  eligibility: {
+    needle: "experiment.eligible ? 'Eligible' : 'Not eligible · this diagnostic cannot qualify a version'",
+    replacement: "'REVIEW_WRONG_ELIGIBILITY'",
+    expect: 'does not state that the diagnostic cannot qualify a version',
+  },
   stationFocus: {
     needle: "  panel.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });",
     replacement: '  void panel;',
@@ -126,6 +131,65 @@ async function labels() {
   });
 }
 
+// Page-side verification: the customer station's rendered evidence must equal the
+// API payload for the run's exact captures. This runs inside the browser through
+// evaluate(), so the matrix rows and the failing incident run share one body.
+async function verifyRenderedCustomerEvidence(runId, minimumOutputs) {
+  const humanize = value => value.toLowerCase().replaceAll('_', ' ');
+  const [run, outputs, checks, ledger] = await Promise.all([`/api/runs/${runId}`, `/api/runs/${runId}/outputs`, `/api/runs/${runId}/checks`, '/api/engagements/bookshop/ledger'].map(async path => (await fetch(path)).json()));
+  const buttons = [...document.querySelectorAll('.customer-button')];
+  if (buttons.length < minimumOutputs || buttons.length !== outputs.length) throw new Error(`Preview needs ${minimumOutputs} actual executed customers on ${runId}, saw ${buttons.length} buttons for ${outputs.length} captured outputs`);
+  for (const output of [...outputs].reverse()) {
+    buttons.find(button => button.dataset.outputId === output.id).click();
+    const panel = document.getElementById('selected-evidence');
+    const verify = () => {
+      if (panel.dataset.runId !== output.run_id || Number(panel.dataset.requestOrdinal) !== output.request_ordinal) throw new Error('Customer identity mismatch');
+      if (panel.querySelector('.request-quote').textContent !== output.request_text) throw new Error('Wrong request text');
+      if (panel.querySelector('[data-body-base64]').dataset.bodyBase64 !== output.body_base64) throw new Error('Body byte mismatch');
+      // Substantive rendered values, each against the independently fetched API payload.
+      const steps = [...panel.querySelectorAll('.evidence-step')];
+      const answer = steps[1]?.querySelector('.evidence-text');
+      const expectedAnswer = output.customer_answer ? output.customer_answer.display_text : 'No validated customer answer. Inspect the captured bytes below.';
+      if (answer?.textContent !== expectedAnswer) throw new Error(`Rendered customer answer does not match the executed output: ${answer?.textContent}`);
+      const record = output.public_shop_record;
+      const recordStep = steps[2];
+      if (record) {
+        const title = [record.title, record.edition].filter(Boolean).join(' · ') || record.record_id;
+        if (recordStep.querySelector('.evidence-text')?.textContent !== title) throw new Error(`Rendered public record title does not match: ${recordStep.querySelector('.evidence-text')?.textContent}`);
+        const value = typeof record.value === 'string' ? humanize(record.value) : JSON.stringify(record.value);
+        const expectedValue = `${humanize(record.kind)}: ${value}`;
+        if (recordStep.querySelector('.public-value')?.textContent !== expectedValue) throw new Error(`Rendered public record value does not match: ${recordStep.querySelector('.public-value')?.textContent}`);
+        if (!recordStep.textContent.includes(`Record age ${record.record_age_ms} ms`)) throw new Error('Rendered public record age does not match');
+      } else if (!recordStep.textContent.includes('No public comparison record')) throw new Error('Rendered no-record state is missing');
+      const linked = checks.filter(c => c.run_id === output.run_id && c.observed_ref === output.id);
+      const ids = new Set(linked.map(c => c.id));
+      const events = ledger.events.filter(e => e.derivation?.run_id === output.run_id && e.derivation?.request_ordinal === output.request_ordinal && ids.has(e.derivation.check_id));
+      if (panel.querySelectorAll('[data-check-id]').length !== linked.length || panel.querySelectorAll('[data-event-seq]').length !== events.length) throw new Error('Incomplete evidence links');
+      for (const check of linked) {
+        const expected = `${humanize(check.verdict)}${check.reason_code ? ` · ${check.reason_code}` : ''}`;
+        const row = panel.querySelector(`[data-check-id="${check.id}"]`);
+        if (!row || row.querySelector('strong')?.textContent !== expected) throw new Error(`Rendered check row does not match result ${check.id}: ${row?.querySelector('strong')?.textContent} is not ${expected}`);
+      }
+      for (const event of events) {
+        const row = panel.querySelector(`[data-event-seq="${event.seq}"]`);
+        if (!row) throw new Error(`Missing rendered event ${event.seq}`);
+        if (row.querySelector('strong')?.textContent !== humanize(event.event_type)) throw new Error(`Rendered event row does not match event ${event.seq}: ${row.querySelector('strong')?.textContent}`);
+        if (!row.querySelector('small')?.textContent.includes(`result ${event.derivation.check_id}`)) throw new Error(`Rendered event row is missing its result link for event ${event.seq}`);
+      }
+      if (output.public_shop_snapshot_hash && !panel.textContent.includes(output.public_shop_snapshot_hash)) throw new Error('Provenance missing');
+    };
+    verify();
+    const originalOrdinal = panel.dataset.requestOrdinal;
+    panel.dataset.requestOrdinal = '999';
+    let caught = false; try { verify(); } catch { caught = true; }
+    panel.dataset.requestOrdinal = originalOrdinal;
+    if (!caught) throw new Error('Ordinal mutation survived');
+    const bytes = new Uint8Array(await (await fetch(panel.querySelector('.download').href)).arrayBuffer());
+    if (btoa(Array.from(bytes, byte => String.fromCharCode(byte)).join('')) !== output.body_base64) throw new Error('Downloaded bytes changed');
+  }
+  return { outputs: outputs.length, run: run.id };
+}
+
 let faultOutcome = null;
 try {
   const { targetId } = await send('Target.createTarget', { url: 'about:blank' }, false);
@@ -150,7 +214,7 @@ try {
   await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   await send('Page.navigate', { url });
   await ready();
-  assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 7);
+  assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 8);
   const matrix = [];
   for (const width of [1280, 640, 390]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -160,69 +224,15 @@ try {
     assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${width}px page overflows`);
     await screenshot(`board-${width}`);
     await evaluate(() => document.querySelector('[data-station="customers"]').click());
-    const result = await evaluate(async () => {
-      const humanize = value => value.toLowerCase().replaceAll('_', ' ');
-      const board = await (await fetch('/api/engagements/bookshop/board')).json();
-      const run = board.latest_run;
-      const [outputs, checks, ledger] = await Promise.all([`/api/runs/${run.id}/outputs`, `/api/runs/${run.id}/checks`, '/api/engagements/bookshop/ledger'].map(async path => (await fetch(path)).json()));
-      const buttons = [...document.querySelectorAll('.customer-button')];
-      if (buttons.length < 2 || buttons.length !== outputs.length) throw new Error('Preview needs two actual executed customers');
-      for (const output of [...outputs].reverse()) {
-        buttons.find(button => button.dataset.outputId === output.id).click();
-        const panel = document.getElementById('selected-evidence');
-        const verify = () => {
-          if (panel.dataset.runId !== output.run_id || Number(panel.dataset.requestOrdinal) !== output.request_ordinal) throw new Error('Customer identity mismatch');
-          if (panel.querySelector('.request-quote').textContent !== output.request_text) throw new Error('Wrong request text');
-          if (panel.querySelector('[data-body-base64]').dataset.bodyBase64 !== output.body_base64) throw new Error('Body byte mismatch');
-          // Substantive rendered values, each against the independently fetched API payload.
-          const steps = [...panel.querySelectorAll('.evidence-step')];
-          const answer = steps[1]?.querySelector('.evidence-text');
-          const expectedAnswer = output.customer_answer ? output.customer_answer.display_text : 'No validated customer answer. Inspect the captured bytes below.';
-          if (answer?.textContent !== expectedAnswer) throw new Error(`Rendered customer answer does not match the executed output: ${answer?.textContent}`);
-          const record = output.public_shop_record;
-          const recordStep = steps[2];
-          if (record) {
-            const title = [record.title, record.edition].filter(Boolean).join(' · ') || record.record_id;
-            if (recordStep.querySelector('.evidence-text')?.textContent !== title) throw new Error(`Rendered public record title does not match: ${recordStep.querySelector('.evidence-text')?.textContent}`);
-            const value = typeof record.value === 'string' ? humanize(record.value) : JSON.stringify(record.value);
-            const expectedValue = `${humanize(record.kind)}: ${value}`;
-            if (recordStep.querySelector('.public-value')?.textContent !== expectedValue) throw new Error(`Rendered public record value does not match: ${recordStep.querySelector('.public-value')?.textContent}`);
-            if (!recordStep.textContent.includes(`Record age ${record.record_age_ms} ms`)) throw new Error('Rendered public record age does not match');
-          } else if (!recordStep.textContent.includes('No public comparison record')) throw new Error('Rendered no-record state is missing');
-          const linked = checks.filter(c => c.run_id === output.run_id && c.observed_ref === output.id);
-          const ids = new Set(linked.map(c => c.id));
-          const events = ledger.events.filter(e => e.derivation?.run_id === output.run_id && e.derivation?.request_ordinal === output.request_ordinal && ids.has(e.derivation.check_id));
-          if (panel.querySelectorAll('[data-check-id]').length !== linked.length || panel.querySelectorAll('[data-event-seq]').length !== events.length) throw new Error('Incomplete evidence links');
-          for (const check of linked) {
-            const expected = `${humanize(check.verdict)}${check.reason_code ? ` · ${check.reason_code}` : ''}`;
-            const row = panel.querySelector(`[data-check-id="${check.id}"]`);
-            if (!row || row.querySelector('strong')?.textContent !== expected) throw new Error(`Rendered check row does not match result ${check.id}: ${row?.querySelector('strong')?.textContent} is not ${expected}`);
-          }
-          for (const event of events) {
-            const row = panel.querySelector(`[data-event-seq="${event.seq}"]`);
-            if (!row) throw new Error(`Missing rendered event ${event.seq}`);
-            if (row.querySelector('strong')?.textContent !== humanize(event.event_type)) throw new Error(`Rendered event row does not match event ${event.seq}: ${row.querySelector('strong')?.textContent}`);
-            if (!row.querySelector('small')?.textContent.includes(`result ${event.derivation.check_id}`)) throw new Error(`Rendered event row is missing its result link for event ${event.seq}`);
-          }
-          if (output.public_shop_snapshot_hash && !panel.textContent.includes(output.public_shop_snapshot_hash)) throw new Error('Provenance missing');
-        };
-        verify();
-        const originalOrdinal = panel.dataset.requestOrdinal;
-        panel.dataset.requestOrdinal = '999';
-        let caught = false; try { verify(); } catch { caught = true; }
-        panel.dataset.requestOrdinal = originalOrdinal;
-        if (!caught) throw new Error('Ordinal mutation survived');
-        const bytes = new Uint8Array(await (await fetch(panel.querySelector('.download').href)).arrayBuffer());
-        if (btoa(Array.from(bytes, byte => String.fromCharCode(byte)).join('')) !== output.body_base64) throw new Error('Downloaded bytes changed');
-      }
-      return { outputs: outputs.length, run: run.id };
-    });
+    const latestRunId = await evaluate(async () => (await (await fetch('/api/engagements/bookshop/board')).json()).latest_run.id);
+    const result = await evaluate(verifyRenderedCustomerEvidence, latestRunId, 2);
     const customerLabels = await labels();
     assert.deepEqual(customerLabels, ['board', 'run', 'event']);
     assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${width}px evidence overflows`);
     await screenshot(`customers-${width}`);
     matrix.push({ width, ...result, labels: [...boardLabels, ...customerLabels] });
   }
+  await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   const navigationErrors = await evaluate(async () => {
     const errors = [];
@@ -304,6 +314,10 @@ try {
       return `focus ended on ${document.activeElement?.tagName ?? 'nothing'} instead of ${incident.failing_output_ref}`;
     });
     if (focus !== 'pass') navigationErrors.push(`Incident navigation does not move focus into the selected request: ${focus}`);
+    // The incident's opening run is the failing evidence the customer station can
+    // load: its rendered checks and ledger events must equal the API payload too.
+    const incidentRunId = await evaluate(async () => (await (await fetch('/api/engagements/bookshop/board')).json()).incidents[0].opening_run_id);
+    await evaluate(verifyRenderedCustomerEvidence, incidentRunId, 1);
   } else navigationErrors.push(`Incident focus check could not arm: ${incidentArmed}`);
   await evaluate(() => {
     document.querySelector('[data-station="service"]').click();
@@ -396,6 +410,122 @@ try {
   assert.deepEqual(malformed, { literal: '<img src=x onerror="window.__injected=true">', image: false, injected: false, bytes: [255, 0], noRecord: true, rawFallback: true, sealedDigest: false });
   await evaluate(() => { window.fetch = window.__fetch; document.getElementById('refresh').click(); });
   await ready();
+  await evaluate(() => document.querySelector('[data-station="investigate"]').click());
+  const investigateView = await evaluate(async () => {
+    const humanize = value => value.toLowerCase().replaceAll('_', ' ');
+    const wait = async (label, condition) => {
+      const deadline = Date.now() + 15000;
+      while (Date.now() < deadline) {
+        if (condition()) return;
+        await new Promise(resolve => setTimeout(resolve, 25));
+      }
+      throw new Error(`Timed out waiting for ${label}: ${document.getElementById('investigate-error')?.textContent ?? ''}`);
+    };
+    const panel = document.getElementById('investigate-view');
+    if (panel.hidden) throw new Error('Investigate station does not open its own panel');
+    if (document.querySelector('[data-station="investigate"]').getAttribute('aria-pressed') !== 'true') throw new Error('Investigate hotspot is not marked pressed');
+    const board = await (await fetch('/api/engagements/bookshop/board')).json();
+    const shiftId = board.latest_shift.id;
+    const stationUrl = `/api/shifts/${encodeURIComponent(shiftId)}/investigations`;
+    const station = await (await fetch(stationUrl)).json();
+    const steps = [...panel.querySelectorAll('#orientation-list li')].map(node => node.textContent);
+    if (JSON.stringify(steps) !== JSON.stringify(station.orientation.steps)) throw new Error(`Orientation copy does not match the API payload: ${JSON.stringify(steps)}`);
+    const checkDenial = async investigationId => {
+      const denial = document.getElementById('assist-denial');
+      denial.textContent = '';
+      document.getElementById('request-assist').click();
+      await wait('the denial detail', () => denial.textContent !== '');
+      const response = await fetch(`/api/shifts/${shiftId}/assist`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ investigation_id: investigationId, role: 'HINT', client_request_id: `harness-${Date.now()}` }) });
+      const expected = await response.json();
+      if (response.status !== 409 || denial.textContent !== expected.detail) throw new Error(`Rendered denial is not the API detail: ${denial.textContent} is not ${expected.detail}`);
+      return expected.detail;
+    };
+    const denials = {};
+    if (!station.investigations.length) denials.beforeEntry = await checkDenial(null);
+    const stamp = Date.now();
+    for (const [id, value] of [['cause-input', `harness cause ${stamp}`], ['falsifier-input', `harness falsifier ${stamp}`], ['public-test-input', `harness public test ${stamp}`]]) document.getElementById(id).value = value;
+    const requestedOrdinal = Number(document.getElementById('source-ordinal').value);
+    document.getElementById('append-investigation').click();
+    await wait('the entry to be recorded', () => document.querySelectorAll('#investigation-list [data-investigation-id]').length === station.investigations.length + 1);
+    const recorded = await (await fetch(stationUrl)).json();
+    const latest = recorded.investigations[recorded.investigations.length - 1];
+    const row = panel.querySelector(`[data-investigation-id="${latest.id}"]`);
+    if (!row || row.dataset.authoredBy !== 'learner') throw new Error(`Recorded entry ${latest.id} is not rendered as the learner's`);
+    for (const [label, value] of [['Cause', latest.cause], ['Falsifier', latest.falsifier], ['Public test', latest.public_test]]) {
+      const line = [...row.querySelectorAll('.contract-line')].find(node => node.querySelector('span')?.textContent === label);
+      if (line?.querySelector('strong')?.textContent !== value) throw new Error(`Rendered ${label} does not match entry ${latest.id}`);
+    }
+    if (latest.revision_of_id) {
+      if (row.dataset.revisionOf !== latest.revision_of_id) throw new Error('Revision linkage is not rendered');
+      if (!panel.querySelector(`[data-investigation-id="${latest.revision_of_id}"]`)) throw new Error('The revised entry is not retained');
+    } else if (latest.source_request_ordinal !== requestedOrdinal) {
+      throw new Error(`Recorded entry cites request ${latest.source_request_ordinal} instead of ${requestedOrdinal}`);
+    }
+    denials.withEntry = await checkDenial(latest.id);
+    return { shift: shiftId, entries: recorded.investigations.length, revision: Boolean(latest.revision_of_id), denials };
+  });
+  const investigateLabels = await labels();
+  assert.deepEqual(investigateLabels, ['board', 'source', 'diagnostic']);
+  assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '1280px investigate panel overflows');
+  await screenshot('investigate-1280');
+  const diagnostic = await evaluate(async investigateShift => {
+    const humanize = value => value.toLowerCase().replaceAll('_', ' ');
+    const panel = document.getElementById('investigate-view');
+    const stepFor = label => [...panel.querySelectorAll('#diagnostic-result .evidence-step')].find(node => node.querySelector('.step-label')?.textContent.includes(label));
+    const stationUrl = `/api/shifts/${encodeURIComponent(investigateShift)}/investigations`;
+    let experiment = (await (await fetch(stationUrl)).json()).latest_experiment;
+    let started = false;
+    if (!experiment) {
+      const runButton = document.getElementById('run-diagnostic');
+      if (runButton.disabled) throw new Error('The public diagnostic button is disabled with an entry recorded');
+      runButton.click();
+      started = true;
+      const deadline = Date.now() + 20000;
+      while (Date.now() < deadline) {
+        if (document.getElementById('diagnostic-result').querySelector('.evidence-step')) break;
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      if (!document.getElementById('diagnostic-result').querySelector('.evidence-step')) throw new Error(`The diagnostic did not reach a rendered result: ${document.getElementById('investigate-error')?.textContent ?? ''}`);
+    }
+    const id = document.getElementById('diagnostic-result').dataset.experimentId;
+    experiment = await (await fetch(`/api/experiments/${encodeURIComponent(id)}`)).json();
+    const trial = experiment.trials[0];
+    const output = trial.outputs[0];
+    if (!output) throw new Error('The diagnostic produced no capture to verify');
+    const trialLine = [...panel.querySelectorAll('.contract-line')].find(node => node.querySelector('span')?.textContent === 'Trial state');
+    if (trialLine?.querySelector('strong')?.textContent !== `${trial.state} · candidate ${trial.candidate_label}`) throw new Error(`Rendered trial state does not match: ${trialLine?.querySelector('strong')?.textContent}`);
+    const request = stepFor('Frozen incident request');
+    if (request?.querySelector('.request-quote')?.textContent !== output.request_text) throw new Error('Rendered frozen request does not match the capture');
+    const exact = stepFor('Exact output the starter produced');
+    const bytes = Uint8Array.from(atob(output.body_base64), character => character.charCodeAt(0));
+    if (exact?.querySelector('.evidence-text')?.textContent !== new TextDecoder('utf-8', { fatal: true }).decode(bytes)) throw new Error('Rendered exact output does not match the capture bytes');
+    if (exact?.querySelector('[data-body-base64]')?.dataset.bodyBase64 !== output.body_base64) throw new Error('Rendered base64 capture does not match the capture');
+    if (!exact.textContent.includes(`HTTP ${output.http_status}`)) throw new Error('Rendered HTTP status does not match the capture');
+    const customer = stepFor('Rendered customer answer');
+    if (customer?.querySelector('.evidence-text')?.textContent !== (trial.customer_text ?? 'No customer answer was rendered for this trial.')) throw new Error('Rendered customer answer does not match the trial');
+    const assessment = stepFor('Independently assessed required tasks');
+    const rows = [...assessment.querySelectorAll('[data-task-id]')];
+    if (rows.length !== trial.task_assessments.length) throw new Error('Rendered task assessment count differs from the API payload');
+    for (const entry of trial.task_assessments) {
+      const item = rows.find(node => node.dataset.taskId === entry.task_id);
+      const expected = `${entry.task_id} · ${humanize(entry.outcome)}${entry.reason_codes.length ? ` · ${entry.reason_codes.join(', ')}` : ''}`;
+      if (item?.querySelector('strong')?.textContent !== expected) throw new Error(`Rendered task row does not match the API payload for ${entry.task_id}: ${item?.querySelector('strong')?.textContent} is not ${expected}`);
+      if (item.dataset.outcome !== entry.outcome || item.dataset.verdict !== (entry.mandatory_pass ? 'pass' : 'fail')) throw new Error(`Rendered mandatory outcome is wrong for ${entry.task_id}`);
+    }
+    const observations = stepFor('Observed interpretation and tool use');
+    if (observations.querySelectorAll('.event-row').length !== trial.observations.length) throw new Error('Rendered observation count differs from the API payload');
+    if (!trial.observations.length && !observations.textContent.includes('no interpretation or tool events')) throw new Error('The empty observation state is missing');
+    const eligibility = stepFor('Eligibility').querySelector('[data-eligible]');
+    if (experiment.eligible || eligibility.dataset.eligible !== 'false') throw new Error('Diagnostic eligibility is misreported as eligible');
+    if (eligibility.querySelector('small')?.textContent !== experiment.eligibility_reason) throw new Error('Rendered eligibility reason does not match the API payload');
+    const statement = eligibility.querySelector('strong')?.textContent;
+    if (statement !== 'Not eligible · this diagnostic cannot qualify a version') throw new Error(`Rendered eligibility statement does not state that the diagnostic cannot qualify a version: ${statement}`);
+    if (!panel.textContent.includes(experiment.context_evidence_class) || !panel.textContent.includes('Evidence class')) throw new Error('The evidence class is not rendered');
+    return { experiment: id, started, state: trial.state, tasks: trial.task_assessments.length, observations: trial.observations.length, customerText: trial.customer_text };
+  }, investigateView.shift);
+  await evaluate(() => document.getElementById('diagnostic-result').scrollIntoView({ block: 'start' }));
+  await screenshot('investigate-diagnostic-1280');
+  await evaluate(() => document.querySelector('[data-station="service"]').click());
   if (process.argv.includes('--exercise-run')) {
     const beforeRun = await evaluate(async () => (await (await fetch('/api/engagements/bookshop/board')).json()).latest_run.id);
     assert.equal(await evaluate(() => document.getElementById('metric-attempts').textContent), '1', 'Run-button proof needs a fresh preview with one remaining attempt');
@@ -412,7 +542,7 @@ try {
     assert.equal(await evaluate(() => document.querySelectorAll('.customer-button').length), 3);
   }
   assert.equal(exceptions.length, 0, JSON.stringify(exceptions));
-  const report = { matrix, navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict and event text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
+  const report = { matrix, investigateStation: { ...investigateView, diagnostic }, navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
   await writeFile(path.join(artifacts, 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
