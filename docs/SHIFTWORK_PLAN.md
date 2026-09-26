@@ -1,6 +1,6 @@
 # Shiftwork: working brief and adjudication register
 
-Updated: 2026-09-24.
+Updated: 2026-09-26.
 
 **Direction:** Shiftwork remains the sole active project. The approved final pivot
 around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
@@ -17,13 +17,17 @@ backtracked for a scoped revision. The user approved that correction and Gate 4
 together on 2026-09-24 and authorized committing and pushing both to main without
 a co-author footer. All four gates are approved. No implementation is authorized;
 each slice still needs its own go-ahead.
-Gate 1 publication and merge/push are complete (`821a24c` on main).
+Gate 1 publication and merge/push are complete (`821a24c` on main). Gate 2
+section 12 and the Gate 3 section 7 configuration list carry a documentation-only
+credential-name correction re-approved by the user on 2026-09-26; it changes no
+behavior, interface or budget.
 
 **Build baseline:** Slices 1 through 10 are recorded as implemented; Slice 9 was
 merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance,
 and Slice 10 was accepted by the user on 2026-09-25, then merged to main as
-`f0a1e81..0432cbd` and pushed the same day. Slices 11 through 25 are the approved
-Gate 4 build order and are not implemented.
+`f0a1e81..0432cbd` and pushed the same day. Slice 11 was accepted on 2026-09-26 and
+is pushed on `shiftwork/slice-11`, not yet merged to main. Slices 12 through 25 are
+the approved Gate 4 build order and are not implemented.
 Preserve that foundation and its evidence;
 it does not demonstrate the new prediction, comparison or selection workflow.
 The full approval history and verbatim evidence remain in
@@ -103,6 +107,15 @@ claims of an exclusive category.
   giving a migrated v5 Northline engagement a `STARTER_BASELINE` starter. No
   runtime evidence, install, credential, external call or human session followed,
   and no slice is authorized by these approvals alone.
+- 2026-09-26: the user re-approved the documentation-only credential-name
+  correction in Gate 2 section 12 and the Gate 3 section 7 configuration list. The
+  correction replaces the stale `CONTREE_SESSION` name with the documented
+  `CONTREE_TOKEN`, `CONTREE_PROJECT` and `NEBIUS_AI_PROJECT` aliases and adds
+  `NEBIUS_PROJECT_ID`. The same session installed `contree-client==0.4.0[httpx]`
+  into `.venv313` for the Slice 12 spike only, with no lockfile change, and
+  confirmed from the installed package plus vendor documentation that no local
+  Docker daemon is needed for the remote image build. No external call, spike run
+  or slice work followed.
 
 The external software-factory guide at the recorded
 `C:/Users/jayd0/.agents/skills/software-factory/SKILL.md` path was unavailable during

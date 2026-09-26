@@ -72,7 +72,12 @@ summaries when a time-sensitive external claim is being made.
   sealed-case contents, outreach, deployment, publication, submission and ADR #4
   each remain separately authorized. Slice 10 is accepted and merged to main as
   `f0a1e81..0432cbd`, pushed 2026-09-25. Slice 11 is accepted (2026-09-26) and
-  pushed on `shiftwork/slice-11` as `add85b1..6832486`. The next action is
+  pushed on `shiftwork/slice-11` as `add85b1..6832486`; it is not yet merged to
+  main, which can fast-forward to it. Gate 2 and Gate 3 carry a documentation-only
+  credential-name correction that the user re-approved on 2026-09-26: the stale
+  `CONTREE_SESSION` name is replaced by the documented `CONTREE_TOKEN`,
+  `CONTREE_PROJECT` and `NEBIUS_AI_PROJECT` aliases, with `NEBIUS_PROJECT_ID` in
+  the Gate 3 configuration list. The next action is
   Slice 12 under `04-slices.md` on a branch named `shiftwork/slice-12`, and it
   needs its own go-ahead. Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and

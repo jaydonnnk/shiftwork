@@ -1,5 +1,59 @@
 # Status: Shiftwork
 
+## Credential-name correction, SDK installation and re-approval pause: 2026-09-26
+
+**Two approved gate documents carry a documentation-only credential-name
+correction, re-approved by the user in chat on 2026-09-26.** The correction
+changes no behavior, interface, budget, evidence claim or product decision, and
+no Slice 12 work has started. Gate 2 and Gate 3 were marked re-approval pending
+when the correction was applied and are marked re-approved again here.
+
+- The vendor's current documentation names the Sandboxes credential `CONTREE_TOKEN`
+  (alias `NEBIUS_API_KEY`), the project `CONTREE_PROJECT` (alias `NEBIUS_AI_PROJECT`)
+  and the base URL `CONTREE_URL`. The approved documents instead listed
+  `CONTREE_SESSION`, which does not appear anywhere in the Sandboxes API, SDK or CLI
+  pages reviewed this session. Sources: the Contree CLI installation page, the
+  Sandboxes auth endpoint page and the SDK getting-started page.
+- `03-program-design.md` section 7 now lists `NEBIUS_PROJECT_ID` in place of
+  `CONTREE_SESSION` and states the documented aliases. `02-architecture.md`
+  section 12 now names the real variables and drops the "recorded in earlier
+  research" hedge that preserved the stale name.
+- The leak-guard marker lists in `tests/api/test_host_path_env_isolation.py` and
+  `tests/executor/test_conformance.py` now inject `NEBIUS_PROJECT_ID` instead of
+  `CONTREE_SESSION`. Only the marker name changed: no assertion, test count or pass
+  condition was touched, and `NEBIUS_API_KEY`, the real token name, was already
+  covered. Re-run under `.venv313/Scripts/python.exe`:
+  `58 passed, 1 skipped` for those two files.
+- The dated Slice 3 entry that recorded `CONTREE_SESSION` is history and was left
+  unrewritten. No ADR, gate body other than the two named sections, or slice
+  requirement changed.
+
+**SDK installation, authorized 2026-09-26.** `contree-client==0.4.0` with the
+`httpx` extra was installed into `.venv313` for the Slice 12 spike only, via
+`uv pip install --link-mode=copy --python .venv313/Scripts/python.exe "contree-client[httpx]"`.
+`requirements.lock` and `pyproject.toml` are unchanged, no `uv.lock` appeared, and
+`httpx` remains at the pinned `0.28.1`. The `requests`, `urllib3` and `aiohttp`
+transports are deliberately absent. If Slice 13 adopts the client for production,
+it enters `pyproject.toml` and `requirements.lock` with pin parity as a separate
+decision.
+
+**Client decision.** The Python SDK is the runtime path because `contree-cli` 0.9.4
+is a wrapper over the same `contree-client` package. Local introspection of the
+installed client shows `whoami`, `spawn_instance`, `upload_file`, `get_file`,
+`operation_subprocess_create`, `iter_operation_events`, `import_image` and
+`inspect_image_grep`, but **no Dockerfile build**, so a custom image needs the CLI
+or a public registry import. This is a static reading of the installed package, not
+executed evidence.
+
+**Spend control accepted 2026-09-26.** The whole spike is capped at $3 with a
+stop-and-report if any part projects above it, against $25 of credits that must also
+cover judging through 2026-12-03. The user reported the keys as valid.
+
+**Not run:** the Sandboxes enablement check (`GET /sandboxes/v1/whoami`), any
+inference call, image import, externally visible command, commit or push. The five
+corrected files are uncommitted. Slice 11 is accepted and pushed but still
+unmerged: main can fast-forward to `shiftwork/slice-11`, which is 19 commits ahead.
+
 ## Slice 11 acceptance: 2026-09-26
 
 **Current step: Slice 11 is ACCEPTED.** The user chose `Accept and push branch`
@@ -398,11 +452,16 @@ those named assertions can fail before recording S11 as complete.
   explicitly approved the revised product, six plain HTML mockups and supporting
   visual brief and manual kit. Human sessions remain unrun; approval supplies no
   participant results or learning evidence.
-- **Gate 2: RE-APPROVED 2026-09-24 after the legacy first-choice backtrack.**
-  `02-architecture.md` permits a non-operational first-choice shift for a closed
-  v5 engagement with no selection. The user approved this revision and requested
-  Gate 3. It is not implemented.
-- **Gate 3: RE-APPROVED 2026-09-24 after the scoped Northline backtrack.**
+- **Gate 2: RE-APPROVED 2026-09-26 for the documentation-only credential-name
+  correction, first re-approved 2026-09-24 after the legacy first-choice
+  backtrack.** `02-architecture.md` permits a non-operational first-choice shift
+  for a closed v5 engagement with no selection. The user approved this revision
+  and requested Gate 3. It is not implemented. The approved correction replaces
+  the stale `CONTREE_SESSION` name with the documented `CONTREE_TOKEN`,
+  `CONTREE_PROJECT` and `NEBIUS_AI_PROJECT` aliases; it changes no behavior,
+  interface, budget or decision.
+- **Gate 3: RE-APPROVED 2026-09-26 for the documentation-only configuration-name
+  correction, first re-approved 2026-09-24 after the scoped Northline backtrack.**
   Gate 4 review found no Northline path from learner-edited code to an eligible
   comparison, explicit choice and operation, because the comparison loader named
   only Bellwether workloads. The approved `03-program-design.md` correction
@@ -412,7 +471,9 @@ those named assertions can fail before recording S11 as complete.
   and failing-capable cross-engagement tests. The user's prior approval and local
   merge as `aedc97f` and `ab5ab9c` remain historical. The approved correction is
   committed as `f4ba057`. This is design, not
-  implementation authority.
+  implementation authority. The approved 2026-09-26 correction replaces
+  `CONTREE_SESSION` with `NEBIUS_PROJECT_ID` in the section 7 configuration-name
+  list and records the documented aliases; it changes no behavior, type or budget.
 - **Gate 4: APPROVED 2026-09-24 for the final pivot.** `04-slices.md` maps
   Slices 10 to 25, traces all 49 Gate 3 obligations to a completing slice and
   keeps the capability spike before any live-dependent work. Its 2026-09-19
@@ -444,7 +505,8 @@ those named assertions can fail before recording S11 as complete.
   was accepted on 2026-09-25 and is merged to main as `f0a1e81..0432cbd`. The
   next action is Slice 12 under `04-slices.md`, which needs its own go-ahead and
   its own `shiftwork/slice-12` branch, with its sandbox-scoped Nebius key
-  precondition still unverified. Stop and
+  precondition still unverified. The two documentation-only credential-name
+  corrections were re-approved on 2026-09-26 and change no behavior. Stop and
   backtrack the affected gate if a slice falsifies an approved Gate 2 or Gate 3
   decision.
 
