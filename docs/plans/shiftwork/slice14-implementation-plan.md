@@ -1,8 +1,9 @@
 # Slice 14: optional assistance after learner commitment
 
-Status: implementation started 2026-09-27 on `shiftwork/slice-14` under the
-user's explicit Slice 14 go-ahead. The user separately authorized the bounded
-live check below. This record is not slice acceptance or evidence of a live run.
+Status: implemented and accepted 2026-09-27 on `shiftwork/slice-14` under the
+user's explicit Slice 14 go-ahead; the acceptance record is in `00-status.md`.
+The user separately authorized the bounded live check below. The live limits
+stated below remain in force.
 
 ## Scope
 

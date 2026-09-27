@@ -100,7 +100,15 @@ summaries when a time-sensitive external claim is being made.
   plus the image-UUID residual and repaired all five with failing-capable
   proofs, and the user ACCEPTED Slice 13 on 2026-09-27. The work is committed in
   focused batches on `shiftwork/slice-13`, merged to main as `ed0802a..1d82e95`
-  and pushed, no co-author footer. Slice 14 onward
+  and pushed, no co-author footer. Slice 14 then received its own go-ahead and
+  its own three-call live authorization on 2026-09-27; its offline
+  implementation, its recorded demo and an independent review round landed, the
+  review's six findings were adjudicated and repaired with failing-capable
+  proofs, and the user ACCEPTED Slice 14 on 2026-09-27. Its live assist evidence
+  and prompt-quality limits stay in
+  `docs/plans/shiftwork/evidence/slice14-assist-live-2026-09-27.md`. The work is
+  committed in focused batches on `shiftwork/slice-14` (acceptance record in
+  this batch), no co-author footer. Slice 15 onward
   still needs its own go-ahead and its own live authorizations.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and

@@ -21,7 +21,7 @@ a co-author footer. All four gates were approved at that point. Gate 2 was
 re-approved on 2026-09-26 for the scoped file-readback rule after the live
 snapshot/capture failure. Gate 3's corresponding program-design correction was
 separately re-approved the same day. Slice 12 was accepted on 2026-09-27;
-Slice 13 was implemented and demonstrated on 2026-09-27, cross-checked with four gaps and the image-UUID residual repaired, and accepted by the user the same day. Its live evidence and limits are recorded in `plans/shiftwork/00-status.md`; the branch is merged to main (`ed0802a..1d82e95`, pushed, 2026-09-27). Slice 14 received its own go-ahead on 2026-09-27. Its implementation and recorded demo are in progress on `shiftwork/slice-14`. Three separately authorized live assist calls completed, exposed a prompt-grounding problem and led to an offline-only repair. The revised prompt has no live quality evidence; see `plans/shiftwork/evidence/slice14-assist-live-2026-09-27.md`.
+Slice 13 was implemented and demonstrated on 2026-09-27, cross-checked with four gaps and the image-UUID residual repaired, and accepted by the user the same day. Its live evidence and limits are recorded in `plans/shiftwork/00-status.md`; the branch is merged to main (`ed0802a..1d82e95`, pushed, 2026-09-27). Slice 14 received its own go-ahead on 2026-09-27. Its offline implementation, recorded demo and independent review round completed; the review's six findings were adjudicated and repaired with failing-capable proofs, and the user accepted Slice 14 the same day. Three separately authorized live assist calls completed, exposed a prompt-grounding problem and led to an offline-only repair. The revised prompt has no live quality evidence; see `plans/shiftwork/evidence/slice14-assist-live-2026-09-27.md`.
 Gate 1 publication and merge/push are complete (`821a24c` on main). Gate 2
 section 12 and the Gate 3 section 7 configuration list carry a documentation-only
 credential-name correction re-approved by the user on 2026-09-26; it changes no
@@ -37,9 +37,8 @@ and retained limits are in `plans/shiftwork/evidence/slice12-capability-2026-09-
 The 2 MiB zero-byte checkpoint observation under a 1 MiB layer cap remains
 unexplained; capture under that cap is unproven. Six trials covered one request
 shape, pre-repair inference records omit reasoning text, and probe 1's
-protected-fixture limb is N/A. Slices 14 through 25 remain unchecked and
-need their own go-aheads and live authorizations, except Slice 14's received
-implementation go-ahead and exhausted three-call live authorization. Preserve the foundation
+protected-fixture limb is N/A. Slice 14 is accepted; Slices 15 through 25 remain
+unchecked and need their own go-aheads and live authorizations. Preserve the foundation
 and its evidence; it does not prove completed comparison, selection,
 operation or human learning outcomes.
 
@@ -329,8 +328,9 @@ observation and the other stated limits remain attached to that verdict.
 The user authorized starting Slice 13 and its required live tests on
 2026-09-27. Gate 3's SDK dependency correction was separately re-approved the
 same day. Slice 13 is implemented, cross-checked, repaired, accepted and
-merged to main (2026-09-27); the record is in `plans/shiftwork/00-status.md`. Slices 14 onward
-remain unchecked, although Slice 14 is in progress under its own go-ahead.
+merged to main (2026-09-27); the record is in `plans/shiftwork/00-status.md`.
+Slice 14 is implemented, reviewed, repaired and accepted (2026-09-27); Slices 15
+onward remain unchecked.
 Fixture authoring, sealed-case contents, outreach,
 deployment, publication, submission and ADR #4 also remain separately
 authorized.

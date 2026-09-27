@@ -93,8 +93,12 @@ including a sentinel-bearing scored case and scanner self-test.
   those row columns. The three live replies were not retained verbatim, so the
   live observations stay summaries as the evidence doc states.
 
-This is an implementation progress record, not acceptance or a live model
-quality claim. Slice 14 remains unchecked.
+The user accepted Slice 14 on 2026-09-27. The work is committed in focused
+batches on `shiftwork/slice-14` (this documentation batch carries the acceptance
+record), no co-author footer. Acceptance keeps the live limits visible: the
+revised prompt and the repaired transport have no live provider evidence, the
+three-call authorization is exhausted, and the three live replies were not
+retained verbatim.
 
 ## Slice 13 cross-check, gap repairs and stress test: 2026-09-27
 
@@ -1616,7 +1620,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
   co-author footer. Acceptance covers Slice 12 only; Slice 13 onward needs its
   own go-ahead and its own authorizations
 - [x] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap; implemented and demonstrated 2026-09-27, ACCEPTED by the user 2026-09-27. Live evidence and limits are recorded in the Slice 13 completion section above. Cross-checked; four gaps and the recorded image-UUID residual repaired with failing-capable proofs, and re-verified `444 passed, 1 skipped, 2 warnings` on 2026-09-27 (section at the top). The work is committed in focused batches on `shiftwork/slice-13`, merged to main as `ed0802a..1d82e95` and pushed, no co-author footer. Acceptance covers Slice 13 only; Slice 14 onward needs its own go-ahead and its own live authorizations.
-- [ ] Slice 14: prediction-gated attributable assist gateway; explicit go-ahead received 2026-09-27. Offline implementation and tests passed; three authorized live calls completed with a quality failure that prompted an offline-only repair. Independent review findings were adjudicated and repaired offline 2026-09-27 (stranded PENDING reconciliation, injected-client deadline bound, records). Revised-prompt live quality and user acceptance remain open. See the Slice 14 progress section and `slice14-implementation-plan.md`.
+- [x] Slice 14: prediction-gated attributable assist gateway; implemented and reviewed 2026-09-27, ACCEPTED by the user 2026-09-27. Offline implementation and tests passed (`457 passed, 1 skipped, 2 warnings`); three authorized live calls completed with a quality failure that prompted an offline-only repair; the review's six findings were adjudicated and repaired with failing-capable tests and six mutation proofs (stranded PENDING reconciliation, injected-client deadline bound, records). Live evidence and limits are in the Slice 14 section above; revised-prompt live quality stays open. The work is committed in focused batches on `shiftwork/slice-14`, no co-author footer. Acceptance covers Slice 14 only; Slice 15 onward needs its own go-ahead and its own live authorizations.
 - [ ] Slice 15: reviewed A/B workloads and six frozen paired trial slots
 - [ ] Slice 16: fair comparison, exposure invalidation and restart recovery
 - [ ] Slice 17: explicit eligible exact-version selection
