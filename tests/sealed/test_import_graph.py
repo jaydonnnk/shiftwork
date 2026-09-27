@@ -24,9 +24,8 @@ Four arms, all failing-capable:
    the three named forms, so a controller module cannot read the sealed files by
    path while importing nothing.
 
-Slice 6 scope: ``shiftwork/assist/`` does not exist until Slice 12, so that arm is
-vacuous here and re-runs non-vacuously there. The scan picks the directory up
-automatically once it exists.
+Slice 14 adds ``shiftwork/assist/``. The scan includes it and an explicit
+non-vacuity check requires the gateway source to enter the import graph.
 
 Gate 3 wording note: test 17's spec says "only ``evaluator``" imports
 ``shiftwork.sealed``. The as-built and as-designed direction is the reverse:
@@ -442,10 +441,16 @@ def test_only_the_loader_references_the_sealed_storage_path() -> None:
         assert _sealed_path_findings(ast.parse(source)), f"{label} was not rejected"
 
 
-def test_assist_directory_absent_until_slice_12() -> None:
-    """Records that test 17's assist arm is vacuous in Slice 6, not silently skipped."""
-    assert not (PACKAGE_ROOT / "assist").exists(), (
-        "shiftwork/assist/ now exists; test 17's assist arm must be exercised non-vacuously"
+def test_assist_gateway_is_scanned_for_forbidden_imports() -> None:
+    """Test 17's assist arm now has real source and a failing-capable detector."""
+    gateway_path = PACKAGE_ROOT / "assist" / "gateway.py"
+    assert gateway_path in _package_files(), "assist gateway was absent from the package scan"
+    importers, computed = _importers()
+    assert "assist/gateway.py" not in importers
+    assert not any(item.startswith("assist/") for item in computed)
+    injected = ast.parse("from shiftwork.sealed import store\n")
+    assert _imports_sealed(_dotted_imports(injected, "shiftwork.assist.gateway")), (
+        "the import scanner must catch a sealed-store import injected into assist"
     )
 
 

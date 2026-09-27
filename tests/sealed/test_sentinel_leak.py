@@ -22,9 +22,8 @@ capture is probed with the sentinel before the lifecycle so the scan cannot pass
 against a mechanism that observes nothing. Without those checks a silently
 ineffective monkeypatch would make every scan below pass for free.
 
-Slice 6 scope, deferred clause NOT claimed here:
-  * the "no prompt" clause is VACUOUS - ``shiftwork/assist/`` does not exist until
-    Slice 12, where this scan re-runs non-vacuously over real assist prompts.
+Slice 14 exercises the assist-prompt clause against the real gateway request
+using a local HTTP double. No provider call is made.
 """
 
 import asyncio
@@ -35,11 +34,14 @@ import sys
 from pathlib import Path
 
 import pytest
+import httpx
 from fastapi.testclient import TestClient
 
 from leakscan import decoded_surfaces
 from shiftwork import config, orchestrator
 from shiftwork.app import create_app
+from shiftwork.assist.gateway import LiveAssistGateway
+from shiftwork.gateway.redaction import serialized_contains
 from shiftwork.evaluator.evaluator import expected_ref_for
 from shiftwork.executor.local_process import LocalProcessAdapter
 from shiftwork.sealed import store as sealed_store
@@ -284,9 +286,56 @@ def test_sentinel_absent_from_the_sandbox_payload_and_execution_logs(
     assert SENTINEL not in logged.decode("utf-8", errors="replace"), "sentinel in the execution log"
 
 
-def test_no_assist_prompt_surface_exists_yet() -> None:
-    """Records that test 16's "no prompt" clause is vacuous in Slice 6, not silently skipped."""
-    assist_dir = config.PACKAGE_DIR / "assist"
-    assert not assist_dir.exists(), (
-        "shiftwork/assist/ now exists; test 16's prompt arm must scan real assist prompts"
+def test_sealed_sentinel_absent_from_real_assist_prompt_and_reply(tmp_path, sentinel_family) -> None:
+    """A scored sealed expectation cannot reach the outbound assist request."""
+    assert sentinel_family["cases"]
+    assert serialized_contains({"messages": [{"content": SENTINEL}]}, SENTINEL), (
+        "the prompt scanner must detect the needle in a serialized provider body"
     )
+    requests = []
+
+    def respond(request):
+        requests.append(request)
+        return httpx.Response(200, json={
+            "model": "recorded-test-model", "choices": [{"message": {"content": "Check the public test."}}],
+            "usage": {"prompt_tokens": 30, "completion_tokens": 6},
+        })
+
+    with httpx.Client(transport=httpx.MockTransport(respond)) as http:
+        gateway = LiveAssistGateway("LOCAL_TEST_TOKEN", http=http)
+        with TestClient(create_app(str(tmp_path / "assist-sentinel.db"), assist_gateway=gateway)) as client:
+            shift = client.post("/api/engagements/bookshop/shifts").json()
+            shift_id = shift["id"]
+            before = client.post(f"/api/shifts/{shift_id}/assist", json={
+                "investigation_id": None, "role": "HINT", "client_request_id": "before-entry",
+            })
+            assert before.status_code == 409
+            run = client.post(f"/api/shifts/{shift_id}/runs").json()
+            checks = client.get(f"/api/runs/{run['id']}/checks").json()
+            assert checks and all(row["expected_ref"].startswith("sealed:") for row in checks)
+            sentinel_refs = {expected_ref_for(case) for case in sentinel_family["cases"]}
+            assert any(row["expected_ref"] in sentinel_refs for row in checks), (
+                "the executed run did not assess a sentinel-bearing sealed case"
+            )
+            investigation = client.post(f"/api/shifts/{shift_id}/investigations", json={
+                "source_run_id": run["id"], "source_request_ordinal": 1,
+                "cause": "The price router omitted collection.",
+                "falsifier": "A nonprice request still omits collection.",
+                "public_test": "Check the collection task in the public request.",
+                "client_request_id": "assist-sentinel-investigation",
+            })
+            assert investigation.status_code == 201, investigation.text
+            helped = client.post(f"/api/shifts/{shift_id}/assist", json={
+                "investigation_id": investigation.json()["id"], "role": "HINT",
+                "client_request_id": "assist-sentinel-call",
+            })
+            assert helped.status_code == 200, helped.text
+            station = client.get(f"/api/shifts/{shift_id}/investigations")
+            assert station.status_code == 200, station.text
+
+    assert len(requests) == 1, "the provider request was never constructed"
+    outbound = json.loads(requests[0].content)
+    assert outbound["messages"][1]["content"].startswith("Role: HINT")
+    for label, surface in (("provider prompt", outbound), ("help response", helped.text),
+                           ("station view", station.text), ("pre-entry error", before.text)):
+        assert not serialized_contains(surface, SENTINEL), f"sealed sentinel leaked into {label}"

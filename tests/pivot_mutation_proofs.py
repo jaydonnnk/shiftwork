@@ -391,10 +391,10 @@ CASES = [
         "expect": "test_an_investigation_from_another_shift_cannot_authorise_a_diagnostic",
     },
     {
-        "name": "s11_absent_assist_gateway_claims_success",
+        "name": "s14_absent_assist_gateway_claims_success",
         "file": "shiftwork/orchestrator.py",
-        "old": '    raise AssistGatewayUnavailable(\n        f"no assist gateway exists yet, so a {role.value} cannot be produced; "\n        "diagnostic help arrives with Slice 14"\n    )',
-        "new": "    return None",
+        "old": '    if gateway is None:\n        raise AssistGatewayUnavailable(\n            f"assist gateway is not configured for this session; {role.value} is unavailable"\n        )',
+        "new": '    if gateway is None:\n        return None',
         "tests": f"{ASSIST}::test_diagnostic_help_needs_an_investigation_and_is_denied_anyway",
         "expect": "test_diagnostic_help_needs_an_investigation_and_is_denied_anyway",
     },

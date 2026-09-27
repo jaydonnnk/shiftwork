@@ -411,7 +411,7 @@ try {
   await evaluate(() => { window.fetch = window.__fetch; document.getElementById('refresh').click(); });
   await ready();
   await evaluate(() => document.querySelector('[data-station="investigate"]').click());
-  const investigateView = await evaluate(async () => {
+  const investigateView = await evaluate(async assistDemo => {
     const humanize = value => value.toLowerCase().replaceAll('_', ' ');
     const wait = async (label, condition) => {
       const deadline = Date.now() + 15000;
@@ -461,13 +461,47 @@ try {
     } else if (latest.source_request_ordinal !== requestedOrdinal) {
       throw new Error(`Recorded entry cites request ${latest.source_request_ordinal} instead of ${requestedOrdinal}`);
     }
-    denials.withEntry = await checkDenial(latest.id);
+    if (assistDemo) {
+      document.getElementById('assist-role').value = 'HINT';
+      document.getElementById('assist-message').value = 'What public evidence should I check?';
+      document.getElementById('request-assist').click();
+      await wait('recorded hint', () => document.querySelectorAll('#assist-events [data-assist-event-id]').length === 1);
+      const hint = document.querySelector('#assist-events [data-assist-event-id]');
+      if (!hint.textContent.includes('recorded-assist-double') || !hint.textContent.includes('collection')) throw new Error('Recorded hint is not visibly attributed');
+      document.getElementById('assist-role').value = 'PATCH_PROPOSAL';
+      document.getElementById('request-assist').click();
+      await wait('recorded patch proposal', () => document.querySelectorAll('#assist-events [data-assist-event-id]').length === 2);
+      const patch = document.querySelectorAll('#assist-events [data-assist-event-id]')[1];
+      if (!patch.textContent.includes('Proposal for learner review only') || !patch.textContent.includes('not changed code')) throw new Error('Patch proposal lacks its attribution and no-edit warning');
+      patch.querySelector('button').click();
+      await wait('accepted help attribution', () => document.querySelectorAll('#assist-events [data-assist-event-id]')[1]?.textContent.includes('Accepted as help attribution'));
+      const assisted = await (await fetch(stationUrl)).json();
+      if (assisted.assist_used !== 2 || assisted.assist_events[1].accepted !== true) throw new Error('UI attribution did not round trip to the assist event');
+      denials.withEntry = 'recorded assist, 2 of 3 calls used';
+    } else denials.withEntry = await checkDenial(latest.id);
     return { shift: shiftId, entries: recorded.investigations.length, revision: Boolean(latest.revision_of_id), denials };
-  });
+  }, process.argv.includes('--assist-demo'));
   const investigateLabels = await labels();
   assert.deepEqual(investigateLabels, ['board', 'source', 'diagnostic']);
+  for (const journey of ['return', 'away']) {
+    await evaluate(journey => document.querySelector(`[data-view="${journey}"]`).click(), journey);
+    assert.equal(await evaluate(() => document.getElementById('investigate-view').hidden), true,
+      `${journey} must hide the live Investigate form and diagnostic result`);
+    await evaluate(() => document.querySelector('[data-station="investigate"]').click());
+    assert.equal(await evaluate(() => document.getElementById('investigate-view').hidden), false,
+      'Investigate must reopen after a journey placeholder');
+  }
   assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '1280px investigate panel overflows');
   await screenshot('investigate-1280');
+  if (process.argv.includes('--assist-demo')) {
+    await evaluate(() => document.getElementById('assist-events').scrollIntoView({ block: 'center' }));
+    await screenshot('assist-1280');
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 900, deviceScaleFactor: 1, mobile: false });
+    await evaluate(() => document.getElementById('assist-events').scrollIntoView({ block: 'center' }));
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '390px assist panel overflows');
+    await screenshot('assist-390');
+    await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+  }
   const diagnostic = await evaluate(async investigateShift => {
     const humanize = value => value.toLowerCase().replaceAll('_', ' ');
     const panel = document.getElementById('investigate-view');
@@ -542,7 +576,7 @@ try {
     assert.equal(await evaluate(() => document.querySelectorAll('.customer-button').length), 3);
   }
   assert.equal(exceptions.length, 0, JSON.stringify(exceptions));
-  const report = { matrix, investigateStation: { ...investigateView, diagnostic }, navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
+  const report = { matrix, investigateStation: { ...investigateView, diagnostic }, assistDemo: process.argv.includes('--assist-demo') ? 'recorded double, hint and accepted patch attribution' : 'not enabled', navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
   await writeFile(path.join(artifacts, 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
