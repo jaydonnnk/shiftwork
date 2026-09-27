@@ -1,5 +1,153 @@
 # Status: Shiftwork
 
+## Slice 13 cross-check, gap repairs and stress test: 2026-09-27
+
+A cross-check of the Slice 13 tree re-ran the focused suites and the full suite,
+re-read every archived `slice13-*.jsonl` record against its claim, decoded the
+three checkpoint captures, re-read the preserved live-run databases, re-served
+the preserved model database through the app, and mutation-probed the new
+assertions. The live claims reproduce: the isolation canary, both live stages,
+the byte-exact readbacks, the zero business writes and the ISOLATED_LIVE
+projection all hold. Four gaps were found and repaired, and the recorded
+image-UUID residual was repaired in a follow-up on the user's instruction (Gap 5
+below). Each repair has a failing-capable proof.
+
+- **Gap 1, recorded settings did not match the executed ceiling.** The frozen
+  execution context stored `{"temperature": 0, "max_tokens": 256}` while the
+  gateway executed the approved 1,024-token ceiling (Gate 3 section 7). The
+  preserved successful model database proves it: its context row says 256, and
+  its archived `INFERENCE_RESULT` used 287 completion tokens. Root cause: the
+  ceiling had two owners, the gateway default and a stale hardcoded copy in
+  `freeze_diagnostic_context`. Repair: `GATEWAY_MAX_OUTPUT_TOKENS = 1024` is
+  now defined once in `shiftwork/gateway/protocol.py`, both the policy default
+  and the frozen context use it, and
+  `test_reserved_isolated_context_records_the_approved_provider_ceiling` failed
+  with 256 before the fix and passes after. The archived runs keep their
+  recorded 256 field; that historical mismatch stays visible here and was not
+  rewritten.
+- **Gap 2, Gate 3 test 36 carried no explicit 422 assertion.** The clause "an
+  injected `allowed_tool_names` request field returns 422 with no gateway call"
+  was satisfied by the `extra="forbid"` experiment schema but no test named it.
+  Added `test_injected_experiment_request_field_returns_422_without_a_run`,
+  which also asserts zero experiment and run rows. Proven failing-capable: with
+  the schema mutated to ignore extras, the test fails.
+- **Gap 3, Gate 3 test 38 had no transport-failure arm.** Only the HTTP-failure
+  path was tested. Added
+  `test_transport_failure_retains_the_provider_request_and_consumes_the_call`,
+  which asserts the raw provider request is retained (model, ceiling, input
+  text, and no token) and that the failed transport still consumes the single
+  call. Proven failing-capable by narrowing the caught exception tuple.
+- **Gap 4, the frozen-policy binding had no named assertion.** Added
+  `test_isolated_execution_binds_the_grant_to_the_frozen_mission_policy`, which
+  captures the adapter's `allowed_tool_names`, requires exact equality with the
+  reviewed mission vocabulary, and requires the frozen context mission bytes to
+  equal the reviewed fixture bytes. Proven failing-capable by widening the
+  executed list.
+- **Also repaired:** a checkpoint readback mismatch now records a public
+  observation with the expected and actual byte counts and digests before the
+  run fails (the S12 zero-byte case lacked exactly this detail), covered by the
+  extended readback test; and test 29's skip reason now states that the real
+  adapter exists and only the authorized live conformance run is deferred.
+- **Gap 5, the image UUID had two owners (the recorded residual).**
+  `shiftwork/config.py` carried the env-aware `TOKEN_FACTORY_IMAGE` while
+  `shiftwork/executor/tokenfactory.py` kept its own literal, so a
+  `SHIFTWORK_TOKEN_FACTORY_IMAGE` override made the adapter fail closed instead
+  of executing the named image. Repair: the adapter gate and the spawn call read
+  `config.TOKEN_FACTORY_IMAGE`, and `demos/final_pivot.py` uses the same source.
+  The new `test_adapter_executes_the_configured_image_and_rejects_a_stale_request`
+  failed with `PROVISION_FAILED` before the fix and passes after; a stale frozen
+  request still fails closed, proven failing-capable by dropping the image clause
+  from the gate. The new
+  `test_reserved_isolated_context_records_the_configured_image` binds the frozen
+  context to the same source, proven failing-capable by restoring the literal at
+  the freeze site. No live call ran for this repair.
+
+After the repairs: focused S13 suites `120 passed, 1 skipped, 2 warnings`; full
+suite `442 passed, 1 skipped, 2 warnings`; `pip check` clean. After Gap 5,
+`tests/executor tests/orchestrator tests/api` gives `194 passed, 1 skipped,
+2 warnings` and the full suite `444 passed, 1 skipped, 2 warnings`; `pip check`
+stays clean. The preserved
+model database re-served through the app reproduces the room data
+(`ISOLATED_LIVE`, `eligible: false`, `public_catalog_search`, the missing-task
+assessments, the envelope-derived customer text, and zero business writes). The
+user accepted Slice 13 on 2026-09-27. The work is committed in focused batches
+on `shiftwork/slice-13` (this documentation batch carries the acceptance
+record), no co-author footer.
+
+That residual note is closed: Gap 5 above repaired the two-owner image. The S12
+historical spike `demos/gateway_spike_live.py` keeps its own pinned literal and
+was left untouched.
+
+A cleanup re-scan over every slice-touched module found and removed two unused
+imports left by the slice, `os` in `shiftwork/executor/tokenfactory.py` and
+`json` in `shiftwork/gateway/service_inference.py`; the suites above were re-run
+after the removal.
+
+## Slice 13 completion and evidence: 2026-09-27
+
+Slice 13 is implemented and ready for user acceptance on this branch. The public route now runs
+one learner-owned frozen service request in the verified Token Factory adapter,
+with controller-mediated Nemotron inference, an exact tool allowlist, no provider
+credential in the Sandbox, network-disabled execution, checkpoint byte/digest
+readback, raw observations before public projections, and no selection, operation,
+ledger or incident writes.
+
+Live evidence:
+
+- The bounded isolation canary passed. The provider key, controller database,
+  host-only marker, protected fixture and other-run grant were all absent from the
+  Sandbox; an unlisted tool returned 403; checkpoint readback was exact (405
+  bytes, SHA-256 `3f3e840883ed3a1f992f16bc41d32039bac64852d839d492871fd5fece2a41df`).
+- Code-only public bootstrap passed once: operation
+  `01a0e191-f432-7455-9244-64b36cb6654f`, trial `COMPLETE`, checkpoint 638 bytes,
+  SHA-256 `7c976840bb7d049ff62a5c661920398d74763c6eae34c7c70b0da9bd8a3091b8`,
+  and zero business counts. The checkpoint was re-read as `PASS_BYTE_EXACT`.
+- Model-backed public bootstrap passed once after a preserved first failed attempt
+  exposed the initial 256-token ceiling. The successful operation was
+  `01a0e193-ebbd-7270-9c51-372bf2fbce3d`; Nemotron selected the allowed
+  `public_catalog_search`, one provider call used 287 completion tokens, the
+  checkpoint was 461 bytes with SHA-256
+  `3bbc6cf4b97836eeb159ed76c8a48e66f006e0b10ae1a14c1c71dc783bcd8b3d`, and the
+  re-read was `PASS_BYTE_EXACT`. Independent task checks still found the response
+  incomplete, so this is evidence of the path and policy boundary, not a passing
+  customer service result.
+- The room was checked at `http://127.0.0.1:8765/?s13=1#board` on desktop and
+  narrow mobile layout. It shows `ISOLATED_LIVE`, the frozen request, exact output,
+  model/tool observations, checkpoint digest, task checks, and the explicit
+  ineligibility/no-business-write boundary.
+
+The first model attempt (`01a0e192-3976-7468-ae9e-357b3804d430`) is retained as a
+failed evidence record: `finish_reason=length`, 256 completion tokens, no final
+tool name, Sandbox status `SUCCESS` but no capture. No business state changed.
+The ceiling is now the approved 1,024-token maximum. The full suite after the
+sealed-path projection repair is `438 passed, 1 skipped, 2 warnings`.
+
+Post-slice architect cleanup found no new orphan or duplicate test/fixture. The
+failed model record is intentionally retained as evidence. Existing future-slice
+fixtures, ADRs, and `PROGRESS.md` remain outside this slice. No commit or push was
+made at demonstration time; the commit record follows acceptance in the section
+at the top. ADR #4 remains separately unauthorized.
+
+## Slice 13 start and scoped Gate 3 backtrack: 2026-09-27
+
+The user authorized starting Slice 13 and its required live tests under the
+repository rules. The clean `main` checkout was switched to the existing
+`shiftwork/slice-13` branch and fast-forwarded to current local `main`; no new
+commit was created. The focused pre-change suite returned `120 passed, 1 skipped,
+2 warnings` using `.venv313/Scripts/python.exe`.
+
+**Gate 3 Program Design: RE-APPROVED 2026-09-27 for the scoped S13 Sandbox SDK dependency.**
+Gate 3 section 2 explicitly excluded a vendor SDK and required a backtrack
+before one enters the lockfile. S12 used `contree-client[httpx]==0.4.0` only in the
+spike environment; the chosen S13 production adapter needs it declared for a clean
+install. The proposed correction in `03-program-design.md` names the exact SDK,
+trusted-process ownership, `pyproject.toml` and `requirements.lock` changes,
+and packaging proof. The user explicitly re-approved this correction in chat;
+Gates 1, 2 and 4 retain their approved decisions. The user's S13 and live-test
+authorization also stands. At the approval point no dependency file,
+production code, fixture, ADR or live service had changed. Slice 13 remains
+unchecked until its working result is demonstrated.
+
 ## Slice 12 offline completion: inference payload archiving and judge route evidence: 2026-09-27
 
 The trials finding is repaired and the judge route is archived; nothing live ran
@@ -1370,7 +1518,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
   raw evidence, and the documentation batch that carries this line), no
   co-author footer. Acceptance covers Slice 12 only; Slice 13 onward needs its
   own go-ahead and its own authorizations
-- [ ] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap
+- [x] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap; implemented and demonstrated 2026-09-27, ACCEPTED by the user 2026-09-27. Live evidence and limits are recorded in the Slice 13 completion section above. Cross-checked; four gaps and the recorded image-UUID residual repaired with failing-capable proofs, and re-verified `444 passed, 1 skipped, 2 warnings` on 2026-09-27 (section at the top). The work is committed in focused batches on `shiftwork/slice-13`, no co-author footer. Acceptance covers Slice 13 only; Slice 14 onward needs its own go-ahead and its own live authorizations.
 - [ ] Slice 14: prediction-gated attributable assist gateway
 - [ ] Slice 15: reviewed A/B workloads and six frozen paired trial slots
 - [ ] Slice 16: fair comparison, exposure invalidation and restart recovery

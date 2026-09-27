@@ -7,6 +7,8 @@ around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
 repairs fairly, explicitly choose one and maintain its later consequences.
 **Gate state:** Gate 1 RE-APPROVED 2026-09-24 after the same-day backtrack, without
 human comprehension sessions. Approval supplies no participant or learning evidence.
+Gate 3's scoped S13 SDK dependency correction was re-approved on 2026-09-27:
+the production pin is `contree-client[httpx]==0.4.0`.
 **Later gates:** Gate 2 was re-approved and committed on main as `f048949` and
 `3799dfc`, then backtracked on 2026-09-24 for the legacy first-choice dead end.
 The user re-approved that revised architecture and separately re-approved the
@@ -19,13 +21,13 @@ a co-author footer. All four gates were approved at that point. Gate 2 was
 re-approved on 2026-09-26 for the scoped file-readback rule after the live
 snapshot/capture failure. Gate 3's corresponding program-design correction was
 separately re-approved the same day. Slice 12 was accepted on 2026-09-27;
-Slice 13 work still needs its own go-ahead.
+Slice 13 was implemented and demonstrated on 2026-09-27, cross-checked with four gaps and the image-UUID residual repaired, and accepted by the user the same day. Its live evidence and limits are recorded in `plans/shiftwork/00-status.md`. Slice 14 work still needs its own go-ahead.
 Gate 1 publication and merge/push are complete (`821a24c` on main). Gate 2
 section 12 and the Gate 3 section 7 configuration list carry a documentation-only
 credential-name correction re-approved by the user on 2026-09-26; it changes no
 behavior, interface or budget.
 
-**Build baseline:** Slices 1 through 12 are recorded as implemented. Slice 9
+**Build baseline:** Slices 1 through 13 are recorded as implemented. Slice 9
 merged to main as `4d5539a` and was pushed on 2026-09-21, with user visual
 acceptance. Slice 10 was accepted on 2026-09-25, then merged to main as
 `f0a1e81..0432cbd` and pushed. Slice 11 was accepted on 2026-09-26 and
@@ -35,7 +37,7 @@ and retained limits are in `plans/shiftwork/evidence/slice12-capability-2026-09-
 The 2 MiB zero-byte checkpoint observation under a 1 MiB layer cap remains
 unexplained; capture under that cap is unproven. Six trials covered one request
 shape, pre-repair inference records omit reasoning text, and probe 1's
-protected-fixture limb is N/A. Slices 13 through 25 remain unchecked and
+protected-fixture limb is N/A. Slices 14 through 25 remain unchecked and
 need their own go-aheads and live authorizations. Preserve the foundation
 and its evidence; it does not prove completed comparison, selection,
 operation or human learning outcomes.
@@ -323,7 +325,10 @@ verdict and retained limits are recorded in
 `plans/shiftwork/evidence/slice12-capability-2026-09-26.md` and
 `plans/shiftwork/00-status.md`. The unexplained historical zero-byte
 observation and the other stated limits remain attached to that verdict.
-The next product step is Slice 13, still unchecked in the approved slice
-plan. It needs a separate go-ahead and separate live authority before work
-begins. Fixture authoring, sealed-case contents, outreach, deployment,
-publication, submission and ADR #4 also remain separately authorized.
+The user authorized starting Slice 13 and its required live tests on
+2026-09-27. Gate 3's SDK dependency correction was separately re-approved the
+same day. Slice 13 is implemented, cross-checked, repaired and accepted
+(2026-09-27); the record is in `plans/shiftwork/00-status.md`. Slices 14 onward
+remain unchecked, and fixture authoring, sealed-case contents, outreach,
+deployment, publication, submission and ADR #4 also remain separately
+authorized.

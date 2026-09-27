@@ -853,3 +853,102 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   `content`, so the invisible completion tokens were the provider's `reasoning`
   field. Records archived before the repair stay incomplete; the repair is
   forward-looking.
+
+## 2026-09-27 S13 Investigate route passed a new adapter argument to an old helper signature
+
+- **What happened:** the first focused S13 test run had two failures; the public
+  Investigate GET raised `TypeError` because the route passed `adapter=` to
+  `investigate_station` before that helper accepted it. The other failure was
+  an old denial-message assertion that needs the newly specified ordinary-shift
+  null-ID wording.
+- **Root cause:** I changed the route and the lower `investigation_view` helper
+  but missed the composing `investigate_station` function between them.
+- **Prevention rule:** when adding a parameter through a route, trace every
+  intermediate call signature and run the route-level focused check immediately.
+
+## 2026-09-27 S13 adapter parsed a Sandbox stdout event as text instead of value
+
+- **What happened:** a real-shape fake event made the adapter mark a successful
+  checkpoint run `SANDBOX_TERMINATED`; the test failed before the fix. The SDK
+  stream carries `value` and `encoding`, including a base64 option, not `text`.
+- **Root cause:** the first fake client used my invented event shape, so its
+  passing result did not exercise the S12-observed SDK wire shape.
+- **Prevention rule:** build transport fakes from archived provider records or
+  installed SDK models, and test both plain and encoded event values before a
+  live call.
+
+## 2026-09-27 S13 scanner missed a JSON string nested inside a JSON response
+
+- **What happened:** the serialized scanner self-test caught raw, slash and
+  base64 path forms, but missed a path inside a JSON string that was itself
+  serialized into a response. The focused test failed, then passed after the
+  scanner checked successive JSON escape layers.
+- **Root cause:** I checked one escape layer while the event payload can be
+  serialized twice.
+- **Prevention rule:** self-test each actual serialized surface shape, including
+  nested JSON strings and base64 bodies, before interpreting an absence scan.
+
+## 2026-09-27 S13 live model response exhausted the initial output allowance
+
+- **What happened:** the first model-backed diagnostic made one provider call, but
+  its 256 completion tokens ended during reasoning with no final tool name. The
+  service had no response capture, so the trial correctly stayed failed and
+  incomplete. No business state changed.
+- **Root cause:** I chose a 256-token default without checking whether the
+  reasoning model could finish this bounded choice inside it. The approved
+  gateway ceiling is 1,024 tokens.
+- **Prevention rule:** set the frozen provider allowance from the approved
+  ceiling and inspect actual `finish_reason`, final content and token usage in a
+  separate failed run before retrying. Preserve the failed run as evidence.
+
+## 2026-09-27 S13 projection scanner crossed the sealed path boundary
+
+- **What happened:** the first full suite failed its sealed storage import guard
+  because the new orchestrator scanner referenced `SEALED_CASES_DIR` directly.
+  The other 437 tests passed.
+- **Root cause:** I used a private path as a leak needle without tracing the
+  existing rule that only the sealed loader may name that location.
+- **Prevention rule:** obtain sealed path needles through the sealed loader and
+  run `tests/sealed/test_import_graph.py` when changing projection boundaries.
+
+## 2026-09-27 Slice 13 frozen context kept the old 256-token ceiling after the runtime change
+
+- **What happened:** the runtime gateway ceiling was raised to the approved
+  1,024 tokens after the first live model attempt, but the frozen execution
+  context still hardcoded `max_tokens: 256`. The archived successful run
+  therefore records 256 while its provider call returned 287 completion tokens.
+  The Slice 13 cross-check found it by re-reading the preserved run database.
+- **Root cause:** the same ceiling had two owners, the `InferencePolicy` default
+  and a literal in `freeze_diagnostic_context`, and no assertion tied the frozen
+  record to the executed value.
+- **Prevention rule:** a fixed ceiling has exactly one named constant; every
+  recorded copy imports it, and a test asserts the frozen record equals the
+  runtime policy value before a live claim is made.
+
+## 2026-09-27 Slice 13 claims implied Gate 3 test 36 and 38 arms that no test pinned
+
+- **What happened:** the completion summary implied the injected-field 422 clause
+  and transport-failure retention were covered; the suite pinned neither. The
+  cross-check found both against the approved test text.
+- **Root cause:** the slice's test list was read as covering whole obligation
+  groups, and the missing arms were never named as required assertions.
+- **Prevention rule:** before claiming a spec clause is covered, name the test
+  that fails when that clause's behavior breaks; if no such test exists, the
+  clause stays open in the completion record.
+
+## 2026-09-27 Slice 13 image UUID kept a second literal, making the documented override inert
+
+- **What happened:** `SHIFTWORK_TOKEN_FACTORY_IMAGE` is a documented configuration
+  name, but the Token Factory adapter compared `image_ref` against its own
+  hardcoded literal, so setting the override made an isolated run fail closed
+  with `PROVISION_FAILED` instead of executing the named image. The S13
+  cross-check found it and recorded it as a residual; the user then instructed
+  the repair. No live run used the override and the archived evidence is
+  unaffected.
+- **Root cause:** the same fixed value had two owners, `config.TOKEN_FACTORY_IMAGE`
+  and a literal in the adapter, the same shape as the 256-token ceiling found in
+  the same cross-check.
+- **Prevention rule:** a fixed value has exactly one named constant; every copy,
+  including the frozen-context record and the adapter gate, reads it, and a test
+  drives an override through both sites with one failing-capable mutation per
+  site.

@@ -94,8 +94,13 @@ summaries when a time-sensitive external claim is being made.
   capture under a 1 MiB cap remains unexplained and was never reproduced, six
   trials cover one request shape, pre-repair inference records omit the model's
   reasoning text, and probe 1's protected-fixture limb is N/A. The small-file
-  readback under the normal 16 MiB cap passed. Slice 13 onward still needs its
-  own go-ahead and its own live authorizations.
+  readback under the normal 16 MiB cap passed. Slice 13 then received its own
+  go-ahead and its own live authorizations on 2026-09-27; its canary, both live
+  stages and the no-run bootstrap ran once each, the cross-check found four gaps
+  plus the image-UUID residual and repaired all five with failing-capable
+  proofs, and the user ACCEPTED Slice 13 on 2026-09-27. The work is committed in
+  focused batches on `shiftwork/slice-13`, no co-author footer. Slice 14 onward
+  still needs its own go-ahead and its own live authorizations.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
@@ -183,8 +188,8 @@ summaries when a time-sensitive external claim is being made.
   pre-pivot numbering Slices 10-17 were not implemented, and that numbering is
   historical. Under the approved pivot, Slice 10 (v5 history to v6 with no
   invented choice) is implemented, was accepted by the user on 2026-09-25 and is
-  merged to main as `f0a1e81..0432cbd` and pushed; Slices 11 and 12 are
-  accepted, while Slices 13-25 are not implemented.
+  merged to main as `f0a1e81..0432cbd` and pushed; Slices 11, 12 and 13 are
+  accepted, while Slices 14-25 are not implemented.
   Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the
