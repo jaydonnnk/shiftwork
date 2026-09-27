@@ -39,6 +39,7 @@ class RunRequest(ExecutorModel):
     image_ref: str
     deadline_s: int = Field(gt=0)
     inference_grant: InferenceGrant | None
+    request_batch_bytes: StrictBytes | None = None
 
 
 class RawCapture(ExecutorModel):
@@ -50,11 +51,18 @@ class RawCapture(ExecutorModel):
     log_ref: str | None
 
 
+class RawObservation(ExecutorModel):
+    kind: str
+    public_payload: dict[str, object]
+    raw_payload: dict[str, object]
+
+
 class RunResult(ExecutorModel):
     captures: tuple[RawCapture, ...]
     executor_ref: str | None
     failure: ExecutorFailure | None
     wall_ms: int = Field(ge=0)
+    observations: tuple[RawObservation, ...] = ()
 
 
 class ExecutorAdapter(Protocol):
@@ -181,12 +189,15 @@ class RequestStimulus(ExecutorModel):
     body: StrictBytes
 
 
-def load_batch(ref: BatchRef) -> tuple[RequestStimulus, ...]:
-    root = Path(__file__).resolve().parents[1] / "fixtures" / "requests"
-    path = (root / ref.path_ref).resolve()
-    if not path.is_relative_to(root):
-        raise ValueError("request batch must be inside fixtures/requests")
-    raw = path.read_bytes()
+def load_batch(ref: BatchRef, frozen_bytes: bytes | None = None) -> tuple[RequestStimulus, ...]:
+    if frozen_bytes is None:
+        root = Path(__file__).resolve().parents[1] / "fixtures" / "requests"
+        path = (root / ref.path_ref).resolve()
+        if not path.is_relative_to(root):
+            raise ValueError("request batch must be inside fixtures/requests")
+        raw = path.read_bytes()
+    else:
+        raw = frozen_bytes
     if canonical.content_hash(base64.b64encode(raw).decode("ascii")) != ref.content_hash:
         raise ValueError("request batch hash mismatch")
     requests = []

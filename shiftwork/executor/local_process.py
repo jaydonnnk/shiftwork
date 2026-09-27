@@ -82,7 +82,7 @@ class LocalProcessAdapter:
                 raise ValueError("artifact is not a pinned trusted fixture")
             if request.inference_grant is not None or request.harness_ref != "stdlib-loopback-v1" or request.image_ref != "local-python-stdlib":
                 raise ValueError("unsupported offline execution request")
-            batch = load_batch(request.request_batch)
+            batch = load_batch(request.request_batch, request.request_batch_bytes)
             snapshot = Path(request.shop_snapshot_ref).read_bytes()
         except (OSError, ValueError, KeyError):
             return RunResult(captures=(), executor_ref=None, failure=ExecutorFailure.PROVISION_FAILED, wall_ms=int((time.monotonic() - started) * 1000))
