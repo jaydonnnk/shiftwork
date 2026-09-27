@@ -37,6 +37,11 @@ _FAMILY_FILES = {
 SUPPORTED_SCHEMA_VERSIONS = (1,)
 
 
+def private_storage_locator() -> str:
+    """A private path needle for controller projection checks, never for clients."""
+    return str(config.SEALED_CASES_DIR)
+
+
 def _raw_family(family: str) -> dict:
     path = config.SEALED_CASES_DIR / _FAMILY_FILES[family]
     data = json.loads(path.read_text(encoding="utf-8"))

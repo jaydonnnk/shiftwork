@@ -22,6 +22,7 @@ import asyncio
 import base64
 import hashlib
 import json
+import os
 import sqlite3
 import tempfile
 from datetime import datetime, timezone
@@ -47,6 +48,7 @@ from shiftwork.domain.models import (
     ContextCondition,
     ContractParams,
     EvidenceMode,
+    ExecutionObservation,
     ExecutionContext,
     ExecutorFailure,
     Experiment,
@@ -66,6 +68,7 @@ from shiftwork.domain.models import (
     RunOutput,
     RunPurpose,
     RunState,
+    ObservationKind,
     ServiceResponse,
     Shift,
     ShiftOpeningMode,
@@ -74,6 +77,9 @@ from shiftwork.evaluator import evaluator
 from shiftwork.executor import base as executor
 from shiftwork.executor.local_process import LocalProcessAdapter
 from shiftwork.executor.recorded import RecordedAdapter
+from shiftwork.executor.tokenfactory import TokenFactoryAdapter
+from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS
+from shiftwork.gateway.redaction import assert_public_safe
 from shiftwork.ledger import chain, reducer
 from shiftwork.sealed import rotation
 from shiftwork.sealed import store as sealed_store
@@ -1131,22 +1137,33 @@ def request_assist(
     )
 
 
-def reserve_bootstrap_diagnostic(conn: sqlite3.Connection, shift_id: str) -> None:
-    """Deny the null-investigation bootstrap until a safe executor exists.
-
-    A legacy first-choice shift with no inherited source run may eventually use
-    exactly one public bootstrap diagnostic, but only once a verified isolated
-    adapter and a reviewed initial request exist. Slice 11 constructs and denies
-    the state; Slice 13 supplies the executor that permits it.
-    """
+def reserve_bootstrap_diagnostic(
+    conn: sqlite3.Connection, shift_id: str, *, adapter: str = "local_process"
+) -> None:
+    """Validate the one public source diagnostic for a no-run v5 shift."""
     shift = _require_open_shift(conn, shift_id)
-    raise BootstrapBlocked(
-        f"shift {shift.id} has no owned source run and no verified isolated "
-        "executor, so no bootstrap diagnostic can be reserved"
-    )
+    if shift.opening_mode is not ShiftOpeningMode.LEGACY_FIRST_CHOICE:
+        raise BootstrapBlocked("a null investigation is reserved only for a legacy first-choice shift")
+    if adapter != TokenFactoryAdapter.name or not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID"):
+        raise BootstrapBlocked("the verified isolated executor and its controller credentials are unavailable")
+    if shift.engagement_slug != config.BOOKSHOP_SLUG:
+        raise BootstrapBlocked("this engagement has no reviewed initial request and public state")
+    if not all(path.is_file() for path in (
+        config.PIVOT_MISSION, config.PIVOT_PUBLIC_STATE, config.PIVOT_INCIDENT_REQUESTS
+    )):
+        raise BootstrapBlocked("the reviewed initial request, mission or public state is missing")
+    if repo.count_experiments_for_shift(conn, shift.id, ExperimentKind.DIAGNOSTIC):
+        raise BootstrapBlocked("a bootstrap cannot be repeated after a diagnostic reservation")
+    prior_runs = conn.execute(
+        "SELECT r.id FROM runs r JOIN shifts s ON s.id = r.shift_id "
+        "WHERE s.engagement_slug = ? AND s.seq < ?",
+        (shift.engagement_slug, shift.seq),
+    ).fetchall()
+    if any(repo.list_outputs(conn, row["id"]) for row in prior_runs):
+        raise BootstrapBlocked("an owned source request already exists in the inherited history")
 
 
-def investigation_view(conn: sqlite3.Connection, shift_id: str) -> dict[str, Any]:
+def investigation_view(conn: sqlite3.Connection, shift_id: str, *, adapter: str = "local_process") -> dict[str, Any]:
     """The public Investigate-station projection.
 
     Carries the learner's own entries with their revision linkage, the
@@ -1156,6 +1173,13 @@ def investigation_view(conn: sqlite3.Connection, shift_id: str) -> dict[str, Any
     shift = _require_shift(conn, shift_id)
     entries = repo.list_investigations_for_shift(conn, shift.id)
     latest = entries[-1] if entries else None
+    try:
+        reserve_bootstrap_diagnostic(conn, shift_id, adapter=adapter)
+        bootstrap_available = True
+        bootstrap_reason = "One public source diagnostic is available for this no-run legacy shift."
+    except (BootstrapBlocked, LifecycleError) as exc:
+        bootstrap_available = False
+        bootstrap_reason = str(exc)
     return {
         "shift_id": shift.id,
         "opening_mode": shift.opening_mode.value if shift.opening_mode else None,
@@ -1177,11 +1201,8 @@ def investigation_view(conn: sqlite3.Connection, shift_id: str) -> dict[str, Any
         "latest_investigation_id": latest.id if latest else None,
         "assist_available": False,
         "assist_reason": "No assist gateway exists yet; diagnostic help arrives with Slice 14.",
-        "bootstrap_available": False,
-        "bootstrap_reason": (
-            "A bootstrap diagnostic needs a verified isolated executor and a "
-            "reviewed initial request, neither of which exists yet."
-        ),
+        "bootstrap_available": bootstrap_available,
+        "bootstrap_reason": bootstrap_reason,
     }
 
 
@@ -1209,6 +1230,42 @@ def _hash_bytes(raw: bytes) -> str:
 
 def _encode(raw: bytes) -> str:
     return base64.b64encode(raw).decode("ascii")
+
+
+def _private_public_needles() -> tuple[str, ...]:
+    """Values that must not appear in serialized diagnostic projections."""
+    needles = {str(Path.cwd()), sealed_store.private_storage_locator(), "sealed/cases"}
+    for key in ("NEBIUS_API_KEY", "NEBIUS_PROJECT_ID"):
+        value = os.environ.get(key)
+        if value:
+            needles.add(value)
+    for family in config.BOOKSHOP_FAMILIES:
+        for case in sealed_store.load_family(family).cases:
+            needles.update((case.id, case.check_id))
+            note = case.expected.get("note")
+            if isinstance(note, str) and len(note) >= 25:
+                needles.add(note)
+    return tuple(needle for needle in needles if len(needle) >= 8)
+
+
+def assert_public_projection(payload: object) -> None:
+    try:
+        assert_public_safe(payload, _private_public_needles())
+    except ValueError as exc:
+        raise LifecycleError("conflict", "public evidence contains private material") from exc
+
+
+def artifact_source(conn: sqlite3.Connection, version_id: str) -> dict[str, Any]:
+    version = repo.get_version(conn, version_id)
+    if version is None:
+        raise LifecycleError("not_found", f"unknown artifact version: {version_id}")
+    payload = {
+        "id": version.id, "parent_id": version.parent_id,
+        "content_hash": version.content_hash, "files": version.files,
+        "contract": version.contract.model_dump(mode="json"), "authorship": version.created_by,
+    }
+    assert_public_projection(payload)
+    return payload
 
 
 def _diagnostic_context_fields(
@@ -1242,7 +1299,9 @@ def _diagnostic_context_fields(
     }
 
 
-def freeze_diagnostic_context(conn: sqlite3.Connection, shift: Shift) -> ExecutionContext:
+def freeze_diagnostic_context(
+    conn: sqlite3.Connection, shift: Shift, *, isolated: bool = False
+) -> ExecutionContext:
     """Freeze the reviewed public material one diagnostic is assessed against.
 
     Every input the assessment reads is retained as its exact bytes plus a hash,
@@ -1250,8 +1309,12 @@ def freeze_diagnostic_context(conn: sqlite3.Connection, shift: Shift) -> Executi
     protected reservation is created or referenced: a public diagnostic may only
     run material the learner can already read (Gate 3 S3.1, test 21).
     """
+    if shift.engagement_slug != config.BOOKSHOP_SLUG:
+        raise LifecycleError("conflict", "this engagement has no reviewed initial diagnostic workload")
     mission_bytes = config.PIVOT_MISSION.read_bytes()
     mission = task_contract.load_mission_bytes(mission_bytes, label=config.PIVOT_MISSION.name)
+    if mission.engagement_slug != shift.engagement_slug:
+        raise LifecycleError("conflict", "reviewed mission belongs to another engagement")
     snapshot_bytes = config.PIVOT_PUBLIC_STATE.read_bytes()
     snapshot = task_contract.load_public_state_bytes(
         snapshot_bytes, label=config.PIVOT_PUBLIC_STATE.name
@@ -1289,6 +1352,18 @@ def freeze_diagnostic_context(conn: sqlite3.Connection, shift: Shift) -> Executi
     fields = _diagnostic_context_fields(
         shift, mission, mission_bytes, snapshot_bytes, specs_bytes, workload, condition, starting_state
     )
+    if isolated:
+        fields.update({
+            "executor_class": EvidenceMode.ISOLATED_LIVE.value,
+            "harness_hash": _hash_bytes(b"sandbox-driver-v1"),
+            "image_ref": config.TOKEN_FACTORY_IMAGE,
+            "service_model": config.SERVICE_MODEL,
+            "service_model_settings_json": {
+                "temperature": 0, "max_tokens": GATEWAY_MAX_OUTPUT_TOKENS,
+            },
+            "resource_limits_json": {"deadline_s": 45, "max_requests": 1,
+                                     "max_layer_bytes": 16 * 1024 * 1024},
+        })
     content_hash = canonical.content_hash(fields)
     existing = repo.get_execution_context_by_hash(conn, content_hash)
     if existing is not None:
@@ -1314,11 +1389,11 @@ def freeze_diagnostic_context(conn: sqlite3.Connection, shift: Shift) -> Executi
         condition=condition,
         evaluator_version=fields["evaluator_version"],
         reducer_version=fields["reducer_version"],
-        executor_class=EvidenceMode.TRUSTED_LOCAL,
+        executor_class=EvidenceMode(fields["executor_class"]),
         harness_hash=fields["harness_hash"],
         image_ref=fields["image_ref"],
-        service_model=None,
-        service_model_settings_json={},
+        service_model=fields["service_model"],
+        service_model_settings_json=fields["service_model_settings_json"],
         resource_limits_json=fields["resource_limits_json"],
         created_at=_now(),
         content_hash=content_hash,
@@ -1334,28 +1409,31 @@ def create_diagnostic_experiment(
     candidate_version_id: str,
     investigation_id: str | None,
     client_request_id: str,
+    adapter: str = "local_process",
 ) -> Experiment:
     """Reserve one public diagnostic experiment and queue its single run.
 
     The controller chooses the workload, the executor and the treatment; the caller
-    names only a candidate version and the investigation it belongs to. Only the
-    pinned reviewed starter is executable, so a diagnostic can never become a fresh
-    look at an arbitrary artifact. One candidate and no protected reservation is
-    what keeps a diagnostic from ever qualifying a version (test 21).
+    names only a candidate version and the investigation it belongs to. The
+    trusted-local path stays pinned; the isolated path can execute the learner's
+    frozen code. Neither path reserves a protected case or qualifies a version.
     """
     conn.execute("BEGIN IMMEDIATE")
     try:
         shift = _require_open_shift(conn, shift_id)
+        isolated = adapter == TokenFactoryAdapter.name
+        if adapter not in (LocalProcessAdapter.name, TokenFactoryAdapter.name):
+            raise LifecycleError("conflict", "no safe diagnostic executor is configured")
+        if isolated and (not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID")):
+            raise BootstrapBlocked("the verified isolated executor and its controller credentials are unavailable")
         if investigation_id is None:
-            # The only null-investigation experiment is the no-source legacy
-            # bootstrap, and S11 reserves and denies that state outright. S13
-            # supplies the verified isolated executor and reviewed initial request
-            # that lift the denial, and only then may it consume a slot (test 21).
-            reserve_bootstrap_diagnostic(conn, shift_id)
-        investigation = repo.get_investigation(conn, investigation_id)
-        if investigation is None:
-            raise LifecycleError("not_found", f"unknown investigation: {investigation_id}")
-        if investigation.shift_id != shift.id:
+            reserve_bootstrap_diagnostic(conn, shift_id, adapter=adapter)
+            investigation = None
+        else:
+            investigation = repo.get_investigation(conn, investigation_id)
+            if investigation is None:
+                raise LifecycleError("not_found", f"unknown investigation: {investigation_id}")
+        if investigation is not None and investigation.shift_id != shift.id:
             raise LifecycleError(
                 "conflict", "a diagnostic must cite an investigation owned by this shift"
             )
@@ -1370,7 +1448,7 @@ def create_diagnostic_experiment(
             if (
                 replay.shift_id == shift.id
                 and replay.kind is ExperimentKind.DIAGNOSTIC
-                and replay.investigation_id == investigation.id
+                and replay.investigation_id == (investigation.id if investigation else None)
                 and candidate is not None
                 and candidate.artifact_version_id == version.id
             ):
@@ -1379,7 +1457,7 @@ def create_diagnostic_experiment(
             raise LifecycleError(
                 "conflict", "client_request_id was already used for a different experiment"
             )
-        if version.content_hash != config.TRUSTED_LOCAL_FIXTURES["pivot_starter"][0]:
+        if not isolated and version.content_hash != config.TRUSTED_LOCAL_FIXTURES["pivot_starter"][0]:
             raise LifecycleError(
                 "conflict",
                 "only the pinned reviewed starter is executable as a public diagnostic candidate",
@@ -1391,8 +1469,14 @@ def create_diagnostic_experiment(
                 f"diagnostic budget exhausted for this shift ({used} of "
                 f"{DIAGNOSTIC_EXPERIMENTS_PER_SHIFT} used)",
             )
-        context = freeze_diagnostic_context(conn, shift)
+        context = freeze_diagnostic_context(conn, shift, isolated=isolated)
         ordinal = used + 1
+        treatment = (
+            "Run this frozen learner-owned service once in the isolated Sandbox "
+            "against the reviewed initial public request and state; no protected "
+            "case, eligibility or business consequence is reserved."
+            if isolated else DIAGNOSTIC_TREATMENT
+        )
         candidates = (
             CandidateRef(
                 label="A",
@@ -1404,9 +1488,9 @@ def create_diagnostic_experiment(
             id=f"experiment-{shift.id}-d{ordinal}",
             shift_id=shift.id,
             kind=ExperimentKind.DIAGNOSTIC,
-            investigation_id=investigation.id,
+            investigation_id=investigation.id if investigation else None,
             candidates=candidates,
-            declared_treatment=DIAGNOSTIC_TREATMENT,
+            declared_treatment=treatment,
             context_id=context.id,
             content_hash=canonical.content_hash(
                 {
@@ -1415,7 +1499,7 @@ def create_diagnostic_experiment(
                     "candidates": [candidate.model_dump(mode="json") for candidate in candidates],
                     "context_hash": context.content_hash,
                     "trial_count_per_candidate": 1,
-                    "declared_treatment": DIAGNOSTIC_TREATMENT,
+                    "declared_treatment": treatment,
                 }
             ),
             trial_count_per_candidate=1,
@@ -1432,10 +1516,10 @@ def create_diagnostic_experiment(
             shop_snapshot_ref=f"frozen-context:{context.id}",
             attempt_number=repo.count_runs(conn, shift.id) + 1,
             state=RunState.QUEUED,
-            adapter=LocalProcessAdapter.name,
+            adapter=adapter,
             started_at=_now(),
             purpose=RunPurpose.EXPERIMENT,
-            evidence_mode=EvidenceMode.TRUSTED_LOCAL,
+            evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
             context_id=context.id,
             experiment_id=experiment.id,
         )
@@ -1487,10 +1571,11 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
                 content_hash=workload.request_batch_hash,
             ),
             shop_snapshot_ref="",
-            harness_ref=DIAGNOSTIC_HARNESS_REF,
-            image_ref=DIAGNOSTIC_IMAGE_REF,
-            deadline_s=DIAGNOSTIC_DEADLINE_S,
+            harness_ref="sandbox-driver-v1" if run.adapter == TokenFactoryAdapter.name else DIAGNOSTIC_HARNESS_REF,
+            image_ref=context.image_ref if run.adapter == TokenFactoryAdapter.name else DIAGNOSTIC_IMAGE_REF,
+            deadline_s=45 if run.adapter == TokenFactoryAdapter.name else DIAGNOSTIC_DEADLINE_S,
             inference_grant=None,
+            request_batch_bytes=base64.b64decode(workload.request_batch_bytes_base64),
         )
     except (ValueError, ShiftworkDomainError):
         repo.update_run(conn, run_id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
@@ -1507,7 +1592,29 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
             snapshot_path = Path(directory) / "public_state.json"
             snapshot_path.write_bytes(snapshot_bytes)
             request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})
-            result = asyncio.run(LocalProcessAdapter().execute(request))
+            if run.adapter == TokenFactoryAdapter.name:
+                adapter = TokenFactoryAdapter(
+                    run_id=run.id,
+                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),
+                    token=os.environ.get("NEBIUS_API_KEY", ""),
+                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),
+                    model=context.service_model or config.SERVICE_MODEL,
+                )
+            elif run.adapter == LocalProcessAdapter.name:
+                adapter = LocalProcessAdapter()
+            else:
+                raise LifecycleError("conflict", "reserved diagnostic has no safe executor")
+            result = asyncio.run(adapter.execute(request))
+
+        for ordinal, observation in enumerate(result.observations, start=1):
+            raw = json.dumps(observation.raw_payload, sort_keys=True, default=str).encode("utf-8")
+            repo.insert_observation(conn, ExecutionObservation(
+                id=f"{run.id}-obs-{ordinal}", run_id=run.id, request_ordinal=1,
+                ordinal=ordinal, kind=ObservationKind(observation.kind),
+                public_payload_json=observation.public_payload,
+                raw_payload_ref="data:application/json;base64," + base64.b64encode(raw).decode("ascii"),
+                measured_at=_now(),
+            ))
 
         outputs = []
         if result.captures:
@@ -1520,6 +1627,9 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
                 })
                 repo.insert_output(conn, output)
                 outputs.append(output)
+
+        # Preserve the raw capture and trusted observations before assessment.
+        conn.commit()
 
         captured = {output.request_ordinal: output for output in outputs}
         completed = 0
@@ -1698,7 +1808,7 @@ def experiment_view(conn: sqlite3.Connection, experiment_id: str) -> dict[str, A
         RunState.FINALIZED: "COMPLETE",
         RunState.FAILED: "FAILED",
     }[run.state] if run is not None else "RESERVED"
-    return {
+    payload = {
         "id": experiment.id,
         "shift_id": experiment.shift_id,
         "kind": experiment.kind.value,
@@ -1747,20 +1857,31 @@ def experiment_view(conn: sqlite3.Connection, experiment_id: str) -> dict[str, A
         ),
         "state": experiment.state,
     }
+    try:
+        assert_public_safe(payload, _private_public_needles())
+    except ValueError as exc:
+        raise LifecycleError("conflict", "public diagnostic evidence contains private material") from exc
+    return payload
 
 
-def investigate_station(conn: sqlite3.Connection, shift_id: str) -> dict[str, Any]:
+def investigate_station(
+    conn: sqlite3.Connection, shift_id: str, *, adapter: str = "local_process"
+) -> dict[str, Any]:
     """The Investigate station: the learner's entries, the denials and the latest
     public diagnostic, composed from the two narrower projections.
 
     Deterministic orientation is available before any investigation exists (Gate 3
     S1), and the station carries no assist content because S11 produces none.
     """
-    view = investigation_view(conn, shift_id)
+    view = investigation_view(conn, shift_id, adapter=adapter)
     experiments = repo.list_experiments_for_shift(conn, shift_id)
     view["latest_experiment"] = (
         experiment_view(conn, experiments[-1].id) if experiments else None
     )
+    try:
+        assert_public_safe(view, _private_public_needles())
+    except ValueError as exc:
+        raise LifecycleError("conflict", "public investigation evidence contains private material") from exc
     return view
 
 

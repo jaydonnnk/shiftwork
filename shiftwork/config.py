@@ -34,7 +34,12 @@ INCIDENT_PREFIX = "BWB"
 # The controller-configured executor persisted on every new run row. The learner
 # never selects an executor through the API; `create_app(executor=...)` configures
 # the controller, and `execute_run` resolves the adapter from the run row.
-EXECUTOR_ADAPTER = "recorded"
+EXECUTOR_ADAPTER = os.environ.get("SHIFTWORK_EXECUTOR_ADAPTER", "recorded")
+SERVICE_MODEL = os.environ.get("SHIFTWORK_SERVICE_MODEL", "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B")
+# The single owner of the sandbox image (the S12-verified public python:3.11-slim).
+# The frozen execution context and the Token Factory adapter gate both read it,
+# so an override executes the named image and a stale frozen image fails closed.
+TOKEN_FACTORY_IMAGE = os.environ.get("SHIFTWORK_TOKEN_FACTORY_IMAGE", "c7ad32fe-8621-3cd2-9022-521c6da02ac1")
 GENESIS_HASH = "0" * 64
 
 # Bookshop engagement_config seed (S7.1 defaults, user-accepted 2026-09-17).
