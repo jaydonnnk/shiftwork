@@ -1,5 +1,101 @@
 # Status: Shiftwork
 
+## Slice 14 started, offline and bounded live proof: 2026-09-27
+
+The user explicitly said to start Slice 14, fold the Return/Away Investigate
+panel leak into this client work, and leave the stale Return/Away planning copy
+for Slices 20 to 22. Work is on `shiftwork/slice-14`. The user separately
+authorized up to three bounded live Token Factory assist calls, one per role.
+The key was loaded from the ignored local `.env`. All three calls completed
+once, with no retry. The call bounds, observed usage and quality limits are in
+`slice14-implementation-plan.md` and
+`evidence/slice14-assist-live-2026-09-27.md`.
+
+The offline implementation adds a prediction-gated assist route and gateway,
+durable attempt and decision records, a shared three-call Bellwether budget with
+one patch proposal, a one-hint Northline policy, safe failure records and a room
+panel with counters. Accepting help changes attribution only. The existing
+Return/Away leak reproduced in the browser before the visibility fix and passed
+after it. The obsolete tests that asserted `shiftwork/assist/` did not exist
+were replaced by actual sealed-import and serialized provider-prompt checks,
+including a sentinel-bearing scored case and scanner self-test.
+
+- Focused assist, import, sentinel, investigation and projection tests passed.
+- Offline suite: `.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`
+  returned `454 passed, 1 skipped, 2 warnings in 46.34s` after the prompt
+  and total-deadline repairs. Packaging was excluded because that check
+  performs an install.
+- Recorded browser demo: `node tests/client/browser.mjs http://127.0.0.1:8144
+  --assist-demo` exited 0 with hint and accepted patch attribution, desktop and
+  mobile screenshots, no horizontal overflow and no uncaught exceptions. The
+  local preview used a disposable database and a labelled recorded assist double.
+- The HTTP request shape was tested with local `httpx.MockTransport`, then
+  the three separately authorized provider calls were made through the real
+  gateway in a disposable preview. No Sandbox run, human session, commit or
+  push was made for Slice 14 in this work.
+- Six independent S14 faults, shared-budget off-by-one, second patch allowed,
+  Northline diagnosis allowed and private reply accepted, plus the two review
+  repairs below (stranded-assist reconciliation and the injected-client
+  deadline), each failed its named test at an assertion and restored the
+  source byte-identically through `tests/assist/mutation_proofs.py`. The
+  historical absent-gateway mutation in `tests/pivot_mutation_proofs.py` was
+  re-anchored and returned `FAIL_CAUGHT`.
+- Post-slice cleanup scan found no new orphan or duplicate fixture. It repaired
+  the stale assist absence guards, the mutation anchor and the schema comment.
+  No file deletion was needed. A migrated engagement row may retain the old
+  six-call placeholder, while the approved controller cap is three; a test
+  proves the row remains unchanged and the three-call cap is enforced. ADR 0001's
+  sealed-store isolation and retained assist interaction boundaries remain
+  consistent with the implementation; no ADR change was needed.
+- The three live calls returned COMPLETE with no safe failure code. The model
+  restated or expanded an unsupported learner premise, and the patch proposal
+  suggested edits to the explanation instead of a service repair. My live
+  probe had incorrectly paired a shelf-availability request with reasoning
+  about price and alternatives. The recorded response was also missing from
+  the prompt. A subsequent offline repair added that public response, a
+  private-output guard, a system-plus-prompt preflight and clearer role
+  instructions. The live transport now enforces a total 20-second deadline;
+  the original provider calls used an HTTPX per-operation timeout and all
+  finished within 20 seconds. Failing-capable tests cover the new path. The
+  revised prompt and transport have no live evidence, and all three authorized
+  calls are used.
+- Independent review adjudicated 2026-09-27 (verdict: READY FOR USER REVIEW,
+  no clause falsified). Two code repairs, each with a failing-capable test and
+  a mutation proof: a crash between an assist reservation and its outcome write
+  stranded a PENDING event that no refresh could resolve, so
+  `reconcile_interrupted` now fails every stranded event at startup with the
+  controller-side `ASSIST_INTERRUPTED` code while preserving its consumed
+  budget slot, its refused decision and the S8 startup-only recovery limit
+  (`test_a_stranded_assist_is_failed_at_the_next_startup`, mutation
+  `stranded_assist_left_pending`); and the injected test/demo gateway client
+  bypassed the call deadline, so it now carries the same 20-second per-request
+  timeout, pinned by `test_injected_client_cannot_bypass_the_call_deadline`
+  and `test_injected_client_timeout_is_a_safe_transport_failure` (mutation
+  `injected_client_loses_the_deadline`). Only the default path keeps the
+  absolute `asyncio.wait_for` wrapper; a live call on the revised prompt stays
+  unauthorized because the three-call authorization is exhausted.
+- Review documentation items: Gate 3 section 3.2's as-designed signatures
+  differ from as-built with no behavior change (the keyword `request_assist`
+  surface, optional `AssistRequest.investigation_id` for the S11
+  null-investigation 409, and extended event/view fields); recorded as an
+  as-built note in `slice14-implementation-plan.md`. Gate 3 obligations 5, 7
+  and 8 name tests that exist under as-built names: 7 is
+  `test_mixed_role_budget_patch_cap_and_idempotency`; 8 is
+  `test_failed_call_consumes_budget_without_raw_error_or_private_output` plus
+  `test_private_source_response_is_refused_before_gateway_call` and
+  `test_sealed_sentinel_absent_from_real_assist_prompt_and_reply`; 5 is
+  `test_diagnostic_help_requires_every_learner_commitment_field` plus the
+  orchestrator entry and help tests. Flagged for Slices 20-22: a migrated
+  `engagement_config` row may keep `total_assist_budget_per_shift = 6` and
+  lowercase `allowed_assist_roles_json` (`demos/final_pivot.py` seeds
+  `["hint","diagnose"]`), while enforcement reads
+  `config.BOOKSHOP_TOTAL_ASSIST_BUDGET` and the slug; no later slice may read
+  those row columns. The three live replies were not retained verbatim, so the
+  live observations stay summaries as the evidence doc states.
+
+This is an implementation progress record, not acceptance or a live model
+quality claim. Slice 14 remains unchecked.
+
 ## Slice 13 cross-check, gap repairs and stress test: 2026-09-27
 
 A cross-check of the Slice 13 tree re-ran the focused suites and the full suite,
@@ -1520,7 +1616,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
   co-author footer. Acceptance covers Slice 12 only; Slice 13 onward needs its
   own go-ahead and its own authorizations
 - [x] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap; implemented and demonstrated 2026-09-27, ACCEPTED by the user 2026-09-27. Live evidence and limits are recorded in the Slice 13 completion section above. Cross-checked; four gaps and the recorded image-UUID residual repaired with failing-capable proofs, and re-verified `444 passed, 1 skipped, 2 warnings` on 2026-09-27 (section at the top). The work is committed in focused batches on `shiftwork/slice-13`, merged to main as `ed0802a..1d82e95` and pushed, no co-author footer. Acceptance covers Slice 13 only; Slice 14 onward needs its own go-ahead and its own live authorizations.
-- [ ] Slice 14: prediction-gated attributable assist gateway
+- [ ] Slice 14: prediction-gated attributable assist gateway; explicit go-ahead received 2026-09-27. Offline implementation and tests passed; three authorized live calls completed with a quality failure that prompted an offline-only repair. Independent review findings were adjudicated and repaired offline 2026-09-27 (stranded PENDING reconciliation, injected-client deadline bound, records). Revised-prompt live quality and user acceptance remain open. See the Slice 14 progress section and `slice14-implementation-plan.md`.
 - [ ] Slice 15: reviewed A/B workloads and six frozen paired trial slots
 - [ ] Slice 16: fair comparison, exposure invalidation and restart recovery
 - [ ] Slice 17: explicit eligible exact-version selection

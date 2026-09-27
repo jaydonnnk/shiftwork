@@ -1,5 +1,35 @@
 # Mistakes Log
 
+## 2026-09-27 Slice 14: live assist probe used a mismatched investigation
+
+- What happened: all three authorized live assist calls used a source request about Dune shelf availability, while the submitted learner cause asserted a price, collection and alternatives failure. The model repeated or expanded the unsupported tasks.
+- Root cause: I copied a generic test investigation into the live probe without first reading the chosen recorded request and response.
+- Prevention rule: before spending an authorized live-call budget, read the exact source request and capture, then write a probe investigation about that evidence; keep model agreement with a bad premise as a separate quality finding.
+
+## 2026-09-27 Slice 14: assist test expected the wrong run status
+
+- What happened: the first assist suite stopped in setup because POST runs returned 202 Accepted and the new fixture asserted 201.
+- Root cause: I assumed the route's status instead of checking the existing API contract before writing the fixture.
+- Prevention rule: read the route's declared status or reproduce it in a small request before asserting it in a new integration fixture.
+
+## 2026-09-27 Slice 14: gateway unit test kept an invalid role argument
+
+- What happened: after the gateway began enforcing the AssistRole enum, its direct-call test still passed a string and failed with ASSIST_ROLE_INVALID.
+- Root cause: I tightened the gateway contract without updating the direct test call in the same edit.
+- Prevention rule: when adding an input type guard, update direct callers and add a separate test that the rejected type actually fails before any transport call.
+
+## 2026-09-27 Slice 14: old absence guards failed after the assist package landed
+
+- What happened: the offline suite reported two failures because Slice 6 guards still asserted that shiftwork/assist did not exist.
+- Root cause: I added the new package before replacing the deferred import and prompt arms with tests against the real S14 surfaces.
+- Prevention rule: when a deferred directory or route lands, find its absence guards in the same edit and replace them with non-vacuous tests that inject a detectable fault.
+
+## 2026-09-27 Slice 14: reply metadata changed positional argument meaning
+
+- What happened: adding reported-model metadata made two recorded test replies pass a numeric token count as the model ID. The tests still passed because they asserted other fields.
+- Root cause: optional metadata fields were positional in a dataclass that grew during implementation.
+- Prevention rule: make optional reply metadata keyword-only and name token counts explicitly in test fixtures.
+
 When a coding error occurs, log it below with: what happened, root cause, and prevention rule.
 When a failure pattern repeats 4+ times, graduate it into a permanent rule in `agents.md`.
 
@@ -952,3 +982,29 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   including the frozen-context record and the adapter gate, reads it, and a test
   drives an override through both sites with one failing-capable mutation per
   site.
+
+## 2026-09-27 Slice 14 stranded an assist event between reserve and finish
+
+- **What happened:** a crash after the committed assist reservation left a
+  PENDING event that counted against the three-call budget, refused every
+  decision and told the learner to refresh for a result that could never
+  arrive. The S14 review found it; the repair fails stranded events at startup
+  with the controller-side `ASSIST_INTERRUPTED` code.
+- **Root cause:** the reserve-before-call design paired no-refund counting with
+  a terminal-outcome write a process death can skip, and only runs had restart
+  reconciliation at the one startup recovery point.
+- **Prevention rule:** every reserve-then-finish pair needs a resolvable
+  terminal state for each reserved row, a startup reconciliation, and panel
+  copy that stays true in every state the row can rest in.
+
+## 2026-09-27 Slice 14's injected gateway client bypassed the call deadline
+
+- **What happened:** the 20-second bounded transport existed only on the
+  default provider path, so the injected `httpx.Client` used by tests and
+  demos made an unbounded call. The S14 review found it; the injected path now
+  carries the same per-request timeout and a transport-level test pins it.
+- **Root cause:** one claim-defining bound lived in a single branch of a
+  two-branch call, and the test/demo seam silently dropped it.
+- **Prevention rule:** apply a claim-defining bound on every call path
+  including injection seams, and pin it with a test that fails when the seam
+  bypasses the bound.
