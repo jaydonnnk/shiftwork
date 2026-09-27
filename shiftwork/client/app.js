@@ -55,7 +55,9 @@ function clearData(message) {
   text('source-note', '');
   text('diagnostic-note', '');
   text('assist-standing', '');
+  text('assist-budget', '');
   text('assist-denial', '');
+  empty($('assist-events'), 'No assistance recorded.');
   text('investigate-error', '');
   $('source-ordinal').replaceChildren();
   $('source-ordinal').disabled = true;
@@ -320,7 +322,37 @@ function renderSource(station) {
     : run ? 'This run captured no request ordinal, so no entry can cite it.' : `No executed run is loaded, so no entry can cite a source request yet. ${station?.bootstrap_available ? '' : station?.bootstrap_reason ?? ''}`.trim());
 }
 function renderAssist(station) {
-  text('assist-standing', station ? (station.assist_available ? 'Diagnostic help is available.' : station.assist_reason) : '');
+  text('assist-standing', station?.assist_reason ?? '');
+  text('assist-budget', station ? `${station.assist_used} of ${station.assist_limit} help calls used this shift. Failed calls also count.` : '');
+  for (const option of $('assist-role').options) option.disabled = station?.assist_limit === 1 && option.value !== 'HINT';
+  if ($('assist-role').selectedOptions[0]?.disabled) $('assist-role').value = 'HINT';
+  const list = $('assist-events');
+  if (!station?.assist_events?.length) empty(list, 'No assistance recorded.');
+  else list.replaceChildren(...station.assist_events.map(event => {
+    const row = element('div', null, 'investigation-entry');
+    row.dataset.assistEventId = event.id;
+    row.append(element('strong', `${humanize(event.role)} · ${event.model_id} · ${humanize(event.state)}`));
+    if (event.reported_model_id || event.elapsed_ms !== null || event.input_tokens !== null || event.output_tokens !== null) {
+      row.append(element('p', `Provider reported ${event.reported_model_id ?? 'unknown model'} · ${event.input_tokens ?? 'unknown'} input tokens · ${event.output_tokens ?? 'unknown'} output tokens · ${event.elapsed_ms ?? 'unknown'} ms`, 'evidence-meta'));
+    }
+    if (event.state === 'COMPLETE') {
+      row.append(element('p', event.response_text, 'evidence-text'));
+      if (event.role === 'PATCH_PROPOSAL') {
+        row.append(element('p', event.accepted === null ? 'Proposal only. It has not changed code, checks, or selection.' :
+          `${event.accepted ? 'Accepted' : 'Rejected'} as help attribution. Code remains yours to edit.`, 'evidence-meta'));
+      }
+      if (event.accepted !== null && event.role !== 'PATCH_PROPOSAL') row.append(element('p',
+        event.accepted ? 'Marked as used help.' : 'Marked as dismissed help.', 'evidence-meta'));
+      if (event.accepted === null) for (const [label, accepted] of [['Mark used', true], ['Dismiss', false]]) {
+        const button = element('button', label, 'button secondary');
+        button.type = 'button'; button.disabled = state.pending;
+        button.addEventListener('click', () => decideAssist(event.id, accepted));
+        row.append(button);
+      }
+    } else if (event.state === 'FAILED') row.append(element('p', `Help failed: ${event.failure_code}. This call used budget.`, 'denial'));
+    else row.append(element('p', 'Help request reserved. Refresh for its result.', 'help-text'));
+    return row;
+  }));
   $('request-assist').disabled = state.pending || !station;
 }
 function renderDiagnostic(station) {
@@ -447,12 +479,27 @@ async function requestAssist() {
   if (!shiftId || state.pending) return;
   state.pending = true; renderBoard(); renderInvestigate();
   try {
-    await api(`/shifts/${encodeURIComponent(shiftId)}/assist`, { method: 'POST', body: JSON.stringify({ investigation_id: state.stationView?.latest_investigation_id ?? null, role: 'HINT', client_request_id: requestId('assist') }) });
+    const event = await api(`/shifts/${encodeURIComponent(shiftId)}/assist`, { method: 'POST', body: JSON.stringify({ investigation_id: state.stationView?.latest_investigation_id ?? null, role: $('assist-role').value, message: $('assist-message').value, client_request_id: requestId('assist') }) });
+    await refresh();
+    text('assist-denial', event.state === 'FAILED' ? `Help failed: ${event.failure_code}. This call used budget.` : 'Help recorded below. Check it against your evidence.');
   } catch (error) {
     text('assist-denial', error.message);
   } finally {
     state.pending = false;
     if (state.board) { renderBoard(); renderInvestigate(); }
+  }
+}
+async function decideAssist(eventId, accepted) {
+  if (state.pending) return;
+  state.pending = true; renderInvestigate();
+  try {
+    await api(`/assist-events/${encodeURIComponent(eventId)}/decision`, { method: 'POST', body: JSON.stringify({ accepted }) });
+    await refresh();
+  } catch (error) {
+    text('assist-denial', error.message);
+  } finally {
+    state.pending = false;
+    if (state.board) renderInvestigate();
   }
 }
 async function runDiagnostic() {
@@ -550,7 +597,7 @@ function navigate(view, userIntent = true) {
     document.querySelectorAll('[data-station]').forEach(button => button.setAttribute('aria-pressed', 'false'));
     text('station-context', 'This journey view is planned for Slice 11; no later shift is started here.');
     delete document.body.dataset.evidence;
-    $('board-view').hidden = true; $('customer-view').hidden = true; $('deferred-view').hidden = false;
+    $('board-view').hidden = true; $('customer-view').hidden = true; $('investigate-view').hidden = true; $('deferred-view').hidden = false;
     text('panel-title', view === 'return' ? 'Return to your work' : 'Northline workshop');
     text('panel-kicker', 'PLANNED FOR SLICE 11');
     text('deferred-title', 'Not part of this client slice yet.');

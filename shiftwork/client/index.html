@@ -96,8 +96,14 @@
         <section class="panel-section">
           <h3>Diagnostic help</h3>
           <p id="assist-standing" class="help-text"></p>
+          <p id="assist-budget" class="evidence-meta"></p>
+          <div class="field"><label for="assist-role">Kind of help</label>
+            <select id="assist-role"><option value="HINT">Hint</option><option value="DIAGNOSIS">Diagnosis to check</option><option value="PATCH_PROPOSAL">Labelled patch proposal</option></select>
+          </div>
+          <div class="field"><label for="assist-message">What do you want help with?</label><textarea id="assist-message" rows="2" maxlength="2000"></textarea></div>
           <p id="assist-denial" class="denial" role="status"></p>
           <div class="panel-actions"><button id="request-assist" class="button secondary">Request diagnostic help</button></div>
+          <div id="assist-events" aria-live="polite"></div>
         </section>
         <section class="panel-section" data-synthetic-region="diagnostic">
           <div class="section-heading"><h3>Public diagnostic</h3><span class="synthetic">Synthetic scenario</span></div>
