@@ -1,5 +1,109 @@
 # Status: Shiftwork
 
+## Slice 12 offline completion: inference payload archiving and judge route evidence: 2026-09-27
+
+The trials finding is repaired and the judge route is archived; nothing live ran
+in this step. `demos/gateway_spike_live.py` now archives the whole provider
+response under `provider_response`, minus an explicit `REDACTED_RESPONSE_FIELDS`
+list (empty today) whose dropped keys are recorded in `redacted_fields`; the
+single emit site inside `infer()` is unchanged. The judge phase now writes its
+own stamped run sink and its route check requires the evidence directory to hold
+`slice12-*.jsonl` records; `demos/gateway_spike.py` calls the new
+`judge_route_probe`, so `--phase judge` still reads no credential and makes no
+live call.
+
+Evidence: the judge route ran once offline
+(`.venv313/Scripts/python.exe -m demos.gateway_spike --phase judge`, exit 0) and
+wrote `evidence/slice12-judge-20260927T000104Z.jsonl`, one record with all five
+checks true, verdict `PASS_JUDGE_ROUTE_READY`, the environment names, the two
+offline commands and the ten live phase commands. The file was re-scanned with
+the harness's own `no_secret_leak` on the parsed records and the raw text; both
+pass.
+
+Guards, failing first: six checks failed against the pre-fix code, then passed.
+Two run `infer()` against a fake HTTP client (one requires every provider field
+back, including `message.reasoning_content`; one forces a redaction and requires
+it dropped and named), two exercise the judge probe (a ready root archives its
+checks and verdict; a bare root fails closed and archives an incomplete
+verdict), and the two route-collection checks now require the `evidence_records`
+key. The spike mutation table is now `assertion-level catches: 58/58` with
+byte-identical restoration, and the full suite is `418 passed, 1 skipped,
+2 warnings`, against 414 and 1 before. The two source fixes changed
+`source_sha256`, so all later records carry a new stamp.
+
+## Slice 12 confirming service call and reset live runs, and the consolidated verdict: 2026-09-27
+
+The user authorized one confirming service call and the reset phase. Both ran
+once and exited 0; no other live call followed.
+
+- Service (the archiving confirmation): `--phase service` wrote
+  `evidence/slice12-service-20260927T000314Z.jsonl` (seven records, source
+  SHA-256 `5389c0342b315dd36fd7fb7025df318aaa0f280a9b347b1180f8c81fb81e46f6`).
+  One inference call: 45 prompt tokens, 104 completion tokens,
+  `finish_reason: stop`, HTTP 1,623 ms inside a 3,679 ms disposable service
+  request that emitted `"tool": "stock_lookup"`; estimated inference cost
+  0.00002766 USD, Sandbox `resources.cost` 0.00063545 in the currency-less
+  field. The archived payload is the whole response and shows `content`
+  `"\nSTOCK"` beside `message.reasoning`, 438 characters, which settles what the
+  earlier invisible tokens were: the provider's `reasoning` field
+  (`completion_tokens_details` is null, so it is not separately counted). The
+  six trials and the escape run keep their incomplete pre-repair observations;
+  the escape run's empty completions stay indistinguishable from a refusal on
+  archived data.
+- Reset: `--phase reset` wrote `evidence/slice12-reset-20260927T000331Z.jsonl`
+  (ten records, same source stamp). The non-disposable seed wrote
+  `/tmp/slice12-reset-marker.txt` and produced checkpoint image
+  `b7c5c81d-447e-47f1-b620-1a711e4a865e`, the sixth non-deletable image. A fresh
+  base-image run printed `False`; a checkpoint run printed `True`; the download
+  returned exactly 14 bytes equal to `SLICE12_MARKER`; and sending `reuse\n` to
+  the seed operation's closed stdin returned HTTP 409 (same-run; the reuse
+  phase's cross-run 409 stands). No inference call; the three operations
+  reported `resources.cost` 0.00019813 / 0.0001896 / 0.00014546 (sum
+  0.00053319). Both runs' records pass the harness's own `no_secret_leak` on
+  parsed records and raw text, with the credential loaded.
+
+**Consolidated verdict (2026-09-27):** the live matrix is complete and the
+2026-09-26 stop is resolved, with the documented limits (the unexplained
+historical zero-byte observation, 1 MiB-cap capture not established, six samples
+of one request shape, pre-repair inference records incomplete, and probe 1's
+protected-fixture limb N/A rather than PASS). No Gate 3 section 8 hostile probe
+succeeded and no S12 Limits trigger fires, so Slice 13 planning is no longer
+blocked; Slice 13 work, ADR #4 and any commit or push still need their own
+authorization. Estimated inference across all `slice12-*.jsonl` is bounded at
+0.00861732 USD against the 3.00 USD cap (a conservative bound, not measured
+spend), and six non-deletable checkpoint images exist. Full detail, the clause
+map and the probe outcomes are in
+`evidence/slice12-capability-2026-09-26.md`. Slice 12 was ACCEPTED by the user
+in chat on 2026-09-27 (recorded in the Slices checklist below; acceptance covers
+Slice 12 only).
+
+### Post-slice cleanup scan (architect-reviewer, 2026-09-27)
+
+- No orphaned or dead code from this session: `REDACTED_RESPONSE_FIELDS`,
+  `archived_provider_response`, `judge_route_probe`, `JUDGE_ENVIRONMENT_NAMES`,
+  `JUDGE_OFFLINE_COMMANDS`, `JUDGE_LIVE_PHASES` and the `evidence_records`
+  check all have call sites in `demos/` and coverage in `tests/spike/`;
+  `demos/slice12_service.py` stays referenced by `gateway_spike_live.py`; no
+  unused imports were added by the four edited Python files, and
+  `__pycache__` is gitignored.
+- Fixtures and evidence: the three new JSONL files are referenced by the
+  verdict and status docs and are read by the harness's own spend lookup; no
+  duplicate fixture covers the same case.
+- Doc drift closed by this scan: the trials section's "reset stays unrun /
+  S13 stays blocked" sentence and the hard-stop section's closing sentence got
+  dated supersession pointers, since both were superseded without a marker.
+- Reported for the user's decision, not changed: `demos/inspect_checkpoint_images.py`
+  (added by `857cf6e` for the 2026-09-26 re-inspection) has no reference in code
+  or docs outside its own docstring; it is the provenance tool for
+  `evidence/slice12-reinspection-2026-09-26.jsonl`, so the recommendation is to
+  keep it unless one-off tools are being pruned. The user chose to keep it as
+  provenance on 2026-09-27.
+- Reported, not changed: `AGENTS.md` section 3 still describes Slice 12 as
+  unchecked with the stop standing and S13 stopped. It carries the user's own
+  unstaged edit and was not touched.
+- The scan made no code changes, so the final full-suite result stands; the
+  doc-only edits after the last run were checked with `git diff --check`.
+
 ## Slice 12 trials phase live run: 2026-09-27
 
 The user authorized the trials phase only, after an offline matrix completeness
@@ -52,7 +156,9 @@ workload is only weakened from one sample to six of the same one. The run also d
 not re-test the escape phase's two empty completions, which exhausted the ceiling
 on harder prompts. The reset phase stays unrun and needs its own spend
 authorization; readback is not a remaining gap. Slice 12 stays unchecked and Slice
-13 onward stays blocked.
+13 onward stays blocked. (Superseded 2026-09-27 by the completion and verdict
+sections at the top of this file: the reset phase ran and the slice's final
+verdict is recorded.)
 
 ## Slice 12 reuse phase live run: 2026-09-26
 
@@ -249,7 +355,9 @@ considered; both scoped approvals are now recorded above. They do not resolve
 the checkpoint loss or complete the matrix.
 The [Slice 12 capability evidence](evidence/slice12-capability-2026-09-26.md)
 and its redacted JSONL record give actual observations, costs, unrun probes and
-limits. No commit, push or Slice 13 work followed.
+limits. No commit, push or Slice 13 work followed. (Superseded 2026-09-27: the
+remaining phases ran and the stop is resolved; see the completion and verdict
+sections at the top of this file.)
 
 ## Slice 12 independent review and checkpoint re-inspection: 2026-09-26
 
@@ -1249,11 +1357,19 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
 - [x] Slice 9: Client isometric room shell + board/customer-shift stations (01, 03); implemented and browser-verified 2026-09-21, its independent review round adjudicated and repaired the same day (evidence in its two sections below), committed in nine reviewable batches on `shiftwork/slice-9` and merged to main (`4d5539a`) the same day, with the user marking that merge as the visual acceptance; pushed to origin. Preview/evidence below.
 - [x] Slice 10: byte-preserving v5-to-v6 migration and non-operational first-choice shift; implemented and verified 2026-09-25, ACCEPTED by the user in chat the same day after the verification report disclosed the preview regression, the fabricated-choice shim, the flaky atomicity proof and the missing room screenshot. Committed in eight focused batches, merged to main as `f0a1e81..0432cbd` and pushed, no co-author footer. Acceptance covers S10 only (evidence in the Slice 10 implementation section and Approval history below)
 - [x] Slice 11: executable task-relevant Bellwether failure, investigation and public diagnostic test; implemented and locally verified 2026-09-26 and ACCEPTED by the user in chat the same day (evidence, numbers and limits in the Slice 11 entries at the top of this file). Committed in 13 focused batches on `shiftwork/slice-11`, pushed as `add85b1..6832486`, no co-author footer. Acceptance covers Slice 11 only
-- [ ] Slice 12: bounded Token Factory capability spike; authorized 2026-09-26,
-  entitlement corrected, partial live matrix stopped on checkpoint loss;
-  Gate 2/3 capture corrections re-approved and one separately authorized
-  small-file checkpoint readback passed; original checkpoint cause and reliable
-  capture route remain unproven, with no slice completion recorded
+- [x] Slice 12: bounded Token Factory capability spike; ACCEPTED by the user in
+  chat 2026-09-27. Live matrix complete 2026-09-27 (pair, controls, outage,
+  escape, reuse, trials, judge route, confirming service call and reset all ran,
+  and the inference-archiving defect is repaired), with the final verdict in
+  `evidence/slice12-capability-2026-09-26.md`. No Gate 3 section 8 hostile probe
+  succeeded and both S12 Limits triggers are clear, with the documented limits
+  (unexplained historical zero-byte observation, 1 MiB-cap capture not
+  established, one request shape for the six trials, pre-repair inference
+  records incomplete, probe 1 protected-fixture limb N/A). Committed in three
+  focused batches on `shiftwork/slice-12` (`fa1b763` code and guards, `f75020e`
+  raw evidence, and the documentation batch that carries this line), no
+  co-author footer. Acceptance covers Slice 12 only; Slice 13 onward needs its
+  own go-ahead and its own authorizations
 - [ ] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap
 - [ ] Slice 14: prediction-gated attributable assist gateway
 - [ ] Slice 15: reviewed A/B workloads and six frozen paired trial slots

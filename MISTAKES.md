@@ -843,3 +843,13 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
   the author expected to matter. Every field counted in `usage` must be either
   archived or explicitly recorded as deliberately dropped with a reason. A guard
   on "the record was emitted" is not coverage of "the observation was captured".
+- **Repair 2026-09-27:** `infer()` now archives the whole provider response body
+  under `provider_response`, minus an explicit `REDACTED_RESPONSE_FIELDS` list whose
+  dropped keys are recorded in `redacted_fields`, and the single emit site is
+  unchanged. Two offline guards (a fake-client round trip of every field, and a
+  forced redaction that must be named) plus two mutation rows fail against the
+  pre-fix code; the spike table is 58/58 with byte-identical restoration. An
+  authorized confirming call archived `message.reasoning` (438 characters) beside
+  `content`, so the invisible completion tokens were the provider's `reasoning`
+  field. Records archived before the repair stay incomplete; the repair is
+  forward-looking.

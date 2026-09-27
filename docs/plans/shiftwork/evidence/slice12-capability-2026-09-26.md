@@ -1,19 +1,64 @@
-# Slice 12 live capability matrix: stopped 2026-09-26
+# Slice 12 live capability matrix: final verdict 2026-09-27
 
-**Verdict: STOP, not Slice 12 acceptance.** A successful non-disposable Sandbox
-operation did not retain a file it reported writing. Under the 1 MiB layer limit,
-its stdout said it wrote 2 MiB of random bytes, the operation reported `SUCCESS`
-and had no `size_cap` event or error, yet the checkpoint listed the file at zero
-bytes and download returned zero bytes. The reason is not established. This
-invalidates the checkpoint/capture path tested here. A separately authorized
-small-file readback later passed under the normal 16 MiB cap; it does not
-explain or cancel the earlier failure. No Slice 13 work followed. The raw
-redacted observations are in
+**Verdict: the live matrix is complete and the 2026-09-26 stop is resolved, with
+the limits below; Slice 12 acceptance itself is the user's decision at the
+review pause.** On 2026-09-26 a STOP was issued because a successful
+non-disposable Sandbox operation did not retain a file it reported writing.
+Under the 1 MiB layer limit, its stdout said it wrote 2 MiB of random bytes, the
+operation reported `SUCCESS` and had no `size_cap` event or error, yet the
+checkpoint listed the file at zero bytes and download returned zero bytes. The
+reason is not established. That invalidated the checkpoint/capture path tested
+here. A separately authorized small-file readback later passed under the normal
+16 MiB cap. The raw redacted observations are in
 `slice12-live-2026-09-26.jsonl`. That file has no listing or download record
 and no per-record timestamp or code revision (review finding F2), and the
 earlier readback ran outside the archived record set. A separately authorized
 read-only re-inspection on 2026-09-26 made the zero-byte finding archival; its
 raw records are in `slice12-reinspection-2026-09-26.jsonl`.
+
+What resolves the stop, in order:
+
+- The repaired byte-first verifier (`pair` phase, 2026-09-26) could not
+  reproduce a silent loss: the 16 MiB control captured the deterministic 2 MiB
+  payload and read it back byte-exact, while the 1 MiB treatment refused the
+  copy loudly (`OSError: [Errno 5]`, exit 1, no completion marker, 0-byte
+  checkpoint). The user's 2026-09-26 adjudication accepted the control run as
+  establishing the transport/capture route and classified the treatment as a
+  visible failed run with incomplete evidence, not a Gate 3 test 38 mismatch,
+  with no further capture runs.
+- The remaining authorized phases then ran: `controls`, `outage`, `escape`,
+  `reuse` and `trials` on 2026-09-26, and the judge route, a confirming service
+  call and `reset` on 2026-09-27. None of those eight closed on a stop
+  condition, and each left a raw record in this directory.
+- No Gate 3 section 8 hostile probe succeeded, the model produced a usable
+  in-service decision under the fixed ceilings in the original run, all six
+  trials and the confirming call, and six trials completed. No S12 Limits
+  trigger in `04-slices.md` fires, so the stop no longer blocks Slice 13
+  planning. It does not itself authorize Slice 13 work.
+
+Limits that stay visible in this verdict:
+
+- The original zero-byte observation remains unexplained and was never
+  reproduced. Capture under a 1 MiB layer cap is not established; the treatment
+  refused the write instead.
+- Gate 3 section 8 probe 1's protected-fixture limb is N/A rather than PASS: a
+  spike has no sealed cases, and the mounted sentinel is a positive control that
+  is meant to be found.
+- The six trials are six samples of one identical request at `temperature=0`.
+  They measure repeatability, latency and cost, not workload coverage; the
+  standing one-task-shape caveat weakens from one sample to six of the same one
+  rather than being retired.
+- Inference observations archived before the 2026-09-27 repair omit the model's
+  `message.reasoning` text. The confirming call established what the missing
+  tokens were; the earlier records cannot be repaired retroactively, and that
+  includes the escape run's two empty completions, which stay indistinguishable
+  from a refusal on archived data alone.
+- The judge route is an offline prerequisites check, not a hosted demo or a
+  measured judge walkthrough; no public ingress, test build or hosted URL was
+  produced.
+
+The 2026-09-26 sections below are preserved as history; where a later section
+supersedes a sentence, the later section says so.
 
 ## One-run small-file follow-up: 2026-09-26
 
@@ -31,7 +76,9 @@ The post-run `whoami` reported zero running instances. No inference call ran.
 **Narrow verdict: PASS for one small file under the normal cap only.** The 2 MiB
 file under the 1 MiB cap still had zero-byte readback, with cause unproven.
 Reset/branch behavior and the rest of the live matrix remain untested. S12 stays
-unchecked and S13 onward stays stopped.
+unchecked and S13 onward stays stopped. (Superseded 2026-09-27: the reset/branch
+behavior and the rest of the live matrix ran under separate authorizations; see
+the final verdict at the top of this document.)
 
 ## Fixed setup and spend
 
@@ -495,6 +542,170 @@ while the "four-request-per-trial estimate" remains a projection, because each
 trial made exactly one customer request rather than four. That paragraph is
 otherwise left as written about the original stopped run.
 
+### Judge route archived offline: 2026-09-27 (no live call)
+
+The judge delivery route had no archived record: `--phase judge` printed its
+result but never set an evidence sink, so matrix clause 12 rested on prose in
+this document while every other clause had a `slice12-*.jsonl` file. The phase
+now writes its own stamped run sink through the same `build_record`/`emit`
+discipline as the live phases, and its route check gained a fifth requirement:
+the evidence directory must actually contain `slice12-*.jsonl` records, so the
+route cannot pass on an empty delivery.
+
+One offline run on 2026-09-27,
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase judge`, exited 0 and
+wrote `slice12-judge-20260927T000104Z.jsonl` (one record, source SHA-256
+`5389c0342b315dd36fd7fb7025df318aaa0f280a9b347b1180f8c81fb81e46f6`). The record
+carries all five checks (all true), verdict `PASS_JUDGE_ROUTE_READY`, the
+environment names a judge needs, the two offline commands and the ten live
+phase commands. A missing prerequisite still archives a
+`STOP_JUDGE_ROUTE_INCOMPLETE` record and exits 2. Offline guards: two new checks
+in `tests/spike/test_spike_verifiers.py` (a ready root archives its checks and
+verdict; a bare root fails closed and archives the incomplete verdict) and three
+new mutation rows, each failing at assertion level. The file was re-scanned with
+the harness's own `no_secret_leak` on the parsed records and the raw text; both
+pass, with the credential loaded from the gitignored `.env`. The phase reads no
+credential and made no live call.
+
+### Inference payload archiving repaired, one authorized confirming call: 2026-09-27
+
+The trials defect (logged in `MISTAKES.md`, 2026-09-27) is repaired. `infer()`
+previously archived a hand-picked field list, so every `nemotron_inference`
+record from before this date omits roughly 100 to 140 billed completion tokens
+per call. It now archives the whole provider response body under
+`provider_response`, minus an explicit `REDACTED_RESPONSE_FIELDS` list (empty
+today) whose dropped keys are recorded in `redacted_fields`, so a deliberate
+omission is visible rather than silent. The single emit site inside `infer()` is
+unchanged; the repair changes what that record contains, not where it is
+produced.
+
+Offline proof: two new checks
+(`test_inference_record_archives_the_whole_provider_payload` runs `infer()`
+against a fake HTTP client and requires every field back, including
+`choices[0].message.reasoning_content` and `usage.completion_tokens_details`;
+`test_an_explicit_redaction_is_dropped_and_named` forces a redaction and
+requires it dropped and named) plus two mutation rows
+(`inference_archive_allowlist`, `inference_redaction_not_named`). Both new
+checks failed against the pre-fix code. The spike mutation table is now 58 of 58
+assertion-level catches with byte-identical restoration, and the full suite is
+at 418 passed, 1 skipped, 2 warnings, against 414 and 1 before.
+
+The user authorized one confirming service call. It ran on 2026-09-27 as
+`--phase service`, exited 0, and wrote `slice12-service-20260927T000314Z.jsonl`
+(seven records, source SHA-256 `5389c034...46f6`). One inference call: 45 prompt
+tokens, 104 completion tokens, `finish_reason: stop`, HTTP 1,623 ms inside a
+3,679 ms end-to-end disposable service request that emitted
+`"tool": "stock_lookup"`; the estimated inference cost at the displayed rates is
+0.00002766 USD, and the Sandbox operation reported `resources.cost` 0.00063545
+in the same currency-less field as before. The archived payload is the whole
+response: `content` `"\nSTOCK"` beside `message.reasoning`, 438 characters of
+the model's working text, plus every other returned field (`prompt_text`,
+`system_fingerprint` `vllm-0.22.0-b08c96cd`, `moderation`, `tool_calls`, and so
+on). This establishes what the earlier records could not: the previously
+invisible completion tokens were the model's reasoning text in the `reasoning`
+field, and the provider returns `completion_tokens_details: null`, so that text
+is not separately counted in usage. The six trial observations and the escape
+run's records from before the repair stay incomplete and cannot be repaired
+retroactively; the escape run's two empty completions still cannot be told apart
+from a purposeful refusal on archived data alone, and this call did not re-test
+those harder prompts. The record was re-scanned with the harness's own
+`no_secret_leak` on the parsed records and the raw text; both pass.
+
+### Reset phase live run: 2026-09-27 (one authorized live step)
+
+The user authorized the reset phase only. It ran once as
+`.venv313/Scripts/python.exe -m demos.gateway_spike --phase reset`, exited 0 at
+`2026-09-27T00:03:31Z` UTC, and wrote `slice12-reset-20260927T000331Z.jsonl`
+(ten records, source SHA-256 `5389c034...46f6`).
+
+- `reset_seed`: a non-disposable run wrote `/tmp/slice12-reset-marker.txt`
+  (`SEED_WRITTEN`, exit 0) and produced checkpoint image
+  `b7c5c81d-447e-47f1-b620-1a711e4a865e`, the sixth non-deletable image (the
+  `whoami` permission set still has no delete).
+- `reset_from_base`: a disposable run from the public base image printed
+  `False`, so a fresh instance does not see the marker.
+- `checkpoint_readback`: a disposable run from the checkpoint image printed
+  `True`, and `inspect_image_download` returned exactly 14 bytes equal to
+  `SLICE12_MARKER`.
+- `terminated_stdin_reuse`: sending `reuse\n` to the seed operation's closed
+  stdin returned HTTP 409. This is the same run's just-finished operation, a
+  different claim from the reuse phase's cross-run 409; both reject.
+- No inference call ran. The three operations reported `resources.cost`
+  0.00019813, 0.0001896 and 0.00014546 (sum 0.00053319) in the currency-less
+  field, and no account charge was inspected. The ten records were re-scanned
+  with the harness's own `no_secret_leak` on the parsed records and the raw
+  text; both pass.
+
+This closes matrix clause 9 and the last F5 items: a base image does not see a
+checkpoint's marker while the checkpoint does, and the marker file survives
+byte-exact under the normal 16 MiB cap.
+
+### Final matrix, hostile probes and stop verdict: 2026-09-27
+
+Every clause of the Slice 12 working matrix now has an archived record. File
+names are in this directory; the 2026-09-26 runs are the `slice12-<phase>-` and
+`slice12-live-` files, and the 2026-09-27 runs are the `judge`, `service` and
+`reset` files.
+
+| Clause | Evidence | Outcome |
+| --- | --- | --- |
+| 1 exact model/image/settings | `whoami` and spawn records in every run; the settings block in each `nemotron_inference` | public `python:3.11-slim` image `c7ad32fe-8621-3cd2-9022-521c6da02ac1`, `networking.enabled=false`, model `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, `temperature=0`, 256-token ceiling, per-phase timeouts and layer caps |
+| 2 request interpretation and tool choice | `service_capture` stdout in the `service`, `trials` and `escape` files | `"tool": "stock_lookup"` for the public request in the original run, all six trials and the confirming call; the adversarial request mapped to `none` |
+| 3 file transfer | `service_upload` and `pair_payload` | the uploaded service artifact returned its size and SHA-256; the 2 MiB payload digest matched before and after |
+| 4 request streaming | the service `stdout` event stream plus the host stdin write in `service_capture` | the service streamed the bound `inference_request` line and the host streamed the choice back on subprocess stdin |
+| 5 output/capture retrieval | `pair_run` control, `marker_readback_verdict` (appended in the `live` file), `capture_file_download` in `reset` | 2 MiB read back byte-exact under the 16 MiB cap; a 14-byte marker byte-exact twice |
+| 6 cleanup | `marker_readback_cleanup` | `running_instances: 0`; a nonterminal run emits a cancel record by construction |
+| 7 six-trial latency, usage and cost | `trials` | `PASS_SIX_TRIALS_FEASIBLE`, mean 3,898.7 ms, mean estimated 0.00003094 USD per trial |
+| 8 dependency outage | `outage` | `PASS_OUTAGE_FAILURES_RECORDED` (transport `ConnectError`, provider HTTP 404) with zero business writes |
+| 9 reset | `reset` | base `False`, checkpoint `True`, marker byte-exact, terminated stdin 409 |
+| 10 crash | `crash_retention` in `controls` | `CAPTURE_BEFORE_CRASH` retained with inner exit code 7 and no automatic retry |
+| 11 deadlines, resources and egress | `deadline` and `access_egress` in `controls`; the ceiling probe in `escape` | `timed_out` with signal 9; all three egress attempts failed; the output ceiling held at 256 tokens |
+| 12 judge delivery route | `judge` | `PASS_JUDGE_ROUTE_READY` with the pinned offline and live commands and a nonempty evidence directory |
+
+The six Gate 3 section 8 hostile probes, and what the archived records show:
+
+1. No provider credential, controller path, host-only canary or other grant was
+   reachable. The controls phase's absence checks each fired a positive control
+   first, the cross-run reuse was rejected HTTP 409 (`reuse`), and the same-run
+   terminated stdin was rejected HTTP 409 (`reset`). The protected-fixture limb
+   is N/A, not PASS: a spike has no sealed cases, and the mounted sentinel is a
+   positive control that is meant to be found.
+2. No undeclared tool escaped and no limit gave way. The service mapped the
+   adversarial answer to `none`, the direct over-long request stayed within the
+   declared model and the 256-token ceiling, the deadline probe timed out with
+   signal 9, terminated operations rejected new input twice, and the disabled
+   networking flag was honoured for all three attempted endpoints. A grant
+   calling a model directly is structurally absent: the host makes the only
+   inference call, and the Sandbox holds no provider credential.
+3. No secret was found on any scanned surface (service, escape, outage, reuse,
+   trials, reset), and each scanner needle is self-tested in serialized form so
+   the pass can fail. The inference record now archives the whole provider
+   payload rather than a chosen field list.
+4. A crash retained its completed capture (`CAPTURE_BEFORE_CRASH`, exit 7), and
+   the independent review verified the SDK does not blind-retry POSTs.
+5. Reset leaves no candidate-visible state: the base image printed `False`, the
+   checkpoint printed `True`, and the marker downloaded byte-exact.
+6. One historical observation reads as a success and stays unexplained: the
+   original run's outer `SUCCESS` with stdout claiming a 2 MiB write and a
+   0-byte checkpoint, confirmed archivally by the re-inspection. It was never
+   reproduced under the repaired verifier, the cause is unproven, and the user
+   adjudicated it on 2026-09-26 as recorded above.
+
+**Stop verdict.** No section 8 hostile probe succeeded against the archived
+evidence, and the six-trial and service results show the model doing the
+reviewed in-service work under the fixed ceilings, so neither S12 Limits
+trigger fires and the stop is resolved. The residual limits at the top of this
+document stay attached to this verdict, and Slice 12 acceptance, later Slice 13
+planning and any commit or push of this work remain the user's decisions.
+
+Spend and residue at the verdict: estimated inference across all
+`slice12-*.jsonl` records is bounded at **0.00861732 USD** against the 3.00 USD
+cap, a conservative bound that sums worst-case reservations alongside actual
+estimates rather than measured spend, and no account balance or charge was
+inspected. Six non-deletable checkpoint images exist, the newest
+`b7c5c81d-447e-47f1-b620-1a711e4a865e` from the reset seed; the permission set
+has no delete.
+
 ## Stopped or unmeasured
 
 The stop rule prevented the planned reset/branch readback, terminated grant
@@ -516,5 +727,13 @@ The local `python -m demos.gateway_spike` command did run the service path and
 returned exit 0 only on the second attempt. A judge would need their own
 credentials, Sandbox entitlement and installed SDK; no test build, hosted URL or
 reproducible judge handoff was completed. Gate 2/3 capture corrections are now
-re-approved, but S12 remains unchecked and S13 onward must remain stopped
-pending a trustworthy full capability verdict.
+re-approved.
+
+**Supersession 2026-09-27:** this section was written under the stop rule. The
+reset/branch readback, the terminated grant reuse checks (cross-run and
+same-run) and the six live trial slots are now measured by the records above,
+and the judge delivery route now has an archived offline check; only the
+four-request-per-trial estimate remains a projection, because each trial made
+exactly one customer request rather than four. The stop itself is resolved by
+the final verdict at the top of this document, and S12 remains unchecked
+pending the user's acceptance.
