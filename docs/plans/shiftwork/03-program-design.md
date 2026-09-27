@@ -1,5 +1,8 @@
 # Program Design: Shiftwork final pivot
 
+**Current Gate 3 state: RE-APPROVED (2026-09-27), scoped to the S13 Sandbox
+SDK dependency below.**
+
 **Gate 3: RE-APPROVED 2026-09-24 after the scoped Northline selection backtrack.**
 
 Gates 1, 2 and 4 are approved. Gate 2's scoped file-readback correction was
@@ -106,6 +109,8 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/assist/__init__.py` | Package boundary only. |
 | `shiftwork/assist/gateway.py` | Prediction-gated, attributable Nemotron help with a separate budget. |
 | `shiftwork/executor/tokenfactory.py` | Real isolated adapter behind the existing protocol, added only after the capability spike passes and credentials are separately authorized. Read saved checkpoint files before returning file-backed capture evidence; outer operation status and process stdout cannot supply file bytes. |
+| `pyproject.toml` | Declare the controller-side Sandbox SDK selected after the verified S12 transport, with the HTTPX extra and an exact version pin. The learner artifact never imports or receives it. |
+| `requirements.lock` | Resolve that exact SDK declaration for reproducible clean installs while retaining the existing HTTPX pin. |
 | `shiftwork/curation/__init__.py` | Package boundary only; never imported by the runtime application. |
 | `shiftwork/curation/pipeline.py` | Operator-only Tavily discovery, human verification and frozen-fixture lifecycle. |
 | `shiftwork/curation/ablation.py` | Frozen, known-page polling and Tavily comparison with the retained DROP rule. |
@@ -170,9 +175,18 @@ consequence assumptions would otherwise fail: `demos/lifecycle.py`,
 They retain their historical assertions where still true and add explicit setup for
 purpose, context and selection. They may not be weakened merely to accept v6.
 
-No change to `requirements.lock`, `pyproject.toml` or a vendor SDK is approved by
-this gate. If the capability spike proves a new dependency necessary, Gate 3 must
-be backtracked before the lockfile changes.
+**Scoped S13 dependency correction, re-approved 2026-09-27.**
+The accepted S12 spike used `contree-client[httpx]==0.4.0` for real Sandbox
+spawn, file transfer, operation streaming and checkpoint readback. S13's production
+adapter uses that same SDK in the trusted controller process; writing a second
+Sandbox HTTP client with the already installed `httpx` would duplicate the
+transport and its failure handling. Add `contree-client[httpx]==0.4.0` to
+`pyproject.toml` and regenerate `requirements.lock` with pin parity after this
+correction is approved. `httpx==0.28.1` is already in the lock. Do not add the
+other SDK transport extras. The SDK and the provider credential remain outside
+the learner artifact and Sandbox. The clean-install packaging check and S13
+adapter tests must exercise the locked dependency. This approval is confined to
+the dependency correction and does not authorize ADR #4, fixtures or publication.
 
 The file map assigns ownership, not permission to invent executable contents.
 Current source has the old bookshop template, mission and catalog, plus the trusted
