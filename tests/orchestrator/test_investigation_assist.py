@@ -383,3 +383,50 @@ def test_appending_twice_creates_two_rows_and_never_updates_one(session, run_id)
         assert repo.get_investigation(conn, first.id).cause == CAUSE
     finally:
         conn.close()
+
+
+class _CrashingGateway:
+    """A provider call that dies with the process: a BaseException skips finish."""
+
+    model_id = "crash-double"
+
+    def generate(self, *, model_id, role, prompt):
+        raise KeyboardInterrupt("simulated interruption between reserve and finish")
+
+
+def test_a_stranded_assist_is_failed_at_the_next_startup(session, run_id, restart):
+    """S14 review repair: a crash between reserve and finish must not leave a
+    PENDING event whose panel copy promises a refresh can never deliver.
+
+    The next startup fails it with the controller-side ASSIST_INTERRUPTED code:
+    the call keeps its budget slot, refuses a decision, and a second restart
+    leaves the row untouched (idempotent)."""
+    appended = _append(session, _request(run_id))
+    conn = db.connect(session.db_file)
+    try:
+        with pytest.raises(KeyboardInterrupt):
+            orchestrator.request_assist(
+                conn, session.shift_id, appended.id, AssistRole.HINT,
+                client_request_id="crash-1", gateway=_CrashingGateway(),
+            )
+        assert [event.state for event in repo.list_assist_for_shift(conn, session.shift_id)] == ["PENDING"], (
+            "the crash must leave the reserved event unresolved"
+        )
+    finally:
+        conn.close()
+
+    restarted = restart(session.db_file)
+    view = restarted.client.get(f"/api/shifts/{restarted.shift_id}/investigations").json()
+    (event,) = view["assist_events"]
+    assert (event["state"], event["failure_code"], event["response_text"]) == (
+        "FAILED", "ASSIST_INTERRUPTED", "",
+    )
+    assert (view["assist_used"], view["assist_limit"]) == (1, 3), (
+        "an interrupted call must keep its budget slot"
+    )
+    refused = restarted.client.post(f"/api/assist-events/{event['id']}/decision", json={"accepted": True})
+    assert refused.status_code == 409, refused.text
+
+    again = restart(session.db_file)
+    second_view = again.client.get(f"/api/shifts/{again.shift_id}/investigations").json()
+    assert second_view["assist_events"] == view["assist_events"], "reconciliation must be idempotent"
