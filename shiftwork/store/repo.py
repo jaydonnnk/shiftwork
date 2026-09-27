@@ -768,13 +768,6 @@ def insert_ledger_event(conn: sqlite3.Connection, slug: str, event: LedgerEvent)
     )
 
 
-def last_ledger_event(conn: sqlite3.Connection, slug: str) -> LedgerEvent | None:
-    row = conn.execute(
-        "SELECT * FROM ledger_events WHERE engagement_slug = ? ORDER BY seq DESC LIMIT 1", (slug,)
-    ).fetchone()
-    return _ledger_event(row) if row else None
-
-
 def list_ledger_events(conn: sqlite3.Connection, slug: str) -> list[LedgerEvent]:
     rows = conn.execute(
         "SELECT * FROM ledger_events WHERE engagement_slug = ? ORDER BY seq", (slug,)
@@ -931,12 +924,6 @@ def list_observations(conn: sqlite3.Connection, run_id: str) -> list[ExecutionOb
         (run_id,),
     ).fetchall()
     return [_observation(row) for row in rows]
-
-
-def count_observations(conn: sqlite3.Connection) -> int:
-    return int(
-        conn.execute("SELECT COUNT(*) AS n FROM execution_observations").fetchone()["n"]
-    )
 
 
 # --- task assessments (Slice 11) -------------------------------------------

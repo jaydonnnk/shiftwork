@@ -3288,9 +3288,11 @@ The repair scope is the one recorded in `04-slices.md` (Slice 6 repair list) and
   forward-slash forms; decoded nested JSON string values) with scanner self-tests
   for the JSON-escaped, forward-slash and nested forms (`tests/leakscan.py`, tests 20/45);
 - an incident-producing run is required and its endpoint and nested board projection
-  are scanned, alongside the served client HTML and controller stdout/stderr; the new
-  additive fixture `fixtures/runs/missing_evidence.json` drives MISSING_EVIDENCE to
-  INCIDENT_OPENED through the real finalize path (tests 16/18/20/45);
+  are scanned, alongside the served client HTML and controller stdout/stderr. At
+  the time, `fixtures/runs/missing_evidence.json` drove MISSING_EVIDENCE to
+  INCIDENT_OPENED through the real finalize path (tests 16/18/20/45). Commit
+  `836345d` later removed that redirect; current sealed tests use the shipped
+  attempt-1 transcript `fixtures/runs/bookshop_repair_01_incident.json` instead;
 - the public-corpus filter no longer includes the served client or the artifact
   template, so a note pasted into a served projection cannot exempt its own
   fragments (`tests/leakscan.py`);
