@@ -87,6 +87,19 @@ class ArtifactVersionView(BaseModel):
         return cls.model_validate(version)
 
 
+class ArtifactSourceView(BaseModel):
+    """Owned source with logical filenames, without any storage locator."""
+
+    model_config = _FROZEN
+
+    id: str
+    parent_id: str | None
+    content_hash: str
+    files: dict[str, str]
+    contract: ContractView
+    authorship: Literal["template", "learner"]
+
+
 class RunView(BaseModel):
     model_config = _FROZEN
 

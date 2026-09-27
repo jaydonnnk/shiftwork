@@ -82,6 +82,13 @@ def freeze_version(
     )
 
 
+@router.get("/artifact-versions/{version_id}", response_model=schemas.ArtifactSourceView)
+def get_artifact_source(
+    version_id: str, conn: sqlite3.Connection = Depends(get_conn)
+) -> schemas.ArtifactSourceView:
+    return schemas.ArtifactSourceView.model_validate(orchestrator.artifact_source(conn, version_id))
+
+
 @router.post("/shifts/{shift_id}/runs", response_model=schemas.RunView, status_code=202)
 def start_run(
     shift_id: str,
@@ -111,10 +118,13 @@ def get_outputs(
     run_id: str, conn: sqlite3.Connection = Depends(get_conn)
 ) -> list[schemas.RunOutputView]:
     run = orchestrator.get_run(conn, run_id)
-    return [
+    payload = [
         schemas.RunOutputView.of(output, **orchestrator.output_evidence_for(conn, output, run))
         for output in orchestrator.list_outputs(conn, run_id)
     ]
+    if run.adapter == "tokenfactory" and run.purpose.value == "EXPERIMENT":
+        orchestrator.assert_public_projection([entry.model_dump(mode="json") for entry in payload])
+    return payload
 
 
 @router.get("/runs/{run_id}/checks", response_model=list[schemas.CheckResultView])
@@ -146,9 +156,11 @@ def close_shift(shift_id: str, conn: sqlite3.Connection = Depends(get_conn)) -> 
 
 @router.get("/shifts/{shift_id}/investigations", response_model=schemas.InvestigateStationView)
 def get_investigate_station(
-    shift_id: str, conn: sqlite3.Connection = Depends(get_conn)
+    shift_id: str, request: Request, conn: sqlite3.Connection = Depends(get_conn)
 ) -> schemas.InvestigateStationView:
-    return schemas.InvestigateStationView.of(orchestrator.investigate_station(conn, shift_id))
+    return schemas.InvestigateStationView.of(orchestrator.investigate_station(
+        conn, shift_id, adapter=request.app.state.executor
+    ))
 
 
 @router.post(
@@ -207,6 +219,7 @@ def create_experiment(
         candidate_version_id=body.candidate_a_version_id,
         investigation_id=body.investigation_id,
         client_request_id=body.client_request_id,
+        adapter="tokenfactory" if request.app.state.executor == "tokenfactory" else "local_process",
     )
     run = orchestrator.experiment_run(conn, experiment.id)
     if run is not None:

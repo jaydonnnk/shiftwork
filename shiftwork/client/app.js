@@ -121,7 +121,10 @@ function renderBoard() {
   text('version-state', version ? `${version.id} · ${needsChoice ? 'saved, not selected' : 'frozen'}` : 'Draft · no frozen version');
   text('version-hash', version ? `Content hash ${version.content_hash}` : '');
   const adapter = state.run?.adapter;
-  text('execution-note', state.run?.purpose === 'LEGACY_OPERATION'
+  const liveDiagnostic = state.stationView?.latest_experiment?.trials?.some(trial => trial.evidence_mode === 'ISOLATED_LIVE');
+  text('execution-note', liveDiagnostic
+    ? 'A real isolated diagnostic ran this saved service. Its result is evidence only; no version was selected or operated. The simulated role is not a credential.'
+    : state.run?.purpose === 'LEGACY_OPERATION'
     ? `Legacy operation · ${state.run.evidence_mode ?? 'evidence mode unknown'}. Missing historical inputs remain unknown; old captures are not a fresh test. No live model or sandbox is established.`
     : adapter === 'local_process'
     ? 'Offline trusted-fixture execution. Not hostile-code isolation. No live model or sandbox. The simulated role is not a credential.'
@@ -325,12 +328,14 @@ function renderDiagnostic(station) {
   const trial = experiment?.trials?.[0] ?? null;
   const output = trial?.outputs?.[0] ?? null;
   const result = $('diagnostic-result');
-  $('run-diagnostic').disabled = state.pending || !station?.latest_investigation_id || !state.board?.latest_version;
+  $('run-diagnostic').disabled = state.pending || !(station?.latest_investigation_id || station?.bootstrap_available) || !state.board?.latest_saved_version_id;
   if (!station) { text('diagnostic-note', ''); return empty(result, 'No shift loaded.'); }
   if (!experiment) {
-    text('diagnostic-note', station.latest_investigation_id
-      ? 'Ready. The diagnostic runs the pinned reviewed starter once against its frozen incident request and public state, then assesses the required tasks.'
-      : 'Record your cause, falsifier and public test first. The diagnostic cites your entry and cannot run before it exists.');
+    text('diagnostic-note', station.bootstrap_available && !station.latest_investigation_id
+      ? 'Freeze your inherited draft to own an exact version, then run the one public source diagnostic. It cannot qualify a version or change business history.'
+      : station.latest_investigation_id
+        ? 'Ready. The diagnostic runs your frozen version against the reviewed public request and state, then checks each requested task.'
+        : 'Record your cause, falsifier and public test first. The diagnostic cites your entry and cannot run before it exists.');
     return empty(result, 'No public diagnostic has run in this shift, and none can qualify a version.');
   }
   text('diagnostic-note', experiment.declared_treatment);
@@ -452,7 +457,7 @@ async function requestAssist() {
 }
 async function runDiagnostic() {
   const shiftId = state.board?.latest_shift?.id;
-  const versionId = state.board?.latest_version?.id;
+  const versionId = state.board?.latest_saved_version_id;
   if (!shiftId || !versionId || state.pending) return;
   state.pending = true; renderBoard(); renderInvestigate();
   try {
@@ -464,7 +469,7 @@ async function runDiagnostic() {
     }) });
     state.diagnostic = experiment;
     renderInvestigate();
-    const deadline = Date.now() + 30000;
+    const deadline = Date.now() + 75000;
     while (!['COMPLETE', 'FAILED'].includes(experiment.trials[0]?.state) && Date.now() < deadline) {
       await new Promise(resolve => setTimeout(resolve, 400));
       experiment = await api(`/experiments/${encodeURIComponent(experiment.id)}`);
@@ -489,7 +494,7 @@ const stations = {
   ledger: ['Incident & ledger wall', 'RECORDED CONSEQUENCES', 'Synthetic scenario. Select an incident to inspect the output and result that opened it.'],
   repair: ['Repair review', 'REPAIR BENCH · READ ONLY', 'Inspect an actual incident below. Repair authoring and rerunning a new version are not available in this build.'],
   evaluator: ['Independent evaluator', 'LOCKED · NOT EDITABLE', 'Neither the learner nor an assistant can edit the scoring rules or see sealed expected values.'],
-  investigate: ['Investigate a failure', 'REVIEW THE RECORDED RUN', 'Read the exact request and output, then write your cause, falsifier and public test. The public diagnostic runs the pinned reviewed starter and can never qualify a version.'],
+  investigate: ['Investigate a failure', 'REVIEW THE EXECUTED REQUEST', 'Read the exact request and output, then write your cause, falsifier and public test. A diagnostic cannot qualify a version.'],
 };
 function bringStationPanelIntoReach() {
   // Narrow layouts stack the panel below the room, so a station selection can
