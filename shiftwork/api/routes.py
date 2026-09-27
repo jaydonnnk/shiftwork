@@ -159,7 +159,8 @@ def get_investigate_station(
     shift_id: str, request: Request, conn: sqlite3.Connection = Depends(get_conn)
 ) -> schemas.InvestigateStationView:
     return schemas.InvestigateStationView.of(orchestrator.investigate_station(
-        conn, shift_id, adapter=request.app.state.executor
+        conn, shift_id, adapter=request.app.state.executor,
+        assist_gateway=request.app.state.assist_gateway,
     ))
 
 
@@ -236,15 +237,23 @@ def get_experiment(
     return schemas.ExperimentView.of(orchestrator.experiment_view(conn, experiment_id))
 
 
-@router.post("/shifts/{shift_id}/assist", response_model=None)
+@router.post("/shifts/{shift_id}/assist", response_model=schemas.AssistEventView)
 def request_assist(
     shift_id: str,
     body: schemas.AssistRequest,
+    request: Request,
     conn: sqlite3.Connection = Depends(get_conn),
-) -> None:
-    """Diagnostic help. S11 always denies it: the prediction gate first, then the
-    absent gateway. The typed denial carries which of the two applied; Slice 14
-    replaces the raise with the attributable gateway and this route's response."""
-    orchestrator.request_assist(
-        conn, shift_id, body.investigation_id, AssistRole(body.role)
+) -> schemas.AssistEventView:
+    event = orchestrator.request_assist(
+        conn, shift_id, body.investigation_id, AssistRole(body.role),
+        message=body.message, client_request_id=body.client_request_id,
+        gateway=request.app.state.assist_gateway,
     )
+    return schemas.AssistEventView.model_validate(orchestrator.assist_event_view(event))
+
+
+@router.post("/assist-events/{event_id}/decision", response_model=schemas.AssistEventView)
+def decide_assist(event_id: str, body: schemas.AssistDecision,
+                  conn: sqlite3.Connection = Depends(get_conn)) -> schemas.AssistEventView:
+    event = orchestrator.record_assist_decision(conn, event_id, body.accepted)
+    return schemas.AssistEventView.model_validate(orchestrator.assist_event_view(event))

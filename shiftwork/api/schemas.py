@@ -4,7 +4,7 @@ import base64
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from shiftwork.domain.models import (
     ArtifactVersion,
@@ -334,9 +334,9 @@ class InvestigationAppendRequest(BaseModel):
 
     source_run_id: str
     source_request_ordinal: int
-    cause: str
-    falsifier: str
-    public_test: str
+    cause: str = Field(max_length=2000)
+    falsifier: str = Field(max_length=2000)
+    public_test: str = Field(max_length=2000)
     revision_of_id: str | None = None
     client_request_id: str
 
@@ -360,7 +360,35 @@ class AssistRequest(BaseModel):
 
     investigation_id: str | None = None
     role: Literal["HINT", "DIAGNOSIS", "PATCH_PROPOSAL"]
+    message: str = Field(default="", max_length=2000)
     client_request_id: str
+
+
+class AssistDecision(BaseModel):
+    model_config = _FROZEN
+
+    accepted: bool
+
+
+class AssistEventView(BaseModel):
+    model_config = _FROZEN
+
+    id: str
+    shift_id: str
+    investigation_id: str
+    role: Literal["HINT", "DIAGNOSIS", "PATCH_PROPOSAL"]
+    model_id: str
+    reported_model_id: str | None
+    input_tokens: int | None
+    output_tokens: int | None
+    elapsed_ms: int | None
+    request_text: str
+    response_text: str
+    proposed_patch: str | None
+    accepted: bool | None
+    state: Literal["PENDING", "COMPLETE", "FAILED"]
+    failure_code: str | None
+    created_at: datetime
 
 
 class ExperimentRequest(BaseModel):
@@ -479,6 +507,9 @@ class InvestigateStationView(BaseModel):
     latest_investigation_id: str | None
     assist_available: bool
     assist_reason: str
+    assist_used: int
+    assist_limit: int
+    assist_events: tuple[AssistEventView, ...]
     bootstrap_available: bool
     bootstrap_reason: str
     latest_experiment: ExperimentView | None = None
