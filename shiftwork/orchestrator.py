@@ -25,11 +25,15 @@ import json
 import os
 import sqlite3
 import tempfile
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 from shiftwork import config
+from shiftwork.assist.gateway import (
+    AssistGateway, AssistRejected, ASSIST_SYSTEM_MESSAGE, MAX_INPUT_BYTES, SAFE_FAILURE_CODES,
+)
 from shiftwork.domain import canonical, contract_catalog, customer_answer, task_contract
 from shiftwork.domain.errors import (
     AssistGatewayUnavailable,
@@ -41,6 +45,7 @@ from shiftwork.domain.errors import (
 )
 from shiftwork.domain.models import (
     ArtifactVersion,
+    AssistEvent,
     AssistRole,
     CandidateRef,
     CheckResult,
@@ -771,24 +776,34 @@ def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
 
 
 def reconcile_interrupted(conn: sqlite3.Connection) -> list[str]:
-    """Startup recovery (S3.6, S6.B.9): fail the runs a restart left nonterminal.
+    """Startup recovery (S3.6, S6.B.9, S14): fail the work a restart left nonterminal.
 
     A restart can leave runs in QUEUED, RUNNING or CAPTURED; none of them
     resumes. Each is marked FAILED with the typed INTERNAL failure kind (the
     interruption is the controller's, not the service's) while its completed
     captures, log bytes and rotation draws stay byte-for-byte intact and no
-    checks or events are written. FINALIZED and FAILED runs are untouched, so
-    the call is idempotent. Returns the reconciled run ids.
+    checks or events are written. A restart can also strand an assist event
+    between its committed reservation and its outcome write; each such event is
+    marked FAILED with the controller-side ``ASSIST_INTERRUPTED`` code, keeps
+    its consumed budget slot and refuses every decision, exactly like a provider
+    failure. Terminal, decided, FINALIZED and FAILED rows are untouched, so the
+    call is idempotent. Returns the reconciled run and assist event ids.
 
     Startup is the only reconciliation point (``app.py`` lifespan is the sole call
-    site): a run left nonterminal while the app keeps running, for example one
-    whose background task never executes, is not reconciled until the process
-    restarts, and ``close_shift`` refuses that shift until then.
+    site): work left nonterminal while the app keeps running, for example a run
+    whose background task never executes or an assist outcome write that failed,
+    is not reconciled until the process restarts, and ``close_shift`` refuses
+    that shift until its runs are reconciled.
     """
     reconciled: list[str] = []
     for run in repo.list_nonterminal_runs(conn):
         repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
         reconciled.append(run.id)
+    for event in repo.list_pending_assist_events(conn):
+        repo.finish_assist_event(
+            conn, event.id, response="", proposed_patch=None, failure_code=ASSIST_INTERRUPTED
+        )
+        reconciled.append(event.id)
     if reconciled:
         conn.commit()
     return reconciled
@@ -1040,6 +1055,11 @@ ASSIST_GATE_REASON = (
     "Diagnostic help needs your own cause, falsifier and public test first."
 )
 
+#: The outcome for an assist call a restart interrupted between its committed
+#: reservation and its outcome write. The interruption is the controller's, not
+#: the service's, so this stays distinct from the gateway's safe failure codes.
+ASSIST_INTERRUPTED = "ASSIST_INTERRUPTED"
+
 
 def orientation(shift_id: str) -> dict[str, Any]:
     """Deterministic orientation, available before any investigation exists."""
@@ -1076,6 +1096,8 @@ def append_investigation(
     for field in ("cause", "falsifier", "public_test"):
         if not getattr(request, field).strip():
             raise InvestigationIncomplete(f"{field} is required before an investigation exists")
+        if len(getattr(request, field)) > 2000:
+            raise InvestigationIncomplete(f"{field} exceeds 2000 characters")
 
     if request.revision_of_id is not None:
         parent = repo.get_investigation(conn, request.revision_of_id)
@@ -1105,22 +1127,16 @@ def append_investigation(
 
 
 def request_assist(
-    conn: sqlite3.Connection, shift_id: str, investigation_id: str | None, role: AssistRole
-) -> None:
-    """Deny diagnostic help. Two separate denials, checked in this order.
+    conn: sqlite3.Connection, shift_id: str, investigation_id: str | None, role: AssistRole,
+    *, message: str = "", client_request_id: str = "", gateway: AssistGateway | None = None,
+) -> AssistEvent:
+    """Reserve a bounded call after learner commitment, then record its outcome.
 
-    The prediction gate comes first, so asking for help before committing a
-    diagnosis fails as an incomplete investigation rather than as a missing
-    gateway. Only a real entry owned by this shift reaches the second denial,
-    which stands until Slice 14 supplies the attributable gateway.
-
-    A stored investigation's fields are not re-checked for blankness here: the
-    append path refuses them and the table is append-only with non-empty CHECK
-    constraints, so a blank stored field is unreachable rather than merely
-    unlikely.
+    A failed or interrupted provider call stays in the shared budget. The model
+    receives public request wording and learner reasoning only; the controller
+    never supplies assessment, protected cases or promotion capabilities.
     """
     shift = _require_open_shift(conn, shift_id)
-
     if investigation_id is None:
         raise InvestigationIncomplete(ASSIST_GATE_REASON)
     investigation = repo.get_investigation(conn, investigation_id)
@@ -1131,10 +1147,126 @@ def request_assist(
             "conflict", "diagnostic help must reference an investigation owned by this shift"
         )
 
-    raise AssistGatewayUnavailable(
-        f"no assist gateway exists yet, so a {role.value} cannot be produced; "
-        "diagnostic help arrives with Slice 14"
+    if gateway is None:
+        raise AssistGatewayUnavailable(
+            f"assist gateway is not configured for this session; {role.value} is unavailable"
+        )
+    if not client_request_id.strip() or len(client_request_id) > 200:
+        raise LifecycleError("conflict", "a bounded client request ID is required")
+    if len(message) > 2000:
+        raise LifecycleError("conflict", "assist message exceeds 2000 characters")
+    if any(len(getattr(investigation, field)) > 2000 for field in ("cause", "falsifier", "public_test")):
+        raise LifecycleError("conflict", "investigation text exceeds the assist limit")
+    output = next((row for row in repo.list_outputs(conn, investigation.source_run_id)
+                   if row.request_ordinal == investigation.source_request_ordinal), None)
+    if output is None:
+        raise LifecycleError("conflict", "the investigation source request is unavailable")
+    try:
+        observed_response = output.body.decode("utf-8")
+    except UnicodeDecodeError:
+        observed_response = "Unavailable: the captured response was not UTF-8 text."
+    if not observed_response:
+        observed_response = "Unavailable: the captured response was empty."
+    prompt = (
+        f"Role: {role.value}\nPublic customer request: {output.request_text}\n"
+        f"Observed service response: HTTP {output.http_status}; {observed_response}\n"
+        f"Learner cause: {investigation.cause}\nLearner falsifier: {investigation.falsifier}\n"
+        f"Learner public test: {investigation.public_test}\nLearner question: {message.strip()}"
     )
+    if len(prompt.encode("utf-8")) + len(ASSIST_SYSTEM_MESSAGE.encode("utf-8")) > MAX_INPUT_BYTES:
+        raise LifecycleError("conflict", "assist prompt exceeds the gateway input limit")
+    try:
+        assert_public_safe({"prompt": prompt}, _private_public_needles())
+    except ValueError as exc:
+        raise LifecycleError("conflict", "assist prompt contains private material") from exc
+
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        replay = repo.get_assist_by_client_request_id(conn, client_request_id)
+        if replay is not None:
+            if (replay.shift_id, replay.investigation_id, replay.role, replay.request_text) != (
+                shift.id, investigation.id, role, prompt
+            ):
+                raise LifecycleError("conflict", "client request ID belongs to another assist request")
+            conn.rollback()
+            return replay
+        events = repo.list_assist_for_shift(conn, shift.id)
+        northline = shift.engagement_slug != config.BOOKSHOP_SLUG
+        limit = 1 if northline else config.BOOKSHOP_TOTAL_ASSIST_BUDGET
+        if northline and role is not AssistRole.HINT:
+            raise LifecycleError("conflict", "this engagement permits one hint only")
+        if len(events) >= limit:
+            raise LifecycleError("conflict", f"assist budget exhausted ({len(events)} of {limit} used)")
+        if role is AssistRole.PATCH_PROPOSAL and any(
+            event.role is AssistRole.PATCH_PROPOSAL for event in events
+        ):
+            raise LifecycleError("conflict", "one patch proposal maximum per shift")
+        model_id = getattr(gateway, "model_id", config.ASSIST_MODEL)
+        event = AssistEvent(
+            id=f"assist-{shift.id}-{len(events) + 1}", shift_id=shift.id,
+            investigation_id=investigation.id, role=role, model_id=model_id,
+            request_text=prompt, response_text="", state="PENDING",
+            client_request_id=client_request_id, created_at=_now(),
+        )
+        repo.insert_assist_event(conn, event)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+
+    started = time.monotonic()
+    try:
+        reply = gateway.generate(model_id=event.model_id, role=role, prompt=prompt)
+        if not reply.text.strip() or len(reply.text.encode("utf-8")) > 8192:
+            raise AssistRejected("ASSIST_OUTPUT_LIMIT")
+        if reply.output_tokens is not None and not 0 <= reply.output_tokens <= 1024:
+            raise AssistRejected("ASSIST_OUTPUT_LIMIT")
+        try:
+            assert_public_safe({"reply": reply.text, "reported_model_id": reply.reported_model_id},
+                               _private_public_needles())
+        except ValueError as exc:
+            raise AssistRejected("ASSIST_PRIVATE_OUTPUT") from exc
+        repo.finish_assist_event(conn, event.id, response=reply.text,
+                                 proposed_patch=reply.text if role is AssistRole.PATCH_PROPOSAL else None,
+                                 failure_code=None, reported_model_id=reply.reported_model_id,
+                                 input_tokens=reply.input_tokens, output_tokens=reply.output_tokens,
+                                 elapsed_ms=reply.elapsed_ms if reply.elapsed_ms is not None
+                                 else round((time.monotonic() - started) * 1000))
+    except AssistRejected as exc:
+        repo.finish_assist_event(conn, event.id, response="", proposed_patch=None,
+                                 failure_code=exc.code if exc.code in SAFE_FAILURE_CODES else "ASSIST_GATEWAY_FAILED",
+                                 elapsed_ms=round((time.monotonic() - started) * 1000))
+    except Exception:
+        repo.finish_assist_event(conn, event.id, response="", proposed_patch=None,
+                                 failure_code="ASSIST_GATEWAY_FAILED",
+                                 elapsed_ms=round((time.monotonic() - started) * 1000))
+    conn.commit()
+    return repo.get_assist_event(conn, event.id)
+
+
+def record_assist_decision(conn: sqlite3.Connection, event_id: str, accepted: bool) -> AssistEvent:
+    event = repo.get_assist_event(conn, event_id)
+    if event is None:
+        raise LifecycleError("not_found", f"unknown assist event: {event_id}")
+    if event.state != "COMPLETE":
+        raise LifecycleError("conflict", "only completed help has an accept/reject decision")
+    if not repo.decide_assist_event(conn, event_id, accepted):
+        raise LifecycleError("conflict", "this assist event already has a decision")
+    conn.commit()
+    return repo.get_assist_event(conn, event_id)
+
+
+def assist_event_view(event: AssistEvent) -> dict[str, Any]:
+    view = {"id": event.id, "shift_id": event.shift_id,
+            "investigation_id": event.investigation_id, "role": event.role.value,
+            "model_id": event.model_id, "reported_model_id": event.reported_model_id,
+            "input_tokens": event.input_tokens, "output_tokens": event.output_tokens,
+            "elapsed_ms": event.elapsed_ms, "request_text": event.request_text,
+            "response_text": event.response_text, "proposed_patch": event.proposed_patch,
+            "accepted": event.accepted, "state": event.state,
+            "failure_code": event.failure_code, "created_at": event.created_at.isoformat()}
+    assert_public_projection(view)
+    return view
 
 
 def reserve_bootstrap_diagnostic(
@@ -1163,7 +1295,8 @@ def reserve_bootstrap_diagnostic(
         raise BootstrapBlocked("an owned source request already exists in the inherited history")
 
 
-def investigation_view(conn: sqlite3.Connection, shift_id: str, *, adapter: str = "local_process") -> dict[str, Any]:
+def investigation_view(conn: sqlite3.Connection, shift_id: str, *, adapter: str = "local_process",
+                       assist_gateway: AssistGateway | None = None) -> dict[str, Any]:
     """The public Investigate-station projection.
 
     Carries the learner's own entries with their revision linkage, the
@@ -1173,6 +1306,17 @@ def investigation_view(conn: sqlite3.Connection, shift_id: str, *, adapter: str 
     shift = _require_shift(conn, shift_id)
     entries = repo.list_investigations_for_shift(conn, shift.id)
     latest = entries[-1] if entries else None
+    assist_events = repo.list_assist_for_shift(conn, shift.id)
+    assist_limit = config.BOOKSHOP_TOTAL_ASSIST_BUDGET if shift.engagement_slug == config.BOOKSHOP_SLUG else 1
+    assist_available = bool(latest and assist_gateway is not None and shift.state == "open"
+                            and len(assist_events) < assist_limit)
+    assist_reason = (
+        "This shift is closed." if shift.state != "open" else
+        ASSIST_GATE_REASON if latest is None else
+        "Assist gateway is not configured." if assist_gateway is None else
+        f"Assist budget exhausted ({len(assist_events)} of {assist_limit} used)."
+        if len(assist_events) >= assist_limit else "Diagnostic help is available."
+    )
     try:
         reserve_bootstrap_diagnostic(conn, shift_id, adapter=adapter)
         bootstrap_available = True
@@ -1199,8 +1343,11 @@ def investigation_view(conn: sqlite3.Connection, shift_id: str, *, adapter: str 
             for entry in entries
         ],
         "latest_investigation_id": latest.id if latest else None,
-        "assist_available": False,
-        "assist_reason": "No assist gateway exists yet; diagnostic help arrives with Slice 14.",
+        "assist_available": assist_available,
+        "assist_reason": assist_reason,
+        "assist_used": len(assist_events),
+        "assist_limit": assist_limit,
+        "assist_events": [assist_event_view(event) for event in assist_events],
         "bootstrap_available": bootstrap_available,
         "bootstrap_reason": bootstrap_reason,
     }
@@ -1865,15 +2012,16 @@ def experiment_view(conn: sqlite3.Connection, experiment_id: str) -> dict[str, A
 
 
 def investigate_station(
-    conn: sqlite3.Connection, shift_id: str, *, adapter: str = "local_process"
+    conn: sqlite3.Connection, shift_id: str, *, adapter: str = "local_process",
+    assist_gateway: AssistGateway | None = None,
 ) -> dict[str, Any]:
     """The Investigate station: the learner's entries, the denials and the latest
     public diagnostic, composed from the two narrower projections.
 
     Deterministic orientation is available before any investigation exists (Gate 3
-    S1), and the station carries no assist content because S11 produces none.
+    S1), and the station shows attributable assist events when a gateway is configured.
     """
-    view = investigation_view(conn, shift_id, adapter=adapter)
+    view = investigation_view(conn, shift_id, adapter=adapter, assist_gateway=assist_gateway)
     experiments = repo.list_experiments_for_shift(conn, shift_id)
     view["latest_experiment"] = (
         experiment_view(conn, experiments[-1].id) if experiments else None

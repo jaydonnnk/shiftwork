@@ -1,11 +1,8 @@
 """Pinned constants and fixture locations. No secrets live here.
 
-Slice 2 adds the real fixture paths (contract catalog, frozen shop snapshot,
-mission fixtures, sealed cases, the thin transcript) and the bookshop
-engagement_config seed values accepted by the user on 2026-09-17
-(04-slices.md S11 decision 3: attempt_limit 3, rotation_group_size 6, total
-assist budget 6). Assist/rotation enforcement lands in later slices; the values
-are seeded now so the engagement_config row is real.
+Slice 2 adds the real fixture paths and the original bookshop configuration.
+Slice 14 enforces the approved three-call assist policy at the controller.
+Older engagement rows may retain the earlier six-call placeholder as history.
 
 Slice 6 adds the two pinned isolation constants: the learner-visible reason-code
 render map (Gate 3 S7.2) and the sandbox payload allowlist. Both live here rather
@@ -36,16 +33,17 @@ INCIDENT_PREFIX = "BWB"
 # the controller, and `execute_run` resolves the adapter from the run row.
 EXECUTOR_ADAPTER = os.environ.get("SHIFTWORK_EXECUTOR_ADAPTER", "recorded")
 SERVICE_MODEL = os.environ.get("SHIFTWORK_SERVICE_MODEL", "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B")
+ASSIST_MODEL = os.environ.get("SHIFTWORK_ASSIST_MODEL", "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B")
 # The single owner of the sandbox image (the S12-verified public python:3.11-slim).
 # The frozen execution context and the Token Factory adapter gate both read it,
 # so an override executes the named image and a stale frozen image fails closed.
 TOKEN_FACTORY_IMAGE = os.environ.get("SHIFTWORK_TOKEN_FACTORY_IMAGE", "c7ad32fe-8621-3cd2-9022-521c6da02ac1")
 GENESIS_HASH = "0" * 64
 
-# Bookshop engagement_config seed (S7.1 defaults, user-accepted 2026-09-17).
+# Bookshop engagement_config seed. Gate 3 section 7 caps assistance at three.
 DEFAULT_ATTEMPT_LIMIT = 3
 BOOKSHOP_ROTATION_GROUP_SIZE = 6
-BOOKSHOP_TOTAL_ASSIST_BUDGET = 6
+BOOKSHOP_TOTAL_ASSIST_BUDGET = 3
 
 # The rotation groups enabled for the bookshop engagement. Slice 7 lands the
 # remaining two families, so all three draw one never-exposed variant per attempt.

@@ -1,5 +1,5 @@
 """FastAPI factory. The controller opens the DB, ensures the schema, seeds the
-bookshop engagement, reconciles runs a restart left nonterminal and mounts the
+bookshop engagement, reconciles work a restart left nonterminal and mounts the
 static client."""
 
 from contextlib import asynccontextmanager
@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from shiftwork import config, orchestrator
+from shiftwork.assist.gateway import AssistGateway
 from shiftwork.api.routes import domain_error_handler, lifecycle_error_handler, router
 from shiftwork.domain.errors import ShiftworkDomainError
 from shiftwork.orchestrator import LifecycleError
@@ -28,14 +29,15 @@ async def lifespan(app: FastAPI):
             config.BOOKSHOP_SLUG,
             business_kind=config.BOOKSHOP_BUSINESS_KIND,
             assist_level="scaffolded",
-            allowed_assist_roles=("hint", "diagnose"),
+            allowed_assist_roles=("HINT", "DIAGNOSIS", "PATCH_PROPOSAL"),
             total_assist_budget_per_shift=config.BOOKSHOP_TOTAL_ASSIST_BUDGET,
             enabled_check_families=config.BOOKSHOP_FAMILIES,
             attempt_limit=config.DEFAULT_ATTEMPT_LIMIT,
             rotation_group_size=config.BOOKSHOP_ROTATION_GROUP_SIZE,
         )
-        # Startup recovery (Slice 8): a run a restart left nonterminal is failed
-        # with its captures and draws retained and no checks or events written.
+        # Startup recovery (Slices 8 and 14): runs and assist events a restart
+        # left nonterminal are failed, with captures and draws retained and no
+        # checks or events written.
         orchestrator.reconcile_interrupted(conn)
     finally:
         conn.close()
@@ -47,6 +49,7 @@ def create_app(
     *,
     executor: str | None = None,
     shop_snapshot: str | Path | None = None,
+    assist_gateway: AssistGateway | None = None,
 ) -> FastAPI:
     """Build the controller app; ``executor`` and ``shop_snapshot`` are the
     controller-side run binding new runs persist (program design 2: adapter
@@ -56,6 +59,7 @@ def create_app(
     app = FastAPI(title="Shiftwork", version="0.2.0-thin", lifespan=lifespan)
     app.state.db_path = db_path or config.db_path()
     app.state.executor = executor or config.EXECUTOR_ADAPTER
+    app.state.assist_gateway = assist_gateway
     app.state.shop_snapshot = (
         Path(shop_snapshot) if shop_snapshot is not None else config.BOOKSHOP_SNAPSHOT
     )
