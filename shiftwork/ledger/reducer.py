@@ -25,7 +25,6 @@ from shiftwork.domain.models import (
     LedgerEventDraft,
     LedgerEventType,
     ReasonCode,
-    Run,
     RunOutput,
 )
 

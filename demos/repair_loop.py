@@ -21,7 +21,6 @@ this demo.
 Run from the repository root: python -m demos.repair_loop
 """
 
-import json
 import sys
 import tempfile
 import time

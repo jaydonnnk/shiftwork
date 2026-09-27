@@ -46,7 +46,6 @@ from shiftwork.domain.models import (
     CloseShiftFacts,
     ContextCondition,
     ContractParams,
-    DrawState,
     EvidenceMode,
     ExecutionContext,
     ExecutorFailure,
