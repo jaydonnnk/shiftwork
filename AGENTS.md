@@ -107,8 +107,8 @@ summaries when a time-sensitive external claim is being made.
   proofs, and the user ACCEPTED Slice 14 on 2026-09-27. Its live assist evidence
   and prompt-quality limits stay in
   `docs/plans/shiftwork/evidence/slice14-assist-live-2026-09-27.md`. The work is
-  committed in focused batches on `shiftwork/slice-14` (acceptance record in
-  this batch), no co-author footer. Slice 15 onward
+  committed in focused batches on `shiftwork/slice-14`, merged to main as
+  `fab497e..3f18669` and pushed, no co-author footer. Slice 15 onward
   still needs its own go-ahead and its own live authorizations.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
@@ -197,8 +197,8 @@ summaries when a time-sensitive external claim is being made.
   pre-pivot numbering Slices 10-17 were not implemented, and that numbering is
   historical. Under the approved pivot, Slice 10 (v5 history to v6 with no
   invented choice) is implemented, was accepted by the user on 2026-09-25 and is
-  merged to main as `f0a1e81..0432cbd` and pushed; Slices 11, 12 and 13 are
-  accepted, while Slices 14-25 are not implemented.
+  merged to main as `f0a1e81..0432cbd` and pushed; Slices 11, 12, 13 and 14 are
+  accepted, while Slices 15-25 are not implemented.
   Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the
