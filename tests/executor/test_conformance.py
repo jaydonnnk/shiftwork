@@ -196,7 +196,7 @@ def test_conformance_suite_recorded_local(executor, monkeypatch, capsys, case):
         print(f"{case.name}: captures={len(normalized)} bytes/status/ordinal/time/logs=identical failure={case.failure or 'NONE'} (injected capture clock; real sockets/deadline)")
 
 
-@pytest.mark.skip(reason="Test 29: tokenfactory conformance requires the real adapter and authorized sandbox access in Slice 14")
+@pytest.mark.skip(reason="Test 29: real-provisioning conformance needs an authorized live Sandbox run; the S13 adapter is covered by tests/executor/test_gateway_isolation.py and the S13 live evidence, and the full conformance arm is planned at Slice 14")
 def test_conformance_suite_tokenfactory():
     pass
 

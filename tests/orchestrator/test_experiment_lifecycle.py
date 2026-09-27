@@ -343,11 +343,11 @@ def test_reusing_a_client_request_id_returns_the_original_reservation(session):
 
 
 def test_a_null_investigation_bootstrap_is_denied_and_reserves_nothing(session):
-    """S11 constructs the no-source bootstrap state and denies it until S13."""
+    """An ordinary shift cannot use the legacy no-source bootstrap exception."""
     version = _freeze_starter(session)
     refused = _create_experiment(session, version["id"], None, key="exp-bootstrap")
     assert refused.status_code == 409, refused.text
-    assert "no verified isolated executor" in refused.json()["detail"]
+    assert "only for a legacy first-choice shift" in refused.json()["detail"]
     conn = db.connect(session.db_file)
     try:
         assert repo.list_experiments_for_shift(conn, session.shift_id) == []
