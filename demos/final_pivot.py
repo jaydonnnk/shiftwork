@@ -14,9 +14,11 @@ database of its own; no runtime file and no protected case is touched.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import base64
 import hashlib
 import json
+import os
 import shutil
 import sqlite3
 import tempfile
@@ -24,13 +26,18 @@ import time
 from pathlib import Path
 
 from fastapi.testclient import TestClient
+from contree_client.httpx import ContreeAsyncClient
 
 from shiftwork import config
 from shiftwork.app import create_app
 from shiftwork.domain import canonical
 from shiftwork.domain.models import ContractParams
+from shiftwork.executor.base import ArtifactSnapshotRef, BatchRef, RunRequest
+from shiftwork.executor.tokenfactory import TokenFactoryAdapter
+from shiftwork.gateway.redaction import assert_public_safe
 from shiftwork.ledger import chain
 from shiftwork.store import db
+from shiftwork.store import repo
 
 ROOT = Path(__file__).resolve().parents[1]
 V5_SCHEMA = ROOT / "tests" / "store" / "schema_v5.sql"
@@ -478,14 +485,313 @@ def investigation_stage() -> int:
     return 0
 
 
+S13_CANARY_SERVICE = r'''
+import json
+import os
+import http.client
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from pathlib import Path
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+    def do_POST(self):
+        port = int(os.environ['SHIFTWORK_GATEWAY_PORT'])
+        conn = http.client.HTTPConnection('127.0.0.1', port, timeout=3)
+        conn.request('POST', '/tool', json.dumps({'tool': 'unlisted_tool'}),
+                     headers={'Content-Type': 'application/json'})
+        tool_status = conn.getresponse().status
+        conn.close()
+        checks = {
+            'provider_key_visible': any(key in os.environ for key in
+                ('NEBIUS_API_KEY', 'CONTREE_TOKEN', 'SHIFTWORK_LEARNER_INFERENCE_KEY')),
+            'controller_db_visible': 'SHIFTWORK_DB_PATH' in os.environ or
+                Path('/work/shiftwork.db').exists(),
+            'host_canary_visible': 'S13_HOST_ONLY_CANARY' in os.environ,
+            'protected_fixture_visible': Path('/work/sealed').exists() or
+                Path('/work/bookshop_task_completion.json').exists(),
+            'other_run_grant_visible': any('GRANT' in key or 'RUN_ID' in key
+                for key in os.environ),
+            'unlisted_tool_status': tool_status,
+        }
+        body = json.dumps(checks, sort_keys=True).encode()
+        self.send_response(200)
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+with HTTPServer(('127.0.0.1', 0), Handler) as server:
+    print(json.dumps({'port': server.server_port}), flush=True)
+    server.serve_forever()
+'''
+
+S13_MODEL_SERVICE = r'''
+import http.client
+import json
+import os
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+def gateway(path, payload):
+    conn = http.client.HTTPConnection('127.0.0.1', int(os.environ['SHIFTWORK_GATEWAY_PORT']), timeout=25)
+    raw = json.dumps(payload).encode()
+    conn.request('POST', path, body=raw, headers={'Content-Type': 'application/json'})
+    response = conn.getresponse()
+    body = response.read()
+    status = response.status
+    conn.close()
+    if status != 200:
+        raise RuntimeError('controller gateway refused the service request')
+    return json.loads(body)
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, *args):
+        pass
+
+    def do_POST(self):
+        request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+        prompt = (
+            'Choose the first public information action needed for this bookshop request. '
+            'Reply with exactly one allowed name, no explanation: public_record_lookup '
+            '(look up a known book fact) or public_catalog_search (find a similar title). '
+            'Customer request: ' + request['text']
+        )
+        choice = gateway('/infer', {'request_ordinal': 1, 'input_text': prompt})['selected_tool']
+        results = []
+        evidence = []
+        if choice == 'public_record_lookup':
+            records = gateway('/tool', {'tool': choice,
+                'entity_ref': 'book:salt-roads:paperback', 'record_kind': 'price'})['records']
+            if records:
+                record = records[0]
+                evidence = [record['record_id']]
+                results = [{'task_id': 'price', 'status': 'COMPLETED',
+                    'entity_ref': 'book:salt-roads:paperback', 'claims': [{
+                        'kind': 'price', 'entity_ref': 'book:salt-roads:paperback',
+                        'value': record['value'], 'evidence_refs': evidence}],
+                    'commitment_ref': None, 'explanation_code': None}]
+        else:
+            gateway('/tool', {'tool': choice, 'genre': 'coastal_travel'})
+        output = {'request_id': request['request_id'], 'task_results': results,
+                  'evidence_refs': evidence, 'uncertainty_codes': []}
+        body = json.dumps(output, separators=(',', ':')).encode()
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Length', str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+with HTTPServer(('127.0.0.1', 0), Handler) as server:
+    print(json.dumps({'port': server.server_port}), flush=True)
+    server.serve_forever()
+'''
+
+
+def s13_service_stage(*, model: bool) -> int:
+    """One real public bootstrap via the HTTP API, preserving its local database."""
+    token = os.environ.get("NEBIUS_API_KEY", "")
+    project = os.environ.get("NEBIUS_PROJECT_ID", "")
+    if not token or not project:
+        print(json.dumps({"stage": "s13-model" if model else "s13-code", "verdict": "BLOCKED_CREDENTIALS_ABSENT"}))
+        return 2
+    label = "model" if model else "code"
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
+    database = ROOT / f"slice13-{label}-{stamp}.db"
+    create_v5_sample(database, with_run=False)
+    source = S13_MODEL_SERVICE if model else config.PIVOT_STARTER_ARTIFACT_PATHS["service.py"].read_text(encoding="utf-8")
+    with TestClient(create_app(str(database), executor="tokenfactory")) as client:
+        opened = client.post("/api/engagements/bookshop/shifts")
+        if opened.status_code != 201:
+            raise RuntimeError("legacy shift did not open")
+        shift_id = opened.json()["id"]
+        before = client.get("/api/engagements/bookshop/board").json()
+        saved = client.put(f"/api/shifts/{shift_id}/artifact", json={"files": {"service.py": source}})
+        if saved.status_code != 200:
+            raise RuntimeError("learner source did not save")
+        frozen = client.post(f"/api/shifts/{shift_id}/artifact/versions",
+            json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+        if frozen.status_code != 201:
+            raise RuntimeError("learner source did not freeze")
+        version = frozen.json()
+        reserved = client.post(f"/api/shifts/{shift_id}/experiments", json={
+            "kind": "DIAGNOSTIC", "investigation_id": None,
+            "candidate_a_version_id": version["id"],
+            "client_request_id": f"s13-{label}-{stamp}"})
+        if reserved.status_code != 202:
+            raise RuntimeError("public source diagnostic was not reserved: " + reserved.text[:300])
+        experiment = client.get(f"/api/experiments/{reserved.json()['id']}")
+        after = client.get("/api/engagements/bookshop/board").json()
+        if experiment.status_code != 200:
+            raise RuntimeError("public diagnostic projection failed")
+        view = experiment.json()
+    trial = view["trials"][0]
+    conn = db.connect(database)
+    try:
+        run_id = trial["run_id"]
+        raw_observations = repo.list_observations(conn, run_id)
+        raw = [json.loads(base64.b64decode(item.raw_payload_ref.split(",", 1)[1]))
+               for item in raw_observations]
+        operation_id = next((entry.get("operation_id") for entry in raw if "operation_id" in entry), None)
+        provider = [entry["provider_response"] for entry in raw if "provider_response" in entry]
+        counts = {
+            "operating_selections": repo.count_operating_selections(conn),
+            "operation_runs": repo.count_operation_runs(conn, shift_id),
+            "ledger_events": len(repo.list_ledger_events(conn, config.BOOKSHOP_SLUG)),
+            "incidents": len(repo.list_incidents(conn, config.BOOKSHOP_SLUG)),
+        }
+    finally:
+        conn.close()
+    output = trial["outputs"][0] if trial["outputs"] else None
+    capture = next((item["public_payload_json"] for item in trial["observations"]
+        if item["public_payload_json"].get("checkpoint_readback")), None)
+    verdict = ("PASS_ONE_PUBLIC_REQUEST" if trial["state"] == "COMPLETE" and output
+        and capture and view["eligible"] is False and not any(counts.values())
+        and (not model or bool(provider)) else "STOP_INCOMPLETE")
+    report = {
+        "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "stage": f"s13-{label}", "verdict": verdict, "shift_id": shift_id,
+        "experiment_id": view["id"], "run_id": run_id, "operation_id": operation_id,
+        "version_hash": version["content_hash"], "source_sha256": hashlib.sha256(source.encode()).hexdigest(),
+        "context_hash": view["context_hash"], "context_evidence_class": view["context_evidence_class"],
+        "trial_state": trial["state"], "missing_evidence": trial["missing_evidence"],
+        "request_text": output["request_text"] if output else None,
+        "output_body_base64": output["body_base64"] if output else None,
+        "customer_text": trial["customer_text"], "task_assessments": trial["task_assessments"],
+        "observations": trial["observations"], "checkpoint": capture,
+        "provider_response": provider, "business_counts": counts,
+        "business_before": {"ledger_events": before["ledger_event_count"],
+                            "incidents": before["total_incidents"]},
+        "business_after": {"ledger_events": after["ledger_event_count"],
+                           "incidents": after["total_incidents"]},
+        "adapter_source_sha256": hashlib.sha256(
+            (ROOT / "shiftwork" / "executor" / "tokenfactory.py").read_bytes()).hexdigest(),
+    }
+    assert_public_safe(report, (token, project, str(Path.cwd())))
+    evidence = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / f"slice13-{label}-{stamp}.jsonl"
+    evidence.write_text(json.dumps(report, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps({"stage": f"s13-{label}", "verdict": verdict,
+        "database": str(database), "evidence_file": str(evidence),
+        "operation_id": operation_id, "checkpoint_sha256": capture.get("capture_sha256") if capture else None,
+        "trial_state": trial["state"], "missing_evidence": trial["missing_evidence"],
+        "model_calls": len(provider), "business_counts": counts}, sort_keys=True))
+    return 0 if verdict == "PASS_ONE_PUBLIC_REQUEST" else 2
+
+
+def s13_canary_stage() -> int:
+    """One bounded real Sandbox isolation probe before product-path live execution."""
+    token = os.environ.get("NEBIUS_API_KEY", "")
+    project = os.environ.get("NEBIUS_PROJECT_ID", "")
+    if not token or not project:
+        print(json.dumps({"stage": "s13-canary", "verdict": "BLOCKED_CREDENTIALS_ABSENT"}))
+        return 2
+    os.environ["S13_HOST_ONLY_CANARY"] = "S13_HOST_ONLY_MARKER_20260927"
+    source = S13_CANARY_SERVICE.encode("utf-8")
+    batch = config.PIVOT_INCIDENT_REQUESTS.read_bytes()
+    run_request = RunRequest(
+        artifact_snapshot=ArtifactSnapshotRef(files={"service.py": source},
+            manifest_hash=hashlib.sha256(source).hexdigest()),
+        request_batch=BatchRef(path_ref=config.PIVOT_INCIDENT_REQUESTS.name,
+            content_hash=canonical.content_hash(base64.b64encode(batch).decode("ascii"))),
+        request_batch_bytes=batch, shop_snapshot_ref=str(config.PIVOT_PUBLIC_STATE),
+        harness_ref="sandbox-driver-v1", image_ref=config.TOKEN_FACTORY_IMAGE,
+        deadline_s=45, inference_grant=None,
+    )
+    result = asyncio.run(TokenFactoryAdapter(run_id="s13-isolation-probe",
+        allowed_tool_names=("public_record_lookup", "public_catalog_search"),
+        token=token, project=project).execute(run_request))
+    body = None
+    if len(result.captures) == 1:
+        try:
+            body = json.loads(result.captures[0].body)
+        except ValueError:
+            pass
+    safe = result.failure is None and isinstance(body, dict) and all(
+        body.get(key) is False for key in (
+            "provider_key_visible", "controller_db_visible", "host_canary_visible",
+            "protected_fixture_visible", "other_run_grant_visible"
+        )
+    ) and body.get("unlisted_tool_status") == 403
+    report = {
+        "stage": "s13-canary", "verdict": "PASS_BOUNDARY_CANARY" if safe else "STOP_BOUNDARY_UNPROVEN",
+        "source_sha256": hashlib.sha256(source).hexdigest(),
+        "image": config.TOKEN_FACTORY_IMAGE,
+        "operation_id": result.executor_ref, "failure": result.failure.value if result.failure else None,
+        "checks": body, "observations": [observation.public_payload for observation in result.observations],
+        "checkpoint_readback": any(observation.public_payload.get("checkpoint_readback")
+            for observation in result.observations),
+    }
+    print(json.dumps(report, sort_keys=True))
+    return 0 if safe else 2
+
+
+def s13_inspect_stage(operation_id: str, expected_sha256: str) -> int:
+    """Read a completed S13 checkpoint, archive bytes and compare its first digest."""
+    token = os.environ.get("NEBIUS_API_KEY", "")
+    project = os.environ.get("NEBIUS_PROJECT_ID", "")
+    if not token or not project or len(expected_sha256) != 64:
+        print(json.dumps({"stage": "s13-inspect", "verdict": "BLOCKED_INPUT"}))
+        return 2
+
+    async def inspect():
+        client = ContreeAsyncClient(token, project=project, timeout=20)
+        status = await client.get_operation_status(operation_id)
+        checkpoint = status.result_image_uuid
+        if not checkpoint:
+            raise ValueError("checkpoint_missing")
+        raw = await client.inspect_image_download(checkpoint, "/work/capture.json")
+        return status, checkpoint, raw
+
+    try:
+        status, checkpoint, raw = asyncio.run(inspect())
+        digest = hashlib.sha256(raw).hexdigest()
+        capture = json.loads(raw)
+        assert_public_safe(capture, (token, project, str(Path.cwd())))
+        record = {
+            "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "stage": "s13-inspect", "operation_id": operation_id,
+            "status": str(status.status), "checkpoint_image": checkpoint,
+            "capture_bytes": len(raw), "capture_sha256": digest,
+            "expected_sha256": expected_sha256,
+            "capture_base64": base64.b64encode(raw).decode("ascii"),
+            "inspector_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "adapter_source_sha256": hashlib.sha256(
+                (ROOT / "shiftwork" / "executor" / "tokenfactory.py").read_bytes()).hexdigest(),
+        }
+        assert_public_safe(record, (token, project, str(Path.cwd())))
+        evidence = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / (
+            "slice13-inspect-" + operation_id + ".jsonl")
+        evidence.write_text(json.dumps(record, sort_keys=True) + "\n", encoding="utf-8")
+        print(json.dumps({"stage": "s13-inspect", "verdict": "PASS_BYTE_EXACT" if digest == expected_sha256 else "STOP_DIGEST_MISMATCH",
+            "operation_id": operation_id, "checkpoint_image": checkpoint,
+            "capture_bytes": len(raw), "capture_sha256": digest,
+            "evidence_file": str(evidence)}, sort_keys=True))
+        return 0 if digest == expected_sha256 else 2
+    except Exception as exc:
+        print(json.dumps({"stage": "s13-inspect", "verdict": "STOP_READBACK_UNAVAILABLE",
+            "error_type": type(exc).__name__}))
+        return 2
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=("migration", "investigation"), required=True)
+    parser.add_argument("--stage", choices=("migration", "investigation", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
+    parser.add_argument("--operation-id")
+    parser.add_argument("--expected-sha256")
     args = parser.parse_args()
     if args.stage == "migration":
         return migration_stage()
     if args.stage == "investigation":
         return investigation_stage()
+    if args.stage == "s13-canary":
+        return s13_canary_stage()
+    if args.stage == "s13-inspect":
+        if not args.operation_id or not args.expected_sha256:
+            parser.error("s13-inspect requires --operation-id and --expected-sha256")
+        return s13_inspect_stage(args.operation_id, args.expected_sha256)
+    if args.stage == "s13-code":
+        return s13_service_stage(model=False)
+    if args.stage == "s13-model":
+        return s13_service_stage(model=True)
     raise AssertionError(args.stage)
 
 
