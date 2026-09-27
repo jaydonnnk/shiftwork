@@ -72,7 +72,8 @@ model database re-served through the app reproduces the room data
 assessments, the envelope-derived customer text, and zero business writes). The
 user accepted Slice 13 on 2026-09-27. The work is committed in focused batches
 on `shiftwork/slice-13` (this documentation batch carries the acceptance
-record), no co-author footer.
+record), no co-author footer. The branch was merged to main as
+`ed0802a..1d82e95` and pushed on 2026-09-27.
 
 That residual note is closed: Gap 5 above repaired the two-owner image. The S12
 historical spike `demos/gateway_spike_live.py` keeps its own pinned literal and
@@ -1518,7 +1519,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
   raw evidence, and the documentation batch that carries this line), no
   co-author footer. Acceptance covers Slice 12 only; Slice 13 onward needs its
   own go-ahead and its own authorizations
-- [x] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap; implemented and demonstrated 2026-09-27, ACCEPTED by the user 2026-09-27. Live evidence and limits are recorded in the Slice 13 completion section above. Cross-checked; four gaps and the recorded image-UUID residual repaired with failing-capable proofs, and re-verified `444 passed, 1 skipped, 2 warnings` on 2026-09-27 (section at the top). The work is committed in focused batches on `shiftwork/slice-13`, no co-author footer. Acceptance covers Slice 13 only; Slice 14 onward needs its own go-ahead and its own live authorizations.
+- [x] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap; implemented and demonstrated 2026-09-27, ACCEPTED by the user 2026-09-27. Live evidence and limits are recorded in the Slice 13 completion section above. Cross-checked; four gaps and the recorded image-UUID residual repaired with failing-capable proofs, and re-verified `444 passed, 1 skipped, 2 warnings` on 2026-09-27 (section at the top). The work is committed in focused batches on `shiftwork/slice-13`, merged to main as `ed0802a..1d82e95` and pushed, no co-author footer. Acceptance covers Slice 13 only; Slice 14 onward needs its own go-ahead and its own live authorizations.
 - [ ] Slice 14: prediction-gated attributable assist gateway
 - [ ] Slice 15: reviewed A/B workloads and six frozen paired trial slots
 - [ ] Slice 16: fair comparison, exposure invalidation and restart recovery

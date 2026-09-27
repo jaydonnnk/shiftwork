@@ -99,7 +99,8 @@ summaries when a time-sensitive external claim is being made.
   stages and the no-run bootstrap ran once each, the cross-check found four gaps
   plus the image-UUID residual and repaired all five with failing-capable
   proofs, and the user ACCEPTED Slice 13 on 2026-09-27. The work is committed in
-  focused batches on `shiftwork/slice-13`, no co-author footer. Slice 14 onward
+  focused batches on `shiftwork/slice-13`, merged to main as `ed0802a..1d82e95`
+  and pushed, no co-author footer. Slice 14 onward
   still needs its own go-ahead and its own live authorizations.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
