@@ -1,6 +1,6 @@
 # Shiftwork: working brief and adjudication register
 
-Updated: 2026-09-26.
+Updated: 2026-09-27.
 
 **Direction:** Shiftwork remains the sole active project. The approved final pivot
 around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
@@ -18,30 +18,28 @@ together on 2026-09-24 and authorized committing and pushing both to main withou
 a co-author footer. All four gates were approved at that point. Gate 2 was
 re-approved on 2026-09-26 for the scoped file-readback rule after the live
 snapshot/capture failure. Gate 3's corresponding program-design correction was
-separately re-approved the same day. No further implementation is authorized;
-each slice still needs its own go-ahead.
+separately re-approved the same day. Slice 12 was accepted on 2026-09-27;
+Slice 13 work still needs its own go-ahead.
 Gate 1 publication and merge/push are complete (`821a24c` on main). Gate 2
 section 12 and the Gate 3 section 7 configuration list carry a documentation-only
 credential-name correction re-approved by the user on 2026-09-26; it changes no
 behavior, interface or budget.
 
-**Build baseline:** Slices 1 through 10 are recorded as implemented; Slice 9 was
-merged to main as `4d5539a` and pushed on 2026-09-21, with user visual acceptance,
-and Slice 10 was accepted by the user on 2026-09-25, then merged to main as
-`f0a1e81..0432cbd` and pushed the same day. Slice 11 was accepted on 2026-09-26,
-pushed on `shiftwork/slice-11`, and merged to main as `36adbf4..973f5ce`. Slices 12
-  through 25 are the approved Gate 4 build order and are not implemented. Slice 12's
-  2026-09-26 entitlement preflight initially used the wrong project header;
-  the support-provided AI project ID now returns all Sandbox permissions true.
-  Its partial live matrix stopped when a successful Sandbox operation failed to
-  retain a reported file write in its checkpoint under a layer cap. Slice 12
-  remains unchecked and dependent slices are stopped. Gate 2's scoped capture
-  correction and Gate 3's matching program-design correction are re-approved.
-  One separately authorized no-inference diagnostic then read back a 14-byte
-  checkpoint file exactly under the normal 16 MiB cap. The earlier 2 MiB loss
-  under a 1 MiB cap remains unexplained; one small-file pass is not S12 acceptance.
-Preserve that foundation and its evidence;
-it does not demonstrate the new prediction, comparison or selection workflow.
+**Build baseline:** Slices 1 through 12 are recorded as implemented. Slice 9
+merged to main as `4d5539a` and was pushed on 2026-09-21, with user visual
+acceptance. Slice 10 was accepted on 2026-09-25, then merged to main as
+`f0a1e81..0432cbd` and pushed. Slice 11 was accepted on 2026-09-26 and
+merged to main as `36adbf4..973f5ce`. Slice 12's live matrix completed
+on 2026-09-27 and the user accepted that slice the same day. Its final verdict
+and retained limits are in `plans/shiftwork/evidence/slice12-capability-2026-09-26.md`.
+The 2 MiB zero-byte checkpoint observation under a 1 MiB layer cap remains
+unexplained; capture under that cap is unproven. Six trials covered one request
+shape, pre-repair inference records omit reasoning text, and probe 1's
+protected-fixture limb is N/A. Slices 13 through 25 remain unchecked and
+need their own go-aheads and live authorizations. Preserve the foundation
+and its evidence; it does not prove completed comparison, selection,
+operation or human learning outcomes.
+
 The full approval history and verbatim evidence remain in
 `plans/shiftwork/00-status.md`. This summary does not re-run or re-certify them.
 
@@ -49,15 +47,15 @@ The full approval history and verbatim evidence remain in
 demonstration; not a score for today's build, a judging prediction or learning
 result. The pivot's verdict is **revise, then pursue**, not a confident 35+.
 Earlier 27/40, 31/40 and conditional 35/40 forecasts are historical, not current caps
-or achieved scores. No human learning/transfer result, qualifying live integration,
-Tavily ablation or prize merit is established by this planning revision.
+or achieved scores. No human learning/transfer result, shipped live service
+integration, Tavily ablation or prize merit is established by this brief.
 
 This brief supports the gate documents; it does not replace or approve them.
 The approved `plans/shiftwork/01-product.md` defines the pivot. Earlier later-gate
 decisions retain their original scope, not permission to implement conflicting
-behavior. The user authorized publication of the current branch and merge/push to
-main. No installs, credentials, external AI calls, spike runs, purchases, outreach,
-deployment, implementation or ADR #4 are authorized.
+behavior. Past authorizations are recorded in `plans/shiftwork/00-status.md`;
+they do not authorize Slice 13 work, new installs, credentials, external calls,
+outreach, deployment, publication, submission or ADR #4.
 
 ## 1. Product thesis
 
@@ -320,14 +318,12 @@ format; the four official criteria remain equally weighted.
 
 ## 12. Immediate next action
 
-Slice 11 is accepted and merged to main. Slice 12's authorized live spike has a
-STOP verdict after a successful Sandbox operation produced a checkpoint missing
-its reported file content. A separately authorized small-file readback under the
-normal cap passed, but did not resolve that STOP. The immediate next action is
-review of both observations and a bounded plan to establish a trustworthy
-capture and reset route.
-Gate 2 and Gate 3 capture corrections were separately re-approved on
-2026-09-26. Slice 12 stays unchecked; those approvals and the single follow-up
-do not authorize further live probes or Slice 13 work. Commits, pushes,
-fixture authoring, sealed-case contents, outreach, deployment, publication,
-submission and ADR #4 remain separately authorized.
+Slice 12 is accepted (2026-09-27). Its completed live matrix, consolidated
+verdict and retained limits are recorded in
+`plans/shiftwork/evidence/slice12-capability-2026-09-26.md` and
+`plans/shiftwork/00-status.md`. The unexplained historical zero-byte
+observation and the other stated limits remain attached to that verdict.
+The next product step is Slice 13, still unchecked in the approved slice
+plan. It needs a separate go-ahead and separate live authority before work
+begins. Fixture authoring, sealed-case contents, outreach, deployment,
+publication, submission and ADR #4 also remain separately authorized.
