@@ -1546,7 +1546,8 @@ services, deployment, outreach and ADR #4 each remain separately authorized.
   the Gate 2 template, and five primary sources were re-fetched to spot-check the S16
   "Verified" claims (sandbox overview, Nemotron service page, `contree` CLI page,
   Serverless overview, inference quickstart) — all held. One correction was applied:
-  S1 Fit now lists `shiftwork_vs_hatchery.md` among the top-level docs. Non-blocking
+  S1 Fit then listed `shiftwork_vs_hatchery.md` among the top-level docs (that
+  superseded handoff was later removed). Non-blocking
   notes carried to later gates: `HACKATHON_REQUIREMENTS.md` says "DevPods" but the live
   Nebius docs name it "Devlabs" (the architecture uses the correct current name; the
   requirements file is stale — do not edit it without authorization); the away-shift

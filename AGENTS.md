@@ -183,8 +183,8 @@ summaries when a time-sensitive external claim is being made.
   pre-pivot numbering Slices 10-17 were not implemented, and that numbering is
   historical. Under the approved pivot, Slice 10 (v5 history to v6 with no
   invented choice) is implemented, was accepted by the user on 2026-09-25 and is
-  merged to main as `f0a1e81..0432cbd` and pushed; Slices 11-25 are not
-  implemented.
+  merged to main as `f0a1e81..0432cbd` and pushed; Slices 11 and 12 are
+  accepted, while Slices 13-25 are not implemented.
   Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the
