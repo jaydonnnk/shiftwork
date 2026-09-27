@@ -13,8 +13,13 @@ function, so every verdict can be judged without a Sandbox. Nothing in this
 module contacts the API or needs credentials; the live clauses stay unrun.
 
 Each test is written to fail when its own branch of a classifier is mutated.
+The archiving guards go further: they run `infer()` against a fake HTTP client
+and require the archived record to carry the whole provider payload, and they
+require the judge route to archive its own checks and verdict instead of only
+printing them.
 """
 
+import asyncio
 import hashlib
 import json
 from datetime import datetime, timezone
@@ -250,6 +255,94 @@ def test_inference_calls_are_archived_from_one_emit_site():
     assert marker in infer_body, "the single inference emit must live inside infer()"
 
 
+UNIT_PROVIDER_BODY: dict[str, object] = {
+    "id": "chatcmpl-slice12-unit",
+    "object": "chat.completion",
+    "created": 1789000000,
+    "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+    "choices": [
+        {
+            "index": 0,
+            "finish_reason": "stop",
+            "message": {
+                "role": "assistant",
+                "content": "\nSTOCK",
+                "reasoning_content": "The customer asks about Salt Roads; the stock lookup answers it.",
+            },
+        }
+    ],
+    "usage": {
+        "prompt_tokens": 45,
+        "completion_tokens": 117,
+        "total_tokens": 162,
+        "completion_tokens_details": {"reasoning_tokens": 113},
+    },
+    "system_fingerprint": "fp_slice12_unit",
+}
+
+
+class _FakeChatResponse:
+    def __init__(self, body: dict[str, object]) -> None:
+        self._body = body
+
+    def raise_for_status(self) -> None:
+        return None
+
+    def json(self) -> dict[str, object]:
+        return self._body
+
+
+class _FakeChatClient:
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        pass
+
+    async def __aenter__(self) -> "_FakeChatClient":
+        return self
+
+    async def __aexit__(self, *exc: object) -> bool:
+        return False
+
+    async def post(self, url: str, **kwargs: object) -> _FakeChatResponse:
+        return _FakeChatResponse(UNIT_PROVIDER_BODY)
+
+
+def _inference_records(sink: Path) -> list[dict]:
+    lines = sink.read_text(encoding="utf-8").splitlines()
+    return [record for record in (json.loads(line) for line in lines)
+            if record["probe"] == "nemotron_inference"]
+
+
+def test_inference_record_archives_the_whole_provider_payload(monkeypatch, tmp_path):
+    sink = tmp_path / "slice12-unit-infer-TEST.jsonl"
+    monkeypatch.setattr(spike, "EVIDENCE_SINK", sink)
+    monkeypatch.setattr(spike.httpx, "AsyncClient", _FakeChatClient)
+    content, _ = asyncio.run(spike.infer("Can I collect Salt Roads tomorrow?", "unit-test-token"))
+    records = _inference_records(sink)
+    assert len(records) == 1
+    record = records[0]
+    assert content == "\nSTOCK"
+    assert record["provider_response"] == UNIT_PROVIDER_BODY
+    assert record["redacted_fields"] == []
+    details = record["provider_response"]["usage"]["completion_tokens_details"]
+    assert details == {"reasoning_tokens": 113}
+    message = record["provider_response"]["choices"][0]["message"]
+    assert message["reasoning_content"].startswith("The customer asks")
+
+
+def test_an_explicit_redaction_is_dropped_and_named(monkeypatch, tmp_path):
+    sink = tmp_path / "slice12-unit-infer-TEST.jsonl"
+    monkeypatch.setattr(spike, "EVIDENCE_SINK", sink)
+    monkeypatch.setattr(spike, "REDACTED_RESPONSE_FIELDS", ("system_fingerprint",))
+    monkeypatch.setattr(spike.httpx, "AsyncClient", _FakeChatClient)
+    asyncio.run(spike.infer("hello", "unit-test-token"))
+    record = _inference_records(sink)[0]
+    assert record["redacted_fields"] == ["system_fingerprint"]
+    assert "system_fingerprint" not in record["provider_response"]
+    expected = {key: value for key, value in UNIT_PROVIDER_BODY.items()
+                if key != "system_fingerprint"}
+    assert record["provider_response"] == expected
+
+
 def test_outage_with_recorded_failures_and_no_business_write_passes():
     verdict = spike.classify_outage(
         transport_failure="ConnectError", provider_failure="400",
@@ -431,28 +524,73 @@ def test_judge_route_with_an_unreported_requirement_is_incomplete():
     assert spike.classify_judge_route(checks) == spike.JUDGE_ROUTE_INCOMPLETE
 
 
-def test_judge_route_collection_finds_every_requirement_when_present():
-    with tempfile.TemporaryDirectory() as tmp:
-        root = Path(tmp)
-        (root / ".venv313" / "Scripts").mkdir(parents=True)
-        (root / ".venv313" / "Scripts" / "python.exe").write_bytes(b"")
-        (root / "demos").mkdir()
-        (root / "demos" / "gateway_spike.py").write_bytes(b"")
-        (root / "tests" / "spike").mkdir(parents=True)
-        (root / "tests" / "spike" / "test_spike_verifiers.py").write_bytes(b"")
-        (root / "docs" / "plans" / "shiftwork" / "evidence").mkdir(parents=True)
-        checks = spike.collect_judge_route_checks(root)
-        assert checks["venv_python"] is True
-        assert checks["evidence_dir"] is True
-        assert checks["spike_entry_point"] is True
-        assert checks["verifier_suite"] is True
+def _judge_ready_root(root: Path) -> None:
+    (root / ".venv313" / "Scripts").mkdir(parents=True)
+    (root / ".venv313" / "Scripts" / "python.exe").write_bytes(b"")
+    (root / "demos").mkdir()
+    (root / "demos" / "gateway_spike.py").write_bytes(b"")
+    (root / "tests" / "spike").mkdir(parents=True)
+    (root / "tests" / "spike" / "test_spike_verifiers.py").write_bytes(b"")
+    evidence = root / "docs" / "plans" / "shiftwork" / "evidence"
+    evidence.mkdir(parents=True)
+    (evidence / "slice12-live-2026-09-26.jsonl").write_text("{}\n", encoding="utf-8")
 
 
-def test_judge_route_collection_reports_every_requirement_for_a_bare_directory():
-    with tempfile.TemporaryDirectory() as tmp:
-        checks = spike.collect_judge_route_checks(Path(tmp))
-        assert set(checks) == set(spike.JUDGE_ROUTE_REQUIREMENTS)
-        assert checks["venv_python"] is False
-        assert checks["evidence_dir"] is False
-        assert checks["spike_entry_point"] is False
-        assert checks["verifier_suite"] is False
+def test_judge_route_collection_finds_every_requirement_when_present(tmp_path):
+    root = tmp_path / "repo"
+    _judge_ready_root(root)
+    checks = spike.collect_judge_route_checks(root)
+    assert checks["venv_python"] is True
+    assert checks["evidence_dir"] is True
+    assert checks["evidence_records"] is True
+    assert checks["spike_entry_point"] is True
+    assert checks["verifier_suite"] is True
+
+
+def test_judge_route_collection_reports_every_requirement_for_a_bare_directory(tmp_path):
+    checks = spike.collect_judge_route_checks(tmp_path)
+    assert set(checks) == set(spike.JUDGE_ROUTE_REQUIREMENTS)
+    assert checks["venv_python"] is False
+    assert checks["evidence_dir"] is False
+    assert checks["evidence_records"] is False
+    assert checks["spike_entry_point"] is False
+    assert checks["verifier_suite"] is False
+
+
+def test_judge_route_probe_archives_its_checks_and_verdict(tmp_path):
+    root = tmp_path / "repo"
+    _judge_ready_root(root)
+    evidence = tmp_path / "run-evidence"
+    original = spike.EVIDENCE_SINK
+    try:
+        code = spike.judge_route_probe(root, evidence_dir=evidence)
+    finally:
+        spike.EVIDENCE_SINK = original
+    assert code == 0
+    files = sorted(evidence.glob("slice12-judge-*.jsonl"))
+    assert len(files) == 1
+    record = json.loads(files[0].read_text(encoding="utf-8").splitlines()[0])
+    assert record["probe"] == "judge_route"
+    assert record["verdict"] == spike.JUDGE_ROUTE_READY
+    assert record["checks"] == {name: True for name in spike.JUDGE_ROUTE_REQUIREMENTS}
+    assert record["source_sha256"] == spike.SOURCE_SHA256
+    assert "T" in record["recorded_utc"]
+    assert record["environment_names"] == ["NEBIUS_API_KEY", "NEBIUS_PROJECT_ID"]
+    assert any("mutation_proofs_spike" in command for command in record["offline_commands"])
+    assert any("--phase reset" in command for command in record["live_commands"])
+
+
+def test_judge_route_probe_fails_closed_and_archives_an_incomplete_verdict(tmp_path):
+    root = tmp_path / "bare"
+    root.mkdir()
+    evidence = tmp_path / "run-evidence"
+    original = spike.EVIDENCE_SINK
+    try:
+        code = spike.judge_route_probe(root, evidence_dir=evidence)
+    finally:
+        spike.EVIDENCE_SINK = original
+    assert code == 2
+    files = sorted(evidence.glob("slice12-judge-*.jsonl"))
+    assert len(files) == 1
+    record = json.loads(files[0].read_text(encoding="utf-8").splitlines()[0])
+    assert record["verdict"] == spike.JUDGE_ROUTE_INCOMPLETE

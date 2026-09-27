@@ -15,7 +15,12 @@ decide, an unacknowledged write must not be called a loss, and an absence check
 must be unable to pass when its positive control did not fire. The `record_*`,
 `run_*`, `emit_*` and `budget_*` rows are the F2 stamping rule. The `outage_*`,
 `escape_*`, `reuse_*`, `trials_*` and `judge_route_*` rows cover the remaining
-F5 probes authored after the live pair and controls runs. A row reporting
+F5 probes authored after the live pair and controls runs. The
+`inference_archive_*` rows and `judge_route_emit_removed` cover the 2026-09-27
+trials finding and the judge route's own archiving: the archived inference
+record must carry the whole provider payload, an explicit redaction must be
+named, and the judge route must write its checks and verdict to a run sink. A
+row reporting
 SKIP means the mutated pattern no longer exists in the target, so the claim it
 carried has to be re-anchored before this table is trusted again.
 
@@ -277,6 +282,35 @@ MUTATIONS = [
     row("judge_route_verifier_check_forced_true",
         '        "verifier_suite": (root / "tests" / "spike" / "test_spike_verifiers.py").is_file(),',
         '        "verifier_suite": True,',
+        "test_judge_route_collection_reports_every_requirement_for_a_bare_directory"),
+    # 2026-09-27 trials finding and judge archiving: the archived inference record
+    # keeps the whole provider payload, an explicit redaction is dropped and named,
+    # and the judge route archives its checks, verdict and exit code.
+    row("inference_archive_allowlist",
+        "    archived = {key: value for key, value in body.items() if key not in REDACTED_RESPONSE_FIELDS}\n",
+        '    archived = {key: body.get(key) for key in ("model", "usage", "choices")}\n',
+        "test_inference_record_archives_the_whole_provider_payload"),
+    row("inference_redaction_not_named",
+        "    return archived, dropped\n",
+        "    return archived, []\n",
+        "test_an_explicit_redaction_is_dropped_and_named"),
+    row("judge_route_emit_removed",
+        '''    emit("judge_route", checks=checks, verdict=verdict,
+         environment_names=list(JUDGE_ENVIRONMENT_NAMES),
+         offline_commands=list(JUDGE_OFFLINE_COMMANDS),
+         live_commands=[".venv313/Scripts/python.exe -m demos.gateway_spike --phase " + phase
+                        for phase in JUDGE_LIVE_PHASES],
+         scope_note="offline route check: no credential is read, no live call is made, and this archived record is the judge-facing proof of the prerequisites and command list")
+''',
+        "",
+        "test_judge_route_probe_archives_its_checks_and_verdict"),
+    row("judge_route_incomplete_exit_zero",
+        "    return 0 if verdict == JUDGE_ROUTE_READY else 2\n",
+        "    return 0\n",
+        "test_judge_route_probe_fails_closed_and_archives_an_incomplete_verdict"),
+    row("judge_route_evidence_records_check_forced_true",
+        '        "evidence_records": any(evidence.glob("slice12-*.jsonl")),\n',
+        '        "evidence_records": True,\n',
         "test_judge_route_collection_reports_every_requirement_for_a_bare_directory"),
 ]
 

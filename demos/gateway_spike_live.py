@@ -37,6 +37,10 @@ MODEL_OUTPUT_USD_PER_MILLION = 0.24
 MAX_SPIKE_USD = 3.00
 EVIDENCE_DIR = Path("docs/plans/shiftwork/evidence")
 EVIDENCE_SINK: Path | None = None
+# A provider response is archived field-for-field. Any key named here is dropped
+# before archiving and listed in the record's `redacted_fields`, so a deliberate
+# omission stays visible instead of silently shrinking the observation.
+REDACTED_RESPONSE_FIELDS: tuple[str, ...] = ()
 SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
 CAPTURE_PASS = "PASS_CAPTURE_INTACT"
@@ -96,9 +100,17 @@ JUDGE_ROUTE_INCOMPLETE = "STOP_JUDGE_ROUTE_INCOMPLETE"
 JUDGE_ROUTE_REQUIREMENTS = (
     "venv_python",
     "evidence_dir",
+    "evidence_records",
     "spike_entry_point",
     "verifier_suite",
 )
+JUDGE_ENVIRONMENT_NAMES = ("NEBIUS_API_KEY", "NEBIUS_PROJECT_ID")
+JUDGE_OFFLINE_COMMANDS = (
+    ".venv313/Scripts/python.exe -m pytest tests/spike -q",
+    ".venv313/Scripts/python.exe -B tests/spike/mutation_proofs_spike.py",
+)
+JUDGE_LIVE_PHASES = ("preflight", "service", "controls", "pair", "outage",
+                     "escape", "reuse", "trials", "reset", "readback")
 
 PROVIDER_URL = "https://api.tokenfactory.nebius.com/v1/chat/completions"
 OUTAGE_TRANSPORT_URL = "https://api.tokenfactory.nebius.com.invalid/v1/chat/completions"
@@ -205,6 +217,12 @@ def classify_judge_route(checks: dict[str, object]) -> str:
     return JUDGE_ROUTE_READY
 
 
+def archived_provider_response(body: dict[str, Any]) -> tuple[dict[str, Any], list[str]]:
+    dropped = sorted(key for key in body if key in REDACTED_RESPONSE_FIELDS)
+    archived = {key: value for key, value in body.items() if key not in REDACTED_RESPONSE_FIELDS}
+    return archived, dropped
+
+
 def build_record(probe: str, fields: dict[str, object]) -> dict[str, object]:
     return {
         "probe": probe,
@@ -272,9 +290,24 @@ def collect_judge_route_checks(root: Path) -> dict[str, bool]:
     return {
         "venv_python": (root / ".venv313" / "Scripts" / "python.exe").is_file(),
         "evidence_dir": evidence.is_dir(),
+        "evidence_records": any(evidence.glob("slice12-*.jsonl")),
         "spike_entry_point": (root / "demos" / "gateway_spike.py").is_file(),
         "verifier_suite": (root / "tests" / "spike" / "test_spike_verifiers.py").is_file(),
     }
+
+
+def judge_route_probe(root: Path, *, evidence_dir: Path = EVIDENCE_DIR) -> int:
+    global EVIDENCE_SINK
+    EVIDENCE_SINK = new_evidence_sink("judge", directory=evidence_dir)
+    checks = collect_judge_route_checks(root)
+    verdict = classify_judge_route(checks)
+    emit("judge_route", checks=checks, verdict=verdict,
+         environment_names=list(JUDGE_ENVIRONMENT_NAMES),
+         offline_commands=list(JUDGE_OFFLINE_COMMANDS),
+         live_commands=[".venv313/Scripts/python.exe -m demos.gateway_spike --phase " + phase
+                        for phase in JUDGE_LIVE_PHASES],
+         scope_note="offline route check: no credential is read, no live call is made, and this archived record is the judge-facing proof of the prerequisites and command list")
+    return 0 if verdict == JUDGE_ROUTE_READY else 2
 
 
 def stream_text(data: Any) -> str:
@@ -328,6 +361,7 @@ async def infer(prompt: str, token: str) -> tuple[str, dict[str, object]]:
         )
     response.raise_for_status()
     body = response.json()
+    archived_body, dropped_fields = archived_provider_response(body)
     usage = body.get("usage") or {}
     input_tokens = usage.get("prompt_tokens")
     output_tokens = usage.get("completion_tokens")
@@ -345,6 +379,8 @@ async def infer(prompt: str, token: str) -> tuple[str, dict[str, object]]:
         "usage": usage,
         "estimated_usd_from_displayed_rate": cost,
         "finish_reason": (body.get("choices") or [{}])[0].get("finish_reason"),
+        "provider_response": archived_body,
+        "redacted_fields": dropped_fields,
     }
     content = (body.get("choices") or [{}])[0].get("message", {}).get("content") or ""
     emit("nemotron_inference", **observation, content=content)
