@@ -1,9 +1,8 @@
 """Durable domain models (program design S3.2).
 
 Slice 2 carries the real contract, catalog, structured-response and ledger-draft
-types the thin vertical path needs. Later slices add the rotation, assist and
-curation models (RotationDraw, AssistEvent, MissionSource) without renumbering
-what exists here.
+types the thin vertical path needs. Later slices added rotation and assist
+models; curation models remain planned.
 """
 
 from datetime import datetime
@@ -293,6 +292,28 @@ class AssistRole(StrEnum):
     HINT = "HINT"
     DIAGNOSIS = "DIAGNOSIS"
     PATCH_PROPOSAL = "PATCH_PROPOSAL"
+
+
+class AssistEvent(BaseModel):
+    model_config = _FROZEN
+
+    id: Id
+    shift_id: Id
+    investigation_id: Id
+    role: AssistRole
+    model_id: str
+    reported_model_id: str | None = None
+    input_tokens: int | None = None
+    output_tokens: int | None = None
+    elapsed_ms: int | None = None
+    request_text: str
+    response_text: str
+    proposed_patch: str | None = None
+    accepted: bool | None = None
+    state: Literal["PENDING", "COMPLETE", "FAILED"]
+    failure_code: str | None = None
+    client_request_id: str
+    created_at: datetime
 
 
 class ObservationKind(StrEnum):

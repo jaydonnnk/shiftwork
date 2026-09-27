@@ -12,6 +12,7 @@ from shiftwork.domain import canonical
 from shiftwork.domain.errors import VersionTampered
 from shiftwork.domain.models import (
     ArtifactVersion,
+    AssistEvent,
     CandidateRef,
     CheckResult,
     ContextCondition,
@@ -877,6 +878,76 @@ def latest_investigation_for_shift(
         (shift_id,),
     ).fetchone()
     return _investigation(row) if row else None
+
+
+def _assist_event(row: sqlite3.Row) -> AssistEvent:
+    return AssistEvent(
+        id=row["id"], shift_id=row["shift_id"],
+        investigation_id=row["investigation_id"], role=row["role"],
+        model_id=row["model_id"], reported_model_id=row["reported_model_id"],
+        input_tokens=row["input_tokens"], output_tokens=row["output_tokens"],
+        elapsed_ms=row["elapsed_ms"], request_text=row["request_text"],
+        response_text=row["response_text"], proposed_patch=row["proposed_patch"],
+        accepted=None if row["accepted"] is None else bool(row["accepted"]),
+        state=row["state"], failure_code=row["failure_code"],
+        client_request_id=row["client_request_id"], created_at=row["created_at"],
+    )
+
+
+def insert_assist_event(conn: sqlite3.Connection, event: AssistEvent) -> None:
+    conn.execute(
+        "INSERT INTO assist_events (id, shift_id, investigation_id, role, model_id, "
+        "reported_model_id, input_tokens, output_tokens, elapsed_ms, "
+        "request_text, response_text, proposed_patch, accepted, state, failure_code, "
+        "client_request_id, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (event.id, event.shift_id, event.investigation_id, event.role.value,
+         event.model_id, event.reported_model_id, event.input_tokens,
+         event.output_tokens, event.elapsed_ms, event.request_text, event.response_text, event.proposed_patch,
+         event.accepted, event.state, event.failure_code, event.client_request_id,
+         event.created_at.isoformat()),
+    )
+
+
+def get_assist_event(conn: sqlite3.Connection, event_id: str) -> AssistEvent | None:
+    row = conn.execute("SELECT * FROM assist_events WHERE id = ?", (event_id,)).fetchone()
+    return _assist_event(row) if row else None
+
+
+def get_assist_by_client_request_id(conn: sqlite3.Connection, client_request_id: str) -> AssistEvent | None:
+    row = conn.execute("SELECT * FROM assist_events WHERE client_request_id = ?", (client_request_id,)).fetchone()
+    return _assist_event(row) if row else None
+
+
+def list_assist_for_shift(conn: sqlite3.Connection, shift_id: str) -> list[AssistEvent]:
+    return [_assist_event(row) for row in conn.execute(
+        "SELECT * FROM assist_events WHERE shift_id = ? ORDER BY rowid", (shift_id,)
+    ).fetchall()]
+
+
+def list_pending_assist_events(conn: sqlite3.Connection) -> list[AssistEvent]:
+    return [_assist_event(row) for row in conn.execute(
+        "SELECT * FROM assist_events WHERE state = 'PENDING' ORDER BY rowid"
+    ).fetchall()]
+
+
+def finish_assist_event(conn: sqlite3.Connection, event_id: str, *, response: str,
+                        proposed_patch: str | None, failure_code: str | None,
+                        reported_model_id: str | None = None, input_tokens: int | None = None,
+                        output_tokens: int | None = None, elapsed_ms: int | None = None) -> None:
+    conn.execute(
+        "UPDATE assist_events SET response_text = ?, proposed_patch = ?, state = ?, "
+        "failure_code = ?, reported_model_id = ?, input_tokens = ?, output_tokens = ?, "
+        "elapsed_ms = ? WHERE id = ? AND state = 'PENDING'",
+        (response, proposed_patch, "FAILED" if failure_code else "COMPLETE", failure_code,
+         reported_model_id, input_tokens, output_tokens, elapsed_ms, event_id),
+    )
+
+
+def decide_assist_event(conn: sqlite3.Connection, event_id: str, accepted: bool) -> bool:
+    return bool(conn.execute(
+        "UPDATE assist_events SET accepted = ? WHERE id = ? AND state = 'COMPLETE' "
+        "AND accepted IS NULL", (accepted, event_id)
+    ).rowcount)
 
 
 def count_investigations(conn: sqlite3.Connection) -> int:

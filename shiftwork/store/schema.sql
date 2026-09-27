@@ -11,8 +11,8 @@
 --
 -- The incidents table exists from the tracer and is read by the board, but
 -- Slice 2 opens no incidents (Slice 5/7). Still awaiting their owning slice:
--- trial_slots, exposure_reservations, exposure_items, assist_events and
--- idempotency_records.
+-- trial_slots, exposure_reservations, exposure_items and idempotency_records.
+-- assist_events landed in Slice 14 in migrations/v6_tables.sql.
 
 CREATE TABLE IF NOT EXISTS engagements (
     slug TEXT PRIMARY KEY,

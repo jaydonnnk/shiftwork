@@ -48,6 +48,60 @@ BEGIN
     SELECT RAISE(ABORT, 'investigations are append-only');
 END;
 
+-- Reserve before calling the model. PENDING and FAILED calls consume the same
+-- budget as COMPLETE calls; a crash can never refund a provider attempt.
+CREATE TABLE IF NOT EXISTS assist_events (
+    id TEXT PRIMARY KEY,
+    shift_id TEXT NOT NULL REFERENCES shifts(id),
+    investigation_id TEXT NOT NULL REFERENCES investigations(id),
+    role TEXT NOT NULL CHECK (role IN ('HINT', 'DIAGNOSIS', 'PATCH_PROPOSAL')),
+    model_id TEXT NOT NULL,
+    reported_model_id TEXT,
+    input_tokens INTEGER,
+    output_tokens INTEGER,
+    elapsed_ms INTEGER,
+    request_text TEXT NOT NULL,
+    response_text TEXT NOT NULL DEFAULT '',
+    proposed_patch TEXT,
+    accepted INTEGER CHECK (accepted IN (0, 1)),
+    state TEXT NOT NULL CHECK (state IN ('PENDING', 'COMPLETE', 'FAILED')),
+    failure_code TEXT,
+    client_request_id TEXT NOT NULL UNIQUE,
+    created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS assist_events_shift ON assist_events(shift_id);
+CREATE TRIGGER IF NOT EXISTS assist_events_owned_investigation
+BEFORE INSERT ON assist_events
+BEGIN
+    SELECT RAISE(ABORT, 'assist must cite an investigation in the same shift')
+    WHERE NOT EXISTS (
+        SELECT 1 FROM investigations
+        WHERE id = NEW.investigation_id AND shift_id = NEW.shift_id
+    );
+END;
+CREATE TRIGGER IF NOT EXISTS assist_events_no_delete
+BEFORE DELETE ON assist_events BEGIN
+    SELECT RAISE(ABORT, 'assist events cannot be deleted');
+END;
+CREATE TRIGGER IF NOT EXISTS assist_events_guard_update
+BEFORE UPDATE ON assist_events BEGIN
+    SELECT RAISE(ABORT, 'assist event history is immutable except completion and decision')
+    WHERE NOT (
+        OLD.id IS NEW.id AND OLD.shift_id IS NEW.shift_id AND
+        OLD.investigation_id IS NEW.investigation_id AND OLD.role IS NEW.role AND
+        OLD.model_id IS NEW.model_id AND OLD.request_text IS NEW.request_text AND
+        OLD.client_request_id IS NEW.client_request_id AND OLD.created_at IS NEW.created_at AND
+        ((OLD.state = 'PENDING' AND NEW.state IN ('COMPLETE', 'FAILED') AND
+          NEW.accepted IS NULL) OR
+         (OLD.state = 'COMPLETE' AND NEW.state = 'COMPLETE' AND
+          OLD.accepted IS NULL AND NEW.accepted IN (0, 1) AND
+          OLD.response_text IS NEW.response_text AND OLD.proposed_patch IS NEW.proposed_patch AND
+          OLD.failure_code IS NEW.failure_code AND OLD.reported_model_id IS NEW.reported_model_id AND
+          OLD.input_tokens IS NEW.input_tokens AND OLD.output_tokens IS NEW.output_tokens AND
+          OLD.elapsed_ms IS NEW.elapsed_ms))
+    );
+END;
+
 -- content_hash UNIQUE makes a context immutable by identity: a changed frozen
 -- input is a new context, never an edit. protected_reservation_id is an internal
 -- controller reference and is never projected.

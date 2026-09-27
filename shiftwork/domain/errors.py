@@ -142,13 +142,7 @@ class InvestigationIncomplete(ShiftworkDomainError):
 
 
 class AssistGatewayUnavailable(ShiftworkDomainError):
-    """No assist gateway exists yet, so no diagnostic help can be produced.
-
-    Slice 11 records the denial; Slice 14 replaces the raise with the
-    prediction-gated attributable gateway. Keeping it a typed error rather than
-    an absent route means removing the guard fails a named assertion instead of
-    silently changing a status code.
-    """
+    """The session has no configured assist gateway; no help call is made."""
 
     kind = "conflict"
 
