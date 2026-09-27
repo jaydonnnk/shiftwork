@@ -80,15 +80,22 @@ summaries when a time-sensitive external claim is being made.
   the Gate 3 configuration list. Slice 12 received its own go-ahead on 2026-09-26
   on `shiftwork/slice-12`. Its live entitlement preflight initially used the
   wrong `Project` header; the support-provided AI project ID now returns all
-  Sandbox permissions true. The partial live matrix then stopped on a successful
-  operation whose checkpoint silently lacked a reported file write. Slice 12 is
-  unchecked; Gate 2's scoped file-readback rule and Gate 3's matching
-  program-design correction were separately re-approved 2026-09-26. S13 onward
-  stays stopped. One separately authorized no-inference Sandbox diagnostic then
-  read back a 14-byte checkpoint file exactly under the normal 16 MiB cap, but
-  the earlier 2 MiB loss under a 1 MiB cap remains unexplained. Neither gate
-  approval nor that one-pass result establishes a live capability verdict or
-  authorizes further probes.
+  Sandbox permissions true. The matrix then stopped on a successful operation
+  whose checkpoint silently lacked a reported file write; the repaired verifier
+  could not reproduce a silent loss, and the user adjudicated the treatment as a
+  visible failed run with incomplete evidence rather than a test 38 mismatch.
+  Gate 2's scoped file-readback rule and Gate 3's matching program-design
+  correction were separately re-approved 2026-09-26. Every remaining phase then
+  ran under its own authorization (pair, controls, outage, escape, reuse,
+  trials, the judge route, one confirming service call and reset), no section 8
+  hostile probe succeeded, and the user ACCEPTED Slice 12 on 2026-09-27 with the
+  final verdict in `docs/plans/shiftwork/evidence/slice12-capability-2026-09-26.md`.
+  Documented limits stay attached to that verdict: the original 2 MiB zero-byte
+  capture under a 1 MiB cap remains unexplained and was never reproduced, six
+  trials cover one request shape, pre-repair inference records omit the model's
+  reasoning text, and probe 1's protected-fixture limb is N/A. The small-file
+  readback under the normal 16 MiB cap passed. Slice 13 onward still needs its
+  own go-ahead and its own live authorizations.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
@@ -358,7 +365,16 @@ Rules:
 - Treat half of this session's context window as the working limit (for example
   200k of a 400k-token window). Use the reported usage indicator when the runtime
   shows one, and a conservative estimate otherwise. When usage reaches about that
-  point, stop starting new work even if the task is unfinished.
+  point, stop starting new work even if the task is unfinished, except in the
+  near-completion case below.
+- Near-completion exception: when the task is almost done as usage approaches the
+  threshold (for example the last step of a five-step task at 45 to 50 percent of
+  the window), finish the task in this session instead of handing off. The
+  exception covers only a short, fully predictable remainder, never a new phase of
+  work or an open question about what remains.
+- The exception lapses on an unexpected error or outcome: a failing check you did
+  not predict, a result that contradicts the plan, or new ambiguity means halt and
+  hand off rather than diagnose an open problem at the end of the window.
 - Do not run the session on to automatic compaction. Finish only the current step
   and leave it at a safe point: the tree consistent, no half-applied edits and no
   unrecorded failing results.
