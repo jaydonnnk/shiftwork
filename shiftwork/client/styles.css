@@ -92,6 +92,14 @@ body[data-evidence="finalized"] .station-service { border-color: var(--amber); b
 .comparison-slot strong { display: block; font-size: 12px; }
 .comparison-slot .result-row { margin-top: 6px; }
 .comparison-slot[data-state="FAILED"] { border-left-color: #d98a7a; }
+.comparison-outcome { display: grid; gap: 9px; margin: 10px 0 16px; }
+.comparison-outcome-card { border: 1px solid #ffffff25; border-left: 2px solid #edbd68; padding: 11px; background: #ffffff05; min-width: 0; }
+.comparison-outcome-card[data-eligible="false"] { border-left-color: #d98a7a; }
+.comparison-outcome-card h4 { margin: 0 0 7px; font-size: 12px; }
+.comparison-outcome-card dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 10px; margin: 0; font-size: 11px; }
+.comparison-outcome-card dt { color: #b2bcc7; }
+.comparison-outcome-card dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.comparison-outcome-note { font-size: 10px; color: #b2bcc7; }
 .room-caption { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 10px; color: #b2bcc7; }
 .tiny-square { display: inline-block; width: 5px; height: 5px; background: var(--amber); }
 .station-context { margin: 12px 0 14px; padding: 10px 13px; border-left: 2px solid var(--amber); background: #ffffff04; color: #bac7cd; font-size: 11px; min-height: 38px; }

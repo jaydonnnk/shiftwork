@@ -62,6 +62,7 @@ function clearData(message) {
   text('compare-state', 'No shift loaded');
   text('compare-note', '');
   text('compare-summary', '');
+  $('comparison-outcome').replaceChildren();
   text('compare-error', '');
   empty($('candidate-list'), 'No candidates loaded.');
   empty($('comparison-slots'), 'No comparison loaded.');
@@ -367,7 +368,7 @@ function renderAssist(station) {
   $('request-assist').disabled = state.pending || !station;
 }
 function renderDiagnostic(station) {
-  const experiment = state.diagnostic ?? station?.latest_experiment ?? null;
+  const experiment = state.diagnostic ?? station?.latest_diagnostic ?? null;
   const trial = experiment?.trials?.[0] ?? null;
   const output = trial?.outputs?.[0] ?? null;
   const result = $('diagnostic-result');
@@ -488,11 +489,47 @@ function renderCompare() {
     : !treatment ? 'Name the one declared treatment that differs between the two candidates.'
     : 'The controller requires operator-sealed workloads and protected variants before reservation. Draft material is refused. This station derives no winner.');
   const slots = $('comparison-slots');
-  if (!compare) { text('compare-summary', ''); return empty(slots, 'Every slot, its run, version, batch count and missing evidence appear here once reserved.'); }
+  const outcomeView = $('comparison-outcome');
+  if (!compare) { text('compare-summary', ''); outcomeView.replaceChildren(); return empty(slots, 'Every slot, its run, version, batch count and missing evidence appear here once reserved.'); }
   const protectedStatus = compare.protected_counts
     ? Object.entries(compare.protected_counts).map(([label, count]) => `${label}: ${count.captured} captured, ${count.missing} missing of ${count.reserved}`).join(' · ')
     : 'protected capture counts appear after the comparison ends';
-  text('compare-summary', `${compare.candidates.map(candidate => `Candidate ${candidate.label} · ${candidate.artifact_version_id} · ${candidate.artifact_content_hash.slice(0, 12)}…`).join(' · ')} · public requests per candidate ${compare.shared_public_denominator_requests} · protected steps per candidate ${compare.protected_denominator_requests_per_candidate} · ${protectedStatus} · ${compare.eligible ? 'eligible' : 'no winner derived here'}`);
+  const outcome = compare.outcome;
+  text('compare-summary', `${compare.candidates.map(candidate => `Candidate ${candidate.label} · ${candidate.artifact_version_id} · ${candidate.artifact_content_hash.slice(0, 12)}…`).join(' · ')} · ${outcome?.status ?? 'INCOMPLETE'} · public requests per candidate ${compare.shared_public_denominator_requests} · protected steps per candidate ${compare.protected_denominator_requests_per_candidate} · ${protectedStatus} · no winner derived here`);
+  outcomeView.replaceChildren();
+  if (outcome) {
+    const note = element('p', `${compare.context_evidence_class} evidence. Public efficiency excludes protected steps. Non-completion categories are incidences and may overlap. Unknown usage or cost is never treated as zero.`, 'comparison-outcome-note');
+    outcomeView.append(note);
+    const fields = [
+      ['Public requests', 'public_denominator_requests'], ['Useful completions', 'useful_completions'],
+      ['Incorrect outputs', 'incorrect_outputs'], ['Justified refusals', 'justified_refusals'],
+      ['Unjustified refusals', 'unjustified_refusals'], ['Justified referrals', 'justified_referrals'],
+      ['Unjustified referrals', 'unjustified_referrals'], ['Justified clarifications', 'justified_clarifications'],
+      ['Unjustified clarifications', 'unjustified_clarifications'], ['Missing outputs', 'missing_outputs'],
+      ['Protected steps', 'protected_denominator'], ['Protected passed', 'protected_passed'],
+      ['Protected failed', 'protected_failed'], ['Protected missing', 'protected_missing'],
+      ['Recorded public model calls', 'service_calls'], ['Public input tokens', 'input_tokens'],
+      ['Public output tokens', 'output_tokens'], ['Public model latency ms', 'service_latency_ms'],
+      ['Public provisioning latency ms', 'provisioning_latency_ms'],
+      ['Public cost minor units', 'cost_minor_units'],
+    ];
+    for (const metrics of outcome.candidate_metrics) {
+      const label = metrics.candidate_label;
+      const eligibility = outcome.eligibility.find(item => item.candidate_label === label);
+      const card = element('section', null, 'comparison-outcome-card');
+      card.dataset.candidateLabel = label;
+      card.dataset.eligible = String(eligibility.eligible);
+      card.append(element('h4', `Candidate ${label} · ${eligibility.eligible ? 'eligible' : 'blocked'}${eligibility.blocking_reason_codes.length ? ` · ${eligibility.blocking_reason_codes.join(', ')}` : ''}`));
+      const list = element('dl');
+      for (const [name, key] of fields) {
+        const value = element('dd', metrics[key] ?? 'unknown');
+        value.dataset.metric = key;
+        list.append(element('dt', name), value);
+      }
+      card.append(list);
+      outcomeView.append(card);
+    }
+  }
   slots.replaceChildren(...compare.trials.map(trial => {
     const row = element('div', null, 'comparison-slot');
     row.dataset.pair = String(trial.pair_ordinal);
