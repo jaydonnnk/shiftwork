@@ -15,6 +15,7 @@ import runpy
 import sqlite3
 import tempfile
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 
 import pytest
@@ -23,7 +24,10 @@ from conftest import BookshopShift
 from shiftwork import config, orchestrator
 from shiftwork.domain import canonical, task_contract
 from shiftwork.domain.errors import BootstrapBlocked
-from shiftwork.domain.models import ExecutorFailure, ExperimentKind, RunOutput, RunState
+from shiftwork.domain.models import (
+    ExecutionObservation, ExecutorFailure, ExperimentKind, ObservationKind,
+    RunOutput, RunState,
+)
 from shiftwork.evaluator import evaluator
 from shiftwork.executor import base as executor_base
 from shiftwork.store import db, repo
@@ -661,6 +665,37 @@ def test_candidates_make_a_measured_price_versus_stock_choice_on_request_011():
         "book:tidal-paths:paperback", "book:harbour-atlas:paperback"]
     assert [next(claim["value"] for claim in result["claims"] if claim["kind"] == "price")
             for result in results] == [1400, 1600]
+
+
+def test_every_protected_spec_accepts_both_declared_candidate_envelopes():
+    """A permitted optional price cannot fail A before the protected rule is read."""
+    cases = sealed_store.load_family("task_completion").cases
+    base = config.PIVOT_COMPARE_STATE.read_bytes()
+    mission = task_contract.load_mission_bytes(config.PIVOT_MISSION.read_bytes())
+    from shiftwork.domain.comparison import protected_acceptance
+    for label, function in (("a", "answer"), ("b", "envelope")):
+        module = runpy.run_path(str(config.PIVOT_COMPARE_CANDIDATE_SOURCES[label.upper()]))
+        responder = module[function]
+        responder.__globals__["observe"] = lambda *_args, **_kwargs: None
+        for case in cases:
+            spec = case.stimulus.task_spec
+            price = next((task for task in spec.tasks if task.id == "price"), None)
+            assert price is not None and price.required is False
+            assert price.requested_entity_ref == case.stimulus.request.entity_ref
+            snapshot = json.loads(task_contract.resolve_protected_state(
+                base, case.stimulus.state_delta
+            ))
+            output = responder(case.stimulus.request.model_dump(mode="json"), snapshot)
+            response = task_contract.validate_response_envelope(
+                spec, json.dumps(output).encode("utf-8")
+            )
+            assessed = evaluator.assess_request(
+                spec=spec, request_ordinal=case.stimulus.request.ordinal,
+                mission=mission, snapshot=task_contract.load_public_state_bytes(
+                    task_contract.resolve_protected_state(base, case.stimulus.state_delta)
+                ), response=response,
+            )
+            assert protected_acceptance(case, assessed), (label, case.check_id)
 
 
 def test_a_comparison_freezes_two_candidates_three_workloads_and_six_slots_before_results(session):
@@ -1325,6 +1360,17 @@ def test_restart_terminalizes_comparison_without_retry_and_keeps_capture(
                 request_text="retained first request", http_status=200,
                 body=b'{"retained":true}', elapsed_ms=11,
             ))
+            for ordinal, kind, payload in (
+                (1, ObservationKind.INFERENCE_REQUEST, {}),
+                (2, ObservationKind.INFERENCE_RESULT,
+                 {"input_tokens": 7, "output_tokens": 9, "elapsed_ms": 13}),
+            ):
+                repo.insert_observation(conn, ExecutionObservation(
+                    id=f"{run.id}-usage-{ordinal}", run_id=run.id,
+                    request_ordinal=1, ordinal=ordinal, kind=kind,
+                    public_payload_json=payload, raw_payload_ref="",
+                    measured_at=datetime.now(timezone.utc),
+                ))
         conn.commit()
     finally:
         conn.close()
@@ -1335,6 +1381,13 @@ def test_restart_terminalizes_comparison_without_retry_and_keeps_capture(
     view = response.json()
     assert view["state"] == "FAILED", "GET left an unclaimable comparison nonterminal"
     assert [trial["state"] for trial in view["trials"]] == ["FAILED"] * 6
+    assert view["outcome"]["status"] == "INCOMPLETE"
+    assert all(not item["eligible"] for item in view["outcome"]["eligibility"])
+    assert view["outcome"]["candidate_metrics"][0]["protected_missing"] == 3
+    if boundary == "mid_slot":
+        metrics = view["outcome"]["candidate_metrics"][0]
+        assert (metrics["service_calls"], metrics["input_tokens"],
+                metrics["output_tokens"], metrics["service_latency_ms"]) == (1, 7, 9, 13)
     conn = db.connect(session.db_file)
     try:
         assert all(repo.get_run(conn, slot.run_id).state is RunState.FAILED for slot in slots)
@@ -1345,6 +1398,9 @@ def test_restart_terminalizes_comparison_without_retry_and_keeps_capture(
         assert len(retained) == (1 if boundary == "mid_slot" else 0)
         if retained:
             assert retained[0].body == b'{"retained":true}'
+            assert [item.kind for item in repo.list_observations(conn, slots[0].run_id)] == [
+                ObservationKind.INFERENCE_REQUEST, ObservationKind.INFERENCE_RESULT,
+            ]
     finally:
         conn.close()
     orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
@@ -1862,8 +1918,15 @@ def test_the_compare_station_shows_all_six_slots_without_a_winner(session):
         2: 5,  # one collection request and one two-task facts request
         3: 5,
     }
-    # The station states membership per run without deriving a winner.
-    assert view["eligible"] is False
+    # The outcome reports candidate eligibility separately and selects neither.
+    outcome = view["outcome"]
+    assert outcome["status"] == "COMPLETE"
+    assert outcome["shared_public_denominator_requests"] == 6
+    assert [item["public_denominator_requests"] for item in outcome["candidate_metrics"]] == [6, 6]
+    assert [item["protected_denominator"] for item in outcome["candidate_metrics"]] == [3, 3]
+    assert all(item["protected_missing"] == 0 for item in outcome["candidate_metrics"])
+    assert all(item["cost_minor_units"] is None for item in outcome["candidate_metrics"])
+    assert view["eligible"] == any(item["eligible"] for item in outcome["eligibility"])
     assert "no winner" in view["eligibility_reason"].lower()
     assert "winner" not in json.dumps(view["trials"], default=str).lower()
     # The candidate difference is visible per assessed request, not in a score.
@@ -1875,6 +1938,349 @@ def test_the_compare_station_shows_all_six_slots_without_a_winner(session):
     }
     assert optional["A"] == ["USEFUL_COMPLETION", "USEFUL_COMPLETION"]
     assert optional["B"] == ["MISSING_OUTPUT", "MISSING_OUTPUT"]
+
+
+def test_every_claim_defining_context_field_blocks_a_stale_outcome(session):
+    candidate_a, candidate_b, investigation = _comparison_session(session)
+    created = _create_comparison(session, candidate_a, candidate_b, investigation)
+    assert created.status_code == 202, created.text
+    experiment_id = created.json()["id"]
+    assert _wait_comparison(session, experiment_id)["outcome"]["status"] == "COMPLETE"
+    conn = db.connect(session.db_file)
+    try:
+        experiment = repo.get_experiment(conn, experiment_id)
+        row = conn.execute("SELECT * FROM execution_contexts WHERE id = ?",
+                           (experiment.context_id,)).fetchone()
+        condition = json.loads(row["condition_json"])
+        condition["public_label"] = "tampered condition"
+        workloads = json.loads(row["workloads_json"])
+        workloads[0]["request_count"] += 1
+        state = json.loads(row["starting_business_state_json"])
+        state["ledger_event_count"] += 1
+        settings = json.loads(row["service_model_settings_json"])
+        settings["temperature"] = 1
+        limits = json.loads(row["resource_limits_json"])
+        limits["deadline_s"] += 1
+        changes = {
+            "mission_bytes": row["mission_bytes"] + b" ",
+            "mission_hash": "0" * 64,
+            "public_data_bytes": row["public_data_bytes"] + b" ",
+            "public_data_hash": "0" * 64,
+            "starting_business_state_json": json.dumps(state),
+            "starting_business_state_hash": "0" * 64,
+            "requirement_set_id": "tampered-rubric",
+            "requirement_set_hash": "0" * 64,
+            "visible_check_set_hash": "0" * 64,
+            "condition_json": json.dumps(condition),
+            "workloads_json": json.dumps(workloads),
+            "evaluator_version": "tampered-evaluator",
+            "reducer_version": "tampered-reducer",
+            "executor_class": "ISOLATED_LIVE",
+            "harness_hash": "0" * 64,
+            "image_ref": "tampered-image",
+            "service_model": "tampered-model",
+            "service_model_settings_json": json.dumps(settings),
+            "resource_limits_json": json.dumps(limits),
+            "protected_reservation_id": None,
+            "content_hash": "0" * 64,
+        }
+        for column, altered in changes.items():
+            conn.execute(f"UPDATE execution_contexts SET {column} = ? WHERE id = ?",
+                         (altered, experiment.context_id))
+            conn.commit()
+            response = session.client.get(f"/api/experiments/{experiment_id}")
+            assert response.status_code == 200, (column, response.text)
+            result = response.json()["outcome"]
+            assert result["status"] == "NOT_COMPARABLE", column
+            assert all(not item["eligible"] for item in result["eligibility"]), column
+            conn.execute(f"UPDATE execution_contexts SET {column} = ? WHERE id = ?",
+                         (row[column], experiment.context_id))
+            conn.commit()
+            assert session.client.get(f"/api/experiments/{experiment_id}").json()["outcome"]["status"] == "COMPLETE", column
+    finally:
+        conn.close()
+
+
+def test_the_investigate_station_projects_a_comparison_only_as_a_comparison(session, diagnostic):
+    """R1: `latest_diagnostic` carries the shift's latest diagnostic only, so the
+    diagnostic panel can never assert a comparison's candidate eligibility while
+    `latest_experiment` still seeds the Compare station."""
+    candidate_a = _freeze_candidate(session, "A")
+    candidate_b = _freeze_candidate(session, "B")
+    created = _create_comparison(session, candidate_a, candidate_b,
+                                 diagnostic["investigation"], key="cmp-r1")
+    assert created.status_code == 202, created.text
+    comparison = _wait_comparison(session, created.json()["id"])
+    assert comparison["state"] == "FINALIZED", comparison["state"]
+    assert comparison["outcome"]["status"] == "COMPLETE"
+    assert comparison["eligible"] is True, "this repair premise needs an eligible comparison"
+
+    response = session.client.get(f"/api/shifts/{session.shift_id}/investigations")
+    assert response.status_code == 200, response.text
+    view = response.json()
+    assert view["latest_experiment"]["kind"] == "QUALIFYING_COMPARISON"
+    assert view["latest_experiment"]["eligible"] is True
+    latest = view["latest_diagnostic"]
+    assert latest is not None, "a completed diagnostic no longer reaches the panel"
+    assert latest["id"] == diagnostic["experiment_id"]
+    assert latest["kind"] == "DIAGNOSTIC"
+    assert latest["eligible"] is False
+
+
+def _recompute_frozen_context_hash(conn, context_id: str) -> str:
+    """Recompute the stored frozen context hash over an already-tampered row.
+
+    A named guard whose input also feeds `_frozen_comparison_context_hash` can
+    only be isolated by recomputing the stored hash, so the frozen context check
+    stays silent and the named guard reports the drift itself.
+    """
+    context = repo.get_execution_context(conn, context_id)
+    bindings = orchestrator._reserved_protected_bindings(
+        conn, context.protected_reservation_id
+    )
+    return orchestrator._frozen_comparison_context_hash(context, bindings)
+
+
+def test_each_named_readback_drift_guard_reports_its_own_field(session):
+    """R4: every named guard in `_comparison_outcome` reports its own drift field.
+
+    The twenty-column context test asserts only the resulting status, so a guard
+    whose tamper is also caught by the recomputed frozen context hash can be
+    deleted unnoticed. Each tamper below is the smallest one that makes the named
+    guard the reporter of its own field, and the assertion names that field, so
+    deleting the guard fails this test even where a sibling guard still blocks the
+    verdict. Measured co-firing, which is expected rather than a defect: a tamper
+    of `public_data_bytes` also trips `condition`, because that guard requires the
+    condition bytes to equal the public bytes; and every tamper that recomputes
+    `execution_contexts.content_hash` also trips `assessment_context` and
+    `experiment_schedule`, because both pin that stored value. `experiment_schedule`,
+    `candidate_A` and `run_binding` are isolated with no sibling.
+    """
+    candidate_a, candidate_b, investigation = _comparison_session(session)
+    created = _create_comparison(session, candidate_a, candidate_b, investigation)
+    assert created.status_code == 202, created.text
+    experiment_id = created.json()["id"]
+    assert _wait_comparison(session, experiment_id)["outcome"]["status"] == "COMPLETE"
+    conn = db.connect(session.db_file)
+    try:
+        experiment = repo.get_experiment(conn, experiment_id)
+        context_id = experiment.context_id
+        context_row = conn.execute("SELECT * FROM execution_contexts WHERE id = ?",
+                                   (context_id,)).fetchone()
+        first_run_id = repo.list_trial_slots(conn, experiment_id)[0].run_id
+        reported: dict[str, list[str]] = {}
+
+        def probe(guard: str, tamper, undo) -> None:
+            tamper()
+            response = session.client.get(f"/api/experiments/{experiment_id}")
+            assert response.status_code == 200, (guard, response.text)
+            outcome = response.json()["outcome"]
+            reported[guard] = sorted(outcome["drift_fields"])
+            assert outcome["status"] == "NOT_COMPARABLE", (guard, reported[guard])
+            assert guard in outcome["drift_fields"], (guard, reported[guard])
+            assert all(not item["eligible"] for item in outcome["eligibility"]), guard
+            undo()
+            conn.commit()
+            assert session.client.get(f"/api/experiments/{experiment_id}").json()[
+                "outcome"]["status"] == "COMPLETE", (guard, "tamper was not reverted")
+
+        def context_column(column: str, value, guard: str, *, recompute: bool = False) -> None:
+            def tamper() -> None:
+                conn.execute(f"UPDATE execution_contexts SET {column} = ? WHERE id = ?",
+                             (value, context_id))
+                if recompute:
+                    conn.execute("UPDATE execution_contexts SET content_hash = ? WHERE id = ?",
+                                 (_recompute_frozen_context_hash(conn, context_id), context_id))
+                conn.commit()
+
+            def undo() -> None:
+                conn.execute(f"UPDATE execution_contexts SET {column} = ? WHERE id = ?",
+                             (context_row[column], context_id))
+                conn.execute("UPDATE execution_contexts SET content_hash = ? WHERE id = ?",
+                             (context_row["content_hash"], context_id))
+
+            probe(guard, tamper, undo)
+
+        def other_column(table: str, column: str, key_column: str, key, value,
+                         guard: str) -> None:
+            original = conn.execute(
+                f"SELECT * FROM {table} WHERE {key_column} = ?", (key,)
+            ).fetchone()
+
+            def tamper() -> None:
+                conn.execute(f"UPDATE {table} SET {column} = ? WHERE {key_column} = ?",
+                             (value, key))
+                conn.commit()
+
+            def undo() -> None:
+                conn.execute(f"UPDATE {table} SET {column} = ? WHERE {key_column} = ?",
+                             (original[column], key))
+
+            probe(guard, tamper, undo)
+
+        condition = json.loads(context_row["condition_json"])
+        condition["exact_bytes_base64"] = base64.b64encode(b"{}").decode("ascii")
+        workloads = json.loads(context_row["workloads_json"])
+        workloads[0]["request_batch_bytes_base64"] = base64.b64encode(b"[]").decode("ascii")
+
+        context_column("public_data_bytes", context_row["public_data_bytes"] + b" ",
+                       "public_data_bytes_hash")
+        context_column("condition_json", json.dumps(condition), "condition", recompute=True)
+        context_column("visible_check_set_hash", "0" * 64, "visible_check_set",
+                       recompute=True)
+        context_column("workloads_json", json.dumps(workloads),
+                       f"workload_{workloads[0]['ordinal']}", recompute=True)
+        context_column("content_hash", "0" * 64, "assessment_context")
+        other_column("experiments", "declared_treatment", "id", experiment_id,
+                     "tampered treatment", "experiment_schedule")
+        other_column("artifact_versions", "content_hash", "id", candidate_a["id"],
+                     "0" * 64, "candidate_A")
+        other_column("runs", "experiment_id", "id", first_run_id,
+                     "tampered-experiment", "run_binding")
+    finally:
+        conn.close()
+
+
+def test_public_and_protected_assessment_tampering_blocks_outcome(session):
+    candidate_a, candidate_b, investigation = _comparison_session(session)
+    created = _create_comparison(session, candidate_a, candidate_b, investigation)
+    assert created.status_code == 202, created.text
+    experiment_id = created.json()["id"]
+    assert _wait_comparison(session, experiment_id)["outcome"]["status"] == "COMPLETE"
+    conn = db.connect(session.db_file)
+    try:
+        slot = repo.list_trial_slots(conn, experiment_id)[0]
+        for request_ordinal in (1, slot.executed_request_count):
+            row = conn.execute(
+                "SELECT id, mandatory_pass FROM task_assessments "
+                "WHERE run_id = ? AND request_ordinal = ? LIMIT 1",
+                (slot.run_id, request_ordinal),
+            ).fetchone()
+            assert row is not None
+            conn.execute(
+                "UPDATE task_assessments SET mandatory_pass = ? WHERE id = ?",
+                (1 - row["mandatory_pass"], row["id"]),
+            )
+            conn.commit()
+            outcome = session.client.get(f"/api/experiments/{experiment_id}").json()["outcome"]
+            assert outcome["status"] == "NOT_COMPARABLE", request_ordinal
+            assert all(not item["eligible"] for item in outcome["eligibility"])
+            conn.execute(
+                "UPDATE task_assessments SET mandatory_pass = ? WHERE id = ?",
+                (row["mandatory_pass"], row["id"]),
+            )
+            conn.commit()
+            assert session.client.get(f"/api/experiments/{experiment_id}").json()[
+                "outcome"
+            ]["status"] == "COMPLETE"
+    finally:
+        conn.close()
+
+
+def test_recorded_inspection_or_wrong_run_mode_cannot_qualify_on_readback(session):
+    candidate_a, candidate_b, investigation = _comparison_session(session)
+    created = _create_comparison(session, candidate_a, candidate_b, investigation)
+    assert created.status_code == 202, created.text
+    experiment_id = created.json()["id"]
+    assert _wait_comparison(session, experiment_id)["outcome"]["status"] == "COMPLETE"
+    conn = db.connect(session.db_file)
+    try:
+        slot = repo.list_trial_slots(conn, experiment_id)[0]
+        row = conn.execute(
+            "SELECT adapter, evidence_mode, purpose FROM runs WHERE id = ?", (slot.run_id,)
+        ).fetchone()
+        for column, altered in (
+            ("adapter", "recorded"),
+            ("evidence_mode", "RECORDED_INSPECTION"),
+            ("purpose", "OPERATION"),
+        ):
+            conn.execute(f"UPDATE runs SET {column} = ? WHERE id = ?", (altered, slot.run_id))
+            conn.commit()
+            response = session.client.get(f"/api/experiments/{experiment_id}")
+            assert response.status_code == 200, (column, response.text)
+            outcome = response.json()["outcome"]
+            assert outcome["status"] == "NOT_COMPARABLE", column
+            assert "run_evidence_class" in outcome["drift_fields"], column
+            assert all(not item["eligible"] for item in outcome["eligibility"]), column
+            conn.execute(f"UPDATE runs SET {column} = ? WHERE id = ?",
+                         (row[column], slot.run_id))
+            conn.commit()
+            assert session.client.get(f"/api/experiments/{experiment_id}").json()[
+                "outcome"
+            ]["status"] == "COMPLETE", column
+    finally:
+        conn.close()
+
+
+def test_persisted_protected_usage_stays_out_of_public_efficiency_and_route(session):
+    candidate_a, candidate_b, investigation = _comparison_session(session)
+    created = _create_comparison(session, candidate_a, candidate_b, investigation)
+    assert created.status_code == 202, created.text
+    experiment_id = created.json()["id"]
+    assert _wait_comparison(session, experiment_id)["outcome"]["status"] == "COMPLETE"
+    conn = db.connect(session.db_file)
+    try:
+        slot = repo.list_trial_slots(conn, experiment_id)[0]
+        for ordinal, request_ordinal, kind, payload in (
+            (1, 1, ObservationKind.INFERENCE_REQUEST, {}),
+            (2, 1, ObservationKind.INFERENCE_RESULT,
+             {"input_tokens": 7, "output_tokens": 9, "elapsed_ms": 11}),
+            (3, slot.executed_request_count, ObservationKind.INFERENCE_REQUEST, {}),
+            (4, slot.executed_request_count, ObservationKind.INFERENCE_RESULT,
+             {"input_tokens": 973121, "output_tokens": 973122,
+              "elapsed_ms": 973123, "protected_marker": "PRIVATE_USAGE_MARKER_S16"}),
+        ):
+            repo.insert_observation(conn, ExecutionObservation(
+                id=f"{slot.run_id}-usage-boundary-{ordinal}", run_id=slot.run_id,
+                request_ordinal=request_ordinal, ordinal=ordinal, kind=kind,
+                public_payload_json=payload, raw_payload_ref="",
+                measured_at=datetime.now(timezone.utc),
+            ))
+        conn.commit()
+        assert len(repo.list_observations(conn, slot.run_id)) == 4
+    finally:
+        conn.close()
+    response = session.client.get(f"/api/experiments/{experiment_id}")
+    assert response.status_code == 200, response.text
+    assert "PRIVATE_USAGE_MARKER_S16" not in response.text
+    metrics = response.json()["outcome"]["candidate_metrics"][0]
+    assert (metrics["service_calls"], metrics["input_tokens"],
+            metrics["output_tokens"], metrics["service_latency_ms"]) == (1, 7, 9, 11)
+
+
+def test_retiring_a_compromised_comparison_keeps_evidence_and_blocks_reuse(session):
+    candidate_a, candidate_b, investigation = _comparison_session(session)
+    created = _create_comparison(session, candidate_a, candidate_b, investigation)
+    assert created.status_code == 202, created.text
+    experiment_id = created.json()["id"]
+    before = _wait_comparison(session, experiment_id)
+    assert before["outcome"]["status"] == "COMPLETE"
+    conn = db.connect(session.db_file)
+    try:
+        reservation = repo.get_exposure_reservation_for_experiment(conn, experiment_id)
+        slots = repo.list_trial_slots(conn, experiment_id)
+        captures = {slot.id: [(out.request_ordinal, out.body)
+                              for out in repo.list_outputs(conn, slot.run_id)] for slot in slots}
+        ledger_before = tuple(repo.list_ledger_events(conn, config.BOOKSHOP_SLUG))
+        orchestrator.retire_comparison_exposure(conn, reservation.id)
+        orchestrator.retire_comparison_exposure(conn, reservation.id)
+        assert repo.get_exposure_reservation(conn, reservation.id).state == "INVALIDATED"
+        assert all(item.state.value == "invalidated"
+                   for item in repo.list_exposure_items(conn, reservation.id))
+        assert {slot.id: [(out.request_ordinal, out.body)
+                          for out in repo.list_outputs(conn, slot.run_id)] for slot in slots} == captures
+        assert tuple(repo.list_ledger_events(conn, config.BOOKSHOP_SLUG)) == ledger_before
+    finally:
+        conn.close()
+    after = session.client.get(f"/api/experiments/{experiment_id}").json()
+    assert after["state"] == "INVALIDATED"
+    assert after["outcome"]["status"] == "NOT_COMPARABLE"
+    assert all(not item["eligible"] for item in after["outcome"]["eligibility"])
+    assert [item["protected_passed"] for item in after["outcome"]["candidate_metrics"]] == [
+        item["protected_passed"] for item in before["outcome"]["candidate_metrics"]
+    ]
+    orchestrator.execute_comparison_task(str(session.db_file), experiment_id)
+    assert session.client.get(f"/api/experiments/{experiment_id}").json() == after
 
 
 def test_a_repeated_comparison_key_returns_the_original_reservation(session):
