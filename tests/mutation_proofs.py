@@ -7,7 +7,9 @@ example "DID NOT RAISE" from pytest.raises). A mutation that only trips a
 collection error, an unexpected exception or a timeout is NOT a proof of the
 guard and is reported distinctly, so a crash can never masquerade as coverage.
 Every file is restored byte-identically (sha256 before == after). Windows
-trap: restoration uses raw bytes, never git checkout.
+trap: restoration uses raw bytes, never git checkout, and every target write
+retries a few times because this OneDrive-synced tree can transiently fail
+with EINVAL (seen 2026-09-28).
 
 Slice 11 re-anchoring (2026-09-26). Three Slice 8 rows silently stopped
 matching when Slice 10 replaced the inherited-version fallbacks with
@@ -28,6 +30,7 @@ import shlex
 import subprocess
 import sys
 import tempfile
+import time
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -509,6 +512,19 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def write_bytes_with_retry(path: Path, data: bytes, attempts: int = 4) -> OSError | None:
+    """Retry OneDrive-synced writes that transiently fail with EINVAL (2026-09-28, MISTAKES.md)."""
+    last: OSError | None = None
+    for attempt in range(attempts):
+        try:
+            path.write_bytes(data)
+            return None
+        except OSError as exc:
+            last = exc
+            time.sleep(0.25 * (attempt + 1))
+    return last
+
+
 def catch_kind(message: str) -> str:
     """Assertion-level catches only.
 
@@ -577,13 +593,15 @@ def run_mutation(mutation: dict) -> dict:
         return {"name": mutation["name"], "status": "SKIP", "reason": f"pattern found {count} times"}
 
     mutated = original_bytes.replace(old, new, 1)
-    target.write_bytes(mutated)
 
     timeout = False
     stdout = ""
     failures: dict[str, dict] = {}
     errors: dict[str, str] = {}
     try:
+        mutation_error = write_bytes_with_retry(target, mutated)
+        if mutation_error is not None:
+            raise mutation_error
         test_args = shlex.split(mutation["tests"])
         with tempfile.TemporaryDirectory() as tmp:
             report = Path(tmp) / "junit.xml"
@@ -601,10 +619,11 @@ def run_mutation(mutation: dict) -> dict:
                 timeout = True
             failures, errors = read_junit(report)
     finally:
-        target.write_bytes(original_bytes)
+        restore_error = write_bytes_with_retry(target, original_bytes)
         restored_hash = sha256(target)
         assert restored_hash == original_hash, (
             f"RESTORATION FAILED for {mutation['name']}: {restored_hash} != {original_hash}"
+            + (f" (last write error: {restore_error!r})" if restore_error is not None else "")
         )
 
     base = {"name": mutation["name"], "sha256_restored": restored_hash == original_hash}
