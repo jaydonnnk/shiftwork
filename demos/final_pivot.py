@@ -28,7 +28,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 from contree_client.httpx import ContreeAsyncClient
 
-from shiftwork import config
+from shiftwork import config, orchestrator
 from shiftwork.app import create_app
 from shiftwork.domain import canonical
 from shiftwork.domain.models import ContractParams
@@ -38,6 +38,7 @@ from shiftwork.gateway.redaction import assert_public_safe
 from shiftwork.ledger import chain
 from shiftwork.store import db
 from shiftwork.store import repo
+from shiftwork.sealed import store as sealed_store
 
 ROOT = Path(__file__).resolve().parents[1]
 V5_SCHEMA = ROOT / "tests" / "store" / "schema_v5.sql"
@@ -772,9 +773,141 @@ def s13_inspect_stage(operation_id: str, expected_sha256: str) -> int:
         return 2
 
 
+def comparison_stage() -> int:
+    """Exercise S16 policy on draft fixtures in one temporary offline process."""
+    admission = orchestrator._require_reviewed_comparison_material
+    reviewed_family = sealed_store.load_reviewed_comparison_family
+    try:
+        # This demo is an explicit draft-review seam. Production admission and
+        # the on-disk review flags are unchanged after this process exits.
+        orchestrator._require_reviewed_comparison_material = lambda *_: None
+        sealed_store.load_reviewed_comparison_family = sealed_store.load_family
+        with tempfile.TemporaryDirectory(prefix="shiftwork-s16-offline-") as directory:
+            db_file = Path(directory) / "comparison.db"
+            with TestClient(create_app(str(db_file))) as client:
+                shift = client.post("/api/engagements/bookshop/shifts")
+                assert shift.status_code == 201, shift.text
+                shift_id = shift.json()["id"]
+                starter = client.post(f"/api/shifts/{shift_id}/artifact/versions",
+                                      json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+                assert starter.status_code == 201, starter.text
+                source = client.post(f"/api/shifts/{shift_id}/runs")
+                assert source.status_code == 202, source.text
+                source_deadline = time.monotonic() + 30
+                while time.monotonic() < source_deadline:
+                    source_run = client.get(f"/api/runs/{source.json()['id']}").json()
+                    if source_run["state"] in ("FINALIZED", "FAILED"):
+                        break
+                    time.sleep(0.05)
+                assert source_run["state"] == "FINALIZED", source_run
+                investigation = client.post(f"/api/shifts/{shift_id}/investigations", json={
+                    "source_run_id": source.json()["id"], "source_request_ordinal": 1,
+                    "cause": "the starter omits a required collection task",
+                    "falsifier": "the reviewed collection request still lacks that task result",
+                    "public_test": "require every declared task result",
+                    "revision_of_id": None, "client_request_id": "s16-demo-investigation",
+                })
+                assert investigation.status_code == 201, investigation.text
+                candidates = {}
+                for label in ("A", "B"):
+                    saved = client.put(f"/api/shifts/{shift_id}/artifact",
+                                       json={"files": config.comparison_candidate_files(label)})
+                    assert saved.status_code == 200, saved.text
+                    frozen = client.post(f"/api/shifts/{shift_id}/artifact/versions",
+                                         json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+                    assert frozen.status_code == 201, frozen.text
+                    candidates[label] = frozen.json()
+                    assert candidates[label]["content_hash"] == config.TRUSTED_LOCAL_FIXTURES[
+                        f"compare_candidate_{label.lower()}"][0]
+                created = client.post(f"/api/shifts/{shift_id}/experiments", json={
+                    "kind": "QUALIFYING_COMPARISON",
+                    "investigation_id": investigation.json()["id"],
+                    "candidate_a_version_id": candidates["A"]["id"],
+                    "candidate_b_version_id": candidates["B"]["id"],
+                    "declared_treatment": "A chooses lowest price; B chooses highest stock",
+                    "client_request_id": "s16-demo-comparison",
+                })
+                assert created.status_code == 202, created.text
+                experiment_id = created.json()["id"]
+                deadline = time.monotonic() + 60
+                view = created.json()
+                while time.monotonic() < deadline:
+                    view = client.get(f"/api/experiments/{experiment_id}").json()
+                    if view["state"] in ("FINALIZED", "FAILED"):
+                        break
+                    time.sleep(0.05)
+                outcome = view["outcome"]
+                conn = db.connect(db_file)
+                try:
+                    reservation = repo.get_exposure_reservation_for_experiment(conn, experiment_id)
+                    slots = repo.list_trial_slots(conn, experiment_id)
+                    captured_before = sum(len(repo.list_outputs(conn, slot.run_id))
+                                          for slot in slots)
+                    runs = [repo.get_run(conn, slot.run_id) for slot in slots]
+                    adapters = sorted({run.adapter for run in runs})
+                    evidence_modes = sorted({run.evidence_mode.value for run in runs})
+                    tokenfactory_observations = sum(
+                        len(repo.list_observations(conn, run.id))
+                        for run in runs if run.adapter == "tokenfactory"
+                    )
+                    orchestrator.retire_comparison_exposure(conn, reservation.id)
+                    captured_after = sum(len(repo.list_outputs(conn, slot.run_id))
+                                         for slot in repo.list_trial_slots(conn, experiment_id))
+                finally:
+                    conn.close()
+                retired = client.get(f"/api/experiments/{experiment_id}").json()
+        sealed_states = {
+            path.name: json.loads(path.read_text(encoding="utf-8"))["review_status"]
+            for path in (config.PIVOT_COMPARE_MANIFEST,
+                         config.SEALED_CASES_DIR / "bookshop_task_completion.json")
+        }
+        operator_sealed = all(state == "OPERATOR_SEALED" for state in sealed_states.values())
+        # The no-live-call claim is measured, not printed as a constant: it reads
+        # the projected evidence class, every run's adapter and evidence mode, and
+        # the observations those adapters own.
+        no_live_call = (view["context_evidence_class"] == "TRUSTED_LOCAL"
+                        and adapters == ["local_process"]
+                        and evidence_modes == ["TRUSTED_LOCAL"]
+                        and tokenfactory_observations == 0)
+        metrics = {item["candidate_label"]: item for item in outcome["candidate_metrics"]}
+        eligibility = {item["candidate_label"]: item for item in outcome["eligibility"]}
+        passed = (outcome is not None and outcome["status"] == "COMPLETE"
+                  and len(view["trials"]) == 6 and captured_before == captured_after
+                  and captured_after == 18
+                  and retired["outcome"]["status"] == "NOT_COMPARABLE"
+                  and outcome["shared_public_denominator_requests"] == 6
+                  and set(metrics) == {"A", "B"} and set(eligibility) == {"A", "B"}
+                  and all(item["public_denominator_requests"] == 6
+                          and item["protected_denominator"] == 3
+                          and item["protected_passed"] + item["protected_failed"] == 3
+                          for item in metrics.values())
+                  and all(item["eligible"] for item in eligibility.values())
+                  and no_live_call)
+        print(json.dumps({
+            "stage": "comparison", "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY",
+            "verdict": "PASS_OFFLINE_POLICY" if passed else "STOP_INCOMPLETE",
+            "trial_states": [item["state"] for item in view["trials"]],
+            "outcome": outcome, "retired_status": retired["outcome"]["status"],
+            "captured_rows_before_retire": captured_before,
+            "captured_rows_after_retire": captured_after,
+            "no_live_call_derivation": {
+                "projected_evidence_class": view["context_evidence_class"],
+                "run_adapters": adapters, "run_evidence_modes": evidence_modes,
+                "tokenfactory_observations": tokenfactory_observations,
+            },
+            "live_calls": tokenfactory_observations,
+            "operator_sealed": operator_sealed,
+            "review_status_on_disk": sealed_states,
+        }, sort_keys=True))
+        return 0 if passed else 2
+    finally:
+        orchestrator._require_reviewed_comparison_material = admission
+        sealed_store.load_reviewed_comparison_family = reviewed_family
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=("migration", "investigation", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
+    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
     parser.add_argument("--operation-id")
     parser.add_argument("--expected-sha256")
     args = parser.parse_args()
@@ -782,6 +915,8 @@ def main() -> int:
         return migration_stage()
     if args.stage == "investigation":
         return investigation_stage()
+    if args.stage == "comparison":
+        return comparison_stage()
     if args.stage == "s13-canary":
         return s13_canary_stage()
     if args.stage == "s13-inspect":
