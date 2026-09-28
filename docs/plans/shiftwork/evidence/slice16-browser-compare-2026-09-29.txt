@@ -1,0 +1,122 @@
+Slice 16 repair round: standalone browser harness captured 2026-09-29, preserved verbatim.
+
+Command: node tests/client/browser.mjs http://127.0.0.1:8171 --compare-demo
+Preview: .venv313/Scripts/python.exe tests/client/draft_review_preview.py --port 8171,
+started isolated and polled at /api/engagements/bookshop/board until it answered as
+this preview with latest_shift bookshop-shift-01, because the preview prints its
+banner before uvicorn binds and local ports are contended on this machine. The
+preview was stopped after the run and port 8171 was confirmed released. No install,
+no credential and no live call; --exercise-run was not passed, so no preview attempt
+was consumed and the run button proof is reported as not exercised.
+
+What this run proves, against review findings R1 and R7. The comparison block that
+--compare-demo enables reaches a FINALIZED six-slot qualifying comparison and then
+navigates a fresh page load. After that reload the harness requires the Investigate
+diagnostic panel to project the earlier diagnostic experiment-bookshop-shift-01-d1,
+to render an eligibility step, to carry data-eligible false, and to print the exact
+statement that a diagnostic cannot qualify a version. Those four assertions are the
+R1 repair, and a green run means the completed eligible comparison no longer leaks
+an eligibility claim into the diagnostic panel. Inside the same block the outcome
+card loop binds each card by candidate_label and reads its metrics and eligibility
+from the payload entry carrying that same label, never from tuple order; that is the
+R7 repair. Both would have thrown before this exit 0.
+
+The slots string is also independent confirmation of the frozen schedule shape used
+by the revised cost estimate: six slots, three pair ordinals, both candidate labels,
+and request_count 2 on every slot.
+
+Matrix rows are the rendered-evidence check at 1280, 640 and 390 pixels, each with
+two customer outputs and every synthetic region labelled. uncaughtExceptions 0 is
+asserted rather than printed as a constant.
+
+Verbatim harness report follows.
+
+{
+  "matrix": [
+    {
+      "width": 1280,
+      "outputs": 2,
+      "run": "run-0002",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    },
+    {
+      "width": 640,
+      "outputs": 2,
+      "run": "run-0002",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    },
+    {
+      "width": 390,
+      "outputs": 2,
+      "run": "run-0002",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    }
+  ],
+  "investigateStation": {
+    "shift": "bookshop-shift-01",
+    "entries": 1,
+    "revision": false,
+    "denials": {
+      "beforeEntry": "Diagnostic help needs your own cause, falsifier and public test first.",
+      "withEntry": "assist gateway is not configured for this session; HINT is unavailable"
+    },
+    "diagnostic": {
+      "experiment": "experiment-bookshop-shift-01-d1",
+      "started": true,
+      "state": "COMPLETE",
+      "tasks": 3,
+      "observations": 0,
+      "customerText": "Salt Roads (paperback) costs £18.00."
+    }
+  },
+  "assistDemo": "not enabled",
+  "compareDemo": {
+    "experiment": "experiment-bookshop-shift-01-c1",
+    "state": "FINALIZED",
+    "slots": "1:1A/workload-01/2 2:1B/workload-01/2 3:2B/workload-02/2 4:2A/workload-02/2 5:3B/workload-03/2 6:3A/workload-03/2"
+  },
+  "navigationAndStaleIncident": "PASS",
+  "keyboard": "PASS (evaluator and customer Enter/Tab)",
+  "reducedMotion": "PASS",
+  "states": [
+    "loading",
+    "error",
+    "empty",
+    "no incidents",
+    "malformed body",
+    "no public record"
+  ],
+  "repairWithoutIncident": "blocked",
+  "literalUntrustedText": "PASS",
+  "realRunButton": "not exercised in this run",
+  "labelRemovalMutations": "caught in every visible region",
+  "ordinalMutation": "caught",
+  "renderedEvidence": "exact answer, public record, verdict, event, investigation and diagnostic text against the API payload",
+  "narrowStationReach": "native touch brings the panel into reach at 640/390",
+  "incidentNavigationFocus": "keyboard activation focuses the selected request",
+  "downloadedBytes": "exact",
+  "uncaughtExceptions": 0
+}
+
+Recorder trailer: harness EXIT=0, so the run passed with zero uncaught exceptions.

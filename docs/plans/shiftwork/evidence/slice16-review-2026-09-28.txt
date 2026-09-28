@@ -1,0 +1,221 @@
+Slice 16 independent review round: measured evidence, 2026-09-28
+================================================================
+
+Reviewer: fresh reading of the uncommitted `shiftwork/slice-16` working tree.
+No repair was applied. No live call, no operator review, no seal, no commit,
+no push. The working tree was preserved: `shiftwork/orchestrator.py`,
+`shiftwork/domain/comparison.py` and
+`tests/orchestrator/test_experiment_lifecycle.py` carry the same SHA-256 before
+and after every probe below, and `git status --porcelain` returned the same 20
+entries before and after.
+
+Commands were run from the repository root with
+`.venv313/Scripts/python.exe`.
+
+
+1. Reproduced baseline claims
+-----------------------------
+
+`.venv313/Scripts/python.exe -m pytest --ignore=tests/packaging -q`
+  -> 556 passed, 1 skipped, 2 warnings in 102.49s
+  Matches the recorded final figure. 528 baseline + 22 new
+  `tests/domain/test_comparison.py` cases + 6 new lifecycle cases = 556, so no
+  test was deleted or skipped to reach green.
+
+`.venv313/Scripts/python.exe -m demos.final_pivot --stage comparison`
+  -> verdict PASS_OFFLINE_POLICY, exit 0. Verbatim JSON:
+
+{"captured_rows_after_retire": 18, "captured_rows_before_retire": 18, "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY", "live_calls": 0, "operator_sealed": false, "outcome": {"candidate_metrics": [{"candidate_version_id": "ver-0003", "cost_minor_units": null, "incorrect_outputs": 0, "input_tokens": 0, "justified_clarifications": 0, "justified_referrals": 0, "justified_refusals": 2, "missing_outputs": 0, "output_tokens": 0, "protected_denominator": 3, "protected_failed": 0, "protected_missing": 0, "protected_passed": 3, "provisioning_latency_ms": null, "public_denominator_requests": 6, "service_calls": 0, "service_latency_ms": 0, "unjustified_clarifications": 0, "unjustified_referrals": 0, "unjustified_refusals": 0, "useful_completions": 4}, {"candidate_version_id": "ver-0004", "cost_minor_units": null, "incorrect_outputs": 0, "input_tokens": 0, "justified_clarifications": 0, "justified_referrals": 0, "justified_refusals": 2, "missing_outputs": 0, "output_tokens": 0, "protected_denominator": 3, "protected_failed": 0, "protected_missing": 0, "protected_passed": 3, "provisioning_latency_ms": null, "public_denominator_requests": 6, "service_calls": 0, "service_latency_ms": 0, "unjustified_clarifications": 0, "unjustified_referrals": 0, "unjustified_refusals": 0, "useful_completions": 4}], "drift_fields": [], "eligibility": [{"blocking_reason_codes": [], "candidate_version_id": "ver-0003", "eligible": true}, {"blocking_reason_codes": [], "candidate_version_id": "ver-0004", "eligible": true}], "experiment_id": "experiment-bookshop-shift-01-c1", "noncompletion_incidence_non_additive": true, "shared_public_denominator_requests": 6, "status": "COMPLETE"}, "retired_status": "NOT_COMPARABLE", "stage": "comparison", "trial_states": ["COMPLETE", "COMPLETE", "COMPLETE", "COMPLETE", "COMPLETE", "COMPLETE"], "verdict": "PASS_OFFLINE_POLICY"}
+
+Protected draft fixture digest, recomputed from the working tree:
+  shiftwork/sealed/cases/bookshop_task_completion.json
+  21892 bytes
+  caf14cb7ec8961c49d299da89c228460bd9835f7212bed679bea70d197a7aff8
+  Matches the operator review packet. `review_status` is still
+  `AWAITING_OPERATOR_REVIEW`; all six variants declare `price` with
+  `required: false` and each `price.requested_entity_ref` equals its own
+  request `entity_ref`.
+
+`git diff --check` -> exit 0, no whitespace error.
+
+`node tests/client/render_faults.mjs` prints
+`render-fault rows: 12 of 12 as expected` for a clean baseline plus its 11
+`FAULTS` rows, so the recorded "12/12" and the reported "11/11 deliberate
+faults" describe the same run.
+
+
+2. Proof for finding R1: the Investigate station projects a comparison as
+   "Eligible"
+---------------------------------------------------------------------------
+
+A temporary offline process (draft-review seam, trusted-local fixtures, no
+repo write, no live call) ran the full comparison flow and then read the
+Investigate station route `GET /api/shifts/{id}/investigations`:
+
+comparison view      : FINALIZED eligible = True outcome = COMPLETE
+station latest_experiment id  : experiment-bookshop-shift-01-c1
+station latest_experiment kind: QUALIFYING_COMPARISON
+station latest_experiment eligible: True
+station eligibility_reason    : No winner is derived here. Candidate eligibility requires a complete comparable outcome, and selection is a separate learner action.
+station latest_experiment has 'outcome': True
+
+Client chain, verbatim from the working tree:
+  shiftwork/orchestrator.py:3386  view["latest_experiment"] = experiment_view(conn, experiments[-1].id) if experiments else None
+  shiftwork/client/app.js:4       ... diagnostic: null ...
+  shiftwork/client/app.js:37      state.diagnostic = null;
+  shiftwork/client/app.js:371     const experiment = state.diagnostic ?? station?.latest_experiment ?? null;
+  shiftwork/client/app.js:449     experiment.eligible ? 'Eligible' : 'Not eligible . this diagnostic cannot qualify a version'
+
+So on any fresh page load after a comparison exists, `state.diagnostic` is
+null, the diagnostic panel takes the QUALIFYING_COMPARISON, and line 449
+prints "Eligible" next to a sentence whose only other branch says a diagnostic
+cannot qualify a version. Before this slice `comparison_view` hardcoded
+`"eligible": False`, so the same mis-render printed the conservative branch.
+
+
+3. Proof for finding R2: the declared `candidates` drift branch cannot return
+------------------------------------------------------------------------------
+
+`shiftwork/domain/comparison.py:248-250` adds drift when the candidate label
+set is not exactly {A, B}, then `:279` indexes `candidates[label]` for both
+labels unconditionally. Calling the pure function with one candidate:
+
+=== PROOF 1: the 'candidates' drift branch cannot be reached ===
+  RAISED KeyError: 'B'
+  expected: status NOT_COMPARABLE with drift field 'candidates'
+
+No test in `tests/domain/test_comparison.py` tampers with
+`experiment.candidates`, so the branch is both untested and unreachable as
+written. Gate 4 obligation 19 names "mutate candidates ... all drift is Not
+comparable"; that mutation currently crashes instead of returning a verdict.
+
+Scope note: at the route level the same tamper already crashed before this
+slice, because `comparison_view` builds its trials rows with
+`candidates[slot.candidate_label].artifact_content_hash` ahead of the outcome
+reading. R2 is therefore a second instance of the same fail-closed gap in new
+code, not a new route behaviour.
+
+
+4. Proof for finding R3: unmeasured usage is reported as a measured zero
+------------------------------------------------------------------------
+
+=== PROOF 2: a run with no recorded model observation reports measured zeros ===
+  status=COMPLETE service_calls=0
+  input_tokens=0 output_tokens=0 service_latency_ms=0
+  cost_minor_units=None provisioning_latency_ms=None
+  two efficiency fields say 'unknown' (None); three assert a measured 0
+  for a run where nothing was instrumented.
+
+`_known_sum(values, 0)` returns `sum([]) == 0`, so a slot with no
+`INFERENCE_REQUEST` observation reports 0 calls, 0 tokens and 0 ms. The
+trusted-local executor records no observation at all, so this is the value the
+offline demo and every route test project. The Compare card note rendered by
+`shiftwork/client/app.js` states "Unknown usage or cost is never treated as
+zero" while the same card prints `0` for three of the five efficiency fields.
+
+The same code path changes an eligibility verdict once a frozen budget makes
+a metric mandatory:
+
+=== PROOF 3: an uninstrumented candidate passes a mandatory budget a measured one fails ===
+  candidate A: eligible=False blockers=('mandatory_budget_exceeded:service_calls',)
+  candidate B: eligible=True blockers=()
+  A recorded one real model call and is blocked; B recorded nothing and is eligible.
+
+Both candidates are otherwise identical and complete. The current draft
+comparison freezes no `mandatory_budget_metrics`, so this arm is latent today
+and the displayed-zero arm is live today.
+
+
+5. Proof for finding R4: most readback drift guards are not independently
+   proven
+--------------------------------------------------------------------------
+
+Method: the repository's own runner (`tests/mutation_proofs.py`,
+`run_mutation`) deleted one `drift.add(...)` guard at a time, ran the whole
+offline suite (`--ignore=tests/packaging tests`), and restored the target
+byte-identically. `NOT_CAUGHT` with `556 passed, 1 skipped` means the guard can
+be removed and nothing in the suite notices.
+
+Batch 1:
+CONTROL frozen_context: FAIL_CAUGHT restored=True :: AssertionError: requirement_set_id assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 555 passed, 1 skipped, 2 warnings in 111.82s (0:01:51)]
+CONTROL public_data_bytes_hash: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 118.96s (0:01:58))
+CONTROL starting_business_state: FAIL_CAUGHT restored=True :: AssertionError: starting_business_state_json assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + C [1 failed, 555 passed, 1 skipped, 2 warnings in 112.24s (0:01:52)]
+PROBE condition: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 109.10s (0:01:49))
+PROBE visible_check_set: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 107.96s (0:01:47))
+PROBE experiment_schedule: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 107.62s (0:01:47))
+PROBE candidate_label_version_hash: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 112.55s (0:01:52))
+PROBE run_binding: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 112.02s (0:01:52))
+PROBE assessment_context: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 111.97s (0:01:51))
+
+Batch 2:
+PROBE mission_bytes_hash: FAIL_CAUGHT restored=True :: AssertionError: mission_bytes assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 555 passed, 1 skipped, 2 warnings in 107.75s (0:01:47)]
+PROBE workload_bytes_and_spec_hash: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 108.49s (0:01:48))
+PROBE exposure_reservation_state: FAIL_CAUGHT restored=True :: AssertionError: assert 'INCOMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + INCOMPLETE [1 failed, 555 passed, 1 skipped, 2 warnings in 118.37s (0:01:58)]
+PROBE protected_rule_ids: NOT_CAUGHT restored=True :: no test-level failure (556 passed, 1 skipped, 2 warnings in 107.59s (0:01:47))
+
+Tally over the 13 probed guards in `_comparison_outcome`:
+  independently proven (4): frozen_context, starting_business_state,
+    mission_bytes_hash, exposure_reservation_state
+  deletable with the suite green (9): public_data_bytes_hash, condition,
+    visible_check_set, experiment_schedule, candidate_{label} version hash,
+    run_binding, assessment_context, workload bytes/spec hash,
+    protected_rule_ids
+  not probed: protected_binding (two sites)
+
+Cause: `test_every_claim_defining_context_field_blocks_a_stale_outcome` mutates
+20 context columns and asserts only the resulting status. Most of those
+tampering paths are caught by the recomputed `frozen_context` hash rather than
+by the named guard, so the assertion passes with the named guard deleted. The
+27-row S16 harness carries three rows for this function (frozen context hash,
+public assessment recompute, protected assessment recompute).
+
+Every probed deletion still produced a correct `NOT_COMPARABLE` or `INCOMPLETE`
+verdict through another guard. This is an unproven-coverage finding, not an
+observed wrong verdict.
+
+
+6. Proof for finding R5: the new Compare outcome cards have no render-fault row
+-------------------------------------------------------------------------------
+
+`tests/client/browser.mjs:12-68` defines the `FAULTS` table that
+`tests/client/render_faults.mjs` drives. Its 11 rows are `answer`, `record`,
+`verdict`, `event`, `eligibility`, `stationFocus`, `incidentFocus`,
+`candidateFreeze`, `slotOrdinalText`, `slotOrdinalKey`, `slotProtectedCount`.
+The `eligibility` row targets the diagnostic string at `app.js:449`, not the
+new cards. No row's needle lies inside the `comparison-outcome` rendering added
+at `app.js:496-534`, so the new per-metric and per-candidate assertions in
+`browser.mjs:646-666` have no failing-capability row in the harness that exists
+for that purpose.
+
+
+7. Checked and found sound (no finding)
+---------------------------------------
+
+- `protected_acceptance` for `completed_alternative_meets_strict_budget`:
+  `evaluator._check_alternative` rejects `price.value >= limit`
+  (`shiftwork/evaluator/evaluator.py:607`), so an at-boundary 1500 minor-unit
+  suggestion is INCORRECT_OUTPUT and the code comment is accurate. The
+  justified-refusal arm is the only reachable pass for variant 04.
+- Aspect `collection_answer_creates_no_commitment` is graded, not just named:
+  `evaluator.py:486-487` raises INVALID_COMMITMENT for a non-null
+  `commitment_ref` on an availability kind, and `protected_acceptance` requires
+  every task's `mandatory_pass`.
+- Retirement cannot recycle an exposed variant: `_exposure_refs`
+  (`orchestrator.py:2048-2063`) unions rotation draws and every exposure item
+  regardless of state, so an invalidated item stays exposed.
+- Protected rows stay out of every public projection: `_slot_evidence` filters
+  assessments, outputs and observations by the frozen public ordinal bound, and
+  `_metrics` filters observations by `1 <= request_ordinal <= slot.request_count`.
+  `list_task_assessments` orders by `request_ordinal, rowid`, so the tuple
+  comparison against recomputed assessments is order-stable.
+- `retire_comparison_exposure` is idempotent, rolls back on error, uses the
+  house `BEGIN IMMEDIATE` form, and `claim_comparison_execution` only claims a
+  `PLANNED` experiment, so a restart after retirement re-executes nothing.
+- `_exposure_refs`, `execute_comparison_slot`'s reservation re-check before the
+  protected phase, and the two INVALIDATED early returns in `execute_comparison`
+  are consistent with the retained-evidence requirement.
+- The S15 operator packet and `slice15-implementation-plan.md` carry the new
+  digest and mark the older proof-round digest historical rather than deleting
+  it. `00-status.md` is additive only (56 insertions, 0 deletions).
+- No em dash was added by this slice; the two existing em dashes in
+  `MISTAKES.md` are in 2026-09-16 and 2026-09-17 entries.

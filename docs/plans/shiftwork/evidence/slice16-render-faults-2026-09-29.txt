@@ -1,0 +1,47 @@
+Slice 16 repair round: render-fault harness captured 2026-09-29, preserved verbatim.
+
+Command: node tests/client/render_faults.mjs --port 8163
+Run from the repository root. Each row started its own isolated preview through
+tests/client/draft_review_preview.py on port 8163, and the runner polled
+/api/engagements/bookshop/board until that preview answered before serving a row,
+because the preview prints its banner before uvicorn binds and local ports are
+contended on this machine. No install, no credential, no live call and no preview
+attempt was consumed: the harness never passes --exercise-run.
+
+What this run proves, against review finding R5: 15 rows are a clean baseline plus
+14 faults. The three rows added by the R5 repair are outcomeMetric,
+outcomeEligibility and outcomeLabelBinding, and each is CAUGHT at its own named
+rendered-evidence assertion rather than surviving or crashing, so the new Compare
+outcome card assertions in tests/client/browser.mjs are proven capable of failing.
+The baseline row is PASS with --compare-demo, which is what makes those three red
+rows non-vacuous: the same harness, flags and preview pass the unmutated client.
+
+The baseline row also carried the R1 and R7 assertions end to end, because
+BASELINE_ARGS is ['--compare-demo'] and both the post-comparison reload check and
+the bind-by-label outcome card loop sit inside the comparison block that flag
+enables. Phase 1 step 5 reruns browser.mjs standalone for the same two findings.
+
+This file records no change to the repository: the harness mutates an in-memory
+copy of shiftwork/client/app.js and never writes it.
+
+Verbatim harness output follows.
+
+Running baseline then 14 fault rows, each against its own preview on port 8163.
+baseline (no fault)                PASS   harness green against the unmutated client
+fault: answer                       CAUGHT FAULT_CAUGHT answer: Error: Rendered customer answer does not match the executed output: REVIEW_WRONG_CUSTOMER_ANSWER
+fault: record                       CAUGHT FAULT_CAUGHT record: Error: Rendered public record value does not match: price: review wrong public value
+fault: verdict                      CAUGHT FAULT_CAUGHT verdict: Error: Rendered check row does not match result cr-0001: pass · MISSING_EVIDENCE is not fail · MISSING_EVIDENCE
+fault: event                        CAUGHT FAULT_CAUGHT event: Error: Rendered event row does not match event 1: sale completed
+fault: eligibility                  CAUGHT FAULT_CAUGHT eligibility: Error: Rendered eligibility statement does not state that the diagnostic cannot qualify a version: REVIEW_WRONG_ELIGIBILITY
+fault: stationFocus                 CAUGHT FAULT_CAUGHT stationFocus: Expected values to be strictly deep-equal:
+fault: incidentFocus                CAUGHT FAULT_CAUGHT incidentFocus: Expected values to be strictly deep-equal:
+fault: candidateFreeze              CAUGHT FAULT_CAUGHT candidateFreeze: Error: Timed out waiting for candidate A freeze
+fault: slotOrdinalText              CAUGHT FAULT_CAUGHT slotOrdinalText: Error: Slot 1 does not display the request ordinal for price
+fault: slotOrdinalKey               CAUGHT FAULT_CAUGHT slotOrdinalKey: Error: Slot 1 renders no price request 1 row with the payload verdict
+fault: slotProtectedCount           CAUGHT FAULT_CAUGHT slotProtectedCount: Error: Slot 1 renders the wrong protected step count
+fault: outcomeMetric                CAUGHT FAULT_CAUGHT outcomeMetric: Error: Candidate A renders the wrong useful_completions
+fault: outcomeEligibility           CAUGHT FAULT_CAUGHT outcomeEligibility: Error: Candidate A renders the wrong eligibility
+fault: outcomeLabelBinding          CAUGHT FAULT_CAUGHT outcomeLabelBinding: Error: The comparison renders no outcome card bound to candidate B
+render-fault rows: 15 of 15 as expected
+
+Recorder trailer: harness EXIT=0, so 15 of 15 rows behaved as expected.
