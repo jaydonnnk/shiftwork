@@ -205,7 +205,7 @@ class FakeSandbox:
 
     async def iter_operation_events(self, _operation_id, *, follow, last_event_id):
         events = [Event(1, "stdout", {"value": json.dumps({
-            "kind": "capture_written", "byte_count": len(self.expected),
+            "kind": "capture_written", "request_ordinal": 1, "byte_count": len(self.expected),
             "sha256": hashlib.sha256(self.expected).hexdigest()}) + "\n",
             "encoding": "ascii"}),
                   Event(2, "completion")]
@@ -217,7 +217,7 @@ class FakeSandbox:
         return Status()
 
     async def inspect_image_download(self, image_uuid, path):
-        assert (image_uuid, path) == ("checkpoint-1", "/work/capture.json")
+        assert (image_uuid, path) == ("checkpoint-1", "/work/capture-1.json")
         return self.capture
 
     async def cancel_operation(self, operation_id):
@@ -292,3 +292,126 @@ def test_adapter_rejects_zero_or_wrong_checkpoint_even_after_success(tmp_path, a
     assert mismatch[0]["actual_bytes"] == len(actual)
     assert mismatch[0]["expected_sha256"] == hashlib.sha256(sandbox.expected).hexdigest()
     assert mismatch[0]["actual_sha256"] == hashlib.sha256(actual).hexdigest()
+
+
+class MultiRequestSandbox(FakeSandbox):
+    def __init__(self, captures):
+        super().__init__(captures[0])
+        self.captures = captures
+        self.sent = []
+        self.downloads = []
+
+    async def iter_operation_events(self, _operation_id, *, follow, last_event_id):
+        ordinal = 1 if last_event_id is None else last_event_id + 1
+        if ordinal <= len(self.captures):
+            if ordinal > 1:
+                assert len(self.sent) == ordinal - 1, "next request was not delivered after its predecessor"
+            raw = self.captures[ordinal - 1]
+            yield Event(ordinal, "stdout", {"value": json.dumps({
+                "kind": "capture_written", "request_ordinal": ordinal,
+                "byte_count": len(raw), "sha256": hashlib.sha256(raw).hexdigest(),
+            }) + "\n", "encoding": "ascii"})
+        elif ordinal == len(self.captures) + 1:
+            yield Event(ordinal, "completion")
+
+    async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+        assert (operation_id, process_id, close) == ("operation-1", 1, False)
+        self.sent.append(json.loads(value))
+
+    async def inspect_image_download(self, image_uuid, path):
+        assert image_uuid == "checkpoint-1"
+        self.downloads.append(path)
+        ordinal = int(path.rsplit("-", 1)[1].split(".", 1)[0])
+        return self.captures[ordinal - 1]
+
+
+def _two_request_batch(tmp_path):
+    request_one = b'{"ordinal":1,"text":"first customer"}\n'
+    request_two = b'{"ordinal":2,"text":"future customer"}\n'
+    batch = request_one + request_two
+    frozen = request(tmp_path).model_copy(update={
+        "request_batch_bytes": batch,
+        "request_batch": BatchRef(path_ref="pair.jsonl", content_hash=canonical.content_hash(
+            base64.b64encode(batch).decode("ascii"))),
+    })
+    captures = [json.dumps({"request_ordinal": ordinal, "http_status": 200,
+        "body_base64": base64.b64encode(f'{{"request_id":"{ordinal}"}}'.encode()).decode(),
+        "elapsed_ms": ordinal, "driver_events": []}, sort_keys=True, separators=(",", ":")).encode()
+        for ordinal in (1, 2)]
+    return frozen, request_one, request_two, captures
+
+
+def test_adapter_streams_only_the_current_request_and_reads_back_each_capture(tmp_path):
+    frozen, request_one, request_two, captures = _two_request_batch(tmp_path)
+    sandbox = MultiRequestSandbox(captures)
+    adapter = TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox)
+    result = run(adapter.execute(frozen))
+    assert result.failure is None
+    assert [capture.request_ordinal for capture in result.captures] == [1, 2]
+    assert [capture.body for capture in result.captures] == [b'{"request_id":"1"}', b'{"request_id":"2"}']
+    initial = json.loads(sandbox.spawn_args["stdin"].value)
+    assert initial["request_count"] == 2 and initial["request_ordinal"] == 1
+    assert base64.b64decode(initial["body_base64"]) == request_one
+    assert b"future customer" not in sandbox.spawn_args["stdin"].value.encode()
+    assert sandbox.sent == [{"kind": "current_request", "request_ordinal": 2,
+                             "body_base64": base64.b64encode(request_two).decode()}]
+    assert sandbox.downloads == ["/work/capture-1.json", "/work/capture-2.json"]
+    assert [obs.public_payload["request_ordinal"] for obs in result.observations
+            if obs.public_payload.get("checkpoint_readback")] == [1, 2]
+
+
+def test_adapter_retains_first_verified_capture_when_second_is_missing(tmp_path):
+    frozen, _, _, captures = _two_request_batch(tmp_path)
+
+    class MissingSecond(MultiRequestSandbox):
+        async def iter_operation_events(self, _operation_id, *, follow, last_event_id):
+            if last_event_id is None:
+                raw = self.captures[0]
+                yield Event(1, "stdout", {"value": json.dumps({"kind": "capture_written",
+                    "request_ordinal": 1, "byte_count": len(raw),
+                    "sha256": hashlib.sha256(raw).hexdigest()}) + "\n", "encoding": "ascii"})
+            elif last_event_id == 1:
+                yield Event(2, "completion")
+
+    sandbox = MissingSecond(captures)
+    adapter = TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox)
+    result = run(adapter.execute(frozen))
+    assert result.failure is ExecutorFailure.CAPTURE_TRUNCATED
+    assert [capture.request_ordinal for capture in result.captures] == [1]
+    assert sandbox.downloads == ["/work/capture-1.json"]
+
+
+def test_gateway_binds_each_request_call_to_the_current_ordinal():
+    policy = InferencePolicy(run_id="run-1", operation_id="operation-1", model="pinned-model",
+        allowed_tool_names=("public_record_lookup",), request_ordinal=2)
+    gateway = ServiceInferenceGateway("TEST_PROVIDER_TOKEN", policy, http=FakeHTTP())
+    with pytest.raises(GatewayRejected, match="REQUEST_ORDINAL_OUTSIDE_FROZEN_WORKLOAD"):
+        run(gateway.infer("operation-1", {"request_ordinal": 1, "input_text": "future?"}))
+    reply = run(gateway.infer("operation-1", {"request_ordinal": 2, "input_text": "current"}))
+    assert reply["selected_tool"] == "public_record_lookup"
+
+
+def test_adapter_stamps_second_gateway_result_with_its_current_ordinal(tmp_path, monkeypatch):
+    from shiftwork.executor import tokenfactory
+
+    class FakeGateway:
+        def __init__(self, token, policy):
+            self.policy = policy
+            self.observations = [("INFERENCE_RESULT", {"source": "controller_verified",
+                "selected_tool": "public_record_lookup"}, {})]
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(tokenfactory, "ServiceInferenceGateway", FakeGateway)
+    frozen, _, _, captures = _two_request_batch(tmp_path)
+    sandbox = MultiRequestSandbox(captures)
+    adapter = TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox)
+    result = run(adapter.execute(frozen))
+    assert result.failure is None
+    assert [(obs.kind, obs.public_payload["request_ordinal"]) for obs in result.observations
+            if obs.kind == "INFERENCE_RESULT"] == [
+                ("INFERENCE_RESULT", 1), ("INFERENCE_RESULT", 2)]

@@ -25,8 +25,8 @@ def test_served_client_has_keyboard_station_controls_and_labelled_regions(tmp_pa
         response = client.get("/")
         assert response.status_code == 200
         shell = Shell(response.text)
-        assert shell.stations == {"owner", "service", "customers", "pipeline", "evaluator", "ledger", "repair", "investigate"}
-        assert shell.regions >= {"board", "run", "incidents", "ledger", "source", "diagnostic"}
+        assert shell.stations == {"owner", "service", "customers", "pipeline", "evaluator", "ledger", "repair", "investigate", "compare"}
+        assert shell.regions >= {"board", "run", "incidents", "ledger", "source", "diagnostic", "comparison", "comparison-slots"}
         assert "Synthetic scenario" in response.text
         assert "junior applied AI engineer" in response.text
         for asset in ("app.js", "styles.css", "room.svg"):

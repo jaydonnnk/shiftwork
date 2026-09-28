@@ -196,7 +196,7 @@ def test_conformance_suite_recorded_local(executor, monkeypatch, capsys, case):
         print(f"{case.name}: captures={len(normalized)} bytes/status/ordinal/time/logs=identical failure={case.failure or 'NONE'} (injected capture clock; real sockets/deadline)")
 
 
-@pytest.mark.skip(reason="Test 29: real-provisioning conformance needs an authorized live Sandbox run; the S13 adapter is covered by tests/executor/test_gateway_isolation.py and the S13 live evidence, and the full conformance arm is planned at Slice 14")
+@pytest.mark.skip(reason="Test 29: full real-provisioning conformance still needs a separately authorized live Sandbox run; Slice 15 multi-request adapter behavior has offline fake-client coverage only")
 def test_conformance_suite_tokenfactory():
     pass
 
@@ -269,7 +269,7 @@ def test_local_process_types_a_provisioning_failure(executor, monkeypatch, capsy
 
     The writer runs after the trust gate, so no pinned fixture reaches it with an
     invalid manifest today; the arm exists because the real-provisioning adapter
-    (Slice 14) wires the writer differently, and an untyped OSError escaping
+    wires the writer differently, and an untyped OSError escaping
     ``execute()`` would break the adapter contract.
     """
     request = request_for(executor)
@@ -298,11 +298,14 @@ def test_pinned_fixture_hashes_match_exact_bytes(executor):
     root = config.FIXTURE_DIR / "artifacts" / "bookshop"
     contract = ContractParams.model_validate_json((root / "contract.json").read_bytes())
     catalog = contract_catalog.load_catalog("bookshop", 1)
+    compare_names = {f"compare_candidate_{label.lower()}" for label in config.PIVOT_COMPARE_CANDIDATE_SOURCES}
     assert set(config.TRUSTED_LOCAL_FIXTURES) == {c.name for c in CASES} | {"env_probe", "pivot_starter"} | {
         f"repair_arc_{stage}" for stage in config.REPAIR_ARC_STAGES
-    }, "a trusted fixture was added or removed without updating this guard"
+    } | compare_names, (
+        "a trusted fixture was added or removed without updating this guard"
+    )
     for name, (manifest_hash, files_hash) in config.TRUSTED_LOCAL_FIXTURES.items():
-        if name.startswith("repair_arc_") or name == "pivot_starter":
+        if name.startswith("repair_arc_") or name == "pivot_starter" or name in compare_names:
             continue
         request = request_for(executor, name)
         files = request.artifact_snapshot.files
@@ -335,6 +338,17 @@ def test_pinned_fixture_hashes_match_exact_bytes(executor):
     assert canonical.content_hash(
         {name: base64.b64encode(body).decode("ascii") for name, body in pivot_files.items()}
     ) == files_hash
+    # Slice 15's comparison candidates freeze under the same contract and catalog
+    # as the starter, so one recomputation covers both draft repairs.
+    for label in config.PIVOT_COMPARE_CANDIDATE_SOURCES:
+        manifest_hash, files_hash = config.TRUSTED_LOCAL_FIXTURES[f"compare_candidate_{label.lower()}"]
+        files = config.comparison_candidate_files(label)
+        assert canonical.artifact_content_hash(
+            files, canonical.contract_params_json(pivot_contract), pivot_catalog.content_hash
+        ) == manifest_hash, f"compare_candidate_{label} version hash no longer matches its pin"
+        assert canonical.content_hash(
+            {name: base64.b64encode(text.encode("utf-8")).decode("ascii") for name, text in files.items()}
+        ) == files_hash, f"compare_candidate_{label} files no longer match their pin"
 
 
 def test_pivot_review_bytes_and_catalog_binding():
@@ -342,6 +356,7 @@ def test_pivot_review_bytes_and_catalog_binding():
         "mission/bookshop_pivot_v1.json": "aebe89555a72688eedfb564088f57b78328c184d0a4e378918c46d13d1e6c12a",
         "requests/bookshop_pivot_incident.jsonl": "e9ae58c7d352f3f21b1f0edacbfcabf73a7c0edc0f551e7eb0bea8ae829cc399",
         "shop/bookshop_pivot_public_state.json": "6bc17d69f43b24aa6048fdead7747e5820cd5740e47ba03a4a004d9ddea3c32c",
+        "shop/bookshop_compare_state_v1.json": "4abe54462600ade9793c1d7dc32978c427d4f0b0a5e5b121830cfc3b478a2f6f",
         "artifacts/bookshop/pivot_starter_failure_service.py": "0069462dd0e1946f296ccd5f4aefbade8d8c3cffa08c39bd3854954b27be36ef",
         "catalogs/bookshop_v3.json": "80129ded2e63240bb30bb2d462dcc3a1a988d6f615a8209f3f891671c9a03f8d",
     }

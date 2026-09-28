@@ -79,7 +79,8 @@ def test_identity_needles_a_serialized_surface_cannot_carry_have_a_capable_twin(
     by their absence; this test pins that property instead of assuming it.
     """
     needles = sealed_identity_strings()
-    incapable = [needle for needle in needles if needle not in json.dumps({"probe": needle})]
+    incapable = [needle for needle in needles
+                 if needle not in json.dumps({"probe": needle}, ensure_ascii=False)]
     assert incapable, "no needle was found incapable; this check would be vacuous"
     for needle in incapable:
         twins = {needle.replace("\\", "/"), Path(needle).name}
@@ -91,15 +92,18 @@ def test_every_enabled_sealed_family_contributes_needles() -> None:
     """A scanner that quietly reads one family would pass every absence scan.
 
     The needle sets are only as wide as the families they read, so this pins that
-    the enabled family list, the file map and the needle collection all agree.
+    the enabled family lists, the file map and the needle collection all agree.
+    Slice 15 enables a fourth family for comparisons only, so the enabled set is
+    the rotation families plus the comparison families.
     """
-    assert set(sealed_store._FAMILY_FILES) == set(config.BOOKSHOP_FAMILIES), (
+    enabled = set(config.BOOKSHOP_FAMILIES) | set(config.BOOKSHOP_COMPARISON_FAMILIES)
+    assert set(sealed_store._FAMILY_FILES) == enabled, (
         "an enabled family has no sealed file, or a sealed file is not enabled"
     )
     assert len(config.BOOKSHOP_FAMILIES) >= 3, "the all-family scans would be mostly vacuous"
     needles = set(sealed_identity_strings())
     for path in family_paths():
         assert path.name in needles, f"{path.name} is not an identity needle"
-    for family in config.BOOKSHOP_FAMILIES:
+    for family in enabled:
         for case in sealed_store.load_family(family).cases:
             assert case.check_id in needles, f"{case.check_id} is not an identity needle"

@@ -26,6 +26,7 @@ from shiftwork.domain.errors import (
 PINNED_PUBLIC_FIXTURE_HASHES = {
     config.PIVOT_MISSION: "aebe89555a72688eedfb564088f57b78328c184d0a4e378918c46d13d1e6c12a",
     config.PIVOT_PUBLIC_STATE: "6bc17d69f43b24aa6048fdead7747e5820cd5740e47ba03a4a004d9ddea3c32c",
+    config.PIVOT_COMPARE_STATE: "4abe54462600ade9793c1d7dc32978c427d4f0b0a5e5b121830cfc3b478a2f6f",
     config.PIVOT_INCIDENT_REQUESTS: "e9ae58c7d352f3f21b1f0edacbfcabf73a7c0edc0f551e7eb0bea8ae829cc399",
 }
 
