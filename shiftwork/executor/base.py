@@ -40,6 +40,7 @@ class RunRequest(ExecutorModel):
     deadline_s: int = Field(gt=0)
     inference_grant: InferenceGrant | None
     request_batch_bytes: StrictBytes | None = None
+    single_request_ordinal: int | None = None
 
 
 class RawCapture(ExecutorModel):
@@ -207,6 +208,20 @@ def load_batch(ref: BatchRef, frozen_bytes: bytes | None = None) -> tuple[Reques
     if not requests or [r.ordinal for r in requests] != list(range(1, len(requests) + 1)):
         raise ValueError("batch ordinals must be consecutive from 1")
     return tuple(requests)
+
+
+def load_single_request(ref: BatchRef, frozen_bytes: bytes, ordinal: int) -> RequestStimulus:
+    """Load one controller-supplied protected line without resolving a path."""
+    if frozen_bytes is None or canonical.content_hash(base64.b64encode(frozen_bytes).decode("ascii")) != ref.content_hash:
+        raise ValueError("protected request bytes are missing or mismatched")
+    lines = frozen_bytes.splitlines(keepends=True)
+    if len(lines) != 1 or not lines[0].strip():
+        raise ValueError("protected request must be exactly one non-empty line")
+    entry = json.loads(lines[0])
+    stimulus = RequestStimulus(ordinal=entry["ordinal"], text=entry["text"], body=lines[0])
+    if stimulus.ordinal != ordinal:
+        raise ValueError("protected request ordinal mismatch")
+    return stimulus
 
 
 def normalize_captures(raw: Iterable[RawCapture], deadline_s: int) -> tuple[RunOutput, ...]:

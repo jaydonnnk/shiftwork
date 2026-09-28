@@ -23,13 +23,12 @@ from contree_client.models import ClosableStreamRepr, FileSpec, InstanceNetworki
 
 from shiftwork import config
 from shiftwork.domain.models import ExecutorFailure
-from shiftwork.executor.base import RawCapture, RawObservation, RunRequest, RunResult, load_batch, provisioning_manifest
+from shiftwork.executor.base import RawCapture, RawObservation, RunRequest, RunResult, load_batch, load_single_request, provisioning_manifest
 from shiftwork.gateway.protocol import InferencePolicy
 from shiftwork.gateway.service_inference import GatewayRejected, ServiceInferenceGateway
 
 
 MODEL = "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B"
-CAPTURE_PATH = "/work/capture.json"
 MAX_BODY_BYTES = 1024 * 1024
 MAX_LAYER_BYTES = 16 * 1024 * 1024
 
@@ -47,6 +46,7 @@ from pathlib import Path
 import subprocess
 import sys
 import threading
+import time
 
 ROOT = Path('/work')
 MAX_BODY = 1024 * 1024
@@ -148,27 +148,39 @@ try:
     port = ready.get('port')
     if type(port) is not int or not 0 < port < 65536:
         raise ValueError('SERVICE_NOT_READY')
-    request_body = base64.b64decode(config['body_base64'], validate=True)
-    if not request_body or len(request_body) > 65536:
-        raise ValueError('FROZEN_REQUEST_INVALID')
-    connection = http.client.HTTPConnection('127.0.0.1', port, timeout=35)
-    connection.request('POST', '/', body=request_body, headers={'Content-Type': 'application/json'})
-    response = connection.getresponse()
-    output = response.read(MAX_BODY + 1)
-    if len(output) > MAX_BODY:
-        raise ValueError('CAPTURE_LIMIT')
-    output.decode('utf-8')
-    capture = {
-        'request_ordinal': 1, 'http_status': response.status,
-        'body_base64': base64.b64encode(output).decode('ascii'),
-        'driver_events': events, 'service_stderr_base64': base64.b64encode(stderr).decode('ascii'),
-    }
-    raw = json.dumps(capture, sort_keys=True, separators=(',', ':')).encode()
-    with open('/work/capture.json', 'wb') as target:
-        target.write(raw)
-        target.flush()
-        os.fsync(target.fileno())
-    send_line({'kind': 'capture_written', 'byte_count': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
+    for ordinal in range(1, config['request_count'] + 1):
+        if ordinal > 1:
+            config = json.loads(sys.stdin.readline())
+        if config.get('kind') != 'current_request' or config.get('request_ordinal') != ordinal:
+            raise ValueError('REQUEST_ORDER_INVALID')
+        events = []
+        request_body = base64.b64decode(config['body_base64'], validate=True)
+        if not request_body or len(request_body) > 65536:
+            raise ValueError('FROZEN_REQUEST_INVALID')
+        request_started = time.monotonic()
+        connection = http.client.HTTPConnection('127.0.0.1', port, timeout=35)
+        try:
+            connection.request('POST', '/', body=request_body, headers={'Content-Type': 'application/json'})
+            response = connection.getresponse()
+            output = response.read(MAX_BODY + 1)
+        finally:
+            connection.close()
+        if len(output) > MAX_BODY:
+            raise ValueError('CAPTURE_LIMIT')
+        output.decode('utf-8')
+        capture = {
+            'request_ordinal': ordinal, 'http_status': response.status,
+            'body_base64': base64.b64encode(output).decode('ascii'),
+            'elapsed_ms': round((time.monotonic() - request_started) * 1000),
+            'driver_events': events, 'service_stderr_base64': base64.b64encode(stderr).decode('ascii'),
+        }
+        raw = json.dumps(capture, sort_keys=True, separators=(',', ':')).encode()
+        with open('/work/capture-%d.json' % ordinal, 'wb') as target:
+            target.write(raw)
+            target.flush()
+            os.fsync(target.fileno())
+        send_line({'kind': 'capture_written', 'request_ordinal': ordinal,
+                   'byte_count': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
 except Exception as exc:
     send_line({'kind': 'driver_failure', 'code': type(exc).__name__})
 finally:
@@ -206,13 +218,14 @@ class TokenFactoryAdapter:
     async def execute(self, request: RunRequest) -> RunResult:
         started = time.monotonic()
         observations: list[RawObservation] = []
+        captures: list[RawCapture] = []
         operation_id: str | None = None
         client = self.client
         terminal = False
         gateway: ServiceInferenceGateway | None = None
 
         def failure(kind: ExecutorFailure) -> RunResult:
-            return RunResult(captures=(), executor_ref=operation_id, failure=kind,
+            return RunResult(captures=tuple(captures), executor_ref=operation_id, failure=kind,
                              wall_ms=round((time.monotonic() - started) * 1000),
                              observations=tuple(observations))
 
@@ -227,11 +240,14 @@ class TokenFactoryAdapter:
             manifest = provisioning_manifest(request)
             artifact_files = request.artifact_snapshot.files
             if ("service.py" not in artifact_files
-                    or {"driver.py", "capture.json", "shop.json"} & set(artifact_files)
+                    or {"driver.py", "shop.json", *(f"capture-{n}.json" for n in range(1, 5))} & set(artifact_files)
                     or sum(len(raw) for raw in artifact_files.values()) > MAX_BODY_BYTES):
                 return failure(ExecutorFailure.PROVISION_FAILED)
-            batch = load_batch(request.request_batch, request.request_batch_bytes)
-            if len(batch) != 1:
+            batch = ((load_single_request(request.request_batch, request.request_batch_bytes,
+                                          request.single_request_ordinal),)
+                     if request.single_request_ordinal is not None else
+                     load_batch(request.request_batch, request.request_batch_bytes))
+            if not 1 <= len(batch) <= 4:
                 return failure(ExecutorFailure.PROVISION_FAILED)
             shop = Path(request.shop_snapshot_ref).read_bytes()
             if not shop:
@@ -245,7 +261,11 @@ class TokenFactoryAdapter:
                 if uploaded[name].sha256 != hashlib.sha256(raw).hexdigest():
                     return failure(ExecutorFailure.PROVISION_FAILED)
             spawn_files = {"/work/" + name: FileSpec(uuid=uploaded[name].uuid, mode="0644") for name in files}
-            initial = {"body_base64": base64.b64encode(batch[0].body).decode("ascii"),
+            def current_request(ordinal: int) -> dict[str, Any]:
+                return {"kind": "current_request", "request_ordinal": ordinal,
+                        "body_base64": base64.b64encode(batch[ordinal - 1].body).decode("ascii")}
+
+            initial = {**current_request(1), "request_count": len(batch),
                        "allowed_tool_names": list(self.allowed_tool_names)}
             instance = await client.spawn_instance(
                 command="/usr/local/bin/python", image=config.TOKEN_FACTORY_IMAGE,
@@ -258,8 +278,9 @@ class TokenFactoryAdapter:
             operation_id = instance.uuid
             gateway = ServiceInferenceGateway(self.token, InferencePolicy(
                 run_id=self.run_id, operation_id=operation_id, model=self.model,
-                allowed_tool_names=self.allowed_tool_names,
+                allowed_tool_names=self.allowed_tool_names, request_ordinal=1,
             ))
+            gateway_observations_recorded = False
             observations.append(RawObservation(kind="INTERPRETATION",
                 public_payload={"source": "controller_verified", "operation_bound": True,
                                 "artifact_sha256": request.artifact_snapshot.manifest_hash,
@@ -269,9 +290,9 @@ class TokenFactoryAdapter:
             seen: int | None = None
             stdout = ""
             processed_lines = 0
-            capture_summary: dict[str, Any] | None = None
+            capture_summaries: list[dict[str, Any]] = []
             gateway_failure = False
-            while time.monotonic() - started < 60:
+            while time.monotonic() - started < request.deadline_s:
                 batch_events = [event async for event in client.iter_operation_events(
                     operation_id, follow=False, last_event_id=seen)]
                 for event in batch_events:
@@ -296,18 +317,41 @@ class TokenFactoryAdapter:
                         except GatewayRejected as exc:
                             gateway_failure = True
                             reply = {"kind": "inference_reply", "error": exc.code}
-                        await client.operation_subprocess_stdin(operation_id, 1, json.dumps(reply) + "\n", close=True)
+                        await client.operation_subprocess_stdin(operation_id, 1, json.dumps(reply) + "\n", close=False)
                     elif event_body.get("kind") == "capture_written":
-                        capture_summary = event_body
+                        ordinal = event_body.get("request_ordinal")
+                        if ordinal != len(capture_summaries) + 1 or ordinal > len(batch):
+                            return failure(ExecutorFailure.CAPTURE_TRUNCATED)
+                        capture_summaries.append(event_body)
+                        for kind, public, raw in gateway.observations:
+                            observations.append(RawObservation(kind=kind,
+                                public_payload={**public, "request_ordinal": gateway.policy.request_ordinal},
+                                raw_payload=raw))
+                        gateway.close()
+                        gateway_observations_recorded = True
+                        if ordinal < len(batch):
+                            await client.operation_subprocess_stdin(
+                                operation_id, 1, json.dumps(current_request(ordinal + 1)) + "\n", close=False
+                            )
+                            gateway = ServiceInferenceGateway(self.token, InferencePolicy(
+                                run_id=self.run_id, operation_id=operation_id, model=self.model,
+                                allowed_tool_names=self.allowed_tool_names, request_ordinal=ordinal + 1,
+                            ))
+                            gateway_observations_recorded = False
                     elif event_body.get("kind") == "driver_failure":
                         observations.append(RawObservation(kind="INTERPRETATION",
-                            public_payload={"source": "controller_verified", "driver_failure": event_body.get("code")},
+                            public_payload={"source": "controller_verified",
+                                            "request_ordinal": len(capture_summaries) + 1,
+                                            "driver_failure": event_body.get("code")},
                             raw_payload=event_body))
                 if terminal:
                     break
                 await asyncio.sleep(0.25)
-            for kind, public, raw in gateway.observations:
-                observations.append(RawObservation(kind=kind, public_payload=public, raw_payload=raw))
+            if gateway is not None and not gateway_observations_recorded:
+                for kind, public, raw in gateway.observations:
+                    observations.append(RawObservation(kind=kind,
+                        public_payload={**public, "request_ordinal": gateway.policy.request_ordinal},
+                        raw_payload=raw))
             if not terminal:
                 return failure(ExecutorFailure.REQUEST_TIMEOUT)
             status = await client.get_operation_status(operation_id)
@@ -315,44 +359,52 @@ class TokenFactoryAdapter:
                 public_payload={"source": "controller_verified", "sandbox_status": str(status.status),
                                 "wall_ms": round((time.monotonic() - started) * 1000)},
                 raw_payload={"status": dataclasses.asdict(status)}))
-            if str(status.status) != "SUCCESS" or gateway_failure or capture_summary is None:
+            if str(status.status) != "SUCCESS":
                 return failure(ExecutorFailure.SANDBOX_TERMINATED)
             checkpoint = status.result_image_uuid
             if not checkpoint:
                 return failure(ExecutorFailure.CAPTURE_TRUNCATED)
-            raw_capture = await client.inspect_image_download(checkpoint, CAPTURE_PATH)
-            if (not raw_capture or len(raw_capture) != capture_summary.get("byte_count")
-                    or hashlib.sha256(raw_capture).hexdigest() != capture_summary.get("sha256")):
+            for ordinal, summary in enumerate(capture_summaries, start=1):
+                try:
+                    raw_capture = await client.inspect_image_download(checkpoint, f"/work/capture-{ordinal}.json")
+                except (OSError, ValueError):
+                    return failure(ExecutorFailure.CAPTURE_TRUNCATED)
+                if (not raw_capture or len(raw_capture) != summary.get("byte_count")
+                        or hashlib.sha256(raw_capture).hexdigest() != summary.get("sha256")):
+                    observations.append(RawObservation(kind="INTERPRETATION",
+                        public_payload={"source": "controller_verified", "request_ordinal": ordinal,
+                                        "checkpoint_readback": False, "expected_bytes": summary.get("byte_count"),
+                                        "actual_bytes": len(raw_capture), "expected_sha256": summary.get("sha256"),
+                                        "actual_sha256": hashlib.sha256(raw_capture).hexdigest()}, raw_payload={}))
+                    return failure(ExecutorFailure.CAPTURE_TRUNCATED)
+                capture = json.loads(raw_capture)
+                if capture.get("request_ordinal") != ordinal or not isinstance(capture.get("http_status"), int):
+                    return failure(ExecutorFailure.CAPTURE_TRUNCATED)
+                body = base64.b64decode(capture["body_base64"], validate=True)
+                if not body or len(body) > MAX_BODY_BYTES:
+                    return failure(ExecutorFailure.CAPTURE_TRUNCATED)
+                body.decode("utf-8")
                 observations.append(RawObservation(kind="INTERPRETATION",
-                    public_payload={"source": "controller_verified", "checkpoint_readback": False,
-                                    "expected_bytes": capture_summary.get("byte_count"),
-                                    "actual_bytes": len(raw_capture),
-                                    "expected_sha256": capture_summary.get("sha256"),
-                                    "actual_sha256": hashlib.sha256(raw_capture).hexdigest()},
-                    raw_payload={}))
+                    public_payload={"source": "controller_verified", "request_ordinal": ordinal,
+                                    "capture_bytes": len(raw_capture),
+                                    "capture_sha256": hashlib.sha256(raw_capture).hexdigest(),
+                                    "checkpoint_readback": True}, raw_payload={"checkpoint": checkpoint}))
+                for driver_event in capture.get("driver_events", []):
+                    name = driver_event.get("kind")
+                    kind = ("TOOL_RESULT" if name == "tool_result" else
+                            "INTERPRETATION" if name == "inference_result" else "TOOL_REQUEST")
+                    observations.append(RawObservation(kind=kind,
+                        public_payload={"source": "driver_verified", **driver_event,
+                                        "request_ordinal": ordinal},
+                        raw_payload=driver_event))
+                captures.append(RawCapture(request_ordinal=ordinal, http_status=capture["http_status"],
+                    body=body, elapsed_ms=capture.get("elapsed_ms", 0), transport_error=None,
+                    log_ref="data:application/octet-stream;base64," + capture.get("service_stderr_base64", "")))
+            if len(captures) != len(batch):
                 return failure(ExecutorFailure.CAPTURE_TRUNCATED)
-            capture = json.loads(raw_capture)
-            if capture.get("request_ordinal") != 1 or not isinstance(capture.get("http_status"), int):
-                return failure(ExecutorFailure.CAPTURE_TRUNCATED)
-            body = base64.b64decode(capture["body_base64"], validate=True)
-            if not body or len(body) > MAX_BODY_BYTES:
-                return failure(ExecutorFailure.CAPTURE_TRUNCATED)
-            body.decode("utf-8")
-            observations.append(RawObservation(kind="INTERPRETATION",
-                public_payload={"source": "controller_verified", "capture_bytes": len(raw_capture),
-                                "capture_sha256": hashlib.sha256(raw_capture).hexdigest(),
-                                "checkpoint_readback": True}, raw_payload={"checkpoint": checkpoint}))
-            for driver_event in capture.get("driver_events", []):
-                name = driver_event.get("kind")
-                kind = ("TOOL_RESULT" if name == "tool_result" else
-                        "INTERPRETATION" if name == "inference_result" else "TOOL_REQUEST")
-                observations.append(RawObservation(kind=kind,
-                    public_payload={"source": "driver_verified", **driver_event}, raw_payload=driver_event))
-            return RunResult(captures=(RawCapture(request_ordinal=1,
-                http_status=capture["http_status"], body=body,
-                elapsed_ms=round((time.monotonic() - started) * 1000),
-                transport_error=None,
-                log_ref="data:application/octet-stream;base64," + capture.get("service_stderr_base64", "")),),
+            if gateway_failure:
+                return failure(ExecutorFailure.SANDBOX_TERMINATED)
+            return RunResult(captures=tuple(captures),
                 executor_ref=operation_id,
                 failure=None, wall_ms=round((time.monotonic() - started) * 1000),
                 observations=tuple(observations))
