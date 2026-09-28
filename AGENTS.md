@@ -108,8 +108,15 @@ summaries when a time-sensitive external claim is being made.
   and prompt-quality limits stay in
   `docs/plans/shiftwork/evidence/slice14-assist-live-2026-09-27.md`. The work is
   committed in focused batches on `shiftwork/slice-14`, merged to main as
-  `fab497e..3f18669` and pushed, no co-author footer. Slice 15 onward
-  still needs its own go-ahead and its own live authorizations.
+  `fab497e..3f18669` and pushed, no co-author footer. Slice 15 received its own
+  go-ahead on 2026-09-27; its offline implementation, the protected-phase proof
+  round and the two harness repairs completed with no live call, and the user
+  confirmed the offline work complete and directed the publish and merge on
+  2026-09-28. The work is committed in focused batches on `shiftwork/slice-15`,
+  merged to main as `96a408e..82364d3` and pushed, no co-author footer. The
+  draft fixture bytes remain AWAITING_OPERATOR_REVIEW and unsealed; operator
+  review, sealing, live execution and Slices 16 onward still need their own
+  authorizations.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
@@ -198,7 +205,8 @@ summaries when a time-sensitive external claim is being made.
   historical. Under the approved pivot, Slice 10 (v5 history to v6 with no
   invented choice) is implemented, was accepted by the user on 2026-09-25 and is
   merged to main as `f0a1e81..0432cbd` and pushed; Slices 11, 12, 13 and 14 are
-  accepted, while Slices 15-25 are not implemented.
+  accepted, and Slice 15's offline work is merged to main as `96a408e..82364d3`
+  and pushed, while Slices 16-25 are not implemented.
   Gate 2, Gate 3 and Gate 4 are re-approved; all scoped backtracks are closed. The
   Gate 4 reconciliation revision is approved; a same-day follow-up revision (Slice 7
   leak-response invalidation; Slice 10 scoring-input alignment) was approved by the

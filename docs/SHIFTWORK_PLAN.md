@@ -8,9 +8,10 @@ repairs fairly, explicitly choose one and maintain its later consequences.
 **Current gate state, 2026-09-28:** Gates 2, 3 and 4 are RE-APPROVED for the
 Slice 15 protected-stimulus reconciliation, and ADR 0006 is ACCEPTED. The user
 explicitly approved the repaired documents after the twenty review findings
-and two follow-on design defects were addressed. Slice 15 remains in progress
-on its earlier go-ahead, with unreviewed and unsealed fixture bytes; no live
-comparison is authorized. `plans/shiftwork/00-status.md` holds the approval
+and two follow-on design defects were addressed. Slice 15's offline work then
+completed and was merged to main (`96a408e..82364d3`, pushed, 2026-09-28);
+its draft fixture bytes remain unreviewed and unsealed, and no live comparison
+is authorized. `plans/shiftwork/00-status.md` holds the approval and merge
 record and evidence limits.
 **Gate state:** Gate 1 RE-APPROVED 2026-09-24 after the same-day backtrack, without
 human comprehension sessions. Approval supplies no participant or learning evidence.

@@ -3,10 +3,29 @@
 **Current authority, 2026-09-28: Gate 2 S8.1, Gate 3 and Gate 4 are
 RE-APPROVED together, and ADR 0006 is ACCEPTED.** The user explicitly approved
 the repaired documents in chat after the twenty-finding repair round and the
-two follow-on design corrections. Slices 10 to 14 remain accepted; Slice 15
-remains in progress on its earlier go-ahead. This approval does not review or
-seal fixture bytes, authorize live calls or spend, accept Slice 15, or authorize
-a commit or push.
+two follow-on design corrections. Slices 10 to 14 remain accepted. Slice 15's
+offline work is complete, committed in focused batches on `shiftwork/slice-15`,
+merged to main as `96a408e..82364d3` and pushed on 2026-09-28, after the user
+confirmed the offline work complete and directed that publish and merge. The
+draft fixture bytes remain `AWAITING_OPERATOR_REVIEW` and unsealed, and no live
+execution is authorized.
+
+## Slice 15 published and merged: 2026-09-28
+
+The user confirmed the offline Slice 15 work complete and directed publishing
+the `shiftwork/slice-15` branch and merging it to main (chat, 2026-09-28). Both
+recorded harness defects were re-verified first-hand on the settled tree before
+publishing: the offline suite returned `528 passed, 1 skipped, 2 warnings`
+(packaging excluded, exit 0) and `node tests/client/render_faults.mjs --port
+8237` returned `render-fault rows: 12 of 12 as expected` with every fault row
+failing at its own named assertion, including `slotProtectedCount`. The five
+byte-addressed fixtures matched their recorded sha256 digests in both the
+working tree and the committed blobs. The work is committed in twenty focused
+batches on the branch, merged fast-forward to main as `96a408e..82364d3` and
+pushed, no co-author footer. No live call, credential, install, spend or
+operator review occurred in this round. Operator review of the three public
+workloads, the visible requirements and the protected variants, sealing, live
+execution and Slices 16 onward remain separately authorized.
 
 ## Slice 15 protected-phase proof round and mutation repair: 2026-09-28
 
