@@ -1,5 +1,843 @@
 # Status: Shiftwork
 
+**Current authority, 2026-09-28: Gate 2 S8.1, Gate 3 and Gate 4 are
+RE-APPROVED together, and ADR 0006 is ACCEPTED.** The user explicitly approved
+the repaired documents in chat after the twenty-finding repair round and the
+two follow-on design corrections. Slices 10 to 14 remain accepted; Slice 15
+remains in progress on its earlier go-ahead. This approval does not review or
+seal fixture bytes, authorize live calls or spend, accept Slice 15, or authorize
+a commit or push.
+
+## Slice 15 protected-phase proof round and mutation repair: 2026-09-28
+
+After the joint re-approval, the approved protected-phase contract (Gate 2
+S8.1, Gate 3 S3.9/S6.3/S6.4 and trace rows 50 to 54) was implemented on top of
+the existing draft, and the proof evidence was rebuilt for it. This section
+records the offline results only; nothing here is operator review, sealing,
+live execution, acceptance, a commit or a push.
+
+- Mutation proof. The first full 96-row run was not a pass: the driver crashed
+  at row 95 restoring `shiftwork/orchestrator.py`
+  (`OSError: [Errno 22] Invalid argument`), the stranded mutation was reverted
+  byte-precisely and all anchors re-verified, and the buffered output was lost
+  with the crash. The rerun used a crash-proof driver (per-row flushed output,
+  a results file appended after every row, a `CRASH` record naming the row that
+  dies, retried target writes) and reported 92 of 96 `FAIL_CAUGHT`, because
+  four older rows had silently lost proof-grade status when the
+  protected-phase guards landed. Repair, one row at a time: row 4 was
+  re-anchored and renamed `s15_protected_snapshot_immutability_removed` (the
+  snapshot write-removal fault reads as an incidental `InvalidSealedCase`
+  instead of an assertion); row 59 names the new pin-consistent
+  `[extra_request_with_recomputed_pin]` parameter; row 68 narrowed to its
+  slot-hash limb with `[slot_hash]`; row 69 was renamed
+  `s15_request_line_identity_unchecked` and names
+  `[wrong_request_id_with_recomputed_pin]`, after the `[slot_count]` limb
+  measured unprovable (the comparison view's private-material guard catches
+  its only divergence as an incidental `LifecycleError`); and the new row 97
+  `s15_frozen_context_hash_not_reverified` faults the frozen context-hash
+  check itself, which had masked rows 68 and 69. Verified after the repairs:
+  all 97 anchors present exactly once, each repaired or new row (4, 59, 68,
+  69, 97) individually `FAIL_CAUGHT restored=True`, the four touched
+  parameters pass on the unmutated tree, and the full 97-row run exited 0 with
+  97 of 97 `FAIL_CAUGHT` and every target restored byte-identically. Evidence:
+  `docs/plans/shiftwork/evidence/slice15-mutation-rerun-2026-09-28.txt`; the
+  preserved 92-of-96 run is `...-pre-repair.txt`. `MISTAKES.md` gained two
+  entries for the masking and the unprovable fault shapes.
+- Full offline suite after the test edits: `528 passed, 1 skipped, 2 warnings
+  in 95.21s`, packaging excluded, exit 0. The +3 over the pre-edit 525 are the
+  three new tamper parameters; the skip is the live adapter conformance test.
+- Browser. `--compare-demo` against a fresh draft-review preview on
+  `http://127.0.0.1:8175` exited 0 with `FINALIZED`, the six ordered slots and
+  zero uncaught exceptions, after the stale `N request` batch-size assertion
+  was updated to the rendered `N public requests + M protected steps` copy and
+  a `slotProtectedCount` served-source fault row was added. The screenshots
+  `artifacts/slice9/compare-1280.png` and `compare-390.png` were inspected.
+  `node tests/client/render_faults.mjs --port 8471` then exited 0 with
+  `render-fault rows: 12 of 12 as expected`; the green baseline ran
+  `--compare-demo` and every fault row failed at its own named assertion,
+  including `slotProtectedCount` (`Slot 1 renders the wrong protected step
+  count`). The first attempt of that run reported `0 of 12` because an
+  unrelated local application held the fixed default port 8137 while the
+  preview banner prints before the bind; `render_faults.mjs` now polls the
+  preview's board endpoint (`waitReachable`) so a port collision fails loudly
+  instead of surfacing as a page-load error. Both harness repairs are recorded
+  in `MISTAKES.md`.
+- The operator packet was rewritten to the revised exact bytes; every digest
+  in it (18) was recomputed from the current files and verified, and the file
+  was normalized to CRLF. Its fairness reading is unchanged in substance: one
+  public request (011) carries the whole observable A/B difference, and the
+  six protected variants' semantic independence stays an operator decision.
+- Architect-reviewer post-slice cleanup scan (report only, nothing deleted).
+  All 17 new Slice 15 paths are referenced: the fixtures through the
+  `config.PIVOT_COMPARE_*` pins and the manifest, the sealed family through the
+  family map, the preview helper through `tests/client/render_faults.mjs`, the
+  documents through this file and the plan doc. No unreferenced comparison or
+  protected helper (`comparison_run` is used by `api/routes.py:235`); no
+  TODO/FIXME markers in `shiftwork/`; no exact duplicate test file and no test
+  importing a removed module (the 528-test run covers collection). The three
+  byte-identical attempt-fixture pairs (`bookshop.jsonl` /
+  `bookshop_attempt_02.jsonl`, `bookshop_attempt_01.jsonl` / `thin.jsonl`,
+  `bookshop_attempt_06.jsonl` / `stale_family.jsonl`) and the unused
+  `update_exposure_item_state` helper are pre-existing and already assigned
+  (Slice 16); `PROGRESS.md` and the `slice13-*.db` files are git-ignored by
+  design. No deletion is recommended.
+
+The revised fixture bytes remain `AWAITING_OPERATOR_REVIEW`, unsealed and
+unaccepted; production reservation still refuses them. No live call,
+credential, install, commit or push occurred in this round.
+
+## Re-approval and handoff: 2026-09-28
+
+The user replied "I approve" to the explicit question covering the revised
+Gate 2 S8.1, Gate 3, Gate 4 and ADR 0006, then requested a handoff prompt for
+another agent to start Slice 15. ADR 0006's narrow supersession of ADR 0001 is
+in force. The approved mechanism is a separate public and protected phase,
+with controller-held assessment inputs, restricted protected captures and
+separate denominators. Gate 3 test 53 uses distinctive string needles plus
+source and ordinal checks for short or overlapping values. No Slice 15
+implementation, fixture revision, operator review, seal, live execution,
+install, commit or push occurred in this approval-recording turn.
+
+## Gate 2 re-approval and Gate 3 reconciliation: 2026-09-28
+
+- Gate 2 - Architecture: BACKTRACKED 2026-09-28 after the Slice 15 review found
+  six protected labels over identical public stimuli. The revised
+  `02-architecture.md` section 8.1 specifies the protected phase: each variant
+  carries its own request row, task spec and additive-only state delta; it is
+  delivered to both candidates of its pair as a separate phase after the public
+  batch, frozen with the public batch before any run, and its contents and
+  captures never reach learner-facing surfaces. The separate comparison state
+  keeps the accepted Slice 11 state and its byte pins unchanged.
+- Gate 2 - Architecture: RE-APPROVED by the user in chat on 2026-09-28
+  ("approve as drafted and proceed to gate 3"). The approval covers the revised
+  section 8.1 only; Gate 3 and Gate 4 now need scoped reconciliation, and no
+  implementation, operator review, seal, live run, commit or push is implied.
+- Gate 3 - Program Design: RE-APPROVED by the user in chat on 2026-09-28
+  ("so gate 2 and gate 3 are approved"). The scoped revision reconciles section
+  3.9 (protected variant types and validation), the separate comparison state,
+  the two-phase slot execution, the restricted snapshot storage, the private
+  capture and projection rules, the separate public and protected denominators,
+  the `PROTECTED_CHECK_FAILED` reason code and tests 50 to 54. Gate 4 now needs
+  its own scoped reconciliation; no implementation, operator review, seal, live
+  run, commit or push is implied by this approval.
+
+## Independent adversarial review of the Gate 2 and Gate 3 revisions: 2026-09-28
+
+Verdict: **STOP. Do not reconcile Gate 4 yet.** The review found 2 BLOCKER
+(F1, F2), 6 MAJOR (F3 to F8), 10 MINOR (F9 to F18) and 2 NIT (F19, F20). The
+approved documents were left unchanged; the only write made was this section. No
+fixture was sealed, no live call was made and no credential was used.
+
+Baseline reproduced on `shiftwork/slice-15` before any judgement:
+`.venv313/Scripts/python.exe -m pytest tests -q --ignore=tests/packaging
+--ignore=tests/client -p no:cacheprovider` exited 0 with `518 passed, 1
+skipped, 2 warnings in 73.94s`. `.venv313/Scripts/python.exe -m
+tests.pivot_mutation_proofs` exited 0 with 77 of 77 `FAIL_CAUGHT`, each
+`restored=True`. Nothing was installed.
+
+### VERIFIED
+
+1. **Writing rules.** No em dash, en dash or section symbol appears in the
+   revised `02-architecture.md`, `03-program-design.md`, `04-slices.md` or the
+   two Slice 15 packets; section references use the S1 form. Grep over all five
+   files returned zero matches.
+2. **The import graph is safe for the stimulus types.** `evaluator/evaluator.py`
+   already imports `domain.task_contract` at lines 54, 69 and 70, so housing
+   `ProtectedStimulus` there creates no new edge. `tests/sealed/test_import_graph.py:51`
+   forbids only `executor, assist, api, client, store, ledger, domain, curation`
+   from importing `shiftwork.sealed`; an evaluator to task-contract edge is not a
+   sealed edge and `evaluator` is not in that set. No test 17 violation.
+3. **The needle-form claim is already satisfied.** `gateway/redaction.py:35-41`
+   checks raw, backslash-to-forward-slash, base64 and three JSON-escape rounds,
+   plus decoded `*_base64` fields and `;base64,` data URIs at lines 7 to 27.
+   Section 3.9's "raw, JSON-escaped and forward-slash forms" is weaker than what
+   exists, so it is consistent.
+4. **Every operator-packet byte pin reproduces.** All nine byte counts and
+   SHA-256 values in `slice15-operator-review-packet.md` match the working tree
+   (mission 10,214/`aebe8955...`, state 3,227/`6bc17d69...`, manifest
+   2,249/`68fa2df2...`, the three spec files, the sealed family
+   4,978/`f03f60e0...`, candidate A 9,148/`7497195...`, candidate B
+   8,416/`b23916a9...`), as do the three `.jsonl` raw pins, the canonical
+   `workloads` digest `c1e3366...` and the canonical `cases` digest `2a37fe5...`.
+5. **The manifest's task-spec digests are correct under the code's
+   canonicalization.** All three `task_specs_sha256` values equal sha256 over
+   `_canonical_specs_bytes` (`orchestrator.py:1873-1878`), which round-trips each
+   item through `CustomerRequestSpec.model_dump(mode="json")`. They do not equal
+   sha256 over the raw parsed list. See finding 10.
+6. **`variant_ref`'s new stimulus coverage breaks neither exposure accounting
+   nor the six-variant minimum.** `rotation.py:83-86` checks `len(cases) >= 6`
+   and `len({variant_ref(c)}) >= 6`, so six stimulus-distinct variants stay
+   distinct and two collapsing variants fail closed. `exposure_items
+   UNIQUE(engagement_slug, family, cycle, variant_ref)` is unaffected because the
+   family is unsealed with no recorded exposure.
+   `test_comparison_variant_identity_cannot_be_refreshed_by_renaming_its_id`
+   (`test_experiment_lifecycle.py:625-630`) still holds because section 3.9's
+   revised input list still excludes `case.id`.
+7. **The Slice 11 state stays byte-unchanged.** The design adds a new file;
+   `config.PIVOT_PUBLIC_STATE` (config.py:231) and its two pin guards
+   (`tests/domain/test_task_contract.py:28`,
+   `tests/executor/test_conformance.py:358`) are untouched. No accepted Slice 11
+   evidence requires a comparison to run under that file.
+8. **No Slice 12 cost limit is contradicted.** The accepted verdict is
+   `PASS_SIX_TRIALS_FEASIBLE` for six single-operation trials; no recorded limit
+   fixes one operation per slot. Section 11 item 9 correctly concedes the
+   estimate must be revised before a live comparison is authorized.
+9. **No Slice 14 assist limit is touched.** Section 3.1 states a diagnostic or
+   operational context carries no protected bindings, the assist route row is
+   unchanged, and section 6.4's protected phase sits inside the experimental
+   execute stack only.
+10. **Both candidates satisfying every mandatory rule on all six public requests
+    is plausible but was NOT independently reproduced here.** The specs carry
+    conditions rather than expected values (`bookshop_compare_pair_01_specs.json`),
+    and `evaluator.assess_request` resolves them against the snapshot at runtime
+    (`orchestrator.py:2524-2526`), so a state change flows through without
+    re-authoring specs. Reproducing the pass requires the proposed comparison
+    state, which does not exist in the tree. Settling it needs that file plus a
+    direct six-request call of each candidate.
+
+### FINDINGS
+
+**F1. BLOCKER. The two-phase execution cannot run against the current driver and
+no gate assigns the change.** `executor/base.py:207-208` requires
+`[r.ordinal for r in requests] == list(range(1, len(requests)+1))`. The protected
+phase streams one line whose ordinal is the public count plus one, that is 3
+(section 3.9 `ProtectedRequestRow.ordinal`; `protected_request_bytes` "returns
+the canonical JSON line ... that the executor streams"). `[3] != [1]` raises
+`ValueError("batch ordinals must be consecutive from 1")`. Both adapters call it
+(`local_process.py:85`, `tokenfactory.py:246`) and `execute_comparison_slot`
+calls it a third time to map ordinal to text (`orchestrator.py:2502`). Two
+further guards reject the same ordinal: `orchestrator.py:2489` raises for an
+observation outside `1..workload.request_count`, and that raise is caught at 2559,
+rolls back and marks the run FAILED/INTERNAL; completeness at 2551-2555 and again
+at 2592-2593 and 2604-2608 requires exactly `request_count` outputs with
+ordinals `set(range(1, request_count+1))`, which a protected capture on the same
+run breaks. Gate 3 assigns none of this: its only `executor/base.py` row (line 99)
+is unchanged pre-revision text, section 6.4 says "stream exactly the protected
+request at its ordinal" without naming a mechanism, and test 50 names the
+behavior rather than the change. Smallest fix: one sentence in section 3.9 fixing
+the mechanism (the protected phase builds its own single-row `BatchRef` whose
+`content_hash` covers `protected_request_bytes(row)`, and `load_batch` gains an
+explicit expected-ordinal argument or a `load_single_request` sibling requiring
+exactly one row at the declared ordinal), plus section 6.4 naming the two guards
+it relaxes and section 2's `executor/base.py` row carrying the new
+responsibility.
+
+**F2. BLOCKER. The design contradicts ADR 0001's Decision clause and no gate
+supersedes it.** `docs/adr/0001-sealed-evaluator-isolation.md:23-25` states
+"sealed cases are never mounted into a sandbox and never placed in an inference
+prompt." The revision makes `SealedCase.stimulus` the source of the streamed
+request (section 3.9, lines 968 and 982-983) and mounts the sealed-derived
+resolved state as the sandbox `shop.json` (section 6.4 "under the resolved
+protected state"; `provision_workspace` writes `SANDBOX_SHOP_SNAPSHOT_NAME`,
+`base.py:74,179-182`). Sealed-case content therefore enters the sandbox by
+design. Neither revised document mentions ADR 0001 except the line 77
+invalidation citation. Smallest fix: record a superseding ADR that narrows the
+clause to "the expected block, the state delta and the resolved-state derivation
+never enter a sandbox or a prompt; only the request row and its public task spec
+are streamed", and cite it from Gate 2 section 8.1 items 3 and 5 and Gate 3
+section 3.9.
+
+**F3. MAJOR. Gate 3 section 2 asserts a Candidate B that does not exist, and a
+passing test pins the opposite.** `03-program-design.md:141` says B has "the
+declared alternative preference for greatest current shelf stock, breaking ties
+by the lower price." The bytes say otherwise:
+`compare_repair_b_service.py:117` is
+`min(qualifying, key=lambda entry: (entry[0], entry[1]))`, cheapest with an
+entity-ref tiebreak, identical to A at `compare_repair_a_service.py:151`. B's own
+docstring at line 6 reads "Both candidates choose the cheapest qualifying
+alternative, so the declared optional-price treatment is the only intended
+behavioral difference." And `test_experiment_lifecycle.py:650-669`
+`test_candidates_share_the_cheapest_qualifying_alternative_policy` asserts both
+return `book:cheaper:paperback` and passes today. The operator packet agrees with
+the bytes and contradicts Gate 3 at lines 88-89, 122 ("No defensible A/B pair
+exists in these exact draft bytes") and 127-141, where the greatest-stock split
+is a proposal "contingent on the Gate 2 and Gate 3 reconciliation" with "No new
+state or candidate bytes have been authored". Gate 3's file map therefore states
+an unauthored proposal as an existing property of a file whose pin lives in
+`TRUSTED_LOCAL_FIXTURES` and is guarded by `tests/executor/test_conformance.py`.
+Smallest fix: reword line 141 to state the greatest-stock preference as required
+new bytes for Slice 15, unauthored, unsealed and with its pin not yet recomputed,
+and add one line to section 2 recording that the present draft bytes implement
+cheapest-for-both and are superseded.
+
+**F4. MAJOR. "Additive only" is asserted structurally but not enforced, so a
+delta can rewrite a base record.** Gate 2 section 8.1 item 2 promises a delta
+"may never rewrite, re-date or remove the frozen state's records"; Gate 3 section
+3.9 justifies it as "its schema has no field that could rewrite, re-date or
+remove a base entity or record". That is not a proof.
+`ProtectedRecordDelta.record_id: str` and
+`ProtectedStateDelta.add_entities: dict[str, ProtectedEntityDelta]` are free
+identifiers, and `_public_records` (`orchestrator.py:537-539`) is
+`{record["record_id"]: record for record in data["records"]}`, so a colliding
+`record_id` silently overwrites the base record. `load_public_state_bytes`
+(`task_contract.py:394-417`) validates entity and dependency references but has
+no record-id or entity-ref uniqueness check, so the resolved document still
+parses. A collision also changes `resolve_records` grouping
+(`task_contract.py:538`) and can turn an AGREED group into CONFLICT, changing the
+protected variant's own expected answer. None of section 3.9's six listed
+validations rejects a collision, and test 51 names "a delta that rewrites or
+removes a base record" without naming a check that can detect one. Smallest fix:
+add to section 3.9's validation list "reject a delta whose `add_entities` key or
+`add_records` `record_id` already exists in the frozen comparison state", and
+require `resolve_protected_state` to assert the resolved entity-ref and
+record-id sets equal the base sets plus exactly the delta's with no duplicates,
+because `load_public_state_bytes` does not check uniqueness.
+
+**F5. MAJOR. The ordinal filter does not cover `output_evidence_for`, whose
+record derivation is per-run rather than per-ordinal.** Section 3.9 bullet 2
+bounds every projection by "the slot's frozen public request count". But
+`output_evidence_for` derives `public_shop_record`, `public_shop_record_ref` and
+`public_shop_snapshot_hash` from `_snapshot_bytes_for_run(conn, run)`
+(`orchestrator.py:896`), which returns the run's stored bytes (548-550), set once
+at 2466 by `repo.set_run_snapshot_bytes`. Only record selection is per-ordinal
+(`_stimulus_record`, 900 and 876); record content and the snapshot hash are not.
+If the protected phase persists the resolved state as the run snapshot, which
+section 6.4 requires it to execute under and never forbids storing, then every
+public-ordinal output on `/api/runs/{id}/outputs` projects hidden delta values
+(908) and the protected state's digest (912-914). The ordinal filter cannot catch
+this because the leak rides on a public ordinal, and test 53's needle set
+(request id, request text, entity ref, record id, expected-block string) contains
+neither a delta record's `value` nor a state digest. Smallest fix: one sentence
+in section 6.4 stating that the run's stored snapshot bytes remain the frozen
+comparison state for the whole slot, that the resolved protected state is
+materialized only inside the protected phase's workspace and is never passed to
+`set_run_snapshot_bytes`, and that `output_evidence_for` derives only from the
+frozen comparison state; add the protected state digest to test 53's needles.
+
+**F6. MAJOR. Releasing protected counts contradicts ADR 0001 and no gate
+supersedes it.** `docs/adr/0001-sealed-evaluator-isolation.md:28-29` states
+"Learner-visible surfaces expose consequences and a minimal reason-code
+vocabulary, never case text, expected values or hidden counts." Section 3.9
+bullet 3 says "Projections expose the protected step only as counts: its
+existence and size before a slot runs, and once the experiment is terminal an
+aggregate per candidate of reserved, captured and missing steps", and Gate 2
+section 8.1 item 5 says "only aggregate protected counts and missingness may be
+released". On the ADR's plain wording that is a hidden count. Smallest fix:
+either reduce the projection to a boolean reserved-or-missing flag with no
+numeric aggregate, or supersede the clause in the same new ADR as F2 and cite it
+from both gates.
+
+**F7. MAJOR. Section 3.9's loader rule fails every public projection closed
+against the present unsealed inventory, and neither gate names the sequencing.**
+Section 3.9 states "A case of an enabled comparison family is invalid without it,
+and a case of the attempt families is invalid with it; the loader enforces both
+directions." The loader is `sealed/store.py::load_family`, which
+`_private_public_needles` calls unconditionally for every enabled family
+(`orchestrator.py:1404-1405`). That collector is reached from `comparison_view`
+(2842), `_diagnostic_experiment_view` (2958), `investigate_station` (2980),
+`artifact_source` (1429) and `assert_public_projection` (1415), which
+`routes.py:126` calls. The present `bookshop_task_completion.json` carries no
+`stimulus` on any of its six cases, so the rule as written makes every one of
+those surfaces raise `InvalidSealedCase` until six stimulus-bearing variants
+exist and carry `review_status: OPERATOR_SEALED` (`store.py:94`). Sealing is a
+separate authorization. Gate 3 does not say whether the rule is conditional on
+the family being sealed or enabled, and Gate 4's Slice 15 contract does not
+mention it. Smallest fix: one sentence in section 3.9 stating that the
+comparison-family stimulus rule is enforced by `load_reviewed_comparison_family`
+rather than `load_family`, so the needle collector and unsealed draft reads keep
+working, or an explicit statement that Slice 15 re-authors the draft file in the
+same change while the operator seal stays separately authorized.
+
+**F8. MAJOR. Gate 3 is internally inconsistent on the denominator.** Section 3.4
+was revised to split a public denominator from a protected one and section 7 now
+reads "4 public maximum, plus exactly 1 protected stimulus", but four other
+places in the same approved document still state one unqualified denominator:
+`CandidateMetrics.denominator_requests: int` (line 513) and
+`ComparisonResult.shared_denominator_requests: int` (line 542) carry no public
+qualifier while the new `protected_denominator` sits beside them; lines 1205-1206
+still read "Each candidate's denominator is the sum of the three pair request
+counts, including failed and missing responses"; and test 23 at lines 1552-1554
+still asserts "per-candidate denominator equals the sum of all three frozen
+workload request counts", which test 54 now contradicts unless read as public.
+Line 307's "at most four requests" likewise predates the split. Gate 2 has the
+same defect inside one document: lines 325-326 still say "Show every trial and
+one shared denominator" while line 611 requires "the public and protected
+denominators". `01-product.md:120-121` says "with the same denominator".
+Smallest fix: rename or qualify the two metric fields, add "public" at lines
+1205-1206, 1552-1554 and 307, and qualify Gate 2 lines 325-326.
+
+**F9. MINOR. Gate 2 delegates the comparison state's "pin and the guard that
+re-verifies both" to Gate 3, and Gate 3 fixes only the file.** Section 8.1 item 1
+delegates all three. Gate 3 names the file (line 139) and assigns a guard through
+revised test 16, but names no pin and no pin location, so test 16's "content
+assertion" has nothing to assert against. The workloads have a pin
+(`bookshop_compare_manifest.json` with `request_bytes_sha256`, recomputed at
+`orchestrator.py:1921-1928`) and the Slice 11 fixtures have one
+(`tests/domain/test_task_contract.py:27-28`,
+`tests/executor/test_conformance.py:356-358`). Rated MINOR because it matches
+section 2's consistent "exact bytes require review and sealing" deferral.
+Smallest fix: name the pin's home in section 2 or 6.3, either a `review_status`
+and digest field inside the state file or a new manifest entry, and add the file
+to the existing pivot pin-guard dicts.
+
+**F10. MINOR. `protected_case_snapshots` must gain a resolved-state column and
+`execution_contexts` a bindings home, and neither migration nor accessor is
+assigned.** Section 4's new row requires "the canonical sealed payload ... plus
+the resolved protected state bytes and their digests". The DDL has four columns
+only (`store/migrations/v6_tables.sql:300-305`) with immutability triggers at
+307-317, and `repo.list_protected_case_snapshots` (`repo.py:1482-1492`) selects
+no state column, so `load_reserved_comparison_cases` (`store.py:104-122`) cannot
+return it and section 6.4's "verify ... resolved-state digest against the
+binding" has no source. Section 2 lists `store/migrations/v6.sql` (line 117) but
+never `v6_tables.sql`, which is where this table lives, and the `repo.py` row
+(line 96) is unchanged generic text. `ExecutionContext.protected_bindings`
+(section 3.1 line 286) has the same problem: `execution_contexts`
+(`v6_tables.sql:108-136`) has no bindings column, so the values the context hash
+commits to cannot be read back for test 51 unless section 3.9 states they are
+reconstructed from `exposure_items` plus the snapshot. Smallest fix: add
+`v6_tables.sql` to section 2 with the two new columns, extend the `repo.py` row
+and `list_protected_case_snapshots`, and state whether `protected_bindings` is
+stored or reconstructed.
+
+**F11. MINOR. The manifest's canonicalization prose misdescribes its own
+digest.** `bookshop_compare_manifest.json` says `task_specs_sha256` is "sha256
+over the canonical UTF-8 JSON of the parsed public task specs (json.dumps of the
+spec list with sort_keys and compact separators)", but the code round-trips each
+item through `CustomerRequestSpec.model_dump(mode="json")` first
+(`orchestrator.py:1874-1875`), which materializes model defaults. An operator
+following the prose with any sha256 tool, as the same sentence invites for the
+raw pins, cannot reproduce these three values. This is a fixture defect, not a
+gate defect; the file was not edited. Smallest fix: correct the sentence to name
+the model round-trip.
+
+**F12. MINOR. `protected_request_bytes` specifies a second, weaker canonicalizer
+than ADR 0002 requires.** `docs/adr/0002-...:30-31` fixes canonical
+serialization as "sorted keys, compact separators, UTF-8, NFC, floats rejected
+... defined in exactly one module and pinned by golden hash vectors"; that module
+is `domain/canonical.py` (`canonical_bytes`, 65-77, with NFC and float rejection
+at 37-61). Section 3.9 specifies `protected_request_bytes` in
+`domain/task_contract.py` as "sorted keys, compact separators, UTF-8" with no
+NFC, and `ProtectedRequestRow.text: str` accepts a decomposed character, so the
+streamed bytes and `stimulus_hash` could diverge under the two rules. Floats are
+not a risk because `JsonValue` (`domain/models.py:14`) excludes them. The same
+weakness pre-exists at `_canonical_specs_bytes` (`orchestrator.py:1873-1878`).
+Smallest fix: section 3.9 should say both new functions build on
+`canonical.canonical_bytes`, and test 51 should name golden vectors.
+
+**F13. MINOR. The leak scan on the outputs route is adapter-conditional, so the
+offline comparison demo has no scanner.** `routes.py:125` scans only when
+`run.adapter == "tokenfactory" and run.purpose.value == "EXPERIMENT"`. The Slice
+15 demo runs `local_process`, so `/api/runs/{id}/outputs` is served with no
+`assert_public_projection` at all and the ordinal filter is the only control.
+Section 3.9 and test 53 do not say the scan becomes unconditional. Also unscanned
+today: `/runs/{id}/checks`, `/engagements/{slug}/ledger` (whose
+`_resolve_derivation` embeds `request_text` and `output_body_base64`,
+`orchestrator.py:946-948`), the board and the investigations station. Smallest
+fix: one sentence in section 3.9 or 5 making the projection scan unconditional on
+every route that can serve an experiment run, independent of adapter.
+
+**F14. MINOR. The needle length floor silently drops short protected values.**
+`_private_public_needles` ends with `return tuple(needle for needle in needles if
+len(needle) >= 8)` (`orchestrator.py:1410`) and admits an expected note only at
+`len(note) >= 25` (1408). Section 3.9 extends the set to "every protected request
+id, request text, entity ref, record id and expected-block string" but never
+lifts the floor. Surviving values include `book:tide-lines:paperback` (25),
+`public:tide-lines:paperback:price` (33) and `bellwether-prot-011` (19). Silently
+dropped values include a record id under 8 characters, a stock or price scalar
+such as `1` or `1400`, and any expected-block string under 25 characters. AGENTS.md
+section 6 requires proving the needle can match the surface as serialized, and a
+dropped needle cannot fail. Smallest fix: section 3.9 should exempt protected
+stimulus needles from the floor, and test 53 should assert each injected needle
+is present in the scanned tuple before asserting detection.
+
+**F15. MINOR. The revision invalidates four passing tests that pin the rejected
+draft, and neither gate names them.** Gate 2 section 8.1 declares the present
+inventory "unsealed and ineligible" and requires its replacement, but
+`test_experiment_lifecycle.py:633-647` pins the exact three drawn aspect strings
+of the current draft, `:619-622` pins its six-case shape, `:650-669` pins the
+shared cheapest policy that F3 shows Gate 3 contradicts, and `:736-772` pins
+`protected_case_snapshots` at exactly three `payload_json` rows, which F10's new
+columns change. Revised test 17 and new tests 50 to 54 do not mention them.
+Smallest fix: name these four tests in the Slice 15 contract as requiring
+revision alongside obligations 50 to 54, so they are not deleted or weakened to
+reach green.
+
+**F16. MINOR. The operator packet overstates which public requests can
+distinguish the candidates.** Packet lines 134-137 say "On an under-£20 request,
+both can satisfy every mandatory rule while exposing the concrete £2 price versus
+two-unit stock-depth preference". Three requests are under £20 (011, 021, 032),
+but the alternative task is conditional (`unless_collection_confirmed: true`,
+`bookshop_compare_pair_01_specs.json:26`) and in the frozen state both other
+requested entities are collectible on 2026-09-26 (`bookshop_pivot_public_state.json:104`
+for the hardback, `:79` for Harbour Atlas), so the alternative task never fires
+for 021 or 032. Under the proposed comparison state exactly one of six public
+requests, 011, can observably separate A from B. Request 012 cannot, because only
+the £14 item is strictly under £15 and the packet itself says so at line 136.
+Requests 021, 022, 031 and 032 cannot, because collection is confirmed or no
+alternative task exists. One distinguishing request is enough for a visible
+choice, but the packet claims three. The packet was not edited; that is outside
+this review's write scope. Smallest fix: correct lines 134-137 to name request
+011 as the only distinguishing public request and record that the other five show
+mandatory-rule parity.
+
+**F17. MINOR. The public material's stated verification basis goes stale when
+the comparison binds a different state.** `bookshop_compare_manifest.json` says
+"The exact bytes are reviewed public material verified against the frozen
+bookshop_pivot_public_state.json and bookshop_pivot_v1.json rubric", but section
+1's new Comparison state row runs the comparison under
+`bookshop_compare_state_v1.json` instead. Adding a £14 same-genre collectible
+paperback flips request 012's correct answer from a justified fallback to a
+completed alternative, so the specs change meaning even though their bytes do
+not. Neither Gate 2 section 8.1 nor Gate 3 section 6.3 or revised test 17
+requires re-verifying the manifest and public specs against the comparison state.
+Smallest fix: one clause in section 6.3 or test 17 naming the comparison state as
+the verification basis, and correcting the manifest sentence when its bytes are
+re-authored.
+
+**F18. MINOR. Section 6.4 promises an acceptance verdict the same sentence
+defers.** It says `comparison.compare` derives eligibility "including each
+reserved variant's acceptance verdict" and then "(the acceptance reading lands
+with Slice 16)". Section 1's Eligibility row likewise requires that "every
+reserved protected variant must reach its acceptance aspect". Smallest fix:
+qualify the clause with "from Slice 16" so the sentence does not read as
+delivered by Slice 15.
+
+**F19. NIT. `expected_ref_for` is not addressed.** Section 3.9 revises
+`variant_ref`'s inputs but says nothing about `expected_ref_for`
+(`evaluator.py:134-138`), which hashes only `{case_id, expected}`. Ids stay
+distinct so there is no collision and test 13's opaque-ref assertion still holds,
+which makes the silence safe, but section 3.9 should record that the stimulus is
+deliberately excluded so a later reader does not change a public value.
+
+**F20. NIT. Section 3.9 names no owning module for its types.** Section 3.1 line
+286 adds `protected_bindings: tuple[ProtectedBinding, ...]` to `ExecutionContext`,
+which lives in `domain/models.py`, but section 2's `domain/models.py` row (line
+87) is unchanged. `ProtectedStimulus`'s owner is only implied by the
+`task_contract.py` row (line 115). Smallest fix: append "(owns
+`ProtectedStimulus`, `ProtectedRequestRow`, `ProtectedEntityDelta`,
+`ProtectedRecordDelta`, `ProtectedStateDelta`)" to line 115 and "(owns
+`ProtectedBinding`)" to line 87.
+
+### Gate 4 lines needing the public qualifier
+
+Recorded now so the eventual Gate 4 reconciliation does not have to re-derive
+them. In `04-slices.md`: lines 76-79 ("up to four customer requests ... metrics
+use the same actual request denominator"), 243-245 ("Reserve three unexposed
+protected variants"), 263-264 ("up to four customer requests; show the frozen
+per-slot batch size and actual shared denominator"), 266 ("at least six
+semantically independent protected task variants"), 274-275 ("all six trials,
+shared request denominator"), 292 ("The denominator equals the sum of all three
+frozen batch counts"), trace row 16 at line 548, trace row 23 at line 555
+("candidate denominators equal their own three frozen batch request counts") and
+no-go line 592 ("Six-trial cost/latency"). Outside Gate 4: `01-product.md:120-121`
+and `02-architecture.md:325-326`.
+
+### Stop condition
+
+Per the review instruction, Gate 4 was NOT reconciled and `04-slices.md` was left
+unchanged apart from its pre-existing uncommitted edit. Findings F1 and F2 are
+BLOCKER and F3 to F8 are MAJOR, so the condition for proceeding failed. The
+recommended order of repair is F2 and F6 together (one superseding ADR), then F1,
+then F3 and F4 (which are both fixture-authoring prerequisites for Slice 15),
+then F5, F7 and F8. No implementation, operator review, seal, live run, install,
+commit or push is implied by this section.
+
+## Slice 15 gate repair round: 2026-09-28 (all twenty findings dispositioned; Gates 2, 3 and 4 backtracked, pending re-approval)
+
+Scope and authority: this round executed the repair order the review above
+recommended and discharged its stop condition. All 2 BLOCKER, 6 MAJOR, 10 MINOR
+and 2 NIT findings are dispositioned below. Gate 2 S8.1, Gate 3 and Gate 4 are set
+back to IN PROGRESS per the software-factory backtrack rule and await one
+re-approval covering all three. `docs/adr/0006-protected-comparison-stimulus-boundary.md`
+was created as PROPOSED. No implementation logic changed: the only non-documentation
+file touched is `shiftwork/fixtures/requests/bookshop_compare_manifest.json`, and
+only its `description` prose. Nothing was committed, pushed, sealed or run live,
+no credential was used and nothing was installed.
+
+| F | Sev | Disposition and where |
+| --- | --- | --- |
+| F1 | BLOCKER | Repaired. Gate 3 S3.9 gains the mechanism the driver actually needs: a new `executor.base.load_single_request(ref, frozen_bytes, ordinal)` that requires caller-supplied bytes, never resolves `path_ref`, requires exactly one line and requires that line's ordinal to equal the declared one; plus a frozen `TrialSlot.executed_request_count`. S3.5 declares the field, S4 gives `trial_slots` the column with `CHECK (executed_request_count BETWEEN 1 AND 5)` and `CHECK (executed_request_count IN (request_count, request_count + 1))`, S6.3 freezes it at reservation, and S6.4 names all four guards restated against it (`orchestrator.py:2488-2490`, `:2551-2554`, `:2592-2593`, `:2604-2608`). S2's `executor/base.py` row carries the responsibility. Test 50 proves the protected line reaches the service through `load_single_request`, that `load_batch` still rejects it, and that each restated guard accepts the protected ordinal while rejecting one beyond it. Gate 4 S1, the Slice 15 contract and new trace row 50 follow. |
+| F2 | BLOCKER | Repaired. New `docs/adr/0006-protected-comparison-stimulus-boundary.md` splits a sealed comparison case into stimulus that may reach a candidate workspace and controller-held assessment inputs that may not, and names the residual leak channel with its three bounds instead of denying it. Its later refinement also classifies response and service logs as workspace-born execution artifacts retained in restricted captures. ADR 0001 gains a header pointer and a dated update note in its own existing house style; its Decision text is unrewritten. Cited from Gate 2 S8.1 item 3, Gate 2 S19, Gate 3 S3.9 and Gate 3 S8. |
+| F3 | MAJOR | Repaired in documentation; no fixture byte changed. Gate 3 S2's candidate B row now states the greatest-stock preference as REQUIRED NEW BYTES with its `TRUSTED_LOCAL_FIXTURES` pin not yet recomputed, and a note under the table records that both drafts are `min(qualifying, key=lambda entry: (entry[0], entry[1]))` today, quotes B's own docstring against Gate 3, and names the passing test that pins the shared policy. |
+| F4 | MAJOR | Repaired. S3.9 replaces the schema-shaped assertion with an enforced check: reservation rejects a delta whose `add_entities` key or `add_records` `record_id` already exists in the frozen comparison state, and `resolve_protected_state` asserts on its own output that the resolved entity-ref and record-id sets equal the base sets plus exactly the delta's with no duplicates. S3.9 records why a parse proves nothing, since `load_public_state_bytes` has no uniqueness check, and why a collision changes the variant's own answer through `resolve_records` regrouping. S6.3's call stack carries both. Test 51 injects each collision independently and proves the colliding document still parses while the reservation rejects it. |
+| F5 | MAJOR | Repaired. S6.4 fixes the run's stored snapshot bytes to the frozen comparison state for the whole slot, forbids passing the resolved protected state to `repo.set_run_snapshot_bytes`, and states that `output_evidence_for` derives only from the frozen comparison state. S3.9's projection bullet records that the ordinal filter is necessary but not sufficient and why: the derivation is per-run, not per-ordinal. Test 53 adds the protected state digest as a needle and asserts the public ordinals' `public_shop_record`, `public_shop_record_ref` and `public_shop_snapshot_hash` derive from the frozen comparison state. |
+| F6 | MAJOR | Repaired by supersession rather than by reducing the projection. ADR 0006 Decision 4 records the argument: each released aggregate equals the comparison's already-public pair count or a partition of it, so none discloses inventory size, variant identity or an expected value, and the terminal-only gate keeps it from becoming a mid-run feedback channel. Cited from Gate 2 S8.1 item 5 and Gate 3 S3.9. |
+| F7 | MAJOR | Repaired. S3.9 scopes the comparison-family stimulus rule to `load_reviewed_comparison_family` and keeps the attempt-family direction in `load_family`, recording the five surfaces that would otherwise fail closed (`comparison_view`, `_diagnostic_experiment_view`, `investigate_station`, `artifact_source`, `assert_public_projection` via `routes.py:126`), that the rule still fires before any exposure because reservation already uses the reviewed loader at `orchestrator.py:2244`, and that sealing stays a separate authorization. S2's sealed-cases row repeats it. |
+| F8 | MAJOR | Repaired. `CandidateMetrics.denominator_requests` renamed `public_denominator_requests` and `ComparisonOutcome.shared_denominator_requests` renamed `shared_public_denominator_requests`; neither old name exists anywhere in the tree, so nothing breaks. "public" added at S3.4's batch bound, S6.3 and test 23, which is also renamed to `test_metrics_share_one_public_denominator_and_unknown_is_not_zero` and records the rename. Gate 2 S8's shared denominator qualified. Gate 4 S1, the Slice 15 limits and demo lines, the mutation clause and trace rows 16 and 23 qualified. |
+| F9 | MINOR | Repaired. S2 names the pin's home as the two existing pin-guard dicts, `PINNED_PUBLIC_FIXTURE_HASHES` and `test_pivot_review_bytes_and_catalog_binding`'s expected map, following the Slice 11 precedent. Test 16 asserts against that pin, so an edited comparison state fails both pin guards and the obligation. Gate 2 S8.1 item 1's three delegated items are now all named. |
+| F10 | MINOR | Repaired. S2 gains a `store/migrations/v6_tables.sql` row and extends the `repo.py` row. S4's `protected_case_snapshots` row names `resolved_state_bytes BLOB NOT NULL` and `resolved_state_sha256 TEXT NOT NULL`, notes its existing triggers already cover them, and gives `load_reserved_comparison_cases` a `ReservedProtectedCase` return shape. `execution_contexts` records that `protected_bindings` is reconstructed from the reservation and not stored. |
+| F11 | MINOR | Repaired at the source rather than deferred. The manifest's `description` now names the `CustomerRequestSpec.model_dump(mode="json")` round-trip and states that a plain sha256 of the parsed list will not reproduce the values. The file moved from 2,249 bytes and `68fa2df2...` to 2,817 bytes and `848e8cfd0a146be6406c961a3a91bb26684e20302e98b72308f1b29b636499f6`; the packet re-records both. The `workloads` array is byte-identical, so the sealing digest `c1e336635ff0...` and all three `task_specs_sha256` values are unchanged, verified by recomputation. |
+| F12 | MINOR | Repaired for the new functions; the pre-existing one is recorded, not silently changed. S3.9 requires `protected_request_bytes` and `resolve_protected_state` to build on `domain.canonical.canonical_bytes`, so both are NFC-normalized and float-rejecting, and test 51 pins golden vectors plus a decomposed-character text. S3.9 also records that migrating `_canonical_specs_bytes` would change all three recorded spec digests, with the exact before and after values (`09708812...` to `fa27937f...`, `a7567bdb...` to `1440d3c6...`, `19e3fe78...` to `b553b9aa...`, differing only on the pound sign under `ensure_ascii`), and assigns that change to the manifest re-authoring with recomputed pins. |
+| F13 | MINOR | Repaired. S3.9 requires `assert_public_projection` unconditionally on every route that can serve an experiment run and names the five surfaces unscanned today. Test 53 runs the whole scan against a `local_process` run as well as a `tokenfactory` run, so the guarantee is proved adapter-independent rather than passing only on the adapter that happens to be scanned. |
+| F14 | MINOR | Initially repaired with a blanket scanner floor exemption; that treatment is superseded by the follow-on review below because a scalar such as `1` matches ordinary public counts. S3.9 and test 53 now keep the floors for substring needles and prove short or overlapping values through source and ordinal assertions, with a valid public `1` positive control. |
+| F15 | MINOR | Repaired. All four invalidated obligations are named in Gate 3 S9 and in the Gate 4 Slice 15 contract as requiring revision in this slice with a failing-capable replacement assertion, so they cannot be deleted, skipped or weakened to reach green. |
+| F16 | MINOR | Repaired. The packet now names request 011 as the only distinguishing public request, gives the per-request reason the other five cannot separate the candidates, and puts the resulting fairness question to the operator explicitly. Verified against the frozen state before editing: `book:salt-roads:paperback` has `can_collect: false`, so only 011 and 012 fire the conditional alternative task, and `book:harbour-atlas:paperback` and `book:salt-roads:hardback` are both collectible, so 021 and 032 never fire it. |
+| F17 | MINOR | Repaired. S6.3 names the comparison state as the verification basis for the manifest and the three spec files and explains why a spec's bytes can stay identical while its correct answer moves. Test 17 asserts against the comparison state's pin. The manifest's stale basis sentence is corrected. |
+| F18 | MINOR | Repaired. S6.4 and S1's Eligibility row both mark the acceptance verdict as Slice 16 and state what Slice 15 derives instead: public assessments plus protected capture completeness, reporting no acceptance verdict. |
+| F19 | NIT | Repaired. S3.9 records that `expected_ref_for` deliberately excludes the stimulus, and why: it produces the opaque `sealed:` pointer a learner-facing check result carries, so folding stimulus in would make a public value change whenever a protected request was reworded. |
+| F20 | NIT | Repaired. S2's `domain/models.py` row names `ProtectedBinding` and its `domain/task_contract.py` row names the five protected stimulus types plus both functions, and records that the evaluator already imports that module so no new or sealed edge is created. |
+
+### Adjudications where the review offered a choice or where this round pushes back
+
+1. **F6 chose supersession over reducing the projection to a boolean.** The
+   review offered both. Reducing it would delete information the learner is
+   entitled to, because Gate 2 S8.1 item 3 requires a missing or unavailable
+   stimulus to stay visible, while protecting nothing: the count is already
+   derivable from the public pair count. Superseding with the argument recorded is
+   the honest resolution. Rejected alternative: a boolean reserved-or-missing flag.
+2. **F7 chose loader scoping over re-authoring the draft in the same change.** The
+   review offered both. Re-authoring six stimulus-bearing sealed variants is
+   separately authorized fixture work and the operator seal is not held, so the
+   scoping option is the only one available without widening authorization. It
+   keeps every public surface working today and still fails closed at reservation.
+3. **F1 chose a `load_single_request` sibling over an expected-ordinal argument on
+   `load_batch`.** `load_batch`'s consecutive-from-1 invariant has eight production
+   call sites. Relaxing it, even through an optional argument, makes the public
+   path's guarantee conditional on a caller-supplied value; a sibling that requires
+   exactly one row at a declared ordinal cannot accept a public batch shape at all,
+   so the public invariant stays unconditional.
+4. **F9 chose the existing pin-guard dicts over a review envelope inside the state
+   file.** The Slice 11 state's pin already lives in those dicts, and an envelope
+   would change the document's shape and force `load_public_state_bytes` to unwrap
+   it, touching a loader that accepted evidence depends on.
+5. **F10 chose reconstruction over a stored bindings column.**
+   `execution_contexts` already carries `protected_reservation_id`, and Gate 2
+   S8.1 item 4 requires execution to reconstruct reserved bytes from the restricted
+   reservation. A stored copy would give the same digests two sources of truth.
+6. **F11 and F17 corrected the manifest prose now rather than deferring to
+   re-authoring.** No code or test pins the manifest's own bytes, the file is
+   explicitly `AWAITING_OPERATOR_REVIEW`, and `_require_reviewed_comparison_material`
+   computes its seal digest over `data["workloads"]` only, so a `description` edit
+   provably cannot disturb it. Leaving a knowingly false reproducibility
+   instruction in an operator-facing document across a review round was the worse
+   risk. The packet's pin was re-recorded in the same change, and the file was
+   rewritten as bytes with LF preserved.
+7. **PUSHBACK, not repaired: `01-product.md:120-121`.** The review listed it under
+   F8 but its own smallest fix excluded it, and on inspection it is not a defect.
+   "Compare useful answers, wrong answers, justified refusals and human referrals
+   separately, with the same denominator" states a fairness principle, that both
+   candidates are measured over the same denominator. The public and protected
+   split does not contradict it, because each of the two denominators is shared by
+   both candidates. Backtracking an approved Gate 1 over a non-contradiction would
+   be disproportionate, and Gate 1 must stay free of implementation choices. Left
+   unchanged deliberately.
+
+### Two further defects found during this round and fixed, which the review did not report
+
+- **Gate 2 S8.1 item 5 contradicted item 3.** Item 5 listed the protected request
+  and the resolved state among material that stays "controller-only", while item 3
+  requires streaming both into the candidate workspace. Item 5 now separates
+  assessment material, which is controller-only absolutely, from stimulus, which
+  reaches the workspace inside the protected phase and is still never projected.
+  Same root cause as F2, and repaired by the same edit.
+- **Gate 4's header was stale against this file.** It read "Slices 10 through 12
+  were implemented and accepted by the user by 2026-09-27; Slice 13 onward is
+  unbuilt", while Slices 13 and 14 are both accepted below. Corrected to Slices 10
+  to 14 accepted, Slice 15 in progress on its own go-ahead, Slice 16 onward
+  unbuilt, with the correction noted in place rather than silently made.
+
+### Verification
+
+- Offline suite: `.venv313/Scripts/python.exe -m pytest tests -q
+  --ignore=tests/packaging --ignore=tests/client -p no:cacheprovider` exited 0 with
+  `518 passed, 1 skipped, 2 warnings in 125.40s`, matching the review's baseline
+  exactly. No new failure and nothing newly passing.
+- Mutation proofs: `.venv313/Scripts/python.exe -m tests.pivot_mutation_proofs`
+  exited 0. Full output captured to a file rather than a tail pipe, because a
+  truncated tail has produced a miscount here before: 77 lines, 77 `FAIL_CAUGHT`,
+  77 `restored=True`. Matches the review's baseline of 77 of 77.
+- The manifest was recomputed after the prose edit: 2,817 bytes, zero CR bytes,
+  parses as JSON, `workloads` canonical digest still
+  `c1e336635ff0bb28b7393cd7c9c197931338e89c5e697a1a8db17c9176ff0234`, and all
+  three `task_specs_sha256` values unchanged.
+- Writing rules: grep for em dash, en dash and section symbol returns zero matches
+  across ADR 0006, both gate documents, Gate 4, the packet and the manifest. ADR
+  0001 retains its two pre-existing em dashes, in its title and at its line 34, and
+  this round added none.
+- Line endings: `core.autocrlf=true`, all touched documents are CRLF in the working
+  tree as before, and the manifest was written as bytes so it stayed LF-only, which
+  `test_pivot_review_bytes_and_catalog_binding` requires of pinned fixtures.
+
+### What this round does not authorize, and the next step
+
+Gates 2, 3 and 4 are backtracked and pending one re-approval covering all three;
+ADR 0006 is PROPOSED and does not take effect until that re-approval lands. The
+review's stop condition is discharged on the repair side, but the condition for
+proceeding was zero BLOCKER and zero MAJOR *accepted*, and acceptance is the user's,
+not this round's.
+
+Slice 15's remaining fixture work is separately authorized and unstarted: candidate
+B's greatest-stock bytes and its recomputed `compare_candidate_b` pin,
+`bookshop_compare_state_v1.json` and its two pin-guard entries, the six
+stimulus-bearing protected variants, and the operator review and seal. The
+live-comparison cost estimate must be revised for twelve executor operations across
+the six slots before any live comparison is authorized, since the accepted Slice 12
+verdict covers six single-operation trials.
+
+The recommended re-approval question is: approve the repaired Gate 2 S8.1, Gate 3
+and Gate 4 reconciliation together with ADR 0006, or what should change?
+
+## Follow-on gate review: 2026-09-28 (two additional design defects repaired; re-approval still pending)
+
+An independent read after the twenty-finding disposition found two further
+design defects in the proposed text. First, ADR 0006, Gate 2 S8.1 item 5 and
+Gate 3 S3.9 classified the protected response and service logs as assessment
+material that never enters a candidate workspace. The candidate service creates
+both there. The revised boundary keeps controller-held assessment inputs and controller
+assessments out of the workspace, describes the response and logs as transient
+execution artifacts retained in restricted captures, and keeps all protected
+captures off learner-facing surfaces. It also qualifies ADR 0006's case-text bar
+to assessment case text, since the protected request text intentionally crosses
+the boundary.
+ADR 0006 also no longer treats public-shaped delta values as proof that the
+right answer cannot be inferred: they contain no authored expected block, but
+the public rules can make an answer inferable from the state.
+
+Second, Gate 3 test 53 and Gate 4's trace row required the global substring
+scanner to include a protected scalar such as `1`. The current scanner returns
+true for `serialized_contains({"pair_ordinal": 1, "request_count": 2}, "1")`,
+so that rule would reject a normal public projection. S3.9 and test 53 now use
+global needles only for protected-only strings proven absent from valid baseline
+projections; short or overlapping identifiers and scalars require a two-variant
+source-invariance check and independent ordinal faults. The test also requires
+a valid public payload containing `1` to remain servable. The Gate 4 trace
+row matches. Needle selection is fixed before each payload scan and cannot
+silently discard a needle that the payload contains.
+
+These were documentation corrections only. The scalar collision was reproduced
+with the installed local Python environment; the 518-test suite and 77 mutation
+proofs cited above were run before these corrections and were not rerun for them.
+The final Gate 3 test 53 wording specifies separate fresh stores and one
+deterministic fake adapter for the two-variant source-invariance proof, then
+checks both adapter projection paths separately. The supporting brief was
+updated to show the current backtracked gate state.
+No implementation, operator review, seal, live run, credential use, commit or push
+followed. Gates 2, 3 and 4 remain BACKTRACKED and IN PROGRESS, and ADR 0006 stays
+PROPOSED until explicit user re-approval.
+
+## Slice 15 scoped Gate 2 backtrack: 2026-09-28 (resolved above)
+
+Gate 2 was IN PROGRESS for the section 8.1 protected-stimulus proposal in
+`02-architecture.md`; the user re-approved the revised design on 2026-09-28.
+The six current protected entries name rule aspects but
+have no distinct request or state stimuli. Their labels and hashes cannot prove
+semantic independence. The current public state also gives the two draft
+candidates only one qualifying alternative, so their observed difference is
+optional price content that the rubric does not value. The operator packet
+records an unsealed comparison redesign and six concrete proposed falsifiers.
+Gate 3 and Gate 4 remain historically approved but need scoped reconciliation
+after Gate 2 re-approval. No operator review, seal, Slice 15 acceptance, live
+comparison, commit or push is implied. Independent review repairs to restart
+recovery, batch parsing and regression guards remain uncommitted on
+`shiftwork/slice-15` and do not authorize the dependent comparison redesign.
+
+Review verification on this branch, without credentials or live calls:
+
+- Failing-first tests reproduced the reserved, claimed and mid-slot restart
+  strand, the executor-incompatible extra blank line, and a pre-adapter error
+  that left a touched slot marked RESERVED. The targeted tests passed after
+  repair. A simultaneous same-key HTTP POST test held both background workers
+  before claim and observed one experiment, one exposure reservation, six
+  slots and six adapter executions.
+- The reservation fault matrix now covers the protected snapshot insert and
+  the experiment-link UPDATE as well as the other seven writes. Every injected
+  failure rolled back with no consumed exposure. A comparison-specific
+  before/after guard found no ledger or incident change during reservation and
+  six-slot execution; injected ledger and incident writes separately tripped
+  that guard.
+- Final offline suite: `.venv313/Scripts/python.exe -B -m pytest tests
+  --ignore=tests/packaging -p no:cacheprovider -q` exited 0 with `518 passed,
+  1 skipped, 2 warnings in 85.44s`. The skip is the live adapter conformance
+  test; packaging was excluded because it installs.
+- Final mutation run: 77 of 77 `FAIL_CAUGHT`, each `restored=True`, exit 0.
+  SHA-256 was printed for all 14 mutated source files before and after;
+  all before/after byte comparisons matched. The new restart, blank-line and
+  pre-adapter faults failed their named assertions. `git diff --check` exited
+  0. No UI file was changed in this review round, so the earlier browser
+  preview is historical, not a fresh visual check of this final tree.
+
+## Slice 15 cleanup and duplicate-worker repair: 2026-09-28
+
+Slice 15 remains unaccepted and unsealed. An implementation review found that a
+same-key comparison POST could schedule a second background worker while the
+first was running. A failing test paused worker one and observed worker two
+entering the reserved slots (`BlockingFirst.calls == 6`, expected 1). The
+controller now reserves a comparison in `PLANNED` and atomically claims it as
+`RUNNING` when one worker starts; replays of a running or terminal experiment
+do not schedule another worker. A thrown slot error marks the experiment
+`FAILED` while retaining the failed slot and remaining reserved slots. The
+reservation fault test now injects into `update_trial_slot`, an actual
+reservation write, instead of the removed state update.
+
+- Focused lifecycle module after the first new test: 56 passed, 2 warnings.
+  Both new targeted tests later passed; the full suite below includes both.
+- Full offline suite, packaging excluded: `503 passed, 1 skipped, 2 warnings`
+  in 69.73s. The skip remains the live adapter conformance test.
+- Mutation proof: one direct run found two stale proof specifications, which
+  were corrected; a second direct run hit an intermittent Windows `OSError 22`
+  writing `shiftwork/orchestrator.py` before it printed a verdict. The file was
+  intact and compiled. The same 74 cases were then run with per-row output:
+  `74 of 74 FAIL_CAUGHT restored=True`, exit 0. This is the verified result;
+  the interrupted direct attempt is not counted as a pass.
+- Fresh local preview at `http://127.0.0.1:8173`, stopped after the proof:
+  `node tests/client/browser.mjs http://127.0.0.1:8173 --compare-demo` exited 0,
+  reported `FINALIZED`, six slots in the stored order and zero uncaught
+  exceptions. This was a draft-review test preview, not production admission.
+- Architect-reviewer post-slice cleanup scan: inspected 246 tracked and 13
+  untracked paths, checked new fixture/helper references, looked for stale
+  documents and exact duplicate test files. No new orphan or exact duplicate
+  test file was found. `tests/client/draft_review_preview.py` is used by the
+  render-fault harness; the exposure invalidation helpers are assigned to
+  Slice 16. No deletion is recommended. This scan precedes acceptance and
+  should be repeated if the tree changes materially.
+- Agent-authored material review recommendation: revise before sealing. The
+  two draft candidates differ intentionally in optional price content while
+  using the same mandatory repair logic. The current public rubric does not
+  establish a measured learner-relevant preference between those answers.
+  Whether the six protected rule aspects are semantically independent remains
+  an operator decision. No operator review, independent review round, live
+  six-slot call, acceptance, commit or push happened in this session.
+
+## Slice 15 browser proof repaired and rendered: 2026-09-27
+
+Slice 15's offline implementation and mutation proofs were already verified in
+`slice15-implementation-plan.md`; the one open item was the browser proof, which
+had exited 1 with `CDP timeout: Runtime.evaluate`. Root-cause work against a
+disposable preview found three harness defects and no product defect. A
+read-only HTTP probe against a real uvicorn server (not TestClient) had already
+shown the whole compare sequence, investigation through six-slot FINALIZED,
+completing in 2.531 s with every slot COMPLETE, which ruled out server slowness
+before any change.
+
+- Defect 1: `wait('candidate A freeze')` was true from the initial render, so the
+  page function clicked freeze B while `state.pending` had disabled the button
+  and the click was swallowed; instrumented output showed the A wait returning at
+  0.00 s with the list still reading `not frozen yet`. The waits now gate each
+  click on the control being enabled and assert the rendered frozen version.
+- Defect 2: the harness's 20 s CDP send timer was shorter than the page
+  function's 60 s polling deadline, so every page-level failure surfaced as the
+  opaque transport error. The send timer is now `CDP_TIMEOUT_MS = 90000`,
+  strictly above the longest in-page deadline.
+- Defect 3: the six-slot wait compared the rendered `humanize`d state (lowercase)
+  against `'FINALIZED'`, and slot task rows were matched on `task_id` plus
+  verdict only, which collides because a two-request workload assesses each task
+  once per request. The slot row now carries `data-request-ordinal` and the
+  harness asserts the displayed ordinal as well as the dataset.
+- Repaired proof (verbatim): `node tests/client/browser.mjs
+  http://127.0.0.1:8159 --compare-demo` exited 0 with `compareDemo` =
+  `experiment-bookshop-shift-01-c1`, `FINALIZED`, slots
+  `1:1A/workload-01/2 2:1B/workload-01/2 3:2B/workload-02/2 4:2A/workload-02/2
+  5:3A/workload-03/2 6:3B/workload-03/2` and `uncaughtExceptions` 0.
+  `artifacts/slice9/compare-1280.png` and `compare-390.png` were inspected: every
+  slot shows pair, candidate, step, workload, request count, version, run and
+  trusted-local mode with the frozen request texts, and the panel states that the
+  station never picks a winner.
+- Failing-capability (verbatim): `node tests/client/render_faults.mjs` printed
+  `render-fault rows: 11 of 11 as expected`, exit 0. The baseline row now runs
+  `--compare-demo`, and the three new rows each failed their own named
+  assertion: `candidateFreeze` at `Timed out waiting for candidate A freeze`,
+  `slotOrdinalText` at `Slot 1 does not display the request ordinal for price`,
+  `slotOrdinalKey` at `Slot 1 renders no price request 1 row with the payload
+  verdict`.
+- Re-verification after the client and harness repairs: the offline suite
+  returned `488 passed, 1 skipped, 2 warnings in 75.89s` and
+  `tests/pivot_mutation_proofs.py` exited 0 with 63 of 63 rows `FAIL_CAUGHT
+  restored=True`, both matching the Slice 15 baseline.
+- Unchanged and still open: the three public workloads, the visible requirements
+  and the six protected variants stay `AWAITING_OPERATOR_REVIEW` and unsealed;
+  live execution credentials and cost remain unauthorized; nothing is committed
+  or pushed for Slice 15.
+
 ## Slice 14 started, offline and bounded live proof: 2026-09-27
 
 The user explicitly said to start Slice 14, fold the Return/Away Investigate

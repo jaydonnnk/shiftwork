@@ -1,5 +1,186 @@
 # Mistakes Log
 
+## 2026-09-28 Slice 15 render-fault run could not tell its preview from a foreign server
+
+- What happened: the first `render_faults.mjs` run after the protected-phase
+  client change reported `0 of 12 as expected`; every row failed at page load
+  with `Expected ready, got undefined`. The preview script prints its banner
+  line before uvicorn binds the port, so a port already held by another local
+  application is indistinguishable from a healthy preview at start time, and
+  the browser talks to whatever answers. A foreign app (an unrelated
+  WorkBuddy/CareRelay service) was found listening on the fixed default port
+  8137 minutes later; the same checks pass against a manually started preview
+  and on a free port.
+- Root cause: the harness treated the banner line as proof of reachability, and
+  the fixed default port let a collision with an unrelated local application
+  misattribute every row's failure to the product.
+- Prevention rule: after spawning a server whose banner precedes its bind,
+  poll that server's own endpoint until it answers before running any check
+  (now `waitReachable()` in `render_faults.mjs`), and run preview checks on a
+  port verified free when the default is in doubt; a port collision is a
+  harness-environment failure, never a red product row.
+
+## 2026-09-28 Slice 15 compare-demo harness kept the pre-protected copy assertion
+
+- What happened: the first `--compare-demo` run after the protected-phase round
+  exited 1 at `Slot 1 renders the wrong frozen batch size`. The slot row copy
+  had changed to `N public requests + M protected steps`, while the harness
+  still asserted the old `N request` substring, so the assertion could no
+  longer match a correct render. The harness was updated to the rendered copy
+  and gained a protected-step limb with its own served-source fault row
+  (`slotProtectedCount`); the rerun passed.
+- Root cause: the client copy changed during the protected-phase round without
+  its browser assertion being updated in the same change, and the browser check
+  was deferred, so the staleness surfaced only when it was finally run (the
+  same client-untested-with-shell-contract pattern as the 2026-09-26 Slice 11
+  entry).
+- Prevention rule: when a client rendering change alters value-bearing copy
+  that a browser assertion reads, update that assertion and add its fault row
+  in the same change; run the browser check before claiming the tree complete
+  rather than leaving it as a pending item across a round boundary.
+
+## 2026-09-28 Slice 15 protected-phase guards masked four older proof rows
+
+- What happened: the protected-phase round added a cluster of guards on the
+  comparison path (a frozen context-hash re-verification, a protected-ordinal
+  tie, a readback that raises on a missing snapshot) and rebuilt its own proof
+  rows, but the first full run under the hardened driver found four older rows
+  had silently lost proof-grade status: the snapshot write-removal row was
+  `CAUGHT_INCIDENTAL` (the reservation readback raises `InvalidSealedCase`
+  before any assertion), and the manifest count row and both slot-binding rows
+  were `NOT_CAUGHT` (the frozen context-hash re-verification catches every
+  context tamper globally, and the count tamper also trips the protected-ordinal
+  tie). Focused per-round checks had stayed green because each row still ran.
+- Root cause: a new guard placed earlier in a shared path changes which
+  mechanism catches an old row's tamper; the row's named assertion no longer
+  observes anything, and a focused run cannot distinguish a row that proves its
+  guard from a row whose tamper is caught elsewhere.
+- Prevention rule: after adding a guard on a path that existing rows anchor
+  onto, re-run the full harness on the settled tree and treat any previously
+  green row that flips to `NOT_CAUGHT` or `CAUGHT_INCIDENTAL` as masking to be
+  re-anchored. Re-anchor the row onto its own guard's limb with a tamper that
+  only that limb catches (here `[slot_hash]` for the slot binding,
+  `[extra_request_with_recomputed_pin]` for the count check and
+  `[wrong_request_id_with_recomputed_pin]` for the request-line identity), and
+  give the masking guard its own row so it is proven too.
+
+## 2026-09-28 Slice 15 two proof shapes measured unprovable
+
+- What happened: repair attempts produced two fault shapes that cannot reach an
+  assertion-level catch. (1) A remove-the-write mutation for the protected-case
+  snapshot write reads as the reservation readback's `InvalidSealedCase` under
+  every reachable shape (`CAUGHT_INCIDENTAL`), so no assertion observes the
+  write. (2) The slot-count limb
+  (`workload.request_count != slot.request_count`) has no failing-capable
+  tamper: with the limb removed, the `[slot_count]` update is caught only by
+  the comparison view's private-material guard raising `LifecycleError`
+  ("public comparison evidence contains private material", measured
+  `CAUGHT_INCIDENTAL`). (3) The original count-check tamper
+  (`wrong_claimed_count`) set `request_count` to 1, which trips both the
+  recomputed count check and the protected-ordinal tie, so it could prove
+  neither.
+- Root cause: each shape was chosen for what it removes, not for the unique
+  divergence it produces; overlapping guards meant the tamper's first
+  observable failure was never the limb under test.
+- Prevention rule: before claiming a row, construct the tamper so the limb
+  under test is the only reachable divergence (recompute every other pin, keep
+  every other check satisfied) and measure the candidate shape; when a removal
+  stays green or turns incidental, record the limb as unproven (or retire the
+  row onto a provable limb) instead of counting the red run as coverage.
+
+## 2026-09-28 Slice 15 mutation run crashed at row 95 and left a stranded mutation
+
+- What happened: the 96-row mutation proof run crashed while restoring
+  `shiftwork/orchestrator.py` after the `s15_protected_counts_before_terminal`
+  row: `OSError: [Errno 22] Invalid argument` on the restore write. The mutated
+  file stayed on disk (the mutation is valid Python, so it still compiled), and
+  because stdout was block-buffered into a redirected log, the crash discarded
+  every completed row's output, so the run produced no usable result table. The
+  stranded mutation was found by re-running the anchor check over all 96 rows
+  (exactly one anchor broken), reverted byte-precisely, and the focused tests
+  passed again.
+- Root cause: two compounding hazards. (1) a Windows write to this
+  OneDrive-synced tree can transiently fail with `EINVAL`, and the shared
+  runner's restore has no retry, so the row's own `finally` died. (2) the
+  runner prints per-row progress with `end=" "` and the final table only; when a
+  crash happens mid-list, buffered per-row evidence is lost along with the run.
+- Prevention rule: run the mutation harness with per-row flushed output and a
+  results file appended after each row, so any crash preserves the completed
+  rows and names the failing one. After a crashed or interrupted run, never
+  trust the tree: re-check every row anchor against the working tree, compile
+  every target, revert the identified stranded mutation byte-precisely, and
+  treat the run as not a pass.
+
+## 2026-09-28 Slice 15 reservation fault test assumed the wrong SQLite error class
+
+- What happened: the new fault test correctly reached the reservation-link
+  UPDATE but failed because the SQLite trigger raised `IntegrityError` while
+  the assertion expected `OperationalError`.
+- Root cause: the test assumed all injected database faults share one SQLite
+  exception subtype, despite `RAISE(ABORT, ...)` using an integrity error.
+- Prevention rule: match the distinctive injected message and the `sqlite3.Error`
+  family when the proof spans both Python-raised and trigger-raised faults.
+
+## 2026-09-28 Slice 15 execution claim: stale fault and mutation targets
+
+- What happened: after moving the comparison's `RUNNING` transition from
+  reservation to the worker claim, the focused suite still injected a fault
+  into the removed reservation-time state update and failed. The first mutation
+  run also had one exact-byte anchor that no longer matched mixed line endings
+  and one `expect` field written as an assertion message instead of a test ID.
+- Root cause: I changed the write boundary without updating its fault target
+  and proof metadata in the same edit, and I did not inspect the mutation
+  runner's exact-byte and test-selector rules before editing the rows.
+- Prevention rule: when moving a durable write across a lifecycle boundary,
+  remap its fault injection to a real write at that boundary and remeasure the
+  source bytes used by mutation anchors. The runner's `expect` names the
+  failing test, not the message. Run the full proof and retain its exit status.
+
+## 2026-09-27 Slice 15 browser proof: a wait condition true on the initial render hides a swallowed click
+
+- What happened: `node tests/client/browser.mjs ... --compare-demo` exited 1 with
+  `CDP timeout: Runtime.evaluate`. Byte-level instrumentation of the page function
+  showed `wait('candidate A freeze')` returning at 0.00s while the candidate list
+  still read `not frozen yet`: its condition `textContent.includes('Candidate A')`
+  is true from the first render, and `'Candidate A\nnot frozen'` never matches
+  because the row renders `Candidate Anot frozen yet`. The script therefore clicked
+  freeze B while `state.pending` had disabled the button; the click was swallowed and
+  candidate B never froze.
+- Root cause: the wait asserted a substring the initial render already satisfies
+  instead of the state the click is supposed to produce. A wait that can pass before
+  its action completes is not a wait.
+- Prevention rule: a wait condition must be false immediately before the action it
+  follows and true only after that action's rendered effect; read the initial
+  render's text before choosing the condition. Gate every click on the control being
+  enabled, and make each in-page wait name its own limb when it times out.
+
+## 2026-09-27 Slice 15 browser proof: a transport timer shorter than the page deadline replaced the real error
+
+- What happened: the harness's CDP send timer (20s) fired before the page function's
+  own 60s polling deadline, so three separate page-level defects all reported the same
+  opaque `CDP timeout: Runtime.evaluate`; the last written screenshot was the only
+  clue to where execution stopped.
+- Root cause: the transport backstop was shorter than the longest in-page deadline, so
+  the transport always failed first and hid the page's own error message.
+- Prevention rule: a transport-level timeout must be strictly greater than the longest
+  deadline of any page function it awaits (now `CDP_TIMEOUT_MS = 90000` against a 60s
+  in-page ceiling). When a timeout message names only the transport method, treat the
+  real error as hidden and instrument the page function before choosing a fix.
+
+## 2026-09-27 Slice 15 browser proof: rendered rows matched on an identity that duplicates
+
+- What happened: after the first two repairs the run failed `Slot 1 task row does not
+  match the API payload for alternative`. A two-request workload assesses each task
+  once per request, so `task_id='alternative'` appeared twice with the same verdict
+  (`pass`) and different outcomes; the finder matched task_id plus verdict and
+  returned the ordinal-1 row for both payload entries.
+- Root cause: the rendered row's identity (task_id + verdict) was not unique for the
+  data it displays. The diagnostic path assesses one pinned request per task, so the
+  collision never appeared there.
+- Prevention rule: before matching rendered rows to payload entries, check that the
+  payload's identifying keys are unique per row for the widest input the surface
+  accepts (here more than one request per workload), and expose any missing key as
+  both a dataset attribute and displayed text so each limb is failing-capable.
 ## 2026-09-27 Slice 14: live assist probe used a mismatched investigation
 
 - What happened: all three authorized live assist calls used a source request about Dune shelf availability, while the submitted learner cause asserted a price, collection and alternatives failure. The model repeated or expanded the unsupported tasks.
@@ -1008,3 +1189,39 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **Prevention rule:** apply a claim-defining bound on every call path
   including injection seams, and pin it with a test that fails when the seam
   bypasses the bound.
+
+## 2026-09-28 Slice 15 ledger-state test guessed the chain label
+
+- **What happened:** the first focused run failed one new assertion because it expected VERIFIED; the ledger verifier actually records VALID.
+- **Root cause:** I guessed an enum value instead of checking the existing chain contract before writing the assertion.
+- **Prevention rule:** read the declared enum or a stored baseline value before asserting exact status text, then run the focused check immediately.
+
+## 2026-09-28 Slice 15 review repairs initially failed focused tests
+
+- **What happened:** a new variant identity passed a tuple to the canonical hasher, which accepts JSON-shaped lists, and an edited candidate B no longer matched its frozen source pin. Two focused tests failed before both were corrected.
+- **Root cause:** I changed content-bearing data without checking the hasher's accepted input shape or regenerating the pin in the same edit.
+- **Prevention rule:** use JSON-shaped values at canonical hash boundaries and recompute candidate pins immediately after any source edit, then run the focused reservation and pin checks.
+
+## 2026-09-28 Slice 15 case reorder introduced CRLF into a byte-addressed fixture
+
+- **What happened:** the focused conformance run found CRLF in the new protected case JSON after a Windows text rewrite; 129 tests passed and one failed. I normalized that file to LF before rerunning.
+- **Root cause:** a text writer applied Windows newline translation to a file whose exact bytes are part of the authored evidence.
+- **Prevention rule:** write byte-addressed fixtures as bytes or explicitly force LF, then check newline counts and content hashes before running conformance.
+
+## 2026-09-28 Slice 15 edits overlapped mutation proof restoration
+
+- **What happened:** I started a mutation proof run as a baseline and edited source before it finished. Its restore step overwrote an orchestrator patch and left the mutation result contaminated by an in-progress evaluator edit. The 77-row run exited 1 and is not a valid baseline.
+- **Root cause:** the mutation harness rewrites and restores production files, so edits and the run cannot safely overlap.
+- **Prevention rule:** complete and inspect a mutation run before editing any file it can target; after an overlap, recheck touched bytes and rerun proofs only on a settled tree.
+
+## 2026-09-28 Slice 15 spec-hash assertion was indented one level too deep
+
+- **What happened:** the first focused rerun stopped at collection with an `IndentationError` in the revised workload pin assertion.
+- **Root cause:** a patch carried indentation from the inner spec list while replacing an assertion at the outer workload level.
+- **Prevention rule:** compile a touched Python test file before starting a long focused run, then inspect the exact edited lines after a multiline patch.
+
+## 2026-09-28 Slice 15 scanner call added an undefined connection
+
+- **What happened:** the full suite found five assist failures because `assist_event_view` called `assert_public_projection(view, conn)` even though that function has no `conn` argument.
+- **Root cause:** a broad replacement matched the assist view while changing scanner calls for experiment routes.
+- **Prevention rule:** anchor scanner edits to the owning function, inspect every changed call site, and run the focused assist route test before the full suite.
