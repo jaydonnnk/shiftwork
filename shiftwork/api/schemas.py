@@ -4,7 +4,7 @@ import base64
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from shiftwork.domain.models import (
     ArtifactVersion,
@@ -392,18 +392,36 @@ class AssistEventView(BaseModel):
 
 
 class ExperimentRequest(BaseModel):
-    """S11 accepts diagnostics only; comparisons arrive with their own slice.
+    """A diagnostic (S11) or a qualifying comparison (S15).
 
-    The controller chooses the workload, the adapter and the treatment, so this
-    body carries no candidate list, no context and no declared treatment.
+    The controller chooses the workloads, the adapter and the frozen material, so
+    this body carries no candidate list, no context and no workload paths. A
+    comparison names its two candidate versions and the treatment the learner
+    declared for the difference between them; a diagnostic names one candidate.
     """
 
     model_config = _FROZEN
 
-    kind: Literal["DIAGNOSTIC"]
+    kind: Literal["DIAGNOSTIC", "QUALIFYING_COMPARISON"]
     investigation_id: str | None = None
     candidate_a_version_id: str
+    candidate_b_version_id: str | None = None
+    declared_treatment: str | None = Field(default=None, max_length=2000)
     client_request_id: str
+
+    @model_validator(mode="after")
+    def _check_kind_shape(self) -> "ExperimentRequest":
+        if self.kind == "QUALIFYING_COMPARISON":
+            if self.candidate_b_version_id is None:
+                raise ValueError("a qualifying comparison needs two candidate versions")
+            if self.declared_treatment is None or not self.declared_treatment.strip():
+                raise ValueError("a qualifying comparison needs a declared treatment")
+        else:
+            if self.candidate_b_version_id is not None:
+                raise ValueError("a diagnostic names exactly one candidate")
+            if self.declared_treatment is not None:
+                raise ValueError("a diagnostic carries no declared treatment")
+        return self
 
 
 class FrozenWorkloadView(BaseModel):
@@ -449,20 +467,32 @@ class ObservationView(BaseModel):
 
 
 class ExperimentTrialView(BaseModel):
+    """One trial slot: a diagnostic's single trial, or one of a comparison's six.
+
+    A comparison fills every slot field, including the exact candidate version
+    and the precommitted execution ordinal; a diagnostic leaves those at their
+    defaults and carries its rendered customer text instead.
+    """
+
     model_config = _FROZEN
 
-    pair_ordinal: int
+    pair_ordinal: int = 1
+    execution_ordinal: int = 1
     candidate_label: Literal["A", "B"]
+    artifact_version_id: str | None = None
+    artifact_content_hash: str | None = None
     workload_id: str
+    workload_ordinal: int = 1
     request_batch_hash: str
     request_count: int
+    protected_request_count: int = 0
     run_id: str | None
     state: Literal["RESERVED", "RUNNING", "COMPLETE", "FAILED"]
     evidence_mode: str | None
     task_assessments: tuple[TrialAssessmentView, ...]
     observations: tuple[ObservationView, ...]
     outputs: tuple[TrialOutputView, ...]
-    customer_text: str | None
+    customer_text: str | None = None
     missing_evidence: tuple[str, ...]
     metrics: dict[str, Any] | None
 
@@ -488,6 +518,9 @@ class ExperimentView(BaseModel):
     workloads: tuple[FrozenWorkloadView, ...]
     candidates: tuple[CandidateView, ...]
     trials: tuple[ExperimentTrialView, ...]
+    shared_public_denominator_requests: int | None = None
+    protected_denominator_requests_per_candidate: int | None = None
+    protected_counts: dict[str, dict[str, int]] | None = None
     eligible: bool
     eligibility_reason: str
     state: str

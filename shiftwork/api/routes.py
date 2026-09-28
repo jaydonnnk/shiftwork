@@ -36,7 +36,9 @@ def domain_error_handler(_request: Request, exc: ShiftworkDomainError) -> JSONRe
 
 @router.get("/engagements/{slug}/board", response_model=schemas.BoardView)
 def get_board(slug: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.BoardView:
-    return schemas.BoardView.of(orchestrator.board_snapshot(conn, slug))
+    payload = schemas.BoardView.of(orchestrator.board_snapshot(conn, slug))
+    orchestrator.assert_public_projection(payload.model_dump(mode="json"), conn)
+    return payload
 
 
 @router.post("/engagements/{slug}/shifts", response_model=schemas.ShiftView, status_code=201)
@@ -122,8 +124,7 @@ def get_outputs(
         schemas.RunOutputView.of(output, **orchestrator.output_evidence_for(conn, output, run))
         for output in orchestrator.list_outputs(conn, run_id)
     ]
-    if run.adapter == "tokenfactory" and run.purpose.value == "EXPERIMENT":
-        orchestrator.assert_public_projection([entry.model_dump(mode="json") for entry in payload])
+    orchestrator.assert_public_projection([entry.model_dump(mode="json") for entry in payload], conn)
     return payload
 
 
@@ -131,15 +132,19 @@ def get_outputs(
 def get_checks(
     run_id: str, conn: sqlite3.Connection = Depends(get_conn)
 ) -> list[schemas.CheckResultView]:
-    return [
+    payload = [
         schemas.CheckResultView.of(result) for result in orchestrator.list_check_results(conn, run_id)
     ]
+    orchestrator.assert_public_projection([entry.model_dump(mode="json") for entry in payload], conn)
+    return payload
 
 
 @router.get("/engagements/{slug}/ledger", response_model=schemas.LedgerView)
 def get_ledger(slug: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.LedgerView:
     payload = orchestrator.ledger(conn, slug)
-    return schemas.LedgerView(chain_status=payload["chain_status"], events=payload["events"])
+    view = schemas.LedgerView(chain_status=payload["chain_status"], events=payload["events"])
+    orchestrator.assert_public_projection(view.model_dump(mode="json"), conn)
+    return view
 
 
 @router.get("/incidents/{incident_id}", response_model=schemas.IncidentView)
@@ -212,21 +217,39 @@ def create_experiment(
     body: schemas.ExperimentRequest,
     conn: sqlite3.Connection = Depends(get_conn),
 ) -> schemas.ExperimentView:
-    # The controller chooses the workload, the adapter and the treatment; the body
-    # names only the candidate and the investigation it belongs to.
-    experiment = orchestrator.create_diagnostic_experiment(
-        conn,
-        shift_id,
-        candidate_version_id=body.candidate_a_version_id,
-        investigation_id=body.investigation_id,
-        client_request_id=body.client_request_id,
-        adapter="tokenfactory" if request.app.state.executor == "tokenfactory" else "local_process",
-    )
-    run = orchestrator.experiment_run(conn, experiment.id)
-    if run is not None:
-        background.add_task(
-            orchestrator.execute_experiment_task, request.app.state.db_path, run.id
+    # The controller chooses the workloads, the adapter and the frozen material;
+    # the body names the candidates and, for a comparison, the learner's declared
+    # treatment for the difference between them.
+    adapter = "tokenfactory" if request.app.state.executor == "tokenfactory" else "local_process"
+    if body.kind == "QUALIFYING_COMPARISON":
+        experiment = orchestrator.create_qualifying_comparison(
+            conn,
+            shift_id,
+            candidate_a_version_id=body.candidate_a_version_id,
+            candidate_b_version_id=body.candidate_b_version_id,
+            investigation_id=body.investigation_id,
+            declared_treatment=body.declared_treatment,
+            client_request_id=body.client_request_id,
+            adapter=adapter,
         )
+        if experiment.state == "PLANNED" and orchestrator.comparison_run(conn, experiment.id) is not None:
+            background.add_task(
+                orchestrator.execute_comparison_task, request.app.state.db_path, experiment.id
+            )
+    else:
+        experiment = orchestrator.create_diagnostic_experiment(
+            conn,
+            shift_id,
+            candidate_version_id=body.candidate_a_version_id,
+            investigation_id=body.investigation_id,
+            client_request_id=body.client_request_id,
+            adapter=adapter,
+        )
+        run = orchestrator.experiment_run(conn, experiment.id)
+        if run is not None:
+            background.add_task(
+                orchestrator.execute_experiment_task, request.app.state.db_path, run.id
+            )
     return schemas.ExperimentView.of(orchestrator.experiment_view(conn, experiment.id))
 
 
