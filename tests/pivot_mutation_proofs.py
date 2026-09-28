@@ -53,6 +53,29 @@ against ``_complete_v6_tables``'s own transaction, and
 ``s10_rerun_reapplies_v6_ddl`` injects its marker table into the idempotent
 script instead of the removed early return. Both still fault
 ``test_v6_migration_is_atomic_and_idempotent``.
+
+Re-anchoring round 2026-09-29. Uncommitted S16 work moved six anchors in
+``shiftwork/orchestrator.py`` and a line-ending regime change hid two more, so the
+run returned 89 of 97 with eight ``SKIP pattern not found`` rows. The diagnosis and
+the 2/6 split are recorded in
+``docs/plans/shiftwork/evidence/slice16-anchor-rot-run-2026-09-29.txt``; the two
+ending-rot rows were fixed in the runner's CRLF handling, not here. The six moved
+rows were re-anchored onto the current bytes with their faults unchanged:
+``s15_missing_capture_success_flag`` still drops the ``capture_complete`` limb, now
+past the ``retired`` reservation check; ``s15_protected_phase_skipped`` still forces
+the protected phase off, now against the ``public_complete and ... == "ACTIVE"``
+condition; ``s15_protected_counts_before_terminal`` still forces the terminal guard
+open, now over ``_comparison_outcome``; and both frozen-order rows keep their
+authored mutations against the refreshed block.
+
+``s15_eligible_derived`` changed DIRECTION and must not be flipped back. S16 made
+``eligible`` derived from ``outcome.eligibility`` and the compare-station scenario
+derives ``True``, so pinning ``True`` mutated nothing and the row correctly reported
+``NOT_CAUGHT``. It now pins ``False``, which breaks the named test's
+``view["eligible"] == any(item["eligible"] ...)`` and is the failing-capable
+direction. ``RESULTS_LOG`` also moved off the committed S15 evidence file, because
+``main()`` truncates it on every run and a single run destroyed the recorded
+97-of-97 record.
 """
 
 import importlib.util
@@ -112,8 +135,8 @@ CASES = [
     {
         "name": "s15_missing_capture_success_flag",
         "file": "shiftwork/orchestrator.py",
-        "old": '        failure = (public_result.failure or (protected_result.failure if protected_result else None)\n                   or (None if capture_complete else ExecutorFailure.CAPTURE_TRUNCATED))\n',
-        "new": '        failure = public_result.failure or (protected_result.failure if protected_result else None)\n',
+        "old": '        retired = repo.get_exposure_reservation(conn, reservation.id).state != "ACTIVE"\n        failure = (ExecutorFailure.INTERNAL if retired else public_result.failure\n                   or (protected_result.failure if protected_result else None)\n                   or (None if capture_complete else ExecutorFailure.CAPTURE_TRUNCATED))\n',
+        "new": '        retired = repo.get_exposure_reservation(conn, reservation.id).state != "ACTIVE"\n        failure = (ExecutorFailure.INTERNAL if retired else public_result.failure\n                   or (protected_result.failure if protected_result else None))\n',
         "tests": f"{LIFECYCLE}::test_success_flag_without_captures_fails_the_slot_without_refunding_exposure",
         "expect": "test_success_flag_without_captures_fails_the_slot_without_refunding_exposure",
     },
@@ -694,8 +717,8 @@ CASES = [
     {
         "name": "s15_eligible_derived",
         "file": "shiftwork/orchestrator.py",
-        "old": '        "eligible": False,\n        "eligibility_reason": (\n            "No winner is derived here: a qualifying comparison derives no eligibility "\n',
-        "new": '        "eligible": True,\n        "eligibility_reason": (\n            "No winner is derived here: a qualifying comparison derives no eligibility "\n',
+        "old": '        "eligible": bool(outcome and any(item.eligible for item in outcome.eligibility)),\n        "eligibility_reason": (\n            "No winner is derived here. Candidate eligibility requires a complete "\n',
+        "new": '        "eligible": False,\n        "eligibility_reason": (\n            "No winner is derived here. Candidate eligibility requires a complete "\n',
         "tests": f"{LIFECYCLE}::test_the_compare_station_shows_all_six_slots_without_a_winner",
         "expect": "test_the_compare_station_shows_all_six_slots_without_a_winner",
     },
@@ -729,8 +752,8 @@ CASES = [
     {
         "name": "s15_protected_phase_skipped",
         "file": "shiftwork/orchestrator.py",
-        "old": "        protected_result = None\n        if public_complete:\n",
-        "new": "        protected_result = None\n        if False:\n",
+        "old": '        protected_result = None\n        if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":\n',
+        "new": '        protected_result = None\n        if False:\n',
         "tests": f"{LIFECYCLE}::test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
         "expect": "test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
     },
@@ -745,7 +768,7 @@ CASES = [
     {
         "name": "s15_protected_phase_executed_before_public",
         "file": "shiftwork/orchestrator.py",
-        "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\r\n            snapshot_path = Path(directory) / "public_state.json"\r\n            snapshot_path.write_bytes(snapshot_bytes)\r\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\r\n            if run.adapter == TokenFactoryAdapter.name:\r\n                adapter = TokenFactoryAdapter(\r\n                    run_id=run.id,\r\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\r\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\r\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\r\n                    model=context.service_model or config.SERVICE_MODEL,\r\n                )\r\n            elif run.adapter == LocalProcessAdapter.name:\r\n                adapter = LocalProcessAdapter()\r\n            else:\r\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\r\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete:\n            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
+        "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == TokenFactoryAdapter.name:\n                adapter = TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                )\n            elif run.adapter == LocalProcessAdapter.name:\n                adapter = LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":\n            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
         "new": '        if run.adapter == TokenFactoryAdapter.name:\n            adapter = TokenFactoryAdapter(\n                run_id=run.id,\n                allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                token=os.environ.get("NEBIUS_API_KEY", ""),\n                project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                model=context.service_model or config.SERVICE_MODEL,\n            )\n        elif run.adapter == LocalProcessAdapter.name:\n            adapter = LocalProcessAdapter()\n        else:\n            raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n        protected_result = None\n        with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n            protected_path = Path(directory) / "protected_state.json"\n            protected_path.write_bytes(protected_state_bytes)\n            protected_request = request.model_copy(update={\n                "shop_snapshot_ref": str(protected_path),\n                "request_batch": protected_ref,\n                "request_batch_bytes": protected_line,\n                "single_request_ordinal": slot.executed_request_count,\n            })\n            protected_result = asyncio.run(adapter.execute(protected_request))\n        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n',
         "tests": f"{LIFECYCLE}::test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
         "expect": "test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
@@ -753,7 +776,7 @@ CASES = [
     {
         "name": "s15_protected_workspace_reused",
         "file": "shiftwork/orchestrator.py",
-        "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\r\n            snapshot_path = Path(directory) / "public_state.json"\r\n            snapshot_path.write_bytes(snapshot_bytes)\r\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\r\n            if run.adapter == TokenFactoryAdapter.name:\r\n                adapter = TokenFactoryAdapter(\r\n                    run_id=run.id,\r\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\r\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\r\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\r\n                    model=context.service_model or config.SERVICE_MODEL,\r\n                )\r\n            elif run.adapter == LocalProcessAdapter.name:\r\n                adapter = LocalProcessAdapter()\r\n            else:\r\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\r\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete:\n            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
+        "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == TokenFactoryAdapter.name:\n                adapter = TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                )\n            elif run.adapter == LocalProcessAdapter.name:\n                adapter = LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":\n            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
         "new": '        import contextlib\n        shared_workspace = tempfile.mkdtemp(prefix=f"shiftwork-compare-shared-{slot.executed_request_count}-")\n        with contextlib.nullcontext(shared_workspace) as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == TokenFactoryAdapter.name:\n                adapter = TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                )\n            elif run.adapter == LocalProcessAdapter.name:\n                adapter = LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete:\n            with contextlib.nullcontext(shared_workspace) as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
         "tests": f"{LIFECYCLE}::test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
         "expect": "test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
@@ -874,8 +897,8 @@ CASES = [
     {
         "name": "s15_protected_counts_before_terminal",
         "file": "shiftwork/orchestrator.py",
-        "old": '    if experiment.state in ("FINALIZED", "FAILED"):\n        protected_counts = {}\n',
-        "new": "    if True:\n        protected_counts = {}\n",
+        "old": '    if experiment.state in ("FINALIZED", "FAILED", "INVALIDATED"):\n        outcome = _comparison_outcome(conn, experiment, context, slots)\n        protected_counts = {\n',
+        "new": '    if True:\n        outcome = _comparison_outcome(conn, experiment, context, slots)\n        protected_counts = {\n',
         "tests": f"{LIFECYCLE}::test_public_and_protected_counts_reconcile_without_merging",
         "expect": "test_public_and_protected_counts_reconcile_without_merging",
     },
@@ -900,7 +923,10 @@ CASES = [
 ]
 
 
-RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice15-mutation-rerun-2026-09-28.txt"
+# Must stay an uncommitted path for the round in progress. main() truncates this
+# file on every run, and it previously pointed at the committed S15 record, so a
+# single run destroyed the recorded 97-of-97 evidence (2026-09-29).
+RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice16-pivot-mutation-2026-09-29.txt"
 
 
 def append_result(line: str) -> None:

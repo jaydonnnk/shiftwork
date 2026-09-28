@@ -23,6 +23,17 @@ carried by the ``s10_legacy_*_guard_removed`` rows in
 ``tests/pivot_mutation_proofs.py``, which is evidence of neither. They are
 renamed onto uncovered branches in the same functions instead, keeping their
 original named tests covered.
+
+Line endings (2026-09-29). ``core.autocrlf`` is true and most ``shiftwork/*.py``
+targets have no ``.gitattributes`` entry, so the committed blob is pure LF while
+the worktree copy is pure CRLF, and a partially rewritten worktree file can be
+mixed. An anchor may therefore be authored in any of the three shapes. The runner
+tries the authored bytes, then the LF normalised form, then the CRLF normalised
+form. It must normalise before converting: converting an anchor that already
+contains ``\r\n`` yields ``\r\r\n``, which matches nothing and reports SKIP for a
+guard that is in fact intact. That defect hid four S15 rows until 2026-09-29.
+A SKIP therefore means "anchor does not match the current bytes", never "guard
+absent", and must be adjudicated rather than read as coverage.
 """
 
 import hashlib
@@ -579,14 +590,22 @@ def run_mutation(mutation: dict) -> dict:
     if isinstance(new, str):
         new = new.encode("utf-8")
 
-    # Handle CRLF: the worktree may use CRLF
-    if old not in original_bytes:
-        old_crlf = old.replace(b"\n", b"\r\n")
-        if old_crlf in original_bytes:
-            old = old_crlf
-            new = new.replace(b"\n", b"\r\n")
-        else:
-            return {"name": mutation["name"], "status": "SKIP", "reason": "pattern not found"}
+    # Handle CRLF: the worktree may use CRLF, and an anchor may itself have been
+    # authored against a mixed-ending worktree. Try the authored bytes first, then
+    # the LF and CRLF normalised forms. Converting without normalising first turns
+    # an authored \r\n into \r\r\n, which makes a mixed anchor unmatchable and
+    # silently SKIPs a real guard (seen 2026-09-29 on four S15 rows).
+    old_lf = old.replace(b"\r\n", b"\n")
+    new_lf = new.replace(b"\r\n", b"\n")
+    candidates = (
+        (old, new),
+        (old_lf, new_lf),
+        (old_lf.replace(b"\n", b"\r\n"), new_lf.replace(b"\n", b"\r\n")),
+    )
+    chosen = next(((o, n) for o, n in candidates if o in original_bytes), None)
+    if chosen is None:
+        return {"name": mutation["name"], "status": "SKIP", "reason": "pattern not found"}
+    old, new = chosen
 
     count = original_bytes.count(old)
     if count != 1:
