@@ -32,7 +32,7 @@ class ServiceInferenceGateway:
     def __init__(self, token: str, policy: InferencePolicy, *, http: httpx.AsyncClient | None = None):
         if not token or not policy.operation_id or not policy.run_id:
             raise ValueError("gateway credentials and run binding are required")
-        if policy.max_calls != 1 or not 0 < policy.max_output_tokens <= 1024:
+        if policy.max_calls != 1 or not 1 <= policy.request_ordinal <= 4 or not 0 < policy.max_output_tokens <= 1024:
             raise ValueError("unsupported service inference ceiling")
         if not policy.allowed_tool_names or len(set(policy.allowed_tool_names)) != len(policy.allowed_tool_names):
             raise ValueError("a frozen unique tool policy is required")
@@ -60,7 +60,7 @@ class ServiceInferenceGateway:
             request = InferenceRequest.model_validate(request_payload)
         except ValidationError:
             self._reject("INFERENCE_REQUEST_INVALID")
-        if request.request_ordinal != 1:
+        if request.request_ordinal != self.policy.request_ordinal:
             self._reject("REQUEST_ORDINAL_OUTSIDE_FROZEN_WORKLOAD")
         raw_input = request.input_text.encode("utf-8")
         if len(raw_input) > self.policy.max_input_bytes:

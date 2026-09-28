@@ -23,6 +23,7 @@ class InferencePolicy:
     operation_id: str
     model: str
     allowed_tool_names: tuple[str, ...]
+    request_ordinal: int = 1
     max_calls: int = 1
     max_input_bytes: int = 8192
     max_output_tokens: int = GATEWAY_MAX_OUTPUT_TOKENS
