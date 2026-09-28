@@ -55,6 +55,7 @@ from shiftwork.domain.task_contract import (
     FALLBACK_STATUSES,
     CustomerRequestSpec,
     MissionSpec,
+    ProtectedStimulus,
     RequiredTask,
     ShopSnapshot,
     TaskAssessment,
@@ -121,6 +122,7 @@ class SealedCase(BaseModel):
     check_id: Id
     request_ordinals: tuple[int, ...]
     expected: dict[str, JsonValue]
+    stimulus: ProtectedStimulus | None = None
 
 
 class SealedCaseSet(BaseModel):

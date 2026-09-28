@@ -461,6 +461,72 @@ class Experiment(BaseModel):
     created_at: datetime
 
 
+class TrialSlot(BaseModel):
+    """One ordered candidate/workload slot of a qualifying comparison (S3.5).
+
+    Slots are reserved with the experiment, before any result exists, and are
+    never edited afterwards except for their run binding and terminal state. A
+    slot binds its pair's frozen workload identity and count, so execution and
+    replay read the slot rather than a mutable fixture path, and it carries the
+    protected variant refs both slots of its pair share.
+    """
+
+    model_config = _FROZEN
+
+    id: Id
+    experiment_id: Id
+    pair_ordinal: int
+    execution_ordinal: int
+    candidate_label: Literal["A", "B"]
+    artifact_version_id: Id
+    workload_id: Id
+    request_batch_hash: str
+    request_count: int
+    executed_request_count: int
+    protected_variant_refs: tuple[str, ...]
+    run_id: Id | None = None
+    state: Literal["RESERVED", "RUNNING", "COMPLETE", "FAILED"] = "RESERVED"
+
+
+class ExposureReservation(BaseModel):
+    """One comparison- or operation-scoped protected reservation (S3.1, S4).
+
+    A compromised or leaked reservation is retired by a state change on this row
+    and its items; nothing is ever deleted (ADR 0001).
+    """
+
+    model_config = _FROZEN
+
+    id: Id
+    engagement_slug: Slug
+    scope: Literal["comparison", "operation"]
+    experiment_id: Id | None
+    state: Literal["ACTIVE", "INVALIDATED"] = "ACTIVE"
+    created_at: datetime
+
+
+class ExposureItem(BaseModel):
+    """One reserved protected variant, shared by both slots of its pair (S4).
+
+    ``variant_ref`` is opaque and never reusable within an engagement for the
+    family and cycle; the unique key on (engagement, family, cycle, variant_ref)
+    makes a relabelled copy collide with the exposed identity instead of
+    counting as a fresh holdout.
+    """
+
+    model_config = _FROZEN
+
+    id: Id
+    reservation_id: Id
+    engagement_slug: Slug
+    family: str
+    cycle: int
+    variant_ref: str
+    pair_ordinal: int
+    state: DrawState = DrawState.ACTIVE
+    drawn_at: datetime
+
+
 class RunOutput(BaseModel):
     model_config = _FROZEN
 

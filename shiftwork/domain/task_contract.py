@@ -33,6 +33,7 @@ from shiftwork.domain.errors import (
     TaskEnvelopeInvalid,
 )
 from shiftwork.domain.models import Id, JsonValue, ReasonCode
+from shiftwork.domain import canonical
 
 _FROZEN = ConfigDict(frozen=True, extra="forbid")
 
@@ -147,6 +148,113 @@ class CustomerRequestSpec(BaseModel):
     requested_entities: tuple[str, ...]
     tasks: tuple[RequiredTask, ...]
     mandatory_rule_ids: tuple[str, ...]
+
+
+class ProtectedRequestRow(BaseModel):
+    model_config = _FROZEN
+
+    ordinal: int
+    request_id: Id
+    text: str
+    entity_ref: str
+
+
+class ProtectedEntityDelta(BaseModel):
+    model_config = _FROZEN
+
+    title: str
+    edition: str
+    genre: str
+
+
+class ProtectedRecordDelta(BaseModel):
+    model_config = _FROZEN
+
+    record_id: str
+    entity_ref: str
+    kind: Literal["price", "stock", "availability"]
+    value: JsonValue
+    record_age_ms: int
+    dependency: str
+    currency: str | None = None
+
+
+class ProtectedStateDelta(BaseModel):
+    model_config = _FROZEN
+
+    description: str
+    add_entities: dict[str, ProtectedEntityDelta]
+    add_records: tuple[ProtectedRecordDelta, ...]
+
+
+class ProtectedStimulus(BaseModel):
+    model_config = _FROZEN
+
+    request: ProtectedRequestRow
+    task_spec: CustomerRequestSpec
+    state_delta: ProtectedStateDelta
+
+
+class ProtectedBinding(BaseModel):
+    model_config = _FROZEN
+
+    pair_ordinal: int
+    variant_ref: str
+    request_ordinal: int
+    stimulus_hash: str
+    protected_state_hash: str
+
+
+def protected_request_bytes(row: ProtectedRequestRow) -> bytes:
+    return canonical.canonical_bytes(row.model_dump(mode="json")) + b"\n"
+
+
+def resolve_protected_state(base_bytes: bytes, delta: ProtectedStateDelta) -> bytes:
+    """Apply a strictly additive delta to the reviewed comparison state."""
+    base = load_public_state_bytes(base_bytes)
+    base_data = json.loads(base_bytes)
+    existing_entities = set(base.entities)
+    existing_records = {record.record_id for record in base.records}
+    added_entities = set(delta.add_entities)
+    added_records = [record.record_id for record in delta.add_records]
+    if (existing_entities & added_entities or existing_records & set(added_records)
+            or len(added_records) != len(set(added_records))):
+        raise PublicStateInvalid("protected delta collides with comparison state")
+    for record in delta.add_records:
+        if record.entity_ref not in existing_entities | added_entities:
+            raise PublicStateInvalid("protected record cites an unknown entity")
+        if record.dependency not in base.dependencies:
+            raise PublicStateInvalid("protected record cites an unknown dependency")
+        expected_dependency = {"price": "catalog", "stock": "inventory", "availability": "collection"}[record.kind]
+        if record.dependency != expected_dependency or record.record_age_ms < 0:
+            raise PublicStateInvalid("protected record has an invalid public dependency or age")
+        if record.kind in ("price", "stock"):
+            if type(record.value) is not int or record.value < 0:
+                raise PublicStateInvalid("protected price and stock must be nonnegative integers")
+            if record.currency != (base.currency if record.kind == "price" else None):
+                raise PublicStateInvalid("protected record currency differs from the public shape")
+        elif (not isinstance(record.value, dict)
+              or set(record.value) != {"collection_date", "can_collect"}
+              or not isinstance(record.value["collection_date"], str)
+              or type(record.value["can_collect"]) is not bool
+              or record.currency is not None):
+            raise PublicStateInvalid("protected availability has an invalid public shape")
+    base_data["entities"].update({
+        key: value.model_dump(mode="json") for key, value in delta.add_entities.items()
+    })
+    base_data["records"].extend(record.model_dump(mode="json", exclude_none=True)
+                                for record in delta.add_records)
+    base_data["description"] = delta.description
+    resolved = canonical.canonical_bytes(base_data)
+    parsed = load_public_state_bytes(resolved)
+    entity_ids = list(parsed.entities)
+    record_ids = [record.record_id for record in parsed.records]
+    if (set(entity_ids) != existing_entities | added_entities
+            or len(entity_ids) != len(set(entity_ids))
+            or set(record_ids) != existing_records | set(added_records)
+            or len(record_ids) != len(set(record_ids))):
+        raise PublicStateInvalid("protected state is not an additive resolution")
+    return resolved
 
 
 class VisibleCheck(BaseModel):
