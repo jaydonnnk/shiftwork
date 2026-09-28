@@ -1,5 +1,402 @@
 # Status: Shiftwork
 
+## Slice 16 repair round: 2026-09-29 (eight review findings repaired and proven, offline verification green, branch uncommitted)
+
+The user gave the Slice 16 repair round its own go-ahead. All eight findings from
+the 2026-09-28 independent review are repaired, and each repair carries a proof
+that is capable of failing. No live call, credential use, fixture seal, push,
+Slice 17 step or new product gate happened. One unintended exception is recorded
+below rather than smoothed over: the wider `pytest tests -q` command also ran
+packaging Test 51, which installs from `requirements.lock` over the network, and
+installs are not authorized by this go-ahead. No existing check was weakened,
+skipped or deleted to reach green: the offline suite grew from 556 to 560 passing
+tests under the same `--ignore=tests/packaging` command, and the S16 mutation
+harness from 27 to 38 rows. The operator's two rulings of 2026-09-28 are treated
+as settled and were not re-litigated.
+
+### The eight repairs and their proofs
+
+| # | Repair | Proof |
+| --- | --- | --- |
+| R1 | The diagnostic panel no longer projects a comparison. `InvestigateStationView` gained `latest_diagnostic` (`schemas.py:551`), `investigate_station` projects it (`orchestrator.py` hunk `@@ -3145,0 +3389,7 @@`), `app.js:371` binds the panel to `state.diagnostic ?? station?.latest_diagnostic`, and `app.js:94` routes a `QUALIFYING_COMPARISON` to `state.comparison` instead of the diagnostic panel. | Mutation row `diagnostic_panel_never_projects_a_comparison` FAIL_CAUGHT. The browser harness now navigates a fresh page load after a FINALIZED comparison and requires the panel to project the earlier diagnostic, render an eligibility step, carry `data-eligible` false and print the exact cannot-qualify statement. Green at exit 0. |
+| R2 | `comparison.compare` reaches its declared `candidates` drift return. `comparison.py:288` to `:295` resolves the label safely as `candidates[label].artifact_version_id if label in candidates else ""` instead of indexing both labels unconditionally, so a candidate set that is not exactly A and B yields `NOT_COMPARABLE` rather than raising `KeyError`. | Mutation row `candidates_drift_returns_a_verdict_not_a_crash` FAIL_CAUGHT, plus a pure case. The route-level instance is deferred and recorded below. |
+| R3 | Unmeasured usage is no longer projected as a measured zero. `comparison.py:204` sets `measured = bool(calls)` at the `CandidateMetrics` call site and `:213` to `:215` return `None` for `input_tokens`, `output_tokens` and `service_latency_ms` when nothing was recorded. | Rows `zero_recorded_calls_is_not_a_measured_zero` and `missing_model_result_keeps_usage_unknown` FAIL_CAUGHT. The demo payload now prints `null` for those fields beside `service_calls: 0`. |
+| R4 | Each named readback drift guard now has its own tamper and its own mutation row, so a deleted guard is caught by a check that names that field. Seven rows `readback_guard_{public_data_bytes_hash, condition, visible_check_set, workload_1, assessment_context, experiment_schedule, run_binding}_reports_its_own_field` each fault one guard and require `test_each_named_readback_drift_guard_reports_its_own_field` to fail naming it. | All seven FAIL_CAUGHT with `restored=True`. These are field-level proofs and must not be described as verdict-isolated; the measured co-firing is recorded below. |
+| R5 | The Compare outcome cards have render-fault rows. Three `FAULTS` entries `outcomeMetric`, `outcomeEligibility` and `outcomeLabelBinding` were added to `browser.mjs` with needles inside the new outcome render block, and `render_faults.mjs` wires all three to `--compare-demo`. | Measured this session: `node tests/client/render_faults.mjs --port 8163` returned 15 of 15 as expected, exit 0, the three new rows each CAUGHT at their own named assertion. The baseline row PASSes with the same `--compare-demo` flag, so the red rows are not vacuous. Evidence: `slice16-render-faults-2026-09-29.txt`. |
+| R6 | The demo's pass predicate now covers every figure cited for it. `final_pivot.py:874` to `:882` fold in `captured_after == 18`, `shared_public_denominator_requests == 6` and the per-candidate 6-public and 3-protected denominators. `live_calls` is `tokenfactory_observations` rather than a literal, the payload prints a `no_live_call_derivation` block with the projected evidence class, run adapters and run evidence modes, and `operator_sealed` derives from the on-disk review states. | Proven failing-capable in the prior session: forcing `captured_after == 19` returned `STOP_INCOMPLETE` and the file was restored byte-identically. Re-run this session: `PASS_OFFLINE_POLICY`, exit 0. |
+| R7 | Candidate metrics and eligibility carry their own label, so nothing depends on tuple order. `candidate_label` was added to `CandidateMetrics` (`comparison.py:28`) and to `CandidateEligibility` (`comparison.py:55`) and is emitted at `:206` and `:316`; the client binds each card by label and `browser.mjs` selects both the card and its payload entry by `candidate_label`. | Render-fault row `outcomeLabelBinding` CAUGHT with "The comparison renders no outcome card bound to candidate B". The standalone browser run passes the bind-by-label loop for both labels at exit 0. |
+| R8 | The operator packet states that the protected axis differentiates neither candidate in this draft. | `slice15-operator-review-packet.md:207` now opens the operator judgements with "(a) The protected axis differentiates neither candidate in this draft." |
+
+### Verification measured this session
+
+- `node tests/client/render_faults.mjs --port 8163`: 15 of 15 rows as expected,
+  exit 0. Each row started its own isolated preview and the runner polled
+  `/api/engagements/bookshop/board` until that preview answered, because the
+  preview prints its banner before uvicorn binds and local ports are contended.
+- `node tests/client/browser.mjs http://127.0.0.1:8171 --compare-demo`: exit 0,
+  `uncaughtExceptions` 0 asserted rather than printed as a constant, rendered
+  evidence matrix green at 1280, 640 and 390 pixels, and the comparison reaching
+  FINALIZED with six slots reading
+  `1:1A/workload-01/2 2:1B/workload-01/2 3:2B/workload-02/2 4:2A/workload-02/2
+  5:3B/workload-03/2 6:3A/workload-03/2`. The preview was stopped afterwards and
+  port 8171 confirmed released; no orphaned harness Chrome process remained.
+  Evidence: `slice16-browser-compare-2026-09-29.txt`. Neither run passed
+  `--exercise-run`, so no preview attempt was consumed.
+- `.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`:
+  **560 passed, 1 skipped, 2 warnings** in 111.27s, exit 0, 561 collected. This is
+  the authoritative offline figure under the no-install boundary and the command
+  this file's other Slice 16 sections use. A second run of `pytest tests -q`
+  returned 561 passed, 1 skipped in 124.41s, exit 0, 562 collected; the one extra
+  test is packaging Test 51, which installs from `requirements.lock` over the
+  network and is not authorized here. Both runs, the discrepancy and the install
+  that the wider command caused are adjudicated below.
+- `.venv313/Scripts/python.exe -m demos.final_pivot --stage comparison`:
+  `PASS_OFFLINE_POLICY`, exit 0, six COMPLETE trial states, 18 captured rows
+  before and after retirement, `retired_status` `NOT_COMPARABLE`, `drift_fields`
+  empty, both candidates 6 public and 3 protected with 3 protected passed and 4
+  useful completions, both eligible with no blocking reason codes,
+  `operator_sealed` false, and both fixture files reported from disk as
+  `AWAITING_OPERATOR_REVIEW`.
+- `shiftwork/orchestrator.py` sha256
+  `f3ae145c9134853e12611391830a7238db23183836567bd0dd924131852934e1` at 165,752
+  bytes, unchanged through the mutation cycles.
+- Re-verified against the recorded evidence rather than transcribed:
+  `slice16-pivot-mutation-2026-09-29.txt` holds 97 contiguous `[n/97] START`
+  markers numbered 1 to 97 with no duplicate names, 97 FAIL_CAUGHT, 0 SKIP, 0
+  NOT_CAUGHT and 0 `restored=False`; `slice16-mutation-2026-09-28.txt` holds 38
+  START markers, 38 FAIL_CAUGHT and 0 `restored=False`.
+- Final diff inspection: `git diff --check` exit 0. `git diff --numstat` and
+  `git diff --ignore-cr-at-eol --numstat` are identical, which proves no line in
+  the diff is a line-ending-only change. No credential material appears in any
+  added line: the two pattern hits are the literal variable names
+  `os.environ.get("NEBIUS_API_KEY", "")` and `os.environ.get("NEBIUS_PROJECT_ID",
+  "")` inside two mutation-anchor strings, not values. No `.env` is tracked. No
+  `pyproject.toml`, lockfile, CI or lint configuration was touched. No generated
+  noise is tracked, and `artifacts/` plus `*.log` are ignored. All 18 modified
+  files and all new files are S16 scope; every `orchestrator.py` hunk sits in the
+  comparison path, the outcome projection or the R1 `investigate_station`
+  projection. No em dash was introduced in any edited or new file.
+
+### The anchor-rot adjudication, and two harness defects fixed
+
+The 89-of-97 run with 8 SKIP rows is adjudicated and closed. `core.autocrlf` is
+true and `shiftwork/orchestrator.py` has no `.gitattributes` entry, so HEAD stores
+pure LF (3157 LF, 0 CRLF) while the worktree checks out pure CRLF (3407 CRLF, 0
+bare LF). `orchestrator.py` is the same blob `b9af29da` at `60a378e`, `224afd4`,
+`b1dabef` and HEAD, so the file the S15 harness was re-anchored against is HEAD's
+file. With line endings normalised on both sides all eight anchors match HEAD
+exactly once, so **the recorded 97-of-97 was genuine and was never fabricated**.
+The prior handoff's 4/4 split was wrong: the real split is 2 rows of pure
+ending-rot and 6 rows genuinely moved by the uncommitted S16 work, every one of
+which overlaps a diff hunk. The repair round caused none of them; R1's only
+orchestrator edit is the `investigate_station` hunk. Full diagnosis is in
+`slice16-anchor-rot-run-2026-09-29.txt`.
+
+Two harness defects were found and fixed while adjudicating that run:
+
+- `tests/mutation_proofs.py:593` to `:608` now tries the authored bytes, then the
+  LF-normalised form, then the CRLF-normalised form. The old fallback did
+  `old.replace(b"\n", b"\r\n")` without normalising first, which turned an authored
+  `\r\n` into `\r\r\n` and made mixed-ending anchors unmatchable. This was the
+  actual cause of the SKIPs, and it is why the 2026-09-20 Slice 8 prevention rule
+  in `MISTAKES.md` could not be used as the oracle: it said to verify anchors with
+  the component that was broken.
+- `tests/pivot_mutation_proofs.py:926` to `:929` moved `RESULTS_LOG` off the
+  committed S15 evidence file, which `main()` truncated on every run. That file
+  was restored from HEAD and re-verified at 97 FAIL_CAUGHT, 0 SKIP.
+
+All six moved rows were re-anchored and each is individually FAIL_CAUGHT with
+`restored=True`. `s15_eligible_derived` changed **direction** and must not be
+flipped back: S16 made `eligible` derived from `outcome.eligibility` and the
+compare-station scenario derives `True`, so pinning `True` mutated nothing and
+returned NOT_CAUGHT. It now pins `False`, which breaks the named test's
+`view["eligible"] == any(item["eligible"] ...)` assertion. Both harness
+docstrings carry these rationales. The 2 ending-rot rows were deliberately not
+re-anchored, because the runner fix subsumes them and editing two
+3000-character literals for cosmetics risked more than it gained.
+
+### The 560 versus 561 discrepancy, re-adjudicated: the earlier adjudication was wrong
+
+A prior handoff recorded 560 passed and a later one recorded 561, then adjudicated
+561 as the true figure and 560 as a stale mis-measurement taken before a 23:55
+edit, adding that this could not be proven directly because the pre-edit content
+is uncommitted. **That adjudication is false, and it was provable directly.** The
+two figures come from two different commands, and both are correct for their own
+command:
+
+| Command | Result | Collected |
+| --- | --- | ---: |
+| `.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q` | 560 passed, 1 skipped, 2 warnings in 111.27s, exit 0 | 561 |
+| `.venv313/Scripts/python.exe -m pytest tests -q` | 561 passed, 1 skipped, 2 warnings in 124.41s, exit 0 | 562 |
+
+The single test of difference is
+`tests/packaging/test_clean_env_install_and_run.py::test_clean_env_install_and_run`,
+which is Test 51. `tests/packaging` collects exactly 1 test, `tests
+--ignore=tests/packaging` collects 561 and `tests` collects 562, so the arithmetic
+closes. The "+4" that the earlier adjudication dismissed as reconstructed is also
+real: this file's Slice 16 implementation section and the review round both
+recorded 556 passed under `--ignore=tests/packaging`, and the repair round added
+four tests, giving 560 under that same command.
+
+**Authoritative offline figure under the current no-install boundary: 560 passed,
+1 skipped (561 collected) via `--ignore=tests/packaging`.** That is the command
+this file's Slice 16 sections and the review round already used, and it is the
+command AGENTS.md section 6 implies when it records that the 2026-09-19 audit
+excluded packaging Test 51 because installs were prohibited. 561 is only reachable
+by running Test 51.
+
+**Boundary deviation, recorded rather than smoothed over.** Test 51 creates a fresh
+venv under `tmp_path` and runs `pip install -r requirements.lock` unconditionally
+(`tests/packaging/test_clean_env_install_and_run.py:128` to `:131`), and its own
+docstring says it requires network access for the installer. The `pytest tests -q`
+run at 2026-09-29 01:02 executed it, so a real install happened: pip wrote 26
+HTTP cache entries under `%LOCALAPPDATA%/pip/cache` at 01:02:43, sixteen seconds
+before that run's log closed at 01:02:59. The follow-up
+`--ignore=tests/packaging` run at 01:09 wrote no new cache entry, which is what
+isolates the cause. Installs are not authorized by this go-ahead. The deviation
+was inadvertent and inherited: the run repeated the exact command the prior
+handoff recorded as verified green, and that prior 561 run therefore installed
+too. Impact is contained: the venv lived in `tmp_path` and is gone, no repository
+file changed, and `requirements.lock` and `pyproject.toml` are untouched in
+`git status`. The corrective rule is that offline verification for this slice uses
+`--ignore=tests/packaging` unless an install is explicitly authorized, and that a
+handed-off test count is never comparable until its exact command is compared too.
+
+**A second install, self-inflicted, and the trap that caused it.** Appending the
+`MISTAKES.md` entries for the deviation above was first attempted as
+`python.exe -c` with the entry prose inside a double-quoted shell string. That
+prose contained Markdown backticks around commands such as `pytest tests -q`, and
+Git Bash performs command substitution on backticks inside double quotes, so the
+shell executed those commands instead of passing them to Python. One ran the full
+suite under the correct interpreter and reached Test 51 again: 30 pip cache entries
+carry mtimes at 01:14:25 to 01:14:26, during that substitution. Two others ran a
+bare `pytest` resolved against an older interpreter and aborted with a PEP 695
+SyntaxError on the `type` statement at `shiftwork/domain/models.py:14`, which is
+why conftest import errors appeared in the task output. The intended append never
+ran, so `MISTAKES.md` stayed at 90,719 bytes with no partial write. The task was
+stopped, no stray pytest or pip process remained, no further pip cache entry was
+written after 01:14:30, `orchestrator.py` still hashes to `f3ae145c...` at 165,752
+bytes, and the tree returned to its expected entry count. The append was then
+redone from a scratch script written with a file tool and executed, which is the
+only safe way to pass prose containing backticks; the scratch file was deleted. So
+this round caused two unauthorized installs, one inherited from a handed-off
+command and one from a shell-quoting error, and neither changed a repository file.
+
+### Two records that were owed
+
+**`protected_rule` is accepted redundancy and was deliberately not faked.** R4
+named it among the deletable guards. It cannot be isolated without disabling an
+immutability guard, which would prove nothing: UPDATE on
+`protected_case_snapshots` aborts with "protected case snapshots are immutable"
+(`shiftwork/store/migrations/v6_tables.sql:314`), measured. Even with that trigger
+dropped, `rotation.variant_ref` binds the expected case (`shiftwork/sealed/
+rotation.py:26`), so editing `rule_ids` mismatches the stored `variant_ref` and
+surfaces as `protected_binding` instead. The related behaviour that can be proven
+is proven: the row `protected_failure_blocks_its_candidate` faults
+`blockers.extend(reading.protected_rule_ids)` and is FAIL_CAUGHT. The seven
+`readback_guard_*` rows therefore exclude `protected_rule` by decision, not by
+oversight.
+
+**R4's measured co-firing, so the proofs are not overclaimed.** Only
+`experiment_schedule`, `candidate_A` and `run_binding` isolate cleanly.
+`public_data_bytes_hash` can never fire without `condition`, because that guard
+requires the condition bytes to equal the public bytes. Any tamper that recomputes
+`execution_contexts.content_hash` also trips `assessment_context` and
+`experiment_schedule`, because both pin that stored value. Those five are
+field-level proofs. Separately, `assessment_context` could not be isolated by
+tampering `run_assessments.context_hash` as the review suggested:
+`run_assessments_no_update` and `run_assessments_no_delete` both abort, so a
+`content_hash` tamper was used instead.
+
+**The R2 route-level instance is deferred, not repaired.** R2 itself named this as
+a second instance of a gap that predates S16. `orchestrator.py:3192` still indexes
+`candidates[slot.candidate_label].artifact_content_hash` unguarded inside
+`comparison_view`'s trials loop, so a tamper that removes a declared candidate
+raises `KeyError` at the route level before the pure function can return
+`NOT_COMPARABLE`. The pure-function arm is repaired and proven. Closing the route
+arm means deciding whether `comparison_view` should fail closed with a 409 or
+project a degraded trial row, which is a Gate 3 contract question rather than a
+one-line fix, so it is recorded here as open instead of being silently folded into
+R2. It is not a regression introduced by this round.
+
+### Decisions retained, with their reasons
+
+- `candidate_label` was added to `CandidateEligibility` as well as
+  `CandidateMetrics`, beyond what R7 named, because the client card binds both by
+  label and after the R2 empty-version fallback `candidate_version_id` can no
+  longer disambiguate.
+- R3 is implemented as `measured = bool(calls)` at the `CandidateMetrics` call
+  site rather than inside `_known_sum`, deliberately, so the existing
+  `missing_model_result_keeps_usage_unknown` mutation anchor stays byte-identical.
+- R1 uses `ExperimentKind.DIAGNOSTIC`. The review's suggested `PUBLIC_DIAGNOSTIC`
+  is not an enum member; the members are `DIAGNOSTIC`, `QUALIFYING_COMPARISON` and
+  `LATER_CONDITION_COMPARISON`.
+- No `.gitattributes` entry was added pinning `shiftwork/*.py`, because it would
+  trigger a mass re-normalisation of a worktree carrying 26 uncommitted entries.
+- The structural fact behind operator judgement (b) was re-verified at all three
+  locations and holds: `compare_repair_a_service.py:143` to `:151` and
+  `compare_repair_b_service.py:106` to `:117` apply the same three conditions and
+  differ only in sort key, and `evaluator.py:607` to `:616` requires those same
+  three plus a matching `collection_date` and the three claim kinds, which both
+  candidates build from the same snapshot records.
+- The operator's stated inventory counts were independently recomputed from the
+  sealed bytes and all hold: 6 distinct request texts, 5 distinct requested
+  entities (01 and 02 share `book:salt-roads:paperback`), 4 distinct rule anchors
+  (`collection.confirmed_only` carries 03, 05 and 06), and 3 variants carrying a
+  state delta (03, 04, 05; 01, 02 and 06 have empty `add_entities` and
+  `add_records`).
+
+### Revised live cost and latency estimate
+
+`evidence/slice15-live-cost-estimate-2026-09-28.md` discharges the obligation at
+`03-program-design.md:1614` and `:2086` to `:2090`, `04-slices.md:655`, and the
+requirement recorded in this file's 2026-09-28 gate re-approval section that the
+S12 single-operation figures be revised for the two-phase slot. Every count was
+read from the frozen bytes and the code path: 3 workloads of 2 public requests
+each, 1 protected step per slot
+(`orchestrator.py:2454`, `:2590`, `:2598` to `:2601`), 6 slots
+(`orchestrator.py:2426`, `:2442`) and 2 executor operations per slot
+(`orchestrator.py:2632` public, `:2651` protected, each in its own temporary
+directory), so one live comparison is 12 operations and at most 18 inference
+calls. Projected from the S12 means of 3,898.7 ms end to end, 1,864.7 ms
+inference and a 2,034.0 ms remainder: 5,763 ms per public operation, 3,899 ms per
+protected operation, 9,662 ms per slot, about 58 s serial on a warm endpoint.
+Cost from the rate card derived from the six S12 rows, 0.060000 USD per 1M prompt
+tokens and 0.240000 USD per 1M completion tokens: 0.00055692 USD at the measured
+token shape, and 0.00995328 USD worst-case reserved, which is 0.3318 percent of
+the 3.00 USD cap, or 0.4424 percent if reserved at the Gate 3 1,024-token output
+ceiling instead of the spike's 256. Sandbox `resources.cost` for 12 operations is
+0.00767412 with no currency stated by the API, so it is not counted as dollars.
+Against prior spend of 0.00803670 the reservation leaves 2.98201002 of headroom.
+The verdict is that twelve operations are feasible within the frozen ceilings and
+cost is not the binding constraint, so no Gate 3 backtrack is indicated on these
+figures. It is a projection from six trials of one request shape, not a
+measurement, and it authorizes nothing.
+
+### Two items deliberately left outside this round
+
+- `cycle_hardcoded_to_one` in `tests/mutation_proofs.py` is the single-line bytes
+  literal `b'cycle=sealed_store.family_cycle(family),'`, which occurs twice in
+  `orchestrator.py`, so that row SKIPs and has not been proof-grade since before
+  this round. It behaves identically under the old and new match logic and is not
+  a regression. Fixing it means choosing which occurrence to fault, which needs its
+  own authorization.
+- CRLF mistakes now have 6 or more logged repeats in `MISTAKES.md` (2026-09-18
+  twice, 09-19, 09-20, 09-28, 09-29) against the 4-repeat graduation threshold in
+  AGENTS.md section 6, so the pattern is due for graduation into a permanent
+  AGENTS.md rule. That is an edit to a project-authority file and needs its own
+  authorization.
+
+Slice 16 remains unaccepted. Both fixture files remain
+`AWAITING_OPERATOR_REVIEW` and unsealed. This section records offline repair and
+verification only: it is not live evidence, not a service-quality or model-behavior
+claim, and not permission to select or operate either candidate.
+
+## Slice 16 independent review round: 2026-09-28 (eight findings recorded, no repair applied, awaiting adjudication)
+
+An independent reading of the uncommitted `shiftwork/slice-16` tree reproduced
+the recorded verification and found eight items. Nothing was repaired, sealed,
+committed, pushed, run live or advanced to Slice 17. The working tree was
+preserved: `shiftwork/orchestrator.py`, `shiftwork/domain/comparison.py` and
+`tests/orchestrator/test_experiment_lifecycle.py` carry the same SHA-256 before
+and after every probe, and `git status --porcelain` returned the same 20
+entries. All measured output is in
+`docs/plans/shiftwork/evidence/slice16-review-2026-09-28.txt`.
+
+Reproduced as recorded: `556 passed, 1 skipped, 2 warnings` (528 baseline plus
+22 new pure cases plus 6 new lifecycle cases, so nothing was deleted to reach
+green); the comparison demo returned `PASS_OFFLINE_POLICY` with six complete
+slots, 18 captures retained after retirement and zero live calls; the protected
+draft is 21,892 bytes at
+`caf14cb7ec8961c49d299da89c228460bd9835f7212bed679bea70d197a7aff8`, still
+`AWAITING_OPERATOR_REVIEW`; `git diff --check` is clean; and the recorded
+`12/12` render-fault rows are a clean baseline plus the harness's 11 faults, the
+same run as the reported 11/11.
+
+| # | Severity | Finding | Evidence | Smallest repair |
+| --- | --- | --- | --- | --- |
+| R1 | MAJOR | The Investigate station's diagnostic panel prints `Eligible` for a qualifying comparison. `investigate_station_view` projects the shift's last experiment of any kind (`orchestrator.py:3386`), `renderDiagnostic` falls back to it whenever `state.diagnostic` is null, which is true after every page load (`app.js:4`, `:37`, `:371`), and `app.js:449` renders `experiment.eligible ? 'Eligible' : 'Not eligible ...'`. S16 changed comparison `eligible` from a hardcoded `False` to `any(candidate eligible)`, so a reload after a complete eligible comparison now asserts eligibility in the one panel whose copy says a diagnostic cannot qualify a version, before any learner selection exists. | Route payload measured: `latest_experiment.kind = QUALIFYING_COMPARISON`, `eligible = True`. | Keep the diagnostic panel on diagnostic experiments only, either by kind-guarding `renderDiagnostic` or by projecting `latest_experiment` for diagnostics plus a separate comparison field, and add a browser row that reloads after the comparison. |
+| R2 | MAJOR | `comparison.compare` declares a `candidates` drift branch it cannot return from. `comparison.py:248-250` adds the drift, then `:279` indexes `candidates[label]` for both labels unconditionally, so a candidate set that is not exactly A and B raises `KeyError` instead of yielding `NOT_COMPARABLE`. Gate 4 obligation 19 names mutating candidates as a drift case; that mutation currently crashes, and no test tampers with `experiment.candidates`. At the route level the same tamper already crashed inside `comparison_view`'s trials loop before S16, so this is a second instance of the same fail-closed gap rather than a new route behaviour. | `RAISED KeyError: 'B'` from the pure function with one candidate. | Resolve the label safely so the drift return is reached, then add the pure case and a mutation row for it. |
+| R3 | MAJOR | Unmeasured usage is projected as a measured zero. `_known_sum(values, 0)` returns `0`, so a slot with no recorded `INFERENCE_REQUEST` reports `service_calls`, `input_tokens`, `output_tokens` and `service_latency_ms` as `0` while `cost_minor_units` and `provisioning_latency_ms` stay `null`. The trusted-local executor records no observation, so the demo, every route test and the rendered card show three zeros beside two unknowns, and the card's own note says unknown usage or cost is never treated as zero. A zero is arguably honest for `TRUSTED_LOCAL`, where the artifact really makes no model call, and indefensible for `ISOLATED_LIVE`, where absent observation rows are absent instrumentation rather than a measurement; the code cannot tell the two apart because it keys off observation presence instead of evidence class. The same arm flips an eligibility verdict once a frozen budget makes a metric mandatory: an uninstrumented candidate passed a `service_calls` limit that a candidate with one recorded call failed. The budget arm is latent because the current draft freezes no `mandatory_budget_metrics`; the displayed-zero arm is live today. | Proofs 2 and 3, plus the demo JSON. | Decide what "measured" means for an evidence class that records no usage, then make the uninstrumented case `None` rather than `0`, with a pure case and a mutation row. If the decision changes the Gate 3 meaning of unknown, record it there rather than only in code. |
+| R4 | MAJOR (verification) | Nine of the thirteen probed drift guards in `_comparison_outcome` can be deleted with the whole offline suite still green: `public_data_bytes_hash`, `condition`, `visible_check_set`, `experiment_schedule`, the `candidate_{label}` version hash, `run_binding`, `assessment_context`, the workload bytes and spec hash, and `protected_rule_ids`. Four are independently proven: `frozen_context`, `starting_business_state`, `mission_bytes_hash` and the exposure reservation state. `protected_binding` was not probed. Cause: the twenty-column context test asserts only the resulting status, and most of those tampers are caught by the recomputed frozen context hash rather than by the named guard. Every probed deletion still returned a correct verdict through another guard, so this is unproven coverage under the repository rule that a check naming every input it tries is not evidence that every branch fires, not an observed wrong verdict. The 27-row S16 harness carries three rows for this function. | Probe batches 1 and 2, each `NOT_CAUGHT` at `556 passed, 1 skipped`, byte-exact restoration verified. | Give each named guard its own tamper that only that guard can catch, then one mutation row per guard, and keep zero SKIP rows. |
+| R5 | MINOR | The new Compare outcome cards have no render-fault row. The eleven `FAULTS` needles in `browser.mjs:12-68` all sit outside the outcome rendering added at `app.js:496-534`, so the new per-metric and per-candidate assertions at `browser.mjs:646-666` are not proven capable of failing by the harness that exists for that purpose. | Fault table read against the new render block. | Add at least one outcome-metric row and one outcome-eligibility row, then rerun the harness and require a clean baseline. |
+| R6 | MINOR | The demo's pass predicate is narrower than the figures cited for it. `passed` checks status, six trials, capture retention and the retired status, but not the 6 and 3 denominators, the eligibility verdicts or the 18 retained rows, all of which this file and the operator packet quote. `live_calls: 0` and `operator_sealed: false` are literals in the printed payload, not measurements. | `demos/final_pivot.py`, `comparison_stage`. | Fold the cited figures into `passed`, and derive the no-live-call claim from the projected evidence class and adapter rather than printing a constant. |
+| R7 | MINOR | `CandidateMetrics` carries `candidate_version_id` but no candidate label, so the client (`app.js:518-521`) and the browser assertions both depend on the tuple being ordered A then B. A reordered emission would mislabel both cards while every check still agreed. | `comparison.py:25-49`, `:279-281`. | Emit the label with the metrics and bind the cards by label. |
+| R8 | MINOR (operator packet) | The packet does not state that the protected axis differentiates neither candidate. `test_every_protected_spec_accepts_both_declared_candidate_envelopes` requires both pinned candidates to pass all six variants, so in this draft the protected phase can block nobody, and the whole observable difference remains the one public request 011. The packet reports the 3/3 passes and the single separating request separately without joining them. | New lifecycle test; packet "Operator judgements" list. | Add one sentence to the packet's judgement list so the operator weighs a protected axis with no discriminating power in this draft before sealing. |
+
+Checked and found sound, so no finding was raised: the strict-budget aspect
+against `evaluator._check_alternative`, which rejects `price.value >= limit`, so
+the at-boundary item does fail and the justified-refusal arm is the only
+reachable pass; the no-commitment aspect, which is graded through
+`INVALID_COMMITMENT` and the all-task `mandatory_pass` gate rather than only
+named; retirement reuse, because `_exposure_refs` keeps invalidated items
+exposed; the public ordinal filters in `_slot_evidence` and `_metrics`, with
+`list_task_assessments` ordered by `request_ordinal, rowid` so the recomputed
+tuple comparison is order-stable; the idempotent, rolled-back, `BEGIN IMMEDIATE`
+retirement and the `PLANNED`-only execution claim; and the additive-only status
+and packet edits.
+
+Slice 16 remains unaccepted. The protected family remains
+`AWAITING_OPERATOR_REVIEW` and unsealed. These findings are recorded for
+adjudication; no repair, live call, seal, commit, push or Slice 17 step is
+authorized or implied by this section.
+
+## Slice 16 offline implementation verified, awaiting review: 2026-09-28
+
+The user gave Slice 16 its own go-ahead and requested thorough failing-capable
+verification. Work is on `shiftwork/slice-16`; the baseline offline suite was
+`528 passed, 1 skipped, 2 warnings` before edits. S16 has a pure comparison
+outcome, controller-side protected assessment, exposure retirement, route
+projection, Compare-station metric cards and a draft-only offline demo. It is
+not yet accepted. No live call, operator seal, commit or push is authorized by
+this go-ahead.
+
+The first offline acceptance reading exposed a defect in the unsealed S15
+protected fixture: A returned a permitted optional price task that the
+protected specs omitted, so the envelope validator rejected A before grading.
+The six protected specs now declare `price` as optional. The operator packet
+has the new bytes and digests; the S15 proof-round digest is historical. A
+second check corrected S16's initial strict-budget acceptance predicate:
+where no item is strictly under the limit, a justified no-match refusal is
+correct. The current local-process demo reports six complete slots, separate
+6-public and 3-protected denominators per candidate, both candidates policy
+eligible on the three drawn variants, and 18 captured rows retained after
+retirement. This is a trusted-local draft-policy result only; all six variants
+were also checked at the function level. The 4/6 useful-completion count is
+limited by the known conditional-alternative vocabulary issue recorded in the
+operator packet. Local policy eligibility is not live service-quality evidence
+or permission to select or operate either version.
+
+The S16 review found and closed two further policy gaps. Protected-step model
+observations are retained internally but excluded from the public efficiency
+metrics; the route test injects distinctive protected usage and confirms both
+the metrics and public response stay clean. A recorded adapter, recorded
+inspection evidence mode or operation-purpose row makes a comparison
+`NOT_COMPARABLE`, even after a completed run. Unknown cost remains unknown;
+when a frozen service budget makes it mandatory, that unknown blocks
+eligibility. The current draft comparison has no mandatory service-cost cap.
+
+Final offline verification on the settled code: `.venv313/Scripts/python.exe -m
+pytest --ignore=tests/packaging -q` returned `556 passed, 1 skipped, 2 warnings`
+in 129.13 seconds. `.venv313/Scripts/python.exe tests/slice16_mutation_proofs.py`
+returned all 27 faults caught at their named assertions with byte-identical
+restoration; the earlier 23-row attempt had one stale-anchor SKIP, repaired and
+rerun as 23/23 before the four run-mode rows were added. `node
+tests/client/render_faults.mjs --port 8147` returned 12/12 as expected. After
+the run-mode guard, the browser baseline at `http://127.0.0.1:8149` passed at
+1280, 640 and 390 pixels with zero uncaught exceptions. `.venv313/Scripts/python.exe
+-m demos.final_pivot --stage comparison` returned `PASS_OFFLINE_POLICY`: six
+complete slots, 18 captures preserved after retirement, both candidates 3/3
+on the drawn protected variants, and zero live calls. `git diff --check` passed
+before this documentation update. The provisional `architect-reviewer` cleanup
+scan found no confirmed orphan or redundant S16 file; it corrected a stale
+Gate 4 backtrack heading and S15 progress sentence in `04-slices.md`.
+
+The protected family is still `AWAITING_OPERATOR_REVIEW` and unsealed. This
+offline result covers policy and trusted-local execution, not human review,
+fresh model quality, live Sandbox behavior, learning gain, selection or
+operation. The branch remains uncommitted and unpushed.
+
 **Current authority, 2026-09-28: Gate 2 S8.1, Gate 3 and Gate 4 are
 RE-APPROVED together, and ADR 0006 is ACCEPTED.** The user explicitly approved
 the repaired documents in chat after the twenty-finding repair round and the

@@ -2,7 +2,8 @@
 
 **Current Gate 4 state: RE-APPROVED 2026-09-28.** The user approved the repaired
 protected-phase slice reconciliation together with Gate 2 S8.1, Gate 3 and
-ADR 0006. Slice 15 remains in progress on its earlier go-ahead.
+ADR 0006. Slice 15's offline work is merged; its fixture review and seal remain
+open. Slice 16 is in progress on its own go-ahead.
 
 **Gate 4: APPROVED 2026-09-24 for the final pivot. Not implementation authority.**
 Gates 1, 2 and 3 are approved for `shiftwork_final_pivot.md`. Gate 3 was approved
@@ -10,12 +11,14 @@ and locally merged, then backtracked when this Gate 4 review found no qualifying
 Northline selection path; that scoped correction is now re-approved and the
 dependency order below reflects it. The 2026-09-19 Gate 4 approval
 applies to the old design only and is historical. Slices 10 through 14 were
-implemented and accepted by the user by 2026-09-27; Slice 15 is in progress on
-its own go-ahead and Slice 16 onward is unbuilt. (This sentence previously read
+implemented and accepted by the user by 2026-09-27; Slice 15's offline work was
+merged to main on 2026-09-28, while its fixture review and seal remain open.
+Slice 16 is in progress on its own go-ahead and Slice 17 onward is unbuilt.
+(This sentence previously read
 "Slices 10 through 12 ... Slice 13 onward is unbuilt", which was stale against
 `00-status.md`; corrected 2026-09-28 during the repair round.)
 
-**GATE 4 SCOPED BACKTRACK, IN PROGRESS 2026-09-28:** this plan is reconciled with
+**GATE 4 SCOPED BACKTRACK, CLOSED 2026-09-28:** this plan was reconciled with
 the revised Gate 2 S8.1 and Gate 3 S3.9 protected phase, which the 2026-09-28
 independent review found this document did not reflect. The changes are: every
 unqualified "shared denominator" and "batch request count" in S1, in the Slice 15

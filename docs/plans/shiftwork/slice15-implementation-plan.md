@@ -322,6 +322,9 @@ manifest `bookshop_compare_manifest.json` 1,762 bytes / `aacb1fff1d7973a2b61b412
 (canonical `workloads` digest `6e21937b65606e489b3768d3cd15347eff778ca6ee90f883dd68b318d8d66317`);
 protected family `bookshop_task_completion.json` 19,977 bytes / `5d0f5af5b5cfd13e50ab5f68b36cf6e34757847439da31916bdab0cb0a2fe5cd`
 (canonical `cases` digest `da93870aee735f1291c8b333bf38c8ce2cf12c33ad4511763e65b4414327d55e`);
+These are the S15 proof-round bytes. S16 corrected the unsealed protected specs
+to admit the optional price task; the current bytes and hashes are in the operator
+review packet. The older proof remains historical, not proof of the revised bytes.
 candidate A `compare_repair_a_service.py` 9,148 bytes / `7497195129f70481940670cd5ce6eb7782dcfcafefe5e5b0a8459e263d3e6b71`;
 candidate B `compare_repair_b_service.py` 8,395 bytes / `b4674218d44abdab011c9201f5f0dcff1a4b302a281623f189376ed5784e0342`.
 Measured candidate behavior over the six public requests and the comparison

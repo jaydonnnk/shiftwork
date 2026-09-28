@@ -1,6 +1,6 @@
 # Slice 15 operator review packet
 
-Status: DRAFT, 2026-09-28 (protected-phase revision). Gate 2 S8.1, Gate 3 and
+Status: DRAFT, 2026-09-28 (S16 optional-task correction). Gate 2 S8.1, Gate 3 and
 Gate 4 were re-approved together and ADR 0006 was accepted after the repair
 round. See the approval, review, repair and proof-round sections in
 `docs/plans/shiftwork/00-status.md`. This packet presents agent-authored
@@ -9,6 +9,17 @@ acceptance, a live run, or permission to use credentials. Every file below
 still says `AWAITING_OPERATOR_REVIEW`; production reservation refuses them.
 
 ## What changed since the previous revision
+
+S16's first controller-side acceptance reading exposed one unfair mismatch in
+the still-unsealed draft: candidate A returned the optional `price` task on
+protected requests, but every protected task spec omitted it. The strict
+response-envelope validator rejected A before the protected rule was assessed;
+the first offline reading's A 0/3 protected result was invalid as a fairness
+demonstration. Every protected task spec now declares `price` with
+`required: false`, matching the public comparison specs. The protected request
+texts, state deltas and expected aspects did not change. This changes the exact
+file and variant digests below. The revised draft remains awaiting operator
+review; no old seal or live result is being carried forward.
 
 The previous revision presented candidates that differed mainly in optional
 price content and six protected entries that were labels over identical
@@ -86,15 +97,15 @@ as the only public preference separator.
 
 ## Protected inventory requiring separate sealing
 
-The file is `shiftwork/sealed/cases/bookshop_task_completion.json` (19,977
+The file is `shiftwork/sealed/cases/bookshop_task_completion.json` (21,892
 bytes, SHA-256
-`5d0f5af5b5cfd13e50ab5f68b36cf6e34757847439da31916bdab0cb0a2fe5cd`).
+`caf14cb7ec8961c49d299da89c228460bd9835f7212bed679bea70d197a7aff8`).
 It holds one enabled family, `task_completion`, cycle 1, with six variants.
-Each variant carries its own request row, its own public task spec (the
-collection task and the conditional alternative) and an additive-only state
+Each variant carries its own request row, its own public task spec (optional
+price, required collection and required conditional alternative) and an additive-only state
 delta, all bound to request ordinal 3, one above each workload's public
 request count. Its canonical `cases` payload digest for sealing is
-`da93870aee735f1291c8b333bf38c8ce2cf12c33ad4511763e65b4414327d55e`,
+`a39d454687495e34e2ee42f2b36fb4f31ba41ae01d9fd96103ee9ac4d7514f7d`,
 computed with the same stdlib recipe. Reservation persists the drawn case
 payload and digest in restricted, immutable database rows so later file edits
 cannot rewrite that exposure; the stimulus request row and its public task
@@ -118,6 +129,22 @@ wording; variants 03 to 05 add the requested entity and the records that carry
 the behavior under test; variant 06 changes only the request. Whether these are
 six semantically independent failures is the operator decision this table
 supports, and it is not a code check.
+
+Counts recomputed from the sealed bytes on 2026-09-28, beside the table rather
+than inside it, so the operator weighs the inventory with the real denominators:
+
+| Axis | Distinct values across the six variants | Detail |
+| --- | --- | --- |
+| Stimulus request text | 6 of 6 | Every variant carries its own request row. |
+| Requested entity | 5 of 6 | Variants 01 and 02 both request `book:salt-roads:paperback`. |
+| Public rule anchor | 4 of 6 | `collection.confirmed_only` carries variants 03, 05 and 06; `task.required_results` 01; `task.requested_entity` 02; `alternative.same_genre_under_budget` 04. |
+| State delta | 3 of 6 | Variants 03, 04 and 05 add entities and records; 01, 02 and 06 have empty `add_entities` and `add_records`. |
+
+The weakest pair is variant 01 against variant 02: the same requested entity and
+the same empty state delta, with only the request wording and the rule anchor
+differing. That pair is still accepted because edition confusion is a real
+failure mode this product has to catch, but it is the pair that adds the least
+independent coverage.
 
 ## Candidate differences and fairness challenge
 
@@ -161,10 +188,62 @@ that content difference carries no score.
 
 Operator judgements this packet supports:
 
+- The S16 offline controller demo now produces a complete six-slot outcome
+  under a test-only review seam: both candidates have 6 public requests and 3
+  protected steps, 4 useful completions, 2 justified non-completions, and 3/3
+  protected passes on the drawn cases. Both are policy eligible and neither is
+  selected. The three undrawn variants were checked at the function level against
+  both pinned candidate envelopes and the frozen assessor, not through a live
+  Sandbox. The 4/6 useful figure follows the current evaluator vocabulary:
+  a conditional alternative that is not needed is recorded as a justified
+  refusal, so it does not count as useful completion even when collection is
+  confirmed. This limits interpretation of that metric.
+
 - One distinguishing public request, 011, carries the whole observable
   difference; the other five show mandatory-rule parity. Weigh that as one
   request out of six and decide whether the comparison is meaningful enough to
   seal.
+
+- (a) The protected axis differentiates neither candidate in this draft.
+  `test_every_protected_spec_accepts_both_declared_candidate_envelopes`
+  (`tests/orchestrator/test_experiment_lifecycle.py:670`) requires both pinned
+  candidates to pass all six protected variants, and the offline demo reports
+  3/3 for A and 3/3 for B on the three drawn variants. So the protected phase
+  can block nobody here, and the whole observable difference remains public
+  request 011. The blocking mechanism itself is still proven by mutation row
+  `protected_failure_blocks_its_candidate` in
+  `tests/slice16_mutation_proofs.py`: a protected mandatory failure does block
+  its own candidate and only that candidate. The axis is unexercised by this
+  material, not untested.
+
+- (b) Request 011 is not one separator out of six by accident, and the count
+  could not have been higher with this candidate pair. Both pinned candidates
+  apply an identical qualifying filter and differ only in the sort key.
+  `compare_repair_a_service.py:143-151` skips an alternative unless its price is
+  strictly under the limit, its stock is above zero and `can_collect` is true,
+  then takes `min(key=(price, entity_ref))`.
+  `compare_repair_b_service.py:106-117` applies the same three conditions, then
+  takes `min(key=(-stock, price, entity_ref))`. `evaluator.py:607-616` requires
+  exactly those same three conditions, plus a matching `collection_date` and the
+  three claim kinds, which both candidates build from the same snapshot records.
+  Therefore no state delta can make either candidate fail
+  `alternative.same_genre_under_budget`, and where nothing qualifies both return
+  the same justified refusal. The comparison cannot produce an eligibility
+  difference with this candidate pair; 011 is the only place the two sort keys
+  pick differently, and both picks are legal. Re-verified at all three code
+  locations on 2026-09-28.
+
+- (c) A blank efficiency field means unmeasured, never zero. Where a candidate's
+  slot recorded no model call, `input_tokens`, `output_tokens` and
+  `service_latency_ms` are reported as unknown rather than as a measured 0, and
+  the card row for calls is labelled "Recorded public model calls" so a 0 there
+  reads as a record count. `cost_minor_units` and `provisioning_latency_ms` were
+  already unknown. This is the S16 repair round's R3 decision, and it implements
+  the approved "unknown stays unknown" clause, so no Gate 3 backtrack follows.
+  The consequence for a live run is recorded as a pre-live obligation in
+  `00-status.md`: an uninstrumented candidate must not be able to pass a
+  mandatory budget that a measured candidate fails.
+
 - Whether the six protected behaviors are six independent failures is an
   operator decision; the request and state deltas above are the evidence for
   it.
