@@ -43,6 +43,7 @@
           <button class="station station-ledger" data-station="ledger"><span class="station-marker">≡</span><span>Incident &amp; ledger wall<small id="incident-tag">Not loaded · Synthetic scenario</small></span></button>
           <button class="station station-repair" data-station="repair"><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small></span></button>
           <button class="station station-investigate" data-station="investigate"><span class="station-marker" aria-hidden="true">◎</span><span>Investigate<small id="investigation-tag">Not loaded</small></span></button>
+          <button class="station station-compare" data-station="compare"><span class="station-marker" aria-hidden="true">⇄</span><span>Compare<small id="compare-tag">Not loaded</small></span></button>
         </div>
         <div class="room-caption"><span class="tiny-square"></span>A real output. An independent check. A recorded consequence.</div>
       </div>
@@ -112,6 +113,30 @@
           <div id="diagnostic-result"></div>
         </section>
         <p id="investigate-error" class="denial" role="status"></p>
+      </section>
+      <section id="compare-view" hidden>
+        <p id="compare-state" class="mono evidence-meta">No shift loaded</p>
+        <section class="panel-section">
+          <h3>Freeze the two candidates</h3>
+          <p class="help-text">A qualifying comparison needs two distinct frozen versions. Freeze the draft you are looking at as one candidate, edit it, then freeze the other.</p>
+          <div class="panel-actions">
+            <button id="freeze-candidate-a" class="button secondary">Freeze draft as candidate A</button>
+            <button id="freeze-candidate-b" class="button secondary">Freeze draft as candidate B</button>
+          </div>
+          <div id="candidate-list"></div>
+        </section>
+        <section class="panel-section" data-synthetic-region="comparison">
+          <div class="section-heading"><h3>Reserve the paired comparison</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p id="compare-note" class="help-text"></p>
+          <div class="field"><label for="treatment-input">Declared treatment: what is the one difference between A and B?</label><textarea id="treatment-input" rows="2" maxlength="2000"></textarea></div>
+          <div class="panel-actions"><button id="run-comparison" class="button primary">Reserve and run all six slots</button></div>
+          <p id="compare-error" class="denial" role="status"></p>
+        </section>
+        <section class="panel-section" data-synthetic-region="comparison-slots">
+          <div class="section-heading"><h3>Six frozen slots</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p id="compare-summary" class="help-text"></p>
+          <div id="comparison-slots"></div>
+        </section>
       </section>
       <section id="deferred-view" hidden><div class="deferred-symbol" aria-hidden="true">◇</div><h3 id="deferred-title"></h3><p id="deferred-copy"></p><button id="back-board" class="button secondary">Back to your service</button></section>
       <footer class="panel-footer"><span class="tiny-square"></span>Evidence, not a narrated outcome.</footer>

@@ -1,7 +1,7 @@
 import { bodyBytes, selectEvidence } from './evidence.js';
 
 const $ = id => document.getElementById(id);
-const state = { board: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null };
+const state = { board: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
 let downloadUrl = null;
 let pollTimer = null;
 const terminal = run => !run || ['FINALIZED', 'FAILED'].includes(run.state);
@@ -45,7 +45,7 @@ function clearData(message) {
   text('evidence-attempts', 'Attempts not loaded.');
   document.querySelector('[data-station="repair"]').setAttribute('aria-disabled', 'true');
   for (const id of ['metric-requests', 'metric-incidents', 'metric-attempts']) text(id, '…');
-  for (const id of ['metric-chain', 'service-tag', 'queue-tag', 'repair-tag', 'attempt-detail', 'event-detail', 'investigation-tag']) text(id, 'Not loaded');
+  for (const id of ['metric-chain', 'service-tag', 'queue-tag', 'repair-tag', 'attempt-detail', 'event-detail', 'investigation-tag', 'compare-tag']) text(id, 'Not loaded');
   text('incident-tag', 'Not loaded · Synthetic scenario');
   for (const id of ['artifact-detail', 'incident-list', 'limit-list', 'ledger-totals', 'customer-list']) empty($(id), 'No verified data loaded.');
   empty($('orientation-list'), 'Orientation loads with your shift.');
@@ -59,9 +59,15 @@ function clearData(message) {
   text('assist-denial', '');
   empty($('assist-events'), 'No assistance recorded.');
   text('investigate-error', '');
+  text('compare-state', 'No shift loaded');
+  text('compare-note', '');
+  text('compare-summary', '');
+  text('compare-error', '');
+  empty($('candidate-list'), 'No candidates loaded.');
+  empty($('comparison-slots'), 'No comparison loaded.');
   $('source-ordinal').replaceChildren();
   $('source-ordinal').disabled = true;
-  for (const id of ['append-investigation', 'request-assist', 'run-diagnostic']) $(id).disabled = true;
+  for (const id of ['append-investigation', 'request-assist', 'run-diagnostic', 'freeze-candidate-a', 'freeze-candidate-b', 'run-comparison']) $(id).disabled = true;
   $('open-shift').disabled = true; $('run-shift').disabled = true;
   text('run-help', 'Refresh to load available actions.');
 }
@@ -84,6 +90,11 @@ async function refresh(runId = null) {
     ]);
     if (generation !== state.generation) return;
     Object.assign(state, { board, draft, stationView, run, outputs, checks, events: ledger.events });
+    if (stationView?.latest_experiment?.kind === 'QUALIFYING_COMPARISON') state.comparison = stationView.latest_experiment;
+    else if (state.comparison) {
+      try { state.comparison = await api(`/experiments/${encodeURIComponent(state.comparison.id)}`); }
+      catch { state.comparison = null; }
+    }
     state.selected = outputs.some(output => output.id === selected) ? selected : outputs[0]?.id ?? null;
     document.body.dataset.loadState = board.latest_shift ? 'ready' : 'empty';
     text('load-message', board.latest_shift ? '' : 'No shift yet. Open one to begin your service history.');
@@ -449,6 +460,121 @@ function renderInvestigate() {
   renderSource(station);
   renderDiagnostic(station);
 }
+function renderCompare() {
+  const board = state.board;
+  const shift = board?.latest_shift ?? null;
+  const compare = state.comparison;
+  const candidates = state.candidates;
+  text('compare-state', shift ? `${shift.id} · ${compare ? `${compare.id} · ${humanize(compare.state)}` : 'no comparison reserved'}` : 'No shift loaded');
+  text('compare-tag', !shift ? 'Not loaded' : compare ? `${compare.trials.length} slots · ${humanize(compare.state)}` : 'Not reserved');
+  const list = $('candidate-list');
+  if (!shift) empty(list, 'No shift loaded.');
+  else list.replaceChildren(...['A', 'B'].map(label => {
+    const version = candidates[label];
+    const row = element('div', null, 'contract-line');
+    row.dataset.candidateLabel = label;
+    row.append(element('span', `Candidate ${label}`), element('strong', version ? `${version.id} · content hash ${version.content_hash}` : 'not frozen yet'));
+    return row;
+  }));
+  const editable = shift?.state === 'open';
+  const treatment = $('treatment-input').value.trim();
+  for (const id of ['freeze-candidate-a', 'freeze-candidate-b']) $(id).disabled = state.pending || !shift || !editable;
+  $('run-comparison').disabled = state.pending || !shift || !editable || !candidates.A || !candidates.B || candidates.A.id === candidates.B.id || !state.stationView?.latest_investigation_id || !treatment;
+  text('compare-note', !shift ? 'Open a shift to compare candidates.'
+    : !editable ? 'This shift is closed. Its recorded comparison evidence stays available.'
+    : !candidates.A || !candidates.B ? 'Freeze two distinct candidate versions to reserve a comparison. Freezing never selects one.'
+    : candidates.A.id === candidates.B.id ? 'The two candidates are the same frozen version. Freeze a second, different version.'
+    : !state.stationView?.latest_investigation_id ? 'Record your cause, falsifier and public test first. A comparison cites your investigation entry and cannot run before it exists.'
+    : !treatment ? 'Name the one declared treatment that differs between the two candidates.'
+    : 'The controller requires operator-sealed workloads and protected variants before reservation. Draft material is refused. This station derives no winner.');
+  const slots = $('comparison-slots');
+  if (!compare) { text('compare-summary', ''); return empty(slots, 'Every slot, its run, version, batch count and missing evidence appear here once reserved.'); }
+  const protectedStatus = compare.protected_counts
+    ? Object.entries(compare.protected_counts).map(([label, count]) => `${label}: ${count.captured} captured, ${count.missing} missing of ${count.reserved}`).join(' · ')
+    : 'protected capture counts appear after the comparison ends';
+  text('compare-summary', `${compare.candidates.map(candidate => `Candidate ${candidate.label} · ${candidate.artifact_version_id} · ${candidate.artifact_content_hash.slice(0, 12)}…`).join(' · ')} · public requests per candidate ${compare.shared_public_denominator_requests} · protected steps per candidate ${compare.protected_denominator_requests_per_candidate} · ${protectedStatus} · ${compare.eligible ? 'eligible' : 'no winner derived here'}`);
+  slots.replaceChildren(...compare.trials.map(trial => {
+    const row = element('div', null, 'comparison-slot');
+    row.dataset.pair = String(trial.pair_ordinal);
+    row.dataset.executionOrdinal = String(trial.execution_ordinal);
+    row.dataset.candidateLabel = trial.candidate_label;
+    row.dataset.workloadId = trial.workload_id;
+    row.dataset.requestCount = String(trial.request_count);
+    row.dataset.protectedRequestCount = String(trial.protected_request_count);
+    row.dataset.versionId = trial.artifact_version_id ?? '';
+    row.dataset.runId = trial.run_id ?? '';
+    row.dataset.state = trial.state;
+    row.append(element('strong', `Pair ${trial.pair_ordinal} · candidate ${trial.candidate_label} · step ${trial.execution_ordinal} of 6 · ${humanize(trial.state)}`));
+    row.append(element('p', `${trial.workload_id} · ${trial.request_count} public request${trial.request_count === 1 ? '' : 's'} + ${trial.protected_request_count} protected step · ${trial.artifact_version_id} · ${trial.artifact_content_hash ?? 'hash not loaded'} · run ${trial.run_id ?? 'not created'} · ${trial.evidence_mode ?? 'evidence mode pending'}`, 'evidence-meta'));
+    if (trial.task_assessments.length) {
+      const detail = element('details');
+      detail.append(element('summary', `${trial.task_assessments.length} assessed task result${trial.task_assessments.length === 1 ? '' : 's'}`));
+      for (const result of trial.task_assessments) {
+        const item = element('div', null, 'result-row');
+        item.dataset.taskId = result.task_id;
+        item.dataset.requestOrdinal = String(result.request_ordinal);
+        item.dataset.outcome = result.outcome;
+        item.dataset.verdict = result.mandatory_pass ? 'pass' : 'fail';
+        item.append(element('strong', `${result.task_id} · ${humanize(result.outcome)}${result.reason_codes.length ? ` · ${result.reason_codes.join(', ')}` : ''}`), element('small', `request ${result.request_ordinal} · ${result.mandatory_pass ? 'mandatory task passes' : 'mandatory task fails'}`));
+        detail.append(item);
+      }
+      row.append(detail);
+    }
+    for (const output of trial.outputs) row.append(element('p', `Request ${output.request_ordinal}: ${output.request_text}`, 'evidence-text request-quote'));
+    if (trial.missing_evidence.length) row.append(element('p', `Missing evidence: ${trial.missing_evidence.join('; ')}`, 'denial'));
+    return row;
+  }));
+}
+async function freezeCandidate(label) {
+  const shiftId = state.board?.latest_shift?.id;
+  const contract = state.board?.latest_version?.contract;
+  if (!shiftId || !contract || state.pending) return;
+  state.pending = true; renderBoard(); renderCompare();
+  try {
+    const version = await api(`/shifts/${encodeURIComponent(shiftId)}/artifact/versions`, { method: 'POST', body: JSON.stringify({ contract }) });
+    state.candidates[label] = version;
+    text('compare-error', '');
+    await refresh();
+  } catch (error) {
+    await refresh();
+    text('compare-error', error.message);
+  } finally {
+    state.pending = false;
+    if (state.board) { renderBoard(); renderCompare(); }
+  }
+}
+async function runComparison() {
+  const shiftId = state.board?.latest_shift?.id;
+  const [a, b] = [state.candidates.A, state.candidates.B];
+  if (!shiftId || !a || !b || state.pending) return;
+  state.pending = true; renderBoard(); renderCompare();
+  try {
+    let experiment = await api(`/shifts/${encodeURIComponent(shiftId)}/experiments`, { method: 'POST', body: JSON.stringify({
+      kind: 'QUALIFYING_COMPARISON',
+      investigation_id: state.stationView?.latest_investigation_id ?? null,
+      candidate_a_version_id: a.id,
+      candidate_b_version_id: b.id,
+      declared_treatment: $('treatment-input').value,
+      client_request_id: requestId('comparison'),
+    }) });
+    state.comparison = experiment;
+    renderCompare();
+    const deadline = Date.now() + 180000;
+    while (!['FINALIZED', 'FAILED'].includes(experiment.state) && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      experiment = await api(`/experiments/${encodeURIComponent(experiment.id)}`);
+      state.comparison = experiment;
+      renderCompare();
+    }
+    await refresh();
+  } catch (error) {
+    await refresh();
+    text('compare-error', error.message);
+  } finally {
+    state.pending = false;
+    if (state.board) { renderBoard(); renderCompare(); }
+  }
+}
 async function appendInvestigation() {
   const shiftId = state.board?.latest_shift?.id;
   const ordinal = Number($('source-ordinal').value);
@@ -542,6 +668,7 @@ const stations = {
   repair: ['Repair review', 'REPAIR BENCH · READ ONLY', 'Inspect an actual incident below. Repair authoring and rerunning a new version are not available in this build.'],
   evaluator: ['Independent evaluator', 'LOCKED · NOT EDITABLE', 'Neither the learner nor an assistant can edit the scoring rules or see sealed expected values.'],
   investigate: ['Investigate a failure', 'REVIEW THE EXECUTED REQUEST', 'Read the exact request and output, then write your cause, falsifier and public test. A diagnostic cannot qualify a version.'],
+  compare: ['Compare two repairs', 'PAIRED CANDIDATE EXECUTION', 'Both candidates run the same frozen workloads under shared requirements and ceilings. This station shows every slot and its missing evidence; it never picks a winner.'],
 };
 function bringStationPanelIntoReach() {
   // Narrow layouts stack the panel below the room, so a station selection can
@@ -567,6 +694,7 @@ function activateStation(name, userIntent = true) {
   $('deferred-view').hidden = name !== 'evaluator';
   $('customer-view').hidden = !['customers', 'pipeline'].includes(name);
   $('investigate-view').hidden = name !== 'investigate';
+  $('compare-view').hidden = name !== 'compare';
   $('board-view').hidden = !['service', 'owner', 'ledger', 'repair'].includes(name);
   if (name === 'evaluator') {
     text('deferred-title', 'Separate by design.');
@@ -576,6 +704,7 @@ function activateStation(name, userIntent = true) {
   if (state.board) text('service-tag', state.board.latest_version ? `${state.board.latest_version.id} · ${state.board.operating_status === 'NEEDS_FIRST_CHOICE' ? 'candidate only' : 'selected baseline'}` : 'Draft · not frozen');
   renderCustomers();
   renderInvestigate();
+  renderCompare();
   const view = name === 'owner' ? 'contract' : name === 'repair' ? 'repair' : ['customers', 'pipeline', 'evaluator'].includes(name) ? 'customers' : 'board';
   state.view = view;
   if (userIntent) history.replaceState(null, '', `#${view}`);
@@ -625,6 +754,10 @@ $('refresh').addEventListener('click', () => refresh());
 $('append-investigation').addEventListener('click', appendInvestigation);
 $('request-assist').addEventListener('click', requestAssist);
 $('run-diagnostic').addEventListener('click', runDiagnostic);
+$('freeze-candidate-a').addEventListener('click', () => freezeCandidate('A'));
+$('freeze-candidate-b').addEventListener('click', () => freezeCandidate('B'));
+$('run-comparison').addEventListener('click', runComparison);
+$('treatment-input').addEventListener('input', () => renderCompare());
 $('back-board').addEventListener('click', () => { location.hash = 'board'; navigate('board'); });
 document.querySelectorAll('[data-station]').forEach(button => button.addEventListener('click', () => activateStation(button.dataset.station)));
 document.querySelectorAll('[data-file]').forEach(button => button.addEventListener('click', () => selectFile(button.dataset.file)));
