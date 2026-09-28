@@ -1,0 +1,567 @@
+{
+  "family": "task_completion",
+  "schema_version": 1,
+  "cycle": 1,
+  "review_status": "AWAITING_OPERATOR_REVIEW",
+  "description": "Six agent-authored protected comparison stimuli for exact-byte operator review. Unsealed; neither a completed acceptance check nor live evidence.",
+  "cases": [
+    {
+      "id": "bookshop-task-completion-01",
+      "schema_version": 1,
+      "family": "task_completion",
+      "check_id": "chk-task-completion-01",
+      "request_ordinals": [
+        3
+      ],
+      "expected": {
+        "aspect": "every_required_task_returns_a_result",
+        "rule_ids": [
+          "task.required_results"
+        ],
+        "note": "An optional price alone leaves both required tasks unanswered."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 3,
+          "request_id": "bellwether-protected-01",
+          "text": "For my coastal weekend, can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £20.",
+          "entity_ref": "book:salt-roads:paperback"
+        },
+        "task_spec": {
+          "id": "bellwether-protected-01",
+          "text": "For my coastal weekend, can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £20.",
+          "requested_entities": [
+            "book:salt-roads:paperback"
+          ],
+          "tasks": [
+            {
+              "id": "collection",
+              "kind": "CONFIRM_COLLECTION",
+              "requested_entity_ref": "book:salt-roads:paperback",
+              "condition_json": {
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            },
+            {
+              "id": "alternative",
+              "kind": "SUGGEST_ALTERNATIVE",
+              "requested_entity_ref": "book:salt-roads:paperback",
+              "condition_json": {
+                "unless_collection_confirmed": true,
+                "same_genre_as_requested_entity": true,
+                "exclude_requested_entity": true,
+                "price_less_than_minor_units": 2000,
+                "currency": "GBP",
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "task.requested_entity",
+            "claim.public_support",
+            "collection.confirmed_only",
+            "alternative.same_genre_under_budget",
+            "outcome.justified_only",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Protected variant 01 controller state for offline review.",
+          "add_entities": {},
+          "add_records": []
+        }
+      }
+    },
+    {
+      "id": "bookshop-task-completion-02",
+      "schema_version": 1,
+      "family": "task_completion",
+      "check_id": "chk-task-completion-02",
+      "request_ordinals": [
+        3
+      ],
+      "expected": {
+        "aspect": "fixed_task_claims_name_the_requested_entity_and_edition",
+        "rule_ids": [
+          "task.requested_entity"
+        ],
+        "note": "The hardback availability does not answer a paperback request."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 3,
+          "request_id": "bellwether-protected-02",
+          "text": "Please check collection of the Salt Roads paperback tomorrow; the hardback listing is a different edition. If not, suggest something similar under £20.",
+          "entity_ref": "book:salt-roads:paperback"
+        },
+        "task_spec": {
+          "id": "bellwether-protected-02",
+          "text": "Please check collection of the Salt Roads paperback tomorrow; the hardback listing is a different edition. If not, suggest something similar under £20.",
+          "requested_entities": [
+            "book:salt-roads:paperback"
+          ],
+          "tasks": [
+            {
+              "id": "collection",
+              "kind": "CONFIRM_COLLECTION",
+              "requested_entity_ref": "book:salt-roads:paperback",
+              "condition_json": {
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            },
+            {
+              "id": "alternative",
+              "kind": "SUGGEST_ALTERNATIVE",
+              "requested_entity_ref": "book:salt-roads:paperback",
+              "condition_json": {
+                "unless_collection_confirmed": true,
+                "same_genre_as_requested_entity": true,
+                "exclude_requested_entity": true,
+                "price_less_than_minor_units": 2000,
+                "currency": "GBP",
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "task.requested_entity",
+            "claim.public_support",
+            "collection.confirmed_only",
+            "alternative.same_genre_under_budget",
+            "outcome.justified_only",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Protected variant 02 controller state for offline review.",
+          "add_entities": {},
+          "add_records": []
+        }
+      }
+    },
+    {
+      "id": "bookshop-task-completion-03",
+      "schema_version": 1,
+      "family": "task_completion",
+      "check_id": "chk-task-completion-03",
+      "request_ordinals": [
+        3
+      ],
+      "expected": {
+        "aspect": "supported_negative_collection_is_a_completed_answer",
+        "rule_ids": [
+          "collection.confirmed_only"
+        ],
+        "note": "Positive shelf stock with can_collect false supports a useful negative answer."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 3,
+          "request_id": "bellwether-protected-03",
+          "text": "Can I collect Cove Trail paperback tomorrow? If not, suggest something similar under £20.",
+          "entity_ref": "book:cove-trail:paperback"
+        },
+        "task_spec": {
+          "id": "bellwether-protected-03",
+          "text": "Can I collect Cove Trail paperback tomorrow? If not, suggest something similar under £20.",
+          "requested_entities": [
+            "book:cove-trail:paperback"
+          ],
+          "tasks": [
+            {
+              "id": "collection",
+              "kind": "CONFIRM_COLLECTION",
+              "requested_entity_ref": "book:cove-trail:paperback",
+              "condition_json": {
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            },
+            {
+              "id": "alternative",
+              "kind": "SUGGEST_ALTERNATIVE",
+              "requested_entity_ref": "book:cove-trail:paperback",
+              "condition_json": {
+                "unless_collection_confirmed": true,
+                "same_genre_as_requested_entity": true,
+                "exclude_requested_entity": true,
+                "price_less_than_minor_units": 2000,
+                "currency": "GBP",
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "task.requested_entity",
+            "claim.public_support",
+            "collection.confirmed_only",
+            "alternative.same_genre_under_budget",
+            "outcome.justified_only",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Protected variant 03 controller state for offline review.",
+          "add_entities": {
+            "book:cove-trail:paperback": {
+              "title": "Cove Trail",
+              "edition": "paperback",
+              "genre": "coastal_travel"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "protected:cove-trail:price",
+              "entity_ref": "book:cove-trail:paperback",
+              "kind": "price",
+              "value": 1900,
+              "record_age_ms": 0,
+              "dependency": "catalog",
+              "currency": "GBP"
+            },
+            {
+              "record_id": "protected:cove-trail:stock",
+              "entity_ref": "book:cove-trail:paperback",
+              "kind": "stock",
+              "value": 3,
+              "record_age_ms": 0,
+              "dependency": "inventory"
+            },
+            {
+              "record_id": "protected:cove-trail:availability",
+              "entity_ref": "book:cove-trail:paperback",
+              "kind": "availability",
+              "value": {
+                "collection_date": "2026-09-26",
+                "can_collect": false
+              },
+              "record_age_ms": 0,
+              "dependency": "collection"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bookshop-task-completion-04",
+      "schema_version": 1,
+      "family": "task_completion",
+      "check_id": "chk-task-completion-04",
+      "request_ordinals": [
+        3
+      ],
+      "expected": {
+        "aspect": "completed_alternative_meets_strict_budget",
+        "rule_ids": [
+          "alternative.same_genre_under_budget"
+        ],
+        "note": "The only same-genre alternative costs exactly £15 and fails a strictly under £15 request."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 3,
+          "request_id": "bellwether-protected-04",
+          "text": "Can I collect Field Manual paperback tomorrow? If not, suggest a similar title under £15.",
+          "entity_ref": "book:field-manual:paperback"
+        },
+        "task_spec": {
+          "id": "bellwether-protected-04",
+          "text": "Can I collect Field Manual paperback tomorrow? If not, suggest a similar title under £15.",
+          "requested_entities": [
+            "book:field-manual:paperback"
+          ],
+          "tasks": [
+            {
+              "id": "collection",
+              "kind": "CONFIRM_COLLECTION",
+              "requested_entity_ref": "book:field-manual:paperback",
+              "condition_json": {
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            },
+            {
+              "id": "alternative",
+              "kind": "SUGGEST_ALTERNATIVE",
+              "requested_entity_ref": "book:field-manual:paperback",
+              "condition_json": {
+                "unless_collection_confirmed": true,
+                "same_genre_as_requested_entity": true,
+                "exclude_requested_entity": true,
+                "price_less_than_minor_units": 1500,
+                "currency": "GBP",
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "task.requested_entity",
+            "claim.public_support",
+            "collection.confirmed_only",
+            "alternative.same_genre_under_budget",
+            "outcome.justified_only",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Protected variant 04 controller state for offline review.",
+          "add_entities": {
+            "book:field-manual:paperback": {
+              "title": "Field Manual",
+              "edition": "paperback",
+              "genre": "field_science"
+            },
+            "book:meadow-notes:paperback": {
+              "title": "Meadow Notes",
+              "edition": "paperback",
+              "genre": "field_science"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "protected:field-manual:price",
+              "entity_ref": "book:field-manual:paperback",
+              "kind": "price",
+              "value": 1700,
+              "record_age_ms": 0,
+              "dependency": "catalog",
+              "currency": "GBP"
+            },
+            {
+              "record_id": "protected:field-manual:stock",
+              "entity_ref": "book:field-manual:paperback",
+              "kind": "stock",
+              "value": 0,
+              "record_age_ms": 0,
+              "dependency": "inventory"
+            },
+            {
+              "record_id": "protected:field-manual:availability",
+              "entity_ref": "book:field-manual:paperback",
+              "kind": "availability",
+              "value": {
+                "collection_date": "2026-09-26",
+                "can_collect": false
+              },
+              "record_age_ms": 0,
+              "dependency": "collection"
+            },
+            {
+              "record_id": "protected:meadow-notes:price",
+              "entity_ref": "book:meadow-notes:paperback",
+              "kind": "price",
+              "value": 1500,
+              "record_age_ms": 0,
+              "dependency": "catalog",
+              "currency": "GBP"
+            },
+            {
+              "record_id": "protected:meadow-notes:stock",
+              "entity_ref": "book:meadow-notes:paperback",
+              "kind": "stock",
+              "value": 2,
+              "record_age_ms": 0,
+              "dependency": "inventory"
+            },
+            {
+              "record_id": "protected:meadow-notes:availability",
+              "entity_ref": "book:meadow-notes:paperback",
+              "kind": "availability",
+              "value": {
+                "collection_date": "2026-09-26",
+                "can_collect": true
+              },
+              "record_age_ms": 0,
+              "dependency": "collection"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bookshop-task-completion-05",
+      "schema_version": 1,
+      "family": "task_completion",
+      "check_id": "chk-task-completion-05",
+      "request_ordinals": [
+        3
+      ],
+      "expected": {
+        "aspect": "conflicting_necessary_collection_records_require_referral",
+        "rule_ids": [
+          "collection.confirmed_only"
+        ],
+        "note": "A true collection record with zero current stock requires referral, not confirmation."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 3,
+          "request_id": "bellwether-protected-05",
+          "text": "Can I collect Quay History paperback tomorrow, despite the empty shelf? If not, suggest something similar under £20.",
+          "entity_ref": "book:quay-history:paperback"
+        },
+        "task_spec": {
+          "id": "bellwether-protected-05",
+          "text": "Can I collect Quay History paperback tomorrow, despite the empty shelf? If not, suggest something similar under £20.",
+          "requested_entities": [
+            "book:quay-history:paperback"
+          ],
+          "tasks": [
+            {
+              "id": "collection",
+              "kind": "CONFIRM_COLLECTION",
+              "requested_entity_ref": "book:quay-history:paperback",
+              "condition_json": {
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            },
+            {
+              "id": "alternative",
+              "kind": "SUGGEST_ALTERNATIVE",
+              "requested_entity_ref": "book:quay-history:paperback",
+              "condition_json": {
+                "unless_collection_confirmed": true,
+                "same_genre_as_requested_entity": true,
+                "exclude_requested_entity": true,
+                "price_less_than_minor_units": 2000,
+                "currency": "GBP",
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "task.requested_entity",
+            "claim.public_support",
+            "collection.confirmed_only",
+            "alternative.same_genre_under_budget",
+            "outcome.justified_only",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Protected variant 05 controller state for offline review.",
+          "add_entities": {
+            "book:quay-history:paperback": {
+              "title": "Quay History",
+              "edition": "paperback",
+              "genre": "local_history"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "protected:quay-history:price",
+              "entity_ref": "book:quay-history:paperback",
+              "kind": "price",
+              "value": 1800,
+              "record_age_ms": 0,
+              "dependency": "catalog",
+              "currency": "GBP"
+            },
+            {
+              "record_id": "protected:quay-history:stock",
+              "entity_ref": "book:quay-history:paperback",
+              "kind": "stock",
+              "value": 0,
+              "record_age_ms": 0,
+              "dependency": "inventory"
+            },
+            {
+              "record_id": "protected:quay-history:availability",
+              "entity_ref": "book:quay-history:paperback",
+              "kind": "availability",
+              "value": {
+                "collection_date": "2026-09-26",
+                "can_collect": true
+              },
+              "record_age_ms": 0,
+              "dependency": "collection"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "bookshop-task-completion-06",
+      "schema_version": 1,
+      "family": "task_completion",
+      "check_id": "chk-task-completion-06",
+      "request_ordinals": [
+        3
+      ],
+      "expected": {
+        "aspect": "collection_answer_creates_no_commitment",
+        "rule_ids": [
+          "collection.confirmed_only"
+        ],
+        "note": "An availability answer cannot create a booking or a non-null commitment reference."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 3,
+          "request_id": "bellwether-protected-06",
+          "text": "Can I collect Harbour Atlas paperback tomorrow, and please hold one copy for me? If not, suggest something similar under £20.",
+          "entity_ref": "book:harbour-atlas:paperback"
+        },
+        "task_spec": {
+          "id": "bellwether-protected-06",
+          "text": "Can I collect Harbour Atlas paperback tomorrow, and please hold one copy for me? If not, suggest something similar under £20.",
+          "requested_entities": [
+            "book:harbour-atlas:paperback"
+          ],
+          "tasks": [
+            {
+              "id": "collection",
+              "kind": "CONFIRM_COLLECTION",
+              "requested_entity_ref": "book:harbour-atlas:paperback",
+              "condition_json": {
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            },
+            {
+              "id": "alternative",
+              "kind": "SUGGEST_ALTERNATIVE",
+              "requested_entity_ref": "book:harbour-atlas:paperback",
+              "condition_json": {
+                "unless_collection_confirmed": true,
+                "same_genre_as_requested_entity": true,
+                "exclude_requested_entity": true,
+                "price_less_than_minor_units": 2000,
+                "currency": "GBP",
+                "collection_date": "2026-09-26"
+              },
+              "required": true
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "task.requested_entity",
+            "claim.public_support",
+            "collection.confirmed_only",
+            "alternative.same_genre_under_budget",
+            "outcome.justified_only",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Protected variant 06 controller state for offline review.",
+          "add_entities": {},
+          "add_records": []
+        }
+      }
+    }
+  ]
+}
