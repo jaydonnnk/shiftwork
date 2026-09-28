@@ -35,6 +35,16 @@
           ],
           "tasks": [
             {
+              "id": "price",
+              "kind": "ANSWER_FACT",
+              "requested_entity_ref": "book:salt-roads:paperback",
+              "condition_json": {
+                "claim_kind": "price",
+                "currency": "GBP"
+              },
+              "required": false
+            },
+            {
               "id": "collection",
               "kind": "CONFIRM_COLLECTION",
               "requested_entity_ref": "book:salt-roads:paperback",
@@ -105,6 +115,16 @@
           ],
           "tasks": [
             {
+              "id": "price",
+              "kind": "ANSWER_FACT",
+              "requested_entity_ref": "book:salt-roads:paperback",
+              "condition_json": {
+                "claim_kind": "price",
+                "currency": "GBP"
+              },
+              "required": false
+            },
+            {
               "id": "collection",
               "kind": "CONFIRM_COLLECTION",
               "requested_entity_ref": "book:salt-roads:paperback",
@@ -174,6 +194,16 @@
             "book:cove-trail:paperback"
           ],
           "tasks": [
+            {
+              "id": "price",
+              "kind": "ANSWER_FACT",
+              "requested_entity_ref": "book:cove-trail:paperback",
+              "condition_json": {
+                "claim_kind": "price",
+                "currency": "GBP"
+              },
+              "required": false
+            },
             {
               "id": "collection",
               "kind": "CONFIRM_COLLECTION",
@@ -279,6 +309,16 @@
             "book:field-manual:paperback"
           ],
           "tasks": [
+            {
+              "id": "price",
+              "kind": "ANSWER_FACT",
+              "requested_entity_ref": "book:field-manual:paperback",
+              "condition_json": {
+                "claim_kind": "price",
+                "currency": "GBP"
+              },
+              "required": false
+            },
             {
               "id": "collection",
               "kind": "CONFIRM_COLLECTION",
@@ -418,6 +458,16 @@
           ],
           "tasks": [
             {
+              "id": "price",
+              "kind": "ANSWER_FACT",
+              "requested_entity_ref": "book:quay-history:paperback",
+              "condition_json": {
+                "claim_kind": "price",
+                "currency": "GBP"
+              },
+              "required": false
+            },
+            {
               "id": "collection",
               "kind": "CONFIRM_COLLECTION",
               "requested_entity_ref": "book:quay-history:paperback",
@@ -522,6 +572,16 @@
             "book:harbour-atlas:paperback"
           ],
           "tasks": [
+            {
+              "id": "price",
+              "kind": "ANSWER_FACT",
+              "requested_entity_ref": "book:harbour-atlas:paperback",
+              "condition_json": {
+                "claim_kind": "price",
+                "currency": "GBP"
+              },
+              "required": false
+            },
             {
               "id": "collection",
               "kind": "CONFIRM_COLLECTION",
