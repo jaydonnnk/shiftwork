@@ -26,10 +26,19 @@ from shiftwork.evaluator.evaluator import SealedCase
 def variant_ref(case: SealedCase) -> str:
     """Opaque, stable identity of one variant; never reused within an engagement.
 
-    The digest covers the family and the case id, so a relabelled copy of an
-    exposed case still collides and can never count as a new holdout.
+    Existing families retain their historic family/id refs. The new comparison
+    family binds its request ordinals and expected content, so an ID-only rename
+    cannot turn an exposed comparison case into a fresh holdout.
     """
-    return "var-" + canonical.content_hash({"family": case.family, "case_id": case.id})[:16]
+    if case.family == "task_completion":
+        # This new comparison family has no legacy exposures to preserve. Its
+        # identity binds content so a later refill cannot recycle a case by ID.
+        identity = {"family": case.family, "request_ordinals": list(case.request_ordinals),
+                    "expected": case.expected,
+                    "stimulus": case.stimulus.model_dump(mode="json") if case.stimulus else None}
+    else:
+        identity = {"family": case.family, "case_id": case.id}
+    return "var-" + canonical.content_hash(identity)[:16]
 
 
 def unexposed_cases(cases: Sequence[SealedCase], exposed_refs: Iterable[str]) -> tuple[SealedCase, ...]:
@@ -50,6 +59,38 @@ def select_variant(family: str, cases: Sequence[SealedCase], exposed_refs: Itera
             "author and review new variants to continue"
         )
     return min(available, key=lambda case: (min(case.request_ordinals), cases.index(case)))
+
+
+def select_pair_variants(
+    family: str,
+    cases: Sequence[SealedCase],
+    exposed_refs: Iterable[str],
+    *,
+    pairs: int = 3,
+) -> tuple[SealedCase, ...]:
+    """One never-exposed variant per pair, deterministically, for one comparison.
+
+    The same ordering rule as ``select_variant`` applies variant by variant: the
+    lowest request ordinal first, file order breaking ties. The first ``pairs``
+    unexposed variants are returned in pair order, so pair 1 and pair 2 never
+    receive an ordinal bound to a later pair's request when an earlier one is
+    available. Fewer available variants than pairs raises ``RotationUnavailable``
+    and refuses the whole comparison rather than partially reserving it.
+    """
+    ordered = sorted(
+        unexposed_cases(cases, exposed_refs),
+        key=lambda case: (min(case.request_ordinals), list(cases).index(case)),
+    )
+    if len(cases) < 6 or len({variant_ref(case) for case in cases}) < 6:
+        raise RotationMisconfigured(
+            f"comparison family {family!r} requires at least six distinct reviewed variants"
+        )
+    if len(ordered) < pairs:
+        raise RotationUnavailable(
+            f"rotation group {family!r} holds {len(ordered)} never-exposed variant(s); "
+            f"a qualifying comparison reserves {pairs}"
+        )
+    return tuple(ordered[:pairs])
 
 
 def shared_ordinal(draws: Mapping[str, SealedCase]) -> int:

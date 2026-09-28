@@ -16,11 +16,14 @@ families on 2026-09-20.
 """
 
 import json
+import hashlib
 import sqlite3
+from typing import NamedTuple
 
 from shiftwork import config
 from shiftwork.domain.errors import InvalidSealedCase, UnsupportedSealedSchema
 from shiftwork.domain.models import IncidentState
+from shiftwork.domain import task_contract
 from shiftwork.evaluator.evaluator import SealedCase, SealedCaseSet
 from shiftwork.sealed import rotation
 from shiftwork.store import repo
@@ -28,11 +31,17 @@ from shiftwork.store import repo
 STALE_INFORMATION = "stale_information"
 POLICY_EXCEPTION = "policy_exception"
 HOSTILE_INSTRUCTION = "hostile_instruction"
+# The comparison-scoped family (Slice 15). Its variants are not attempt stimuli:
+# a qualifying comparison reserves one never-exposed variant per pair and both
+# candidate slots in that pair share it. It is listed here so the loader, the
+# cycle reader and the projection needles cover it like any other family.
+TASK_COMPLETION = "task_completion"
 
 _FAMILY_FILES = {
     STALE_INFORMATION: "bookshop_stale_information.json",
     POLICY_EXCEPTION: "bookshop_policy_exception.json",
     HOSTILE_INSTRUCTION: "bookshop_hostile_instruction.json",
+    TASK_COMPLETION: "bookshop_task_completion.json",
 }
 SUPPORTED_SCHEMA_VERSIONS = (1,)
 
@@ -74,12 +83,81 @@ def load_family(family: str) -> SealedCaseSet:
                 f"positive request ordinals; got {ordinals!r}"
             )
         cases.append(SealedCase.model_validate(raw))
+    if family != TASK_COMPLETION and any(case.stimulus is not None for case in cases):
+        raise InvalidSealedCase("attempt family cannot carry protected comparison stimulus")
     return SealedCaseSet(cases=tuple(cases))
+
+
+def load_reviewed_comparison_family(family: str) -> SealedCaseSet:
+    """Admit a comparison family only after its exact cases have an operator seal."""
+    data = _raw_family(family)
+    cases = data.get("cases")
+    digest = hashlib.sha256(
+        json.dumps(cases, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
+    if data.get("review_status") != "OPERATOR_SEALED" or data.get("sealed_payload_sha256") != digest:
+        raise InvalidSealedCase(f"comparison family {family!r} awaits operator review and sealing")
+    loaded = load_family(family)
+    if any(case.stimulus is None for case in loaded.cases):
+        raise InvalidSealedCase("reviewed comparison case lacks protected stimulus")
+    request_ids = [case.stimulus.request.request_id for case in loaded.cases]
+    if len(set(request_ids)) != len(request_ids):
+        raise InvalidSealedCase("reviewed comparison variants reuse a protected request id")
+    return loaded
 
 
 def family_cycle(family: str) -> int:
     """The family's inventory generation; a refill appends variants and bumps this."""
     return int(_raw_family(family).get("cycle", 1))
+
+
+class ReservedProtectedCase(NamedTuple):
+    family: str
+    pair_ordinal: int
+    case: SealedCase
+    resolved_state_bytes: bytes
+    resolved_state_sha256: str
+
+
+def load_reserved_comparison_cases(
+    conn: sqlite3.Connection, reservation_id: str,
+) -> tuple[ReservedProtectedCase, ...]:
+    """Reconstruct exact protected cases from the reservation, never an editable file."""
+    rows = repo.list_protected_case_snapshots(conn, reservation_id)
+    if not rows:
+        raise InvalidSealedCase(f"comparison reservation {reservation_id!r} has no protected cases")
+    result = []
+    for row in rows:
+        payload = row["payload_json"]
+        if payload is None or row["variant_ref"] != row["exposure_ref"]:
+            raise InvalidSealedCase("comparison reservation has a missing or mismatched case snapshot")
+        if hashlib.sha256(payload.encode("utf-8")).hexdigest() != row["payload_sha256"]:
+            raise InvalidSealedCase("comparison case snapshot digest mismatch")
+        case = SealedCase.model_validate(json.loads(payload))
+        if case.family != row["family"] or rotation.variant_ref(case) != row["variant_ref"]:
+            raise InvalidSealedCase("comparison case snapshot identity mismatch")
+        if case.stimulus is None or row["resolved_state_bytes"] is None:
+            raise InvalidSealedCase("comparison case snapshot lacks protected stimulus")
+        if hashlib.sha256(row["resolved_state_bytes"]).hexdigest() != row["resolved_state_sha256"]:
+            raise InvalidSealedCase("comparison resolved state digest mismatch")
+        result.append(ReservedProtectedCase(
+            row["family"], row["pair_ordinal"], case,
+            row["resolved_state_bytes"], row["resolved_state_sha256"],
+        ))
+    return tuple(result)
+
+
+def load_reserved_protected_state(conn: sqlite3.Connection, reservation_id: str,
+                                  pair_ordinal: int) -> bytes:
+    rows = [row for row in repo.list_protected_case_snapshots(conn, reservation_id)
+            if row["pair_ordinal"] == pair_ordinal]
+    if len(rows) != 1:
+        raise InvalidSealedCase("comparison pair has no unique protected snapshot")
+    row = rows[0]
+    if hashlib.sha256(row["resolved_state_bytes"]).hexdigest() != row["resolved_state_sha256"]:
+        raise InvalidSealedCase("comparison resolved state digest mismatch")
+    task_contract.load_public_state_bytes(row["resolved_state_bytes"])
+    return row["resolved_state_bytes"]
 
 
 def case_index() -> dict[str, SealedCase]:
