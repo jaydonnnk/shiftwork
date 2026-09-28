@@ -6,6 +6,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from shiftwork.domain.comparison import ComparisonOutcome
 from shiftwork.domain.models import (
     ArtifactVersion,
     CheckResult,
@@ -521,6 +522,7 @@ class ExperimentView(BaseModel):
     shared_public_denominator_requests: int | None = None
     protected_denominator_requests_per_candidate: int | None = None
     protected_counts: dict[str, dict[str, int]] | None = None
+    outcome: ComparisonOutcome | None = None
     eligible: bool
     eligibility_reason: str
     state: str
@@ -546,6 +548,7 @@ class InvestigateStationView(BaseModel):
     bootstrap_available: bool
     bootstrap_reason: str
     latest_experiment: ExperimentView | None = None
+    latest_diagnostic: ExperimentView | None = None
 
     @classmethod
     def of(cls, payload: dict[str, Any]) -> "InvestigateStationView":
