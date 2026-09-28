@@ -114,9 +114,12 @@ summaries when a time-sensitive external claim is being made.
   confirmed the offline work complete and directed the publish and merge on
   2026-09-28. The work is committed in focused batches on `shiftwork/slice-15`,
   merged to main as `96a408e..82364d3` and pushed, no co-author footer. The
-  draft fixture bytes remain AWAITING_OPERATOR_REVIEW and unsealed; operator
-  review, sealing, live execution and Slices 16 onward still need their own
-  authorizations.
+  Slice 16 repair round then completed offline and was committed in focused
+  batches on `shiftwork/slice-16`. On 2026-09-29 the operator reviewed and sealed
+  both comparison fixture files, so each now reads OPERATOR_SEALED with its exact
+  canonical payload digest and production reservation admits those bytes. Sealing
+  does not accept Slice 16. Live execution, credentials, cost, publication, push
+  and Slices 17 onward still each need their own authorization.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of

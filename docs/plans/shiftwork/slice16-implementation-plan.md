@@ -1,10 +1,14 @@
 # Slice 16 implementation plan
 
-Status: offline implementation verified, awaiting review, 2026-09-28. Slice 16 has its own user go-ahead. The Slice 15
-comparison manifest and protected family remain unreviewed and unsealed. Offline
-tests may inject a review gate; production reservations must continue to refuse
-those bytes. No live call, fixture sealing, commit, push or later-slice selection
-is authorized here.
+Status: repair round complete and committed, 2026-09-29. Slice 16 has its own
+user go-ahead, and the eight findings from the 2026-09-28 independent review are
+repaired with failing-capable proofs. The Slice 15 comparison manifest and
+protected family were reviewed and sealed by the operator on 2026-09-29, so
+production reservations now admit those bytes; the two tests that prove the
+review gate construct their own unsealed material rather than depending on the
+shipped state. Offline tests may still inject a review gate. No live call, push,
+Slice 16 acceptance or later-slice selection is authorized here, and sealing does
+not authorize any of them.
 
 The first acceptance reading found an S15 draft-fixture error: all six protected
 task specs omitted the optional price task that candidate A returns and the

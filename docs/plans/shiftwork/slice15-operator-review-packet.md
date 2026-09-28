@@ -1,12 +1,14 @@
 # Slice 15 operator review packet
 
-Status: DRAFT, 2026-09-28 (S16 optional-task correction). Gate 2 S8.1, Gate 3 and
+Status: SEALED by the operator, 2026-09-29. The draft was last revised
+2026-09-28 for the S16 optional-task correction. Gate 2 S8.1, Gate 3 and
 Gate 4 were re-approved together and ADR 0006 was accepted after the repair
 round. See the approval, review, repair and proof-round sections in
 `docs/plans/shiftwork/00-status.md`. This packet presents agent-authored
-material for a human decision. Nothing here records operator review, sealing,
-acceptance, a live run, or permission to use credentials. Every file below
-still says `AWAITING_OPERATOR_REVIEW`; production reservation refuses them.
+material for a human decision. The operator reviewed and sealed both files on
+2026-09-29, so each now reads `OPERATOR_SEALED` with its exact canonical payload
+digest and production reservation admits those bytes. Nothing here records Slice
+15 or Slice 16 acceptance, a live run, or permission to use credentials.
 
 ## What changed since the previous revision
 
@@ -252,15 +254,39 @@ Operator judgements this packet supports:
   live Sandbox or live model evidence. A live six-slot comparison requires its
   own authorization, credentials and cost.
 
-## Decision requested
+## Decision recorded: sealed by the operator, 2026-09-29
 
 The gate reconciliation is approved, and the offline mechanism, 97-row
 mutation proof, full suite and browser checks are recorded in
-`docs/plans/shiftwork/slice15-implementation-plan.md`. Sealing is a separate
-operator act: set `review_status` to `OPERATOR_SEALED` and write each file's
-`sealed_payload_sha256` to the canonical digest recorded above. The digests
-cover only the `workloads` and `cases` payloads, so sealing does not change
-them; any edit inside a sealed payload invalidates its digest and returns the
-file to review. Live execution, credentials and cost require their own
-explicit authorization after sealing, and Slice 15 acceptance is separate
-again.
+`docs/plans/shiftwork/slice15-implementation-plan.md`. Sealing was a separate
+operator act, and the operator performed it on 2026-09-29 after being told
+judgement (a), that the protected axis differentiates neither candidate in this
+draft, and judgement (b), that public request 011 carries the whole observable
+difference structurally rather than by accident.
+
+Each file's `review_status` is now `OPERATOR_SEALED` and its
+`sealed_payload_sha256` is the canonical digest recorded above. Both digests were
+recomputed from the current bytes with the controller's own recipe,
+`sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"),
+ensure_ascii=False))`, and matched before anything was written, so the seal is
+exact rather than transcribed. Only those two top-level fields changed; the
+`workloads` and `cases` payloads are byte-identical to what was reviewed.
+
+| File | Pre-seal raw bytes | Post-seal raw bytes | Post-seal raw SHA-256 |
+| --- | --- | --- | --- |
+| `bookshop_compare_manifest.json` | 1,762 | 1,848 | `2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f` |
+| `bookshop_task_completion.json` | 21,892 | 21,978 | `170dd925880b035c3a999512c982aaccaa2deda96e8d55950f4b7c14f0ce9a24` |
+
+The canonical payload digests are unchanged at `6e21937b...` for `workloads` and
+`a39d4546...` for `cases`. Any edit inside a sealed payload invalidates its
+digest and returns the file to review, so the seal is self-policing.
+
+Two offline tests had the unsealed state as their premise and failed once the
+seal landed. Neither was weakened, skipped nor deleted; both now construct their
+own unsealed material, and the second gained a wrong-digest limb so it proves the
+seal must match exactly rather than merely be present. See `00-status.md`.
+
+Live execution, credentials and cost still require their own explicit
+authorization, and Slice 15 and Slice 16 acceptance are separate again. Sealing
+admits the bytes for reservation; it does not select or operate either
+candidate.

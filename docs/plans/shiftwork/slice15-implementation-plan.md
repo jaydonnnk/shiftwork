@@ -184,6 +184,11 @@ needed reconciliation after Gate 2 re-approval. That hold was closed by the
 2026-09-28 joint re-approval recorded at the top. The active fixture bytes
 remain unreviewed and unsealed; Slice 15 remains unaccepted.
 
+Updated 2026-09-29: the operator has since reviewed and sealed both files, so
+each now reads `OPERATOR_SEALED` with its exact canonical payload digest and
+production reservation admits those bytes. Slice 15 remains unaccepted, and no
+live execution, credential use or cost is authorized by the seal.
+
 ## 2026-09-28 protected-phase proof round and mutation repair
 
 After the joint re-approval, this round implemented the approved Gate 2 S8.1,
@@ -327,6 +332,15 @@ to admit the optional price task; the current bytes and hashes are in the operat
 review packet. The older proof remains historical, not proof of the revised bytes.
 candidate A `compare_repair_a_service.py` 9,148 bytes / `7497195129f70481940670cd5ce6eb7782dcfcafefe5e5b0a8459e263d3e6b71`;
 candidate B `compare_repair_b_service.py` 8,395 bytes / `b4674218d44abdab011c9201f5f0dcff1a4b302a281623f189376ed5784e0342`.
+The manifest and protected-family raw-byte hashes above are pre-seal and are now
+historical: the operator seal of 2026-09-29 added `sealed_payload_sha256` and
+changed `review_status` in both files, so the manifest is 1,848 bytes at
+`2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f` and the
+protected family is 21,978 bytes at
+`170dd925880b035c3a999512c982aaccaa2deda96e8d55950f4b7c14f0ce9a24`. The
+canonical `workloads` and `cases` digests are unchanged, because sealing touches
+only those two top-level fields. Both candidate artifact hashes still match on
+disk. The comparison state hash still matches on disk.
 Measured candidate behavior over the six public requests and the comparison
 state: both complete every required task; the only rubric-bearing difference is
 request 011, where A returns `book:tidal-paths:paperback` at 1,400 and B returns

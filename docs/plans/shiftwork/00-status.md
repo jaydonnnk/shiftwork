@@ -1,6 +1,99 @@
 # Status: Shiftwork
 
-## Slice 16 repair round: 2026-09-29 (eight review findings repaired and proven, offline verification green, branch uncommitted)
+## Operator seal applied to both comparison fixtures: 2026-09-29
+
+The user, acting as the operator, reviewed the packet and sealed both comparison
+fixture files. The decision was taken after being told the two material facts the
+packet asks the operator to weigh: judgement (a), that the protected axis
+differentiates neither candidate in this draft, and judgement (b), that public
+request 011 carries the whole observable difference structurally rather than by
+accident. Sealing admits the bytes for reservation. It does not accept Slice 15
+or Slice 16, does not select or operate either candidate, and does not authorize
+a live call, credentials or cost.
+
+### What was written
+
+Each file gained `review_status: OPERATOR_SEALED` and a `sealed_payload_sha256`
+equal to the canonical digest of its own payload, computed with the controller's
+recipe `sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"),
+ensure_ascii=False))`. Both digests were recomputed from the current bytes and
+matched the packet's recorded values **before** anything was written, so the seal
+is exact rather than transcribed. Only those two top-level fields changed; the
+`workloads` and `cases` payloads are byte-identical to what was reviewed, which
+was asserted rather than assumed.
+
+| File | Pre-seal raw | Post-seal raw | Post-seal raw SHA-256 | Canonical payload digest |
+| --- | --- | --- | --- | --- |
+| `bookshop_compare_manifest.json` | 1,762 | 1,848 | `2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f` | `6e21937b...` unchanged |
+| `bookshop_task_completion.json` | 21,892 | 21,978 | `170dd925880b035c3a999512c982aaccaa2deda96e8d55950f4b7c14f0ce9a24` | `a39d4546...` unchanged |
+
+Both files stayed pure LF, as `.gitattributes` pins them, and each grew by exactly
+86 bytes. The seal is self-policing: any edit inside a sealed payload changes its
+canonical digest, so the stored `sealed_payload_sha256` stops matching and the
+loader returns the file to review.
+
+### Two tests had the unsealed state as their premise, and neither was weakened
+
+Sealing broke two checks in `tests/orchestrator/test_experiment_lifecycle.py`,
+both of which asserted against the shipped bytes being draft. That is a premise
+failure, not a guard failure: the guards behaved correctly and admitted material
+that now carries an exact seal. Neither test was deleted, skipped nor relaxed.
+Both were re-pointed at material they construct themselves, so the proofs no
+longer depend on where the fixture lifecycle happens to be.
+
+- `test_draft_material_cannot_reserve_a_production_comparison` now writes a copy
+  of the manifest to `tmp_path` with the seal withdrawn and points
+  `config.PIVOT_COMPARE_MANIFEST` at it, then restores the real gate. It still
+  exercises the production refusal path against the real request batch files, and
+  still asserts 409 with no reservation, run or slot rows written.
+- `test_a_status_label_without_an_exact_seal_cannot_admit_material` now withdraws
+  the seal from copies of both files, and **gained a limb it did not have**: a
+  manifest labelled `OPERATOR_SEALED` but carrying a wrong digest must also be
+  refused. The test therefore proves the property its name claims, that the seal
+  must be exact, rather than the weaker property it previously proved, that a
+  missing field is refused. Its family limb points `config.SEALED_CASES_DIR` at a
+  temporary directory holding the unsealed copy.
+
+Failing-capable proofs, each with byte-exact restoration asserted:
+
+| Mutation | Result | Restored |
+| --- | --- | --- |
+| `_require_reviewed_comparison_material` reduced to a no-op | the draft-material test FAILS, 202 instead of 409 | `orchestrator.py` byte-identical at `f3ae145c...` |
+| Manifest gate keeps the label check, drops the digest comparison | the exact-seal test FAILS | `orchestrator.py` byte-identical at `f3ae145c...` |
+| Family gate keeps the label check, drops the digest comparison | the exact-seal test FAILS | `sealed/store.py` byte-identical at `dc92ad2b...` |
+
+### Verification on the sealed state
+
+- `.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`:
+  **560 passed, 1 skipped, 2 warnings** in 113.37s, exit 0. The intermediate run
+  before the two test repairs returned 559 passed and 1 failed, which is what
+  identified them.
+- The comparison demo now reports `operator_sealed: true`, read off disk rather
+  than printed as a constant, and still returns `PASS_OFFLINE_POLICY` at exit 0.
+  Its `evidence_class` label still reads `TRUSTED_LOCAL_DRAFT_POLICY_ONLY`, which
+  is now a stale word in a stage label; the derived `operator_sealed: true` sits
+  beside it in the same payload, so the seal state is not misreported. Left as is
+  rather than widened into a rename.
+- `tests/client/draft_review_preview.py` still monkeypatches the review gate. That
+  patch is now redundant for these bytes but harmless, and it keeps the preview
+  working if a family is ever returned to review. Not removed.
+
+### Documents synced to the sealed state
+
+Six documents carried present-tense claims that the seal falsified, and all six
+were corrected rather than left to contradict each other: this file's repair-round
+closing line, the operator review packet's status line, its introduction and its
+"Decision requested" section (now "Decision recorded"), `slice15-implementation-plan.md`
+in two places including the now-historical pre-seal raw-byte hashes,
+`slice16-implementation-plan.md`'s status line, `docs/SHIFTWORK_PLAN.md`, and
+`AGENTS.md` section 3. Historical sections that described the unsealed state as of
+their own date were left untouched, because they are accurate records of that date.
+
+Both comparison fixture files are now `OPERATOR_SEALED`. Slice 15 and Slice 16
+both remain unaccepted. Live execution, credentials, cost, publication, push and
+Slice 17 each still require their own explicit authorization.
+
+## Slice 16 repair round: 2026-09-29 (eight review findings repaired and proven, offline verification green, committed in focused batches)
 
 The user gave the Slice 16 repair round its own go-ahead. All eight findings from
 the 2026-09-28 independent review are repaired, and each repair carries a proof
@@ -287,8 +380,9 @@ measurement, and it authorizes nothing.
   AGENTS.md rule. That is an edit to a project-authority file and needs its own
   authorization.
 
-Slice 16 remains unaccepted. Both fixture files remain
-`AWAITING_OPERATOR_REVIEW` and unsealed. This section records offline repair and
+Slice 16 remains unaccepted. At the time of this section both fixture files were
+still `AWAITING_OPERATOR_REVIEW` and unsealed; the operator sealed them later the
+same day, in the next section. This section records offline repair and
 verification only: it is not live evidence, not a service-quality or model-behavior
 claim, and not permission to select or operate either candidate.
 

@@ -10,10 +10,11 @@ Slice 15 protected-stimulus reconciliation, and ADR 0006 is ACCEPTED. The user
 explicitly approved the repaired documents after the twenty review findings
 and two follow-on design defects were addressed. Slice 15's offline work then
 completed and was merged to main (`96a408e..82364d3`, pushed, 2026-09-28);
-its draft fixture bytes remain unreviewed and unsealed, and no live comparison
-is authorized. Slice 16 is in progress offline; its first acceptance reading
-found and corrected an unsealed protected-spec mismatch, so the current review
-packet supersedes the S15 draft digest. `plans/shiftwork/00-status.md` holds
+its fixture bytes were reviewed and sealed by the operator on 2026-09-29, and no
+live comparison is authorized. Slice 16's repair round is complete offline and
+committed on `shiftwork/slice-16`; its first acceptance reading found and
+corrected a protected-spec mismatch, so the current review packet supersedes the
+S15 draft digest. `plans/shiftwork/00-status.md` holds
 the approval and merge record and evidence limits.
 **Gate state:** Gate 1 RE-APPROVED 2026-09-24 after the same-day backtrack, without
 human comprehension sessions. Approval supplies no participant or learning evidence.
