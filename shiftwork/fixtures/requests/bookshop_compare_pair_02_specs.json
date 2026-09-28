@@ -1,0 +1,74 @@
+[
+  {
+    "id": "bellwether-compare-021",
+    "text": "Can I collect the Salt Roads hardback tomorrow? If not, suggest something similar under £20.",
+    "requested_entities": ["book:salt-roads:hardback"],
+    "tasks": [
+      {
+        "id": "price",
+        "kind": "ANSWER_FACT",
+        "requested_entity_ref": "book:salt-roads:hardback",
+        "condition_json": {"claim_kind": "price", "currency": "GBP"},
+        "required": false
+      },
+      {
+        "id": "collection",
+        "kind": "CONFIRM_COLLECTION",
+        "requested_entity_ref": "book:salt-roads:hardback",
+        "condition_json": {"collection_date": "2026-09-26"},
+        "required": true
+      },
+      {
+        "id": "alternative",
+        "kind": "SUGGEST_ALTERNATIVE",
+        "requested_entity_ref": "book:salt-roads:hardback",
+        "condition_json": {
+          "unless_collection_confirmed": true,
+          "same_genre_as_requested_entity": true,
+          "exclude_requested_entity": true,
+          "price_less_than_minor_units": 2000,
+          "currency": "GBP",
+          "collection_date": "2026-09-26"
+        },
+        "required": true
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "task.requested_entity",
+      "claim.public_support",
+      "collection.confirmed_only",
+      "alternative.same_genre_under_budget",
+      "outcome.justified_only",
+      "response.structured_only"
+    ]
+  },
+  {
+    "id": "bellwether-compare-022",
+    "text": "How much is the Harbour Atlas paperback, and do you have it on the shelf?",
+    "requested_entities": ["book:harbour-atlas:paperback"],
+    "tasks": [
+      {
+        "id": "price",
+        "kind": "ANSWER_FACT",
+        "requested_entity_ref": "book:harbour-atlas:paperback",
+        "condition_json": {"claim_kind": "price", "currency": "GBP"},
+        "required": true
+      },
+      {
+        "id": "stock",
+        "kind": "ANSWER_FACT",
+        "requested_entity_ref": "book:harbour-atlas:paperback",
+        "condition_json": {"claim_kind": "stock"},
+        "required": true
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "task.requested_entity",
+      "claim.public_support",
+      "outcome.justified_only",
+      "response.structured_only"
+    ]
+  }
+]

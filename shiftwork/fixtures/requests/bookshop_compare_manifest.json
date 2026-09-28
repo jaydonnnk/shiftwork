@@ -1,0 +1,37 @@
+{
+  "engagement_slug": "bookshop",
+  "schema_version": 1,
+  "version": 1,
+  "review_status": "AWAITING_OPERATOR_REVIEW",
+  "description": "Agent-authored Slice 15 public workloads, independently pinned to bookshop_compare_state_v1.json. Candidate A favors lowest qualifying price; B favors greatest shelf stock then lower price. Request 011 is the only public preference separator. Exact bytes await operator review and seal.",
+  "workloads": [
+    {
+      "ordinal": 1,
+      "request_file": "bookshop_compare_pair_01.jsonl",
+      "request_bytes_sha256": "749ea9360c55e8340ccd995234c3e333d66d0740cfb02e227223c60c9c406005",
+      "request_bytes_length": 394,
+      "request_count": 2,
+      "task_spec_file": "bookshop_compare_pair_01_specs.json",
+      "task_specs_sha256": "fa27937f6b590c50d54587402b7534aa1d0cc8c8da6f5c45123c1fea18a1a278"
+    },
+    {
+      "ordinal": 2,
+      "request_file": "bookshop_compare_pair_02.jsonl",
+      "request_bytes_sha256": "43b5e8275ceb4a4fb444e26232fde303c7e4feb35ae8976bb443a3c143a21de5",
+      "request_bytes_length": 374,
+      "request_count": 2,
+      "task_spec_file": "bookshop_compare_pair_02_specs.json",
+      "task_specs_sha256": "1440d3c63b80f7d0764b6f71ccdfe62a55b974e46d2deb4729640a8846a380e2"
+    },
+    {
+      "ordinal": 3,
+      "request_file": "bookshop_compare_pair_03.jsonl",
+      "request_bytes_sha256": "c0e0ed996c2cc6f05971be34ceb68daadb36aa838d6a1344d2d3e13b1000bb0f",
+      "request_bytes_length": 376,
+      "request_count": 2,
+      "task_spec_file": "bookshop_compare_pair_03_specs.json",
+      "task_specs_sha256": "b553b9aac350d10944e86496b6e20a3f32435e6116d58b3e019017adaae5cdfe"
+    }
+  ],
+  "comparison_state_sha256": "4abe54462600ade9793c1d7dc32978c427d4f0b0a5e5b121830cfc3b478a2f6f"
+}

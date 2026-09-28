@@ -1,0 +1,90 @@
+[
+  {
+    "id": "bellwether-compare-011",
+    "text": "Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £20.",
+    "requested_entities": ["book:salt-roads:paperback"],
+    "tasks": [
+      {
+        "id": "price",
+        "kind": "ANSWER_FACT",
+        "requested_entity_ref": "book:salt-roads:paperback",
+        "condition_json": {"claim_kind": "price", "currency": "GBP"},
+        "required": false
+      },
+      {
+        "id": "collection",
+        "kind": "CONFIRM_COLLECTION",
+        "requested_entity_ref": "book:salt-roads:paperback",
+        "condition_json": {"collection_date": "2026-09-26"},
+        "required": true
+      },
+      {
+        "id": "alternative",
+        "kind": "SUGGEST_ALTERNATIVE",
+        "requested_entity_ref": "book:salt-roads:paperback",
+        "condition_json": {
+          "unless_collection_confirmed": true,
+          "same_genre_as_requested_entity": true,
+          "exclude_requested_entity": true,
+          "price_less_than_minor_units": 2000,
+          "currency": "GBP",
+          "collection_date": "2026-09-26"
+        },
+        "required": true
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "task.requested_entity",
+      "claim.public_support",
+      "collection.confirmed_only",
+      "alternative.same_genre_under_budget",
+      "outcome.justified_only",
+      "response.structured_only"
+    ]
+  },
+  {
+    "id": "bellwether-compare-012",
+    "text": "Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £15.",
+    "requested_entities": ["book:salt-roads:paperback"],
+    "tasks": [
+      {
+        "id": "price",
+        "kind": "ANSWER_FACT",
+        "requested_entity_ref": "book:salt-roads:paperback",
+        "condition_json": {"claim_kind": "price", "currency": "GBP"},
+        "required": false
+      },
+      {
+        "id": "collection",
+        "kind": "CONFIRM_COLLECTION",
+        "requested_entity_ref": "book:salt-roads:paperback",
+        "condition_json": {"collection_date": "2026-09-26"},
+        "required": true
+      },
+      {
+        "id": "alternative",
+        "kind": "SUGGEST_ALTERNATIVE",
+        "requested_entity_ref": "book:salt-roads:paperback",
+        "condition_json": {
+          "unless_collection_confirmed": true,
+          "same_genre_as_requested_entity": true,
+          "exclude_requested_entity": true,
+          "price_less_than_minor_units": 1500,
+          "currency": "GBP",
+          "collection_date": "2026-09-26"
+        },
+        "required": true
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "task.requested_entity",
+      "claim.public_support",
+      "collection.confirmed_only",
+      "alternative.same_genre_under_budget",
+      "outcome.justified_only",
+      "response.structured_only"
+    ]
+  }
+]
