@@ -45,6 +45,26 @@ const FAULTS = {
     replacement: '      void target;',
     expect: 'Incident navigation does not move focus into the selected request',
   },
+  candidateFreeze: {
+    needle: 'state.candidates[label] = version;',
+    replacement: 'void version;',
+    expect: 'Timed out waiting for candidate A freeze',
+  },
+  slotOrdinalText: {
+    needle: 'request ${result.request_ordinal}',
+    replacement: 'request 99',
+    expect: 'does not display the request ordinal',
+  },
+  slotOrdinalKey: {
+    needle: 'item.dataset.requestOrdinal = String(result.request_ordinal);',
+    replacement: "item.dataset.requestOrdinal = String(result.request_ordinal) + '9';",
+    expect: 'row with the payload verdict',
+  },
+  slotProtectedCount: {
+    needle: '+ ${trial.protected_request_count} protected step',
+    replacement: '+ 7 protected step',
+    expect: 'renders the wrong protected step count',
+  },
 };
 
 const url = process.argv[2] ?? 'http://127.0.0.1:8009';
@@ -82,10 +102,12 @@ socket.addEventListener('message', ({ data }) => {
     if (message.error) item.reject(new Error(JSON.stringify(message.error))); else item.resolve(message.result);
   }
 });
+// Must outlive the longest in-page polling deadline (60s) or a real page timeout surfaces as this opaque transport error.
+const CDP_TIMEOUT_MS = 90000;
 function send(method, params = {}, useSession = true) {
   return new Promise((resolve, reject) => {
     const id = ++sequence;
-    const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP timeout: ${method}`)); }, 20000);
+    const timer = setTimeout(() => { pending.delete(id); reject(new Error(`CDP timeout: ${method}`)); }, CDP_TIMEOUT_MS);
     pending.set(id, { resolve, reject, timer });
     socket.send(JSON.stringify({ id, method, params, ...(useSession && session ? { sessionId: session } : {}) }));
   });
@@ -214,7 +236,7 @@ try {
   await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   await send('Page.navigate', { url });
   await ready();
-  assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 8);
+  assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 9);
   const matrix = [];
   for (const width of [1280, 640, 390]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -560,6 +582,84 @@ try {
   await evaluate(() => document.getElementById('diagnostic-result').scrollIntoView({ block: 'start' }));
   await screenshot('investigate-diagnostic-1280');
   await evaluate(() => document.querySelector('[data-station="service"]').click());
+  const comparison = process.argv.includes('--compare-demo') ? await evaluate(async (candidateA, candidateB) => {
+    const humanize = value => value.toLowerCase().replaceAll('_', ' ');
+    const shiftId = (await (await fetch('/api/engagements/bookshop/board')).json()).latest_shift.id;
+    const put = files => fetch(`/api/shifts/${encodeURIComponent(shiftId)}/artifact`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ files }) }).then(response => {
+      if (!response.ok) throw new Error(`Artifact save failed: ${response.status}`);
+      return response.json();
+    });
+    const wait = async (label, check) => {
+      const deadline = Date.now() + 60000;
+      while (Date.now() < deadline) { if (check()) return; await new Promise(resolve => setTimeout(resolve, 60)); }
+      throw new Error(`Timed out waiting for ${label}`);
+    };
+    document.querySelector('[data-station="compare"]').click();
+    if (document.getElementById('compare-view').hidden) throw new Error('The Compare station does not open its own panel');
+    if (document.getElementById('run-comparison').disabled !== true) throw new Error('The comparison can start without two frozen candidates and a treatment');
+    const frozenLabel = index => document.getElementById('candidate-list').querySelectorAll('.contract-line strong')[index]?.textContent ?? '';
+    const freezeIdle = () => !document.getElementById('freeze-candidate-a').disabled && !document.getElementById('freeze-candidate-b').disabled;
+    await put({ 'service.py': candidateA });
+    await wait('the Compare station to accept the first freeze', freezeIdle);
+    document.getElementById('freeze-candidate-a').click();
+    await wait('candidate A freeze', () => frozenLabel(0).startsWith('ver-') && freezeIdle());
+    await put({ 'service.py': candidateB });
+    await wait('the Compare station to accept the second freeze', freezeIdle);
+    document.getElementById('freeze-candidate-b').click();
+    await wait('candidate B freeze', () => frozenLabel(1).startsWith('ver-') && freezeIdle());
+    if (frozenLabel(0) === frozenLabel(1)) throw new Error('Both candidates froze the same version, so the comparison cannot bind two distinct repairs');
+    const frozen = await (await fetch(`/api/engagements/bookshop/board`)).json();
+    if (frozen.latest_version.id === frozen.operating_selection?.selected_version_id) throw new Error('Freezing a candidate changed the operating selection');
+    document.getElementById('treatment-input').value = 'A answers the optional price fact everywhere; B answers it only when the request asks for it';
+    document.getElementById('treatment-input').dispatchEvent(new Event('input'));
+    if (document.getElementById('run-comparison').disabled) throw new Error('The comparison button stays disabled after two distinct candidates, a treatment and a recorded investigation');
+    document.getElementById('run-comparison').click();
+    await wait('the six rendered comparison slots', () => document.querySelectorAll('#comparison-slots .comparison-slot').length === 6);
+    await wait('the comparison to reach a terminal state', () => ['FINALIZED', 'FAILED'].map(humanize).includes(document.getElementById('compare-state').textContent.split('·').pop().trim()));
+    const experimentId = document.getElementById('compare-state').textContent.match(/experiment-[^\s]+/)?.[0];
+    const payload = await (await fetch(`/api/experiments/${encodeURIComponent(experimentId)}`)).json();
+    if (payload.kind !== 'QUALIFYING_COMPARISON' || payload.trials.length !== 6) throw new Error('The Compare station payload is not a six-slot qualifying comparison');
+    const rows = [...document.querySelectorAll('#comparison-slots .comparison-slot')];
+    const seenVersions = new Set();
+    for (const trial of payload.trials) {
+      const row = rows.find(node => Number(node.dataset.executionOrdinal) === trial.execution_ordinal);
+      if (!row) throw new Error(`Slot ${trial.execution_ordinal} is not rendered`);
+      if (row.dataset.pair !== String(trial.pair_ordinal) || row.dataset.candidateLabel !== trial.candidate_label) throw new Error(`Slot ${trial.execution_ordinal} renders the wrong pair or candidate`);
+      if (row.dataset.versionId !== trial.artifact_version_id || row.dataset.runId !== (trial.run_id ?? '')) throw new Error(`Slot ${trial.execution_ordinal} renders the wrong version or run identity`);
+      if (row.dataset.requestCount !== String(trial.request_count) || !row.textContent.includes(`${trial.request_count} public request`)) throw new Error(`Slot ${trial.execution_ordinal} renders the wrong frozen batch size`);
+      if (row.dataset.protectedRequestCount !== String(trial.protected_request_count) || !row.textContent.includes(`${trial.protected_request_count} protected step`)) throw new Error(`Slot ${trial.execution_ordinal} renders the wrong protected step count`);
+      if (row.dataset.state !== trial.state) throw new Error(`Slot ${trial.execution_ordinal} renders the wrong state`);
+      if (trial.missing_evidence.length && !row.textContent.includes('Missing evidence')) throw new Error(`Slot ${trial.execution_ordinal} hides its missing evidence`);
+      seenVersions.add(trial.artifact_version_id);
+      const assessed = [...row.querySelectorAll('[data-task-id]')];
+      if (assessed.length !== trial.task_assessments.length) throw new Error(`Slot ${trial.execution_ordinal} renders the wrong task-assessed count`);
+      for (const entry of trial.task_assessments) {
+        const item = assessed.find(node => node.dataset.taskId === entry.task_id && node.dataset.requestOrdinal === String(entry.request_ordinal) && node.dataset.verdict === (entry.mandatory_pass ? 'pass' : 'fail'));
+        if (!item) throw new Error(`Slot ${trial.execution_ordinal} renders no ${entry.task_id} request ${entry.request_ordinal} row with the payload verdict`);
+        if (!item.querySelector('small')?.textContent.includes(`request ${entry.request_ordinal}`)) throw new Error(`Slot ${trial.execution_ordinal} does not display the request ordinal for ${entry.task_id}`);
+        const expected = `${entry.task_id} · ${humanize(entry.outcome)}${entry.reason_codes.length ? ` · ${entry.reason_codes.join(', ')}` : ''}`;
+        if (item.querySelector('strong')?.textContent !== expected) throw new Error(`Slot ${trial.execution_ordinal} task row does not match the API payload for ${entry.task_id} request ${entry.request_ordinal}`);
+      }
+      for (const output of trial.outputs) if (!row.textContent.includes(output.request_text)) throw new Error(`Slot ${trial.execution_ordinal} does not render its frozen request text`);
+    }
+    if (seenVersions.size !== 2) throw new Error('The six slots do not bind exactly the two frozen candidate versions');
+    const pairs = payload.trials.reduce((acc, trial) => { (acc[trial.pair_ordinal] ??= new Set()).add(trial.workload_id); return acc; }, {});
+    if (Object.values(pairs).some(workloads => workloads.size !== 1)) throw new Error('A pair does not share one frozen workload');
+    if (!document.getElementById('compare-summary').textContent.includes('no winner derived here')) throw new Error('The Compare station does not state that it derives no winner');
+    if (payload.eligible !== false) throw new Error('A raw paired comparison reports eligibility before its outcome slice');
+    return { experiment: experimentId, state: payload.state, slots: payload.trials.map(trial => `${trial.execution_ordinal}:${trial.pair_ordinal}${trial.candidate_label}/${trial.workload_id}/${trial.request_count}`).join(' ') };
+  }, await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_a_service.py', 'utf8'), await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_b_service.py', 'utf8')) : null;
+  if (comparison) {
+    await evaluate(() => document.getElementById('comparison-slots').scrollIntoView({ block: 'start' }));
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '1280px compare panel overflows');
+    await screenshot('compare-1280');
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 900, deviceScaleFactor: 1, mobile: false });
+    await evaluate(() => document.getElementById('comparison-slots').scrollIntoView({ block: 'start' }));
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '390px compare panel overflows');
+    await screenshot('compare-390');
+    await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+    await evaluate(() => document.querySelector('[data-station="service"]').click());
+  }
   if (process.argv.includes('--exercise-run')) {
     const beforeRun = await evaluate(async () => (await (await fetch('/api/engagements/bookshop/board')).json()).latest_run.id);
     assert.equal(await evaluate(() => document.getElementById('metric-attempts').textContent), '1', 'Run-button proof needs a fresh preview with one remaining attempt');
@@ -576,7 +676,7 @@ try {
     assert.equal(await evaluate(() => document.querySelectorAll('.customer-button').length), 3);
   }
   assert.equal(exceptions.length, 0, JSON.stringify(exceptions));
-  const report = { matrix, investigateStation: { ...investigateView, diagnostic }, assistDemo: process.argv.includes('--assist-demo') ? 'recorded double, hint and accepted patch attribution' : 'not enabled', navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
+  const report = { matrix, investigateStation: { ...investigateView, diagnostic }, assistDemo: process.argv.includes('--assist-demo') ? 'recorded double, hint and accepted patch attribution' : 'not enabled', compareDemo: comparison ?? 'not enabled', navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
   await writeFile(path.join(artifacts, 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {

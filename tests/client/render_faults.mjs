@@ -19,8 +19,24 @@ const portIndex = process.argv.indexOf('--port');
 const port = portIndex === -1 ? 8137 : Number(process.argv[portIndex + 1]);
 const python = path.join(root, '.venv313', 'Scripts', 'python.exe');
 
+// The preview prints its banner before uvicorn binds, so the banner is not
+// proof the port answers: a foreign process holding the port leaves every row
+// talking to the wrong server. Poll the board endpoint until this preview
+// answers, or fail the row with the real cause.
+async function waitReachable() {
+  const deadline = Date.now() + 15000;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(`http://127.0.0.1:${port}/api/engagements/bookshop/board`);
+      if (response.ok && (await response.json()).latest_shift?.id) return;
+    } catch { /* not up yet */ }
+    await new Promise(resolve => setTimeout(resolve, 200));
+  }
+  throw new Error(`Preview on ${port} did not answer as this preview (is the port already in use?)`);
+}
+
 function startPreview() {
-  const preview = spawn(python, ['-m', 'demos.client', '--port', String(port)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+  const preview = spawn(python, ['tests/client/draft_review_preview.py', '--port', String(port)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
   let previewLog = '';
   const started = new Promise((resolve, reject) => {
     const timeout = setTimeout(() => reject(new Error(`Preview did not start in 30s:\n${previewLog}`)), 30000);
@@ -40,9 +56,9 @@ async function stopPreview(preview) {
   if (preview.exitCode === null) preview.kill();
 }
 
-function harness(fault) {
+function harness(fault, args = []) {
   return new Promise(resolve => {
-    const child = spawn(process.execPath, ['tests/client/browser.mjs', `http://127.0.0.1:${port}`], {
+    const child = spawn(process.execPath, ['tests/client/browser.mjs', `http://127.0.0.1:${port}`, ...args], {
       cwd: root,
       env: { ...process.env, ...(fault ? { SHIFTWORK_FAULT: fault } : {}) },
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -54,7 +70,10 @@ function harness(fault) {
   });
 }
 
-const FAULTS = ['answer', 'record', 'verdict', 'event', 'eligibility', 'stationFocus', 'incidentFocus'];
+const FAULTS = ['answer', 'record', 'verdict', 'event', 'eligibility', 'stationFocus', 'incidentFocus', 'candidateFreeze', 'slotOrdinalText', 'slotOrdinalKey', 'slotProtectedCount'];
+// The compare-path rows need the flag that exercises them, and the baseline runs that flag too so a red row cannot be vacuous.
+const FAULT_ARGS = { candidateFreeze: ['--compare-demo'], slotOrdinalText: ['--compare-demo'], slotOrdinalKey: ['--compare-demo'], slotProtectedCount: ['--compare-demo'] };
+const BASELINE_ARGS = ['--compare-demo'];
 const results = [];
 let failures = 0;
 console.log(`Running baseline then ${FAULTS.length} fault rows, each against its own preview on port ${port}.`);
@@ -62,7 +81,8 @@ for (const [label, fault] of [['baseline (no fault)', null], ...FAULTS.map(name 
   const { preview, started } = startPreview();
   try {
     await started;
-    const run = await harness(fault);
+    await waitReachable();
+    const run = await harness(fault, fault === null ? BASELINE_ARGS : (FAULT_ARGS[fault] ?? []));
     if (fault === null) {
       if (run.code === 0) {
         results.push('baseline (no fault)                PASS   harness green against the unmutated client');
