@@ -193,6 +193,35 @@ PIVOT_STARTER_CONTRACT_JSON = {
     "declared_limits": ["Public collection and alternative answers only; no reservations or business writes."],
 }
 
+# The protected family a qualifying comparison reserves from (Slice 15). Each
+# pair draws one never-exposed variant and both of its candidate slots share it,
+# so the comparison needs at least six reviewed variants per cycle.
+BOOKSHOP_COMPARISON_FAMILIES: tuple[str, ...] = ("task_completion",)
+
+# The reviewed ordinal map for the three public comparison workloads. It is the
+# controller's only source of workload paths, hashes, counts and task-spec
+# hashes; the workloads themselves live beside the other request fixtures.
+PIVOT_COMPARE_MANIFEST = FIXTURE_DIR / "requests" / "bookshop_compare_manifest.json"
+PIVOT_COMPARE_REQUEST_DIR = FIXTURE_DIR / "requests"
+
+# The two draft candidate repairs the offline comparison tests execute under the
+# pinned trusted-local adapter (Slice 15). They stand in for learner-authored
+# versions until a separately authorized live run; each is a complete artifact
+# whose frozen version composes the reviewed starter contract and the bookshop
+# v3 catalog, exactly like the pinned starter.
+PIVOT_COMPARE_CANDIDATE_SOURCES = {
+    "A": FIXTURE_DIR / "artifacts" / "bookshop" / "compare_repair_a_service.py",
+    "B": FIXTURE_DIR / "artifacts" / "bookshop" / "compare_repair_b_service.py",
+}
+
+
+def comparison_candidate_files(label: str) -> dict[str, str]:
+    """One draft comparison candidate's frozen artifact files, as UTF-8 text."""
+    source = PIVOT_COMPARE_CANDIDATE_SOURCES.get(label)
+    if source is None:
+        raise ValueError(f"unknown comparison candidate label: {label!r}")
+    return {"service.py": source.read_bytes().decode("utf-8")}
+
 # The reviewed public material the first Bellwether investigation runs against
 # (Slice 11). These are public by design: the learner reads the same rubric,
 # request and shop state the assessor uses, so nothing here is a hidden rule.
@@ -200,6 +229,7 @@ PIVOT_STARTER_CONTRACT_JSON = {
 # docs/plans/shiftwork/00-status.md and re-verified by a guard test.
 PIVOT_MISSION = FIXTURE_DIR / "mission" / "bookshop_pivot_v1.json"
 PIVOT_PUBLIC_STATE = FIXTURE_DIR / "shop" / "bookshop_pivot_public_state.json"
+PIVOT_COMPARE_STATE = FIXTURE_DIR / "shop" / "bookshop_compare_state_v1.json"
 PIVOT_INCIDENT_REQUESTS = FIXTURE_DIR / "requests" / "bookshop_pivot_incident.jsonl"
 
 
@@ -218,6 +248,12 @@ TRUSTED_LOCAL_FIXTURES = {
     "connection_refused": ("c15bf5ca1fc39f818a8b51a2b7451574c99e94ce080b5446e94f812580fec99c", "dad47aea8427d2bad00367bc5824d19d6582a8d337f456269818ba68a94a8c7f"),
     "kill_mid_batch": ("3ed340e86545c9e8e23a727abb6964853631ae0a06c936d8976ad81c47c9062e", "ac3ffc04f0123f540e018ae91c86f80a1423afb7995b98f32766276f5dae8f58"),
     "env_probe": ("42b7be0ed72373478f205b3793066da8ebffb2c536b8e8779362b01f65f9a33a", "860018c4c94ef50a929ddc1f799e45427832b24b731123e1ad09ff99e2287d42"),
+    # Slice 15's two draft comparison candidates, frozen under the starter
+    # contract and the bookshop v3 catalog. Their version content hash and file
+    # hash are recomputed from the fixture files by the same guard test that
+    # re-verifies every other pin, so the offline comparison cannot run unpinned.
+    "compare_candidate_a": ("01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82", "db3a7e3e3108991ef4beff1d50871bca7366115fae2f63782b89887785fb3fd4"),
+    "compare_candidate_b": ("21b9733dbffab5d1845edc3f0b4e5c8cd9b26aafca3edb57778bdd51e3000105", "0e4302dcc0d3b609b3cfe13175d417063b25b98229c8d61672fbc2fe3a65af10"),
     "repair_arc_pre": ("36c485fdd777913fc8c0034f7509d9f28a03a06b91c72e2f1e463b42bba7f8fd", "2b103de1c6b95bdecb2eac786034a11ead12040d0abcbc744d5e1db10cc97359"),
     "repair_arc_post": ("390d8bad95c00cd7b8a9e7aebeb632930ba2146ec72a464e6d6b0a3021ef9f64", "651a825fe4b76f7aff52a08b62c7ab455fd805f9d1ed9bbb124ee6d03698f2ff"),
     "pivot_starter": ("a1c1093fcc456ebb5afc07241bb24f34ca4ca80877a7fff00fe5c82e2c542f28", "407906232c54c0a76679fd70a0d72a9fa53fc123417975022bb974c09f5ba618"),
