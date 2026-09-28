@@ -65,6 +65,21 @@ const FAULTS = {
     replacement: '+ 7 protected step',
     expect: 'renders the wrong protected step count',
   },
+  outcomeMetric: {
+    needle: "        const value = element('dd', metrics[key] ?? 'unknown');",
+    replacement: "        const value = element('dd', key === 'useful_completions' ? 99 : (metrics[key] ?? 'unknown'));",
+    expect: 'renders the wrong useful_completions',
+  },
+  outcomeEligibility: {
+    needle: '      card.dataset.eligible = String(eligibility.eligible);',
+    replacement: '      card.dataset.eligible = String(!eligibility.eligible);',
+    expect: 'renders the wrong eligibility',
+  },
+  outcomeLabelBinding: {
+    needle: '      card.dataset.candidateLabel = label;',
+    replacement: "      card.dataset.candidateLabel = 'A';",
+    expect: 'renders no outcome card bound to candidate B',
+  },
 };
 
 const url = process.argv[2] ?? 'http://127.0.0.1:8009';
@@ -646,7 +661,23 @@ try {
     const pairs = payload.trials.reduce((acc, trial) => { (acc[trial.pair_ordinal] ??= new Set()).add(trial.workload_id); return acc; }, {});
     if (Object.values(pairs).some(workloads => workloads.size !== 1)) throw new Error('A pair does not share one frozen workload');
     if (!document.getElementById('compare-summary').textContent.includes('no winner derived here')) throw new Error('The Compare station does not state that it derives no winner');
-    if (payload.eligible !== false) throw new Error('A raw paired comparison reports eligibility before its outcome slice');
+    if (payload.outcome?.status !== 'COMPLETE') throw new Error('The terminal comparison has no complete outcome reading');
+    const cards = [...document.querySelectorAll('#comparison-outcome .comparison-outcome-card')];
+    if (cards.length !== 2) throw new Error('The comparison does not show both candidate outcome cards');
+    for (const label of ['A', 'B']) {
+      const card = cards.find(node => node.dataset.candidateLabel === label);
+      const metrics = payload.outcome.candidate_metrics.find(item => item.candidate_label === label);
+      const eligibility = payload.outcome.eligibility.find(item => item.candidate_label === label);
+      if (!card) throw new Error(`The comparison renders no outcome card bound to candidate ${label}`);
+      if (!metrics || !eligibility) throw new Error(`The outcome payload carries no candidate_label binding for ${label}`);
+      if (card.dataset.eligible !== String(eligibility.eligible)) throw new Error(`Candidate ${label} renders the wrong eligibility`);
+      for (const [key, value] of Object.entries(metrics)) {
+        if (key === 'candidate_version_id' || key === 'candidate_label') continue;
+        const rendered = card.querySelector(`[data-metric="${key}"]`)?.textContent;
+        if (rendered !== String(value ?? 'unknown')) throw new Error(`Candidate ${label} renders the wrong ${key}`);
+      }
+    }
+    if (!document.getElementById('comparison-outcome').textContent.includes('may overlap')) throw new Error('The comparison hides non-additive incidence meaning');
     return { experiment: experimentId, state: payload.state, slots: payload.trials.map(trial => `${trial.execution_ordinal}:${trial.pair_ordinal}${trial.candidate_label}/${trial.workload_id}/${trial.request_count}`).join(' ') };
   }, await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_a_service.py', 'utf8'), await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_b_service.py', 'utf8')) : null;
   if (comparison) {
@@ -658,6 +689,21 @@ try {
     assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '390px compare panel overflows');
     await screenshot('compare-390');
     await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+    await send('Page.navigate', { url });
+    await ready();
+    await evaluate(() => document.querySelector('[data-station="investigate"]').click());
+    await evaluate(async diagnosticId => {
+      const deadline = Date.now() + 10000;
+      const panel = document.getElementById('diagnostic-result');
+      while (!panel.dataset.experimentId && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 50));
+      if (panel.dataset.experimentId !== diagnosticId) throw new Error(`After a reload the diagnostic panel projects ${panel.dataset.experimentId || 'nothing'} instead of the earlier diagnostic ${diagnosticId}`);
+      const eligibility = [...panel.querySelectorAll('.evidence-step')].find(node => node.querySelector('.step-label')?.textContent.includes('Eligibility'))?.querySelector('[data-eligible]');
+      if (!eligibility) throw new Error('After a reload the diagnostic panel renders no eligibility step');
+      if (eligibility.dataset.eligible !== 'false') throw new Error('After a reload the diagnostic panel reports eligible for a shift whose latest experiment is a comparison');
+      const statement = eligibility.querySelector('strong')?.textContent;
+      if (statement !== 'Not eligible · this diagnostic cannot qualify a version') throw new Error(`After a reload the diagnostic panel prints the wrong eligibility statement: ${statement}`);
+    }, diagnostic.experiment);
+    await screenshot('investigate-diagnostic-after-comparison-reload-1280');
     await evaluate(() => document.querySelector('[data-station="service"]').click());
   }
   if (process.argv.includes('--exercise-run')) {

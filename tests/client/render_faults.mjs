@@ -70,9 +70,9 @@ function harness(fault, args = []) {
   });
 }
 
-const FAULTS = ['answer', 'record', 'verdict', 'event', 'eligibility', 'stationFocus', 'incidentFocus', 'candidateFreeze', 'slotOrdinalText', 'slotOrdinalKey', 'slotProtectedCount'];
+const FAULTS = ['answer', 'record', 'verdict', 'event', 'eligibility', 'stationFocus', 'incidentFocus', 'candidateFreeze', 'slotOrdinalText', 'slotOrdinalKey', 'slotProtectedCount', 'outcomeMetric', 'outcomeEligibility', 'outcomeLabelBinding'];
 // The compare-path rows need the flag that exercises them, and the baseline runs that flag too so a red row cannot be vacuous.
-const FAULT_ARGS = { candidateFreeze: ['--compare-demo'], slotOrdinalText: ['--compare-demo'], slotOrdinalKey: ['--compare-demo'], slotProtectedCount: ['--compare-demo'] };
+const FAULT_ARGS = { candidateFreeze: ['--compare-demo'], slotOrdinalText: ['--compare-demo'], slotOrdinalKey: ['--compare-demo'], slotProtectedCount: ['--compare-demo'], outcomeMetric: ['--compare-demo'], outcomeEligibility: ['--compare-demo'], outcomeLabelBinding: ['--compare-demo'] };
 const BASELINE_ARGS = ['--compare-demo'];
 const results = [];
 let failures = 0;
