@@ -58,6 +58,8 @@ from shiftwork.domain.models import (
     ExecutorFailure,
     Experiment,
     ExperimentKind,
+    ExposureItem,
+    ExposureReservation,
     FrozenWorkload,
     Incident,
     IncidentState,
@@ -77,6 +79,7 @@ from shiftwork.domain.models import (
     ServiceResponse,
     Shift,
     ShiftOpeningMode,
+    TrialSlot,
 )
 from shiftwork.evaluator import evaluator
 from shiftwork.executor import base as executor
@@ -776,7 +779,7 @@ def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
 
 
 def reconcile_interrupted(conn: sqlite3.Connection) -> list[str]:
-    """Startup recovery (S3.6, S6.B.9, S14): fail the work a restart left nonterminal.
+    """Startup recovery: fail nonterminal work without retrying or refunding it.
 
     A restart can leave runs in QUEUED, RUNNING or CAPTURED; none of them
     resumes. Each is marked FAILED with the typed INTERNAL failure kind (the
@@ -787,7 +790,9 @@ def reconcile_interrupted(conn: sqlite3.Connection) -> list[str]:
     marked FAILED with the controller-side ``ASSIST_INTERRUPTED`` code, keeps
     its consumed budget slot and refuses every decision, exactly like a provider
     failure. Terminal, decided, FINALIZED and FAILED rows are untouched, so the
-    call is idempotent. Returns the reconciled run and assist event ids.
+    call is idempotent. A reserved or claimed comparison also becomes FAILED;
+    its six slots remain visible, and any stored capture is retained. Returns
+    the reconciled run, assist event and comparison ids.
 
     Startup is the only reconciliation point (``app.py`` lifespan is the sole call
     site): work left nonterminal while the app keeps running, for example a run
@@ -798,12 +803,22 @@ def reconcile_interrupted(conn: sqlite3.Connection) -> list[str]:
     reconciled: list[str] = []
     for run in repo.list_nonterminal_runs(conn):
         repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
+        if run.trial_slot_id is not None:
+            # A comparison slot shares its run's fate: the slot is not refunded,
+            # not re-executed and not silently dropped from the six-slot schedule.
+            repo.update_trial_slot(conn, run.trial_slot_id, state="FAILED")
         reconciled.append(run.id)
     for event in repo.list_pending_assist_events(conn):
         repo.finish_assist_event(
             conn, event.id, response="", proposed_patch=None, failure_code=ASSIST_INTERRUPTED
         )
         reconciled.append(event.id)
+    for experiment in repo.list_nonterminal_comparisons(conn):
+        for slot in repo.list_trial_slots(conn, experiment.id):
+            if slot.state not in ("COMPLETE", "FAILED"):
+                repo.update_trial_slot(conn, slot.id, state="FAILED")
+        repo.update_experiment_state(conn, experiment.id, "FAILED")
+        reconciled.append(experiment.id)
     if reconciled:
         conn.commit()
     return reconciled
@@ -818,7 +833,9 @@ def get_run(conn: sqlite3.Connection, run_id: str) -> Run:
 
 def list_outputs(conn: sqlite3.Connection, run_id: str) -> list[RunOutput]:
     get_run(conn, run_id)
-    return repo.list_outputs(conn, run_id)
+    slot = repo.get_trial_slot_for_run(conn, run_id)
+    return [output for output in repo.list_outputs(conn, run_id)
+            if slot is None or output.request_ordinal <= slot.request_count]
 
 
 def list_check_results(conn: sqlite3.Connection, run_id: str) -> list[CheckResult]:
@@ -833,7 +850,8 @@ def get_incident(conn: sqlite3.Connection, incident_id: str) -> Incident:
     return incident
 
 
-def _stimulus_record(run: Run, ordinal: int, records: dict[str, JsonValue]) -> JsonValue | None:
+def _stimulus_record(conn: sqlite3.Connection, run: Run, ordinal: int,
+                     records: dict[str, JsonValue]) -> JsonValue | None:
     """The public record the executed request ordinal asked about, or None.
 
     The stimulus comes from the run's persisted request batch; any unavailable or
@@ -842,11 +860,24 @@ def _stimulus_record(run: Run, ordinal: int, records: dict[str, JsonValue]) -> J
     if run.purpose is RunPurpose.LEGACY_OPERATION:
         return None
     try:
-        batch_path = config.FIXTURE_DIR / "requests" / run.request_batch_ref
-        batch = executor.load_batch(executor.BatchRef(
-            path_ref=run.request_batch_ref,
-            content_hash=canonical.content_hash(base64.b64encode(batch_path.read_bytes()).decode("ascii")),
-        ))
+        if run.context_id:
+            context = repo.get_execution_context(conn, run.context_id)
+            if context is None:
+                return None
+            workload = next((item for item in context.workloads
+                             if run.request_batch_ref == f"frozen-workload:{item.id}"), None)
+            if workload is None:
+                return None
+            frozen_bytes = base64.b64decode(workload.request_batch_bytes_base64)
+            batch = executor.load_batch(executor.BatchRef(
+                path_ref=run.request_batch_ref, content_hash=workload.request_batch_hash,
+            ), frozen_bytes)
+        else:
+            batch_path = config.FIXTURE_DIR / "requests" / run.request_batch_ref
+            batch = executor.load_batch(executor.BatchRef(
+                path_ref=run.request_batch_ref,
+                content_hash=canonical.content_hash(base64.b64encode(batch_path.read_bytes()).decode("ascii")),
+            ))
     except (OSError, ValueError, KeyError):
         return None
     stimulus = next((entry for entry in batch if entry.ordinal == ordinal), None)
@@ -858,7 +889,16 @@ def _stimulus_record(run: Run, ordinal: int, records: dict[str, JsonValue]) -> J
         return None
     if not isinstance(body, dict):
         return None
-    return records.get(body.get("record_id"))
+    record_id = body.get("record_id")
+    if isinstance(record_id, str):
+        return records.get(record_id)
+    entity_ref = body.get("entity_ref")
+    if isinstance(entity_ref, str):
+        stock = [record for record in records.values()
+                 if record.get("entity_ref") == entity_ref and record.get("kind") == "stock"]
+        if len(stock) == 1:
+            return stock[0]
+    return None
 
 
 def output_evidence_for(conn: sqlite3.Connection, output: RunOutput, run: Run) -> dict[str, Any]:
@@ -882,7 +922,7 @@ def output_evidence_for(conn: sqlite3.Connection, output: RunOutput, run: Run) -
         records = _public_records(snapshot_bytes)
     except (OSError, ValueError):
         snapshot_bytes = None
-    record = _stimulus_record(run, output.request_ordinal, records) if snapshot_bytes else None
+    record = _stimulus_record(conn, run, output.request_ordinal, records) if snapshot_bytes else None
     if record is not None:
         evidence.update({
             "public_shop_record": {
@@ -995,7 +1035,7 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         operating_status = "STARTER_BASELINE"
     else:
         operating_status = "SELECTED"
-    requests_run = len(repo.list_outputs(conn, latest_run.id)) if latest_run else 0
+    requests_run = len(list_outputs(conn, latest_run.id)) if latest_run else 0
     attempts_used = repo.count_operation_runs(conn, latest_shift.id) if latest_shift else 0
     attempt_limit = _attempt_limit(conn, slug)
     incidents = repo.list_incidents(conn, slug)
@@ -1379,25 +1419,36 @@ def _encode(raw: bytes) -> str:
     return base64.b64encode(raw).decode("ascii")
 
 
-def _private_public_needles() -> tuple[str, ...]:
+def _private_public_needles(conn: sqlite3.Connection | None = None) -> tuple[str, ...]:
     """Values that must not appear in serialized diagnostic projections."""
     needles = {str(Path.cwd()), sealed_store.private_storage_locator(), "sealed/cases"}
     for key in ("NEBIUS_API_KEY", "NEBIUS_PROJECT_ID"):
         value = os.environ.get(key)
         if value:
             needles.add(value)
-    for family in config.BOOKSHOP_FAMILIES:
+    for family in (*config.BOOKSHOP_FAMILIES, *config.BOOKSHOP_COMPARISON_FAMILIES):
         for case in sealed_store.load_family(family).cases:
             needles.update((case.id, case.check_id))
             note = case.expected.get("note")
             if isinstance(note, str) and len(note) >= 25:
                 needles.add(note)
+            if case.stimulus is not None:
+                stimulus = case.stimulus
+                needles.update((stimulus.request.request_id, stimulus.request.text,
+                                stimulus.task_spec.id, stimulus.task_spec.text,
+                                stimulus.state_delta.description))
+                aspect = case.expected.get("aspect")
+                if isinstance(aspect, str) and len(aspect) >= 8:
+                    needles.add(aspect)
+    if conn is not None:
+        needles.update(row["resolved_state_sha256"] for row in conn.execute(
+            "SELECT resolved_state_sha256 FROM protected_case_snapshots"))
     return tuple(needle for needle in needles if len(needle) >= 8)
 
 
-def assert_public_projection(payload: object) -> None:
+def assert_public_projection(payload: object, conn: sqlite3.Connection | None = None) -> None:
     try:
-        assert_public_safe(payload, _private_public_needles())
+        assert_public_safe(payload, _private_public_needles(conn))
     except ValueError as exc:
         raise LifecycleError("conflict", "public evidence contains private material") from exc
 
@@ -1411,7 +1462,7 @@ def artifact_source(conn: sqlite3.Connection, version_id: str) -> dict[str, Any]
         "content_hash": version.content_hash, "files": version.files,
         "contract": version.contract.model_dump(mode="json"), "authorship": version.created_by,
     }
-    assert_public_projection(payload)
+    assert_public_projection(payload, conn)
     return payload
 
 
@@ -1846,6 +1897,911 @@ def execute_experiment_task(db_path: str, run_id: str) -> None:
         conn.close()
 
 
+# --- Slice 15: the qualifying comparison ------------------------------------
+
+COMPARISONS_PER_SHIFT = 1
+COMPARE_DEADLINE_S = 10
+COMPARE_EVALUATOR_VERSION = evaluator.RULE_VERSION
+COMPARE_REDUCER_VERSION = "no-reduction: a qualifying comparison writes no ledger event"
+COMPARISON_PAIRS = 3
+
+
+def _canonical_specs_bytes(specs: tuple[task_contract.CustomerRequestSpec, ...]) -> bytes:
+    return canonical.canonical_bytes([spec.model_dump(mode="json") for spec in specs])
+
+
+def _read_comparison_workloads(
+    slug: str, mission: task_contract.MissionSpec, snapshot_bytes: bytes
+) -> tuple[FrozenWorkload, ...]:
+    """Load and verify the engagement's reviewed workload manifest, or fail closed.
+
+    The manifest is the controller's only source of workload paths, bytes, counts
+    and task-spec hashes, and it is selected by the shift's engagement slug, never
+    by caller input. Every pinned value is recomputed from the actual files here:
+    a replaced batch, a swapped pair assignment, a changed count or a file edited
+    after review fails before any reservation exists.
+    """
+    if slug != config.BOOKSHOP_SLUG:
+        raise LifecycleError("conflict", "this engagement has no reviewed comparison workloads")
+    try:
+        data = json.loads(config.PIVOT_COMPARE_MANIFEST.read_bytes().decode("utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise LifecycleError("conflict", "the reviewed comparison manifest is unreadable") from exc
+    _require_reviewed_comparison_material(data, "comparison workload manifest", "workloads")
+    if (data.get("engagement_slug") != slug or data.get("schema_version") != 1
+            or data.get("comparison_state_sha256") != _hash_bytes(snapshot_bytes)):
+        raise LifecycleError(
+            "conflict", "the reviewed comparison manifest belongs to another engagement"
+        )
+    entries = data.get("workloads")
+    if not isinstance(entries, list) or [entry.get("ordinal") for entry in entries] != [1, 2, 3]:
+        raise LifecycleError(
+            "conflict", "the reviewed comparison manifest must map ordinals 1, 2 and 3"
+        )
+    workloads: list[FrozenWorkload] = []
+    for entry in entries:
+        try:
+            batch_bytes = (
+                config.PIVOT_COMPARE_REQUEST_DIR / str(entry["request_file"])
+            ).read_bytes()
+            specs_bytes = (
+                config.PIVOT_COMPARE_REQUEST_DIR / str(entry["task_spec_file"])
+            ).read_bytes()
+        except (OSError, KeyError, TypeError) as exc:
+            raise LifecycleError(
+                "conflict", f"comparison workload {entry.get('ordinal')} is unreadable"
+            ) from exc
+        if (
+            hashlib.sha256(batch_bytes).hexdigest() != entry.get("request_bytes_sha256")
+            or len(batch_bytes) != entry.get("request_bytes_length")
+        ):
+            raise LifecycleError(
+                "conflict",
+                f"comparison workload {entry['ordinal']} does not match its reviewed raw bytes",
+            )
+        try:
+            loaded = json.loads(specs_bytes.decode("utf-8"))
+            specs = tuple(
+                task_contract.CustomerRequestSpec.model_validate(item) for item in loaded
+            )
+        except (UnicodeDecodeError, json.JSONDecodeError, TypeError, ValueError) as exc:
+            raise LifecycleError(
+                "conflict", f"comparison workload {entry['ordinal']} task specs are unusable"
+            ) from exc
+        canonical_specs = _canonical_specs_bytes(specs)
+        if hashlib.sha256(canonical_specs).hexdigest() != entry.get("task_specs_sha256"):
+            raise LifecycleError(
+                "conflict",
+                f"comparison workload {entry['ordinal']} does not match its reviewed task specs",
+            )
+        # Parse the exact frozen bytes with the same parser that each executor
+        # uses. In particular, a blank line is a malformed request, not a row
+        # reservation may silently discard before exposure is spent.
+        try:
+            batch = executor.load_batch(
+                executor.BatchRef(
+                    path_ref=str(entry["request_file"]),
+                    content_hash=canonical.content_hash(_encode(batch_bytes)),
+                ),
+                batch_bytes,
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            raise LifecycleError(
+                "conflict", f"comparison workload {entry['ordinal']} carries a malformed request"
+            ) from exc
+        if (
+            len(batch) != entry.get("request_count")
+            or len(specs) != entry.get("request_count")
+            or not 1 <= len(specs) <= 4
+        ):
+            raise LifecycleError(
+                "conflict",
+                f"comparison workload {entry['ordinal']} request count does not match its manifest",
+            )
+        for stimulus, spec in zip(batch, specs, strict=True):
+            try:
+                parsed_line = json.loads(stimulus.body)
+            except (TypeError, ValueError) as exc:
+                raise LifecycleError(
+                    "conflict", f"comparison workload {entry['ordinal']} carries a malformed request"
+                ) from exc
+            if (
+                not isinstance(parsed_line, dict)
+                or parsed_line.get("request_id") != spec.id
+                or stimulus.text != spec.text
+                or parsed_line.get("text") != spec.text
+            ):
+                raise LifecycleError(
+                    "conflict",
+                    f"comparison workload {entry['ordinal']} request {spec.id} does not match its spec",
+                )
+        for rule_id in {rule for spec in specs for rule in spec.mandatory_rule_ids}:
+            if rule_id not in mission.public_rules:
+                raise LifecycleError(
+                    "conflict",
+                    f"comparison workload {entry['ordinal']} cites an undefined public rule",
+                )
+        workloads.append(
+            FrozenWorkload(
+                id=f"workload-{entry['ordinal']:02d}",
+                ordinal=entry["ordinal"],
+                request_batch_bytes_base64=_encode(batch_bytes),
+                request_batch_hash=canonical.content_hash(_encode(batch_bytes)),
+                request_specs_bytes_base64=_encode(canonical_specs),
+                request_specs_hash=hashlib.sha256(canonical_specs).hexdigest(),
+                request_count=entry["request_count"],
+            )
+        )
+    return tuple(workloads)
+
+
+def _require_reviewed_comparison_material(data: dict[str, Any], label: str, payload_key: str) -> None:
+    """Require an operator seal over the exact reviewed inventory, not a draft label."""
+    payload = data.get(payload_key)
+    digest = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
+    if data.get("review_status") != "OPERATOR_SEALED" or data.get("sealed_payload_sha256") != digest:
+        raise LifecycleError("conflict", f"{label} awaits operator review and sealing")
+
+
+def _exposure_refs(conn: sqlite3.Connection, slug: str, family: str) -> set[str]:
+    """Every variant of one family this engagement already consumed or retired.
+
+    Both exposure stores count: legacy attempt draws and comparison reservations.
+    A retired or invalidated item stays in the set, so a compromised group can
+    never be re-drawn (ADR 0001).
+    """
+    refs = {
+        draw.variant_ref
+        for draw in repo.list_rotation_draws(conn, slug)
+        if draw.family == family
+    }
+    refs.update(
+        item.variant_ref for item in repo.list_exposure_items_for_family(conn, slug, family)
+    )
+    return refs
+
+
+def _comparison_schedule(
+    context_hash: str, candidate_hashes: tuple[str, str]
+) -> tuple[tuple[int, str, int], ...]:
+    """The precommitted slot order: (pair ordinal, candidate label, execution ordinal).
+
+    Pair 1 runs A then B, pair 2 runs B then A, and pair 3's order is derived
+    from the low bit of a decision hash over the context hash and both candidate
+    content hashes. Pair 3's input includes the context hash, so the schedule is
+    fixed with the frozen material and computed before the experiment content
+    hash exists.
+    """
+    decision = hashlib.sha256(f"{context_hash}:{candidate_hashes[0]}:{candidate_hashes[1]}".encode("utf-8")).digest()
+    pair_three = ("A", "B") if decision[-1] & 1 == 0 else ("B", "A")
+    order = [(1, "A"), (1, "B"), (2, "B"), (2, "A"), (3, pair_three[0]), (3, pair_three[1])]
+    return tuple((pair, label, index) for index, (pair, label) in enumerate(order, start=1))
+
+
+def _comparison_context_fields(
+    shift: Shift,
+    mission: task_contract.MissionSpec,
+    mission_bytes: bytes,
+    snapshot_bytes: bytes,
+    workloads: tuple[FrozenWorkload, ...],
+    reservation_id: str,
+    isolated: bool,
+    starting_state: dict[str, Any],
+    protected_bindings: tuple[task_contract.ProtectedBinding, ...],
+) -> dict[str, Any]:
+    fields: dict[str, Any] = {
+        "engagement_slug": shift.engagement_slug,
+        "workloads": [workload.model_dump(mode="json") for workload in workloads],
+        "mission_hash": _hash_bytes(mission_bytes),
+        "public_data_hash": _hash_bytes(snapshot_bytes),
+        "starting_business_state_hash": canonical.content_hash(starting_state),
+        "requirement_set_id": f"public-rubric:{mission.engagement_slug}:v{mission.version}",
+        "requirement_set_hash": _hash_bytes(mission_bytes),
+        "visible_check_set_hash": canonical.content_hash(
+            [
+                {"ordinal": workload.ordinal, "task_specs_hash": workload.request_specs_hash}
+                for workload in workloads
+            ]
+        ),
+        "condition": ContextCondition(
+            id="condition-normal",
+            kind="normal",
+            public_label="Normal public conditions",
+            exact_bytes_base64=_encode(snapshot_bytes),
+            content_hash=_hash_bytes(snapshot_bytes),
+        ).model_dump(mode="json"),
+        "evaluator_version": COMPARE_EVALUATOR_VERSION,
+        "reducer_version": COMPARE_REDUCER_VERSION,
+        "executor_class": EvidenceMode.ISOLATED_LIVE.value if isolated else EvidenceMode.TRUSTED_LOCAL.value,
+        "harness_hash": _hash_bytes(
+            (b"sandbox-driver-v1" if isolated else DIAGNOSTIC_HARNESS_REF.encode("utf-8"))
+        ),
+        "image_ref": config.TOKEN_FACTORY_IMAGE if isolated else DIAGNOSTIC_IMAGE_REF,
+        "service_model": config.SERVICE_MODEL if isolated else None,
+        "service_model_settings_json": (
+            {"temperature": 0, "max_tokens": GATEWAY_MAX_OUTPUT_TOKENS} if isolated else {}
+        ),
+        "resource_limits_json": {
+            "deadline_s": 45 if isolated else COMPARE_DEADLINE_S,
+            "max_requests": 4,
+            "trial_slots": 2 * COMPARISON_PAIRS,
+        },
+        # The reservation is part of the frozen material: the bytes that were
+        # reserved are the bytes that execute, and the reservation identity the
+        # context names is the one the slots carry.
+        "protected_reservation_id": reservation_id,
+        "protected_bindings": [binding.model_dump(mode="json") for binding in protected_bindings],
+    }
+    return fields
+
+
+def _reserved_protected_bindings(
+    conn: sqlite3.Connection, reservation_id: str,
+) -> tuple[task_contract.ProtectedBinding, ...]:
+    bindings = []
+    for reserved in sealed_store.load_reserved_comparison_cases(conn, reservation_id):
+        stimulus = reserved.case.stimulus
+        bindings.append(task_contract.ProtectedBinding(
+            pair_ordinal=reserved.pair_ordinal, variant_ref=rotation.variant_ref(reserved.case),
+            request_ordinal=stimulus.request.ordinal,
+            stimulus_hash=canonical.content_hash(stimulus.model_dump(mode="json")),
+            protected_state_hash=reserved.resolved_state_sha256,
+        ))
+    return tuple(sorted(bindings, key=lambda item: item.pair_ordinal))
+
+
+def _frozen_comparison_context_hash(
+    context: ExecutionContext, bindings: tuple[task_contract.ProtectedBinding, ...],
+) -> str:
+    fields = {
+        "engagement_slug": context.engagement_slug,
+        "workloads": [item.model_dump(mode="json") for item in context.workloads],
+        "mission_hash": context.mission_hash,
+        "public_data_hash": context.public_data_hash,
+        "starting_business_state_hash": context.starting_business_state_hash,
+        "requirement_set_id": context.requirement_set_id,
+        "requirement_set_hash": context.requirement_set_hash,
+        "visible_check_set_hash": context.visible_check_set_hash,
+        "condition": context.condition.model_dump(mode="json"),
+        "evaluator_version": context.evaluator_version,
+        "reducer_version": context.reducer_version,
+        "executor_class": context.executor_class.value,
+        "harness_hash": context.harness_hash,
+        "image_ref": context.image_ref,
+        "service_model": context.service_model,
+        "service_model_settings_json": context.service_model_settings_json,
+        "resource_limits_json": context.resource_limits_json,
+        "protected_reservation_id": context.protected_reservation_id,
+        "protected_bindings": [item.model_dump(mode="json") for item in bindings],
+    }
+    return canonical.content_hash(fields)
+
+
+def create_qualifying_comparison(
+    conn: sqlite3.Connection,
+    shift_id: str,
+    *,
+    candidate_a_version_id: str,
+    candidate_b_version_id: str,
+    investigation_id: str,
+    declared_treatment: str,
+    client_request_id: str,
+    adapter: str = "local_process",
+) -> Experiment:
+    """Reserve one qualifying comparison atomically, before any result exists.
+
+    One transaction writes the exposure reservation and its per-pair items, the
+    frozen context (three verified workloads, reviewed mission, public state and
+    ceilings), the experiment with its precommitted six-slot schedule, the six
+    ordered trial slots and their six queued runs. A fault anywhere rolls back
+    the whole reservation: there is no partially reserved comparison, and a
+    failed reservation consumes nothing.
+    """
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        shift = _require_open_shift(conn, shift_id)
+        isolated = adapter == TokenFactoryAdapter.name
+        if adapter not in (LocalProcessAdapter.name, TokenFactoryAdapter.name):
+            raise LifecycleError("conflict", "no safe comparison executor is configured")
+        if isolated and (
+            not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID")
+        ):
+            raise BootstrapBlocked(
+                "the verified isolated executor and its controller credentials are unavailable"
+            )
+        if investigation_id is None:
+            raise LifecycleError(
+                "conflict", "a qualifying comparison requires an owned investigation"
+            )
+        investigation = repo.get_investigation(conn, investigation_id)
+        if investigation is None:
+            raise LifecycleError("not_found", f"unknown investigation: {investigation_id}")
+        if investigation.shift_id != shift.id:
+            raise LifecycleError(
+                "conflict", "a qualifying comparison requires an investigation owned by this shift"
+            )
+        candidate_a = repo.get_version(conn, candidate_a_version_id)
+        candidate_b = repo.get_version(conn, candidate_b_version_id)
+        if candidate_a is None or candidate_b is None:
+            raise LifecycleError("not_found", "unknown candidate artifact version")
+        if candidate_a.shift_id != shift.id or candidate_b.shift_id != shift.id:
+            raise LifecycleError("conflict", "comparison candidates must belong to this shift")
+        if candidate_a.content_hash == candidate_b.content_hash:
+            raise LifecycleError(
+                "conflict", "a qualifying comparison needs two distinct candidate versions"
+            )
+        if not isolated:
+            pinned = {
+                config.TRUSTED_LOCAL_FIXTURES["compare_candidate_a"][0],
+                config.TRUSTED_LOCAL_FIXTURES["compare_candidate_b"][0],
+            }
+            if {candidate_a.content_hash, candidate_b.content_hash} != pinned:
+                raise LifecycleError(
+                    "conflict",
+                    "only the two pinned reviewed candidates are executable as an offline comparison",
+                )
+        candidates = (
+            CandidateRef(label="A", artifact_version_id=candidate_a.id,
+                         artifact_content_hash=candidate_a.content_hash),
+            CandidateRef(label="B", artifact_version_id=candidate_b.id,
+                         artifact_content_hash=candidate_b.content_hash),
+        )
+        treatment = declared_treatment.strip()
+        if not treatment:
+            raise LifecycleError("conflict", "a qualifying comparison needs a declared treatment")
+        replay = repo.get_experiment_by_client_request_id(conn, client_request_id)
+        if replay is not None:
+            if (
+                replay.shift_id == shift.id
+                and replay.kind is ExperimentKind.QUALIFYING_COMPARISON
+                and replay.investigation_id == investigation.id
+                and replay.candidates == candidates
+                and replay.declared_treatment == treatment
+            ):
+                conn.rollback()
+                return replay
+            raise LifecycleError(
+                "conflict", "client_request_id was already used for a different experiment"
+            )
+        used = repo.count_experiments_for_shift(conn, shift.id, ExperimentKind.QUALIFYING_COMPARISON)
+        if used >= COMPARISONS_PER_SHIFT:
+            raise LifecycleError(
+                "conflict",
+                f"this shift already reserved its qualifying comparison ({used} of "
+                f"{COMPARISONS_PER_SHIFT})",
+            )
+
+        mission_bytes = config.PIVOT_MISSION.read_bytes()
+        mission = task_contract.load_mission_bytes(mission_bytes, label=config.PIVOT_MISSION.name)
+        if mission.engagement_slug != shift.engagement_slug:
+            raise LifecycleError("conflict", "reviewed mission belongs to another engagement")
+        snapshot_bytes = config.PIVOT_COMPARE_STATE.read_bytes()
+        snapshot = task_contract.load_public_state_bytes(
+            snapshot_bytes, label=config.PIVOT_COMPARE_STATE.name
+        )
+        if not snapshot.records:
+            raise LifecycleError("conflict", "the reviewed public state carries no record")
+        workloads = _read_comparison_workloads(shift.engagement_slug, mission, snapshot_bytes)
+        events = repo.list_ledger_events(conn, shift.engagement_slug)
+        chain_status = chain.verify_chain(events)
+        if chain_status is chain.ChainStatus.BROKEN:
+            raise LifecycleError("conflict", "ledger chain is BROKEN; refusing comparison")
+        totals: dict[str, int] = {}
+        for event in events:
+            totals[event.event_type.value] = totals.get(event.event_type.value, 0) + 1
+        starting_state = {
+            "chain_status": chain_status.value,
+            "ledger_event_count": len(events),
+            "ledger_head_hash": events[-1].hash if events else None,
+            "ledger_totals": totals,
+            "unresolved_incidents": [
+                incident.model_dump(mode="json")
+                for incident in repo.list_incidents(conn, shift.engagement_slug)
+                if incident.state in (IncidentState.OPEN, IncidentState.CLOSED_UNRESOLVED)
+            ],
+            "unresolved_limits": repo.list_unresolved_limits(conn, shift.engagement_slug),
+        }
+
+        reservation_id = f"reservation-{repo.count_exposure_reservations(conn) + 1:04d}"
+        reservation = ExposureReservation(
+            id=reservation_id,
+            engagement_slug=shift.engagement_slug,
+            scope="comparison",
+            experiment_id=None,
+            state="ACTIVE",
+            created_at=_now(),
+        )
+        repo.insert_exposure_reservation(conn, reservation)
+        reserved: dict[int, tuple[str, ...]] = {}
+        for family in config.BOOKSHOP_COMPARISON_FAMILIES:
+            drawn = rotation.select_pair_variants(
+                family,
+                sealed_store.load_reviewed_comparison_family(family).cases,
+                _exposure_refs(conn, shift.engagement_slug, family),
+            )
+            for pair_ordinal, case in enumerate(drawn, start=1):
+                stimulus = case.stimulus
+                workload = workloads[pair_ordinal - 1]
+                if (stimulus is None
+                        or stimulus.request.ordinal != workload.request_count + 1
+                        or stimulus.task_spec.id != stimulus.request.request_id
+                        or stimulus.task_spec.text != stimulus.request.text
+                        or stimulus.request.entity_ref not in stimulus.task_spec.requested_entities
+                        or not stimulus.task_spec.tasks
+                        or len({task.id for task in stimulus.task_spec.tasks}) != len(stimulus.task_spec.tasks)
+                        or any(task.requested_entity_ref != stimulus.request.entity_ref
+                               for task in stimulus.task_spec.tasks)
+                        or any(rule not in mission.public_rules
+                               for rule in stimulus.task_spec.mandatory_rule_ids)):
+                    raise LifecycleError("conflict", "protected comparison stimulus violates the frozen public contract")
+                resolved_state = task_contract.resolve_protected_state(snapshot_bytes, stimulus.state_delta)
+                ref = rotation.variant_ref(case)
+                exposure_item_id = f"{reservation_id}-{family}-p{pair_ordinal}"
+                repo.insert_exposure_item(
+                    conn,
+                    ExposureItem(
+                        id=exposure_item_id,
+                        reservation_id=reservation_id,
+                        engagement_slug=shift.engagement_slug,
+                        family=family,
+                        cycle=sealed_store.family_cycle(family),
+                        variant_ref=ref,
+                        pair_ordinal=pair_ordinal,
+                        drawn_at=_now(),
+                    ),
+                )
+                case_json = json.dumps(
+                    case.model_dump(mode="json"), sort_keys=True, separators=(",", ":"),
+                    ensure_ascii=False,
+                )
+                repo.insert_protected_case_snapshot(
+                    conn, exposure_item_id, ref, case_json,
+                    hashlib.sha256(case_json.encode("utf-8")).hexdigest(),
+                    resolved_state, _hash_bytes(resolved_state),
+                )
+                reserved[pair_ordinal] = reserved.get(pair_ordinal, ()) + (ref,)
+
+        bindings = _reserved_protected_bindings(conn, reservation_id)
+        fields = _comparison_context_fields(
+            shift, mission, mission_bytes, snapshot_bytes, workloads, reservation_id, isolated,
+            starting_state, bindings,
+        )
+        context_hash = canonical.content_hash(fields)
+        existing_context = repo.get_execution_context_by_hash(conn, context_hash)
+        if existing_context is not None:
+            context = existing_context
+        else:
+            context = ExecutionContext(
+                id=f"context-{repo.count_execution_contexts(conn) + 1:04d}",
+                schema_version=1,
+                engagement_slug=shift.engagement_slug,
+                workloads=workloads,
+                mission_bytes_base64=_encode(mission_bytes),
+                mission_hash=fields["mission_hash"],
+                public_data_bytes_base64=_encode(snapshot_bytes),
+                public_data_hash=fields["public_data_hash"],
+                starting_business_state_json=starting_state,
+                starting_business_state_hash=fields["starting_business_state_hash"],
+                requirement_set_id=fields["requirement_set_id"],
+                requirement_set_hash=fields["requirement_set_hash"],
+                visible_check_set_hash=fields["visible_check_set_hash"],
+                protected_reservation_id=reservation_id,
+                condition=ContextCondition.model_validate(fields["condition"]),
+                evaluator_version=fields["evaluator_version"],
+                reducer_version=fields["reducer_version"],
+                executor_class=EvidenceMode(fields["executor_class"]),
+                harness_hash=fields["harness_hash"],
+                image_ref=fields["image_ref"],
+                service_model=fields["service_model"],
+                service_model_settings_json=fields["service_model_settings_json"],
+                resource_limits_json=fields["resource_limits_json"],
+                created_at=_now(),
+                content_hash=context_hash,
+            )
+            repo.insert_execution_context(conn, context)
+        schedule = _comparison_schedule(
+            context.content_hash, (candidate_a.content_hash, candidate_b.content_hash)
+        )
+        experiment = Experiment(
+            id=f"experiment-{shift.id}-c1",
+            shift_id=shift.id,
+            kind=ExperimentKind.QUALIFYING_COMPARISON,
+            investigation_id=investigation.id,
+            candidates=candidates,
+            declared_treatment=treatment,
+            context_id=context.id,
+            content_hash=canonical.content_hash(
+                {
+                    "shift_id": shift.id,
+                    "kind": ExperimentKind.QUALIFYING_COMPARISON.value,
+                    "candidates": [candidate.model_dump(mode="json") for candidate in candidates],
+                    "context_hash": context.content_hash,
+                    "trial_count_per_candidate": COMPARISON_PAIRS,
+                    "declared_treatment": treatment,
+                    # The schedule is fixed before this hash exists; storing it in
+                    # the hash means a later reordering is a different experiment.
+                    "schedule": [
+                        {"pair_ordinal": pair, "candidate_label": label, "execution_ordinal": ordinal}
+                        for pair, label, ordinal in schedule
+                    ],
+                }
+            ),
+            trial_count_per_candidate=COMPARISON_PAIRS,
+            state="PLANNED",
+            client_request_id=client_request_id,
+            created_at=_now(),
+        )
+        repo.insert_experiment(conn, experiment)
+        conn.execute(
+            "UPDATE exposure_reservations SET experiment_id = ? WHERE id = ?",
+            (experiment.id, reservation_id),
+        )
+        versions = {"A": candidate_a, "B": candidate_b}
+        for pair, label, ordinal in schedule:
+            workload = workloads[pair - 1]
+            slot = TrialSlot(
+                id=f"{experiment.id}-slot-{ordinal}",
+                experiment_id=experiment.id,
+                pair_ordinal=pair,
+                execution_ordinal=ordinal,
+                candidate_label=label,
+                artifact_version_id=versions[label].id,
+                workload_id=workload.id,
+                request_batch_hash=workload.request_batch_hash,
+                request_count=workload.request_count,
+                executed_request_count=workload.request_count + 1,
+                protected_variant_refs=reserved.get(pair, ()),
+                state="RESERVED",
+            )
+            repo.insert_trial_slot(conn, slot)
+            run = Run(
+                id=f"run-{repo.count_runs_all(conn) + 1:04d}",
+                shift_id=shift.id,
+                artifact_version_id=versions[label].id,
+                request_batch_ref=f"frozen-workload:{workload.id}",
+                shop_snapshot_ref=f"frozen-context:{context.id}",
+                attempt_number=repo.count_runs(conn, shift.id) + 1,
+                state=RunState.QUEUED,
+                adapter=adapter,
+                started_at=_now(),
+                purpose=RunPurpose.EXPERIMENT,
+                evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
+                context_id=context.id,
+                experiment_id=experiment.id,
+                trial_slot_id=slot.id,
+            )
+            repo.insert_run(conn, run)
+            repo.update_trial_slot(conn, slot.id, run_id=run.id)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    return experiment
+
+
+def _comparison_run_request(
+    run: Run, context: ExecutionContext, workload: FrozenWorkload, version: ArtifactVersion
+) -> executor.RunRequest:
+    isolated = run.adapter == TokenFactoryAdapter.name
+    return executor.RunRequest(
+        artifact_snapshot=executor.ArtifactSnapshotRef(
+            files={path: text.encode("utf-8") for path, text in version.files.items()},
+            manifest_hash=version.content_hash,
+        ),
+        request_batch=executor.BatchRef(
+            path_ref=run.request_batch_ref,
+            content_hash=workload.request_batch_hash,
+        ),
+        shop_snapshot_ref="",
+        harness_ref="sandbox-driver-v1" if isolated else DIAGNOSTIC_HARNESS_REF,
+        image_ref=context.image_ref if isolated else DIAGNOSTIC_IMAGE_REF,
+        deadline_s=int(context.resource_limits_json.get("deadline_s", COMPARE_DEADLINE_S)),
+        inference_grant=None,
+        request_batch_bytes=base64.b64decode(workload.request_batch_bytes_base64),
+    )
+
+
+def _terminalize_comparison_slot(
+    conn: sqlite3.Connection, slot: TrialSlot, state: str, failure: ExecutorFailure | None
+) -> None:
+    repo.update_run(conn, slot.run_id, RunState.FAILED if failure else RunState.FINALIZED, failure, _now())
+    repo.update_trial_slot(conn, slot.id, state=state)
+
+
+def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot) -> TrialSlot:
+    """Execute one reserved comparison slot against its own frozen workload.
+
+    The slot's workload is resolved by identity from the frozen context, and the
+    bytes, hash and count are re-verified before anything runs: a slot whose
+    binding no longer matches the context fails closed instead of quietly
+    executing another workload. Each slot runs in its own fresh workspace, so no
+    cache, booking or process state carries from one candidate to the next.
+    """
+    if slot.state != "RESERVED" or slot.run_id is None:
+        return slot
+    run = repo.get_run(conn, slot.run_id)
+    context = repo.get_execution_context(conn, run.context_id) if run and run.context_id else None
+    version = repo.get_version(conn, slot.artifact_version_id)
+    workload = next(
+        (item for item in context.workloads if item.id == slot.workload_id), None
+    ) if context else None
+    if (
+        run is None
+        or run.state is not RunState.QUEUED
+        or context is None
+        or version is None
+        or workload is None
+        or workload.request_batch_hash != slot.request_batch_hash
+        or workload.request_count != slot.request_count
+    ):
+        repo.update_run(conn, slot.run_id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
+        repo.update_trial_slot(conn, slot.id, state="FAILED")
+        conn.commit()
+        return repo.get_trial_slot(conn, slot.id)
+
+    try:
+        snapshot_bytes = base64.b64decode(context.public_data_bytes_base64)
+        mission = task_contract.load_mission_bytes(base64.b64decode(context.mission_bytes_base64))
+        snapshot = task_contract.load_public_state_bytes(snapshot_bytes)
+        specs = tuple(
+            task_contract.CustomerRequestSpec.model_validate(item)
+            for item in json.loads(base64.b64decode(workload.request_specs_bytes_base64).decode("utf-8"))
+        )
+        request = _comparison_run_request(run, context, workload, version)
+        bindings = _reserved_protected_bindings(conn, context.protected_reservation_id)
+        binding = next(item for item in bindings if item.pair_ordinal == slot.pair_ordinal)
+        if (len(bindings) != COMPARISON_PAIRS
+                or _frozen_comparison_context_hash(context, bindings) != context.content_hash
+                or slot.protected_variant_refs != (binding.variant_ref,)
+                or slot.executed_request_count != workload.request_count + 1
+                or binding.request_ordinal != slot.executed_request_count):
+            raise ValueError("protected slot binding differs from frozen context")
+        reserved_case = next(item for item in sealed_store.load_reserved_comparison_cases(
+            conn, context.protected_reservation_id) if item.pair_ordinal == slot.pair_ordinal)
+        protected_state_bytes = reserved_case.resolved_state_bytes
+        protected_line = task_contract.protected_request_bytes(reserved_case.case.stimulus.request)
+        protected_ref = executor.BatchRef(
+            path_ref="sealed:protected", content_hash=canonical.content_hash(_encode(protected_line)))
+        protected_stimulus = executor.load_single_request(
+            protected_ref, protected_line, slot.executed_request_count)
+        if (_hash_bytes(protected_state_bytes) != binding.protected_state_hash
+                or canonical.content_hash(reserved_case.case.stimulus.model_dump(mode="json")) != binding.stimulus_hash):
+            raise ValueError("protected stimulus digest differs from frozen binding")
+    except (ValueError, ShiftworkDomainError):
+        repo.update_run(conn, slot.run_id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
+        repo.update_trial_slot(conn, slot.id, state="FAILED")
+        conn.commit()
+        return repo.get_trial_slot(conn, slot.id)
+
+    repo.update_run(conn, slot.run_id, RunState.RUNNING)
+    repo.update_trial_slot(conn, slot.id, state="RUNNING")
+    repo.set_run_snapshot_bytes(conn, slot.run_id, snapshot_bytes)
+    conn.commit()
+    try:
+        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:
+            snapshot_path = Path(directory) / "public_state.json"
+            snapshot_path.write_bytes(snapshot_bytes)
+            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})
+            if run.adapter == TokenFactoryAdapter.name:
+                adapter = TokenFactoryAdapter(
+                    run_id=run.id,
+                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),
+                    token=os.environ.get("NEBIUS_API_KEY", ""),
+                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),
+                    model=context.service_model or config.SERVICE_MODEL,
+                )
+            elif run.adapter == LocalProcessAdapter.name:
+                adapter = LocalProcessAdapter()
+            else:
+                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")
+            public_result = asyncio.run(adapter.execute(request))
+        public_complete = (
+            public_result.failure is None
+            and len(public_result.captures) == workload.request_count
+            and {capture.request_ordinal for capture in public_result.captures}
+                == set(range(1, workload.request_count + 1))
+            and all(capture.transport_error is None and capture.body for capture in public_result.captures)
+        )
+        protected_result = None
+        if public_complete:
+            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:
+                protected_path = Path(directory) / "protected_state.json"
+                protected_path.write_bytes(protected_state_bytes)
+                protected_request = request.model_copy(update={
+                    "shop_snapshot_ref": str(protected_path),
+                    "request_batch": protected_ref,
+                    "request_batch_bytes": protected_line,
+                    "single_request_ordinal": slot.executed_request_count,
+                })
+                protected_result = asyncio.run(adapter.execute(protected_request))
+        captures = list(public_result.captures)
+        observations = list(public_result.observations)
+        if protected_result is not None:
+            for capture in protected_result.captures:
+                captures.append(capture.model_copy(update={
+                    "request_ordinal": slot.executed_request_count,
+                }))
+            for observation in protected_result.observations:
+                observations.append(observation.model_copy(update={
+                    "public_payload": {**observation.public_payload,
+                                       "request_ordinal": slot.executed_request_count},
+                }))
+
+        for ordinal, observation in enumerate(observations, start=1):
+            request_ordinal = observation.public_payload.get("request_ordinal", 1)
+            if type(request_ordinal) is not int or not 1 <= request_ordinal <= slot.executed_request_count:
+                raise ValueError("comparison observation ordinal is outside its frozen workload")
+            raw = json.dumps(observation.raw_payload, sort_keys=True, default=str).encode("utf-8")
+            repo.insert_observation(conn, ExecutionObservation(
+                id=f"{run.id}-obs-{ordinal}", run_id=run.id, request_ordinal=request_ordinal,
+                ordinal=ordinal, kind=ObservationKind(observation.kind),
+                public_payload_json=observation.public_payload,
+                raw_payload_ref="data:application/json;base64," + base64.b64encode(raw).decode("ascii"),
+                measured_at=_now(),
+            ))
+
+        outputs = []
+        if captures:
+            batch = {entry.ordinal: entry for entry in executor.load_batch(request.request_batch, request.request_batch_bytes)}
+            batch[protected_stimulus.ordinal] = protected_stimulus
+            for output in executor.normalize_captures(captures, request.deadline_s):
+                output = output.model_copy(update={
+                    "id": f"{run.id}-out-{output.request_ordinal}",
+                    "run_id": run.id,
+                    "request_text": batch[output.request_ordinal].text,
+                })
+                repo.insert_output(conn, output)
+                outputs.append(output)
+        conn.commit()
+
+        captured = {output.request_ordinal: output for output in outputs}
+        completed = 0
+        mandatory_pass = True
+        for index, spec in enumerate(specs, start=1):
+            output = captured.get(index)
+            response = None
+            if output is not None and output.transport_error is None:
+                try:
+                    response = task_contract.validate_response_envelope(spec, output.body)
+                except TaskEnvelopeInvalid:
+                    response = None
+            request_assessments = evaluator.assess_request(
+                spec=spec, request_ordinal=index, mission=mission, snapshot=snapshot, response=response,
+            )
+            for assessment in request_assessments:
+                repo.insert_task_assessment(
+                    conn,
+                    assessment_id=f"{run.id}-a{index}-{assessment.task_id}",
+                    run_id=run.id,
+                    assessment=assessment,
+                    assessed_at=_now(),
+                )
+            if any(assessment.mandatory_pass is False for assessment in request_assessments):
+                mandatory_pass = False
+            if evaluator.request_usefully_completed(spec, request_assessments):
+                completed += 1
+        repo.insert_run_assessment(
+            conn,
+            RunAssessment(
+                run_id=run.id,
+                context_hash=context.content_hash,
+                complete_request_count=completed,
+                expected_request_count=len(specs),
+                mandatory_pass=mandatory_pass,
+                rule_version=COMPARE_EVALUATOR_VERSION,
+                assessed_at=_now(),
+            ),
+        )
+        capture_complete = (
+            len(outputs) == slot.executed_request_count
+            and {output.request_ordinal for output in outputs} == set(range(1, slot.executed_request_count + 1))
+            and all(output.transport_error is None and output.body for output in outputs)
+        )
+        failure = (public_result.failure or (protected_result.failure if protected_result else None)
+                   or (None if capture_complete else ExecutorFailure.CAPTURE_TRUNCATED))
+        _terminalize_comparison_slot(conn, slot, "FAILED" if failure else "COMPLETE", failure)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        repo.update_run(conn, slot.run_id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
+        repo.update_trial_slot(conn, slot.id, state="FAILED")
+        conn.commit()
+        raise
+    return repo.get_trial_slot(conn, slot.id)
+
+
+def execute_comparison(conn: sqlite3.Connection, experiment_id: str) -> Experiment:
+    """Execute every reserved slot of one comparison in its precommitted order.
+
+    A slot that already terminated (for example before a restart) is reconciled
+    from its run and never re-executed: a failed slot keeps its exposure and its
+    missing evidence, and there is no automatic retry or refund. The experiment
+    finalizes only when all six slots completed; any failure leaves it FAILED
+    with every slot's state visible.
+    """
+    experiment = repo.get_experiment(conn, experiment_id)
+    if experiment is None:
+        raise LifecycleError("not_found", f"unknown experiment: {experiment_id}")
+    if experiment.kind is not ExperimentKind.QUALIFYING_COMPARISON:
+        raise LifecycleError("conflict", "only a qualifying comparison is executed by this path")
+    if not repo.claim_comparison_execution(conn, experiment.id):
+        conn.rollback()
+        return repo.get_experiment(conn, experiment.id)
+    conn.commit()
+    active_slot_id: str | None = None
+    try:
+        for slot in repo.list_trial_slots(conn, experiment.id):
+            run = repo.get_run(conn, slot.run_id) if slot.run_id else None
+            if slot.state == "COMPLETE":
+                outputs = repo.list_outputs(conn, run.id) if run else []
+                if (run is None or len(outputs) != slot.executed_request_count
+                        or {output.request_ordinal for output in outputs} != set(range(1, slot.executed_request_count + 1))
+                        or any(output.transport_error is not None or not output.body for output in outputs)):
+                    if run is not None:
+                        repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.CAPTURE_TRUNCATED, _now())
+                    repo.update_trial_slot(conn, slot.id, state="FAILED")
+                    conn.commit()
+                continue
+            if slot.state != "RESERVED":
+                continue
+            if run is not None and run.state in (RunState.FINALIZED, RunState.FAILED):
+                outputs = repo.list_outputs(conn, run.id)
+                complete = (
+                    run.state is RunState.FINALIZED
+                    and len(outputs) == slot.executed_request_count
+                    and {output.request_ordinal for output in outputs} == set(range(1, slot.executed_request_count + 1))
+                    and all(output.transport_error is None and output.body for output in outputs)
+                )
+                if not complete and run.state is RunState.FINALIZED:
+                    repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.CAPTURE_TRUNCATED, _now())
+                repo.update_trial_slot(
+                    conn, slot.id, state="COMPLETE" if complete else "FAILED"
+                )
+                conn.commit()
+                continue
+            active_slot_id = slot.id
+            execute_comparison_slot(conn, slot)
+            active_slot_id = None
+        slots = repo.list_trial_slots(conn, experiment.id)
+        final = "FINALIZED" if slots and all(slot.state == "COMPLETE" for slot in slots) else "FAILED"
+        repo.update_experiment_state(conn, experiment.id, final)
+        conn.commit()
+        return repo.get_experiment(conn, experiment.id)
+    except Exception:
+        conn.rollback()
+        if active_slot_id is not None:
+            # A provisioning or persistence error can happen before the slot's
+            # inner try block. The worker touched this slot, so it must not
+            # remain visually RESERVED after the comparison has failed.
+            active = repo.get_trial_slot(conn, active_slot_id)
+            if active is not None and active.state not in ("COMPLETE", "FAILED"):
+                run = repo.get_run(conn, active.run_id) if active.run_id else None
+                if run is not None and run.state not in (RunState.FINALIZED, RunState.FAILED):
+                    repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
+                repo.update_trial_slot(conn, active.id, state="FAILED")
+        repo.update_experiment_state(conn, experiment.id, "FAILED")
+        conn.commit()
+        raise
+
+
+def execute_comparison_task(db_path: str, experiment_id: str) -> None:
+    conn = db.connect(db_path)
+    try:
+        execute_comparison(conn, experiment_id)
+    finally:
+        conn.close()
+
+
+def comparison_run(conn: sqlite3.Connection, experiment_id: str) -> Run | None:
+    """The first slot run of a reserved comparison, or None before it was created."""
+    slots = repo.list_trial_slots(conn, experiment_id)
+    if not slots or slots[0].run_id is None:
+        return None
+    return repo.get_run(conn, slots[0].run_id)
+
+
 def experiment_run(conn: sqlite3.Connection, experiment_id: str) -> Run | None:
     """The run a reserved experiment executes, or None before it was created."""
     experiment = repo.get_experiment(conn, experiment_id)
@@ -1893,7 +2849,171 @@ def _diagnostic_customer_text(
 
 
 def experiment_view(conn: sqlite3.Connection, experiment_id: str) -> dict[str, Any]:
-    """The public experiment projection.
+    """The public experiment projection, dispatched by experiment kind."""
+    experiment = repo.get_experiment(conn, experiment_id)
+    if experiment is None:
+        raise LifecycleError("not_found", f"unknown experiment: {experiment_id}")
+    if experiment.kind is ExperimentKind.QUALIFYING_COMPARISON:
+        return comparison_view(conn, experiment)
+    return _diagnostic_experiment_view(conn, experiment)
+
+
+def _slot_evidence(
+    conn: sqlite3.Connection, run: Run | None, public_count: int
+) -> dict[str, Any]:
+    """One slot's stored evidence: assessments, exact outputs and missingness."""
+    assessments: list[dict[str, Any]] = []
+    outputs: list[dict[str, Any]] = []
+    observations: list[dict[str, Any]] = []
+    missing_evidence: list[str] = []
+    if run is None:
+        missing_evidence.append("the reserved comparison run has not been created")
+        return {
+            "task_assessments": assessments, "observations": observations,
+            "outputs": outputs, "missing_evidence": missing_evidence,
+        }
+    assessments = [
+        {
+            "request_id": assessment.request_id,
+            "request_ordinal": assessment.request_ordinal,
+            "task_id": assessment.task_id,
+            "outcome": assessment.outcome.value,
+            "mandatory_pass": assessment.mandatory_pass,
+            "reason_codes": [code.value for code in assessment.reason_codes],
+        }
+        for assessment in repo.list_task_assessment_models(conn, run.id)
+        if assessment.request_ordinal <= public_count
+    ]
+    outputs = [
+        {
+            "request_ordinal": output.request_ordinal,
+            "request_text": output.request_text,
+            "http_status": output.http_status,
+            "body_base64": _encode(output.body),
+            "elapsed_ms": output.elapsed_ms,
+            "transport_error": output.transport_error.value if output.transport_error else None,
+        }
+        for output in repo.list_outputs(conn, run.id)
+        if output.request_ordinal <= public_count
+    ]
+    observations = [
+        {"kind": observation.kind.value, "public_payload_json": observation.public_payload_json}
+        for observation in repo.list_observations(conn, run.id)
+        if observation.request_ordinal <= public_count
+    ]
+    if run.failure_kind is not None:
+        missing_evidence.append(f"execution failure: {run.failure_kind.value}")
+    if run.state in (RunState.QUEUED, RunState.RUNNING):
+        missing_evidence.append("the reserved comparison run has not finished")
+    elif not outputs:
+        missing_evidence.append("no capture was produced for the frozen workload")
+    else:
+        slot = repo.get_trial_slot_for_run(conn, run.id)
+        if slot is not None and len(outputs) < slot.request_count:
+            missing_evidence.append("the frozen workload has requests with no captured output")
+    return {
+        "task_assessments": assessments,
+        "observations": observations,
+        "outputs": outputs,
+        "missing_evidence": missing_evidence,
+    }
+
+
+def comparison_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[str, Any]:
+    """The Compare station projection for one qualifying comparison.
+
+    Every one of the six ordered slots is listed with its pair, candidate label,
+    exact version, frozen workload identity, batch request count, run identity,
+    state and missing evidence. Before a slot runs, its workload appears only as
+    a safe summary (id, ordinal, hash, count): no future request bytes and no
+    protected pair refs are projected. No winner, ranking, eligibility verdict or
+    metric is derived here; that is the outcome slice's job (Gate 3 S3.7, S16).
+    """
+    context = repo.get_execution_context(conn, experiment.context_id)
+    if context is None:
+        raise LifecycleError("not_found", f"unknown context: {experiment.context_id}")
+    candidates = {candidate.label: candidate for candidate in experiment.candidates}
+    slots = repo.list_trial_slots(conn, experiment.id)
+    trials = []
+    for slot in slots:
+        run = repo.get_run(conn, slot.run_id) if slot.run_id else None
+        evidence = _slot_evidence(conn, run, slot.request_count)
+        trials.append({
+            "pair_ordinal": slot.pair_ordinal,
+            "execution_ordinal": slot.execution_ordinal,
+            "candidate_label": slot.candidate_label,
+            "artifact_version_id": slot.artifact_version_id,
+            "artifact_content_hash": candidates[slot.candidate_label].artifact_content_hash,
+            "workload_id": slot.workload_id,
+            "workload_ordinal": slot.pair_ordinal,
+            "request_batch_hash": slot.request_batch_hash,
+            "request_count": slot.request_count,
+            "protected_request_count": slot.executed_request_count - slot.request_count,
+            "run_id": slot.run_id,
+            "state": slot.state,
+            "evidence_mode": run.evidence_mode.value if run and run.evidence_mode else None,
+            **evidence,
+            "metrics": None,
+        })
+    protected_counts = None
+    if experiment.state in ("FINALIZED", "FAILED"):
+        protected_counts = {}
+        for label in ("A", "B"):
+            candidate_slots = [slot for slot in slots if slot.candidate_label == label]
+            captured = sum(1 for slot in candidate_slots if slot.run_id and any(
+                output.request_ordinal == slot.executed_request_count
+                and output.transport_error is None and bool(output.body)
+                for output in repo.list_outputs(conn, slot.run_id)))
+            protected_counts[label] = {
+                "reserved": len(candidate_slots), "captured": captured,
+                "missing": len(candidate_slots) - captured,
+            }
+    payload = {
+        "id": experiment.id,
+        "shift_id": experiment.shift_id,
+        "kind": experiment.kind.value,
+        "investigation_id": experiment.investigation_id,
+        "declared_treatment": experiment.declared_treatment,
+        "context_hash": context.content_hash,
+        "context_evidence_class": context.executor_class.value,
+        "workloads": [
+            {
+                "id": workload.id,
+                "ordinal": workload.ordinal,
+                "request_batch_hash": workload.request_batch_hash,
+                "request_count": workload.request_count,
+            }
+            for workload in context.workloads
+        ],
+        "candidates": [
+            {
+                "label": candidate.label,
+                "artifact_version_id": candidate.artifact_version_id,
+                "artifact_content_hash": candidate.artifact_content_hash,
+            }
+            for candidate in experiment.candidates
+        ],
+        "trials": trials,
+        "shared_public_denominator_requests": sum(item.request_count for item in context.workloads),
+        "protected_denominator_requests_per_candidate": len(context.workloads),
+        "protected_counts": protected_counts,
+        "eligible": False,
+        "eligibility_reason": (
+            "No winner is derived here: a qualifying comparison derives no eligibility "
+            "from reserved or partial slots, and the outcome reading lands with the "
+            "comparison outcome slice."
+        ),
+        "state": experiment.state,
+    }
+    try:
+        assert_public_safe(payload, _private_public_needles(conn))
+    except ValueError as exc:
+        raise LifecycleError("conflict", "public comparison evidence contains private material") from exc
+    return payload
+
+
+def _diagnostic_experiment_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[str, Any]:
+    """The public diagnostic projection.
 
     It carries the frozen workload identity, the candidate, the trial's public
     assessments and the exact output the learner's own service produced. Raw
@@ -1901,9 +3021,6 @@ def experiment_view(conn: sqlite3.Connection, experiment_id: str) -> dict[str, A
     reservation never appear, and eligibility stays false: a public diagnostic
     cannot qualify a version (Gate 3 S3.7, test 21).
     """
-    experiment = repo.get_experiment(conn, experiment_id)
-    if experiment is None:
-        raise LifecycleError("not_found", f"unknown experiment: {experiment_id}")
     context = repo.get_execution_context(conn, experiment.context_id)
     if context is None:
         raise LifecycleError("not_found", f"unknown context: {experiment.context_id}")
@@ -2005,7 +3122,7 @@ def experiment_view(conn: sqlite3.Connection, experiment_id: str) -> dict[str, A
         "state": experiment.state,
     }
     try:
-        assert_public_safe(payload, _private_public_needles())
+        assert_public_safe(payload, _private_public_needles(conn))
     except ValueError as exc:
         raise LifecycleError("conflict", "public diagnostic evidence contains private material") from exc
     return payload
@@ -2027,7 +3144,7 @@ def investigate_station(
         experiment_view(conn, experiments[-1].id) if experiments else None
     )
     try:
-        assert_public_safe(view, _private_public_needles())
+        assert_public_safe(view, _private_public_needles(conn))
     except ValueError as exc:
         raise LifecycleError("conflict", "public investigation evidence contains private material") from exc
     return view
