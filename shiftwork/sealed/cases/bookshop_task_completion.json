@@ -2,7 +2,8 @@
   "family": "task_completion",
   "schema_version": 1,
   "cycle": 1,
-  "review_status": "AWAITING_OPERATOR_REVIEW",
+  "review_status": "OPERATOR_SEALED",
+  "sealed_payload_sha256": "a39d454687495e34e2ee42f2b36fb4f31ba41ae01d9fd96103ee9ac4d7514f7d",
   "description": "Six agent-authored protected comparison stimuli for exact-byte operator review. Unsealed; neither a completed acceptance check nor live evidence.",
   "cases": [
     {
