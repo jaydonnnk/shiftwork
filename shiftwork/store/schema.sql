@@ -10,9 +10,10 @@
 -- silently, and only the migration copy is exercised against real v5 evidence.
 --
 -- The incidents table exists from the tracer and is read by the board, but
--- Slice 2 opens no incidents (Slice 5/7). Still awaiting their owning slice:
--- trial_slots, exposure_reservations, exposure_items and idempotency_records.
--- assist_events landed in Slice 14 in migrations/v6_tables.sql.
+-- Slice 2 opens no incidents (Slice 5/7). assist_events landed in Slice 14 and
+-- trial_slots, exposure_reservations and exposure_items landed in Slice 15, all
+-- in migrations/v6_tables.sql. Still awaiting its owning slice:
+-- idempotency_records.
 
 CREATE TABLE IF NOT EXISTS engagements (
     slug TEXT PRIMARY KEY,

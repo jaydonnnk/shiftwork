@@ -23,6 +23,8 @@ from shiftwork.domain.models import (
     ExecutionObservation,
     Experiment,
     ExperimentKind,
+    ExposureItem,
+    ExposureReservation,
     FrozenWorkload,
     Incident,
     IncidentState,
@@ -38,6 +40,7 @@ from shiftwork.domain.models import (
     RunPurpose,
     RunState,
     Shift,
+    TrialSlot,
 )
 from shiftwork.domain.task_contract import TaskAssessment, TaskOutcome
 
@@ -1266,6 +1269,16 @@ def list_experiments_for_shift(conn: sqlite3.Connection, shift_id: str) -> list[
     return [_experiment(row) for row in rows]
 
 
+def list_nonterminal_comparisons(conn: sqlite3.Connection) -> list[Experiment]:
+    """Comparison reservations that a restarted process must terminalize."""
+    rows = conn.execute(
+        "SELECT * FROM experiments WHERE kind = ? AND state IN ('PLANNED', 'RUNNING') "
+        "ORDER BY rowid",
+        (ExperimentKind.QUALIFYING_COMPARISON.value,),
+    ).fetchall()
+    return [_experiment(row) for row in rows]
+
+
 def count_experiments_for_shift(
     conn: sqlite3.Connection, shift_id: str, kind: ExperimentKind
 ) -> int:
@@ -1279,3 +1292,221 @@ def count_experiments_for_shift(
 
 def update_experiment_state(conn: sqlite3.Connection, experiment_id: str, state: str) -> None:
     conn.execute("UPDATE experiments SET state = ? WHERE id = ?", (state, experiment_id))
+
+
+def claim_comparison_execution(conn: sqlite3.Connection, experiment_id: str) -> bool:
+    """Let exactly one worker move a reserved comparison into execution."""
+    changed = conn.execute(
+        "UPDATE experiments SET state = 'RUNNING' "
+        "WHERE id = ? AND kind = 'QUALIFYING_COMPARISON' AND state = 'PLANNED'",
+        (experiment_id,),
+    )
+    return changed.rowcount == 1
+
+
+# --- trial slots and exposure reservations (Slice 15) ----------------------
+
+
+def _trial_slot(row: sqlite3.Row) -> TrialSlot:
+    return TrialSlot(
+        id=row["id"],
+        experiment_id=row["experiment_id"],
+        pair_ordinal=row["pair_ordinal"],
+        execution_ordinal=row["execution_ordinal"],
+        candidate_label=row["candidate_label"],
+        artifact_version_id=row["artifact_version_id"],
+        workload_id=row["workload_id"],
+        request_batch_hash=row["request_batch_hash"],
+        request_count=row["request_count"],
+        executed_request_count=row["executed_request_count"],
+        protected_variant_refs=tuple(_load(row["protected_variant_refs_json"])),
+        run_id=row["run_id"],
+        state=row["state"],
+    )
+
+
+def insert_trial_slot(conn: sqlite3.Connection, slot: TrialSlot) -> None:
+    conn.execute(
+        "INSERT INTO trial_slots "
+        "(id, experiment_id, pair_ordinal, execution_ordinal, candidate_label, "
+        "artifact_version_id, workload_id, request_batch_hash, request_count, executed_request_count, "
+        "protected_variant_refs_json, run_id, state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            slot.id,
+            slot.experiment_id,
+            slot.pair_ordinal,
+            slot.execution_ordinal,
+            slot.candidate_label,
+            slot.artifact_version_id,
+            slot.workload_id,
+            slot.request_batch_hash,
+            slot.request_count,
+            slot.executed_request_count,
+            _dump(list(slot.protected_variant_refs)),
+            slot.run_id,
+            slot.state,
+        ),
+    )
+
+
+def get_trial_slot(conn: sqlite3.Connection, slot_id: str) -> TrialSlot | None:
+    row = conn.execute("SELECT * FROM trial_slots WHERE id = ?", (slot_id,)).fetchone()
+    return _trial_slot(row) if row else None
+
+
+def list_trial_slots(conn: sqlite3.Connection, experiment_id: str) -> list[TrialSlot]:
+    rows = conn.execute(
+        "SELECT * FROM trial_slots WHERE experiment_id = ? ORDER BY execution_ordinal",
+        (experiment_id,),
+    ).fetchall()
+    return [_trial_slot(row) for row in rows]
+
+
+def get_trial_slot_for_run(conn: sqlite3.Connection, run_id: str) -> TrialSlot | None:
+    row = conn.execute("SELECT * FROM trial_slots WHERE run_id = ?", (run_id,)).fetchone()
+    return _trial_slot(row) if row else None
+
+
+def update_trial_slot(
+    conn: sqlite3.Connection, slot_id: str, *, run_id: str | None = None, state: str | None = None
+) -> None:
+    """Bind a slot's run and/or move its terminal state; every other field is frozen."""
+    if run_id is not None:
+        conn.execute("UPDATE trial_slots SET run_id = ? WHERE id = ?", (run_id, slot_id))
+    if state is not None:
+        conn.execute("UPDATE trial_slots SET state = ? WHERE id = ?", (state, slot_id))
+
+
+def _exposure_reservation(row: sqlite3.Row) -> ExposureReservation:
+    return ExposureReservation(
+        id=row["id"],
+        engagement_slug=row["engagement_slug"],
+        scope=row["scope"],
+        experiment_id=row["experiment_id"],
+        state=row["state"],
+        created_at=row["created_at"],
+    )
+
+
+def insert_exposure_reservation(conn: sqlite3.Connection, reservation: ExposureReservation) -> None:
+    conn.execute(
+        "INSERT INTO exposure_reservations "
+        "(id, engagement_slug, scope, experiment_id, state, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        (
+            reservation.id,
+            reservation.engagement_slug,
+            reservation.scope,
+            reservation.experiment_id,
+            reservation.state,
+            reservation.created_at.isoformat(),
+        ),
+    )
+
+
+def count_exposure_reservations(conn: sqlite3.Connection) -> int:
+    return int(conn.execute("SELECT COUNT(*) AS n FROM exposure_reservations").fetchone()["n"])
+
+
+def get_exposure_reservation(conn: sqlite3.Connection, reservation_id: str) -> ExposureReservation | None:
+    row = conn.execute(
+        "SELECT * FROM exposure_reservations WHERE id = ?", (reservation_id,)
+    ).fetchone()
+    return _exposure_reservation(row) if row else None
+
+
+def get_exposure_reservation_for_experiment(
+    conn: sqlite3.Connection, experiment_id: str
+) -> ExposureReservation | None:
+    row = conn.execute(
+        "SELECT * FROM exposure_reservations WHERE experiment_id = ?", (experiment_id,)
+    ).fetchone()
+    return _exposure_reservation(row) if row else None
+
+
+def update_exposure_reservation_state(
+    conn: sqlite3.Connection, reservation_id: str, state: str
+) -> None:
+    conn.execute(
+        "UPDATE exposure_reservations SET state = ? WHERE id = ?", (state, reservation_id)
+    )
+
+
+def update_exposure_item_state(conn: sqlite3.Connection, reservation_id: str, state: str) -> None:
+    conn.execute(
+        "UPDATE exposure_items SET state = ? WHERE reservation_id = ?", (state, reservation_id)
+    )
+
+
+def _exposure_item(row: sqlite3.Row) -> ExposureItem:
+    return ExposureItem(
+        id=row["id"],
+        reservation_id=row["reservation_id"],
+        engagement_slug=row["engagement_slug"],
+        family=row["family"],
+        cycle=row["cycle"],
+        variant_ref=row["variant_ref"],
+        pair_ordinal=row["pair_ordinal"],
+        state=DrawState(row["state"]),
+        drawn_at=row["drawn_at"],
+    )
+
+
+def insert_exposure_item(conn: sqlite3.Connection, item: ExposureItem) -> None:
+    conn.execute(
+        "INSERT INTO exposure_items "
+        "(id, reservation_id, engagement_slug, family, cycle, variant_ref, pair_ordinal, state, drawn_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            item.id,
+            item.reservation_id,
+            item.engagement_slug,
+            item.family,
+            item.cycle,
+            item.variant_ref,
+            item.pair_ordinal,
+            item.state.value,
+            item.drawn_at.isoformat(),
+        ),
+    )
+
+
+def insert_protected_case_snapshot(
+    conn: sqlite3.Connection, exposure_item_id: str, variant_ref: str, payload_json: str,
+    payload_sha256: str, resolved_state_bytes: bytes, resolved_state_sha256: str,
+) -> None:
+    conn.execute(
+        "INSERT INTO protected_case_snapshots "
+        "(exposure_item_id, variant_ref, payload_json, payload_sha256, resolved_state_bytes, resolved_state_sha256) VALUES (?, ?, ?, ?, ?, ?)",
+        (exposure_item_id, variant_ref, payload_json, payload_sha256, resolved_state_bytes, resolved_state_sha256),
+    )
+
+
+def list_protected_case_snapshots(
+    conn: sqlite3.Connection, reservation_id: str,
+) -> list[sqlite3.Row]:
+    return conn.execute(
+        "SELECT e.family, e.pair_ordinal, e.variant_ref AS exposure_ref, "
+        "s.variant_ref, s.payload_json, s.payload_sha256, s.resolved_state_bytes, s.resolved_state_sha256 "
+        "FROM exposure_items e LEFT JOIN protected_case_snapshots s "
+        "ON s.exposure_item_id = e.id "
+        "WHERE e.reservation_id = ? ORDER BY e.family, e.pair_ordinal",
+        (reservation_id,),
+    ).fetchall()
+
+
+def list_exposure_items(conn: sqlite3.Connection, reservation_id: str) -> list[ExposureItem]:
+    rows = conn.execute(
+        "SELECT * FROM exposure_items WHERE reservation_id = ? ORDER BY family, pair_ordinal",
+        (reservation_id,),
+    ).fetchall()
+    return [_exposure_item(row) for row in rows]
+
+
+def list_exposure_items_for_family(
+    conn: sqlite3.Connection, engagement_slug: str, family: str
+) -> list[ExposureItem]:
+    rows = conn.execute(
+        "SELECT * FROM exposure_items WHERE engagement_slug = ? AND family = ? ORDER BY rowid",
+        (engagement_slug, family),
+    ).fetchall()
+    return [_exposure_item(row) for row in rows]

@@ -210,3 +210,112 @@ BEFORE DELETE ON run_assessments
 BEGIN
     SELECT RAISE(ABORT, 'run assessments are immutable');
 END;
+
+-- Slice 15: one qualifying comparison reserves its two candidates, three paired
+-- public workloads, three never-exposed protected variants and six ordered trial
+-- slots before any result exists. Slots are immutable except for their run
+-- binding and terminal state; nothing here has a delete path.
+CREATE TABLE IF NOT EXISTS trial_slots (
+    id TEXT PRIMARY KEY,
+    experiment_id TEXT NOT NULL REFERENCES experiments(id),
+    pair_ordinal INTEGER NOT NULL CHECK (pair_ordinal BETWEEN 1 AND 3),
+    execution_ordinal INTEGER NOT NULL CHECK (execution_ordinal BETWEEN 1 AND 6),
+    candidate_label TEXT NOT NULL CHECK (candidate_label IN ('A', 'B')),
+    artifact_version_id TEXT NOT NULL REFERENCES artifact_versions(id),
+    workload_id TEXT NOT NULL,
+    request_batch_hash TEXT NOT NULL,
+    request_count INTEGER NOT NULL CHECK (request_count BETWEEN 1 AND 4),
+    executed_request_count INTEGER NOT NULL CHECK (executed_request_count BETWEEN 1 AND 5 AND executed_request_count IN (request_count, request_count + 1)),
+    protected_variant_refs_json TEXT NOT NULL CHECK (json_valid(protected_variant_refs_json)),
+    run_id TEXT REFERENCES runs(id),
+    state TEXT NOT NULL CHECK (state IN ('RESERVED', 'RUNNING', 'COMPLETE', 'FAILED')),
+    UNIQUE (experiment_id, pair_ordinal, candidate_label),
+    UNIQUE (experiment_id, execution_ordinal),
+    UNIQUE (run_id)
+);
+
+CREATE TRIGGER IF NOT EXISTS trial_slots_guard_update
+BEFORE UPDATE ON trial_slots
+WHEN NEW.id IS NOT OLD.id
+    OR NEW.experiment_id IS NOT OLD.experiment_id
+    OR NEW.pair_ordinal IS NOT OLD.pair_ordinal
+    OR NEW.execution_ordinal IS NOT OLD.execution_ordinal
+    OR NEW.candidate_label IS NOT OLD.candidate_label
+    OR NEW.artifact_version_id IS NOT OLD.artifact_version_id
+    OR NEW.workload_id IS NOT OLD.workload_id
+    OR NEW.request_batch_hash IS NOT OLD.request_batch_hash
+    OR NEW.request_count IS NOT OLD.request_count
+    OR NEW.executed_request_count IS NOT OLD.executed_request_count
+    OR NEW.protected_variant_refs_json IS NOT OLD.protected_variant_refs_json
+BEGIN
+    SELECT RAISE(ABORT, 'trial slots are immutable except for their run and state');
+END;
+
+CREATE TRIGGER IF NOT EXISTS trial_slots_no_delete
+BEFORE DELETE ON trial_slots
+BEGIN
+    SELECT RAISE(ABORT, 'trial slots are never deleted');
+END;
+
+-- One comparison- or operation-scoped reservation. Invalidation is a state
+-- change on this row; the row and its items are never deleted (ADR 0001).
+CREATE TABLE IF NOT EXISTS exposure_reservations (
+    id TEXT PRIMARY KEY,
+    engagement_slug TEXT NOT NULL REFERENCES engagements(slug),
+    scope TEXT NOT NULL CHECK (scope IN ('comparison', 'operation')),
+    experiment_id TEXT REFERENCES experiments(id),
+    state TEXT NOT NULL CHECK (state IN ('ACTIVE', 'INVALIDATED')),
+    created_at TEXT NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS exposure_reservations_no_delete
+BEFORE DELETE ON exposure_reservations
+BEGIN
+    SELECT RAISE(ABORT, 'exposure reservations are never deleted');
+END;
+
+-- One reserved protected variant. The engagement-wide unique key makes an
+-- exposed identity unreusable in the same family and cycle, and one item binds
+-- both candidate slots of exactly one pair.
+CREATE TABLE IF NOT EXISTS exposure_items (
+    id TEXT PRIMARY KEY,
+    reservation_id TEXT NOT NULL REFERENCES exposure_reservations(id),
+    engagement_slug TEXT NOT NULL REFERENCES engagements(slug),
+    family TEXT NOT NULL,
+    cycle INTEGER NOT NULL,
+    variant_ref TEXT NOT NULL,
+    pair_ordinal INTEGER NOT NULL CHECK (pair_ordinal BETWEEN 1 AND 3),
+    state TEXT NOT NULL DEFAULT 'active' CHECK (state IN ('active', 'invalidated')),
+    drawn_at TEXT NOT NULL,
+    UNIQUE (engagement_slug, family, cycle, variant_ref),
+    UNIQUE (reservation_id, family, pair_ordinal)
+);
+
+CREATE TRIGGER IF NOT EXISTS exposure_items_no_delete
+BEFORE DELETE ON exposure_items
+BEGIN
+    SELECT RAISE(ABORT, 'exposure items are never deleted');
+END;
+
+-- Restricted, immutable contents behind a comparison exposure identity. A
+-- later edit to the authored family file cannot change what was reserved.
+CREATE TABLE IF NOT EXISTS protected_case_snapshots (
+    exposure_item_id TEXT PRIMARY KEY REFERENCES exposure_items(id),
+    variant_ref TEXT NOT NULL,
+    payload_json TEXT NOT NULL CHECK (json_valid(payload_json)),
+    payload_sha256 TEXT NOT NULL,
+    resolved_state_bytes BLOB NOT NULL,
+    resolved_state_sha256 TEXT NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS protected_case_snapshots_no_update
+BEFORE UPDATE ON protected_case_snapshots
+BEGIN
+    SELECT RAISE(ABORT, 'protected case snapshots are immutable');
+END;
+
+CREATE TRIGGER IF NOT EXISTS protected_case_snapshots_no_delete
+BEFORE DELETE ON protected_case_snapshots
+BEGIN
+    SELECT RAISE(ABORT, 'protected case snapshots are never deleted');
+END;
