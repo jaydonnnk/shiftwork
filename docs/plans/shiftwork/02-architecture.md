@@ -1,5 +1,9 @@
 # Architecture: Shiftwork final pivot
 
+**Current Gate 2 state: RE-APPROVED 2026-09-28.** The user approved the repaired
+section 8.1 together with Gates 3 and 4 and ADR 0006 after the review round
+recorded below. Fixture review, sealing and live execution remain separate.
+
 **Gate 2: RE-APPROVED 2026-09-24 after the legacy first-choice backtrack.**
 The earlier final-pivot approval and commits remain historical. An adversarial
 review found that a closed v5 shift with no learner selection could not open the
@@ -12,13 +16,47 @@ Prior approvals: 2026-09-15, then 2026-09-19 for orchestration-owned sealed load
 and pure evaluator inputs. Those decisions and their evidence retain their original
 scope. The pre-pivot architecture remains available in Git at `fb73c78`. This revision
 retains its section numbers so dependent documents can be reconciled explicitly.
-No runtime code, fixtures, credentials, packages, deployment or ADR is changed here.
+That 2026-09-24 revision changed no runtime code, fixtures, credentials,
+packages, deployment or ADR.
 
 **SCOPED BACKTRACK RE-APPROVED, 2026-09-26:** the user approved the section 13
 file readback rule after the Slice 12 checkpoint mismatch. Gate 3's matching
 correction was separately re-approved on 2026-09-26. Neither approval supplies
 a live capability verdict or implementation authority. See `00-status.md` for
 current authority.
+
+**GATE 2 SCOPED BACKTRACK RE-APPROVED, 2026-09-28:** Slice 15 review found that
+the present protected inventory supplied six labels over the same public
+requests and state, without distinct hidden stimuli. Section 8.1 now specifies
+the protected phase: each variant carries its own request, task spec and
+additive-only state delta; it reaches both candidates of its pair as a separate
+protected phase after the public batch, frozen with the public batch before any
+run and never projected to learner-facing surfaces. The user approved this
+revision in chat on 2026-09-28 and asked for Gate 3 next. The present Slice 15
+protected inventory and candidate bytes remain unsealed and ineligible until
+the Gate 3 reconciliation, fixture authoring and a separate operator review.
+This approval changes no runtime behavior, sealed material or historical
+approval above, and supplies no implementation authority by itself.
+
+**GATE 2 SCOPED BACKTRACK, IN PROGRESS 2026-09-28:** an independent adversarial
+review of that section 8.1 revision returned STOP with 2 BLOCKER, 6 MAJOR, 10
+MINOR and 2 NIT findings across Gate 2 and Gate 3, recorded in `00-status.md`.
+Two concerned this document. First, section 8.1 mounts sealed-derived stimulus
+into a candidate sandbox, which ADR 0001 forbids in terms and no gate superseded;
+item 3 now cites `docs/adr/0006-protected-comparison-stimulus-boundary.md`, which
+splits a sealed comparison case into stimulus that may reach a workspace and
+controller-held assessment inputs that may not, and names the resulting bounded leak channel
+rather than denying it. Second, item 5 released aggregate protected counts
+against ADR 0001's bar on hidden counts; ADR 0006 Decision 4 records why those
+counts are not hidden counts, since each equals the comparison's already-public
+pair count or a partition of it. Item 5 is also corrected internally: it
+previously listed the protected request and resolved state as controller-only
+while item 3 requires streaming both into the candidate workspace. Section 8's
+shared denominator is qualified as public, and section 19 carries the ADR 0006
+row. At this backtrack point, ADR 0006 was PROPOSED and not in force. The
+re-approval recorded at the top supersedes that pending state. No
+implementation, operator review, seal, live run, install, commit or push was
+implied by the backtrack repair.
 
 ## 1. Fit
 
@@ -310,7 +348,9 @@ than inheriting the old three-run budget or mockup's illustrative three repeats.
 Eligibility requires comparable, complete, non-invalidated execution evidence for
 the exact versions and all mandatory checks passing across required trials. A
 comparison is not complete merely because its successful rows passed. Show every
-trial and one shared denominator; account for skipped/missing requests explicitly.
+trial and one shared public denominator per candidate, with the section 8.1
+protected step accounted on its own denominator that is never merged into the
+public one; account for skipped/missing requests explicitly in both.
 
 Recorded inspection is never fresh execution or new repair eligibility. Fresh
 trusted-fixture checks establish only labelled offline pre-proof, not eligibility
@@ -324,12 +364,102 @@ metric is a mandatory budget constraint, unknown evidence blocks eligibility.
 Keep service latency, provisioning overhead, calls and model usage distinguishable.
 No aggregate score may conceal a mandatory failure or automatically choose a repair.
 
-Suspected leakage retires the affected group and invalidates all dependent comparison
-and operational evidence for future use. Recheck invalidation at selection and run
-start: a compromised selection blocks further operation until requalified, without
-silently choosing another version. Preserve prior choices, outcomes and ledger bytes;
-append any authorized correction, never roll history back. Existing invalidation
-readback is not this enforcement (`docs/adr/0001-sealed-evaluator-isolation.md:77`).
+### 8.1 Protected task stimuli: distinct phases, frozen together, never public
+
+The current Slice 15 reservation stores a protected case identity and a rule
+aspect per pair, but executes only the two public requests in each pair. Six
+different case labels cannot establish six independent task variants when the
+request and state remain identical. Treat that draft as unsealed and ineligible.
+
+Revised decision, drafted 2026-09-28 for explicit re-approval: each protected
+variant carries its own controller-held customer request, its own public task
+specification and a bounded additive public-state delta. It reaches both
+candidates of its pair as a separate protected phase that follows the pair's
+public batch, so the reviewed public workloads always execute against the
+reviewed comparison state and no hidden delta can change a public request's
+expected answer. The design:
+
+1. **Separate comparison state.** A comparison binds its own reviewed public
+   state. The accepted Slice 11 state (`bookshop_pivot_public_state.json`) and
+   its byte pins are unchanged and stay attached to the investigation path.
+   Gate 3 fixes the comparison state file, its pin and the guard that re-verifies
+   both.
+
+2. **Protected variant content.** Each sealed variant of the enabled comparison
+   family carries its own request row (distinct request id, text and entity),
+   its own task specification, and an additive-only state delta over the frozen
+   comparison state. A delta may add entities and records; it may never rewrite,
+   re-date or remove the frozen state's records, so the public requests'
+   expectations are provably untouched. Gate 3 owns the exact schema, bounds and
+   validation for variant and delta.
+
+3. **Delivery and order.** A slot executes as two phases over one run identity.
+   The public phase streams exactly the frozen public batch under the frozen
+   comparison state. The protected phase streams exactly one hidden request at
+   its predeclared ordinal (the public count plus one) under the frozen state
+   resolved from the comparison state plus its variant's delta, in a fresh
+   workspace with no carryover from the public phase. Within a pair, A and B
+   receive byte-identical public batches and byte-identical protected stimuli in
+   the same order and under the same ceilings; only the declared treatment may
+   differ between them. A missing, mismatched, reordered or unavailable stimulus
+   fails that slot closed: no refund, no retry, and the failure stays visible.
+   Sealed-derived bytes therefore reach a candidate workspace by design, which
+   ADR 0001 forbade in terms; the boundary that permits it is
+   `docs/adr/0006-protected-comparison-stimulus-boundary.md`, and only the
+   request row and the resolved state cross it. The candidate service is
+   learner-authored code that can read its own workspace snapshot, so this is a
+   named and bounded leak channel, not a denied one: ADR 0006 Decision 3 states
+   its three bounds and item 6 below states its invalidation consequence.
+
+4. **Freezing.** The reservation records one drawn variant per pair (existing
+   exposure items), stores the canonical variant payload behind the restricted
+   reservation, and stores the resolved protected state bytes with their digest.
+   The comparison context covers the public batch and the protected bindings
+   (pair ordinal, variant ref, request ordinal, stimulus and state digests) in
+   its content hash before either candidate runs. The bytes that execute are the
+   bytes reserved: execution reconstructs them from the restricted reservation,
+   never from a mutable file or the current inventory.
+
+5. **Privacy.** Protected material stays off every learner-facing surface, but
+   its classes differ in where they may go. Controller-held assessment inputs stay
+   controller-side and never enter a workspace or a prompt: the task
+   specification, the authored delta, the expected block and variant identities.
+   The per-request assessment is produced controller-side. The raw protected
+   response and service logs originate in the candidate workspace, then become
+   restricted controller captures; they cannot be classified as never entering it.
+   Stimulus reaches the candidate workspace inside the protected phase only, as
+   item 3 requires, and is still never projected: the protected request row and
+   the resolved protected state. No learner-facing payload, error, log line or
+   client bootstrap carries the stimulus, assessment inputs or retained
+   execution artifacts, and no route serves a protected capture. The
+   classification is ADR 0006 Decisions 1 and 2. Public
+   evidence stays bounded by the frozen public workload count: before a slot runs,
+   projections expose only counts; after the comparison is terminal, only
+   aggregate protected counts and missingness may be released. Those aggregates
+   are not hidden counts in ADR 0001's sense, because each equals the
+   comparison's already-public pair count or a partition of it, so they disclose
+   no inventory size, variant identity or expected value; ADR 0006 Decision 4
+   records that reasoning and the terminal-only gate that keeps the count from
+   becoming a mid-run feedback channel. The separately specified acceptance
+   reading (Gate 3, Slice 16) may add aggregate pass/fail counts and an
+   eligibility blocker naming only the public rule id; it may not release stimulus
+   content or captured protected bytes. Gate 3 fixes the projector source and
+   ordinal filters, then uses distinctive scanner needles only where
+   substring matching can be meaningful; Gate 4 assigns the proof.
+
+6. **Failure and leakage.** A suspected protected leak retires the affected group
+   and invalidates all dependent comparison and operational evidence for future
+   use. Recheck invalidation at selection and run start: a compromised selection
+   blocks further operation until requalified, without silently choosing another
+   version. Preserve prior choices, outcomes and ledger bytes; append any
+   authorized correction, never roll history back. Existing invalidation
+   readback is not this enforcement (`docs/adr/0001-sealed-evaluator-isolation.md:77`).
+
+The present protected inventory is a draft of labels over identical public
+stimuli and remains unsealed and ineligible. Its replacement (six variants with
+distinct request or state stimuli and a concrete failure each) is authored,
+validated and sealed only after this Gate 2 approval and the Gate 3
+reconciliation it names.
 
 ## 9. Deterministic ledger ownership and replay
 
@@ -510,11 +640,19 @@ decisions in the appropriate later-gate work. Preserve original ADRs and their
 evidence:
 
 - ADR 0001: preserve loader ownership/purity; reconcile comparison-scoped exposure,
-  gateway isolation and enforcement of invalidated evidence.
+  gateway isolation and enforcement of invalidated evidence. Two of its Decision
+  clauses are narrowed for the section 8.1 protected phase by ADR 0006; the
+  narrowing was proposed during backtracking and took effect when the user
+  re-approved this gate and Gate 3 S3.9 on 2026-09-28.
 - ADR 0002: preserve chain/reducer rules; make experiment exclusion and semantic replay
   obligations explicit without rewriting old event history.
 - ADR 0003: preserve immutable artifacts/restoration; supersede latest-version
   inheritance with explicit selection and extend captured execution context.
+- ADR 0006: the section 8.1 protected-stimulus boundary. Splits a sealed
+  comparison case into stimulus that may reach a candidate workspace and
+  controller-held assessment inputs that may not, names the resulting bounded leak channel
+  rather than denying it, and records why the released aggregate protected counts
+  are not hidden counts. Gate 3 S3.9 and S6.4 carry the mechanism.
 - ADR #4: still unapproved, dependent on the authorized integration spike.
 
 ## 20. Handoff to the next gates
@@ -524,7 +662,11 @@ response contracts, task-aware envelope/evaluator, two finalization call stacks,
 immutable context and historical replay format, migration from schema v5, trial/
 exposure/inference budgets, idempotency/concurrency, safe gateway channel and trust
 probes, reason/metric vocabulary, ancestry/authorship, revised learner-study rubric
-and clause-level tests. Specify the requalification shift state, legacy route and
+and clause-level tests. Specify the section 8.1 protected phase exactly: the
+separate comparison state file and pins, the variant request/spec/delta schema,
+restricted storage, the two-phase execution order, the public projector filters
+and scanner needles, the public and protected denominators, and the failing tests
+for each. Specify the requalification shift state, legacy route and
 board projection, first-choice transition, bounded failed-comparison recovery and
 failing-capable tests that a closed v5 engagement can reach its first choice while
 every no-choice operation and implicit promotion is rejected. New curriculum cases

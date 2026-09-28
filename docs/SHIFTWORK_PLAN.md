@@ -1,10 +1,17 @@
 # Shiftwork: working brief and adjudication register
 
-Updated: 2026-09-27.
+Updated: 2026-09-28.
 
 **Direction:** Shiftwork remains the sole active project. The approved final pivot
 around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
 repairs fairly, explicitly choose one and maintain its later consequences.
+**Current gate state, 2026-09-28:** Gates 2, 3 and 4 are RE-APPROVED for the
+Slice 15 protected-stimulus reconciliation, and ADR 0006 is ACCEPTED. The user
+explicitly approved the repaired documents after the twenty review findings
+and two follow-on design defects were addressed. Slice 15 remains in progress
+on its earlier go-ahead, with unreviewed and unsealed fixture bytes; no live
+comparison is authorized. `plans/shiftwork/00-status.md` holds the approval
+record and evidence limits.
 **Gate state:** Gate 1 RE-APPROVED 2026-09-24 after the same-day backtrack, without
 human comprehension sessions. Approval supplies no participant or learning evidence.
 Gate 3's scoped S13 SDK dependency correction was re-approved on 2026-09-27:

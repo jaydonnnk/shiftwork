@@ -1,11 +1,12 @@
 # Program Design: Shiftwork final pivot
 
-**Current Gate 3 state: RE-APPROVED (2026-09-27), scoped to the S13 Sandbox
-SDK dependency below.**
+**Current Gate 3 state: RE-APPROVED 2026-09-28.** The user approved the repaired
+protected-phase design together with Gate 2 S8.1, Gate 4 and ADR 0006. Fixture
+review, sealing and live execution remain separate.
 
 **Gate 3: RE-APPROVED 2026-09-24 after the scoped Northline selection backtrack.**
 
-Gates 1, 2 and 4 are approved. Gate 2's scoped file-readback correction was
+At that point, Gates 1, 2 and 4 were approved. Gate 2's scoped file-readback correction was
 re-approved on 2026-09-26; the user separately re-approved this Gate 3
 correction on 2026-09-26.
 This document replaces the pre-pivot program
@@ -33,6 +34,40 @@ gateway/isolation test plan add file-capture verification after the Slice 12
 checkpoint mismatch. This approval does not establish a reliable live capture
 route or complete Slice 12. See `00-status.md` for current authority.
 
+**SCOPED REVISION RE-APPROVED 2026-09-28:** this document reconciles the
+approved Gate 2 section 8.1 protected-stimulus design: the separate comparison
+state, the protected variant schema (own request, task spec and additive-only
+state delta), the two-phase slot execution order, the restricted storage and
+private capture rules, the separate public and protected denominators, and new
+failing tests 50 to 54. The user approved this revision in chat on 2026-09-28
+("so gate 2 and gate 3 are approved"). The Slice 15 draft bytes stay unsealed
+and ineligible; the Slice 11 state and its pins stay byte-unchanged. Gate 4
+still needs its own scoped reconciliation and approval.
+
+**SCOPED BACKTRACK, IN PROGRESS 2026-09-28:** an independent adversarial review
+of that revision returned STOP with 2 BLOCKER, 6 MAJOR, 10 MINOR and 2 NIT
+findings, recorded in `00-status.md`. The 2026-09-28 approval above is therefore
+set back to in progress and this document is revised to repair all twenty. The
+substantive changes: section 3.9 gains the two-phase execution mechanism the
+driver actually needs (`executor.base.load_single_request` plus a frozen
+`TrialSlot.executed_request_count`), because the protected line's ordinal is the
+public count plus one and four existing guards reject it; additivity is enforced
+by a collision check and a set assertion rather than asserted from the schema;
+the comparison-family stimulus rule moves to
+`load_reviewed_comparison_family` so the unsealed draft keeps loading for the
+needle collector; the protected canonicalizers build on `canonical.canonical_bytes`;
+the projection scan becomes unconditional on adapter; distinctive private
+strings use the scanner while overlapping short values use source and ordinal
+checks; section 6.4 fixes the run's stored
+snapshot bytes to the frozen comparison state so no hidden value can ride out on
+a public ordinal; the denominator split is carried through sections 3.4, 6.3 and
+9 and test 23 is renamed; section 2 states that candidate B's declared
+greatest-stock preference is unauthored required bytes rather than a present
+property; and sections 4 and 2 name the storage columns and owning modules the
+design needs. ADR 0006 supplies the sealed-boundary authority that sections 3.9
+and 6.4 previously lacked. No implementation, operator review, seal, live run,
+install, commit or push is implied by this backtrack.
+
 ## 1. Decisions fixed at this gate
 
 | Question | Decision |
@@ -41,8 +76,8 @@ route or complete Slice 12. See `00-status.md` for current authority.
 | Run authority | Every run has an immutable purpose: experiment or operation. Recorded inspection is an evidence mode, never fresh execution. |
 | Investigation gate | The learner must append a cause, falsifier and chosen public test before diagnostic hints, diagnosis or patch help. Orientation is deterministic UI copy and is allowed earlier. |
 | Comparison shape | One qualifying comparison has two frozen candidate versions and three predeclared paired workloads. Each workload is executed once per candidate, for six trial slots total. This is demonstration evidence, not statistical confidence. |
-| Fairness | Both candidates share requirements, starting business state, public data, protected workload identities, model/settings and resource ceilings unless one field is the declared treatment. Unplanned drift makes the comparison not comparable. |
-| Eligibility | All six slots must terminate with complete evidence. Every mandatory task, correctness and safety rule must pass. No average score can hide a mandatory failure. |
+| Fairness | Both candidates share requirements, starting business state, public data, protected workload identities, the pair's protected stimulus, model/settings and resource ceilings unless one field is the declared treatment. Unplanned drift makes the comparison not comparable. |
+| Eligibility | All six slots must terminate with complete evidence, meaning every public output plus the slot's one protected output present and usable at its frozen `executed_request_count`. Every mandatory task, correctness and safety rule must pass on the public workloads. From Slice 16, every reserved protected variant must also reach its acceptance aspect; Slice 15 derives eligibility from the public assessments and protected capture completeness only and reports no acceptance verdict, so this clause is a Slice 16 obligation and not a Slice 15 deliverable. No average score can hide a mandatory failure. |
 | Selection | The learner explicitly appends a choice of one eligible exact version plus rationale and retained alternative. Save, freeze, test and close never select implicitly. |
 | Operation | Only a run bound to the latest valid operating selection can create ledger events or change incidents. Experimental finalization cannot call the reducer. |
 | Inheritance | The next shift restores the selected version, rationale, alternative, visible tests, limits and unresolved incidents. It never chooses the latest saved version. |
@@ -51,6 +86,8 @@ route or complete Slice 12. See `00-status.md` for current authority.
 | Historical evidence | Schema v5 rows remain byte-preserved and are labelled legacy evidence. Migration never invents an experiment, comparison or learner choice. |
 | Legacy first choice | A closed v5 engagement with no selection opens a controller-labelled requalification shift for investigation and comparison. It has no operating pointer or selected-contract close until the learner makes a valid explicit choice. |
 | Workload binding | The controller freezes three reviewed request batches with exact bytes, hashes and parsed request counts. Each pair's A and B slots reference the same batch; there is no generic six-slot batch. |
+| Protected stimulus | Each pair reserves one never-exposed variant carrying its own request row, task spec and additive-only state delta. Each slot executes it as a separate protected phase after the public batch, under the frozen state resolved from the comparison state plus that delta. Contents, captures and assessments stay controller-only; public evidence stays bounded by the public workload count. |
+| Comparison state | A qualifying comparison binds its own reviewed comparison state. The accepted Slice 11 state and its byte pins are unchanged and stay attached to the investigation path. |
 | Gateway tool policy | The controller derives a run-scoped tool allowlist from frozen policy. Learner code cannot widen it by request field or prompt text. |
 | Clarification | A captured clarification is assessed and reported separately from completion, refusal, referral and missing output. Its acceptability follows a public task rule, not the service's own label. |
 | Curriculum ownership | Bellwether has an executable failing starter plus reviewed incident/workload data. Northline has a distinct blank learner scaffold, mission, incident requests, three paired workloads with a reviewed manifest, state and protected assessment owned outside learner code. File contents and catalog identity require review before use. |
@@ -72,7 +109,7 @@ vertical slices, but it may not silently change their ownership.
 | --- | --- |
 | `shiftwork/app.py` | Wire the revised configuration, gateway boundary, schema migration, reviewed Northline engagement seeding and startup reconciliation. |
 | `shiftwork/config.py` | Named experiment, operation, inference and assist ceilings; model/image config names; controller-owned per-engagement fixture and tool policy and reason render map. No secret values. |
-| `shiftwork/domain/models.py` | Durable shift opening mode, investigation, context, experiment, trial, gateway-event, selection and revised run types. |
+| `shiftwork/domain/models.py` | Durable shift opening mode, investigation, context, experiment, trial, gateway-event, selection and revised run types. Owns `ProtectedBinding`, which section 3.1 adds to `ExecutionContext`. |
 | `shiftwork/domain/canonical.py` | Versioned canonical hashes for complete execution contexts and assessment snapshots, while retaining old artifact hashes. |
 | `shiftwork/domain/customer_answer.py` | Render customer text only from the validated task-aware envelope and public records. |
 | `shiftwork/domain/contract_catalog.py` | Keep the immutable per-engagement catalog loader; refuse a missing or incompatible reviewed Northline catalog rather than borrowing Bellwether options or guessing a version. |
@@ -81,10 +118,10 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/api/routes.py` | Final routes in section 5; handlers only validate, delegate and map typed failures. |
 | `shiftwork/store/schema.sql` | Fresh-database schema including the new pivot records and constraints. |
 | `shiftwork/store/db.py` | Transactional v5 to v6 migration and refusal of unknown versions. |
-| `shiftwork/store/repo.py` | Parameterized reads/writes for every new record and idempotent engagement seeding; no policy decisions. |
+| `shiftwork/store/repo.py` | Parameterized reads/writes for every new record and idempotent engagement seeding; no policy decisions. `list_protected_case_snapshots` extends to select the two new resolved-state columns so `load_reserved_comparison_cases` can return the reserved bytes, and the trial-slot writes carry the frozen `executed_request_count`. |
 | `shiftwork/evaluator/evaluator.py` | Pure assessment from explicit captured inputs, including entity and required-task checks. No loader or model access. |
 | `shiftwork/ledger/reducer.py` | Accept only an `OperationalAssessment`; reject experimental inputs by type and runtime guard. |
-| `shiftwork/executor/base.py` | Purpose/context-bound execution request, slot-selected workload and trusted request/tool driver, observation stream and trusted measurement fields. Required file-backed capture carries readback byte count/digest or an incomplete-evidence failure. |
+| `shiftwork/executor/base.py` | Purpose/context-bound execution request, slot-selected workload and trusted request/tool driver, observation stream and trusted measurement fields. Required file-backed capture carries readback byte count/digest or an incomplete-evidence failure. Gains `load_single_request(ref, frozen_bytes, ordinal)`, the protected phase's only batch entry point: it requires caller-supplied bytes, never resolves `path_ref` against `fixtures/requests`, requires exactly one line and requires that line's ordinal to equal the declared one. `load_batch` and its consecutive-from-1 invariant are unchanged, so no public path is relaxed. See section 3.9. |
 | `shiftwork/executor/local_process.py` | Retain byte-pinned trusted-fixture restriction and implement the revised adapter protocol. |
 | `shiftwork/executor/recorded.py` | Retain transcript inspection and label it `RECORDED_INSPECTION`; never emit fresh eligibility. |
 | `shiftwork/sealed/store.py` | Orchestration-only loader for exact reserved protected workload refs. |
@@ -100,9 +137,10 @@ vertical slices, but it may not silently change their ownership.
 
 | File | Responsibility |
 | --- | --- |
-| `shiftwork/domain/task_contract.py` | Pure validation of public requested entities/tasks and the structured service response envelope. |
+| `shiftwork/domain/task_contract.py` | Pure validation of public requested entities/tasks and the structured service response envelope; protected stimulus validation, additive delta application and protected-state resolution. Owns `ProtectedStimulus`, `ProtectedRequestRow`, `ProtectedEntityDelta`, `ProtectedRecordDelta` and `ProtectedStateDelta`, plus `protected_request_bytes` and `resolve_protected_state`. `evaluator/evaluator.py` already imports this module, so housing the stimulus types here adds no new import edge and no sealed edge. |
 | `shiftwork/domain/comparison.py` | Pure completeness, comparability, eligibility and metric derivation. Never selects a winner. |
 | `shiftwork/store/migrations/v6.sql` | Additive v5 to v6 migration described in section 4. |
+| `shiftwork/store/migrations/v6_tables.sql` | The fresh-database table definitions the v6 migration applies, and where `trial_slots`, `execution_contexts` and `protected_case_snapshots` actually live. Section 4's protected changes land here: two resolved-state columns on `protected_case_snapshots` and the frozen `executed_request_count` on `trial_slots`. Both tables are new in this slice, so this is a same-slice definition change and not a migration of an already-applied migration. |
 | `shiftwork/gateway/__init__.py` | Package boundary only. |
 | `shiftwork/gateway/protocol.py` | Run capability, request/response and observation types. |
 | `shiftwork/gateway/service_inference.py` | Controller-side Nemotron mediation with bounded model, calls, bytes, tokens, deadline, controller-owned tool allowlist and redaction. |
@@ -122,8 +160,12 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/fixtures/requests/bookshop_compare_pair_01.jsonl` | First paired public workload. Exact contents require review and sealing. |
 | `shiftwork/fixtures/requests/bookshop_compare_pair_02.jsonl` | Second paired public workload. Exact contents require review and sealing. |
 | `shiftwork/fixtures/requests/bookshop_compare_pair_03.jsonl` | Third paired public workload. Exact contents require review and sealing. |
-| `shiftwork/fixtures/requests/bookshop_compare_manifest.json` | Operator-reviewed ordinal 1/2/3 mapping with independently pinned file hashes, parsed request counts and task-spec hashes; created only after the three actual batches are reviewed. |
-| `shiftwork/sealed/cases/bookshop_task_completion.json` | Protected task/entity/completion cases with at least six variants. Exact cases require a separate sealing review. |
+| `shiftwork/fixtures/requests/bookshop_compare_pair_0{1,2,3}_specs.json` | The public task spec beside each paired batch; the manifest pins each file's canonical parsed-spec digest. Exact contents require review and sealing. |
+| `shiftwork/fixtures/requests/bookshop_compare_manifest.json` | Operator-reviewed ordinal 1/2/3 mapping with independently pinned file hashes, parsed request counts and task-spec hashes; created only after the three actual batches are reviewed. Two sentences in its `description` were wrong and were corrected on 2026-09-28, which moved the file from 2,249 bytes and SHA-256 `68fa2df2...` to 2,817 bytes and `848e8cfd0a146be6406c961a3a91bb26684e20302e98b72308f1b29b636499f6`; the new pin is re-recorded in the operator packet. The `workloads` array is byte-identical, so its canonical sealing digest `c1e336635ff0...` and all three `task_specs_sha256` values are unchanged. The first sentence described `task_specs_sha256` as plain `json.dumps` of the parsed spec list, while the code round-trips each item through `CustomerRequestSpec.model_dump(mode="json")` first (`orchestrator.py:1874-1875`) and materializes model defaults, so an operator following the old prose could not reproduce the three values. The second named `bookshop_pivot_public_state.json` as the verification basis, which the separate comparison state above supersedes. |
+| `shiftwork/fixtures/shop/bookshop_compare_state_v1.json` | The comparison's own reviewed public state: the accepted Slice 11 state plus the reviewed comparison entities and records. It keeps the Slice 11 state's document shape with no review envelope, so `load_public_state_bytes` parses it unchanged. Its pin follows the Slice 11 precedent and lives in the two existing pin-guard dicts, not in the file: `PINNED_PUBLIC_FIXTURE_HASHES` (`tests/domain/test_task_contract.py:26-30`) and the `expected` map in `test_pivot_review_bytes_and_catalog_binding` (`tests/executor/test_conformance.py:355-361`), which also asserts the bytes are LF-only. Exact bytes require review and sealing; the Slice 11 state file and its pins are untouched. This names all three items Gate 2 S8.1 item 1 delegated: the file, its pin and the guard that re-verifies both. |
+| `shiftwork/fixtures/artifacts/bookshop/compare_repair_a_service.py` | Candidate A's draft repair: it completes every mandatory rule and picks the cheapest qualifying alternative, breaking ties by entity ref. Trusted-local fixture for offline verification only. |
+| `shiftwork/fixtures/artifacts/bookshop/compare_repair_b_service.py` | Candidate B's repair. REQUIRED NEW BYTES, NOT YET AUTHORED: the declared alternative preference for greatest current shelf stock, breaking ties by the lower price. The bytes in the tree today do not implement this; see the note under this table. Authoring them changes the file, so its `compare_candidate_b` pin in `config.TRUSTED_LOCAL_FIXTURES` must be recomputed in the same change and is not valid until it is. Trusted-local fixture for offline verification only. |
+| `shiftwork/sealed/cases/bookshop_task_completion.json` | Protected comparison variants, at least six, each carrying its own request row, task spec, additive-only state delta and the expected acceptance aspect with a concrete failure. Exact cases require a separate sealing review; nothing here is executable before reservation. The rule that a comparison-family case must carry a stimulus is enforced by `load_reviewed_comparison_family` and not by `load_family`, so the present unsealed six-case draft, which carries no stimulus, keeps loading for the private-needle collector and the public projections until the replacement is authored and sealed. See section 3.9. |
 | `shiftwork/templates/artifact/northline_blank_service.py` | Executable minimal service scaffold with no authored transfer solution; the away learner owns its logic and starts from a blank artifact. |
 | `shiftwork/fixtures/mission/northline_transfer.json` | Operator-reviewed public future-commitment, safety-escalation and retry-safe booking rules, allowed information/tool vocabulary and deterministic synthetic transitions. No Bellwether rules are borrowed. |
 | `shiftwork/fixtures/requests/northline_transfer.jsonl` | Operator-reviewed public away requests and required-task specifications, captured as exact bytes for execution. |
@@ -135,6 +177,20 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/sealed/cases/northline_transfer.json` | Operator-authored protected transfer acceptance cases, loaded only by orchestration and passed as explicit inputs to the pure evaluator; no case contents are set here. |
 | `demos/final_pivot.py` | Canonical offline walkthrough: inspect, predict, compare, choose, operate, inherit and test retained alternative. |
 | `demos/gateway_spike.py` | Separately authorized capability-spike driver. It is not part of normal offline verification. |
+
+The two draft comparison candidates in the tree today do NOT implement the
+declared treatment, and the rows above state required bytes rather than present
+ones. `compare_repair_a_service.py:151` and `compare_repair_b_service.py:117` are
+both `min(qualifying, key=lambda entry: (entry[0], entry[1]))`, so both pick the
+cheapest qualifying alternative with an entity-ref tiebreak, and candidate B's own
+docstring says so: "Both candidates choose the cheapest qualifying alternative, so
+the declared optional-price treatment is the only intended behavioral difference."
+`test_candidates_share_the_cheapest_qualifying_alternative_policy`
+(`tests/orchestrator/test_experiment_lifecycle.py:650-669`) asserts that shared
+policy and passes today. The greatest-stock split is therefore unauthored
+Slice 15 work whose pins are not yet recomputed, not an existing property of a
+file already pinned in `config.TRUSTED_LOCAL_FIXTURES`. Authoring it invalidates
+that passing test, which section 9 names rather than deletes.
 
 ### Tests to add or change
 
@@ -195,7 +251,9 @@ The Northline catalog must be reviewed and frozen through the existing loader's
 `{slug}_v{version}.json` convention before any transfer execution. This design
 assigns no version or case content. If no compatible catalog is approved, Northline
 execution and any transfer claim stop. The same review and byte pins apply to the
-new Bellwether starter, incident request, public state and three paired workloads.
+new Bellwether starter, incident request, public state, the comparison state and
+the three paired workloads, and every comparison variant needs an operator seal
+before reservation.
 Northline's three separate comparison batches and manifest also require review,
 byte pins and enough protected variants under the same reservation policy before
 its learner-edited version can qualify. The initial `northline_transfer.jsonl`
@@ -265,6 +323,7 @@ class ExecutionContext(BaseModel):
     requirement_set_hash: Sha256
     visible_check_set_hash: Sha256
     protected_reservation_id: Id | None
+    protected_bindings: tuple[ProtectedBinding, ...]
     condition: ContextCondition
     evaluator_version: str
     reducer_version: str
@@ -285,12 +344,15 @@ The protected reservation points to controller-only material and is never
 projected. A mutable
 path, current fixture or current incident state cannot reconstruct old evidence.
 The controller parses each frozen request batch once and requires a nonzero count
-of at most four requests, matching the same number of frozen public task specs.
+of at most four public requests, matching the same number of frozen public task specs.
 A qualifying comparison has exactly three ordered workloads; a diagnostic or
-operational context has one. The context hash covers the frozen mission bytes/hash
-and each workload's exact bytes, hashes, count and order. Future workload bytes
-remain controller-held and are not
-provisioned to a learner service before each permitted request is streamed.
+operational context has one. The context hash covers the frozen mission
+bytes/hash, each workload's exact bytes, hashes, count and order, and each
+protected binding's pair ordinal, variant ref, request ordinal, stimulus digest
+and protected-state digest.
+Future workload bytes and every protected stimulus remain controller-held and
+are not provisioned to a learner service before each permitted request is
+streamed; a diagnostic or operational context carries no protected bindings.
 
 ### 3.2 Investigation and assistance
 
@@ -456,6 +518,7 @@ MISSING_EXECUTION_EVIDENCE
 CONTEXT_DRIFT
 EXPOSURE_INVALIDATED
 GATEWAY_LIMIT_EXCEEDED
+PROTECTED_CHECK_FAILED
 ```
 
 ### 3.4 Evaluator and comparison policy
@@ -487,7 +550,7 @@ class OperationalAssessment(RunAssessment):
 
 class CandidateMetrics(BaseModel):
     candidate_version_id: Id
-    denominator_requests: int
+    public_denominator_requests: int
     useful_completions: int
     incorrect_outputs: int
     justified_refusals: int
@@ -497,6 +560,10 @@ class CandidateMetrics(BaseModel):
     unjustified_referrals: int
     unjustified_clarifications: int
     missing_outputs: int
+    protected_denominator: int
+    protected_passed: int
+    protected_failed: int
+    protected_missing: int
     service_calls: int
     input_tokens: int | None
     output_tokens: int | None
@@ -512,7 +579,7 @@ class CandidateEligibility(BaseModel):
 class ComparisonOutcome(BaseModel):
     experiment_id: Id
     status: Literal["INCOMPLETE", "NOT_COMPARABLE", "COMPLETE"]
-    shared_denominator_requests: int
+    shared_public_denominator_requests: int
     candidate_metrics: tuple[CandidateMetrics, CandidateMetrics]
     eligibility: tuple[CandidateEligibility, CandidateEligibility]
     drift_fields: tuple[str, ...]
@@ -528,16 +595,21 @@ def compare(
 `evaluate` and `compare` are pure, deterministic and LLM-free. They do not read
 files, databases, environment variables or the network. Unknown usage or cost stays
 `None`. An unknown mandatory budget measure blocks eligibility. Metrics have one
-shared request denominator, and every failed or missing slot remains visible.
+shared public request denominator, and every failed or missing slot remains visible.
 Clarifications keep distinct assessed and reported counters in the public
 comparison and task-detail views. Neither category increments useful completion,
-refusal or referral. The denominator is the sum of the three frozen workload
-request counts per candidate, including requests with missing outputs.
+refusal or referral. The public denominator is the sum of the three frozen public
+workload request counts per candidate, including requests with missing outputs.
+The protected stimulus of each pair carries its own denominator (one per pair per
+candidate) with its own passed, failed and missing counts; protected steps are
+never merged into the public completion, refusal, referral, clarification,
+missing-output or cost counters, and both counts reconcile to each slot's full
+executed denominator of public count plus one.
 `useful_completions` counts a request only when all required tasks are completed;
 the other counters count requests containing at least one assessed outcome of
 their named kind. One multi-task request can appear in several non-completion
 categories, so these incidence counts are labelled non-additive and are never
-presented as shares that sum to the denominator.
+presented as shares that sum to the public denominator.
 
 ### 3.5 Experiments, runs, observations and gateway
 
@@ -571,9 +643,18 @@ class TrialSlot(BaseModel):
     workload_id: Id
     request_batch_hash: Sha256
     request_count: int
+    executed_request_count: int
     run_id: Id | None
     protected_variant_refs: tuple[str, ...]
     state: Literal["RESERVED", "RUNNING", "COMPLETE", "FAILED"]
+
+`request_count` stays the frozen public batch size. `executed_request_count` is
+frozen at reservation and is `request_count + 1` when the comparison reserved a
+protected binding for that pair, otherwise `request_count`. It is the only
+denominator the execution and completeness guards use, so a diagnostic
+experiment, which never reserves a protected binding, keeps its existing
+behavior exactly. Test 54's "each slot's full executed denominator" reads this
+field.
 
 class ExperimentRequest(BaseModel):
     kind: ExperimentKind
@@ -889,6 +970,238 @@ customer requests, cannot load protected assessment and cannot decide pass/fail.
 Retrieved text is quarantined data, never executable instructions. The historical
 pre-registered ablation thresholds remain unchanged until Gate 4 reconciliation.
 
+### 3.9 Protected comparison stimuli (approved Gate 2 section 8.1)
+
+```python
+class ProtectedRequestRow(BaseModel):
+    ordinal: int
+    request_id: Id
+    text: str
+    entity_ref: str
+
+class ProtectedEntityDelta(BaseModel):
+    title: str
+    edition: str
+    genre: str
+
+class ProtectedRecordDelta(BaseModel):
+    record_id: str
+    entity_ref: str
+    kind: Literal["price", "stock", "availability"]
+    value: JsonValue
+    record_age_ms: int
+    dependency: str
+    currency: str | None = None
+
+class ProtectedStateDelta(BaseModel):
+    description: str
+    add_entities: dict[str, ProtectedEntityDelta]
+    add_records: tuple[ProtectedRecordDelta, ...]
+
+class ProtectedStimulus(BaseModel):
+    request: ProtectedRequestRow
+    task_spec: CustomerRequestSpec
+    state_delta: ProtectedStateDelta
+
+class ProtectedBinding(BaseModel):
+    pair_ordinal: int
+    variant_ref: str
+    request_ordinal: int
+    stimulus_hash: Sha256
+    protected_state_hash: Sha256
+
+def protected_request_bytes(row: ProtectedRequestRow) -> bytes: ...
+def resolve_protected_state(base_bytes: bytes, delta: ProtectedStateDelta) -> bytes: ...
+```
+
+`SealedCase` gains one optional field, `stimulus: ProtectedStimulus | None`. A
+case of an enabled comparison family is invalid without it, and a case of the
+attempt families is invalid with it. The two directions are deliberately enforced
+by different loaders.
+
+The comparison direction is enforced by `sealed.store.load_reviewed_comparison_family`,
+not by `load_family`. That is load-bearing, not stylistic: `_private_public_needles`
+calls `load_family` unconditionally for every enabled family
+(`orchestrator.py:1404-1405`), and that collector is reached from
+`comparison_view`, `_diagnostic_experiment_view`, `investigate_station`,
+`artifact_source` and `assert_public_projection`, which `routes.py:126` calls.
+The present draft `bookshop_task_completion.json` carries no `stimulus` on any of
+its six cases, so enforcing the rule inside `load_family` would make every one of
+those surfaces raise `InvalidSealedCase` until six stimulus-bearing variants
+existed and carried `review_status: OPERATOR_SEALED`, and sealing is a separate
+authorization that this slice does not hold. `load_reviewed_comparison_family`
+already gates on that seal (`store.py:94`) and is already the reservation path
+(`orchestrator.py:2244`), so the rule fires before any exposure is recorded and
+the needle collector and unsealed draft reads keep working. The attempt-family
+direction stays in `load_family`, which is safe because no attempt-family case
+carries a stimulus today, so it fails closed on the first one that does.
+
+`rotation.variant_ref` for a comparison family hashes the family, its request
+ordinals, the request row, the task spec, the state delta and the expected block,
+so a reworded or re-stated variant is a different variant. `expected_ref_for`
+(`evaluator.py:134-138`) is unchanged and hashes only `{case_id, expected}`: the
+stimulus is excluded on purpose, because that function produces the opaque
+`sealed:` pointer a learner-facing check result carries, and folding stimulus
+into it would make a public value change whenever a protected request was
+reworded. Case ids stay distinct, so there is no collision and test 13's
+opaque-ref assertion still holds.
+
+Reservation validates each drawn variant before any exposure is recorded: the
+request row's ordinal equals the pair's public request count plus one; the task
+spec's id and text equal the row's; every mandatory rule id exists in the frozen
+mission's public rules; the delta is additive only, enforced as a check rather
+than asserted from the schema, per the collision rule below; every added record
+cites a delta or base entity and a declared dependency with the public value
+shapes; and the resolved document parses through `load_public_state_bytes`.
+
+Additivity is enforced, not structural. `ProtectedRecordDelta.record_id` and each
+`add_entities` key are free identifiers, and `_public_records` keys the base state
+by `record_id`, so a colliding identifier would silently overwrite a base record
+while the resolved document still parsed. `load_public_state_bytes` validates
+entity and dependency references but performs no record-id or entity-ref
+uniqueness check, so a parse proves nothing about collisions. A collision also
+regroups `resolve_records` and can turn an AGREED group into CONFLICT, changing
+the protected variant's own expected answer. Reservation therefore rejects a
+delta whose `add_entities` key or whose `add_records` `record_id` already exists
+in the frozen comparison state, and `resolve_protected_state` asserts on its own
+output that the resolved entity-ref set equals the base set plus exactly the
+delta's keys, that the resolved record-id set equals the base set plus exactly
+the delta's record ids, and that neither set contains a duplicate. Both checks
+fail closed at reservation with no exposure recorded, and test 51 proves each one
+independently.
+
+`protected_request_bytes` returns the canonical JSON line that the executor
+streams for the protected phase. `resolve_protected_state` returns the canonical
+JSON document built from the frozen comparison state with the delta's entities
+and records added and its description substituted, deterministically from the two
+frozen inputs. Both build on `domain.canonical.canonical_bytes`, so both are
+sorted-keys, compact-separator, UTF-8 and NFC-normalized, and both reject floats.
+That matters because `ProtectedRequestRow.text: str` accepts a decomposed
+character: without NFC the streamed bytes and `stimulus_hash` could diverge under
+two different rules, which ADR 0002 forbids by requiring canonical serialization
+to be defined in exactly one module. Test 51 names golden hash vectors for both
+functions so a later change to either canonicalizer fails.
+
+The pre-existing `_canonical_specs_bytes` (`orchestrator.py:1873-1878`) does not
+build on `canonical_bytes`; it calls `json.dumps` with the default
+`ensure_ascii=True`, so it ASCII-escapes the pound sign that the three reviewed
+spec files contain. Restating it on `canonical_bytes` is correct in principle and
+is deliberately NOT part of this revision, because it would change all three
+recorded `task_specs_sha256` values (`09708812...` to `fa27937f...`,
+`a7567bdb...` to `1440d3c6...`, `19e3fe78...` to `b553b9aa...`) and with them the
+operator packet's canonical `workloads` digest. Those are recorded review
+evidence. The change belongs to the manifest re-authoring that section 2 already
+requires for candidate B and the comparison state, and it must be made together
+with recomputed manifest pins and a re-recorded packet digest, never silently.
+
+Two-phase execution mechanism. The protected phase does not extend the public
+batch and does not relax `load_batch`, whose consecutive-from-1 ordinal invariant
+eight production call sites depend on. It builds its own single-row reference,
+`BatchRef(path_ref="sealed:protected", content_hash=canonical.content_hash(
+base64.b64encode(protected_request_bytes(row))))`, and loads it through a new
+`executor.base.load_single_request(ref, frozen_bytes, ordinal) -> RequestStimulus`.
+That function requires `frozen_bytes` and never resolves `ref.path_ref` against
+`fixtures/requests`, so a protected stimulus can never be read from a mutable
+path; it verifies the same content hash as `load_batch`; it requires exactly one
+non-empty line; and it requires that line's ordinal to equal the declared
+`ordinal`. Given the public batch, a two-row protected batch or an undeclared
+ordinal it raises, so the protected phase fails closed rather than streaming the
+wrong stimulus. The reserved `ordinal` is the pair's public `request_count + 1`,
+which `load_batch` would reject, and that is why a separate entry point exists.
+
+Four guards currently bound a comparison slot by its public `request_count` and
+are restated against the frozen `TrialSlot.executed_request_count` (line numbers
+as of the 2026-09-28 working tree): the observation ordinal bound
+(`orchestrator.py:2488-2490`), post-run capture completeness (`:2551-2554`) and
+both restart-reconciliation completeness checks (`:2592-2593` and `:2604-2608`).
+Restated completeness requires the public ordinals
+`set(range(1, request_count + 1))` and, when the slot has a protected binding,
+exactly one further output at `request_count + 1`. A protected output on a slot
+with no binding, or a second output at that ordinal, fails the slot closed.
+Diagnostic experiments reserve no protected binding, so their
+`executed_request_count` equals `request_count` and every one of the four guards
+behaves exactly as it does today.
+
+Privacy rules (the program-design half of the Gate 2 section 8.1 decision; the
+classification below is ADR 0006 Decisions 1 and 2):
+
+- Controller-held assessment inputs never enter a workspace
+  or a prompt: the complete reserved payload, the task spec, the authored
+  delta, the expected block and the variant ref. Only the extracted request row
+  and the resolved state cross into the protected workspace. Protected task
+  assessments are produced controller-side. The protected response and service logs originate in the
+  candidate workspace, then become restricted controller captures and
+  observations; they cannot be described as never entering the workspace.
+  Stimulus, meaning the protected request row and the resolved protected state,
+  does enter the candidate workspace inside the protected phase, because the
+  service cannot answer a request it never receives, and is still never
+  projected. No learner-facing payload, error, log line or client bootstrap
+  carries protected stimulus, assessment inputs or retained execution
+  artifacts, and no route serves a protected capture. ADR 0006
+  Decision 3 names the residual channel this opens, its three bounds and its
+  invalidation consequence; it is not denied here.
+- Every public projection is bounded by the slot's frozen public request count:
+  outputs, observations and task assessments whose request ordinal exceeds it are
+  filtered out before serialization on every route that serves an experiment run.
+  The ordinal filter is necessary but not sufficient, and must not be treated as
+  the whole control. `output_evidence_for` derives `public_shop_record`,
+  `public_shop_record_ref` and `public_shop_snapshot_hash` from
+  `_snapshot_bytes_for_run` (`orchestrator.py:896`, `:548-550`), which returns the
+  run's stored snapshot bytes, and only the record selection inside it is
+  per-ordinal (`_stimulus_record`, `:900`). A hidden value stored once per run
+  therefore rides out on every public ordinal and no ordinal filter can catch it.
+  Section 6.4 fixes the run's stored snapshot bytes to the frozen comparison
+  state for the whole slot; that rule is what makes this bullet true.
+- Projections expose the protected step only as counts: its existence and size
+  before a slot runs, and once the experiment is terminal an aggregate per
+  candidate of reserved, captured and missing steps. These are not hidden counts
+  in ADR 0001's sense: each equals the comparison's already-public pair count or
+  a partition of it, so none discloses inventory size, variant identity or an
+  expected value, and the terminal-only gate keeps the count from becoming a
+  mid-run feedback channel. ADR 0006 Decision 4 records that reasoning and
+  supersedes the clause to exactly that extent. The acceptance reading (Slice 16)
+  may add passed and failed counts and an eligibility blocker naming only the
+  public rule id (`PROTECTED_CHECK_FAILED`); it may not release stimulus content
+  or captured protected bytes.
+- The serialized projection scanner is a defense against distinctive private
+  strings, not a proof of value provenance. It receives protected-only request
+  identifiers and text, assessment identifiers and text, and the resolved
+  protected state's digest. The needle set is fixed from the protected inventory
+  before scanning a payload; it is never reduced because that payload contains
+  a needle. Test 53 verifies that each admitted needle and its serialized forms
+  are absent from known-valid baseline public route payloads for the frozen
+  fixture. A later collision fails closed rather than disabling the scan.
+  `gateway/redaction.py:35-41` checks raw, JSON-escaped, forward-slash and
+  base64 forms. Keep the existing length floors for substring needles; no
+  blanket protected-stimulus exemption is permitted. A short record id or
+  expected string that overlaps allowed public text, and any generic
+  added-record scalar such as `1`, are never global substring needles:
+  `serialized_contains({"pair_ordinal": 1}, "1")` is true on a valid payload.
+  A collision is not evidence that a public field came from the protected
+  phase. The primary boundary is structural: route projectors select only
+  public ordinals for outputs, observations and assessments; public shop fields
+  derive only from the frozen comparison state; restricted captures,
+  controller-held assessment inputs and resolved protected state never supply
+  learner-facing payload fields. The count reducer may read restricted capture
+  status, and the scanner may read controller-held material as needles, but
+  neither may serialize that material. Test 53 proves the boundary with two valid
+  protected variants under one deterministic fake adapter whose short id,
+  expected string and added scalar differ while public inputs stay identical.
+  Public request/output/shop content must stay identical across the variants;
+  opaque context hashes and run identities
+  are excluded from that equality because their frozen bindings differ. A
+  mutant that sources public shop fields from the protected state or includes
+  a protected-ordinal capture must break the equality or the ordinal assertion.
+- `assert_public_projection` is unconditional on every route that can serve an
+  experiment run, independent of adapter. `routes.py:125` scans only when
+  `run.adapter == "tokenfactory" and run.purpose.value == "EXPERIMENT"`, so the
+  Slice 15 offline demo, which runs `local_process`, is served today with no
+  scanner at all and the ordinal filter as the only control. The routes that gain
+  the unconditional scan are the run outputs route, `/runs/{id}/checks`,
+  `/engagements/{slug}/ledger` (whose `_resolve_derivation` embeds `request_text`
+  and `output_body_base64`, `orchestrator.py:946-948`), the board and the
+  investigations station.
+
 ## 4. Storage and migration
 
 Schema version becomes 6. `migrations/v6.sql` runs with `BEGIN IMMEDIATE`; the
@@ -899,11 +1212,12 @@ version marker changes only in the same successful transaction.
 | Table | Required constraints |
 | --- | --- |
 | `investigations` | Append-only; `revision_of_id` references the same shift; source run/request must exist. |
-| `execution_contexts` | Immutable `content_hash UNIQUE`; reviewed mission bytes/hash plus exact public and request-spec bytes retained for one or three ordered `FrozenWorkload` records; protected reservation remains an internal ref. |
+| `execution_contexts` | Immutable `content_hash UNIQUE`; reviewed mission bytes/hash plus exact public and request-spec bytes retained for one or three ordered `FrozenWorkload` records; protected reservation remains an internal ref and protected bindings are hashed into the context, never projected. `protected_bindings` is RECONSTRUCTED, not stored: the table gains no bindings column, and the field is derived at load time from `exposure_items` joined to `protected_case_snapshots` through the existing `protected_reservation_id`. Storing a second copy would give the same digests two sources of truth and contradict Gate 2 S8.1 item 4, which requires execution to reconstruct reserved bytes from the restricted reservation. `content_hash` commits to the reconstructed values, and test 51 reads them back through the same reconstruction. |
 | `experiments` | `client_request_id UNIQUE`; exactly one or two candidates according to kind; immutable after reservation except terminal state. `investigation_id` may be null only for one public bootstrap diagnostic in a `LEGACY_FIRST_CHOICE` shift with no owned source run. |
-| `trial_slots` | `UNIQUE(experiment_id, pair_ordinal, candidate_label)` and `UNIQUE(run_id)` when assigned; each slot pins a workload ID, request-batch hash and parsed request count matching its context. |
+| `trial_slots` | `UNIQUE(experiment_id, pair_ordinal, candidate_label)` and `UNIQUE(run_id)` when assigned; each slot pins a workload ID, request-batch hash and parsed request count matching its context. Gains `executed_request_count INTEGER NOT NULL`, frozen at reservation, with `CHECK (executed_request_count BETWEEN 1 AND 5)` and `CHECK (executed_request_count IN (request_count, request_count + 1))` so a slot can only ever claim its own public count or that count plus one protected step. Every execution and completeness guard in section 6.4 reads this column instead of `request_count`. |
 | `exposure_reservations` | One comparison or operation scope; invalidation is a state change, never deletion. |
 | `exposure_items` | `UNIQUE(engagement_slug, family, cycle, variant_ref)`; one item can bind both candidate slots in the same pair only. |
+| `protected_case_snapshots` | One immutable row per reserved variant behind `exposure_items`: the canonical sealed payload (request row, task spec, delta, expected block) plus the resolved protected state bytes and their digests. The table as defined today has four columns only (`exposure_item_id`, `variant_ref`, `payload_json`, `payload_sha256`), so it gains `resolved_state_bytes BLOB NOT NULL` and `resolved_state_sha256 TEXT NOT NULL`; its existing `BEFORE UPDATE` and `BEFORE DELETE` triggers already cover the new columns, so immutability needs no new trigger. `repo.list_protected_case_snapshots` selects both, and `load_reserved_comparison_cases` returns them, so section 6.4's resolved-state digest check has a source instead of recomputing from a mutable file. Its return type becomes one `ReservedProtectedCase(family, pair_ordinal, case, resolved_state_bytes, resolved_state_sha256)` per row. Reconstructed only by the controller; never projected or written by persistence. |
 | `execution_observations` | Append-only; `UNIQUE(run_id, request_ordinal, ordinal)`; raw ref internal, public payload sanitized. |
 | `run_assessments` | One immutable row per terminal assessed run with context hash, completeness, mandatory result and rule version. |
 | `task_assessments` | `UNIQUE(run_id, request_ordinal, task_id)`; request identity, exact outcome and reason codes, never model-authored grading. |
@@ -958,13 +1272,13 @@ content returns 409. Reusing it with identical content returns the original resu
 | `/api/artifact-versions/{id}` | GET | none to `ArtifactSourceView` | Learner-owned safe logical files only. |
 | `/api/shifts/{id}/investigations` | POST | cause/falsifier/test to `InvestigationView` | Append original or explicit revision. |
 | `/api/investigations/{id}` | GET | none to `InvestigationView` | Includes links, not assistant-authored cause. |
-| `/api/shifts/{id}/experiments` | POST | `ExperimentRequest` to `ExperimentView` (202) | First-choice shifts may compare. Only a no-source-run `LEGACY_FIRST_CHOICE` shift may start one public bootstrap diagnostic with null investigation; it consumes the ordinary diagnostic budget, creates no eligibility and cannot grant help. A qualifying comparison still requires an investigation. The controller freezes three reviewed workload bytes/hashes/counts and all A/B slot bindings before protected results; queues execution. |
+| `/api/shifts/{id}/experiments` | POST | `ExperimentRequest` to `ExperimentView` (202) | First-choice shifts may compare. Only a no-source-run `LEGACY_FIRST_CHOICE` shift may start one public bootstrap diagnostic with null investigation; it consumes the ordinary diagnostic budget, creates no eligibility and cannot grant help. A qualifying comparison still requires an investigation. The controller freezes the reviewed comparison state, three reviewed workload bytes/hashes/counts, one validated protected variant per pair and all A/B slot bindings before protected results; queues execution. |
 | `/api/experiments/{id}` | GET | none to `ExperimentView` | Shows every slot, missing evidence, drift and eligibility. |
 | `/api/shifts/{id}/selections` | POST | `SelectionRequest` to `SelectionView` (201) | Atomic revalidation and append; a first valid choice lifts a legacy shift's operation block without changing its historical opening mode. |
 | `/api/engagements/{slug}/selections` | GET | none to `SelectionView[]` | History includes invalidated choices, never fallback. |
 | `/api/shifts/{id}/runs` | POST | key to `RunView` (202) | Operation only; exact latest valid selection or the separately labelled new-engagement starter. No operation from a migrated no-choice shift; no candidate ID in request. |
 | `/api/runs/{id}` | GET | none to `RunView` | Purpose and evidence mode are always visible. |
-| `/api/runs/{id}/outputs` | GET | none to existing extended output views | Exact captures plus safe observations/provenance. |
+| `/api/runs/{id}/outputs` | GET | none to existing extended output views | Public-ordinal captures plus safe observations/provenance; protected-phase captures are filtered and never projected. |
 | `/api/runs/{id}/checks` | GET | none to existing check views | No protected identity/text. |
 | `/api/shifts/{id}/close` | POST | key to `ShiftView` | Uses selected contract; refuses nonterminal work and legacy first-choice shifts without a valid explicit selection. |
 | `/api/shifts/{id}/assist` | POST | `AssistRequest` to public assist reply | Requires investigation for all diagnostic roles. |
@@ -1052,13 +1366,23 @@ engagement slug, never by caller input -> load that engagement's three reviewed
 workload files in ordinal order -> verify the reviewed ordinal/hash/count/task-spec
 manifest -> validate and capture each batch's exact bytes, hash, public task-spec
 bytes/hash and parsed request count -> capture the engagement's reviewed mission
-bytes/hash and freeze the other public context inputs -> reserve three
-unexposed protected variants per enabled family -> finish and hash the
+bytes/hash and the reviewed comparison state bytes -> draw one unexposed protected
+variant per pair and validate each variant against its pair's workload (request
+ordinal equals the public count plus one; spec id and text match the row; every
+rule id is defined; the delta is additive only, proved by rejecting any
+`add_entities` key or `add_records` record id that already exists in the frozen
+comparison state and by asserting the resolved entity-ref and record-id sets equal
+the base sets plus exactly the delta's with no duplicates; the resolved state
+parses) ->
+resolve each variant's protected state and store both the canonical variant
+payload and the resolved state bytes behind the reservation -> freeze the other
+public context inputs and the protected bindings -> finish and hash the
 ExecutionContext with the internal reservation ID -> create six TrialSlots with
 pair 1 bound to workload 1, pair 2 to workload 2 and pair 3 to workload 3, each
-with one A and one B slot sharing that workload ID/hash/count and protected pair
-refs -> insert experiment/context/reservation/slots -> commit -> queue
-execute_experiment`.
+with one A and one B slot sharing that workload ID/hash/count and the pair's
+protected variant ref, each freezing `executed_request_count` as its public
+request count plus one -> insert experiment/context/reservation/slots -> commit
+-> queue execute_experiment`.
 
 | Pair | Bellwether reviewed source | Northline reviewed source | Slots bound to the same frozen bytes/hash/count/task spec |
 | --- | --- | --- | --- |
@@ -1073,6 +1397,21 @@ and request counts are checked against that independently reviewed manifest;
 no value is invented in this document. The resulting context and slot records,
 not these pathnames, govern execution and replay.
 
+The reviewed comparison state, not the accepted Slice 11 state, is the
+verification basis for the comparison manifest and its three public spec files.
+That is a re-verification obligation and not a formality: a spec carries
+conditions rather than expected values, so its bytes can stay identical while its
+correct answer changes. Adding one same-genre collectible paperback under the
+request's price ceiling flips request 012 from a justified fallback to a
+completed alternative, and the same class of change can move any other request.
+The manifest's `description` named `bookshop_pivot_public_state.json` as its
+basis and was corrected on 2026-09-28, as section 2 records. Revised test 17
+asserts the manifest and the three spec files against
+the comparison state's own pin, so a comparison state edited without
+re-verification fails rather than silently re-grading six public requests. The
+comparison state's pin lives in the two existing pin-guard dicts named in
+section 2, following the Slice 11 precedent.
+
 Pair 1 runs A then B, pair 2 runs B then A, and pair 3 order is derived before any
 result from the low bit of a decision hash over the context hash and the two candidate
 content hashes. The experiment content hash is computed after that schedule is fixed.
@@ -1081,8 +1420,11 @@ settings or context drift creates `NOT_COMPARABLE`, never an automatic rerun.
 The slot binding, not a mutable fixture pathname or executor-selected batch,
 determines the requests sent. The same exact bytes are reconstructed for both
 members of a pair. A slot with a mismatched hash/count or a request omitted from
-the frozen batch fails closed. Each candidate's denominator is the sum of the
-three pair request counts, including failed and missing responses.
+the frozen batch fails closed. Each candidate's public denominator is the sum of
+the three pair public request counts, including failed and missing responses. The
+protected step carries its own denominator of one per pair per candidate, and a
+slot's completeness is judged against its frozen `executed_request_count` rather
+than against either denominator alone.
 
 Diagnostic experiments use one candidate, public tests only and one trial. They
 cannot reserve protected cases or produce eligibility. The only null-investigation
@@ -1093,17 +1435,58 @@ it does not infer a test from an absent investigation.
 
 ### 6.4 Execute and finalize an experimental trial
 
-`execute_experiment -> for each stored TrialSlot in execution order -> create fresh
-workspace -> resolve only that slot's frozen workload from the context -> verify
-the pinned bytes/hash/count -> bind exact candidate/workload/shared state/grant ->
-stream only each current permitted request -> adapter.execute -> append raw
-outputs and trusted observations -> pure evaluator -> BEGIN IMMEDIATE -> verify
-purpose EXPERIMENT and slot identity -> insert assessment -> terminalize run/slot
--> commit`.
+`execute_experiment -> for each stored TrialSlot in execution order -> public
+phase: create fresh workspace -> resolve only that slot's frozen workload from
+the context -> verify the pinned bytes/hash/count -> bind exact candidate,
+comparison state and grant -> store the frozen comparison state as the run's
+snapshot bytes -> stream only each current permitted request through `load_batch`
+-> adapter.execute -> append raw outputs and trusted observations -> protected
+phase: resolve the pair's protected binding and snapshot from the reservation ->
+verify variant ref, payload digest and resolved-state digest against the binding
+-> fresh workspace -> materialize the resolved protected state inside that
+workspace only -> load the protected line through `load_single_request` at
+ordinal `executed_request_count` -> adapter.execute -> append its capture and
+observations -> pure evaluator assesses the public requests (the protected
+acceptance assessment lands with Slice 16) -> BEGIN IMMEDIATE -> verify purpose
+EXPERIMENT and slot identity -> insert assessment -> terminalize run/slot ->
+commit`.
+
+A slot is complete only when every public output and the protected output are
+present and usable; a failure in either phase fails the slot and keeps its
+exposure. The protected phase never runs after a failed public phase, and it
+always starts from a fresh workspace, so no cache, booking or process state
+carries from the public phase into the probe. The executed public batches are the
+reviewed bytes under the reviewed comparison state; the delta applies only to the
+protected phase.
+
+The run's stored snapshot bytes remain the frozen comparison state for the whole
+slot, in both phases. The resolved protected state is materialized only inside
+the protected phase's own workspace and is never passed to
+`repo.set_run_snapshot_bytes`, so `output_evidence_for` derives
+`public_shop_record`, `public_shop_record_ref` and `public_shop_snapshot_hash`
+only from the frozen comparison state and cannot project a delta value or the
+protected state's digest on a public ordinal. This is the rule that makes section
+3.9's ordinal filter sufficient; without it the filter would miss the leak
+entirely, because the derivation is per-run rather than per-ordinal. Test 53
+carries the protected state digest as a needle so a violation fails.
+
+Two phases over one run identity means the guards that bound a slot by its public
+`request_count` are restated against the frozen `executed_request_count`, as
+section 3.9 specifies: the observation ordinal bound (`orchestrator.py:2488-2490`),
+post-run capture completeness (`:2551-2554`) and both restart-reconciliation
+completeness checks (`:2592-2593` and `:2604-2608`). The protected line is
+loaded through `executor.base.load_single_request`, not `load_batch`, so
+`load_batch`'s consecutive-from-1 invariant and its eight existing call sites are
+untouched. Nothing else about the driver changes.
 
 After every slot is terminal, `comparison.compare` derives status, metrics and
-eligibility from all six slots. This transaction has no import or call path to the
-ledger reducer, incident mutators, selection writes or close logic.
+eligibility from all six slots; from Slice 16 it also reads each reserved
+variant's acceptance verdict, and a mandatory protected failure then blocks that
+candidate before cost comparison. Slice 15 derives eligibility from the public
+assessments and from protected capture completeness only, and reports no
+acceptance verdict, because the acceptance reading is Slice 16 work. Section 1's
+Eligibility row is qualified the same way. This transaction has no import or call
+path to the ledger reducer, incident mutators, selection writes or close logic.
 
 ### 6.5 Select
 
@@ -1227,7 +1610,8 @@ These are product ceilings, not measured vendor performance.
 | Operational reservations per shift | 2 maximum | Second allowed only when the first failed with zero accepted customer outputs and zero reducer writes; same selection/context only. |
 | Successful operational finalizations per shift | 1 | Unique database constraint. |
 | Service inference calls per customer request | 1 maximum | Zero is valid when ordinary code handles the request. |
-| Customer requests per trial | 4 maximum | Exact denominator is frozen in context. |
+| Customer requests per trial | 4 public maximum, plus exactly 1 protected stimulus | Exact public denominator is frozen in context; the protected step carries its own ordinal and denominator. |
+| Executor operations per trial slot | 2 (public phase, protected phase) | Each phase is a fresh workspace with the frozen bytes for that phase; the live spike's cost estimate must be revised for two operations per slot before any live comparison is authorized. |
 | Gateway input per call | 8 KiB UTF-8 | Reject before provider call. |
 | Gateway output per call | 1,024 tokens | Provider request and local guard. |
 | Gateway deadline per call | 20 seconds | Trusted gateway measurement. |
@@ -1280,6 +1664,14 @@ configuration even if a client submits a hidden role value.
   only an application check.
 - Raw evidence is written before derived projections. Public views fail closed if
   allowlist or leak scanning fails.
+- A learner-facing surface carrying any protected stimulus content, resolved
+  protected state, expected block, variant identity or captured protected
+  response is treated as a leak: the projection fails closed and the reservation
+  is invalidated under the existing leak rule. The boundary is the learner-facing
+  surface, not the controller: the request row and the resolved state do enter
+  the candidate workspace inside the protected phase, because a service cannot
+  answer a request it never receives, and that is permitted by ADR 0006 Decision
+  2 rather than being a leak. Assessment material never enters either.
 - A Sandbox outer `SUCCESS` does not prove that the inner process succeeded or
   that a saved file contains its reported bytes. For every required file-backed
   capture, read back the checkpoint file and record the actual byte count and
@@ -1306,7 +1698,7 @@ these probes succeeds:
 4. A crash loses completed captures/usage or permits an unpaid retry without a new
    durable reservation.
 5. Trial reset leaves candidate-visible cache, booking or process state from the
-   other candidate.
+   other candidate, or from the public phase into its slot's protected phase.
 6. A required checkpoint file is absent, unreadable, empty when content is
    required, or differs from its trusted expected bytes while the outer operation
    reports success.
@@ -1377,14 +1769,28 @@ not count as proof.
 16. `test_comparison_freezes_both_candidates_context_and_all_six_slots_before_results`
    faults after each write and requires all-or-nothing reservation. It freezes
    exactly three reviewed request batches with raw bytes, parsed counts and
-   request-spec hashes before any result; a mutable-path substitution or missing
-   workload must fail a content assertion for either engagement. The controller
-   chooses the reviewed manifest by engagement, never from caller input.
+   request-spec hashes, the reviewed comparison state, and one validated
+   protected variant per pair with its resolved state before any result; a
+   mutable-path substitution, a missing workload or a missing or invalid
+   protected variant must fail a content assertion for either engagement. The
+   comparison state's content assertion is against the pin section 2 places in
+   `PINNED_PUBLIC_FIXTURE_HASHES` and in
+   `test_pivot_review_bytes_and_catalog_binding`'s expected map, so an edited
+   comparison state fails both pin guards and this obligation rather than only a
+   structural check. The controller chooses the reviewed manifest and state by
+   engagement, never from caller input.
 17. `test_each_pair_shares_workload_and_resets_state` compares raw bytes, hashes,
-   request counts, task-spec hashes and protected pair refs for A/B in each of
+   request counts, task-spec hashes, protected pair refs and the pair's protected
+   stimulus (request row, task spec, delta, resolved state) for A/B in each of
    pairs 1 to 3 against independently pinned reviewed files, plus sentinel
-   state for both Bellwether and Northline. Pair 1 maps to that engagement's
-   file 01, pair 2 to file 02 and pair 3 to file 03;
+   state for both Bellwether and Northline. The pinned reviewed files include
+   that engagement's comparison state, and the manifest and the three public spec
+   files are asserted against the comparison state rather than against the
+   accepted Slice 11 state, so a spec whose bytes are unchanged but whose correct
+   answer moved under the comparison state fails re-verification instead of
+   silently re-grading six public requests. Pair 1 maps to that engagement's
+   file 01, pair 2 to file 02 and pair 3 to file 03; A and B in a pair are
+   byte-identical; no pair shares another pair's variant;
    swapping whole pair assignments, swapping only pair 2's B batch or count,
    dropping a request, substituting Bellwether files/manifest in Northline, or
    leaking cache/booking state must each fail a named assertion against the
@@ -1401,14 +1807,20 @@ not count as proof.
    version; ordinary and repeated null-investigation requests fail. The POST and
    GET projections preserve the null investigation ID without validation error.
 22. `test_recorded_inspection_cannot_supply_fresh_eligibility` rejects replay labels.
-23. `test_metrics_share_one_denominator_and_unknown_is_not_zero` mutates denominator,
-   missing output, usage and cost independently. It also asserts per-candidate
-   denominator equals the sum of all three frozen workload request counts and
-   that justified/unjustified clarification each has a separate reported count;
+23. `test_metrics_share_one_public_denominator_and_unknown_is_not_zero` mutates
+   denominator, missing output, usage and cost independently. It also asserts the
+   per-candidate public denominator equals the sum of all three frozen public
+   workload request counts, that no protected step is counted in it, and that
+   justified/unjustified clarification each has a separate reported count;
    merging either with useful completion, refusal or referral must fail. A
    multi-task request retains distinct `(request_ordinal, task_id)` assessments;
    useful completion requires every required task while non-completion incidence
-   categories may overlap and are labelled non-additive.
+   categories may overlap and are labelled non-additive. The protected
+   denominator is asserted separately by test 54, so the two never read as one
+   number. This obligation was named
+   `test_metrics_share_one_denominator_and_unknown_is_not_zero` before the public
+   and protected denominators were split; it is renamed here and the test does not
+   yet exist in the tree, so nothing is broken by the rename.
 24. `test_mandatory_failure_blocks_candidate_before_efficiency_comparison` proves no
    aggregate score can conceal the failure.
 
@@ -1517,6 +1929,89 @@ not count as proof.
    latency, usage, failures and every trust probe. A static PASS or LLM opinion is
    not acceptance evidence.
 
+### Protected phase (section 3.9, Gate 2 section 8.1)
+
+50. `test_slot_runs_public_phase_then_protected_phase_in_frozen_order` executes a
+   reserved slot with an instrumented adapter and proves the public phase streams
+   exactly the frozen public batch under the frozen comparison state, then the
+   protected phase exactly one request at the public count plus one under the
+   frozen resolved protected state, each in a fresh workspace with no carryover.
+   It proves the protected line reaches the service through
+   `executor.base.load_single_request` and not `load_batch`, that
+   `load_single_request` refuses a two-line batch, a batch whose ordinal differs
+   from the declared one and a call with no frozen bytes, and that
+   `load_batch`'s consecutive-from-1 invariant still rejects the protected line
+   on its own. It proves each of the four guards restated against
+   `executed_request_count` accepts the protected ordinal and still rejects an
+   ordinal beyond it, and that a diagnostic slot, whose `executed_request_count`
+   equals its `request_count`, is unchanged. A mutated phase order, a swapped
+   phase state, a missing protected phase, a protected request before the public
+   batch or a reused workspace must each fail a named assertion. A failure in
+   either phase fails the slot, keeps its exposure and performs no retry.
+51. `test_protected_variant_is_bound_and_snapshotted_before_any_result` faults
+   after each reservation write, including the protected snapshot insert, and
+   requires all-or-nothing reservation. The context hash covers each protected
+   binding, read back through the reconstruction from `exposure_items` and
+   `protected_case_snapshots` rather than from a stored context column; a swapped
+   variant, an edited payload digest, a substituted resolved state or a
+   pair-binding change after reservation fails before execution. A delta that
+   rewrites or removes a base record, cites an unknown entity, record or
+   dependency, or resolves to an unparseable document is rejected at reservation
+   with no exposure recorded. Because a parse proves nothing about collisions, two
+   further faults are injected independently and each must fail its own named
+   assertion: an `add_entities` key that already exists in the frozen comparison
+   state, and an `add_records` `record_id` that already exists there, the second
+   proved by showing the colliding resolved document still parses through
+   `load_public_state_bytes` while the reservation rejects it. `resolve_protected_state`'s
+   set assertions are proved by a delta whose record id collides only after
+   resolution. Both `protected_request_bytes` and `resolve_protected_state` are
+   pinned by golden hash vectors, and a decomposed-character request text proves
+   the NFC path by requiring the streamed bytes and `stimulus_hash` to agree.
+52. `test_each_pair_shares_one_identical_protected_stimulus` compares request row
+   bytes, task spec, delta and resolved state for A and B in each pair:
+   byte-identical within a pair, one distinct variant per pair, one protected
+   request ordinal per slot equal to the public count plus one. A variant leaked
+   into another pair's binding, a second variant in one slot or a mismatched
+   ordinal must fail a named assertion.
+53. `test_protected_content_and_captures_never_reach_public_surfaces` first
+    checks each admitted protected-only string needle against every valid
+    baseline public route payload for the frozen fixture. Each must be present
+    in the scanner's tuple, absent from those payloads, and detectable when
+    injected into a representative serialized surface in raw, JSON-escaped
+    and forward-slash forms. A valid payload containing
+    `pair_ordinal: 1` must remain servable. Next, run two valid protected
+    variants in separate fresh stores with the same public requests, candidate,
+    comparison state and deterministic fake adapter, but different short record
+    ids, short expected strings and added scalar values such as `1` and `2`.
+    Compare the public request, output and
+    `public_shop_record`, `public_shop_record_ref` and
+    `public_shop_snapshot_hash` fields: they must remain identical. Opaque
+    context hashes, run identities and terminal protected counts are checked
+    by their own rules, not this equality. Fault the public shop derivation to
+    read the resolved protected state, and separately fault a route to include
+    the protected ordinal's response, observation or log; each must fail a
+    named assertion. Scan the comparison view before, during and after
+    execution, run output and check routes, error responses, logs and client
+    bootstrap for both `local_process` and `tokenfactory` runs. The terminal
+    aggregate carries counts only, never protected content.
+54. `test_public_and_protected_counts_reconcile_without_merging` proves the
+   public metrics denominator stays the sum of the three frozen public batch
+   counts, the protected denominator is one per pair per candidate, and both
+   reconcile to each slot's frozen `executed_request_count`. Merging a protected
+   step into a public counter, hiding a missing protected capture, or reporting
+   captured or missing protected counts before the experiment is terminal must
+   each fail its named assertion.
+
+Obligations 50 to 54 are new. Four obligations that exist and pass today are
+invalidated by this revision and must be revised in the same change rather than
+deleted or weakened to reach green: the six-case shape assertion at
+`tests/orchestrator/test_experiment_lifecycle.py:619-622`, the three drawn aspect
+strings at `:633-647`, `test_candidates_share_the_cheapest_qualifying_alternative_policy`
+at `:650-669`, which section 2's candidate B row supersedes, and the
+`protected_case_snapshots` three-column `payload_json` assertion at `:736-772`,
+which section 4's two new columns change. The Gate 4 Slice 15 contract names all
+four.
+
 ## 10. Learning and product evidence plan
 
 The service checks above prove software behavior, not learning.
@@ -1588,6 +2083,11 @@ authorized work. No session has run.
    workloads and manifest, starting state and protected cases are not authored
    or reviewed by this document. The file map fixes ownership, not their
    contents or an executable transfer claim.
+9. **Protected phase cost.** The two-phase slot doubles live sandbox operations
+   per slot, from six to twelve. The S12 spike's cost estimate covered
+   single-operation trials; a live comparison needs a revised estimate before it
+   is authorized. If twelve operations are infeasible, backtrack rather than
+   drop the protected phase or shrink the schedule.
 
 Hard no-go conditions before dependent live claims:
 
@@ -1629,6 +2129,16 @@ contracts, budgets, transactions, migration rules and test obligations. It does
 not approve implementation, installs, credentials, live calls, sealed-case
 contents, fixture authoring, outreach, deployment, publication or submission.
 That authorization is limited to these documents.
+
+**Scoped revision 2026-09-28 (RE-APPROVED):** sections 1 to 9
+and 12 reconcile the approved Gate 2 section 8.1 protected-stimulus design:
+the separate comparison state, the protected variant schema and validation,
+the two-phase slot execution, the restricted snapshot storage, the private
+capture and projection rules, the separate public and protected denominators,
+the `PROTECTED_CHECK_FAILED` reason code, and tests 50 to 54. The earlier
+approvals above remain historical for the rest of the document. This revision
+approves no fixture content, seal, live run or implementation; the Slice 15
+draft bytes stay unsealed and ineligible until a separate operator review.
 
 Gate 4 was separately approved on the same date over completed Slices 1 to 9.
 Its clause trace maps every numbered obligation above to one prerequisite slice

@@ -1,12 +1,38 @@
 # Vertical Slice Plan: Shiftwork final pivot
 
+**Current Gate 4 state: RE-APPROVED 2026-09-28.** The user approved the repaired
+protected-phase slice reconciliation together with Gate 2 S8.1, Gate 3 and
+ADR 0006. Slice 15 remains in progress on its earlier go-ahead.
+
 **Gate 4: APPROVED 2026-09-24 for the final pivot. Not implementation authority.**
 Gates 1, 2 and 3 are approved for `shiftwork_final_pivot.md`. Gate 3 was approved
 and locally merged, then backtracked when this Gate 4 review found no qualifying
 Northline selection path; that scoped correction is now re-approved and the
 dependency order below reflects it. The 2026-09-19 Gate 4 approval
-applies to the old design only and is historical. Slices 10 through 12 were
-implemented and accepted by the user by 2026-09-27; Slice 13 onward is unbuilt.
+applies to the old design only and is historical. Slices 10 through 14 were
+implemented and accepted by the user by 2026-09-27; Slice 15 is in progress on
+its own go-ahead and Slice 16 onward is unbuilt. (This sentence previously read
+"Slices 10 through 12 ... Slice 13 onward is unbuilt", which was stale against
+`00-status.md`; corrected 2026-09-28 during the repair round.)
+
+**GATE 4 SCOPED BACKTRACK, IN PROGRESS 2026-09-28:** this plan is reconciled with
+the revised Gate 2 S8.1 and Gate 3 S3.9 protected phase, which the 2026-09-28
+independent review found this document did not reflect. The changes are: every
+unqualified "shared denominator" and "batch request count" in S1, in the Slice 15
+contract and in trace rows 16 and 23 now names the public denominator and keeps
+the protected denominator separate; the Slice 15 contract states the two-phase
+execution, the frozen `executed_request_count`, `load_single_request` and the
+variant content each protected case must carry; trace rows 50 to 54 are added for
+the new obligations, which previously had no trace row at all; the four
+currently-passing obligations that the revision invalidates are named in the
+Slice 15 contract as requiring revision rather than deletion; and the six-trial
+no-go condition records that the protected phase doubles the live cost to twelve
+executor operations, so the S12 single-operation feasibility verdict does not by
+itself authorize a live comparison. This reconciliation was blocked until the
+review's 2 BLOCKER and 6 MAJOR findings were repaired. It was pending
+re-approval at that point; the approval recorded at the top closes the
+backtrack. No implementation, operator review, seal, live run, install, commit
+or push was implied by the repair round.
 
 This is a build order, not new runtime evidence. Approval authorizes planning one
 slice at a time under the repository process. Each slice still needs its own
@@ -75,8 +101,12 @@ S10 and S11 are offline policy and investigation slices; their recorded/trusted
 local results are explicitly labelled. S12 is a bounded integration proof, not a
 substitute for the later learner journey. S15's **six trial slots** mean one A
 and one B execution for each of three paired workloads. Each workload is a frozen
-batch of up to four customer requests. Six slots do not mean six customer
-requests; metrics use the same actual request denominator for both candidates.
+batch of up to four public customer requests, and each slot additionally executes
+exactly one protected stimulus as a separate phase after that batch. Six slots do
+not mean six customer requests; metrics use the same actual public request
+denominator for both candidates, and the protected step carries its own
+denominator of one per pair per candidate that is never merged into the public
+one.
 
 ## 3. Slice exit contracts
 
@@ -238,19 +268,36 @@ requests; metrics use the same actual request denominator for both candidates.
   reviewed mission bytes/hash, starting state, public records, model/settings,
   ceilings and three reviewed workload
   batches. The independently reviewed manifest pins each batch's raw bytes,
-  hash, parsed request count and public task-spec hash. Pair 1 uses batch 01,
+  hash, parsed public request count and public task-spec hash. Pair 1 uses batch 01,
   pair 2 batch 02 and pair 3 batch 03; each pair's A/B slots bind the same
   frozen bytes and count, not a mutable path. Reserve three unexposed protected
   variants per enabled family, each
   shared by A/B in its pair, and all six ordered slots before releasing any
-  result. Execute A/B, B/A and the precommitted hash-derived order in fresh reset
-  workspaces. The Compare station shows every slot, run identity, batch request
-  count, exact version and missingness without a winner. The request driver
+  result, and freeze each slot's `executed_request_count` as its public count
+  plus one at that reservation. Execute A/B, B/A and the precommitted hash-derived
+  order in fresh reset workspaces: each slot runs its public batch under the
+  frozen comparison state, then one protected request at ordinal
+  `executed_request_count` under the resolved protected state in a second fresh
+  workspace with no carryover, loaded through `executor.base.load_single_request`
+  so `load_batch`'s consecutive-from-1 invariant is never relaxed. The Compare
+  station shows every slot, run identity, public batch request
+  count, exact version and missingness without a winner, and shows the protected
+  step as counts only. The request driver
   streams only the current request; a pre-run payload or earlier public surface
   cannot expose future customer wording. Diagnostic runs remain public-only and
   cannot appear in this comparison.
-- **Tests:** `python -m pytest tests/orchestrator/test_experiment_lifecycle.py tests/executor/conformance.py -q`;
-  obligations 16 to 18, 20 to 22. Fault each reservation write, race duplicate
+- **Tests:** `python -m pytest tests/orchestrator/test_experiment_lifecycle.py tests/executor/test_conformance.py -q`;
+  obligations 16 to 18, 20 to 22 and 50 to 54. Four obligations that pass today
+  are invalidated by the revised Gate 2 S8.1 and Gate 3 S3.9 and must be revised
+  in this slice rather than deleted, skipped or weakened to reach green: the
+  six-case shape assertion at
+  `tests/orchestrator/test_experiment_lifecycle.py:619-622`, the three drawn
+  aspect strings at `:633-647`,
+  `test_candidates_share_the_cheapest_qualifying_alternative_policy` at
+  `:650-669`, which the required greatest-stock candidate B supersedes, and the
+  `protected_case_snapshots` three-column `payload_json` assertion at `:736-772`,
+  which the two new resolved-state columns change. Each revision keeps a
+  failing-capable assertion for the behavior it replaces. Fault each reservation write, race duplicate
   keys, mutate order after first result, replace a file after reservation,
   swap whole pair assignments, swap only pair 2's B batch or count, drop one
   request, leak a cache/booking/process sentinel across candidates and fail
@@ -260,11 +307,16 @@ requests; metrics use the same actual request denominator for both candidates.
   runs, public views expose only safe ID/hash/count, never future request bytes
   or protected pair refs. S16 completes eligibility/invalidation readback.
 - **Limits:** raw paired execution alone does not rank candidates or prove
-  stable statistics. Each slot may contain up to four customer requests; show the
-  frozen per-slot batch size and actual shared denominator.
+  stable statistics. Each slot may contain up to four public customer requests
+  plus exactly one protected stimulus; show the frozen per-slot public batch size,
+  the actual shared public denominator and the separate protected denominator, and
+  never present the two as one number.
 - **Authorization:** separate review of all three public workloads, visible
   requirements and at least six semantically independent protected task variants
-  per enabled family before sealing; separate live execution credentials/cost.
+  per enabled family before sealing, each variant carrying its own request row,
+  its own task spec and an additive-only state delta over the reviewed comparison
+  state, since six labels over one shared request and state do not establish six
+  independent variants; separate live execution credentials/cost.
   Cases are not inferred from mockup numbers. If both repairs cannot be defensible
   under the same rules, stop and revise the incident before building farther.
 
@@ -272,7 +324,8 @@ requests; metrics use the same actual request denominator for both candidates.
 
 - **Working result and demo:** `python -m demos.final_pivot --stage comparison`
   shows the offline policy; the live Compare station displays all six
-  trials, shared request denominator, useful completion, incorrect output,
+  trials, the shared public request denominator with the separate protected
+  denominator beside it, useful completion, incorrect output,
   justified/unjustified refusals and referrals, missing output, service calls,
   token/latency/cost fields (unknown stays unknown), eligibility and explicit
   `INCOMPLETE` or `NOT_COMPARABLE`. A mandatory failure blocks that candidate
@@ -289,10 +342,12 @@ requests; metrics use the same actual request denominator for both candidates.
   context field, including the mission bytes/hash, each metric
   denominator/missingness/unknown field, both
   clarification counts and task identity, and the interrupted experiment state.
-  The denominator equals the sum of all three frozen batch counts for each
-  candidate. A request counts as useful only when every required task completes;
+  The public denominator equals the sum of all three frozen public batch counts
+  for each candidate, the protected denominator is one per pair per candidate, and
+  the two reconcile to each slot's frozen `executed_request_count` without merging.
+  A request counts as useful only when every required task completes;
   faults that credit one task in a multi-task request or force overlapping
-  non-completion categories to sum to the denominator must fail. S17 and S18
+  non-completion categories to sum to the public denominator must fail. S17 and S18
   complete invalidation enforcement at selection and run start; S18 completes
   interrupted-operation restart.
 - **Limits:** no candidate is selected merely because it is eligible. Three pairs
@@ -545,14 +600,14 @@ Every row includes the assertion clauses, not merely a test name.
 | 13 | S11 missing capture is missing evidence, never refusal or clarification; S13 live timeout and S16 missing slot keep that meaning | S16 (partial S11, S13) |
 | 14 | S11 validated envelope alone renders customer text; contradictory/free prose rejected; S13 live projection repeats | S13 (partial S11) |
 | 15 | S11 pure evaluator and orchestrator-only loader, including import/runtime I/O traps; S13/S14 new gateway/assist imports repeat | S14 (partial S11, S13) |
-| 16 | S15 Bellwether and S22 Northline atomically freeze both versions, their own reviewed mission bytes/hash and three reviewed request batches with raw bytes, hashes, parsed counts and task-spec hashes, context, protected reservation and all six slots before result; fault every write, missing batch, caller-selected/cross-engagement manifest and mutable-path substitution | S22 (partial S15) |
+| 16 | S15 Bellwether and S22 Northline atomically freeze both versions, their own reviewed mission bytes/hash, the reviewed comparison state against its own pin and three reviewed request batches with raw bytes, hashes, parsed counts and task-spec hashes, context, protected reservation and all six slots before result; fault every write, missing batch, caller-selected/cross-engagement manifest and mutable-path substitution | S22 (partial S15) |
 | 17 | S15 Bellwether and S22 Northline independently pinned manifests map each engagement's file 01/02/03 to pair 1/2/3; each pair's A/B slots share exact bytes/hash/count/task-spec hash and protected ref; whole-pair swap, B-only swap/count, dropped request, cross-engagement fallback and cache/booking/process leakage fail | S22 (partial S15) |
 | 18 | S15 predeclared A/B, B/A, hash-derived third order cannot change after first result | S15 |
 | 19 | S16 mutate candidates and every context field separately, including frozen mission bytes/hash, model/settings, requirements and starting state; all drift is Not comparable | S16 |
 | 20 | S15 failure retains slot/exposure; S16 each missing/failed slot blocks complete status without refund | S16 (partial S15) |
 | 21 | S11 ordinary public diagnostic cannot reserve protected material, open assist, write business state or become eligible; S13 safely runs one null-investigation legacy source bootstrap with public-only inputs, null POST/GET ID and no protected/business/help effect, rejecting repeat/ordinary null IDs; S15 repeats the guard against comparison reservation | S15 (partial S11, S13) |
 | 22 | S11 recorded inspection cannot earn fresh eligibility; S16 comparison rejects its mode | S16 (partial S11) |
-| 23 | S16 Bellwether and S22 Northline candidate denominators equal their own three frozen batch request counts; missing output counts, unknown usage/cost stays unknown, mandatory unknown budget blocks eligibility; justified/unjustified clarification have separate counts; `(request_ordinal, task_id)` stays distinct, useful completion needs all required tasks, and overlapping non-completion incidence is labelled non-additive, with faults for each arm | S22 (partial S16) |
+| 23 | S16 Bellwether and S22 Northline candidate public denominators equal their own three frozen public batch request counts, with the protected denominator kept separate and never merged; missing output counts, unknown usage/cost stays unknown, mandatory unknown budget blocks eligibility; justified/unjustified clarification have separate counts; `(request_ordinal, task_id)` stays distinct, useful completion needs all required tasks, and overlapping non-completion incidence is labelled non-additive, with faults for each arm | S22 (partial S16) |
 | 24 | S16 mandatory task/correctness/safety failure blocks candidate before efficiency; no aggregate score conceals it | S16 |
 | 25 | S17 Bellwether and S22 Northline choices bind an exact eligible version/hash, current requirements, uninvalidated exposure and expected prior selection atomically; null prior choice is valid only for an eligible first choice, while Northline's prior ID must be its labelled starter selection | S22 (partial S17) |
 | 26 | S10/S11 no-choice requalification cannot select implicitly; S17 save/freeze/test and failed comparison retain block/exposure without auto retake; S20 close does not select | S20 (partial S10, S11, S17) |
@@ -579,6 +634,11 @@ Every row includes the assertion clauses, not merely a test name.
 | 47 | S10 retains old package skeleton; S24 approved-lock clean install and full offline pivot demo; missing live credentials labelled skip | S24 (partial S10) |
 | 48 | S23 frozen/polling/Tavily ablation, retained known URLs and DROP on every unmet pre-registered threshold | S23 |
 | 49 | S12 raw capability matrix records exact model/image/settings, trials, latency, usage, failures and every trust probe | S12 |
+| 50 | S15 runs the public phase then the protected phase in frozen order, each in a fresh workspace, the protected line reaching the service through `load_single_request` and not `load_batch`, and all four guards restated against `executed_request_count` accept the protected ordinal while still rejecting one beyond it; faults phase order, swapped phase state, missing protected phase, protected-before-public, reused workspace and a two-line or wrong-ordinal protected batch | S15 |
+| 51 | S15 binds and snapshots each protected variant before any result, reads the bindings back through the reservation reconstruction, rejects a colliding `add_entities` key or `add_records` record id even though the colliding document still parses, and pins both protected canonicalizers with golden hash vectors including a decomposed-character text | S15 |
+| 52 | S15 proves each pair shares one byte-identical protected stimulus, one distinct variant per pair and one protected ordinal per slot equal to the public count plus one; faults a variant leaked into another pair, a second variant in one slot and a mismatched ordinal | S15 |
+| 53 | S15 proves protected content and captures never reach a public surface: each admitted distinctive scanner needle is present, absent from valid baseline route payloads and detected when injected; a valid public scalar `1` remains servable. Two valid protected variants vary short ids, expected strings and added scalars while public inputs stay fixed; public request, output and shop fields remain identical, excluding opaque hashes and run identities. Fault the public shop derivation and protected-ordinal response, observation and log filters separately. Scan `local_process` and `tokenfactory` routes before, during and after execution | S15 |
+| 54 | S15 proves the public and protected denominators reconcile to each slot's `executed_request_count` without merging; faults a protected step merged into a public counter, a hidden missing protected capture and a protected count reported before the experiment is terminal. The acceptance-reading arm is S16 | S16 (partial S15) |
 
 ## 5. No-go conditions and evidence boundaries
 
@@ -589,7 +649,7 @@ Every row includes the assertion clauses, not merely a test name.
 | Real isolation or gateway section 8 probe succeeds: credential/controller/host/protected/other-run access; grant/model/limit/URL escape; secret on normal/error/log surface; lost crash evidence or unpaid retry; dirty trial reset | S12 spike is stop; S13 repeats product path, S15 repeats paired reset. Backtrack Gate 2/3 before live learner execution. |
 | Learner request or prompt widens the controller-frozen gateway tool policy | S12 probes the channel; S13 exact-grant and injected-field tests stop before any unapproved tool executes. Backtrack Gate 3 if the fixed boundary cannot be enforced. |
 | Model cannot do meaningful in-service interpretation/tool selection within the fixed ceilings | S12 stop; S13 demonstrates real behavior. Backtrack Gate 3 if infeasible. |
-| Six-trial cost/latency forces replay or hidden dropped slots | S12 feasibility stop; S15/S16 retain all six slots and failures. Backtrack Gate 3, never relabel replay. |
+| Six-trial cost/latency forces replay or hidden dropped slots. The protected phase doubles this to twelve executor operations across the six slots, so the S12 single-operation feasibility verdict does not by itself authorize a live comparison | S12 feasibility stop; S15/S16 retain all six slots, both phases of each and all failures. The cost and latency estimate is revised for two operations per slot before any live comparison is authorized. Backtrack Gate 3, never relabel replay or drop the protected phase to fit a budget. |
 | Reviewed executable Bellwether starter fails to reproduce the task-relevant incident, or the evaluator passes a supported but request-irrelevant fact | S11 fails the pinned starter/request/state and task assessment; S13 proves the live output path. Stop and revise the public incident/rubric before further comparisons. |
 | Clarification is counted as completion/referral, unnecessary clarification passes, or a timeout is labelled clarification | S11 checks exact public task outcomes; S13 tests live missing capture; S16 checks distinct counts and non-additive task incidence. Stop and repair the assessor/metrics within Gate 3 or backtrack if the contract is wrong. |
 | Three reviewed batches are not frozen to their pair's exact A/B bytes, hashes, counts and task specs | S15 manifest, slot and swap/drop-request faults stop before eligibility. No mutable-path or generic six-slot batch fallback. |
