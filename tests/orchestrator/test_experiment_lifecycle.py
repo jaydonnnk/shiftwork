@@ -592,8 +592,18 @@ def _wait_comparison(session, experiment_id: str, deadline_s: float = 90) -> dic
         time.sleep(0.05)
 
 
-def test_draft_material_cannot_reserve_a_production_comparison(session, monkeypatch):
+def test_draft_material_cannot_reserve_a_production_comparison(session, monkeypatch, tmp_path):
     candidate_a, candidate_b, investigation = _comparison_session(session)
+    # The shipped manifest carries an operator seal, so this builds the draft the
+    # guard exists to refuse: the same bytes with the seal withdrawn. Constructing
+    # it keeps the proof independent of where the fixture lifecycle happens to be,
+    # and still exercises the real gate against the real request batch files.
+    reviewed = json.loads(config.PIVOT_COMPARE_MANIFEST.read_bytes().decode("utf-8"))
+    draft = dict(reviewed, review_status="AWAITING_OPERATOR_REVIEW")
+    draft.pop("sealed_payload_sha256", None)
+    draft_path = tmp_path / "draft_compare_manifest.json"
+    draft_path.write_bytes(json.dumps(draft, indent=2, ensure_ascii=False).encode("utf-8"))
+    monkeypatch.setattr(config, "PIVOT_COMPARE_MANIFEST", draft_path)
     monkeypatch.setattr(orchestrator, "_require_reviewed_comparison_material", _REVIEW_GATE)
     monkeypatch.setattr(sealed_store, "load_reviewed_comparison_family", _REVIEWED_FAMILY)
     conn = db.connect(session.db_file)
@@ -611,11 +621,27 @@ def test_draft_material_cannot_reserve_a_production_comparison(session, monkeypa
         conn.close()
 
 
-def test_a_status_label_without_an_exact_seal_cannot_admit_material(monkeypatch):
+def test_a_status_label_without_an_exact_seal_cannot_admit_material(monkeypatch, tmp_path):
+    # The shipped material carries an operator seal, so each limb withdraws it from
+    # a copy. That keeps the proof independent of the fixture lifecycle and lets it
+    # assert the stronger property its name claims: the digest must match exactly,
+    # not merely be present beside the label.
     manifest = json.loads(config.PIVOT_COMPARE_MANIFEST.read_text(encoding="utf-8"))
     manifest["review_status"] = "OPERATOR_SEALED"
+    manifest.pop("sealed_payload_sha256", None)
     with pytest.raises(orchestrator.LifecycleError, match="awaits operator review"):
         _REVIEW_GATE(manifest, "comparison workload manifest", "workloads")
+    manifest["sealed_payload_sha256"] = "0" * 64
+    with pytest.raises(orchestrator.LifecycleError, match="awaits operator review"):
+        _REVIEW_GATE(manifest, "comparison workload manifest", "workloads")
+    sealed_dir = tmp_path / "sealed_cases"
+    sealed_dir.mkdir()
+    family_name = sealed_store._FAMILY_FILES[sealed_store.TASK_COMPLETION]
+    family = json.loads((config.SEALED_CASES_DIR / family_name).read_text(encoding="utf-8"))
+    family["review_status"] = "OPERATOR_SEALED"
+    family.pop("sealed_payload_sha256", None)
+    (sealed_dir / family_name).write_text(json.dumps(family, ensure_ascii=False), encoding="utf-8")
+    monkeypatch.setattr(config, "SEALED_CASES_DIR", sealed_dir)
     with pytest.raises(Exception, match="awaits operator review"):
         _REVIEWED_FAMILY("task_completion")
 
