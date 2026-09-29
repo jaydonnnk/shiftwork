@@ -1,5 +1,28 @@
 # Mistakes Log
 
+## 2026-09-29 S17 stale station label and ambiguous test patch
+
+- What happened: the service station's activation handler overwrote the new
+  selected-version label with the latest saved version and called it a baseline.
+  A later test edit also placed failed-comparison assertions inside another
+  test's `finally` block; inspection caught that before a run.
+- Root cause: I changed one render path without checking the second writer, and
+  used a patch anchor that matched a generic `finally` block.
+- Prevention rule: search every writer of a changed UI label and inspect the
+  rendered result; use function-specific patch context and read the edited
+  block before testing.
+
+## 2026-09-29 S17 Compare panel crashed before the first board load
+
+- What happened: the browser check stayed in `loading` because `renderCompare()`
+  treated two absent optional IDs as an existing selection, then read a property
+  from the null board. The browser's page exception identified the line.
+- Root cause: optional chaining returned `undefined` for both values, and
+  `undefined === undefined` was true.
+- Prevention rule: when comparing optional IDs for identity, require the owning
+  object to exist before comparing. Exercise the initial empty render in the
+  browser, not only the loaded state.
+
 ## 2026-09-28 Slice 15 render-fault run could not tell its preview from a foreign server
 
 - What happened: the first `render_faults.mjs` run after the protected-phase

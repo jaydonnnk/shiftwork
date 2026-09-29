@@ -7,9 +7,11 @@ manifest and protected family. S15 was accepted and published to main. The one
 authorized six-slot live comparison completed with twelve Sandbox operations,
 eighteen verified captures and zero model calls. S16's R2 and R3 repairs and
 offline checks passed, so the user's conditional S16 acceptance is met. Model
-answer quality remains unmeasured because the run made no inference call. S17
-has no go-ahead. See `plans/shiftwork/00-status.md` for the dated evidence; the
-older current-state paragraphs below are historical snapshots.
+answer quality remains unmeasured because the run made no inference call. The
+user gave S17 its own go-ahead; its exact-version choice is implemented and
+demonstrated offline on `shiftwork/slice-17`, awaiting user review. S18 has no
+go-ahead. See `plans/shiftwork/00-status.md` for the dated evidence; the older
+current-state paragraphs below are historical snapshots.
 
 **Direction:** Shiftwork remains the sole active project. The approved final pivot
 around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
@@ -237,9 +239,11 @@ closed and whose selection is absent to open a labelled non-operational shift fo
 investigation, repair comparison and its first explicit choice. It seeds only an
 editable draft, not an operating version or invented consent; operation stays
 blocked until a valid learner choice. The controller, store, room and offline
-paths remain the baseline. Gate 2's scoped capture correction and Gate 3's
-matching correction are re-approved. Gate 4's approved slice order
-is retained. Actual task rubrics,
+paths remain the baseline. A matching selection request key returns its recorded
+choice even after that shift closes; a new choice still requires an open shift.
+The user approved this scoped Gate 3 clarification on 2026-09-29. Gate 2's
+scoped capture correction and Gate 3's matching correction are re-approved.
+Gate 4's approved slice order is retained. Actual task rubrics,
 reviewed fixtures and channel verification require later authorization and evidence.
 Repeated probing, protected-case leakage and isolation remain constraints.
 
@@ -351,7 +355,8 @@ same day. Slice 13 is implemented, cross-checked, repaired, accepted and
 merged to main (2026-09-27); the record is in `plans/shiftwork/00-status.md`.
 Slice 14 is implemented, reviewed, repaired and accepted (2026-09-27). Slice 15
 was accepted on 2026-09-29 on offline and sealed evidence. Slice 16 was accepted
-after the bounded live comparison and final offline checks. Slice 17 onward
+after the bounded live comparison and final offline checks. Slice 17 is
+implemented and demonstrated offline, pending user review. Slice 18 onward
 remains unchecked.
 Further fixture authoring, outreach, deployment, publication, submission and
 ADR #4 also remain separately authorized.

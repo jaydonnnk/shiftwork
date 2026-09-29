@@ -1,5 +1,248 @@
 # Status: Shiftwork
 
+## Gate 3 scoped selection-retry clarification and S17 repair: 2026-09-29
+
+The user approved the scoped recommendation in chat: an identical selection
+request key on its owning shift returns the recorded choice after that shift
+closes. A changed body conflicts, and a new key cannot select on a closed
+shift. The replay does not write a selection or restore an invalidated choice.
+Gate 3 sections 5 and 6.5 now state this selection rule; Gate 1, Gate 2, Gate 4
+and ADR decisions did not change. Other mutating POST replay paths were not
+audited or changed in this scoped repair.
+
+The migrated first-choice test was extended with a close followed by the
+identical retry, changed-body retry, new-key request and cross-shift key reuse.
+Before the code change, the identical retry returned 409 at the open-shift
+guard, failing the new 201 assertion. After moving only the replay lookup ahead
+of that guard, the focused selection and pivot route suite passed 17 tests.
+Removing the owning-shift comparison then failed the cross-shift 409 assertion;
+the source was restored byte-identically (SHA-256
+`12ce2fe3238b149434cfb7c0fd7c433cd91e2f4c9e63079061ab39432ead27ff`).
+The selection walkthrough returned `PASS_OFFLINE_POLICY`, six COMPLETE slots,
+18 captured rows, `TRUSTED_LOCAL_DRAFT_POLICY_ONLY` and zero live calls.
+The final `.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`
+returned **576 passed, 1 skipped, 2 warnings**; packaging Test 51 did not run.
+This is offline route and policy proof. S17 user acceptance and an S18 go-ahead
+remain separate from this repair and publication authorization.
+
+## Slice 17 implemented and demonstrated offline: 2026-09-29
+
+The user gave S17 its own go-ahead. This implementation record was written on
+`shiftwork/slice-17` before publication. The explicit selection route appends one exact eligible
+version, rationale, retained alternative, comparison reference, original
+requirement hash and expected prior selection in one transaction. It recomputes
+the stored comparison outcome and refuses incomplete, incompatible, changed,
+unselected or invalidated evidence. A repeated request key returns the same
+choice only for the same body. Saving and freezing leave the choice alone; a
+compromised comparison invalidates its dependent choice without fallback.
+
+The S10 first-choice path was exercised against a copied synthetic v5 database.
+Its investigation now may cite the immediately preceding closed v5 shift's
+owned request, as Gate 3 S6.0 specified. A complete comparison followed by
+`expected_prior_selection_id=None` appended the first choice and lifted the
+operation block. A recorded operation then finalized on the chosen exact
+version. Its historical incident stayed `CLOSED_UNRESOLVED`: the old check has
+no current sealed case, so no passing regression or resolution was invented.
+An unknown sealed check on a new operation still raises `InvalidSealedCase`.
+Failure and retirement retain the exposure and operation block, with no
+automatic retake or new shift.
+
+The live Compare station accepts a rationale and A/B choice, then shows the
+selected version/hash, retained alternative, comparison and original
+requirement hash separately from latest saved. The obsolete preview
+`selection_factory` hook was removed. The new `selection` walkthrough uses a
+temporary database and reported six complete slots, both candidates eligible,
+one explicit A choice, `TRUSTED_LOCAL_DRAFT_POLICY_ONLY` and zero model calls.
+This is offline policy evidence, not model answer-quality evidence. The prior
+S16 live comparison remains the only bounded live comparison record.
+
+Verification: `.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`
+returned **572 passed, 1 skipped, 2 warnings** after the legacy-loader repair;
+packaging Test 51 did not run. `node tests/client/browser.mjs
+http://127.0.0.1:8184 --selection-demo` exited 0 with one selected choice,
+desktop and 390 px checks, and zero uncaught page exceptions. The preview URL
+was local and is now stopped. `git diff --check` passed. The post-slice
+architecture cleanup scan found no confirmed orphan file or unused new entry
+point; S18 still owns full operational policy and run-start revalidation.
+This status records implementation and demonstration, not user acceptance or
+authority for S18.
+
+## Slice 17 independent review repair round: 2026-09-29
+
+An independent adversarial review of the uncommitted S17 tree returned six
+findings and five suspected risks. Each was re-verified against the sources and
+the approved gate documents before any edit. Four findings were repaired with new
+failing-capable tests, one was documentation only, and one needed no change. All
+five suspected risks were cleared, and two of them name a deferred obligation.
+No gate document (01 to 04) and no ADR was edited.
+
+Repaired:
+
+- Obligation 25's eligible arm had no failing-capable test. Stored evidence
+  cannot reach COMPLETE plus ineligible offline, because editing a recorded
+  assessment adds `public_assessment` drift and editing `resource_limits_json`
+  adds `frozen_context` drift, both verified in `_comparison_outcome`.
+  `test_choice_refuses_an_ineligible_candidate_and_still_accepts_the_eligible_one`
+  therefore substitutes only the recomputed outcome at that recompute boundary,
+  keeping every stored row real: A is refused 409 with no row appended, and B
+  still returns 201 with A retained as the alternative.
+- The approved program design S6.0 inherited-source exception had no negative
+  test. `test_a_standard_shift_cannot_investigate_a_previous_closed_shifts_run`
+  closes shift 1, opens a STANDARD shift 2 over the real HTTP surface and
+  requires 409 when it cites shift 1's run, with no investigation row appended.
+  `test_legacy_investigation_exception_is_narrow` isolates the prior shift's
+  `opening_mode is None` conjunct and the run's `LEGACY_OPERATION` purpose
+  conjunct separately, each against an unmutated 201 positive control before and
+  after. The approved positive legacy path is unchanged.
+- `test_choice_refuses_a_candidate_version_owned_by_another_shift` reaches the
+  `version.shift_id` ownership arm on its own, which no drift check covers, and
+  returns 201 once ownership is restored.
+- The board's legacy-run fallback is now asserted inside the existing
+  first-choice test before the comparison is built: `latest_run` is
+  `run-v5-0001` with purpose `LEGACY_OPERATION`, and `requests_run` is 1, the
+  exact output count the v5 sample holds for that run.
+
+Evidence limits this round records:
+
+- The changed-content-hash 409 in
+  `test_choice_rejects_incomplete_drifted_and_changed_requirements` is proven at
+  the completeness guard, not at the later hash comparison. A changed
+  `artifact_versions.content_hash` is already `candidate_A` drift, so the
+  comparison is NOT_COMPARABLE and the earlier guard fires first. Removing the
+  later comparison's hash conjunct leaves that test passing, which is the proof.
+  The later comparison is retained deliberately as defence in depth, and the
+  guard it shares a line with now has its own owner in the ownership test above.
+- Two conjuncts of the inherited-source exception are not independently
+  falsifiable offline, and neither was tested with a fabricated state.
+  `state == "closed"` never varies because `open_next_shift` refuses to open a
+  successor while the latest shift is open, so the shift at `seq - 1` is always
+  closed. `seq == shift.seq - 1` never varies because the v5 sample holds one
+  prior shift. The same-engagement conjunct needs a second engagement with its
+  own legacy history, which is S22 material.
+- Two preview assertions were retired together with the behaviour they
+  described, and no equivalent coverage transferred elsewhere.
+  `latest_run.adapter == "local_process"` became `"recorded"` because the preview
+  now starts from the labelled recorded starter, and
+  `latest_version.created_by == "learner"` was dropped because that version is
+  now the starter baseline rather than a test-installed learner freeze. The
+  selection test proves the operated version is the exact selected one; it does
+  not prove learner authorship. No current S17 obligation (25, 27 and the
+  save/freeze/test clauses of 26) requires either assertion, so no replacement
+  test was added and none is claimed. The removed `selection_factory` hook
+  orphaned nothing: `select_version_for_test` still has six test-file users, and
+  `config.repair_arc_artifact_files` and `config.REPAIR_ARC_CONTRACT_JSON` are
+  still used by two demos and by test files.
+
+Cleared with no code change:
+
+- The per-shift in-flight-operation check in `append_selection` matches
+  `close_shift`'s existing per-shift form, and the two are equivalent for every
+  state the public API can produce: `open_next_shift` refuses while the latest
+  shift is open and `close_shift` refuses nonterminal work, so a nonterminal
+  operation can only exist in the engagement's one open shift. Program design S8
+  also requires one in-flight operation per engagement to be enforced by a
+  database constraint, and S7 requires one successful operational finalization
+  per shift by unique constraint. Neither constraint exists in `schema.sql` or
+  the v6 migrations, whose only run-level uniqueness is
+  `UNIQUE (shift_id, attempt_number)`. Gate 4 assigns "one in-flight operation"
+  to the S18 tests, so both stay pending approved S18 obligations and were not
+  implemented here.
+- `append_selection` requires the open shift before the request-key replay
+  lookup, so a same-key retry arriving after close returns 409 rather than the
+  recorded choice. That ordering matches the three accepted implementations that
+  carry a `client_request_id` (assist, diagnostic reservation and comparison
+  reservation), and program design S6.5 specifies "require open shift" as the
+  first step of the select transaction. Program design S5's replay sentence is
+  unqualified, so the two clauses are in tension repo-wide rather than broken by
+  S17. Satisfying S5 literally for selections would contradict S6.5's approved
+  call-stack order, so this is reported to the user as a Gate 3 clarification
+  instead of being repaired inside S17.
+- The sealed loader's new `LEGACY_OPERATION` exception is required by the
+  approved design rather than a silent gap: without it `load_drawn_cases` would
+  raise `InvalidSealedCase` for every new operation in a migrated engagement,
+  while program design S6.0 requires the first valid choice to make operation
+  permissible for that exact version. ADR 0005 Decision 4 treats missing
+  historical inputs as unknown rather than fatal, the incident stays visibly
+  unresolved and is pinned that way by the first-choice test, and the blast
+  radius is v5-migrated incidents only. The `tests/mutation_proofs.py` anchor on
+  the RESOLVED skip is byte-present after CRLF normalisation and that harness
+  normalises endings, so the existing proof still fires. No approved clause
+  requires a "no drawable regression" marker on a board or run surface.
+- The non-Bookshop refusal message is accurate as written. No Northline mission
+  or reviewed requirement set exists in the tree, `seed_reviewed_northline` is
+  unimplemented, and a Northline shift cannot be opened at all, so the message
+  never denies a requirement set that exists. Trace row 25 assigns the Northline
+  selection path to S22.
+- The Compare panel note after a later invalidation is a wording preference, not
+  a product-honesty defect. Its two claims stay true (the choice is recorded, and
+  saving or testing does not change it), and the board already surfaces the
+  invalidation twice: the selection summary's state row and the service tag's
+  operating status. No S17 UI clause and no requirement in
+  `client-visual-direction.md` asks the Compare panel to restate it, so no client
+  code changed for this risk.
+
+The S17 checklist row was left as it stands. Gate 4 S1 checks a slice after its
+own demonstration, and the row already reads "implemented and demonstrated
+offline 2026-09-29, awaiting user review", so pending acceptance is visible and
+no contradiction was found. The demonstration rule itself still lives in Gate 4
+S1, which supersedes this mirror.
+
+Mutation proofs ran one file at a time on `shiftwork/orchestrator.py`, whose
+SHA-256 was `90ddac301e5d7f3eafb4c2b55af6fd7938f2f1d4da44b8d736d1df1cedf6733f`
+before each probe and byte-identical after every restore. Removing
+`or not eligibility.eligible` fails the ineligible-candidate test at
+`assert refused.status_code == 409` with a real 201 body. Removing
+`or version.shift_id != shift.id` fails the ownership test at the same assertion.
+Replacing the whole `inherited_source` expression with `True` fails the
+STANDARD-shift test there. Dropping `and source_shift.opening_mode is None`
+fails at `assert investigate("legacy-opening-mode").status_code == 409`. Dropping
+`and run.purpose is RunPurpose.LEGACY_OPERATION` fails at
+`assert investigate("legacy-run-purpose").status_code == 409`. Removing the
+board's legacy fallback block fails at `assert board["latest_run"] is not None`.
+A seventh probe removed only the later content-hash conjunct and left the
+changed-requirements test passing, which is the redundancy evidence above.
+
+Verification: focused suites returned `17 passed` (selection operation and pivot
+routes), `26 passed` (client preview, budget rotation and close inheritance),
+`19 passed` (pivot migration and S13 bootstrap) and `25 passed` (investigation
+assist), against pre-edit baselines of 14, 26, 19 and 24.
+`tests/orchestrator/test_investigation_assist.py` cannot be collected in the same
+pytest session as `tests/store/test_pivot_migration.py`: neither test directory
+has an `__init__.py` and the module does `from conftest import BookshopShift`, so
+the wrong `conftest` wins. That collision is present at HEAD, is untouched by
+this diff and is not an S17 defect; the files were run separately. Both offline
+demos returned `PASS_OFFLINE_POLICY` with exit 0. The `selection` stage reported
+stage `selection`, evidence class `TRUSTED_LOCAL_DRAFT_POLICY_ONLY`,
+operating_status `SELECTED`, selection `sel-0002`, selected version `ver-0003`,
+retained alternative `ver-0004`, latest saved `ver-0004`, six COMPLETE trial
+states, 18 captured rows before and after the choice, run adapters
+`local_process` and evidence modes `TRUSTED_LOCAL`, so no live call. The
+`comparison` stage reported `retired_status` NOT_COMPARABLE, six COMPLETE slots
+and 18 captured rows before and after retirement. Both are offline policy
+evidence only, not live execution and not model answer-quality evidence.
+`node tests/client/browser.mjs http://127.0.0.1:8184 --selection-demo` exited 0
+against a preview server started on a port verified free by bind probe and then
+confirmed to be this repository's app by polling its board and served
+`index.html`. It reported the 1280, 640 and 390 px matrix, one LEARNER_CHOICE
+`sel-0002` binding the exact selected version and its retained alternative, six
+correctly bound slots and zero uncaught page exceptions. The server was stopped
+afterwards and the port released.
+`.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`
+returned **576 passed, 1 skipped, 2 warnings** against a pre-edit baseline of
+**572 passed, 1 skipped, 2 warnings** on the same tree, so the four added tests
+account for the whole difference and nothing regressed. Packaging Test 51 did not
+run. `git diff --check` passed.
+
+One working-tree deviation is recorded rather than repaired. Every other Python
+file in the tree is uniformly CRLF, but the new untracked
+`tests/orchestrator/test_selection_operation.py` is uniformly LF (389 lines, no
+mixed endings). `.gitattributes` pins `eol=lf` only for fixture, sealed, template
+and mission paths and does not list test files, and `core.autocrlf` is `true`, so
+git stores LF in the index for both forms and the committed blob is identical
+either way. Converting it would be a 389-line whitespace rewrite that no finding
+requires, so it is left for the user to decide. This round records repair and
+verification only, not user acceptance and not authority for S18.
+
 ## Slice 16 accepted after bounded live comparison: 2026-09-29
 
 The user conditionally accepted S16 after reconciling main, closing R2 and R3
@@ -2992,9 +3235,9 @@ deferred to Slice 13 evidence and separate authorization.
 
 The approvals from 2026-09-17 through 2026-09-19 apply to the pre-pivot plan.
 Slices 1 to 9 below keep their completed historical status and evidence. The
-2026-09-24 Slices 10 to 25 are the approved Gate 4 build order; none is
-implemented and none may be checked before its own demonstration. Each slice
-needs its own explicit go-ahead, and the separately authorized items in its Gate
+2026-09-24 Slices 10 to 25 are the approved Gate 4 build order; current
+completion is shown below. Each slice needs its own explicit go-ahead, and the
+separately authorized items in its Gate
 4 Authorization line stay separate. After each
 authorized slice: show the actual demonstration, record evidence, check it off,
 review affected ADRs and stale files, then ask whether to continue or re-steer.
@@ -3034,8 +3277,8 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
 - [x] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap; implemented and demonstrated 2026-09-27, ACCEPTED by the user 2026-09-27. Live evidence and limits are recorded in the Slice 13 completion section above. Cross-checked; four gaps and the recorded image-UUID residual repaired with failing-capable proofs, and re-verified `444 passed, 1 skipped, 2 warnings` on 2026-09-27 (section at the top). The work is committed in focused batches on `shiftwork/slice-13`, merged to main as `ed0802a..1d82e95` and pushed, no co-author footer. Acceptance covers Slice 13 only; Slice 14 onward needs its own go-ahead and its own live authorizations.
 - [x] Slice 14: prediction-gated attributable assist gateway; implemented and reviewed 2026-09-27, ACCEPTED by the user 2026-09-27. Offline implementation and tests passed (`457 passed, 1 skipped, 2 warnings`); three authorized live calls completed with a quality failure that prompted an offline-only repair; the review's six findings were adjudicated and repaired with failing-capable tests and six mutation proofs (stranded PENDING reconciliation, injected-client deadline bound, records). Live evidence and limits are in the Slice 14 section above; revised-prompt live quality stays open. The work is committed in focused batches on `shiftwork/slice-14`, merged to main as `fab497e..3f18669` and pushed, no co-author footer. Acceptance covers Slice 14 only; Slice 15 onward needs its own go-ahead and its own live authorizations.
 - [x] Slice 15: reviewed A/B workloads and six frozen paired trial slots; ACCEPTED by the user 2026-09-29 on offline and sealed evidence, with the live comparison still unrun (acceptance entry at top)
-- [ ] Slice 16: fair comparison, exposure invalidation and restart recovery
-- [ ] Slice 17: explicit eligible exact-version selection
+- [x] Slice 16: fair comparison, exposure invalidation and restart recovery; accepted 2026-09-29 (dated evidence at top)
+- [x] Slice 17: explicit eligible exact-version selection; implemented and demonstrated offline 2026-09-29, awaiting user review (dated evidence at top)
 - [ ] Slice 18: selected-version operation and operation-only consequences
 - [ ] Slice 19: read-only semantic replay and legacy unknown handling
 - [ ] Slice 20: selected-version inheritance and later alternative experiment

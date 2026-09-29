@@ -1264,6 +1264,10 @@ version marker changes only in the same successful transaction.
 Every mutating POST requires a stable `client_request_id` in its body or the
 `Idempotency-Key` header where the body is empty. Reusing a key with different
 content returns 409. Reusing it with identical content returns the original result.
+For selection, a matching same-key request on its owning shift returns the
+recorded choice even after that shift closes. This replay writes nothing and
+does not restore an invalidated choice or grant operation. A different body
+conflicts; a new key still requires an open shift.
 
 | Route | Verb | Request to response | Rules |
 | --- | --- | --- | --- |
@@ -1493,9 +1497,11 @@ path to the ledger reducer, incident mutators, selection writes or close logic.
 
 ### 6.5 Select
 
-`routes.create_selection -> BEGIN IMMEDIATE -> require open shift and expected prior
-selection -> load completed comparison -> recompute comparison outcome from stored
-inputs -> require chosen exact version eligible + non-invalidated exposure + current
+`routes.create_selection -> BEGIN IMMEDIATE -> require existing shift and valid
+request fields -> return a matching recorded same-key choice, even after close,
+without a write -> for a new key require open shift and expected prior selection
+-> load completed comparison -> recompute comparison outcome from stored inputs
+-> require chosen exact version eligible + non-invalidated exposure + current
 requirements hash -> append OperatingSelection with retained alternative -> derive
 operation permission from that valid selection -> commit`.
 

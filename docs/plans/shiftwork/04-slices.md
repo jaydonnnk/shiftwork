@@ -4,9 +4,10 @@
 comparison manifest and protected family. S15 is accepted and published. The
 one authorized six-slot live comparison completed with all eighteen captures
 verified, twelve Sandbox operations and zero model calls. S16's conditional
-acceptance is met after R2 and R3 repair and offline verification. S17 remains
-unbuilt and has no go-ahead. The 2026-09-28 state descriptions below are
-historical.
+acceptance is met after R2 and R3 repair and offline verification. The user
+gave S17 its own go-ahead; S17 is implemented and demonstrated offline on
+`shiftwork/slice-17`, awaiting user review. S18 has no go-ahead. The 2026-09-28
+state descriptions below are historical.
 
 **Current Gate 4 state: RE-APPROVED 2026-09-28.** The user approved the repaired
 protected-phase slice reconciliation together with Gate 2 S8.1, Gate 3 and
