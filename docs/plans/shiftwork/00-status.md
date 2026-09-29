@@ -37,8 +37,10 @@ operate a candidate, prove learning impact, or authorize S17.
   the new imports, comparison fixtures, test coverage and current documents.
   It found no confirmed orphan or redundant S16 file; no deletion is proposed.
 
-The sections below retain their dated historical states. Publication and merge
-details are recorded separately after the Git operations complete.
+The S16 work was committed in four focused follow-up batches ending at
+`bf315b2`, published as `origin/shiftwork/slice-16`, fast-forwarded from
+`b9287aa` to `bf315b2` on main, and pushed to `origin/main` on 2026-09-29.
+The sections below retain their dated historical states.
 
 ## Operator seal applied to both comparison fixtures: 2026-09-29
 
