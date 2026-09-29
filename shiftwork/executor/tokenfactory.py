@@ -26,6 +26,7 @@ from shiftwork.domain.models import ExecutorFailure
 from shiftwork.executor.base import RawCapture, RawObservation, RunRequest, RunResult, load_batch, load_single_request, provisioning_manifest
 from shiftwork.gateway.protocol import InferencePolicy
 from shiftwork.gateway.service_inference import GatewayRejected, ServiceInferenceGateway
+from shiftwork.live_budget import LiveComparisonBudget
 
 
 MODEL = "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B"
@@ -207,13 +208,15 @@ class TokenFactoryAdapter:
     name = "tokenfactory"
 
     def __init__(self, *, run_id: str, allowed_tool_names: tuple[str, ...], token: str, project: str,
-                 model: str = MODEL, client: ContreeAsyncClient | None = None):
+                 model: str = MODEL, client: ContreeAsyncClient | None = None,
+                 live_budget: LiveComparisonBudget | None = None):
         self.run_id = run_id
         self.allowed_tool_names = allowed_tool_names
         self.token = token
         self.project = project
         self.model = model
         self.client = client
+        self.live_budget = live_budget
 
     async def execute(self, request: RunRequest) -> RunResult:
         started = time.monotonic()
@@ -267,6 +270,8 @@ class TokenFactoryAdapter:
 
             initial = {**current_request(1), "request_count": len(batch),
                        "allowed_tool_names": list(self.allowed_tool_names)}
+            if self.live_budget is not None:
+                self.live_budget.before_operation()
             instance = await client.spawn_instance(
                 command="/usr/local/bin/python", image=config.TOKEN_FACTORY_IMAGE,
                 args=["-u", "/work/driver.py"],
@@ -276,10 +281,11 @@ class TokenFactoryAdapter:
                 files=spawn_files, timeout=45, truncate_output_at=65536,
             )
             operation_id = instance.uuid
+            gateway_kwargs = {"live_budget": self.live_budget} if self.live_budget is not None else {}
             gateway = ServiceInferenceGateway(self.token, InferencePolicy(
                 run_id=self.run_id, operation_id=operation_id, model=self.model,
                 allowed_tool_names=self.allowed_tool_names, request_ordinal=1,
-            ))
+            ), **gateway_kwargs)
             gateway_observations_recorded = False
             observations.append(RawObservation(kind="INTERPRETATION",
                 public_payload={"source": "controller_verified", "operation_bound": True,
@@ -327,6 +333,12 @@ class TokenFactoryAdapter:
                             observations.append(RawObservation(kind=kind,
                                 public_payload={**public, "request_ordinal": gateway.policy.request_ordinal},
                                 raw_payload=raw))
+                        observations.append(RawObservation(kind="INTERPRETATION",
+                            public_payload={"source": "controller_verified",
+                                            "request_ordinal": gateway.policy.request_ordinal,
+                                            "inference_meter_complete": True,
+                                            "service_calls": gateway.call_count},
+                            raw_payload={}))
                         gateway.close()
                         gateway_observations_recorded = True
                         if ordinal < len(batch):
@@ -336,7 +348,7 @@ class TokenFactoryAdapter:
                             gateway = ServiceInferenceGateway(self.token, InferencePolicy(
                                 run_id=self.run_id, operation_id=operation_id, model=self.model,
                                 allowed_tool_names=self.allowed_tool_names, request_ordinal=ordinal + 1,
-                            ))
+                            ), **gateway_kwargs)
                             gateway_observations_recorded = False
                     elif event_body.get("kind") == "driver_failure":
                         observations.append(RawObservation(kind="INTERPRETATION",

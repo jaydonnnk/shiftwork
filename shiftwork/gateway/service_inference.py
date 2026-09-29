@@ -16,6 +16,7 @@ import httpx
 from pydantic import ValidationError
 
 from shiftwork.gateway.protocol import InferencePolicy, InferenceRequest
+from shiftwork.live_budget import LiveComparisonBudget
 
 PROVIDER_URL = "https://api.tokenfactory.nebius.com/v1/chat/completions"
 
@@ -29,7 +30,8 @@ class GatewayRejected(Exception):
 
 
 class ServiceInferenceGateway:
-    def __init__(self, token: str, policy: InferencePolicy, *, http: httpx.AsyncClient | None = None):
+    def __init__(self, token: str, policy: InferencePolicy, *, http: httpx.AsyncClient | None = None,
+                 live_budget: LiveComparisonBudget | None = None):
         if not token or not policy.operation_id or not policy.run_id:
             raise ValueError("gateway credentials and run binding are required")
         if policy.max_calls != 1 or not 1 <= policy.request_ordinal <= 4 or not 0 < policy.max_output_tokens <= 1024:
@@ -39,10 +41,16 @@ class ServiceInferenceGateway:
         self._token = token
         self.policy = policy
         self._http = http
+        self._live_budget = live_budget
         self._calls = 0
         self._closed = False
         self._expires_at = time.monotonic() + policy.deadline_s
         self.observations: list[tuple[str, dict[str, Any], dict[str, Any]]] = []
+
+    @property
+    def call_count(self) -> int:
+        """Controller-owned count, including calls whose provider request failed."""
+        return self._calls
 
     def close(self) -> None:
         self._closed = True
@@ -67,6 +75,11 @@ class ServiceInferenceGateway:
             self._reject("GATEWAY_INPUT_LIMIT")
         if self._calls >= self.policy.max_calls:
             self._reject("GATEWAY_CALL_LIMIT")
+        if self._live_budget is not None:
+            try:
+                self._live_budget.before_inference(self.policy.model)
+            except ValueError:
+                self._reject("LIVE_COMPARISON_BUDGET_EXHAUSTED")
         self._calls += 1  # A provider failure still consumes the one call.
         self.observations.append((
             "INFERENCE_REQUEST",

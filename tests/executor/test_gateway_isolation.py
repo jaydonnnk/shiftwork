@@ -359,6 +359,12 @@ def test_adapter_streams_only_the_current_request_and_reads_back_each_capture(tm
     assert sandbox.downloads == ["/work/capture-1.json", "/work/capture-2.json"]
     assert [obs.public_payload["request_ordinal"] for obs in result.observations
             if obs.public_payload.get("checkpoint_readback")] == [1, 2]
+    meters = [obs.public_payload for obs in result.observations
+              if obs.public_payload.get("inference_meter_complete") is True]
+    assert [(item["request_ordinal"], item["source"], item["service_calls"])
+            for item in meters] == [
+                (1, "controller_verified", 0), (2, "controller_verified", 0),
+            ]
 
 
 def test_adapter_retains_first_verified_capture_when_second_is_missing(tmp_path):
@@ -399,6 +405,7 @@ def test_adapter_stamps_second_gateway_result_with_its_current_ordinal(tmp_path,
     class FakeGateway:
         def __init__(self, token, policy):
             self.policy = policy
+            self.call_count = 0
             self.observations = [("INFERENCE_RESULT", {"source": "controller_verified",
                 "selected_tool": "public_record_lookup"}, {})]
 
