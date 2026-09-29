@@ -69,6 +69,7 @@ from shiftwork.domain.models import (
     LedgerEventDraft,
     LedgerEventType,
     OperatingSelection,
+    SelectionRequest,
     RotationDraw,
     Run,
     RunAssessment,
@@ -144,6 +145,109 @@ def _selected_operating_version(
     ):
         raise LifecycleError("conflict", "selected version is missing or changed")
     return selection, version
+
+
+def append_selection(
+    conn: sqlite3.Connection, shift_id: str, request: SelectionRequest
+) -> OperatingSelection:
+    """Append an exact learner choice after atomic stored-evidence revalidation."""
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        shift = _require_shift(conn, shift_id)
+        rationale = request.rationale.strip()
+        if not rationale or not request.client_request_id.strip():
+            raise LifecycleError("conflict", "selection needs a rationale and request key")
+        replay = repo.get_selection_by_client_request_id(conn, request.client_request_id)
+        if replay is not None:
+            if (replay.shift_id == shift.id
+                    and replay.comparison_id == request.comparison_id
+                    and replay.selected_version_id == request.selected_version_id
+                    and replay.rationale == rationale
+                    and replay.prior_selection_id == request.expected_prior_selection_id):
+                conn.rollback()
+                return replay
+            raise LifecycleError("conflict", "client_request_id was already used for another selection")
+        shift = _require_open_shift(conn, shift_id)
+        prior = repo.get_latest_operating_selection(conn, shift.engagement_slug)
+        if request.expected_prior_selection_id != (prior.id if prior else None):
+            raise LifecycleError("conflict", "expected prior selection is stale")
+        if any(run.purpose is RunPurpose.OPERATION
+               and run.state not in (RunState.FINALIZED, RunState.FAILED)
+               for run in repo.list_runs_for_shift(conn, shift.id)):
+            raise LifecycleError("conflict", "operation in flight; selection refused")
+        experiment = repo.get_experiment(conn, request.comparison_id)
+        if experiment is None:
+            raise LifecycleError("conflict", "qualifying comparison is missing")
+        if (experiment.shift_id != shift.id
+                or experiment.kind is not ExperimentKind.QUALIFYING_COMPARISON
+                or experiment.state != "FINALIZED"):
+            raise LifecycleError("conflict", "a completed owned comparison is required")
+        context = repo.get_execution_context(conn, experiment.context_id)
+        if context is None or context.engagement_slug != shift.engagement_slug:
+            raise LifecycleError("conflict", "frozen comparison context is unavailable")
+        slots = repo.list_trial_slots(conn, experiment.id)
+        outcome = _comparison_outcome(conn, experiment, context, slots)
+        if outcome.status != "COMPLETE":
+            raise LifecycleError("conflict", "comparison is incomplete or no longer comparable")
+        candidate = next(
+            (item for item in experiment.candidates
+             if item.artifact_version_id == request.selected_version_id), None
+        )
+        if candidate is None:
+            raise LifecycleError("conflict", "selected version was not in this comparison")
+        eligibility = next(
+            (item for item in outcome.eligibility
+             if item.candidate_label == candidate.label
+             and item.candidate_version_id == candidate.artifact_version_id), None
+        )
+        if eligibility is None or not eligibility.eligible:
+            raise LifecycleError("conflict", "selected exact version is not eligible")
+        version = repo.get_version(conn, candidate.artifact_version_id)
+        if (version is None or version.shift_id != shift.id
+                or version.content_hash != candidate.artifact_content_hash):
+            raise LifecycleError("conflict", "selected version changed after the comparison")
+        if shift.engagement_slug != config.BOOKSHOP_SLUG:
+            raise LifecycleError("conflict", "current requirements are unavailable for this engagement")
+        if _hash_bytes(config.PIVOT_MISSION.read_bytes()) != context.requirement_set_hash:
+            raise LifecycleError("conflict", "requirements changed after the comparison")
+        alternative = next(
+            (item for item in experiment.candidates if item.label != candidate.label), None
+        )
+        if alternative is None:
+            raise LifecycleError("conflict", "comparison has no retained alternative")
+        selection = OperatingSelection(
+            id=f"sel-{repo.count_operating_selections(conn) + 1:04d}",
+            engagement_slug=shift.engagement_slug, shift_id=shift.id,
+            kind="LEARNER_CHOICE",
+            selected_version_id=version.id,
+            selected_content_hash=version.content_hash,
+            comparison_id=experiment.id,
+            retained_alternative_version_id=alternative.artifact_version_id,
+            rationale=rationale,
+            requirement_set_hash=context.requirement_set_hash,
+            prior_selection_id=prior.id if prior else None,
+            state="VALID", client_request_id=request.client_request_id,
+            created_at=_now(),
+        )
+        assert_public_projection({
+            "rationale": selection.rationale,
+            "selected_version_id": selection.selected_version_id,
+            "selected_content_hash": selection.selected_content_hash,
+            "comparison_id": selection.comparison_id,
+            "retained_alternative_version_id": selection.retained_alternative_version_id,
+        }, conn)
+        repo.insert_operating_selection(conn, selection)
+        conn.commit()
+        return selection
+    except Exception:
+        conn.rollback()
+        raise
+
+
+def selection_history(conn: sqlite3.Connection, slug: str) -> list[OperatingSelection]:
+    if repo.get_engagement(conn, slug) is None:
+        raise LifecycleError("not_found", f"unknown engagement: {slug}")
+    return repo.list_operating_selections(conn, slug)
 
 
 def _attempt_limit(conn: sqlite3.Connection, slug: str) -> int:
@@ -1025,6 +1129,16 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         # the inherited one until the learner freezes their own (Slice 8).
         latest_version = repo.get_latest_version_for_engagement(conn, slug)
     latest_run = repo.get_latest_run(conn, latest_shift.id) if latest_shift else None
+    if (latest_run is None and latest_shift is not None
+            and latest_shift.opening_mode is ShiftOpeningMode.LEGACY_FIRST_CHOICE):
+        previous = conn.execute(
+            "SELECT id FROM shifts WHERE engagement_slug = ? AND seq = ? AND state = 'closed'",
+            (slug, latest_shift.seq - 1),
+        ).fetchone()
+        if previous is not None:
+            historical = repo.get_latest_run(conn, previous["id"])
+            if historical is not None and historical.purpose is RunPurpose.LEGACY_OPERATION:
+                latest_run = historical
     selection = repo.get_latest_operating_selection(conn, slug)
     if latest_shift is None:
         operating_status = None
@@ -1112,9 +1226,9 @@ def append_investigation(
 ) -> Investigation:
     """Append the learner's diagnosis. A revision never overwrites its parent.
 
-    The source run must belong to this shift and must actually have produced the
-    named request ordinal, so an investigation cannot cite evidence this shift
-    does not hold. ``authored_by`` is not caller-controlled: the model fixes it to
+    The source run must belong to this shift, except for the immediately prior
+    closed v5 shift when this is its first-choice successor. It must have produced
+    the named request ordinal. ``authored_by`` is not caller-controlled: the model fixes it to
     the learner, and no assist or model output can author one.
     """
     shift = _require_open_shift(conn, shift_id)
@@ -1122,7 +1236,17 @@ def append_investigation(
     run = repo.get_run(conn, request.source_run_id)
     if run is None:
         raise LifecycleError("not_found", f"unknown source run: {request.source_run_id}")
-    if run.shift_id != shift.id:
+    source_shift = repo.get_shift(conn, run.shift_id)
+    inherited_source = (
+        shift.opening_mode is ShiftOpeningMode.LEGACY_FIRST_CHOICE
+        and source_shift is not None
+        and source_shift.engagement_slug == shift.engagement_slug
+        and source_shift.seq == shift.seq - 1
+        and source_shift.state == "closed"
+        and source_shift.opening_mode is None
+        and run.purpose is RunPurpose.LEGACY_OPERATION
+    )
+    if run.shift_id != shift.id and not inherited_source:
         raise LifecycleError(
             "conflict", "a source run must belong to the shift that investigates it"
         )
@@ -2530,6 +2654,7 @@ def retire_comparison_exposure(conn: sqlite3.Connection, reservation_id: str) ->
                     repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
                 repo.update_trial_slot(conn, slot.id, state="FAILED")
         repo.update_experiment_state(conn, reservation.experiment_id, "INVALIDATED")
+        repo.invalidate_selections_for_comparison(conn, reservation.experiment_id)
         conn.commit()
     except Exception:
         conn.rollback()

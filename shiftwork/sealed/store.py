@@ -22,7 +22,7 @@ from typing import NamedTuple
 
 from shiftwork import config
 from shiftwork.domain.errors import InvalidSealedCase, UnsupportedSealedSchema
-from shiftwork.domain.models import IncidentState
+from shiftwork.domain.models import IncidentState, RunPurpose
 from shiftwork.domain import task_contract
 from shiftwork.evaluator.evaluator import SealedCase, SealedCaseSet
 from shiftwork.sealed import rotation
@@ -223,6 +223,11 @@ def load_drawn_cases(conn: sqlite3.Connection, run_id: str) -> SealedCaseSet:
             )
         case = index.get(failing.check_id)
         if case is None:
+            opening = repo.get_run(conn, incident.opening_run_id)
+            if opening is not None and opening.purpose is RunPurpose.LEGACY_OPERATION:
+                # Historical v5 checks have no current sealed case. Keep the
+                # incident unresolved rather than inventing a passing regression.
+                continue
             raise InvalidSealedCase(
                 f"incident {incident.id} links to sealed check {failing.check_id!r}, which no family file provides"
             )

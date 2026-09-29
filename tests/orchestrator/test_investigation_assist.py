@@ -318,6 +318,31 @@ def test_an_investigation_cannot_cite_a_run_it_does_not_own(session, run_id):
         conn.close()
 
 
+def test_a_standard_shift_cannot_investigate_a_previous_closed_shifts_run(session, run_id):
+    """The approved S6.0 exception belongs to a legacy first choice only.
+
+    Without that limit an ordinary shift could cite the previous closed shift's
+    run as its own diagnostic evidence, which also gates assist.
+    """
+    closed = session.client.post(f"/api/shifts/{session.shift_id}/close")
+    assert closed.status_code == 200, closed.text
+    opened = session.client.post("/api/engagements/bookshop/shifts")
+    assert opened.status_code == 201, opened.text
+    assert opened.json()["opening_mode"] == "STANDARD"
+    second = opened.json()["id"]
+    refused = session.client.post(f"/api/shifts/{second}/investigations", json={
+        "source_run_id": run_id, "source_request_ordinal": 1,
+        "cause": CAUSE, "falsifier": FALSIFIER, "public_test": PUBLIC_TEST,
+        "client_request_id": "client-previous-shift-run",
+    })
+    assert refused.status_code == 409, refused.text
+    conn = db.connect(session.db_file)
+    try:
+        assert repo.count_investigations(conn) == 0
+    finally:
+        conn.close()
+
+
 def test_bootstrap_diagnostic_is_denied_without_a_safe_executor(session):
     """S11 constructs the denial; S13 supplies the executor that lifts it."""
     conn = db.connect(session.db_file)

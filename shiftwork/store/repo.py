@@ -311,6 +311,32 @@ def get_latest_operating_selection(
     return _operating_selection(row) if row else None
 
 
+def get_selection_by_client_request_id(
+    conn: sqlite3.Connection, client_request_id: str
+) -> OperatingSelection | None:
+    row = conn.execute(
+        "SELECT * FROM operating_selections WHERE client_request_id = ?",
+        (client_request_id,),
+    ).fetchone()
+    return _operating_selection(row) if row else None
+
+
+def list_operating_selections(conn: sqlite3.Connection, slug: str) -> list[OperatingSelection]:
+    rows = conn.execute(
+        "SELECT * FROM operating_selections WHERE engagement_slug = ? ORDER BY rowid",
+        (slug,),
+    ).fetchall()
+    return [_operating_selection(row) for row in rows]
+
+
+def invalidate_selections_for_comparison(conn: sqlite3.Connection, experiment_id: str) -> None:
+    conn.execute(
+        "UPDATE operating_selections SET state = 'INVALIDATED' "
+        "WHERE comparison_id = ? AND state = 'VALID'",
+        (experiment_id,),
+    )
+
+
 def count_operating_selections(conn: sqlite3.Connection) -> int:
     return int(conn.execute("SELECT COUNT(*) AS n FROM operating_selections").fetchone()["n"])
 

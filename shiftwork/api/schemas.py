@@ -291,6 +291,8 @@ class SelectionView(BaseModel):
     comparison_id: str | None
     retained_alternative_version_id: str | None
     rationale: str
+    requirement_set_hash: str
+    prior_selection_id: str | None
     state: Literal["VALID", "INVALIDATED"]
     created_at: datetime
 

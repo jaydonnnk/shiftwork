@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from shiftwork import orchestrator
 from shiftwork.api import schemas
 from shiftwork.domain.errors import ShiftworkDomainError
-from shiftwork.domain.models import AssistRole, ContractParams, InvestigationRequest
+from shiftwork.domain.models import AssistRole, ContractParams, InvestigationRequest, SelectionRequest
 from shiftwork.orchestrator import LifecycleError
 from shiftwork.store import db
 
@@ -264,6 +264,24 @@ def get_experiment(
     experiment_id: str, conn: sqlite3.Connection = Depends(get_conn)
 ) -> schemas.ExperimentView:
     return schemas.ExperimentView.of(orchestrator.experiment_view(conn, experiment_id))
+
+
+@router.post("/shifts/{shift_id}/selections", response_model=schemas.SelectionView, status_code=201)
+def create_selection(
+    shift_id: str, body: SelectionRequest, conn: sqlite3.Connection = Depends(get_conn)
+) -> schemas.SelectionView:
+    view = schemas.SelectionView.of(orchestrator.append_selection(conn, shift_id, body))
+    orchestrator.assert_public_projection(view.model_dump(mode="json"), conn)
+    return view
+
+
+@router.get("/engagements/{slug}/selections", response_model=list[schemas.SelectionView])
+def get_selections(
+    slug: str, conn: sqlite3.Connection = Depends(get_conn)
+) -> list[schemas.SelectionView]:
+    payload = [schemas.SelectionView.of(item) for item in orchestrator.selection_history(conn, slug)]
+    orchestrator.assert_public_projection([item.model_dump(mode="json") for item in payload], conn)
+    return payload
 
 
 @router.post("/shifts/{shift_id}/assist", response_model=schemas.AssistEventView)

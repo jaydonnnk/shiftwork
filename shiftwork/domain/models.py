@@ -9,7 +9,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 type JsonValue = str | int | bool | None | list[JsonValue] | dict[str, JsonValue]
 type Id = str
@@ -252,6 +252,16 @@ class OperatingSelection(BaseModel):
     state: Literal["VALID", "INVALIDATED"]
     client_request_id: str
     created_at: datetime
+
+
+class SelectionRequest(BaseModel):
+    model_config = _FROZEN
+
+    comparison_id: Id
+    selected_version_id: Id
+    rationale: str = Field(min_length=1, max_length=2000)
+    expected_prior_selection_id: Id | None
+    client_request_id: str = Field(min_length=1)
 
 
 class Investigation(BaseModel):
