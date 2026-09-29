@@ -2309,6 +2309,54 @@ def test_retiring_a_compromised_comparison_keeps_evidence_and_blocks_reuse(sessi
     assert session.client.get(f"/api/experiments/{experiment_id}").json() == after
 
 
+def test_comparison_route_returns_not_comparable_when_candidate_labels_drift(session):
+    candidate_a, candidate_b, investigation = _comparison_session(session)
+    created = _create_comparison(session, candidate_a, candidate_b, investigation)
+    assert created.status_code == 202, created.text
+    experiment_id = created.json()["id"]
+    assert _wait_comparison(session, experiment_id)["outcome"]["status"] == "COMPLETE"
+    conn = db.connect(session.db_file)
+    try:
+        row = conn.execute("SELECT candidates_json FROM experiments WHERE id = ?",
+                           (experiment_id,)).fetchone()
+        candidates = json.loads(row["candidates_json"])
+        candidates[1]["label"] = "A"
+        conn.execute("UPDATE experiments SET candidates_json = ? WHERE id = ?",
+                     (json.dumps(candidates), experiment_id))
+        conn.commit()
+    finally:
+        conn.close()
+    response = session.client.get(f"/api/experiments/{experiment_id}")
+    assert response.status_code == 200, response.text
+    view = response.json()
+    assert view["outcome"]["status"] == "NOT_COMPARABLE"
+    assert "candidates" in view["outcome"]["drift_fields"]
+    assert all(not item["eligible"] for item in view["outcome"]["eligibility"])
+    assert len(view["trials"]) == 6
+
+
+def test_live_comparison_route_requires_a_run_budget_before_reservation(session):
+    from fastapi.testclient import TestClient
+    from shiftwork.app import create_app
+
+    candidate_a, candidate_b, investigation = _comparison_session(session)
+    with TestClient(create_app(str(session.db_file), executor="tokenfactory")) as client:
+        response = client.post(f"/api/shifts/{session.shift_id}/experiments", json={
+            "kind": "QUALIFYING_COMPARISON", "investigation_id": investigation["id"],
+            "candidate_a_version_id": candidate_a["id"],
+            "candidate_b_version_id": candidate_b["id"],
+            "declared_treatment": TREATMENT, "client_request_id": "no-live-budget",
+        })
+        assert response.status_code == 409
+        assert "bounded run budget" in response.text
+    conn = db.connect(session.db_file)
+    try:
+        assert repo.count_experiments_for_shift(
+            conn, session.shift_id, ExperimentKind.QUALIFYING_COMPARISON) == 0
+    finally:
+        conn.close()
+
+
 def test_a_repeated_comparison_key_returns_the_original_reservation(session):
     candidate_a, candidate_b, investigation = _comparison_session(session)
     first = _create_comparison(session, candidate_a, candidate_b, investigation, key="cmp-repeat")

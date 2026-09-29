@@ -88,6 +88,7 @@ from shiftwork.executor.recorded import RecordedAdapter
 from shiftwork.executor.tokenfactory import TokenFactoryAdapter
 from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS
 from shiftwork.gateway.redaction import assert_public_safe
+from shiftwork.live_budget import LiveComparisonBudget
 from shiftwork.ledger import chain, reducer
 from shiftwork.sealed import rotation
 from shiftwork.sealed import store as sealed_store
@@ -2535,7 +2536,8 @@ def retire_comparison_exposure(conn: sqlite3.Connection, reservation_id: str) ->
         raise
 
 
-def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot) -> TrialSlot:
+def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
+                            live_budget: LiveComparisonBudget | None = None) -> TrialSlot:
     """Execute one reserved comparison slot against its own frozen workload.
 
     The slot's workload is resolved by identity from the frozen context, and the
@@ -2624,6 +2626,7 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot) -> TrialS
                     token=os.environ.get("NEBIUS_API_KEY", ""),
                     project=os.environ.get("NEBIUS_PROJECT_ID", ""),
                     model=context.service_model or config.SERVICE_MODEL,
+                    live_budget=live_budget,
                 )
             elif run.adapter == LocalProcessAdapter.name:
                 adapter = LocalProcessAdapter()
@@ -2771,7 +2774,8 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot) -> TrialS
     return repo.get_trial_slot(conn, slot.id)
 
 
-def execute_comparison(conn: sqlite3.Connection, experiment_id: str) -> Experiment:
+def execute_comparison(conn: sqlite3.Connection, experiment_id: str,
+                       live_budget: LiveComparisonBudget | None = None) -> Experiment:
     """Execute every reserved slot of one comparison in its precommitted order.
 
     A slot that already terminated (for example before a restart) is reconciled
@@ -2785,6 +2789,21 @@ def execute_comparison(conn: sqlite3.Connection, experiment_id: str) -> Experime
         raise LifecycleError("not_found", f"unknown experiment: {experiment_id}")
     if experiment.kind is not ExperimentKind.QUALIFYING_COMPARISON:
         raise LifecycleError("conflict", "only a qualifying comparison is executed by this path")
+    if live_budget is not None:
+        slots = repo.list_trial_slots(conn, experiment.id)
+        runs = [repo.get_run(conn, slot.run_id) if slot.run_id else None for slot in slots]
+        contexts = [repo.get_execution_context(conn, run.context_id)
+                    if run and run.context_id else None for run in runs]
+        if (len(slots) != 6 or any(slot.state != "RESERVED" for slot in slots)
+                or sorted((slot.pair_ordinal, slot.candidate_label) for slot in slots)
+                    != [(pair, label) for pair in (1, 2, 3) for label in ("A", "B")]
+                or any(slot.request_count != 2 or slot.executed_request_count != 3 for slot in slots)
+                or any(run is None or run.adapter != TokenFactoryAdapter.name for run in runs)
+                or any(context is None for context in contexts)
+                or len({context.content_hash for context in contexts}) != 1):
+            raise ValueError("live comparison reservation does not have six fresh bound slots")
+        live_budget.preflight(model=contexts[0].service_model or config.SERVICE_MODEL,
+                              slots=len(slots), requests=sum(slot.executed_request_count for slot in slots))
     if not repo.claim_comparison_execution(conn, experiment.id):
         conn.rollback()
         return repo.get_experiment(conn, experiment.id)
@@ -2823,7 +2842,10 @@ def execute_comparison(conn: sqlite3.Connection, experiment_id: str) -> Experime
                 conn.commit()
                 continue
             active_slot_id = slot.id
-            execute_comparison_slot(conn, slot)
+            if live_budget is None:
+                execute_comparison_slot(conn, slot)
+            else:
+                execute_comparison_slot(conn, slot, live_budget)
             active_slot_id = None
         slots = repo.list_trial_slots(conn, experiment.id)
         if repo.get_experiment(conn, experiment.id).state == "INVALIDATED":
@@ -2850,10 +2872,11 @@ def execute_comparison(conn: sqlite3.Connection, experiment_id: str) -> Experime
         raise
 
 
-def execute_comparison_task(db_path: str, experiment_id: str) -> None:
+def execute_comparison_task(db_path: str, experiment_id: str,
+                            live_budget: LiveComparisonBudget | None = None) -> None:
     conn = db.connect(db_path)
     try:
-        execute_comparison(conn, experiment_id)
+        execute_comparison(conn, experiment_id, live_budget)
     finally:
         conn.close()
 
@@ -3189,7 +3212,10 @@ def comparison_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[st
             "execution_ordinal": slot.execution_ordinal,
             "candidate_label": slot.candidate_label,
             "artifact_version_id": slot.artifact_version_id,
-            "artifact_content_hash": candidates[slot.candidate_label].artifact_content_hash,
+            "artifact_content_hash": (
+                candidates[slot.candidate_label].artifact_content_hash
+                if slot.candidate_label in candidates else ""
+            ),
             "workload_id": slot.workload_id,
             "workload_ordinal": slot.pair_ordinal,
             "request_batch_hash": slot.request_batch_hash,

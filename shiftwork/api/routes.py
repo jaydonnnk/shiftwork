@@ -222,6 +222,8 @@ def create_experiment(
     # treatment for the difference between them.
     adapter = "tokenfactory" if request.app.state.executor == "tokenfactory" else "local_process"
     if body.kind == "QUALIFYING_COMPARISON":
+        if adapter == "tokenfactory" and request.app.state.live_comparison_budget is None:
+            raise orchestrator.LifecycleError("conflict", "live comparison requires a bounded run budget")
         experiment = orchestrator.create_qualifying_comparison(
             conn,
             shift_id,
@@ -233,9 +235,13 @@ def create_experiment(
             adapter=adapter,
         )
         if experiment.state == "PLANNED" and orchestrator.comparison_run(conn, experiment.id) is not None:
-            background.add_task(
-                orchestrator.execute_comparison_task, request.app.state.db_path, experiment.id
-            )
+            if request.app.state.live_comparison_budget is None:
+                background.add_task(orchestrator.execute_comparison_task,
+                                    request.app.state.db_path, experiment.id)
+            else:
+                background.add_task(orchestrator.execute_comparison_task,
+                                    request.app.state.db_path, experiment.id,
+                                    request.app.state.live_comparison_budget)
     else:
         experiment = orchestrator.create_diagnostic_experiment(
             conn,
