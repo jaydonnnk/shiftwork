@@ -1,5 +1,14 @@
 # Status: Shiftwork
 
+## Slice 17 branch and main publication: 2026-09-29
+
+The user authorized committing the S17 branch and pushing main, without a
+co-author footer. Four focused commits on `shiftwork/slice-17` (`aca0407`,
+`73fe6d1`, `0882df3`, `c1e5af6`) were fast-forwarded into local main and pushed
+as `7109571..c1e5af6` on `origin/main`. The final S17 offline suite was
+`576 passed, 1 skipped, 2 warnings` with packaging Test 51 excluded. This
+publication is not a separate user acceptance of S17 or a go-ahead for S18.
+
 ## Gate 3 scoped selection-retry clarification and S17 repair: 2026-09-29
 
 The user approved the scoped recommendation in chat: an identical selection
