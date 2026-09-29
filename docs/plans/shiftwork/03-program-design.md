@@ -564,7 +564,7 @@ class CandidateMetrics(BaseModel):
     protected_passed: int
     protected_failed: int
     protected_missing: int
-    service_calls: int
+    service_calls: int | None
     input_tokens: int | None
     output_tokens: int | None
     service_latency_ms: int | None
@@ -594,8 +594,11 @@ def compare(
 
 `evaluate` and `compare` are pure, deterministic and LLM-free. They do not read
 files, databases, environment variables or the network. Unknown usage or cost stays
-`None`. An unknown mandatory budget measure blocks eligibility. Metrics have one
-shared public request denominator, and every failed or missing slot remains visible.
+`None`. An unknown mandatory budget measure blocks eligibility. Zero service calls
+are proven for a trusted local run with no inference grant or for a live request
+with a complete controller meter. Missing live meter instrumentation leaves
+service calls and usage unknown, even when no inference row was recorded. Metrics
+have one shared public request denominator, and every failed or missing slot remains visible.
 Clarifications keep distinct assessed and reported counters in the public
 comparison and task-detail views. Neither category increments useful completion,
 refusal or referral. The public denominator is the sum of the three frozen public

@@ -1,14 +1,14 @@
 # Slice 16 implementation plan
 
-Status: repair round complete and committed, 2026-09-29. Slice 16 has its own
-user go-ahead, and the eight findings from the 2026-09-28 independent review are
-repaired with failing-capable proofs. The Slice 15 comparison manifest and
-protected family were reviewed and sealed by the operator on 2026-09-29, so
-production reservations now admit those bytes; the two tests that prove the
-review gate construct their own unsealed material rather than depending on the
-shipped state. Offline tests may still inject a review gate. No live call, push,
-Slice 16 acceptance or later-slice selection is authorized here, and sealing does
-not authorize any of them.
+Status: accepted 2026-09-29 after R2 and R3 follow-up repairs, the one bounded
+six-slot live comparison and final offline verification. The eight findings from
+the 2026-09-28 independent review remain repaired with failing-capable proofs.
+The Slice 15 comparison manifest and protected family were reviewed and sealed
+by the operator on 2026-09-29, so production reservations admit those exact
+bytes. The two review-gate tests construct their own unsealed material. The
+live run made twelve Sandbox operations and verified eighteen captures, with
+zero inference calls. It does not measure model answer quality or select a
+candidate. Slice 17 still needs its own go-ahead.
 
 The first acceptance reading found an S15 draft-fixture error: all six protected
 task specs omitted the optional price task that candidate A returns and the
@@ -16,7 +16,8 @@ public specs permit. The byte-addressed draft now declares that task as
 optional. The first A 0/3 protected result is preserved as a failed fairness
 reading; after correction the local demo shows A and B at 3/3 on the drawn
 variants. A separate S16 predicate correction accepts a justified no-match
-refusal in the strict budget case. Neither repair seals the family.
+refusal in the strict budget case. At that time neither repair sealed the family;
+the operator sealed it separately later on 2026-09-29.
 
 ## Result to build
 

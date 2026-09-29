@@ -119,8 +119,11 @@ summaries when a time-sensitive external claim is being made.
   both comparison fixture files, so each now reads OPERATOR_SEALED with its exact
   canonical payload digest and production reservation admits those bytes. The
   user accepted Slice 15 on offline and sealed evidence, and the seals plus
-  review-gate test repairs are published on main. The six-slot live comparison
-  has not run. Slice 16 remains local and unaccepted; later slices need their
+  review-gate test repairs are published on main. The user then conditionally
+  accepted Slice 16 after R2 and R3 repairs, offline verification and one bounded
+  six-slot live comparison. Those conditions passed on 2026-09-29: 12 Sandbox
+  operations, 18 verified captures, zero inference calls and a COMPLETE outcome.
+  The run does not measure model answer quality. Slice 17 and later need their
   own go-ahead.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and

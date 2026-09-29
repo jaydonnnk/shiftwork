@@ -1,10 +1,12 @@
 # Vertical Slice Plan: Shiftwork final pivot
 
 **Current slice state, 2026-09-29:** The operator reviewed and sealed the
-comparison manifest and protected family. The user accepted Slice 15 on the
-offline and sealed evidence; the six-slot live comparison remains unrun and is
-not implied by acceptance. Slice 16 remains unaccepted on its local branch.
-The 2026-09-28 state descriptions below are historical.
+comparison manifest and protected family. S15 is accepted and published. The
+one authorized six-slot live comparison completed with all eighteen captures
+verified, twelve Sandbox operations and zero model calls. S16's conditional
+acceptance is met after R2 and R3 repair and offline verification. S17 remains
+unbuilt and has no go-ahead. The 2026-09-28 state descriptions below are
+historical.
 
 **Current Gate 4 state: RE-APPROVED 2026-09-28.** The user approved the repaired
 protected-phase slice reconciliation together with Gate 2 S8.1, Gate 3 and
@@ -19,7 +21,7 @@ dependency order below reflects it. The 2026-09-19 Gate 4 approval
 applies to the old design only and is historical. Slices 10 through 14 were
 implemented and accepted by the user by 2026-09-27; Slice 15's offline work was
 merged to main on 2026-09-28, while its fixture review and seal remain open.
-Slice 16 is in progress on its own go-ahead and Slice 17 onward is unbuilt.
+At that checkpoint Slice 16 was in progress and Slice 17 onward was unbuilt.
 (This sentence previously read
 "Slices 10 through 12 ... Slice 13 onward is unbuilt", which was stale against
 `00-status.md`; corrected 2026-09-28 during the repair round.)

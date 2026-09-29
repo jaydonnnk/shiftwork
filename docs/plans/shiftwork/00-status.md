@@ -1,5 +1,45 @@
 # Status: Shiftwork
 
+## Slice 16 accepted after bounded live comparison: 2026-09-29
+
+The user conditionally accepted S16 after reconciling main, closing R2 and R3
+with failing-capable proofs, bounding the one authorized live comparison, and
+passing relevant checks. Those conditions are met on `shiftwork/slice-16`.
+This accepts the S16 outcome and invalidation work. It does not select or
+operate a candidate, prove learning impact, or authorize S17.
+
+- Main's two newer commits were merged into S16. The operator-sealed fixture
+  raw SHA-256 values stayed `2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f`
+  and `170dd925880b035c3a999512c982aaccaa2deda96e8d55950f4b7c14f0ce9a24`.
+- R2 route candidate-label drift first failed with `KeyError: 'B'`; it now
+  returns `NOT_COMPARABLE` and names `candidates` as drift. R3's missing live
+  controller meter first produced a false measured zero; it now leaves calls
+  and usage unknown, and a mandatory unknown budget blocks eligibility. A
+  complete controller meter or trusted local no-gateway run proves zero.
+- The separate live run budget checks six fresh bound slots, twelve Sandbox
+  operation attempts, eighteen inference call attempts, and a $0.10 projected
+  inference cap. A live API comparison without a budget returns 409 before
+  reservation. The official model card and Sandbox beta billing page were
+  checked before the one-shot run. At the advertised rates, the full eighteen
+  call reservation projected $0.03981312. See
+  `evidence/slice16-live-comparison-2026-09-29.md` for sources and limits.
+- The one authorized run returned six COMPLETE slots, eighteen verified
+  checkpoint captures, twelve Sandbox operation attempts, eighteen controller
+  request meters, zero inference calls and a COMPLETE comparison outcome.
+  Both candidates were eligible with six public and three protected requests
+  each. The independent persisted audit passed. No retry or top-up occurred.
+  Because no model call occurred, this run does not measure Nemotron answer
+  quality. No candidate was selected or operated.
+- Focused R2, R3, adapter and budget checks passed. The final full offline
+  suite command `.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`
+  returned **567 passed, 1 skipped, 2 warnings**. Packaging Test 51 was not
+  run. The post-slice cleanup scan checked the 253 searchable repository files,
+  the new imports, comparison fixtures, test coverage and current documents.
+  It found no confirmed orphan or redundant S16 file; no deletion is proposed.
+
+The sections below retain their dated historical states. Publication and merge
+details are recorded separately after the Git operations complete.
+
 ## Operator seal applied to both comparison fixtures: 2026-09-29
 
 The user, acting as the operator, reviewed the packet and sealed both comparison
