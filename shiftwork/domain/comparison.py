@@ -41,7 +41,7 @@ class CandidateMetrics(BaseModel):
     protected_passed: int
     protected_failed: int
     protected_missing: int
-    service_calls: int
+    service_calls: int | None
     input_tokens: int | None
     output_tokens: int | None
     service_latency_ms: int | None
@@ -145,11 +145,13 @@ def _known_sum(values: list[object], expected: int) -> int | None:
 
 def _metrics(candidate_label: str, candidate_version_id: str,
              readings: tuple[TrialReading, ...],
-             workloads: tuple[FrozenWorkload, ...]) -> CandidateMetrics:
+             workloads: tuple[FrozenWorkload, ...],
+             evidence_mode: EvidenceMode) -> CandidateMetrics:
     counts = {name: 0 for name in _OUTCOME_FIELDS.values()}
     useful = 0
     protected_passed = protected_failed = protected_missing = 0
     calls = 0
+    meter_complete = True
     token_in: list[object] = []
     token_out: list[object] = []
     latencies: list[object] = []
@@ -159,6 +161,7 @@ def _metrics(candidate_label: str, candidate_version_id: str,
         if reading is None:
             counts["missing_outputs"] += workload.request_count
             protected_missing += 1
+            meter_complete = False
             continue
         slot = reading.slot
         by_ordinal: dict[int, list[TaskAssessment]] = {}
@@ -192,16 +195,28 @@ def _metrics(candidate_label: str, candidate_version_id: str,
         # efficiency or cost counters, even when its model usage is recorded.
         public_observations = tuple(item for item in reading.observations
                                     if 1 <= item.request_ordinal <= slot.request_count)
+        if evidence_mode is EvidenceMode.ISOLATED_LIVE:
+            for ordinal in range(1, slot.request_count + 1):
+                observed = sum(item.kind is ObservationKind.INFERENCE_REQUEST
+                               for item in public_observations if item.request_ordinal == ordinal)
+                meters = [item.public_payload_json for item in public_observations
+                          if item.kind is ObservationKind.INTERPRETATION
+                          and item.request_ordinal == ordinal
+                          and item.public_payload_json.get("inference_meter_complete") is True]
+                if (len(meters) != 1 or meters[0].get("source") != "controller_verified"
+                        or type(meters[0].get("service_calls")) is not int
+                        or meters[0]["service_calls"] != observed):
+                    meter_complete = False
         calls += sum(item.kind is ObservationKind.INFERENCE_REQUEST for item in public_observations)
         for item in public_observations:
             if item.kind is ObservationKind.INFERENCE_RESULT:
                 token_in.append(item.public_payload_json.get("input_tokens"))
                 token_out.append(item.public_payload_json.get("output_tokens"))
                 latencies.append(item.public_payload_json.get("elapsed_ms"))
-    # Zero recorded calls is absent instrumentation, not a measured zero, so the
-    # usage and latency it would report stays unknown. service_calls remains the
-    # count of recorded rows, which is a record count rather than a measurement.
-    measured = bool(calls)
+    # The local fixture has no inference grant. For a live run, every public
+    # request needs a controller-owned terminal meter, including explicit zeroes.
+    measured = evidence_mode is EvidenceMode.TRUSTED_LOCAL or meter_complete
+    known_calls = calls if measured else None
     return CandidateMetrics(
         candidate_label=candidate_label,
         candidate_version_id=candidate_version_id,
@@ -209,7 +224,7 @@ def _metrics(candidate_label: str, candidate_version_id: str,
         useful_completions=useful, **counts,
         protected_denominator=len(workloads), protected_passed=protected_passed,
         protected_failed=protected_failed, protected_missing=protected_missing,
-        service_calls=calls,
+        service_calls=known_calls,
         input_tokens=_known_sum(token_in, calls) if measured else None,
         output_tokens=_known_sum(token_out, calls) if measured else None,
         service_latency_ms=_known_sum(latencies, calls) if measured else None,
@@ -292,6 +307,7 @@ def compare(
         candidates[label].artifact_version_id if label in candidates else "",
         tuple(item for item in readings if item.slot.candidate_label == label),
         context.workloads,
+        context.executor_class,
     ) for label in ("A", "B"))
     eligibility = []
     for label, item in zip(("A", "B"), metrics, strict=True):

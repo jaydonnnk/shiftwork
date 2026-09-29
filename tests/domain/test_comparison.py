@@ -62,18 +62,79 @@ def test_public_and_protected_denominators_and_unknown_cost_are_separate():
     assert all(item.eligible for item in outcome.eligibility)
 
 
-def test_no_recorded_model_call_reports_unknown_usage_not_a_measured_zero():
+def test_trusted_local_without_a_gateway_proves_zero_model_usage():
     experiment, context, readings = _fixture()
     assert all(item.observations == () for item in readings)
     outcome = compare(experiment, context, tuple(readings))
     assert outcome.status == "COMPLETE"
     for metrics in outcome.candidate_metrics:
         assert metrics.service_calls == 0
-        assert metrics.input_tokens is None
-        assert metrics.output_tokens is None
-        assert metrics.service_latency_ms is None
+        assert metrics.input_tokens == 0
+        assert metrics.output_tokens == 0
+        assert metrics.service_latency_ms == 0
         assert metrics.cost_minor_units is None
         assert metrics.provisioning_latency_ms is None
+
+
+def _as_live(context, readings):
+    context.executor_class = EvidenceMode.ISOLATED_LIVE
+    for index, reading in enumerate(readings):
+        run = NS(**{**reading.run.__dict__, "evidence_mode": EvidenceMode.ISOLATED_LIVE,
+                    "adapter": "tokenfactory"})
+        readings[index] = TrialReading(**{**reading.__dict__, "run": run})
+
+
+def _metered(reading, calls_by_ordinal):
+    observations = []
+    for ordinal, count in enumerate(calls_by_ordinal, 1):
+        if count:
+            observations.extend((
+                NS(kind=ObservationKind.INFERENCE_REQUEST, request_ordinal=ordinal,
+                   public_payload_json={"source": "controller_verified"}),
+                NS(kind=ObservationKind.INFERENCE_RESULT, request_ordinal=ordinal,
+                   public_payload_json={"input_tokens": 7, "output_tokens": 9,
+                                        "elapsed_ms": 11}),
+            ))
+        observations.append(NS(
+            kind=ObservationKind.INTERPRETATION, request_ordinal=ordinal,
+            public_payload_json={"source": "controller_verified",
+                                 "inference_meter_complete": True, "service_calls": count},
+        ))
+    return TrialReading(**{**reading.__dict__, "observations": tuple(observations)})
+
+
+def test_live_missing_meter_cannot_beat_a_measured_candidate_on_a_mandatory_call_budget():
+    experiment, context, readings = _fixture()
+    _as_live(context, readings)
+    context.resource_limits_json = {"mandatory_budget_metrics": {"service_calls": 0}}
+    for index, reading in enumerate(readings):
+        if reading.slot.candidate_label == "A":
+            readings[index] = _metered(reading, (1, 0) if index == 0 else (0, 0))
+    outcome = compare(experiment, context, tuple(readings))
+    assert outcome.status == "COMPLETE"
+    assert outcome.candidate_metrics[0].service_calls == 1
+    assert outcome.candidate_metrics[1].service_calls is None
+    assert outcome.eligibility[0].blocking_reason_codes == (
+        "mandatory_budget_exceeded:service_calls",)
+    assert outcome.eligibility[1].blocking_reason_codes == (
+        "unknown_mandatory_budget:service_calls",)
+    assert not any(item.eligible for item in outcome.eligibility)
+
+
+def test_live_controller_meter_proves_zero_and_missing_one_marker_restores_unknown():
+    experiment, context, readings = _fixture()
+    _as_live(context, readings)
+    context.resource_limits_json = {"mandatory_budget_metrics": {"service_calls": 0}}
+    readings[:] = [_metered(reading, (0, 0)) for reading in readings]
+    outcome = compare(experiment, context, tuple(readings))
+    assert [item.service_calls for item in outcome.candidate_metrics] == [0, 0]
+    assert all(item.eligible for item in outcome.eligibility)
+    first = readings[0]
+    readings[0] = TrialReading(**{**first.__dict__, "observations": first.observations[:1]})
+    outcome = compare(experiment, context, tuple(readings))
+    assert outcome.candidate_metrics[0].service_calls is None
+    assert outcome.eligibility[0].blocking_reason_codes == (
+        "unknown_mandatory_budget:service_calls",)
 
 
 def test_a_declared_candidate_set_that_is_not_exactly_a_and_b_returns_a_verdict():
