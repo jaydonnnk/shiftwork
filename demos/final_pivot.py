@@ -1,4 +1,4 @@
-"""Offline final-pivot stages: ``migration`` (S10) and ``investigation`` (S11).
+"""Offline final-pivot stages through explicit selection (S17).
 
 The migration stage creates a synthetic schema-v5 sample, copies it, and opens
 only the copy with the current controller. It never reads SHIFTWORK_DB_PATH.
@@ -773,8 +773,8 @@ def s13_inspect_stage(operation_id: str, expected_sha256: str) -> int:
         return 2
 
 
-def comparison_stage() -> int:
-    """Exercise S16 policy on draft fixtures in one temporary offline process."""
+def comparison_stage(*, select: bool = False) -> int:
+    """Exercise comparison policy and optionally append an offline learner choice."""
     admission = orchestrator._require_reviewed_comparison_material
     reviewed_family = sealed_store.load_reviewed_comparison_family
     try:
@@ -850,12 +850,27 @@ def comparison_stage() -> int:
                         len(repo.list_observations(conn, run.id))
                         for run in runs if run.adapter == "tokenfactory"
                     )
-                    orchestrator.retire_comparison_exposure(conn, reservation.id)
+                    if not select:
+                        orchestrator.retire_comparison_exposure(conn, reservation.id)
                     captured_after = sum(len(repo.list_outputs(conn, slot.run_id))
                                          for slot in repo.list_trial_slots(conn, experiment_id))
                 finally:
                     conn.close()
-                retired = client.get(f"/api/experiments/{experiment_id}").json()
+                retired = client.get(f"/api/experiments/{experiment_id}").json() if not select else None
+                selected = None
+                selected_board = None
+                if select:
+                    prior = client.get("/api/engagements/bookshop/board").json()["operating_selection"]
+                    choice = client.post(f"/api/shifts/{shift_id}/selections", json={
+                        "comparison_id": experiment_id,
+                        "selected_version_id": candidates["A"]["id"],
+                        "rationale": "A completed the required tasks under the shared conditions.",
+                        "expected_prior_selection_id": prior["id"] if prior else None,
+                        "client_request_id": "s17-demo-selection",
+                    })
+                    assert choice.status_code == 201, choice.text
+                    selected = choice.json()
+                    selected_board = client.get("/api/engagements/bookshop/board").json()
         sealed_states = {
             path.name: json.loads(path.read_text(encoding="utf-8"))["review_status"]
             for path in (config.PIVOT_COMPARE_MANIFEST,
@@ -874,7 +889,10 @@ def comparison_stage() -> int:
         passed = (outcome is not None and outcome["status"] == "COMPLETE"
                   and len(view["trials"]) == 6 and captured_before == captured_after
                   and captured_after == 18
-                  and retired["outcome"]["status"] == "NOT_COMPARABLE"
+                  and (selected_board["operating_selection"]["id"] == selected["id"]
+                       and selected_board["latest_shift"]["operation_allowed"]
+                       and selected["retained_alternative_version_id"] == candidates["B"]["id"]
+                       if select else retired["outcome"]["status"] == "NOT_COMPARABLE")
                   and outcome["shared_public_denominator_requests"] == 6
                   and set(metrics) == {"A", "B"} and set(eligibility) == {"A", "B"}
                   and all(item["public_denominator_requests"] == 6
@@ -884,12 +902,16 @@ def comparison_stage() -> int:
                   and all(item["eligible"] for item in eligibility.values())
                   and no_live_call)
         print(json.dumps({
-            "stage": "comparison", "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY",
+            "stage": "selection" if select else "comparison", "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY",
             "verdict": "PASS_OFFLINE_POLICY" if passed else "STOP_INCOMPLETE",
             "trial_states": [item["state"] for item in view["trials"]],
-            "outcome": outcome, "retired_status": retired["outcome"]["status"],
-            "captured_rows_before_retire": captured_before,
-            "captured_rows_after_retire": captured_after,
+            "outcome": outcome, "retired_status": retired["outcome"]["status"] if retired else None,
+            "selection": selected, "operating_status": selected_board["operating_status"] if selected_board else None,
+            "latest_saved_version_id": selected_board["latest_saved_version_id"] if selected_board else None,
+            "captured_rows_before_retire": captured_before if not select else None,
+            "captured_rows_before_selection": captured_before if select else None,
+            "captured_rows_after_retire": captured_after if not select else None,
+            "captured_rows_after_selection": captured_after if select else None,
             "no_live_call_derivation": {
                 "projected_evidence_class": view["context_evidence_class"],
                 "run_adapters": adapters, "run_evidence_modes": evidence_modes,
@@ -907,7 +929,7 @@ def comparison_stage() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
+    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "selection", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
     parser.add_argument("--operation-id")
     parser.add_argument("--expected-sha256")
     args = parser.parse_args()
@@ -917,6 +939,8 @@ def main() -> int:
         return investigation_stage()
     if args.stage == "comparison":
         return comparison_stage()
+    if args.stage == "selection":
+        return comparison_stage(select=True)
     if args.stage == "s13-canary":
         return s13_canary_stage()
     if args.stage == "s13-inspect":
