@@ -2,7 +2,8 @@
   "engagement_slug": "bookshop",
   "schema_version": 1,
   "version": 1,
-  "review_status": "AWAITING_OPERATOR_REVIEW",
+  "review_status": "OPERATOR_SEALED",
+  "sealed_payload_sha256": "6e21937b65606e489b3768d3cd15347eff778ca6ee90f883dd68b318d8d66317",
   "description": "Agent-authored Slice 15 public workloads, independently pinned to bookshop_compare_state_v1.json. Candidate A favors lowest qualifying price; B favors greatest shelf stock then lower price. Request 011 is the only public preference separator. Exact bytes await operator review and seal.",
   "workloads": [
     {
