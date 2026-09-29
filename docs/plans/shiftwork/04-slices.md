@@ -1,9 +1,15 @@
 # Vertical Slice Plan: Shiftwork final pivot
 
+**Current slice state, 2026-09-29:** The operator reviewed and sealed the
+comparison manifest and protected family. The user accepted Slice 15 on the
+offline and sealed evidence; the six-slot live comparison remains unrun and is
+not implied by acceptance. Slice 16 remains unaccepted on its local branch.
+The 2026-09-28 state descriptions below are historical.
+
 **Current Gate 4 state: RE-APPROVED 2026-09-28.** The user approved the repaired
 protected-phase slice reconciliation together with Gate 2 S8.1, Gate 3 and
-ADR 0006. Slice 15's offline work is merged; its fixture review and seal remain
-open. Slice 16 is in progress on its own go-ahead.
+ADR 0006. At that 2026-09-28 checkpoint Slice 15 remained in progress on its
+earlier go-ahead.
 
 **Gate 4: APPROVED 2026-09-24 for the final pivot. Not implementation authority.**
 Gates 1, 2 and 3 are approved for `shiftwork_final_pivot.md`. Gate 3 was approved
@@ -18,7 +24,7 @@ Slice 16 is in progress on its own go-ahead and Slice 17 onward is unbuilt.
 "Slices 10 through 12 ... Slice 13 onward is unbuilt", which was stale against
 `00-status.md`; corrected 2026-09-28 during the repair round.)
 
-**GATE 4 SCOPED BACKTRACK, CLOSED 2026-09-28:** this plan was reconciled with
+**GATE 4 SCOPED BACKTRACK, CLOSED 2026-09-28:** this plan is reconciled with
 the revised Gate 2 S8.1 and Gate 3 S3.9 protected phase, which the 2026-09-28
 independent review found this document did not reflect. The changes are: every
 unqualified "shared denominator" and "batch request count" in S1, in the Slice 15

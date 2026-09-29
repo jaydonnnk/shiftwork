@@ -1,6 +1,14 @@
 # Shiftwork: working brief and adjudication register
 
-Updated: 2026-09-28.
+Updated: 2026-09-29.
+
+**Current slice state, 2026-09-29:** The operator sealed the reviewed comparison
+manifest and protected family. The user accepted the full Slice 15 on the offline
+and sealed evidence and authorized publishing the seal to main. No live six-slot
+comparison has run, so live service quality and cost remain unmeasured. Slice 16
+remains unaccepted and local. See `plans/shiftwork/00-status.md` for the dated
+decision and verification; the older current-state paragraphs below are the
+2026-09-28 snapshot.
 
 **Direction:** Shiftwork remains the sole active project. The approved final pivot
 around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
@@ -48,9 +56,10 @@ and retained limits are in `plans/shiftwork/evidence/slice12-capability-2026-09-
 The 2 MiB zero-byte checkpoint observation under a 1 MiB layer cap remains
 unexplained; capture under that cap is unproven. Six trials covered one request
 shape, pre-repair inference records omit reasoning text, and probe 1's
-protected-fixture limb is N/A. Slice 14 is accepted; Slices 15 through 25 remain
-unchecked and need their own go-aheads and live authorizations. Preserve the foundation
-and its evidence; it does not prove completed comparison, selection,
+protected-fixture limb is N/A. Slices 14 and 15 are accepted. Slice 16 is in
+progress on its own go-ahead; Slices 17 through 25 remain unchecked and need
+their own go-aheads and live authorizations. Preserve the foundation
+and its evidence; it does not prove a completed live comparison, selection,
 operation or human learning outcomes.
 
 The full approval history and verbatim evidence remain in
@@ -340,8 +349,8 @@ The user authorized starting Slice 13 and its required live tests on
 2026-09-27. Gate 3's SDK dependency correction was separately re-approved the
 same day. Slice 13 is implemented, cross-checked, repaired, accepted and
 merged to main (2026-09-27); the record is in `plans/shiftwork/00-status.md`.
-Slice 14 is implemented, reviewed, repaired and accepted (2026-09-27); Slices 15
-onward remain unchecked.
-Fixture authoring, sealed-case contents, outreach,
-deployment, publication, submission and ADR #4 also remain separately
-authorized.
+Slice 14 is implemented, reviewed, repaired and accepted (2026-09-27). Slice 15
+was accepted on 2026-09-29 on offline and sealed evidence. Slice 16 onward remains
+unchecked; the live six-slot comparison is still unrun.
+Further fixture authoring, outreach, deployment, publication, submission and
+ADR #4 also remain separately authorized.

@@ -490,6 +490,27 @@ The protected family is still `AWAITING_OPERATOR_REVIEW` and unsealed. This
 offline result covers policy and trusted-local execution, not human review,
 fresh model quality, live Sandbox behavior, learning gain, selection or
 operation. The branch remains uncommitted and unpushed.
+## Slice 15 acceptance and sealed-material publication: 2026-09-29
+
+The user explicitly ACCEPTED the full Slice 15 in chat and authorized merging
+and pushing it to main without a co-author footer. Its offline implementation
+was already merged and pushed on 2026-09-28. This publication adds the reviewed
+optional-price task correction and the operator's exact seals to main, with
+seal-gate tests that construct their own draft material. The two sealed files
+are `shiftwork/fixtures/requests/bookshop_compare_manifest.json` and
+`shiftwork/sealed/cases/bookshop_task_completion.json`. Production reservation
+admits those bytes; a wrong digest remains refused.
+
+Verification on main after these changes: the two seal-gate tests and two
+comparison checks passed (4 passed), and the offline suite with
+`--ignore=tests/packaging` passed (528 passed, 1 skipped, 2 warnings). No live
+six-slot comparison ran. Acceptance is the user's product decision on the
+offline and sealed evidence, not a claim of live model quality, measured live
+cost or useful customer answers. One shared live comparison can later supply
+S15 execution and S16 live-facing evidence. S16 remains unaccepted and unmerged.
+The post-slice cleanup scan found the changed fixtures referenced by the
+production loaders and tests, no confirmed redundant file to delete, and a stale
+Gate 4 backtrack heading, which was corrected in `04-slices.md`.
 
 **Current authority, 2026-09-28: Gate 2 S8.1, Gate 3 and Gate 4 are
 RE-APPROVED together, and ADR 0006 is ACCEPTED.** The user explicitly approved
@@ -2970,7 +2991,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
   own go-ahead and its own authorizations
 - [x] Slice 13: isolated live service inference, safe public evidence and no-run legacy source bootstrap; implemented and demonstrated 2026-09-27, ACCEPTED by the user 2026-09-27. Live evidence and limits are recorded in the Slice 13 completion section above. Cross-checked; four gaps and the recorded image-UUID residual repaired with failing-capable proofs, and re-verified `444 passed, 1 skipped, 2 warnings` on 2026-09-27 (section at the top). The work is committed in focused batches on `shiftwork/slice-13`, merged to main as `ed0802a..1d82e95` and pushed, no co-author footer. Acceptance covers Slice 13 only; Slice 14 onward needs its own go-ahead and its own live authorizations.
 - [x] Slice 14: prediction-gated attributable assist gateway; implemented and reviewed 2026-09-27, ACCEPTED by the user 2026-09-27. Offline implementation and tests passed (`457 passed, 1 skipped, 2 warnings`); three authorized live calls completed with a quality failure that prompted an offline-only repair; the review's six findings were adjudicated and repaired with failing-capable tests and six mutation proofs (stranded PENDING reconciliation, injected-client deadline bound, records). Live evidence and limits are in the Slice 14 section above; revised-prompt live quality stays open. The work is committed in focused batches on `shiftwork/slice-14`, merged to main as `fab497e..3f18669` and pushed, no co-author footer. Acceptance covers Slice 14 only; Slice 15 onward needs its own go-ahead and its own live authorizations.
-- [ ] Slice 15: reviewed A/B workloads and six frozen paired trial slots
+- [x] Slice 15: reviewed A/B workloads and six frozen paired trial slots; ACCEPTED by the user 2026-09-29 on offline and sealed evidence, with the live comparison still unrun (acceptance entry at top)
 - [ ] Slice 16: fair comparison, exposure invalidation and restart recovery
 - [ ] Slice 17: explicit eligible exact-version selection
 - [ ] Slice 18: selected-version operation and operation-only consequences

@@ -1,14 +1,19 @@
 # Slice 15 operator review packet
 
-Status: SEALED by the operator, 2026-09-29. The draft was last revised
-2026-09-28 for the S16 optional-task correction. Gate 2 S8.1, Gate 3 and
+**Decision recorded, 2026-09-29:** The operator reviewed and sealed both
+comparison files with their exact canonical payload digests. The user then
+accepted the full Slice 15 on offline and sealed evidence. No live comparison
+has run; this decision is not live service-quality evidence.
+
+The draft was last revised 2026-09-28 for the S16 optional-task correction.
+Gate 2 S8.1, Gate 3 and
 Gate 4 were re-approved together and ADR 0006 was accepted after the repair
 round. See the approval, review, repair and proof-round sections in
 `docs/plans/shiftwork/00-status.md`. This packet presents agent-authored
 material for a human decision. The operator reviewed and sealed both files on
 2026-09-29, so each now reads `OPERATOR_SEALED` with its exact canonical payload
-digest and production reservation admits those bytes. Nothing here records Slice
-15 or Slice 16 acceptance, a live run, or permission to use credentials.
+digest and production reservation admits those bytes. This packet records no
+Slice 16 acceptance or live result.
 
 ## What changed since the previous revision
 

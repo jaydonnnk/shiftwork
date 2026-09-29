@@ -117,9 +117,11 @@ summaries when a time-sensitive external claim is being made.
   Slice 16 repair round then completed offline and was committed in focused
   batches on `shiftwork/slice-16`. On 2026-09-29 the operator reviewed and sealed
   both comparison fixture files, so each now reads OPERATOR_SEALED with its exact
-  canonical payload digest and production reservation admits those bytes. Sealing
-  does not accept Slice 16. Live execution, credentials, cost, publication, push
-  and Slices 17 onward still each need their own authorization.
+  canonical payload digest and production reservation admits those bytes. The
+  user accepted Slice 15 on offline and sealed evidence, and the seals plus
+  review-gate test repairs are published on main. The six-slot live comparison
+  has not run. Slice 16 remains local and unaccepted; later slices need their
+  own go-ahead.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of
