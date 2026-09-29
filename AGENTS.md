@@ -113,10 +113,13 @@ summaries when a time-sensitive external claim is being made.
   round and the two harness repairs completed with no live call, and the user
   confirmed the offline work complete and directed the publish and merge on
   2026-09-28. The work is committed in focused batches on `shiftwork/slice-15`,
-  merged to main as `96a408e..82364d3` and pushed, no co-author footer. The
-  draft fixture bytes remain AWAITING_OPERATOR_REVIEW and unsealed; operator
-  review, sealing, live execution and Slices 16 onward still need their own
-  authorizations.
+  merged to main as `96a408e..82364d3` and pushed, no co-author footer.
+  On 2026-09-29 the operator reviewed and sealed the comparison manifest and
+  protected family, and the user ACCEPTED the full Slice 15 on offline and
+  sealed evidence. The seals and review-gate test repairs are published on main.
+  No live six-slot comparison has run, so acceptance does not establish live
+  service quality or cost. Slice 16 remains local and unaccepted; Slices 17
+  onward still need their own go-ahead.
   Do not implement the pivot under historical approvals.
 - Approved product focus: evidence-led diagnosis of a real AI service, a short cause and
   falsifier before diagnostic help, fair repair comparisons, explicit selection of

@@ -1,5 +1,11 @@
 # Slice 15: paired candidate execution
 
+**Current result, 2026-09-29:** The reviewed comparison files are sealed and
+the user accepted Slice 15 on offline and sealed evidence. The seal and the
+optional-price task correction are published with this record. One live
+six-slot comparison remains unrun; it is not part of the acceptance evidence.
+The draft and pre-seal statements below retain their historical dates.
+
 Status: implementation started 2026-09-27 on `shiftwork/slice-15` under the
 user's explicit Slice 15 go-ahead. The draft fixtures below are **not sealed and
 not operator-reviewed**; the slice's authorization line requires a separate

@@ -1,5 +1,11 @@
 # Slice 15 operator review packet
 
+**Decision recorded, 2026-09-29:** The operator reviewed and sealed both
+comparison files with their exact canonical payload digests. The user then
+accepted the full Slice 15 on offline and sealed evidence. No live comparison
+has run; this decision is not live service-quality evidence. The draft status
+below describes the packet before the operator decision.
+
 Status: DRAFT, 2026-09-28 (protected-phase revision). Gate 2 S8.1, Gate 3 and
 Gate 4 were re-approved together and ADR 0006 was accepted after the repair
 round. See the approval, review, repair and proof-round sections in
