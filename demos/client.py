@@ -8,7 +8,6 @@ from pathlib import Path
 import uvicorn
 from fastapi.testclient import TestClient
 
-from shiftwork import config
 from shiftwork.app import create_app
 from shiftwork.assist.gateway import AssistReply, LiveAssistGateway
 
@@ -36,7 +35,7 @@ def _execute_attempts(client: TestClient, shift_id: str, count: int = 2) -> None
             raise RuntimeError(f"Preview fixture did not finalize: {run['state']}")
 
 
-def create_preview(db_path: str, *, empty: bool = False, selection_factory=None,
+def create_preview(db_path: str, *, empty: bool = False,
                    recorded_assist: bool = False, live_assist: bool = False):
     """Build an isolated preview database and return its app.
 
@@ -45,11 +44,8 @@ def create_preview(db_path: str, *, empty: bool = False, selection_factory=None,
     replay the pinned recorded inspections the room shows and the Investigate
     station cites as its source. That run path writes no learner choice.
 
-    ``selection_factory(db_path, shift_id, version_id)`` is a test-layer hook for
-    the Slice 8 executed-fixture scenario: it freezes the pre-repair candidate,
-    installs the test-only selection and really executes it twice under
-    ``local_process``. The shipped CLI passes nothing, so no ``LEARNER_CHOICE``
-    row is written outside a test.
+    The preview starts with the labelled baseline and two recorded inspections.
+    The learner can compare and explicitly choose through the real selection route.
     """
     if Path(db_path).exists():
         raise ValueError("Preview requires a new database; existing work is never overwritten.")
@@ -59,25 +55,12 @@ def create_preview(db_path: str, *, empty: bool = False, selection_factory=None,
         raise ValueError("NEBIUS_API_KEY is required for --live-assist")
     gateway = (RecordedAssistGateway() if recorded_assist else
                LiveAssistGateway(os.environ["NEBIUS_API_KEY"]) if live_assist else None)
-    app = create_app(db_path, executor="local_process" if selection_factory else None,
-                     assist_gateway=gateway)
+    app = create_app(db_path, assist_gateway=gateway)
     with TestClient(app) as client:
         if not empty:
             shift = client.post("/api/engagements/bookshop/shifts")
             shift.raise_for_status()
             shift_id = shift.json()["id"]
-            if selection_factory is not None:
-                saved = client.put(
-                    f"/api/shifts/{shift_id}/artifact",
-                    json={"files": config.repair_arc_artifact_files("pre")},
-                )
-                saved.raise_for_status()
-                frozen = client.post(
-                    f"/api/shifts/{shift_id}/artifact/versions",
-                    json={"contract": config.REPAIR_ARC_CONTRACT_JSON},
-                )
-                frozen.raise_for_status()
-                selection_factory(db_path, shift_id, frozen.json()["id"])
             _execute_attempts(client, shift_id, 2)
     return app
 

@@ -41,6 +41,7 @@ function clearData(message) {
   text('shift-number', 'No shift loaded');
   text('version-state', 'No verified version loaded');
   text('version-hash', '');
+  empty($('selection-summary'), 'No operating choice loaded.');
   text('run-state', 'No run loaded');
   text('evidence-attempts', 'Attempts not loaded.');
   document.querySelector('[data-station="repair"]').setAttribute('aria-disabled', 'true');
@@ -64,11 +65,13 @@ function clearData(message) {
   text('compare-summary', '');
   $('comparison-outcome').replaceChildren();
   text('compare-error', '');
+  text('selection-note', 'A complete eligible comparison is required.');
+  text('selection-error', '');
   empty($('candidate-list'), 'No candidates loaded.');
   empty($('comparison-slots'), 'No comparison loaded.');
   $('source-ordinal').replaceChildren();
   $('source-ordinal').disabled = true;
-  for (const id of ['append-investigation', 'request-assist', 'run-diagnostic', 'freeze-candidate-a', 'freeze-candidate-b', 'run-comparison']) $(id).disabled = true;
+  for (const id of ['append-investigation', 'request-assist', 'run-diagnostic', 'freeze-candidate-a', 'freeze-candidate-b', 'run-comparison', 'select-candidate-a', 'select-candidate-b']) $(id).disabled = true;
   $('open-shift').disabled = true; $('run-shift').disabled = true;
   text('run-help', 'Refresh to load available actions.');
 }
@@ -126,14 +129,29 @@ function renderBoard() {
   text('evidence-attempts', `${board.attempts_remaining} attempt${board.attempts_remaining === 1 ? '' : 's'} remaining in the current shift · ${board.attempts_used} of ${board.attempt_limit} used`);
   document.querySelector('[data-station="repair"]').setAttribute('aria-disabled', String(!board.incidents.length));
   text('event-detail', `${board.ledger_event_count} recorded events`);
-  text('service-tag', version ? `${version.id} · ${needsChoice ? 'candidate only' : 'selected baseline'}` : 'Draft · not frozen');
+  text('service-tag', board.operating_selection ? `${board.operating_selection.selected_version_id} · ${humanize(board.operating_status)}` : version ? `${version.id} · candidate only` : 'Draft · not frozen');
   text('queue-tag', `${state.outputs.length} executed requests`);
   text('incident-tag', `${board.incidents.length} unresolved · Synthetic scenario`);
   text('repair-tag', board.incidents.length ? 'Incident available · read only' : 'No unresolved incident');
   const entries = state.stationView?.investigations ?? [];
   text('investigation-tag', !state.stationView ? 'Not loaded' : entries.length ? `${entries.length} recorded` : 'Orientation only');
-  text('version-state', version ? `${version.id} · ${needsChoice ? 'saved, not selected' : 'frozen'}` : 'Draft · no frozen version');
+  text('version-state', version ? `${version.id} · latest saved${board.operating_selection?.selected_version_id === version.id ? ' and selected' : ''}` : 'Draft · no frozen version');
   text('version-hash', version ? `Content hash ${version.content_hash}` : '');
+  const choice = board.operating_selection;
+  const summary = $('selection-summary');
+  summary.replaceChildren();
+  for (const [label, value] of [
+    ['Latest saved', board.latest_saved_version_id ?? 'none'],
+    ['Operating choice', choice ? `${choice.selected_version_id} · ${choice.selected_content_hash} · ${humanize(choice.state)}` : 'none'],
+    ['Retained alternative', choice?.retained_alternative_version_id ?? 'none'],
+    ['Comparison', choice?.comparison_id ?? 'none'],
+    ['Original requirement hash', choice?.requirement_set_hash ?? 'none'],
+  ]) {
+    const row = element('div', null, 'contract-line');
+    row.dataset.selectionField = label.toLowerCase().replaceAll(' ', '-');
+    row.append(element('span', label), element('strong', value));
+    summary.append(row);
+  }
   const adapter = state.run?.adapter;
   const liveDiagnostic = state.stationView?.latest_experiment?.trials?.some(trial => trial.evidence_mode === 'ISOLATED_LIVE');
   text('execution-note', liveDiagnostic
@@ -195,7 +213,7 @@ function renderArtifact() {
     if (!contract) return empty(target, 'No committed contract. Authoring is not available in this build; no stance is preselected.');
     for (const [label, value] of [
       ['Committed constraint', contract.must_never.map(humanize).join(', ')],
-      [state.board.operating_status === 'NEEDS_FIRST_CHOICE' ? 'Saved candidate stance' : 'Operating stance', Object.values(contract.selections).map(humanize).join(', ')],
+      [state.board.operating_selection?.selected_version_id === state.board.latest_version?.id ? 'Operating stance' : 'Latest saved stance', Object.values(contract.selections).map(humanize).join(', ')],
       ['Response time limit', `${contract.response_time_limit_ms} ms`],
       ['Contract catalog', `Version ${contract.catalog_version}`],
     ]) {
@@ -468,6 +486,18 @@ function renderCompare() {
   const candidates = state.candidates;
   text('compare-state', shift ? `${shift.id} · ${compare ? `${compare.id} · ${humanize(compare.state)}` : 'no comparison reserved'}` : 'No shift loaded');
   text('compare-tag', !shift ? 'Not loaded' : compare ? `${compare.trials.length} slots · ${humanize(compare.state)}` : 'Not reserved');
+  const selectedHere = Boolean(compare && board?.operating_selection?.comparison_id === compare.id);
+  const rationale = $('selection-rationale').value.trim();
+  const eligible = label => compare?.outcome?.status === 'COMPLETE' &&
+    compare.outcome.eligibility.some(item => item.candidate_label === label && item.eligible);
+  for (const label of ['A', 'B']) $('select-candidate-' + label.toLowerCase()).disabled =
+    state.pending || !shift || shift.state !== 'open' || selectedHere || !eligible(label) || !rationale;
+  text('selection-note', selectedHere ? `Choice ${board.operating_selection.id} is recorded. Saving or testing does not change it.`
+    : !compare ? 'Run a qualifying comparison first.'
+    : compare.outcome?.status !== 'COMPLETE' ? 'The comparison must finish complete and comparable before a choice.'
+    : !eligible('A') && !eligible('B') ? 'Neither candidate is eligible under the frozen requirements.'
+    : !rationale ? 'Write a rationale, then choose an eligible exact version.'
+    : 'Your choice will keep the other tested version and original requirement hash in history.');
   const list = $('candidate-list');
   if (!shift) empty(list, 'No shift loaded.');
   else list.replaceChildren(...['A', 'B'].map(label => {
@@ -612,6 +642,29 @@ async function runComparison() {
     if (state.board) { renderBoard(); renderCompare(); }
   }
 }
+async function chooseCandidate(label) {
+  const shiftId = state.board?.latest_shift?.id;
+  const candidate = state.comparison?.candidates.find(item => item.label === label);
+  if (!shiftId || !candidate || state.pending) return;
+  state.pending = true; renderCompare();
+  try {
+    await api(`/shifts/${encodeURIComponent(shiftId)}/selections`, { method: 'POST', body: JSON.stringify({
+      comparison_id: state.comparison.id,
+      selected_version_id: candidate.artifact_version_id,
+      rationale: $('selection-rationale').value,
+      expected_prior_selection_id: state.board.operating_selection?.id ?? null,
+      client_request_id: requestId('selection'),
+    }) });
+    text('selection-error', '');
+    await refresh();
+  } catch (error) {
+    await refresh();
+    text('selection-error', error.message);
+  } finally {
+    state.pending = false;
+    if (state.board) { renderBoard(); renderCompare(); }
+  }
+}
 async function appendInvestigation() {
   const shiftId = state.board?.latest_shift?.id;
   const ordinal = Number($('source-ordinal').value);
@@ -738,7 +791,9 @@ function activateStation(name, userIntent = true) {
     text('deferred-copy', 'The controller scores captured service outputs against independent checks. You can inspect recorded results at the customer queue, but this booth has no editing controls and never displays sealed expected values.');
   }
   if (name === 'owner') { state.file = 'contract'; selectFile('contract'); }
-  if (state.board) text('service-tag', state.board.latest_version ? `${state.board.latest_version.id} · ${state.board.operating_status === 'NEEDS_FIRST_CHOICE' ? 'candidate only' : 'selected baseline'}` : 'Draft · not frozen');
+  if (state.board) text('service-tag', state.board.operating_selection
+    ? `${state.board.operating_selection.selected_version_id} · ${humanize(state.board.operating_status)}`
+    : state.board.latest_version ? `${state.board.latest_version.id} · candidate only` : 'Draft · not frozen');
   renderCustomers();
   renderInvestigate();
   renderCompare();
@@ -795,6 +850,9 @@ $('freeze-candidate-a').addEventListener('click', () => freezeCandidate('A'));
 $('freeze-candidate-b').addEventListener('click', () => freezeCandidate('B'));
 $('run-comparison').addEventListener('click', runComparison);
 $('treatment-input').addEventListener('input', () => renderCompare());
+$('select-candidate-a').addEventListener('click', () => chooseCandidate('A'));
+$('select-candidate-b').addEventListener('click', () => chooseCandidate('B'));
+$('selection-rationale').addEventListener('input', () => renderCompare());
 $('back-board').addEventListener('click', () => { location.hash = 'board'; navigate('board'); });
 document.querySelectorAll('[data-station]').forEach(button => button.addEventListener('click', () => activateStation(button.dataset.station)));
 document.querySelectorAll('[data-file]').forEach(button => button.addEventListener('click', () => selectFile(button.dataset.file)));

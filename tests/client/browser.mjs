@@ -250,7 +250,8 @@ try {
   }
   await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   await send('Page.navigate', { url });
-  await ready();
+  try { await ready(); }
+  catch (error) { throw new Error(`${error.message}; page exceptions: ${exceptions.map(item => item.exception?.description ?? item.text).join(' | ')}`); }
   assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 9);
   const matrix = [];
   for (const width of [1280, 640, 390]) {
@@ -597,7 +598,8 @@ try {
   await evaluate(() => document.getElementById('diagnostic-result').scrollIntoView({ block: 'start' }));
   await screenshot('investigate-diagnostic-1280');
   await evaluate(() => document.querySelector('[data-station="service"]').click());
-  const comparison = process.argv.includes('--compare-demo') ? await evaluate(async (candidateA, candidateB) => {
+  const selectionDemo = process.argv.includes('--selection-demo');
+  const comparison = (process.argv.includes('--compare-demo') || selectionDemo) ? await evaluate(async (candidateA, candidateB, choose) => {
     const humanize = value => value.toLowerCase().replaceAll('_', ' ');
     const shiftId = (await (await fetch('/api/engagements/bookshop/board')).json()).latest_shift.id;
     const put = files => fetch(`/api/shifts/${encodeURIComponent(shiftId)}/artifact`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ files }) }).then(response => {
@@ -678,8 +680,25 @@ try {
       }
     }
     if (!document.getElementById('comparison-outcome').textContent.includes('may overlap')) throw new Error('The comparison hides non-additive incidence meaning');
-    return { experiment: experimentId, state: payload.state, slots: payload.trials.map(trial => `${trial.execution_ordinal}:${trial.pair_ordinal}${trial.candidate_label}/${trial.workload_id}/${trial.request_count}`).join(' ') };
-  }, await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_a_service.py', 'utf8'), await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_b_service.py', 'utf8')) : null;
+    let selection = null;
+    if (choose) {
+      const before = await (await fetch('/api/engagements/bookshop/board')).json();
+      document.getElementById('selection-rationale').value = 'A answered the required tasks in the shared trial.';
+      document.getElementById('selection-rationale').dispatchEvent(new Event('input'));
+      await wait('eligible A to become selectable', () => !document.getElementById('select-candidate-a').disabled);
+      document.getElementById('select-candidate-a').click();
+      await wait('the selected version on the board', () => document.querySelector('[data-selection-field="operating-choice"] strong')?.textContent.includes(payload.candidates[0].artifact_version_id));
+      const after = await (await fetch('/api/engagements/bookshop/board')).json();
+      selection = after.operating_selection;
+      if (selection?.selected_version_id !== payload.candidates[0].artifact_version_id || selection.selected_content_hash !== payload.candidates[0].artifact_content_hash) throw new Error('The choice did not bind exact A bytes');
+      if (selection.retained_alternative_version_id !== payload.candidates[1].artifact_version_id || selection.comparison_id !== experimentId || selection.prior_selection_id !== before.operating_selection.id) throw new Error('The choice lost its alternative, comparison, or prior selection');
+      if (!after.latest_shift.operation_allowed || after.operating_status !== 'SELECTED') throw new Error('The choice did not unlock operation');
+      const summary = document.getElementById('selection-summary').textContent;
+      if (![selection.selected_content_hash, selection.retained_alternative_version_id, selection.comparison_id, selection.requirement_set_hash, after.latest_saved_version_id].every(value => summary.includes(value))) throw new Error('The board hides selected or saved evidence');
+      if (!document.getElementById('select-candidate-a').disabled || !document.getElementById('select-candidate-b').disabled) throw new Error('The same comparison offers a second choice');
+    }
+    return { experiment: experimentId, state: payload.state, slots: payload.trials.map(trial => `${trial.execution_ordinal}:${trial.pair_ordinal}${trial.candidate_label}/${trial.workload_id}/${trial.request_count}`).join(' '), selection };
+  }, await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_a_service.py', 'utf8'), await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_b_service.py', 'utf8'), selectionDemo) : null;
   if (comparison) {
     await evaluate(() => document.getElementById('comparison-slots').scrollIntoView({ block: 'start' }));
     assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '1280px compare panel overflows');
@@ -688,6 +707,10 @@ try {
     await evaluate(() => document.getElementById('comparison-slots').scrollIntoView({ block: 'start' }));
     assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '390px compare panel overflows');
     await screenshot('compare-390');
+    if (selectionDemo) {
+      await evaluate(() => { document.querySelector('[data-station="service"]').click(); document.getElementById('selection-summary').scrollIntoView({ block: 'start' }); });
+      await screenshot('selection-390');
+    }
     await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
     await send('Page.navigate', { url });
     await ready();

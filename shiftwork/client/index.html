@@ -64,6 +64,7 @@
       <div id="load-message" class="load-message" role="status">Loading your shift…</div>
       <section id="board-view">
         <div class="service-card"><div class="service-card-heading"><span class="service-icon" aria-hidden="true">⌘</span><div><strong>Bellwether service</strong><span id="version-state">Waiting for the board</span></div><span class="owner-label">Owned by you</span></div><p id="version-hash" class="mono hash"></p></div>
+        <div id="selection-summary" class="artifact-detail" aria-live="polite"></div>
         <div class="file-tabs" role="group" aria-label="Artifact details"><button data-file="contract" aria-pressed="true">Contract</button><button data-file="checks">Visible checks</button><button data-file="files">Files</button><button data-file="history">Change log</button></div>
         <div id="artifact-detail" class="artifact-detail"></div>
         <section class="panel-section" data-synthetic-region="incidents"><div class="section-heading"><h3>Unresolved incidents</h3><span class="synthetic">Synthetic scenario</span></div><div id="incident-list"></div></section>
@@ -137,6 +138,13 @@
           <p id="compare-summary" class="help-text"></p>
           <div id="comparison-outcome" class="comparison-outcome"></div>
           <div id="comparison-slots"></div>
+        </section>
+        <section class="panel-section">
+          <h3>Choose the version to operate</h3>
+          <p id="selection-note" class="help-text">A complete eligible comparison is required.</p>
+          <div class="field"><label for="selection-rationale">Why this exact version?</label><textarea id="selection-rationale" rows="2" maxlength="2000"></textarea></div>
+          <div class="panel-actions"><button id="select-candidate-a" class="button secondary" disabled>Choose A</button><button id="select-candidate-b" class="button secondary" disabled>Choose B</button></div>
+          <p id="selection-error" class="denial" role="status"></p>
         </section>
       </section>
       <section id="deferred-view" hidden><div class="deferred-symbol" aria-hidden="true">◇</div><h3 id="deferred-title"></h3><p id="deferred-copy"></p><button id="back-board" class="button secondary">Back to your service</button></section>
