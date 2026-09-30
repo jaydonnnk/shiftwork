@@ -432,6 +432,13 @@ class RunAssessment(BaseModel):
     assessed_at: datetime
 
 
+class OperationalAssessment(RunAssessment):
+    """A selected operational assessment, never constructible from a trial."""
+
+    purpose: Literal[RunPurpose.OPERATION] = RunPurpose.OPERATION
+    selection_id: Id
+
+
 class ExperimentKind(StrEnum):
     DIAGNOSTIC = "DIAGNOSTIC"
     QUALIFYING_COMPARISON = "QUALIFYING_COMPARISON"

@@ -76,7 +76,9 @@ from shiftwork.domain.models import (
     RunOutput,
     RunPurpose,
     RunState,
+    ReasonCode,
     ObservationKind,
+    OperationalAssessment,
     ServiceResponse,
     Shift,
     ShiftOpeningMode,
@@ -479,6 +481,7 @@ def start_run(
     *,
     executor: str | None = None,
     shop_snapshot: str | Path | None = None,
+    client_request_id: str | None = None,
 ) -> Run:
     """Reserve one attempt: budget check, one never-exposed draw per family, atomically.
 
@@ -499,6 +502,10 @@ def start_run(
     try:
         shift = _require_open_shift(conn, shift_id)
         selection, version = _selected_operating_version(conn, shift)
+        if selection.kind == "LEARNER_CHOICE" and selection.comparison_id is not None:
+            run = _reserve_selected_operation(conn, shift, selection, version, client_request_id)
+            conn.commit()
+            return run
         used = repo.count_operation_runs(conn, shift_id)
         limit = _attempt_limit(conn, shift.engagement_slug)
         if used >= limit:
@@ -553,6 +560,70 @@ def start_run(
     return run
 
 
+def _reserve_selected_operation(
+    conn: sqlite3.Connection, shift: Shift, selection: OperatingSelection,
+    version: ArtifactVersion, client_request_id: str | None,
+) -> Run:
+    """Reserve an exact choice and frozen current conditions in the caller's transaction."""
+    if not client_request_id or not client_request_id.strip():
+        raise LifecycleError("conflict", "selected operation needs a request key")
+    replay = conn.execute(
+        "SELECT id FROM runs WHERE client_request_id = ?", (client_request_id,)
+    ).fetchone()
+    if replay is not None:
+        prior = repo.get_run(conn, replay["id"])
+        if prior.shift_id == shift.id and prior.selection_id == selection.id:
+            return prior
+        raise LifecycleError("conflict", "operation request key was already used")
+    if selection.comparison_id is not None:
+        reservation = repo.get_exposure_reservation_for_experiment(conn, selection.comparison_id)
+        if reservation is None or reservation.state != "ACTIVE":
+            raise LifecycleError("conflict", "selected comparison exposure was invalidated")
+    if shift.engagement_slug != config.BOOKSHOP_SLUG:
+        raise LifecycleError("conflict", "operational mission is unavailable for this engagement")
+    mission_bytes = config.PIVOT_MISSION.read_bytes()
+    if _hash_bytes(mission_bytes) != selection.requirement_set_hash:
+        raise LifecycleError("conflict", "selected requirements changed before operation")
+    prior_operations = [run for run in repo.list_runs_for_shift(conn, shift.id)
+                        if run.purpose is not RunPurpose.EXPERIMENT]
+    if any(run.state is RunState.FINALIZED for run in prior_operations):
+        raise LifecycleError("conflict", "one successful operation is already finalized this shift")
+    if any(run.state not in (RunState.FINALIZED, RunState.FAILED) for run in prior_operations):
+        raise LifecycleError("conflict", "operation already in flight")
+    if len(prior_operations) >= 2:
+        raise LifecycleError("conflict", "two operational reservations already spent")
+    if prior_operations:
+        previous = prior_operations[0]
+        if (repo.list_outputs(conn, previous.id)
+                or any(previous.id in event.cause_refs for event in
+                       repo.list_ledger_events(conn, shift.engagement_slug))):
+            raise LifecycleError("conflict", "retry requires zero captured outputs and no business write")
+        if previous.selection_id != selection.id or previous.context_id is None:
+            raise LifecycleError("conflict", "retry selection or context changed")
+    context = freeze_diagnostic_context(conn, shift, operation=True)
+    if context.mission_hash != selection.requirement_set_hash:
+        raise LifecycleError("conflict", "selected requirements changed before operation")
+    if prior_operations and prior_operations[0].context_id != context.id:
+        raise LifecycleError("conflict", "retry conditions changed")
+    ordinal = repo.count_runs_all(conn) + 1
+    run = Run(
+        id=f"run-{ordinal:04d}", shift_id=shift.id, artifact_version_id=version.id,
+        request_batch_ref=f"frozen-workload:{context.workloads[0].id}",
+        shop_snapshot_ref="pivot:frozen",
+        attempt_number=repo.count_runs(conn, shift.id) + 1, state=RunState.QUEUED,
+        adapter=LocalProcessAdapter.name, started_at=_now(), purpose=RunPurpose.OPERATION,
+        evidence_mode=EvidenceMode.TRUSTED_LOCAL, selection_id=selection.id,
+        context_id=context.id,
+    )
+    repo.insert_run(conn, run)
+    conn.execute("UPDATE runs SET client_request_id = ? WHERE id = ?", (client_request_id, run.id))
+    repo.insert_exposure_reservation(conn, ExposureReservation(
+        id=f"exposure-operation-{run.id}", engagement_slug=shift.engagement_slug,
+        scope="operation", experiment_id=None, state="ACTIVE", created_at=_now(),
+    ))
+    return run
+
+
 def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
     """Execute a queued run against the snapshot bytes it captures here.
 
@@ -564,6 +635,8 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
     run = repo.get_run(conn, run_id)
     if run is None:
         raise LifecycleError("not_found", f"unknown run: {run_id}")
+    if run.context_id is not None and run.purpose is RunPurpose.OPERATION:
+        return execute_selected_operation(conn, run_id)
     if run.state is not RunState.QUEUED:
         return run
     try:
@@ -629,6 +702,216 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
         conn.commit()
         raise
     return repo.get_run(conn, run_id)
+
+
+def execute_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
+    """Run only the frozen public workload, retaining captures before consequences."""
+    run = get_run(conn, run_id)
+    if run.purpose is not RunPurpose.OPERATION or run.context_id is None:
+        raise LifecycleError("conflict", "selected operation required")
+    if run.state is not RunState.QUEUED:
+        return run
+    context = repo.get_execution_context(conn, run.context_id)
+    version = repo.get_version(conn, run.artifact_version_id)
+    if context is None or version is None or len(context.workloads) != 1:
+        repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
+        conn.commit()
+        return repo.get_run(conn, run.id)
+    workload = context.workloads[0]
+    try:
+        mission_bytes = base64.b64decode(context.mission_bytes_base64, validate=True)
+        state_bytes = base64.b64decode(context.public_data_bytes_base64, validate=True)
+        batch_bytes = base64.b64decode(workload.request_batch_bytes_base64, validate=True)
+        mission = task_contract.load_mission_bytes(mission_bytes)
+        task_contract.load_public_state_bytes(state_bytes)
+        if (_hash_bytes(mission_bytes) != context.mission_hash
+                or _hash_bytes(state_bytes) != context.public_data_hash
+                or canonical.content_hash(_encode(batch_bytes)) != workload.request_batch_hash
+                or run.selection_id is None):
+            raise ValueError("frozen operation context digest mismatch")
+        request = _comparison_run_request(run, context, workload, version)
+    except (ValueError, ShiftworkDomainError):
+        repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
+        conn.commit()
+        return repo.get_run(conn, run.id)
+    repo.update_run(conn, run.id, RunState.RUNNING)
+    repo.set_run_snapshot_bytes(conn, run.id, state_bytes)
+    conn.commit()
+    try:
+        with tempfile.TemporaryDirectory(prefix="shiftwork-operation-") as directory:
+            state_path = Path(directory) / "public_state.json"
+            state_path.write_bytes(state_bytes)
+            request = request.model_copy(update={"shop_snapshot_ref": str(state_path)})
+            # S18 is offline only. A live operational adapter needs a separately
+            # authorized run and its bounded service controls.
+            if run.adapter != LocalProcessAdapter.name:
+                raise LifecycleError("conflict", "selected operation has no offline executor")
+            result = asyncio.run(LocalProcessAdapter().execute(request))
+        for ordinal, observation in enumerate(result.observations, start=1):
+            raw = json.dumps(observation.raw_payload, sort_keys=True, default=str).encode("utf-8")
+            repo.insert_observation(conn, ExecutionObservation(
+                id=f"{run.id}-obs-{ordinal}", run_id=run.id,
+                request_ordinal=observation.public_payload.get("request_ordinal", 1),
+                ordinal=ordinal, kind=ObservationKind(observation.kind),
+                public_payload_json=observation.public_payload,
+                raw_payload_ref="data:application/json;base64," + _encode(raw), measured_at=_now(),
+            ))
+        batch = {item.ordinal: item for item in executor.load_batch(request.request_batch, batch_bytes)}
+        for capture in executor.normalize_captures(result.captures, request.deadline_s):
+            repo.insert_output(conn, capture.model_copy(update={
+                "id": f"{run.id}-out-{capture.request_ordinal}", "run_id": run.id,
+                "request_text": batch[capture.request_ordinal].text,
+            }))
+        # This boundary keeps raw evidence even when assessment or reduction fails.
+        conn.commit()
+        if result.failure is not None:
+            repo.update_run(conn, run.id, RunState.FAILED, result.failure, _now())
+            conn.commit()
+        elif (len(repo.list_outputs(conn, run.id)) != workload.request_count
+              or any(item.transport_error is not None or not item.body
+                     for item in repo.list_outputs(conn, run.id))):
+            repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.CAPTURE_TRUNCATED, _now())
+            conn.commit()
+        else:
+            repo.update_run(conn, run.id, RunState.CAPTURED)
+            conn.commit()
+            finalize_selected_operation(conn, run.id)
+    except Exception:
+        conn.rollback()
+        if repo.get_run(conn, run.id).state not in (RunState.FINALIZED, RunState.FAILED):
+            repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
+            conn.commit()
+        raise
+    return repo.get_run(conn, run.id)
+
+
+def finalize_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
+    """Commit checks, synthetic events, incidents and terminal state together."""
+    run = get_run(conn, run_id)
+    if run.state is RunState.FINALIZED:
+        return run
+    if run.purpose is not RunPurpose.OPERATION or run.context_id is None:
+        raise LifecycleError("conflict", "selected operation required for business finalization")
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        run = get_run(conn, run_id)
+        if run.state is not RunState.CAPTURED:
+            raise LifecycleError("conflict", "operation has no completed capture")
+        shift = _require_shift(conn, run.shift_id)
+        selection, version = _selected_operating_version(conn, shift)
+        context = repo.get_execution_context(conn, run.context_id)
+        if (selection.id != run.selection_id or version.id != run.artifact_version_id
+                or context is None or context.engagement_slug != shift.engagement_slug
+                or len(context.workloads) != 1):
+            raise LifecycleError("conflict", "selected operation binding changed")
+        if selection.comparison_id:
+            exposure = repo.get_exposure_reservation_for_experiment(conn, selection.comparison_id)
+            if exposure is None or exposure.state != "ACTIVE":
+                raise LifecycleError("conflict", "selected comparison exposure was invalidated")
+        operation_exposure = repo.get_exposure_reservation(conn, f"exposure-operation-{run.id}")
+        if operation_exposure is None or operation_exposure.state != "ACTIVE":
+            raise LifecycleError("conflict", "operational exposure was invalidated")
+        mission_bytes = base64.b64decode(context.mission_bytes_base64, validate=True)
+        state_bytes = base64.b64decode(context.public_data_bytes_base64, validate=True)
+        if (_hash_bytes(mission_bytes) != context.mission_hash
+                or _hash_bytes(state_bytes) != context.public_data_hash
+                or repo.get_run_snapshot_bytes(conn, run.id) != state_bytes):
+            raise LifecycleError("conflict", "captured operational mission or state differs")
+        mission = task_contract.load_mission_bytes(mission_bytes)
+        snapshot = task_contract.load_public_state_bytes(state_bytes)
+        outputs = repo.list_outputs(conn, run.id)
+        workload = context.workloads[0]
+        if (len(outputs) != workload.request_count
+                or {item.request_ordinal for item in outputs}
+                != set(range(1, workload.request_count + 1))
+                or any(item.transport_error is not None or not item.body for item in outputs)):
+            raise LifecycleError("conflict", "operational capture is incomplete")
+        captured = {item.request_ordinal: item for item in outputs}
+        assessed = []
+        completed = 0
+        mandatory_pass = True
+        for index, spec in enumerate(mission.request_specs, start=1):
+            output = captured[index]
+            try:
+                response = task_contract.validate_response_envelope(spec, output.body)
+            except TaskEnvelopeInvalid:
+                response = None
+            rows = evaluator.assess_request(spec=spec, request_ordinal=index,
+                                            mission=mission, snapshot=snapshot, response=response)
+            assessed.extend(rows)
+            completed += int(evaluator.request_usefully_completed(spec, rows))
+            mandatory_pass &= all(row.mandatory_pass for row in rows)
+        assessment = OperationalAssessment(
+            run_id=run.id, context_hash=context.content_hash,
+            complete_request_count=completed, expected_request_count=len(mission.request_specs),
+            mandatory_pass=mandatory_pass, rule_version=context.reducer_version,
+            assessed_at=_now(), selection_id=selection.id,
+        )
+        checks: dict[str, CheckResult] = {}
+        for row in assessed:
+            check_id = f"task:{row.request_id}:{row.task_id}"
+            check = CheckResult(
+                id=f"cr-{repo.count_check_results(conn) + 1:04d}", run_id=run.id,
+                check_id=check_id, verdict="pass" if row.mandatory_pass else "fail",
+                observed_ref=captured[row.request_ordinal].id,
+                reason_code=(row.reason_codes[0] if row.reason_codes else
+                             (None if row.mandatory_pass else ReasonCode.REQUIRED_TASK_MISSING)),
+            )
+            repo.insert_check_result(conn, check)
+            repo.insert_task_assessment(conn, assessment_id=f"{run.id}-a{row.request_ordinal}-{row.task_id}",
+                                        run_id=run.id, assessment=row, assessed_at=_now())
+            checks[check_id] = check
+        repo.insert_run_assessment(conn, assessment)
+        drafts = reducer.reduce_operation(run, assessment, mission, tuple(assessed), tuple(checks.values()))
+        resolving = []
+        for incident in repo.list_incidents(conn, shift.engagement_slug):
+            if incident.state is IncidentState.RESOLVED:
+                continue
+            opened = repo.get_run(conn, incident.opening_run_id)
+            old_check = next((row for row in repo.list_check_results(conn, incident.opening_run_id)
+                              if row.id == incident.check_result_id), None)
+            regression = checks.get(old_check.check_id) if old_check else None
+            opened_context = (repo.get_execution_context(conn, opened.context_id)
+                              if opened is not None and opened.context_id is not None else None)
+            if (opened is None or opened.artifact_version_id == version.id
+                    or opened_context is None
+                    or opened_context.mission_hash != context.mission_hash
+                    or opened_context.evaluator_version != context.evaluator_version
+                    or regression is None or regression.verdict != "pass"):
+                continue
+            resolving.append((incident.id, LedgerEventDraft(
+                event_type=LedgerEventType.INCIDENT_RESOLVED,
+                cause_refs=(run.id, regression.id, incident.id),
+                payload={"incident_id": incident.id, "resolving_version_id": version.id,
+                         "rule_version": assessment.rule_version},
+            )))
+        existing = repo.list_ledger_events(conn, shift.engagement_slug)
+        events = chain.append(drafts + [item[1] for item in resolving],
+                              prev_hash=chain.next_prev_hash(existing), start_seq=chain.next_seq(existing))
+        for event in events:
+            repo.insert_ledger_event(conn, shift.engagement_slug, event)
+        for draft, event in zip(drafts, events):
+            if draft.event_type is not LedgerEventType.INCIDENT_OPENED:
+                continue
+            check = next(item for item in checks.values() if item.id == draft.cause_refs[1])
+            repo.insert_incident(conn, Incident(
+                id=f"{config.INCIDENT_PREFIX}-{repo.count_incidents(conn, shift.engagement_slug) + 1:02d}",
+                engagement_slug=shift.engagement_slug, shift_id=shift.id,
+                opening_run_id=run.id, failing_output_ref=check.observed_ref,
+                check_result_id=check.id,
+                reason_code=check.reason_code or ReasonCode(draft.payload["reason_code"]),
+                opened_event_seq=event.seq, state=IncidentState.OPEN,
+            ))
+        for (incident_id, _), event in zip(resolving, events[len(drafts):]):
+            repo.resolve_incident(conn, incident_id, version.id, event.seq)
+        repo.update_run(conn, run.id, RunState.FINALIZED, ended_at=_now())
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
+        conn.commit()
+        raise
+    return get_run(conn, run.id)
 
 
 def execute_run_task(db_path: str, run_id: str) -> None:
@@ -1021,6 +1304,29 @@ def output_evidence_for(conn: sqlite3.Connection, output: RunOutput, run: Run) -
         "public_shop_record_ref": None,
         "public_shop_snapshot_hash": None,
     }
+    if run.context_id is not None and run.purpose is RunPurpose.OPERATION:
+        context = repo.get_execution_context(conn, run.context_id)
+        if context is None:
+            return evidence
+        try:
+            mission = task_contract.load_mission_bytes(base64.b64decode(context.mission_bytes_base64))
+            snapshot = task_contract.load_public_state_bytes(base64.b64decode(context.public_data_bytes_base64))
+            spec = mission.request_specs[output.request_ordinal - 1]
+            response = task_contract.validate_response_envelope(spec, output.body)
+            display = customer_answer.render_task_customer_text(
+                spec=spec, mission=mission, snapshot=snapshot, response=response)
+        except (IndexError, ShiftworkDomainError, ValueError):
+            return evidence
+        statuses = {item.status.value for item in response.task_results}
+        action = ("escalate" if "REFERRED" in statuses else "ask" if "NEEDS_CLARIFICATION" in statuses
+                  else "decline" if "REFUSED" in statuses else "answer")
+        evidence["customer_answer"] = {
+            "action": action, "display_text": display,
+            "claims": [{"kind": claim.kind, "value": claim.value}
+                       for task in response.task_results for claim in task.claims],
+            "evidence_refs": list(response.evidence_refs), "verified_record_age_ms": None,
+        }
+        return evidence
     records: dict[str, JsonValue] = {}
     try:
         snapshot_bytes = _snapshot_bytes_for_run(conn, run)
@@ -1152,12 +1458,27 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         operating_status = "SELECTED"
     requests_run = len(list_outputs(conn, latest_run.id)) if latest_run else 0
     attempts_used = repo.count_operation_runs(conn, latest_shift.id) if latest_shift else 0
-    attempt_limit = _attempt_limit(conn, slug)
+    attempt_limit = (2 if selection is not None and selection.kind == "LEARNER_CHOICE"
+                     and selection.comparison_id is not None
+                     else _attempt_limit(conn, slug))
+    successful_operation = (latest_shift is not None and any(
+        run.purpose is not RunPurpose.EXPERIMENT and run.state is RunState.FINALIZED
+        for run in repo.list_runs_for_shift(conn, latest_shift.id)))
     incidents = repo.list_incidents(conn, slug)
     events = repo.list_ledger_events(conn, slug)
     status = chain.verify_chain(events)
     if status is chain.ChainStatus.BROKEN:
         raise LifecycleError("conflict", "ledger chain is BROKEN; refusing board counters")
+    operation_runs = ([run for run in repo.list_runs_for_shift(conn, latest_shift.id)
+                       if run.purpose is not RunPurpose.EXPERIMENT]
+                      if latest_shift else [])
+    retry_blocked = (attempt_limit == 2 and len(operation_runs) == 1
+                     and operation_runs[0].state is RunState.FAILED
+                     and (bool(repo.list_outputs(conn, operation_runs[0].id))
+                          or any(operation_runs[0].id in event.cause_refs for event in events)
+                          or operation_runs[0].selection_id != (selection.id if selection else None)))
+    attempts_remaining = (0 if attempt_limit == 2 and (successful_operation or retry_blocked)
+                          else max(0, attempt_limit - attempts_used))
     totals: dict[str, int] = {}
     for event in events:
         totals[event.event_type.value] = totals.get(event.event_type.value, 0) + 1
@@ -1177,7 +1498,7 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         "requests_run": requests_run,
         "attempts_used": attempts_used,
         "attempt_limit": attempt_limit,
-        "attempts_remaining": attempt_limit - attempts_used,
+        "attempts_remaining": attempts_remaining,
         "incidents": [
             incident
             for incident in incidents
@@ -1623,7 +1944,8 @@ def _diagnostic_context_fields(
 
 
 def freeze_diagnostic_context(
-    conn: sqlite3.Connection, shift: Shift, *, isolated: bool = False
+    conn: sqlite3.Connection, shift: Shift, *, isolated: bool = False,
+    operation: bool = False,
 ) -> ExecutionContext:
     """Freeze the reviewed public material one diagnostic is assessed against.
 
@@ -1665,6 +1987,12 @@ def freeze_diagnostic_context(
         "state": "not_applicable",
         "reason": "a public diagnostic writes no business state",
     }
+    if operation:
+        starting_state = {
+            "ledger_head": chain.next_prev_hash(repo.list_ledger_events(conn, shift.engagement_slug)),
+            "unresolved_incident_ids": [incident.id for incident in repo.list_incidents(
+                conn, shift.engagement_slug) if incident.state is not IncidentState.RESOLVED],
+        }
     condition = ContextCondition(
         id="condition-normal",
         kind="normal",
@@ -1675,6 +2003,9 @@ def freeze_diagnostic_context(
     fields = _diagnostic_context_fields(
         shift, mission, mission_bytes, snapshot_bytes, specs_bytes, workload, condition, starting_state
     )
+    if operation:
+        fields["evaluator_version"] = "operation-task-v1"
+        fields["reducer_version"] = "operation-ledger-v1"
     if isolated:
         fields.update({
             "executor_class": EvidenceMode.ISOLATED_LIVE.value,

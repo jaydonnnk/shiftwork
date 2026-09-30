@@ -319,3 +319,40 @@ BEFORE DELETE ON protected_case_snapshots
 BEGIN
     SELECT RAISE(ABORT, 'protected case snapshots are never deleted');
 END;
+
+-- Historical runs have no frozen operation context. The partial constraint
+-- governs S18 pivot operations without rewriting accepted legacy evidence.
+CREATE UNIQUE INDEX IF NOT EXISTS one_finalized_pivot_operation_per_shift
+ON runs(shift_id) WHERE purpose = 'OPERATION' AND context_id IS NOT NULL AND state = 'FINALIZED';
+
+CREATE TRIGGER IF NOT EXISTS one_inflight_pivot_operation_insert
+BEFORE INSERT ON runs
+WHEN NEW.purpose = 'OPERATION' AND NEW.context_id IS NOT NULL
+ AND NEW.state NOT IN ('FINALIZED', 'FAILED')
+BEGIN
+    SELECT RAISE(ABORT, 'operation already in flight for engagement')
+    WHERE EXISTS (
+        SELECT 1 FROM runs r JOIN shifts s ON s.id = r.shift_id
+        JOIN shifts target ON target.id = NEW.shift_id
+        WHERE s.engagement_slug = target.engagement_slug
+          AND r.purpose = 'OPERATION' AND r.state NOT IN ('FINALIZED', 'FAILED')
+    );
+END;
+
+-- Replace the earlier state-only trigger when completing an existing v6 database.
+-- The completion migration runs in one transaction, so no write can slip between
+-- the drop and replacement.
+DROP TRIGGER IF EXISTS one_inflight_pivot_operation_update;
+CREATE TRIGGER one_inflight_pivot_operation_update
+BEFORE UPDATE OF state, purpose, context_id, shift_id ON runs
+WHEN NEW.purpose = 'OPERATION' AND NEW.context_id IS NOT NULL
+ AND NEW.state NOT IN ('FINALIZED', 'FAILED')
+BEGIN
+    SELECT RAISE(ABORT, 'operation already in flight for engagement')
+    WHERE EXISTS (
+        SELECT 1 FROM runs r JOIN shifts s ON s.id = r.shift_id
+        JOIN shifts target ON target.id = NEW.shift_id
+        WHERE s.engagement_slug = target.engagement_slug AND r.id != NEW.id
+          AND r.purpose = 'OPERATION' AND r.state NOT IN ('FINALIZED', 'FAILED')
+    );
+END;

@@ -24,9 +24,14 @@ from shiftwork.domain.models import (
     JsonValue,
     LedgerEventDraft,
     LedgerEventType,
+    OperationalAssessment,
     ReasonCode,
+    Run,
+    RunPurpose,
     RunOutput,
 )
+from shiftwork.domain.task_contract import MissionSpec, TaskAssessment
+from shiftwork.evaluator import evaluator
 
 _FROZEN = ConfigDict(frozen=True, extra="forbid")
 
@@ -133,6 +138,44 @@ def reduce(
                 committed_contract.catalog_version,
             )
         )
+    return drafts
+
+
+def reduce_operation(
+    run: Run, assessment: OperationalAssessment, mission: MissionSpec,
+    task_assessments: tuple[TaskAssessment, ...], checks: tuple[CheckResult, ...],
+) -> list[LedgerEventDraft]:
+    """Derive labelled synthetic order and incident drafts from one selected run."""
+    if (run.purpose is not RunPurpose.OPERATION or run.selection_id is None
+            or assessment.purpose is not RunPurpose.OPERATION
+            or assessment.selection_id != run.selection_id
+            or assessment.run_id != run.id):
+        raise ValueError("business reduction requires the selected operational run")
+    drafts: list[LedgerEventDraft] = []
+    by_task = {check.check_id: check for check in checks}
+    for index, spec in enumerate(mission.request_specs, start=1):
+        required = {task.id for task in spec.tasks if task.required}
+        rows = [row for row in task_assessments if row.request_ordinal == index]
+        if required and evaluator.request_usefully_completed(spec, rows):
+            source = by_task[f"task:{spec.id}:{sorted(required)[0]}"]
+            drafts.append(LedgerEventDraft(
+                event_type=LedgerEventType.SALE_COMPLETED,
+                cause_refs=(run.id, source.id, source.observed_ref),
+                payload={"synthetic_orders": 1, "mission_version": mission.version,
+                         "rule_version": assessment.rule_version},
+            ))
+        else:
+            for row in rows:
+                if row.task_id in required and not row.mandatory_pass:
+                    source = by_task[f"task:{row.request_id}:{row.task_id}"]
+                    drafts.append(LedgerEventDraft(
+                        event_type=LedgerEventType.INCIDENT_OPENED,
+                        cause_refs=(run.id, source.id, source.observed_ref),
+                        payload={"reason_code": (row.reason_codes[0].value if row.reason_codes
+                                                  else ReasonCode.REQUIRED_TASK_MISSING.value),
+                                 "mission_version": mission.version,
+                                 "rule_version": assessment.rule_version},
+                    ))
     return drafts
 
 

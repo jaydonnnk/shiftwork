@@ -38,10 +38,11 @@ def _complete_v6_tables(conn: sqlite3.Connection) -> None:
 
     Gate 3 S4 assigns every pivot table to schema version 6, but the slices that
     first need them land later, so a database migrated by an earlier build
-    reports version 6 while lacking them. ``v6_tables.sql`` holds only
-    ``IF NOT EXISTS`` DDL, so re-applying it changes no historical byte and no
-    existing row. Column changes and backfills stay in ``v6.sql``, which never
-    runs on this path.
+    reports version 6 while lacking them. ``v6_tables.sql`` uses idempotent
+    DDL; it atomically replaces the S18 in-flight update trigger so databases
+    created by an earlier S18 build receive the corrected guard. Re-applying
+    it changes no historical row. Column changes and backfills stay in
+    ``v6.sql``, which never runs on this path.
     """
     script = MIGRATION_V6_TABLES_PATH.read_text(encoding="utf-8")
     if conn.in_transaction:
