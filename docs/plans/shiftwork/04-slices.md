@@ -1,13 +1,10 @@
 # Vertical Slice Plan: Shiftwork final pivot
 
-**Current slice state, 2026-09-29:** The operator reviewed and sealed the
-comparison manifest and protected family. S15 is accepted and published. The
-one authorized six-slot live comparison completed with all eighteen captures
-verified, twelve Sandbox operations and zero model calls. S16's conditional
-acceptance is met after R2 and R3 repair and offline verification. The user
-gave S17 its own go-ahead; S17 is implemented and demonstrated offline on
-`shiftwork/slice-17`, awaiting user review. S18 has no go-ahead. The 2026-09-28
-state descriptions below are historical.
+**Current slice state, 2026-09-30:** S17 is accepted and published. S18 has its
+own offline go-ahead and its review repairs are complete on
+`shiftwork/slice-18`, awaiting user acceptance. Live operation, publication and
+S19 have no authority. See `00-status.md` for evidence and limits. Older state
+descriptions below are historical.
 
 **Current Gate 4 state: RE-APPROVED 2026-09-28.** The user approved the repaired
 protected-phase slice reconciliation together with Gate 2 S8.1, Gate 3 and
@@ -436,6 +433,16 @@ one.
 
 ### Slice 20: inherit and test the retained alternative later
 
+- **Future proof reminder (user request 2026-09-30; pending Gate 4 reconciliation):**
+  Demonstrate one linked `ISOLATED_LIVE` Bellwether path: a learner-owned
+  repaired version makes recorded Nemotron calls in its qualifying comparison,
+  independently passes the customer task checks, is explicitly selected by exact
+  version/hash, then makes a recorded Nemotron call as that same selected version
+  in operation with independently checked synthetic consequences. The next shift
+  inherits that exact version and history. Retain IDs and hashes linking the
+  inference requests, captures, checks, comparison, choice, operation, ledger
+  and inheritance. Separate model-only and code-only runs do not prove this
+  end-to-end claim. This note authorizes no live execution or fixture change.
 - **Working result and demo:** `python -m demos.final_pivot --stage inheritance`
   shows the offline history rule; at the reported local URL close and open the next
   Bellwether shift from the exact selection, and displays original rationale,
@@ -556,6 +563,11 @@ one.
 
 ### Slice 24: full-pivot package and honest judge evidence
 
+- **Future proof reminder (user request 2026-09-30; pending Gate 4 reconciliation):**
+  The judge path must show or link the single S20 Nemotron-backed evidence chain,
+  not assemble unrelated inference, comparison, operation and inheritance runs
+  into an end-to-end claim. If that chain is absent, label the missing link and
+  do not claim a successful live AI-powered learner repair.
 - **Working result and demo:** `python -m pytest tests/packaging/test_clean_env_install_and_run.py -q`
   installs only the approved lock in a clean environment and runs the **full
   offline pivot demo**. A downloadable test build includes source/assets,

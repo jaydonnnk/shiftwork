@@ -1,5 +1,16 @@
 # Mistakes Log
 
+## 2026-09-30 S18 mutation classifier missed bare pytest assertions
+
+- What happened: the first stricter mutation run called six rows UNPROVEN even
+  though their named tests failed at bare `assert` statements. Its 8-of-14
+  summary was a classifier error, not a proof of eight remaining guards.
+- Root cause: the harness recognized `AssertionError` and `DID NOT RAISE` but
+  omitted pytest's common `E   assert ...` failure format.
+- Prevention rule: classify bare asserts as assertion failures, require each
+  mutation's expected assertion text and print the observed assertion. Do not
+  count an incidental production exception as an assertion-level catch.
+
 ## 2026-09-29 S17 stale station label and ambiguous test patch
 
 - What happened: the service station's activation handler overwrote the new
@@ -1308,3 +1319,21 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **What happened:** the first route-drift test used an invalid candidate label and failed during model validation rather than at the intended route KeyError. Later, adding an optional live budget positional argument broke three focused tests whose spies and fake gateway still used the original two-argument interfaces.
 - **Root cause:** the drift fixture did not preserve the domain model's label constraint, and the new optional dependency changed call shapes even when it was absent.
 - **Prevention rule:** make fault fixtures valid at every layer before the target guard. When adding optional execution controls, keep the original invocation shape on the default path and test existing fakes and spies before wider verification.
+
+## 2026-09-29 S18 routed legacy test selections into the new keyed operation
+
+- **What happened:** the first full offline suite returned 24 failures and 11 errors because the S18 run-start branch treated old test-only `LEARNER_CHOICE` rows as qualifying S17 selections and demanded a new request key.
+- **Root cause:** the dispatch checked the selection kind but ignored whether a completed comparison backed it. Historical tests deliberately use a selection row without a comparison to exercise the older execution path.
+- **Prevention rule:** when adding a new lifecycle route for a reused enum value, dispatch on the full durable prerequisite and run the older route groups before the full suite. S18 now requires a comparison ID for the new path.
+
+## 2026-09-29 S18 proof setup used stale assumptions
+
+- **What happened:** one migrated S17 test first failed because the new selected-operation route requires a request key; a database constraint test expected an index name although SQLite reported `UNIQUE constraint failed: runs.shift_id`. The first mutation run also caught only four of eight cases because anchors had moved and the v5-copy test reads `v6_tables.sql`, not fresh `schema.sql`.
+- **Root cause:** the tests and mutation targets were written from the intended design instead of the measured route, SQLite error and active migration path.
+- **Prevention rule:** inspect the actual response and schema path for migrated databases, make assertions about stable failure semantics, and require zero skipped or unproven named mutations after every anchor change.
+
+## 2026-09-29 S18 operation indexes broke pre-v5 upgrades
+
+- **What happened:** the first final repository suite returned three legacy upgrade failures because the added `schema.sql` indexes referenced `runs.purpose` before the old fixture acquired that column.
+- **Root cause:** I duplicated S18 constraints in the fresh schema despite its instruction to place later v6 DDL in `migrations/v6_tables.sql`, which also handles migrated databases.
+- **Prevention rule:** add slice-owned v6 constraints only to the idempotent completion migration, then run the schema 2/3 upgrade tests before the broad suite.

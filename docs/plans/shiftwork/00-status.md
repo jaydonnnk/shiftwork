@@ -1,5 +1,123 @@
 # Status: Shiftwork
 
+## Future S20 and S24 Nemotron proof request: 2026-09-30
+
+The user asked to retain a stronger end-to-end evidence target for the future
+Bellwether live journey. The pending reminders in `04-slices.md` S20 and S24
+require one traceable learner-owned version/hash across a passing Nemotron-backed
+isolated comparison, explicit selection, a Nemotron-backed selected operation
+with independently checked synthetic consequences, and exact-version next-shift
+inheritance. Separate successful runs cannot be assembled into that claim.
+This records the request; it is not Gate 4 re-approval, live-call authority or
+S18 acceptance. Reconcile the stronger exit target with the approved gates
+before dependent S20 work.
+
+## Slice 18 review repairs awaiting user acceptance: 2026-09-30
+
+The user rejected offline acceptance pending three behavior defects, the retry
+display, assertion-level mutation evidence and an active browser walkthrough.
+The approved S18 implementation scope covers these repairs. S18 remains unchecked;
+this entry gives no authority to commit, push, merge, run live services or start S19.
+
+- The operational reducer now uses the evaluator's request completion predicate.
+  An unsupported optional price claim prevents `SALE_COMPLETED` even when both
+  required tasks pass. A focused test failed on the old code and passes now.
+- Run reservation compares the frozen mission hash with the exact selection
+  after the second mission read. A valid byte change between reads now returns
+  conflict and leaves no run. A focused test failed before this repair.
+- The v6 in-flight trigger covers updates to state, purpose, context and shift.
+  Its completion migration atomically replaces the earlier state-only trigger
+  on an existing v6 database. Direct SQL tests for a purpose change and an
+  already-migrated database failed before repair and pass now.
+- The board now shows zero remaining attempts after a failed selected operation
+  with captured output or a linked business write, and after a changed choice.
+  The failed-output test first showed one remaining attempt while the retry API
+  refused it; it now shows zero.
+- The named mutation harness now records each expected failing assertion and
+  isolates the business-write retry guard from context drift. Its settled run
+  returned **19 FAIL_CAUGHT, 0 SKIP, 0 UNPROVEN**. The earlier 14-row count in
+  the section below is historical and did not establish independent guards.
+
+The active browser walkthrough used a fresh local database at
+`http://127.0.0.1:8187/`. After an offline qualifying comparison and selection,
+the browser saved a comment-only newer draft through the local API form, froze
+it as unselected `ver-0005`, then used the room's Run control. The browser and
+read-only API both showed selection `ver-0003`, finalized `run-0008` operating
+`ver-0003`, three passing checks and synthetic `SALE_COMPLETED` event 5. The
+comment-only saved version proves pointer separation; it was not executed or
+qualified as a working service. The adapter was `local_process` with
+`TRUSTED_LOCAL` evidence and no live call. The browser remains open for review.
+
+The focused route, ledger and migration suite returned **69 passed, 2 warnings**
+before the existing-v6 migration repair; its 16 directly affected checks then
+passed. The final offline suite
+`.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`
+returned **601 passed, 1 skipped, 2 warnings** after all repairs. Packaging
+Test 51 remains excluded because it performs installation. Offline policy and
+browser evidence do not prove model answer quality, Sandbox isolation, vendor
+availability, actual billing or later inheritance.
+The post-repair architecture cleanup scan found no new fixture, orphaned changed
+entry point or duplicate guard proof to remove. No deletion is proposed.
+
+## Slice 18 offline implementation awaiting acceptance: 2026-09-29
+
+The user accepted S17 on its documented offline evidence and limits, then gave
+S18 its separate go-ahead for offline implementation and verification only.
+Before edits, clean local main was `5399a82` and matched `origin/main`. The
+authorized branch is `shiftwork/slice-18`. This entry does not mark S18 accepted
+or authorize live operations, credentials, installs, fixture edits, sealing,
+commits, pushes, deployment or S19.
+
+The selected operation now reserves the exact chosen version and a frozen
+current mission, public state and starting synthetic business state. Saving a
+newer unselected version leaves the operating pointer intact. SQLite enforces
+one in-flight operation per engagement and one successful pivot finalization
+per shift through the idempotent v6 completion migration. A second reservation
+needs a failed first run with zero captured outputs and zero business writes,
+the same choice and the same frozen context. Invalid selection or exposure,
+changed selected hash or current requirement bytes block run start. Captures
+and usage are stored before assessment. Checks, synthetic ledger events,
+incident changes and terminal state commit together or roll back together.
+Experiments cannot enter the operational reducer. A prior incident resolves
+only after a passing selected-version operation using the pinned mission and
+evaluator rule; old contextless incidents stay unresolved. Restart fails an
+interrupted operation while retaining its capture, usage and exposure.
+
+The `operation` walkthrough returned `PASS_OFFLINE_POLICY`: selected ver-0003,
+saved newer unselected ver-0005, finalized run-0008 on ver-0003, one output,
+three checks and one labelled synthetic `SALE_COMPLETED` event at sequence 5.
+Its adapter was `local_process`, evidence mode `TRUSTED_LOCAL`, and it reported
+zero live calls. The focused S18 command
+`.venv313/Scripts/python.exe -m pytest tests/orchestrator/test_selection_operation.py tests/ledger tests/api/test_pivot_routes.py -q`
+returned **52 passed, 2 warnings**. The named fault harness
+`.venv313/Scripts/python.exe tests/s18_mutation_proofs.py` returned
+**14 FAIL_CAUGHT, 0 SKIP, 0 UNPROVEN**, including selection, exact hash, partial
+retry, changed selection/context, prior business write, request-key replay,
+captured mission, experimental reducer, incident version and rule, in-flight
+database, cross-shift engagement scope and one-success database faults. The
+three older schema 2/3 upgrade tests passed after moving S18 constraints out
+of `schema.sql`.
+
+At `http://127.0.0.1:8186/`, a local browser inspection showed selected
+ver-0003 separately from latest saved ver-0005, run-0008's customer output,
+three public checks and the synthetic sale. At desktop width 1280 px and
+mobile width 390 px, the customer station rendered without horizontal overflow;
+after success the Run button was disabled. This was a local seeded preview,
+not a live service run. The post-slice architecture cleanup scan found no
+confirmed orphan among the changed production, demo and test entry points and
+no deletion to propose. The future-slice fixture and gate files remain in use.
+
+The final `.venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q`
+returned **597 passed, 1 skipped, 2 warnings**. The first full run reached
+591 passed, 1 skipped, 3 failed and 2 warnings; those three failures were
+pre-v5 upgrade tests caused by duplicate indexes in `schema.sql`. The duplicate
+was removed and all three affected tests passed before the final suite.
+Packaging Test 51 is excluded from this offline command. S18 proves policy
+with local doubles, not model answer quality, Sandbox isolation, vendor
+availability, actual billing or later inheritance. The operational live adapter
+is not enabled in this slice. A live trial needs a separate proposal and
+authorization before any service operation.
+
 ## Slice 17 branch and main publication: 2026-09-29
 
 The user authorized committing the S17 branch and pushing main, without a

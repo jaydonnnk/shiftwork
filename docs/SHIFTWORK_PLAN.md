@@ -1,17 +1,15 @@
 # Shiftwork: working brief and adjudication register
 
-Updated: 2026-09-29.
+Updated: 2026-09-30.
 
-**Current slice state, 2026-09-29:** The operator sealed the reviewed comparison
-manifest and protected family. S15 was accepted and published to main. The one
-authorized six-slot live comparison completed with twelve Sandbox operations,
-eighteen verified captures and zero model calls. S16's R2 and R3 repairs and
-offline checks passed, so the user's conditional S16 acceptance is met. Model
-answer quality remains unmeasured because the run made no inference call. The
-user gave S17 its own go-ahead; its exact-version choice is implemented and
-demonstrated offline on `shiftwork/slice-17`, awaiting user review. S18 has no
-go-ahead. See `plans/shiftwork/00-status.md` for the dated evidence; the older
-current-state paragraphs below are historical snapshots.
+**Current slice state, 2026-09-30:** S17 is accepted and published. S18's
+offline implementation and review repairs are complete on
+`shiftwork/slice-18`, awaiting user acceptance. Its local browser walkthrough
+operated the selected version after a newer unselected save. The offline suite
+passed; model answer quality, Sandbox isolation and live cost remain unmeasured.
+No live operation, publication or S19 is authorized. See
+`plans/shiftwork/00-status.md` for evidence and limits. Older current-state
+paragraphs below are historical snapshots.
 
 **Direction:** Shiftwork remains the sole active project. The approved final pivot
 around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare
