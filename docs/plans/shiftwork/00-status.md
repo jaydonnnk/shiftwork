@@ -12,10 +12,11 @@ and named fault harness, `5a0fa15` the seven re-anchored or re-proved mutation
 rows plus the repair-run evidence file, `accd267` the status, ADR and MISTAKES
 records; no co-author footer) were pushed as a new branch
 (`4cd4403..accd267`), fast-forwarded into local main and pushed. Both
-`origin/main` and `origin/shiftwork/slice-19` carry `accd267`, and this push
-also published the four pending gate-revision commits (`e34d7f4`, `afe9b55`,
-`0965be2`, `4cd4403`). The review round and the repair round happened before any
-publication.
+`origin/main` and `origin/shiftwork/slice-19` received `accd267` in that push;
+this record commit then advanced `origin/main` to `d50519b`, which contains all
+five commits. This push also published the four pending gate-revision commits
+(`e34d7f4`, `afe9b55`, `0965be2`, `4cd4403`). The review round and the repair
+round happened before any publication.
 
 On 2026-09-30 the user accepted Slice 19 by that instruction, after the
 independent review round and its corrections landed. Acceptance covers the
