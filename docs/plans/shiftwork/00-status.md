@@ -3,9 +3,9 @@
 ## Three-board scope direction, revision memo and approval: 2026-09-30
 
 The user directed a product scope expansion to three role boards in one workplace:
-applied AI engineer at Bellwether Books (existing), GTM engineer at a new fictional
-employer, and forward deployed engineer deployed at the Northline Bike Cooperative,
-which stops being the applied AI engineer's away shift.
+applied AI engineer at Bellwether Books (existing), Go-To-Market (GTM) engineer
+at a new fictional employer, and Forward Deployed Engineer (FDE) deployed at the
+Northline Bike Cooperative, which stops being the applied AI engineer's away shift.
 
 `shiftwork_three_boards.md` (repository root) records the direction; the user
 APPROVED it on 2026-09-30 after a second-opinion review and a read-only
@@ -31,6 +31,42 @@ authority, or S18 acceptance. Approval authorizes drafting the reconciling gate
 revisions only, in order: Gate 1 (product scope, screens, mockups) next, then
 scoped Gate 2 and Gate 3, then the Gate 4 slice revision. Slices 19 to 21 are
 unaffected by the scope change.
+
+## Gate 1 three-board reconciliation RE-APPROVED: 2026-09-30
+
+Under the approved direction memo (`shiftwork_three_boards.md`), the Gate 1
+reconciliation was drafted. `01-product.md`: problem framing, cross-board transfer
+wording in the success metric, the three-board S6 scope boundary, the screens table
+listing eight screens, the announcement, and the Gate-state header.
+`client-visual-direction.md`: board selector above the journey
+navigation, per-board station maps for the revenue floor and the Northline
+deployment workshop, updated interaction rules, later-board state changes and the
+comprehension list. The 'Stonebridge Software' employer name is settled for Gate 1;
+the working-name tags are dropped from `01-product.md` and the memo. Three mockups
+were authored: `mockups/00-workplace.html`, `mockups/06-revenue-floor.html` and
+`mockups/07-northline-deployment.html` (revised from `06-away-shift.html`, which is
+superseded and removed; the 06 filename carries no memo shorthand). Screens 01 to 05
+keep Board 1; their journey navigation drops the Away shift step and gains a
+workplace link, and `wireframe.css` now sizes journey navigation for variable step
+counts. A 07 copy correction makes the acceptance chapter explicit that a rollback
+resolved within the same counter visit is a recorded follow-up, not a missed
+commitment. Both new boards label the protected-variant envelope row `P1`,
+removing the clash with Board 1's `S1` starting-conditions label. Verification
+(corrected in the 2026-09-30 review pass): desktop renders at 1280 px confirmed
+for screens 00, 01, 06 and 07, with fresh captures for the renamed 06 and the
+corrected 07; mobile fit confirmed for all eight screens at a true 375 to 390 px
+layout (scrollWidth equals clientWidth; zero overflowing elements) using an
+iframe harness, because direct small-window headless captures on this machine
+write a narrow image of a wider minimum-width layout (a crop, not a reflow). The
+mockups carry no scripts or external resources, so no browser console output is
+expected; no live service, install, credential or external call was
+involved. The user reviewed the draft through an independent stress-test pass and
+its required corrections, then re-approved Gate 1 on 2026-09-30. Approval covers
+the reconciled problem framing, scope boundary, success metric wording, screens,
+announcement, mockups and visual direction. It authorizes the commit and push of
+this draft and the scoped Gate 2 and Gate 3 revisions next, each with its own
+explicit approval; it authorizes no implementation, install, credential, live
+call, fixture authoring, sealing, deployment or submission.
 
 ## Future S20 and S24 Nemotron proof request: 2026-09-30
 
