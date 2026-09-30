@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shiftwork Gate 1 | Northline deployment</title>
+  <link rel="stylesheet" href="wireframe.css?v=5">
+</head>
+<body class="northline">
+  <a class="skip-link" href="#main">Skip to the deployment workshop</a>
+  <div class="prototype">Gate 1 concept storyboard. Illustrative only; nothing runs or saves.</div>
+  <header class="topbar">
+    <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
+    <div class="engagement">Junior Forward Deployed Engineer · Fictional customer deployment: Northline Bike Cooperative</div>
+    <a class="workplace-link" href="00-workplace.html">Workplace boards</a>
+    <div class="state">Deployment workshop preview</div>
+  </header>
+  <nav class="journey" aria-label="Northline workshop station previews, navigation only"><div class="journey-track">
+    <a class="active" href="#brief" aria-current="page"><span class="step-no">1</span><span>Deployment brief<small>Preview</small></span></a>
+    <a href="#map"><span class="step-no">2</span><span>System map<small>Preview</small></span></a>
+    <a href="#bench"><span class="step-no">3</span><span>Integration bench<small>Preview</small></span></a>
+    <a href="#acceptance"><span class="step-no">4</span><span>Acceptance<small>Preview</small></span></a>
+    <a href="#rollout"><span class="step-no">5</span><span>Rollout<small>Preview</small></span></a>
+    <a href="#handover"><span class="step-no">6</span><span>Handover<small>Preview</small></span></a>
+  </div></nav>
+  <main class="page" id="main" tabindex="-1">
+    <div class="page-head">
+      <div><p class="stage-kicker">Northline deployment workshop · Deployed at the co-op</p><h1>An integration the counter can trust.</h1><p class="lead">You are the platform vendor's forward deployed engineer, embedded with the Northline Bike Cooperative. The pilot booking integration must survive conflicting requirements, connection retries and safety questions before the co-op rolls it out.</p></div>
+      <aside class="phase-card"><strong>One hint, your investigation</strong>This board offers a single hint per shift and no worked repair. No Northline execution or learning-transfer result exists.</aside>
+    </div>
+    <div class="room-layout">
+      <aside class="room-overview" aria-label="Northline deployment workshop">
+        <figure>
+          <svg viewBox="0 0 600 370" aria-hidden="true" focusable="false">
+            <path class="room-floor" d="M35 235 300 90 565 235 300 365Z"/>
+            <path class="room-wall" d="M35 235V95L300 15V90Z"/><path class="room-wall-right" d="M300 15 565 95V235L300 90Z"/>
+            <path class="workshop-marking" d="m60 243 235 112M89 226l235 112M347 147l174 87"/>
+            <g class="workshop-bike" transform="matrix(1 -.34 0 1 68 156)"><circle cx="35" cy="35" r="28"/><circle cx="145" cy="35" r="28"/><path d="m35 35 37-51 36 51H35l22-50h66l22 50M108 35l15-50-6-12h20M61-22h24"/></g>
+            <path class="workshop-pegboard" d="m348 57 145 44v82l-145-48Z"/>
+            <g class="workshop-tools"><path d="m369 88 8 3v29l-8-3ZM401 98l22 7m-11-10v38M454 118v27m-10-36 10 9 11-2"/></g>
+            <path class="room-desk-side" d="m204 220 118-60 105 54v40l-107 59-116-55Z"/><path class="room-desk" d="m204 220 118-60 105 54-107 60Z"/>
+            <path class="room-monitor" d="m299 177 48 23v34l-48-24Z"/><path class="room-screen" d="m305 185 35 18v20l-35-18Z"/>
+            <path class="workshop-cabinet" d="m452 234 47-23 39 21v57l-47 24-39-22Z"/><path class="workshop-drawers" d="m491 255 39-20m-39 36 39-20m-39 37 39-20"/>
+            <path class="room-board" d="m82 248 53-26 37 18-53 29Z"/><path class="room-paper" d="m97 247 36-17 21 12-34 18Z"/>
+            <path class="room-counter" d="m356 268 54-27 52 27v29l-54 28-52-28Z"/><path class="room-desk" d="m356 268 54-27 52 27-54 28Z"/>
+            <g class="room-numbers"><text x="117" y="280">1</text><text x="412" y="160">2</text><text x="282" y="253">3</text><text x="493" y="280">4</text><text x="135" y="235">5</text><text x="420" y="300">6</text></g>
+          </svg>
+          <figcaption><strong>Northline Bike Cooperative</strong>The deployment brief board, the system map, the integration bench, the acceptance rig, the repair stand and the handover desk. A different workshop, not a live simulation.</figcaption>
+        </figure>
+        <nav class="station-links" aria-label="Northline workshop station previews">
+          <a class="active" href="#brief" aria-current="page"><b>1</b><span>Deployment brief<small>Conflicting requirements preview</small></span></a>
+          <a href="#map"><b>2</b><span>System map<small>Discovery and permissions preview</small></span></a>
+          <a href="#bench"><b>3</b><span>Integration bench<small>Compare and choose preview</small></span></a>
+          <a href="#acceptance"><b>4</b><span>Acceptance<small>Customer checks preview</small></span></a>
+          <a href="#rollout"><b>5</b><span>Rollout<small>Pilot state preview</small></span></a>
+          <a href="#handover"><b>6</b><span>Handover<small>What the co-op receives</small></span></a>
+        </nav>
+      </aside>
+      <div class="station-content">
+        <section class="surface signal" id="brief" tabindex="-1">
+          <span class="tag">Deployment brief · Conflicting requirements</span>
+          <h2>What the co-op needs, and what the template assumes</h2>
+          <div class="mission-list">
+            <article class="mission"><b aria-hidden="true">1</b><div><h3>Speed at the counter versus safe commitments</h3><p>Counter staff want confirmation without leaving the queue. Co-op policy: never confirm a repair before parts and mechanic availability are checked.</p></div></article>
+            <article class="mission"><b aria-hidden="true">2</b><div><h3>Safety questions go to a mechanic</h3><p>A customer asks whether an uninspected brake fault is safe to ride with. The integration must escalate to a human mechanic and never answer from a knowledge base.</p></div></article>
+            <article class="mission"><b aria-hidden="true">3</b><div><h3>Retries must not double-book</h3><p>The booking widget retries after connection failures. The integration must keep one intended repair slot without duplicating a booking or losing the first commitment.</p></div></article>
+          </div>
+          <p class="section-note">The vendor's default template assumes immediate confirmation and cannot escalate; the co-op will not accept that. Pilot rollout requires the customer acceptance checks below to pass and a rollout and handover decision to be recorded.</p>
+        </section>
+        <section class="surface" id="map" tabindex="-1">
+          <span class="tag">System map · Discovery record and permissions</span>
+          <h2>What the integration may touch</h2>
+          <dl class="record-list">
+            <div><dt>Booking surface</dt><dd>The co-op's booking widget sends each request to the integration and retries it on failure.</dd></div>
+            <div><dt>Availability data</dt><dd>Parts stock and mechanic schedules change through the day; nothing is confirmed from memory.</dd></div>
+            <div><dt>Safety policy</dt><dd>No assurance without a mechanic inspection; the integration escalates instead of answering.</dd></div>
+            <div><dt>Permissions map</dt><dd>Read parts availability and mechanic schedules; write repair slots only. No payment, account or customer-history access.</dd></div>
+            <div><dt>Recorded conflict</dt><dd>The template's fast path contradicts the co-op's policy, and both cannot win.</dd></div>
+          </dl>
+          <p class="section-note">In the intended product you write your own discovery record from the pinned tickets, schema notes and policies; this mockup shows its shape. No real people are interviewed here.</p>
+        </section>
+        <section class="surface" id="bench" tabindex="-1">
+          <span class="tag">Integration bench · Two candidates, one acceptance contract</span>
+          <h2>Compare two ways to keep the counter honest</h2>
+          <section aria-label="Conceptual artifact">
+            <div class="file-strip"><span class="active">integration code</span><span>acceptance tests</span><span>permissions map</span><span>discovery record</span></div>
+            <p>The artifact is the integration itself: validation, escalation and retry-safe writes. The starter template exists; no candidate is preselected.</p>
+          </section>
+          <div class="candidate-grid">
+            <article><h3>A · optimistic auto-confirm with rollback</h3><p>Confirm at the counter immediately, watch for conflicts and roll back what fails. Fastest for customers, but every retraction needs a counter follow-up and the rollback window will not always stay invisible.</p></article>
+            <article><h3>B · conservative validation with manual fallback</h3><p>Check parts and mechanic availability before confirming, and hand anything unclear to the counter. Never retracts, but the queue waits on every confirmation.</p></article>
+          </div>
+          <h3>Shared comparison envelope · C1 / W1 / P1</h3>
+          <dl class="record-list">
+            <div><dt>C1 · contract</dt><dd>The same visible acceptance checks for both candidates: no double bookings, escalation fires, commitments honored, access boundaries held.</dd></div>
+            <div><dt>W1 · workload</dt><dd>18 pinned booking requests per trial, 3 fresh trials each, against the same starting pilot state.</dd></div>
+            <div><dt>P1 · protected variant</dt><dd>Each comparison pair draws one never-exposed booking workload from this board's sealed family, run in a separate protected phase that learner code and assistance never touch.</dd></div>
+          </dl>
+          <details id="results"><summary>Later in the story: inspect the comparison results</summary>
+            <p class="honesty">Invented, not measured. Illustrative only; nothing runs or saves.</p>
+            <table class="trial-table"><caption>A · optimistic auto-confirm · C1 / W1 / P1 · 18 requests per trial</caption><thead><tr><th scope="col">Result</th><th scope="col">Trial 1</th><th scope="col">Trial 2</th><th scope="col">Trial 3</th></tr></thead><tbody>
+              <tr><th scope="row">Double bookings</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Safety questions escalated</th><td>3</td><td>3</td><td>3</td></tr>
+              <tr><th scope="row">Commitments honored</th><td>15</td><td>15</td><td>15</td></tr>
+              <tr><th scope="row">Access-boundary violations</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Counter follow-ups (retractions)</th><td>2</td><td>3</td><td>2</td></tr>
+              <tr><th scope="row">Median confirmation time (s)</th><td>6</td><td>5</td><td>6</td></tr>
+              <tr><th scope="row">Trial cost (units)</th><td>0.013</td><td>0.014</td><td>0.013</td></tr>
+            </tbody></table>
+            <table class="trial-table"><caption>B · conservative validation · C1 / W1 / P1 · 18 requests per trial</caption><thead><tr><th scope="col">Result</th><th scope="col">Trial 1</th><th scope="col">Trial 2</th><th scope="col">Trial 3</th></tr></thead><tbody>
+              <tr><th scope="row">Double bookings</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Safety questions escalated</th><td>3</td><td>3</td><td>3</td></tr>
+              <tr><th scope="row">Commitments honored</th><td>15</td><td>15</td><td>15</td></tr>
+              <tr><th scope="row">Access-boundary violations</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Counter follow-ups (retractions)</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Median confirmation time (s)</th><td>46</td><td>52</td><td>48</td></tr>
+              <tr><th scope="row">Trial cost (units)</th><td>0.008</td><td>0.009</td><td>0.008</td></tr>
+            </tbody></table>
+            <p>Both candidates pass all four acceptance checks in these samples. A keeps the counter fast at a higher cost, and its retraction path produced recorded follow-ups, not missed commitments; B never retracts but makes the queue wait. These trials vary, and neither is crowned.</p>
+            <fieldset><legend>Compare with your prediction</legend><div class="field"><label for="fde-revision">What changed your view, and what uncertainty remains?</label><textarea id="fde-revision" rows="2"></textarea></div></fieldset>
+          </details>
+          <h3>Explicitly retain an exact tested version</h3>
+          <fieldset aria-describedby="fde-choice-note"><legend>Choice rehearsal · neither preselected</legend>
+            <p id="fde-choice-note">In the intended product, a choice binds the exact integration tested under C1 / W1 / P1 with your rationale. No auto-promotion. This static UI neither enforces eligibility nor persists a selection.</p>
+            <div class="choice-set">
+              <label class="choice"><input id="fde-a" type="radio" name="fde-integration" value="a"><span><strong>A · optimistic auto-confirm with rollback</strong>Fastest for the counter; accept follow-ups and a rollback window the schema change below will test.</span></label>
+              <label class="choice"><input id="fde-b" type="radio" name="fde-integration" value="b"><span><strong>B · conservative validation with manual fallback</strong>Never retracts; accept slower confirmation and a queue that grows when data is unavailable.</span></label>
+            </div>
+            <div class="field"><label for="fde-rationale">Which observed tradeoff justifies your choice?</label><textarea id="fde-rationale" rows="2"></textarea></div>
+          </fieldset>
+        </section>
+        <section class="surface" id="acceptance" tabindex="-1">
+          <span class="tag">Acceptance · Independently checked</span>
+          <h2>The co-op's acceptance tests</h2>
+          <ul class="rule-list">
+            <li><strong>No double bookings.</strong> One intended slot per request, under retries and failures.</li>
+            <li><strong>Escalation fires.</strong> Every safety question reaches a human mechanic before any answer is given.</li>
+            <li><strong>Commitments honored.</strong> A confirmed slot stays; the co-op records any change and why. A rollback resolved within the same counter visit counts as a recorded follow-up, not a missed commitment.</li>
+            <li><strong>Access boundaries held.</strong> Availability is read and slots are written; payment and account data are never touched.</li>
+          </ul>
+          <p class="muted">The independent evaluator owns these checks; learner code and assistance cannot alter them, and the protected workload stays sealed. Visible acceptance tests mirror them for your own runs. A failing check blocks selection regardless of speed or cost.</p>
+        </section>
+        <section class="surface" id="rollout" tabindex="-1">
+          <span class="tag">Rollout · Pilot state</span>
+          <h2>Operate the choice, then live with it</h2>
+          <p>Operation writes the pilot state: bookings, incidents, and the rollout and handover decisions the co-op records. An experiment never changes the pilot; only operation does. Each kept example below is a separate invented history.</p>
+          <details id="kept-a"><summary>Example history: kept A · optimistic auto-confirm</summary>
+            <p class="honesty">Invented post-operation illustration. This is not your selection and nothing runs.</p>
+            <p><strong>Operated A on the pilot:</strong> 15 confirmations landed within seconds and 3 safety questions escalated; 2 counter follow-ups were recorded. <strong>Later condition in this example:</strong> the co-op renames an availability field during a booking-schema update and a customer-side connection drops mid-shift. A's optimistic path confirms two requests against the stale field shape and retracts both within the same counter visit; NB-01 records the mapping defect, not a customer harm.</p>
+          </details>
+          <details id="kept-b"><summary>Example history: kept B · conservative validation</summary>
+            <p class="honesty">Invented post-operation illustration. This is not your selection and nothing runs.</p>
+            <p><strong>Operated B on the pilot:</strong> 15 confirmations and 3 escalations with no retractions; the queue carried the wait. <strong>Later condition in this example:</strong> the same schema update and connection drop pause confirmations; every affected request waits in the fallback queue, nothing is confirmed from the stale shape, and the queue clears once the mapping is repaired.</p>
+          </details>
+          <p><strong>Retained alternative experiment:</strong> after the later condition, the alternative is tested under that same condition as a separate, non-writing experiment. A different operating integration is a new explicit action with a new rationale; nothing switches automatically and nothing rewrites what the chosen version did.</p>
+          <p><strong>Inheritance:</strong> bookings, incidents, rollout decisions and the retained alternative persist. The next shift inherits the exact selected integration, not the newest saved file.</p>
+        </section>
+        <section class="surface green" id="handover" tabindex="-1">
+          <h2>Handover: what the co-op receives</h2>
+          <p>The runbook written from your discovery record, the permissions map, the acceptance results, the known limits (the retraction window for A, or the wait for B) and the unresolved incidents. The co-op owns the rollout decision; you record the handover.</p>
+          <p><strong>Less help here:</strong> one hint per shift, no patch proposals, no worked repair. The role is fiction and proof of nothing: no certification, employer validation or job-readiness claim.</p>
+        </section>
+      </div>
+    </div>
+    <p class="honesty">Illustrative only; nothing runs or saves. Pilot bookings, incidents and rollout decisions are invented synthetic scenario content; no booking is made, no safety decision executed and no learner outcome measured.</p>
+    <div class="actions"><a class="button" href="00-workplace.html">Back to the workplace</a><a class="button primary" href="01-shift-board.html">Preview the Bellwether service room</a><small>Navigation only. Nothing runs or saves.</small></div>
+  </main>
+</body>
+</html>

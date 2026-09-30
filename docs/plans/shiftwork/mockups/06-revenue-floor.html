@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Shiftwork Gate 1 | Revenue floor</title>
+  <link rel="stylesheet" href="wireframe.css?v=5">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to the revenue floor</a>
+  <div class="prototype">Gate 1 concept storyboard. Illustrative only; nothing runs or saves.</div>
+  <header class="topbar">
+    <div class="brand-lockup"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="brand">Shiftwork</span></div>
+    <div class="engagement">Junior Go-To-Market engineer · Fictional employer: Stonebridge Software</div>
+    <a class="workplace-link" href="00-workplace.html">Workplace boards</a>
+    <div class="state">Revenue floor preview</div>
+  </header>
+  <nav class="journey" aria-label="Revenue floor station previews, navigation only"><div class="journey-track">
+    <a class="active" href="#signals" aria-current="page"><span class="step-no">1</span><span>Signal intake<small>Preview</small></span></a>
+    <a href="#rules"><span class="step-no">2</span><span>Qualification rules<small>Preview</small></span></a>
+    <a href="#bench"><span class="step-no">3</span><span>Workflow bench<small>Preview</small></span></a>
+    <a href="#wall"><span class="step-no">4</span><span>Pipeline wall<small>Preview</small></span></a>
+  </div></nav>
+  <main class="page" id="main" tabindex="-1">
+    <div class="page-head">
+      <div><p class="stage-kicker">Revenue floor · Signal-to-owner workflow</p><h1>Route every signal to the right owner, once.</h1><p class="lead">You are the junior Go-To-Market engineer for Stonebridge Software's revenue team. Inbound signals must be qualified, routed and written to the pipeline without dropping, duplicating or mis-owning a record. Inspect a pinned failure, compare two workflows, and choose the one the team will operate.</p></div>
+      <aside class="phase-card"><strong>A human handoff, never a sent message</strong>The workflow prepares work for a person. Nothing here contacts a customer, and synthetic pipeline changes are never real revenue.</aside>
+    </div>
+    <div class="room-layout">
+      <aside class="room-overview" aria-label="Stonebridge Software revenue floor">
+        <figure>
+          <svg viewBox="0 0 600 370" aria-hidden="true" focusable="false">
+            <path class="room-floor" d="M35 235 300 90 565 235 300 365Z"/>
+            <path class="room-wall" d="M35 235V95L300 15V90Z"/><path class="room-wall-right" d="M300 15 565 95V235L300 90Z"/>
+            <path class="room-board" d="m64 107 126 39v66l-126-48Z"/><path class="room-paper" d="m82 126 32 10v30l-32-11Zm49 16 40 12v30l-40-13Z"/>
+            <path class="room-board" d="m347 53 126 39v66l-126-48Z"/><path class="room-paper" d="m358 64 26 8v22l-26-9Zm32 10 26 8v22l-26-9Zm-32 20 26 8v22l-26-9Zm32 10 26 8v22l-26-9Z"/>
+            <path class="room-desk-side" d="m220 198 95-48 105 54v48l-95 52-105-55Z"/><path class="room-desk" d="m220 198 95-48 105 54-95 53Z"/>
+            <path class="room-monitor" d="m299 161 47 23v35l-47-23Z"/><path class="room-screen" d="m305 170 34 17v19l-34-17Z"/>
+            <path class="room-counter" d="m78 244 72-36 75 38v37l-73 39-74-39Z"/><path class="room-desk" d="m78 244 72-36 75 38-73 37Z"/>
+            <path class="room-paper" d="m96 247 34-16 20 11-34 17Z"/>
+            <g class="room-numbers"><text x="140" y="270">1</text><text x="122" y="172">2</text><text x="282" y="253">3</text><text x="420" y="166">4</text></g>
+          </svg>
+          <figcaption><strong>Stonebridge Software · revenue floor</strong>Signal intake, the qualification rules board, the workflow bench and the pipeline wall. A different kind of work, not a relabelled bookshop.</figcaption>
+        </figure>
+        <nav class="station-links" aria-label="Revenue floor station previews">
+          <a class="active" href="#signals" aria-current="page"><b>1</b><span>Signal intake<small>Pinned failure preview</small></span></a>
+          <a href="#rules"><b>2</b><span>Qualification rules<small>Contract preview</small></span></a>
+          <a href="#bench"><b>3</b><span>Workflow bench<small>Compare and choose preview</small></span></a>
+          <a href="#wall"><b>4</b><span>Pipeline wall<small>Operation and inheritance preview</small></span></a>
+        </nav>
+      </aside>
+      <div class="station-content">
+        <section class="surface signal" id="signals" tabindex="-1">
+          <span class="tag">Pinned failure · Record R-104</span>
+          <h2>One signal, two records, the wrong owner</h2>
+          <ol class="evidence-chain">
+            <li><h3>Inbound signal · R-104</h3><blockquote>"We're evaluating routing tools for our 40-person operations team. Can we book a demo this week and see pricing?"</blockquote><p class="small muted">Invented capture from the website form, pinned to this record.</p></li>
+            <li><h3>Recorded qualification</h3><p>Seats recorded: <strong>40</strong>, from the enrichment lookup. Intent: <strong>demo and pricing</strong>. Region: <strong>"East"</strong>.</p></li>
+            <li><h3>Recorded routing and pipeline write</h3><p>The ownership lookup returned the <strong>SMB pod</strong>. The webhook retried once and the writer ran <strong>twice</strong>, creating a second pipeline record for R-104.</p></li>
+            <li><h3>Independent checks · per pinned record</h3><p>Expected owner under the pinned rules: <strong>Enterprise pod</strong>. Recorded owner: <strong>SMB pod</strong>. Records written: <strong>2</strong>. SLA clock started: <strong>twice</strong>.</p></li>
+            <li><h3>Synthetic incident SB-01 · open</h3><p>R-104 is mis-owned and duplicated; neither pod has acted. No real customer, message or revenue exists here.</p></li>
+          </ol>
+        </section>
+        <section class="surface">
+          <h2>Your explanation, before a hint</h2>
+          <fieldset aria-describedby="assist-note"><legend>Short investigation notes · preview inputs</legend>
+            <p id="assist-note">This board allows two assist calls per shift and no patch proposals. Hints follow your written cause and falsifier. These fields stay blank, are not recorded, and nothing is sent.</p>
+            <div class="field"><label for="revenue-cause">What do you suspect caused the mis-route and the duplicate?</label><textarea id="revenue-cause" rows="2"></textarea></div>
+            <div class="field"><label for="revenue-falsifier">What observable result would disprove that explanation?</label><textarea id="revenue-falsifier" rows="2"></textarea></div>
+            <div class="field"><label for="revenue-test">What test would distinguish competing explanations?</label><textarea id="revenue-test" rows="2"></textarea></div>
+          </fieldset>
+          <details><summary>Optional example: testing the duplicate-write explanation</summary><p><strong>Hypothetical experiment, not an observed outcome:</strong> redeliver R-104 with a stable record key while holding everything else fixed. If the writer checks the key and updates instead of inserting, the retry explanation predicts exactly one record. If two records appear again, the retry is not the whole story.</p></details>
+          <details><summary>Where optional model help ends</summary><p>A model may suggest explanations or help read a trace. Treat those as opinions to test, never verdicts. Neither learner code nor model help controls the independent checks or sees the protected records.</p></details>
+        </section>
+        <section class="surface" id="rules" tabindex="-1">
+          <span class="tag">Qualification rules · Illustrative proposed contract</span>
+          <h2>What the workflow must do, for both candidates</h2>
+          <ul class="rule-list">
+            <li><strong>Exactly one owner per signal.</strong> Every signal ends owned under the pinned rules; nothing is left unowned or assigned to a guess.</li>
+            <li><strong>Uncertain records go to the review queue.</strong> Low confidence is not a reason to skip qualification; anything unclear waits for a person.</li>
+            <li><strong>Reprocessing is idempotent.</strong> A repeated delivery updates the existing record; it never creates a second one.</li>
+            <li><strong>SLA clocks start once, when a record is owned.</strong> Duplicate clocks distort the pipeline and are checked.</li>
+            <li><strong>A human handoff, never a sent message.</strong> The workflow prepares work for a person; the artifact never contacts a customer.</li>
+          </ul>
+          <p class="muted">These rules are visible, not hidden grading rules. You can add learner-owned tests and priorities; you cannot waive a mandatory rule. Replacing an unnecessary AI step with ordinary code remains a valid choice.</p>
+        </section>
+        <section class="surface" id="bench" tabindex="-1">
+          <span class="tag">Workflow bench · Two candidates, one contract</span>
+          <h2>Compare two ways to own every record</h2>
+          <div class="candidate-grid">
+            <article><h3>A · rules-first</h3><p>Deterministic qualification and a routing table, with a review queue for anything that does not map cleanly. Predictable ownership at the lowest cost, but more records wait for a person.</p></article>
+            <article><h3>B · model-assisted</h3><p>Model-assisted qualification with confidence thresholds, sending uncertain records to the same review queue. Records reach owners faster, at higher cost and with a threshold to maintain.</p></article>
+          </div>
+          <p class="section-note">Illustrative directions, not supplied executable patches. The intended work is changing your own workflow code and visible tests.</p>
+          <h3>Shared comparison envelope · C1 / W1 / P1</h3>
+          <dl class="record-list">
+            <div><dt>C1 · contract</dt><dd>The same visible rules for both candidates. No separate A/B rules.</dd></div>
+            <div><dt>W1 · workload</dt><dd>24 pinned signals per trial, 3 fresh trials each. Both candidates run the same records and the same starting pipeline.</dd></div>
+            <div><dt>P1 · protected variant</dt><dd>Each comparison pair draws one never-exposed record set from this board's sealed family, run in a separate protected phase that learner code and assistance never touch.</dd></div>
+          </dl>
+          <details id="results"><summary>Later in the story: inspect the comparison results</summary>
+            <p class="honesty">Invented, not measured. Illustrative only; nothing runs or saves.</p>
+            <table class="trial-table"><caption>A · rules-first · C1 / W1 / P1 · 24 records per trial</caption><thead><tr><th scope="col">Result</th><th scope="col">Trial 1</th><th scope="col">Trial 2</th><th scope="col">Trial 3</th></tr></thead><tbody>
+              <tr><th scope="row">Correctly owned</th><td>21</td><td>21</td><td>22</td></tr>
+              <tr><th scope="row">Mis-routed</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Duplicate records</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Dropped signals</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Review-queue handoffs</th><td>3</td><td>3</td><td>2</td></tr>
+              <tr><th scope="row">Median time to owner (min)</th><td>38</td><td>41</td><td>37</td></tr>
+              <tr><th scope="row">Trial cost (units)</th><td>0.009</td><td>0.010</td><td>0.009</td></tr>
+            </tbody></table>
+            <table class="trial-table"><caption>B · model-assisted · C1 / W1 / P1 · 24 records per trial</caption><thead><tr><th scope="col">Result</th><th scope="col">Trial 1</th><th scope="col">Trial 2</th><th scope="col">Trial 3</th></tr></thead><tbody>
+              <tr><th scope="row">Correctly owned</th><td>22</td><td>22</td><td>23</td></tr>
+              <tr><th scope="row">Mis-routed</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Duplicate records</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Dropped signals</th><td>0</td><td>0</td><td>0</td></tr>
+              <tr><th scope="row">Review-queue handoffs</th><td>2</td><td>2</td><td>1</td></tr>
+              <tr><th scope="row">Median time to owner (min)</th><td>12</td><td>14</td><td>13</td></tr>
+              <tr><th scope="row">Trial cost (units)</th><td>0.031</td><td>0.034</td><td>0.032</td></tr>
+            </tbody></table>
+            <p>A keeps more records waiting for a person but costs least; B moves records to owners faster at a higher cost. Both samples vary, and neither is a universal winner.</p>
+            <p>A mis-routed, dropped, unowned or duplicate record blocks choice regardless of speed or cost. Neither candidate shows a mandatory failure in these samples.</p>
+            <fieldset><legend>Compare with your prediction</legend><div class="field"><label for="revenue-revision">What changed your view, and what uncertainty remains?</label><textarea id="revenue-revision" rows="2"></textarea></div></fieldset>
+          </details>
+          <h3>Explicitly retain an exact tested version</h3>
+          <fieldset aria-describedby="revenue-choice-note"><legend>Choice rehearsal · neither preselected</legend>
+            <p id="revenue-choice-note">In the intended product, a choice binds the exact workflow tested under C1 / W1 / P1 with your rationale. No auto-promotion, no latest-file inheritance. This static UI neither enforces eligibility nor persists a selection.</p>
+            <div class="choice-set">
+              <label class="choice"><input id="revenue-a" type="radio" name="revenue-workflow" value="a"><span><strong>A · rules-first</strong>Lowest cost and fully predictable; accept more review-queue wait.</span></label>
+              <label class="choice"><input id="revenue-b" type="radio" name="revenue-workflow" value="b"><span><strong>B · model-assisted</strong>Fastest time-to-owner in these samples; accept higher cost and a threshold boundary to maintain.</span></label>
+            </div>
+            <div class="field"><label for="revenue-rationale">Which observed tradeoff justifies your choice?</label><textarea id="revenue-rationale" rows="2"></textarea></div>
+          </fieldset>
+        </section>
+        <section class="surface" id="wall" tabindex="-1">
+          <span class="tag">Pipeline wall · Operation and inheritance</span>
+          <h2>Operate the choice, then live with it</h2>
+          <p>Operation writes synthetic pipeline state: owners, SLA clocks, escalations and missed-handoff incidents. An experiment never moves an owner or starts a clock; only operation does. Each kept example below is a separate invented history, not a combined ledger and not your saved selection.</p>
+          <details id="kept-a"><summary>Example history: kept A · rules-first</summary>
+            <p class="honesty">Invented post-operation illustration. This is not your selection and nothing runs.</p>
+            <p><strong>Operated A on the next shift's signals:</strong> every record ended owned once; 3 records waited in the review queue; R-104 was re-owned to the Enterprise pod and the duplicate retired. SB-01 resolves only when linked operational evidence satisfies its resolution rule; choosing a repair did not close it.</p>
+            <p><strong>Later condition in this example:</strong> the enrichment provider is unavailable. A still qualifies against the pinned rules; review-queue arrivals rise from 3 to 6, and time-to-owner for clean records is unchanged.</p>
+          </details>
+          <details id="kept-b"><summary>Example history: kept B · model-assisted</summary>
+            <p class="honesty">Invented post-operation illustration. This is not your selection and nothing runs.</p>
+            <p><strong>Operated B on the next shift's signals:</strong> every record ended owned once; 2 handoffs; the fastest time-to-owner in the samples. SB-01's mis-route is corrected once the operated workflow re-owns R-104, and the incident resolves on that linked evidence.</p>
+            <p><strong>Later condition in this example:</strong> the enrichment provider is unavailable. Confidence scoring degrades at the threshold boundary and 11 records fall back to the review queue; nothing ends unowned, and the speed advantage largely disappears.</p>
+          </details>
+          <p><strong>Retained alternative experiment:</strong> after the later condition, the alternative is tested under that same condition as a separate, non-writing experiment. Choosing a different operating workflow is a new explicit action with a new rationale; nothing switches automatically and nothing rewrites what the chosen version did.</p>
+          <p><strong>Inheritance:</strong> owners, SLA clocks, escalations, missed-handoff incidents, both candidates and the original rationale persist. The next shift inherits the exact selected workflow, not the newest saved file.</p>
+        </section>
+      </div>
+    </div>
+    <p class="honesty">Illustrative only; nothing runs or saves. Pipeline records, owners, clocks and incidents are invented synthetic scenario content, never real customers, messages or revenue.</p>
+    <div class="actions"><a class="button" href="00-workplace.html">Back to the workplace</a><a class="button primary" href="07-northline-deployment.html">Preview the Northline deployment workshop</a><small>Navigation only. Nothing runs or saves.</small></div>
+  </main>
+</body>
+</html>
