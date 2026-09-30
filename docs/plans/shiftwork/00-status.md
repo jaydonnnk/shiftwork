@@ -1,5 +1,38 @@
 # Status: Shiftwork
 
+## Slice 19 branch and main publication and user acceptance: 2026-09-30
+
+The user authorized publishing the S19 branch and merging it to main with the
+instruction "do these and then commit slice 19 (publish branch merge and push to
+main, i approve)", where "these" are the review-round corrections: the
+status-entry wording fixes and the anchor-repair round recorded inside the
+Slice 19 entry below. Five focused commits on `shiftwork/slice-19` (`3719cee`
+the replay core and report model, `2577304` the demo stage, `802149a` the tests
+and named fault harness, `5a0fa15` the seven re-anchored or re-proved mutation
+rows plus the repair-run evidence file, `accd267` the status, ADR and MISTAKES
+records; no co-author footer) were pushed as a new branch
+(`4cd4403..accd267`), fast-forwarded into local main and pushed. Both
+`origin/main` and `origin/shiftwork/slice-19` carry `accd267`, and this push
+also published the four pending gate-revision commits (`e34d7f4`, `afe9b55`,
+`0965be2`, `4cd4403`). The review round and the repair round happened before any
+publication.
+
+On 2026-09-30 the user accepted Slice 19 by that instruction, after the
+independent review round and its corrections landed. Acceptance covers the
+offline evidence recorded in the Slice 19 entry: the named command returned
+`39 passed`; the S19 fault harness returned 16 of 16 FAIL_CAUGHT with zero
+skipped or unproven rows; the repaired multi-harness round returned 42 of 42,
+38 of 38 and 97 of 97 FAIL_CAUGHT with zero skipped, incidental or not-caught
+rows; the demo replay JSON reproduced byte-identically; and the full offline
+suite returned `612 passed, 1 skipped` (packaging Test 51 excluded because it
+performs an installation). The carried limits: replay re-evaluates captured
+evidence rather than making fresh inference or a second customer outcome; it is
+defined for finalized operational runs; and the evidence is offline policy
+proof through local doubles, not model answer quality, Sandbox isolation or
+live-service evidence. Acceptance covers Slice 19 only; S20 onward need their
+own go-aheads, and every live run keeps its own credential and spend
+authorization.
+
 ## Slice 19 offline implementation and verification: 2026-09-30
 
 The user gave S19 its own go-ahead ("Start slice 19"). This entry records offline
@@ -3832,7 +3865,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
 - [x] Slice 16: fair comparison, exposure invalidation and restart recovery; accepted 2026-09-29 (dated evidence at top)
 - [x] Slice 17: explicit eligible exact-version selection; implemented, demonstrated and published 2026-09-29, ACCEPTED by the user 2026-09-29 (dated evidence at top)
 - [x] Slice 18: selected-version operation and operation-only consequences; review repairs completed, published to main 2026-09-30 and ACCEPTED by the user 2026-09-30 (dated evidence at top)
-- [ ] Slice 19: read-only semantic replay and legacy unknown handling; implemented and verified offline 2026-09-30 on `shiftwork/slice-19` (evidence at top); awaiting user acceptance
+- [x] Slice 19: read-only semantic replay and legacy unknown handling; implemented, verified offline and published 2026-09-30 on `shiftwork/slice-19` (evidence at top), merged to main as `4cd4403..accd267` and pushed, no co-author footer; ACCEPTED by the user 2026-09-30
 - [ ] Slice 20: selected-version inheritance and the later retained-alternative experiment
 - [ ] Slice 21: complete the five-station Bellwether room journey
 - [ ] Slice 22a: FDE material, engagement-pack registration and the offline reproduction proof

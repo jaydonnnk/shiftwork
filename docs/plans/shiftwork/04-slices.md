@@ -892,6 +892,6 @@ still needs its own explicit go-ahead, and Slice 12, 13, 14, 22a, 22b, 23, 24,
 25, 26, 27 and 28 keep the separate authorizations named in their own
 Authorization lines.
 
-The next planned slice is Slice 19 under section 3. Slices 10 through 18 are
-accepted and published; Slice 19 still needs its own go-ahead. See
+The next planned slice is Slice 20 under section 3. Slices 10 through 19 are
+accepted and published; Slice 20 still needs its own go-ahead. See
 `00-status.md` for the completion evidence and current gate state.

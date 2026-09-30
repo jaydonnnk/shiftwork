@@ -2,11 +2,11 @@
 
 Updated: 2026-09-30.
 
-**Current slice state, 2026-09-30:** S17 and S18 are accepted and published.
-S18's offline implementation, review repairs and browser walkthrough are
-complete; its publication record and acceptance are in
+**Current slice state, 2026-09-30:** S17, S18 and S19 are accepted and
+published. S19's semantic replay, independent review round and anchor-repair
+round are complete; its publication record and acceptance are in
 `plans/shiftwork/00-status.md`. The offline suite passed; model answer quality,
-Sandbox isolation and live cost remain unmeasured. No live operation or S19 is
+Sandbox isolation and live cost remain unmeasured. No live operation or S20 is
 authorized. See `plans/shiftwork/00-status.md` for evidence and limits. Older
 current-state paragraphs below are historical snapshots.
 
