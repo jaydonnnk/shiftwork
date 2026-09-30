@@ -1337,3 +1337,9 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **What happened:** the first final repository suite returned three legacy upgrade failures because the added `schema.sql` indexes referenced `runs.purpose` before the old fixture acquired that column.
 - **Root cause:** I duplicated S18 constraints in the fresh schema despite its instruction to place later v6 DDL in `migrations/v6_tables.sql`, which also handles migrated databases.
 - **Prevention rule:** add slice-owned v6 constraints only to the idempotent completion migration, then run the schema 2/3 upgrade tests before the broad suite.
+
+## 2026-09-30 Gate 1 mobile captures cropped a wider layout instead of rendering at 390 px
+
+- **What happened:** the three-board Gate 1 drafting session recorded "local headless Chrome renders at 1280 px and 390 px for screens 00, 01, 06 and 07" in `00-status.md`. Every 390-wide mobile capture it produced became a left-side crop of a wider layout (the review pass reproduced the same crop with its own first renders), the claimed 01 mobile capture was missing from the folder, and the 06/07 captures (5600 px tall) truncated pages that are about 6817 and 6963 px tall at that width, hiding the retained-alternative, inheritance and footer copy.
+- **Root cause:** a direct `--headless=new --window-size=390` capture on this machine keeps the requested image width but lays the page out at a wider minimum window width (roughly 500 px), so the image crops instead of reflowing; `--hide-scrollbars` hides the overflow, and page heights were never compared with the capture height.
+- **Prevention rule:** verify narrow viewports only with a method that forces the layout width (an iframe harness at a fixed width, or CDP device emulation), and before claiming a viewport was inspected, assert scrollWidth equals clientWidth and that the capture covers scrollHeight for every screen named in the claim.
