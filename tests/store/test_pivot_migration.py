@@ -7,6 +7,7 @@ import sqlite3
 import pytest
 
 from demos.final_pivot import assert_v5_rows_preserved, create_v5_sample, snapshot_v5_rows
+from shiftwork import orchestrator
 from shiftwork.store import db
 
 
@@ -114,8 +115,18 @@ def test_unknown_schema_version_fails_closed(tmp_path):
     try:
         conn.execute("PRAGMA user_version = 99")
         schema_before = tuple(conn.execute("SELECT type, name, sql FROM sqlite_master ORDER BY type, name"))
-        with pytest.raises(RuntimeError, match="version 99"):
+        try:
             db.ensure_schema(conn)
+        except RuntimeError as error:
+            assert "version 99" in str(error)
+        except Exception as error:
+            # A regressed guard must fail here explicitly: a deeper crash (for
+            # example a missing v6 column reached through the accepted
+            # version) still fails the test, and the mutation harness requires
+            # an assertion-level failure rather than a crash.
+            pytest.fail(f"expected the version-99 refusal, got {type(error).__name__}: {error}")
+        else:
+            pytest.fail("an unknown schema version was accepted instead of refused")
         assert conn.execute("PRAGMA user_version").fetchone()[0] == 99
         assert tuple(conn.execute("SELECT type, name, sql FROM sqlite_master ORDER BY type, name")) == schema_before
         assert_v5_rows_preserved(conn, before)
@@ -151,6 +162,24 @@ def test_legacy_adapter_label_does_not_claim_fresh_live_execution(
         assert run["adapter"] == adapter
         assert run["purpose"] == "LEGACY_OPERATION"
         assert run["evidence_mode"] == expected_mode
+    finally:
+        conn.close()
+
+
+def test_migrated_legacy_run_replay_reports_unknown_missing_inputs(tmp_path):
+    """S19 completes the S10 legacy-replay clause: a v5 run that lacks captured
+    inputs reports UNKNOWN_MISSING_INPUTS, never a guessed replay, and the
+    replay writes nothing."""
+    _, copied, before = _copy_v5(tmp_path)
+    conn = db.connect(copied)
+    try:
+        db.ensure_schema(conn)
+        report = orchestrator.replay_assessment(conn, "run-v5-0001")
+        assert report.status == "UNKNOWN_MISSING_INPUTS"
+        assert report.check_differences == ()
+        assert report.event_draft_differences == ()
+        assert report.wrote_rows is False
+        assert_v5_rows_preserved(conn, before)
     finally:
         conn.close()
 
