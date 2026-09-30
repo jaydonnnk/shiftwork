@@ -23,6 +23,7 @@ import shutil
 import sqlite3
 import tempfile
 import time
+from contextlib import nullcontext
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -773,7 +774,8 @@ def s13_inspect_stage(operation_id: str, expected_sha256: str) -> int:
         return 2
 
 
-def comparison_stage(*, select: bool = False) -> int:
+def comparison_stage(*, select: bool = False, operate: bool = False,
+                     preview_db: Path | None = None) -> int:
     """Exercise comparison policy and optionally append an offline learner choice."""
     admission = orchestrator._require_reviewed_comparison_material
     reviewed_family = sealed_store.load_reviewed_comparison_family
@@ -782,8 +784,11 @@ def comparison_stage(*, select: bool = False) -> int:
         # the on-disk review flags are unchanged after this process exits.
         orchestrator._require_reviewed_comparison_material = lambda *_: None
         sealed_store.load_reviewed_comparison_family = sealed_store.load_family
-        with tempfile.TemporaryDirectory(prefix="shiftwork-s16-offline-") as directory:
-            db_file = Path(directory) / "comparison.db"
+        with (nullcontext(preview_db.parent) if preview_db else
+              tempfile.TemporaryDirectory(prefix="shiftwork-s16-offline-")) as directory:
+            db_file = preview_db or Path(directory) / "comparison.db"
+            if preview_db and preview_db.exists():
+                raise FileExistsError(f"preview database already exists: {preview_db}")
             with TestClient(create_app(str(db_file))) as client:
                 shift = client.post("/api/engagements/bookshop/shifts")
                 assert shift.status_code == 201, shift.text
@@ -859,6 +864,7 @@ def comparison_stage(*, select: bool = False) -> int:
                 retired = client.get(f"/api/experiments/{experiment_id}").json() if not select else None
                 selected = None
                 selected_board = None
+                operation = None
                 if select:
                     prior = client.get("/api/engagements/bookshop/board").json()["operating_selection"]
                     choice = client.post(f"/api/shifts/{shift_id}/selections", json={
@@ -871,6 +877,36 @@ def comparison_stage(*, select: bool = False) -> int:
                     assert choice.status_code == 201, choice.text
                     selected = choice.json()
                     selected_board = client.get("/api/engagements/bookshop/board").json()
+                    if operate:
+                        closed = client.post(f"/api/shifts/{shift_id}/close")
+                        assert closed.status_code == 200, closed.text
+                        next_shift = client.post("/api/engagements/bookshop/shifts")
+                        assert next_shift.status_code == 201, next_shift.text
+                        next_id = next_shift.json()["id"]
+                        newer = client.put(f"/api/shifts/{next_id}/artifact", json={
+                            "files": config.comparison_candidate_files("B")})
+                        assert newer.status_code == 200, newer.text
+                        newer_version = client.post(f"/api/shifts/{next_id}/artifact/versions",
+                            json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+                        assert newer_version.status_code == 201, newer_version.text
+                        before = client.get("/api/engagements/bookshop/ledger").json()["events"]
+                        started = client.post(f"/api/shifts/{next_id}/runs",
+                            json={"client_request_id": "s18-demo-operation"})
+                        assert started.status_code == 202, started.text
+                        finished = client.get(f"/api/runs/{started.json()['id']}").json()
+                        checks = client.get(f"/api/runs/{finished['id']}/checks").json()
+                        outputs = client.get(f"/api/runs/{finished['id']}/outputs").json()
+                        after = client.get("/api/engagements/bookshop/ledger").json()["events"]
+                        operation = {
+                            "run_id": finished["id"], "state": finished["state"],
+                            "purpose": finished["purpose"], "adapter": finished["adapter"],
+                            "evidence_mode": finished["evidence_mode"],
+                            "selected_version_id": selected["selected_version_id"],
+                            "operated_version_id": finished["artifact_version_id"],
+                            "newer_unselected_version_id": newer_version.json()["id"],
+                            "check_count": len(checks), "output_count": len(outputs),
+                            "new_events": after[len(before):],
+                        }
         sealed_states = {
             path.name: json.loads(path.read_text(encoding="utf-8"))["review_status"]
             for path in (config.PIVOT_COMPARE_MANIFEST,
@@ -900,13 +936,27 @@ def comparison_stage(*, select: bool = False) -> int:
                           and item["protected_passed"] + item["protected_failed"] == 3
                           for item in metrics.values())
                   and all(item["eligible"] for item in eligibility.values())
-                  and no_live_call)
+                  and no_live_call
+                  and (not operate or (operation["state"] == "FINALIZED"
+                       and operation["operated_version_id"] == operation["selected_version_id"]
+                       and operation["newer_unselected_version_id"] != operation["selected_version_id"]
+                       and operation["adapter"] == "local_process"
+                       and operation["evidence_mode"] == "TRUSTED_LOCAL"
+                       and operation["check_count"] > 0 and operation["output_count"] > 0
+                       and any(event["derivation"] and event["derivation"]["run_id"] == operation["run_id"]
+                               for event in operation["new_events"]))))
         print(json.dumps({
-            "stage": "selection" if select else "comparison", "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY",
+            "stage": "operation" if operate else "selection" if select else "comparison", "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY",
             "verdict": "PASS_OFFLINE_POLICY" if passed else "STOP_INCOMPLETE",
             "trial_states": [item["state"] for item in view["trials"]],
             "outcome": outcome, "retired_status": retired["outcome"]["status"] if retired else None,
             "selection": selected, "operating_status": selected_board["operating_status"] if selected_board else None,
+            "operation": ({**operation, "new_events": [
+                {"seq": event["seq"], "event_type": event["event_type"],
+                 "synthetic": event["synthetic"],
+                 "derived_run_id": event["derivation"]["run_id"] if event["derivation"] else None}
+                for event in operation["new_events"]]}
+                if operation else None),
             "latest_saved_version_id": selected_board["latest_saved_version_id"] if selected_board else None,
             "captured_rows_before_retire": captured_before if not select else None,
             "captured_rows_before_selection": captured_before if select else None,
@@ -929,9 +979,11 @@ def comparison_stage(*, select: bool = False) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "selection", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
+    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "selection", "operation", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
     parser.add_argument("--operation-id")
     parser.add_argument("--expected-sha256")
+    parser.add_argument("--preview-db", type=Path,
+                        help="keep the offline operation walkthrough database for local browser inspection")
     args = parser.parse_args()
     if args.stage == "migration":
         return migration_stage()
@@ -941,6 +993,8 @@ def main() -> int:
         return comparison_stage()
     if args.stage == "selection":
         return comparison_stage(select=True)
+    if args.stage == "operation":
+        return comparison_stage(select=True, operate=True, preview_db=args.preview_db)
     if args.stage == "s13-canary":
         return s13_canary_stage()
     if args.stage == "s13-inspect":

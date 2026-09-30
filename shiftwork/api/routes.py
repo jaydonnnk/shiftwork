@@ -96,6 +96,7 @@ def start_run(
     shift_id: str,
     background: BackgroundTasks,
     request: Request,
+    body: schemas.OperationRequest | None = Body(default=None),
     conn: sqlite3.Connection = Depends(get_conn),
 ) -> schemas.RunView:
     # The controller's configured executor and shop snapshot are persisted on the
@@ -105,6 +106,7 @@ def start_run(
         shift_id,
         executor=request.app.state.executor,
         shop_snapshot=request.app.state.shop_snapshot,
+        client_request_id=body.client_request_id if body else None,
     )
     background.add_task(orchestrator.execute_run_task, request.app.state.db_path, run.id)
     return schemas.RunView.of(run)

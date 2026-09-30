@@ -193,7 +193,8 @@ function renderBoard() {
     return row;
   }));
   $('open-shift').disabled = state.pending || shift?.state === 'open';
-  $('run-shift').disabled = state.pending || !version || !shift?.operation_allowed || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run);
+  $('run-shift').disabled = state.pending || !version || !shift?.operation_allowed || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run) ||
+    (board.latest_run?.purpose === 'OPERATION' && board.latest_run?.state === 'FINALIZED' && board.latest_run?.shift_id === shift.id);
   text('run-help', needsChoice ? 'Operation is blocked. Compare qualifying repairs and explicitly choose an eligible tested version; saving or freezing a draft does not choose it.'
     : !version ? 'No frozen version is available to operate.'
     : !terminal(board.latest_run) ? 'Your run is in progress. Results appear only after the controller records them.'
@@ -293,6 +294,8 @@ function renderCustomers() {
     record.append(source, element('p', `Public record ${output.public_shop_record_ref}\nRun snapshot ${output.public_shop_snapshot_hash}`, 'evidence-meta'));
   } else record.append(element('p', run.purpose === 'LEGACY_OPERATION'
     ? 'Historical public context unknown. The original output and checks remain available; current files cannot fill missing old inputs.'
+    : state.checks.some(check => check.run_id === run.id && check.public_check_id?.startsWith('task:'))
+    ? 'Task checks use the frozen public state and the citations in the captured answer. No single record represents this multi-task request.'
     : 'No public comparison record. Sealed expectations are not shown.', 'empty'));
   const comparison = evidenceStep(4, 'Independent check result');
   const linked = selectEvidence(output, state.checks, state.events);
@@ -840,7 +843,8 @@ $('run-shift').addEventListener('click', () => {
   const shiftId = state.board?.latest_shift?.id;
   if (!shiftId) return;
   activateStation('customers');
-  act(() => api(`/shifts/${encodeURIComponent(shiftId)}/runs`, { method: 'POST' }));
+  act(() => api(`/shifts/${encodeURIComponent(shiftId)}/runs`, { method: 'POST',
+    body: JSON.stringify({ client_request_id: requestId('operation') }) }));
 });
 $('refresh').addEventListener('click', () => refresh());
 $('append-investigation').addEventListener('click', appendInvestigation);

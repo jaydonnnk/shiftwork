@@ -101,6 +101,12 @@ class ArtifactSourceView(BaseModel):
     authorship: Literal["template", "learner"]
 
 
+class OperationRequest(BaseModel):
+    model_config = _FROZEN
+
+    client_request_id: str
+
+
 class RunView(BaseModel):
     model_config = _FROZEN
 
@@ -213,10 +219,9 @@ class CheckResultView(BaseModel):
             observed_ref=result.observed_ref,
             expected_ref=result.expected_ref,
             reason_code=result.reason_code.value if result.reason_code else None,
-            # Sealed expectations are never rendered; only reason-code outcomes surface.
-            # CheckResult.check_id is the sealed case's own identity, so it is not
-            # projected either (Gate 3 S3.9: the client works without a sealed check id).
-            public_check_id=None,
+            # Pivot task checks are public rubric identities. Historical sealed
+            # check identities stay withheld.
+            public_check_id=result.check_id if result.check_id.startswith("task:") else None,
         )
 
 
