@@ -1,13 +1,27 @@
 # Vertical Slice Plan: Shiftwork final pivot
 
-**Approved scope change (memo approved 2026-09-30):** the user approved the
-three-board expansion memo `shiftwork_three_boards.md` (Applied AI Engineer, GTM
-Engineer, FDE; FDE-first build order; one operator-sealed comparison family per
-new board). The approved restructure is 11 remaining slices: S22 split into S22a
-(content, review and seal) and S22b (journey and board selector), GTM fixed at
-S23 to S25, and Tavily, package and hosting shifted to S26 to S28. The
-reconciling gate revisions are drafted in order (Gate 1 next, then scoped Gate 2
-and Gate 3, then this document's Gate 4 revision). Nothing below is changed yet.
+**GATE 4 SCOPED REVISION (THREE BOARDS): RE-APPROVED 2026-09-30.** The user
+reviewed the draft and approved it: "approve gate 4", and in the same
+instruction authorized committing both gate revisions and their records in
+focused batches; no push was instructed. Under the approved memo
+`shiftwork_three_boards.md` (Applied AI Engineer, Go-To-Market (GTM) Engineer,
+Forward Deployed Engineer (FDE); FDE-first build order; one operator-sealed
+comparison family per new board), the re-approved Gate 1, Gate 2 section 21 and
+the RE-APPROVED Gate 3 three-board revision, this document carries the
+restructure: 11 remaining slices, with S22 split into S22a (FDE content
+written, reviewed and sealed, the engagement-pack registration, and an offline
+reproduction proof) and S22b (the FDE board journey and the workplace board
+selector), the GTM pack fixed at S23 to S25, and Tavily, package and hosting
+shifted to S26 to S28. The two Nemotron-chain reminders are reconciled: the S20
+chain is a stretch goal with a 2026-10-20 drop point, and the package slice
+keeps the judge-path honesty rule. Two text corrections from the memo are
+included: S21's exit wording now names the FDE board journey instead of the
+retired Away shift, and the browser test citations name the files the
+repository holds, `tests/client/browser.mjs` and
+`tests/client/render_faults.mjs`. This approval is slice-plan approval only: it
+authorizes planning one slice at a time under the repository process and no
+implementation, install, credential, live call, fixture authoring, sealing,
+deployment, publication or submission, and no push.
 
 **Current slice state, 2026-09-30:** S17 and S18 are accepted and published.
 S18's review repairs are included in its four focused commits on main, and its
@@ -15,10 +29,10 @@ publication and acceptance are recorded in `00-status.md`. Live operation and
 S19 have no authority. See `00-status.md` for evidence and limits. Older state
 descriptions below are historical.
 
-**Current Gate 4 state: RE-APPROVED 2026-09-28.** The user approved the repaired
-protected-phase slice reconciliation together with Gate 2 S8.1, Gate 3 and
-ADR 0006. At that 2026-09-28 checkpoint Slice 15 remained in progress on its
-earlier go-ahead.
+**Gate 4 state before the three-board revision: RE-APPROVED 2026-09-28.** The
+user approved the repaired protected-phase slice reconciliation together with
+Gate 2 S8.1, Gate 3 and ADR 0006. At that 2026-09-28 checkpoint Slice 15
+remained in progress on its earlier go-ahead.
 
 **Gate 4: APPROVED 2026-09-24 for the final pivot. Not implementation authority.**
 Gates 1, 2 and 3 are approved for `shiftwork_final_pivot.md`. Gate 3 was approved
@@ -82,8 +96,8 @@ walkthrough; its staged views are not live evidence. For room demonstrations,
 start `python -m uvicorn shiftwork.app:create_app --factory --port 8000`, open
 `http://127.0.0.1:8000/`, and report the actual URL/port used. Use the project's
 approved interpreter. Every guard test needs a valid, behavior-changing
-mutation that fails at its named assertion. Gate 3 section 9 has **49 numbered
-obligations with multiple assertion clauses**, not 49 single-clause tests. Section
+mutation that fails at its named assertion. Gate 3 section 9 has **60 numbered
+obligations with multiple assertion clauses**, not 60 single-clause tests. Section
 4 maps the clauses and names where partial coverage becomes complete.
 
 **Stop rule:** if a slice falsifies an approved Gate 2 or Gate 3 decision, stop
@@ -109,10 +123,19 @@ run-bound channel before the adapter implements one.
 | 19 | Captured operational evidence supports read-only semantic replay | 18 |
 | 20 | A next shift inherits the choice and can test the retained alternative without rewriting history | 19 |
 | 21 | The Bellwether room completes its five-station live journey | 20 |
-| 22 | Northline runs a distinct executable reduced-help transfer journey, completing the sixth station | 21; reviewed Northline material, paired manifest and compatible catalog |
-| 23 | Optional reviewed Tavily curation and ablation | 22; separate Tavily authority if live |
-| 24 | Reproducible full-pivot test build and submission evidence | 22, and 23 only if claimed |
-| 25 | Conditional hosted demo, only if spike and delivery decision support it | 12, 24; separate deployment authority |
+| 22a | The FDE pack registers and seeds, its material and comparison family are authored for operator review and seal, and its reviewed starter reproduces the deployment incident offline | 21; operator review and seal authority for the FDE material |
+| 22b | The FDE board runs the distinct executable reduced-help deployment journey through inherited operation, completing the sixth station, and the workplace selector lands with the Boards 2 and 3 entries | 22a; sealed FDE material |
+| 23 | The GTM pack's reviewed material, contract and checks land, and its offline comparison makes a candidate eligible while writing nothing to the ledger | 22b; operator review and seal of the GTM material |
+| 24 | The GTM pipeline consequences operate and inherit offline, with idempotent reprocessing and no unowned or duplicate records | 23 |
+| 25 | The GTM revenue floor completes its browser journey and live-capable path; Board 2 complete | 24; separate live credentials and spend if the arm runs live |
+| 26 | Optional reviewed Tavily curation and ablation | 25; separate Tavily authority if live |
+| 27 | Reproducible full-pivot test build and submission evidence | 22b, 25, and 26 only if a Tavily claim is made |
+| 28 | Conditional hosted demo, only if spike and delivery decision support it | 12, 27; separate deployment authority |
+
+Build order for the new boards: the FDE pack first at S22a and S22b, then the
+GTM pack at S23 to S25, then Tavily, package and hosting at S26 to S28.
+Display order in the workplace stays Applied AI Engineer, Go-To-Market Engineer,
+Forward Deployed Engineer.
 
 S12 is before S13 or any other live-dependent product implementation or claim.
 S10 and S11 are offline policy and investigation slices; their recorded/trusted
@@ -442,15 +465,21 @@ one.
 
 ### Slice 20: inherit and test the retained alternative later
 
-- **Future proof reminder (user request 2026-09-30; pending Gate 4 reconciliation):**
-  Demonstrate one linked `ISOLATED_LIVE` Bellwether path: a learner-owned
-  repaired version makes recorded Nemotron calls in its qualifying comparison,
-  independently passes the customer task checks, is explicitly selected by exact
-  version/hash, then makes a recorded Nemotron call as that same selected version
-  in operation with independently checked synthetic consequences. The next shift
-  inherits that exact version and history. Retain IDs and hashes linking the
-  inference requests, captures, checks, comparison, choice, operation, ledger
-  and inheritance. Separate model-only and code-only runs do not prove this
+- **Future proof reminder (user request 2026-09-30; reconciled in the Gate 4
+  three-board revision):** this is a stretch evidence target, not an exit
+  condition. The chain's drop point is 2026-10-20: if it is not achieved by then
+  it is recorded as not achieved, and no later slice or claim depends on it.
+  S20's exit contract and every slice after it stay complete without the chain,
+  and each live run it needs keeps its own credential and spend authorization.
+  The target itself is unchanged: demonstrate one linked `ISOLATED_LIVE`
+  Bellwether path in which a learner-owned repaired version makes recorded
+  Nemotron calls in its qualifying comparison, independently passes the
+  customer task checks, is explicitly selected by exact version/hash, then
+  makes a recorded Nemotron call as that same selected version in operation
+  with independently checked synthetic consequences. The next shift inherits
+  that exact version and history. Retain IDs and hashes linking the inference
+  requests, captures, checks, comparison, choice, operation, ledger and
+  inheritance. Separate model-only and code-only runs do not prove this
   end-to-end claim. This note authorizes no live execution or fixture change.
 - **Working result and demo:** `python -m demos.final_pivot --stage inheritance`
   shows the offline history rule; at the reported local URL close and open the next
@@ -485,65 +514,192 @@ one.
   selected-panel reachability, no horizontal overflow and reduced motion. One
   real request/version ID binds room selection, workbench, output, checks and
   operational event. Experiment views visibly state that history did not change.
-- **Tests:** Bellwether assertions in `node tests/client/pivot-browser.mjs` and
-  `node tests/client/pivot-render-faults.mjs`, plus
+- **Tests:** Bellwether assertions in `node tests/client/browser.mjs` and
+  `node tests/client/render_faults.mjs`, plus
   `python -m pytest tests/api/test_pivot_projection.py -q`. Each served-source
   fault must fail a value assertion against independently fetched API data,
   including purpose, evidence mode, context, trial values, blocker, selected
   version and synthetic label. Gate 3 obligations 39, 45 and 46 remain partial
-  until the distinct Away shift is executed and inspected at S22.
+  until the distinct Forward Deployed Engineer board journey is executed and
+  inspected at S22b.
 - **Limits:** browser mechanics do not prove learner comprehension or transfer.
   Five moderated sessions and any study/outreach remain separately authorized;
   a pilot cannot justify the 20-point learning claim.
 - **Authorization:** no framework or rendering-engine change is assumed.
 
-### Slice 22: execute the distinct Northline transfer journey
+### Slice 22a: FDE material, registration and offline reproduction
 
-- **Working result and demo:** the Away shift starts with its reviewed Northline
-  mission, initial and three paired public request files, reviewed ordinal
-  manifest, starting booking/dependency state, compatible frozen catalog,
-  orchestration-owned protected inventory and executable blank learner scaffold.
-  Idempotent operator-reviewed seeding creates the distinct engagement. The
-  scaffold has no authored solution. In its first shift, operate only that
-  labelled starter to expose the initial failure, record the learner's cause and
-  falsifier, edit/freeze two distinct learner-owned versions, execute six
-  Northline A/B slots, and explicitly choose one eligible exact version. Close
-  and open the next shift before operating the chosen version, because the
-  starter used the first shift's successful-operation allowance. A second
-  successful operation in that shift must return 409 even after selection. Run a real
-  future-commitment, safety-escalation and retry-safe booking request through
-  the approved isolated path, then show exact output, independent task checks,
-  one-hint-only policy and deterministic synthetic consequences in the Northline
-  workshop. An experiment creates no such consequence. Bellwether mission,
-  catalog, manifest and source cannot substitute. Complete the native
-  keyboard/touch six-station journey with real public API values on desktop and
-  390px mobile.
-- **Tests:** `python -m pytest tests/orchestrator/test_northline_transfer.py tests/api/test_pivot_projection.py -q`,
-  `node tests/client/pivot-browser.mjs` and
-  `node tests/client/pivot-render-faults.mjs`. Fault each missing or unreviewed
-  mission, initial/paired requests, manifest, state, catalog and protected
+- **Working result and demo:** the workplace gains the Forward Deployed Engineer
+  board without regressing Board 1. The three engagement pack declarations
+  (Gate 3 section 3.10) resolve every engagement-scoped read from the shift's
+  slug, replacing the hardcoded bookshop comparison family list and the
+  bookshop-only comparison workload loader; an unregistered, incomplete or
+  unsealed board fails closed and is not offered. The reviewed FDE material
+  lands in journey order: the deployment brief with its conflicting
+  requirements, the discovery record, the permissions map, the acceptance
+  tests, and the rollout and handover documents, plus the reviewed mission,
+  initial and three paired public request files with their ordinal manifest,
+  starting state, compatible catalog and the executable blank learner scaffold
+  with no authored solution. The FDE comparison family (at least six distinct
+  protected variants whose expected acceptance aspects cover the customer
+  acceptance checks) is authored with its digest packet for operator review and
+  seal. Offline, the reviewed starter reproduces the deployment incident on its
+  pinned request and public state, operator-reviewed seeding is idempotent and
+  every reviewed pin re-verifies. The workplace selector client work may start
+  during the operator-review window.
+- **Tests:** `python -m pytest tests/packs/test_registry.py tests/orchestrator/test_fde_deployment.py -q`;
+  obligation 55 in full, obligation 60's per-family validation arms, and the
+  offline material arms of 45. Fault an unregistered slug, an incomplete
+  declaration, a missing, unsealed or short family, a duplicate family name,
+  two packs sharing a variant ref, a stale reviewed pin and a caller-supplied
+  pack, family or manifest selection; substitute Bellwether material; inject
+  solution code into the blank scaffold. Each must fail a named assertion. The
+  family fails closed at reservation until the operator seal is applied.
+- **Limits:** authoring and admission are not execution; the comparison,
+  choice, operation, browser and live arms stay in S22b. An unreviewed file, an
+  unsealed family or an unverified pin refuses use rather than degrading.
+- **Authorization:** operator review and sealing of the actual FDE material,
+  family variants and compatible catalog precede any use; no live call,
+  credential or spend.
+
+### Slice 22b: execute the FDE board journey
+
+- **Working result and demo:** with the material sealed, the FDE board starts
+  from its reviewed mission, initial and three paired public request files,
+  reviewed ordinal manifest, starting booking and dependency state, compatible
+  frozen catalog, orchestration-owned protected inventory and the executable
+  blank learner scaffold. Idempotent operator-reviewed seeding creates the
+  distinct deployment engagement. In its first shift, operate only that
+  labelled starter to expose the initial failure, record the learner's cause
+  and falsifier, edit and freeze two distinct learner-owned versions, execute
+  the six FDE A/B slots, and explicitly choose one eligible exact version.
+  Close and open the next shift before operating the chosen version, because
+  the starter used the first shift's successful-operation allowance; a second
+  successful operation in that shift must return 409 even after selection. Run
+  a real future-commitment, safety-escalation and retry-safe booking request
+  through the approved isolated path, then show the exact output, the
+  independent task checks, the one-hint-only policy, the all-or-nothing pilot
+  arm (full acceptance emits exactly one `ROLLOUT_APPROVED` and writes the
+  pilot state; a failing run opens incidents and writes none) and the close
+  record with one `HANDOVER_DECLARED` carrying the runbook reference, declared
+  limits and unresolved incidents in the Northline deployment workshop, where
+  `COUNTER_FOLLOWUP_RECORDED` stays a follow-up rather than a missed
+  commitment. An experiment creates no such consequence. Bellwether mission,
+  catalog, manifest and source cannot substitute. The workplace board selector
+  and `/api/boards` land with the Boards 2 and 3 entries governed by their
+  registration state, and the native keyboard/touch six-station journey with
+  real public API values completes on desktop and 390 px mobile.
+- **Tests:** `python -m pytest tests/orchestrator/test_fde_deployment.py tests/api/test_pivot_projection.py -q`,
+  `node tests/client/browser.mjs` and
+  `node tests/client/render_faults.mjs`. Fault each missing or unreviewed
+  mission, initial or paired request, manifest, state, catalog and protected
   inventory prerequisite; swap Bellwether mission/source/manifest; inject
-  solution code into the blank scaffold; widen Northline assist beyond one
-  hint; choose without a complete eligible comparison or with a stale/null prior
+  solution code into the blank scaffold; widen FDE assist beyond one hint;
+  choose without a complete eligible comparison or with a stale or null prior
   selection ID instead of the labelled starter ID; allow a second successful
-  operation in the starter shift; run unselected edited
-  code; or let an experimental pass write business history. Each must fail a
-  named assertion. A separate existing v5 Northline no-run case must receive no
-  starter, use only a reviewed Northline initial request for its isolated public
-  bootstrap, then require investigation and eligible choice. Check both new
-  engagement shifts and the exact inherited selected hash.
-  Served-source faults must also catch wrong Northline request, outcome, evidence
-  mode and synthetic label. Complete Northline arms of obligations 16, 17, 23,
-  25, 28, 29 and 40, plus obligations 39, 45 and 46 here.
-- **Limits:** a representative executable away run proves software behavior,
-  not reduced-assistance human learning or the 20-point transfer target.
-- **Authorization:** operator review and sealing of the actual
-  Northline files, protected inventory and compatible catalog precede execution.
-  If any prerequisite is missing,
-  stop Northline execution and any transfer claim. Participant contact/consent,
-  live credentials and spend each remain separately authorized.
+  operation in the starter shift; run unselected edited code; let an
+  experimental pass write business history; and fail the pilot arm on each
+  acceptance boundary. Each must fail a named assertion. A separate existing
+  v5 Northline no-run case must receive no starter, use only a reviewed initial
+  request for its isolated public bootstrap, then require investigation and
+  eligible choice. Check both new engagement shifts and the exact inherited
+  selected hash. Served-source faults must also catch a wrong FDE request,
+  outcome, evidence mode and synthetic label. Complete the FDE arms of
+  obligations 16, 17, 20, 23, 25, 28, 29, 39, 40, 45, 46, 56 and 59.
+- **Limits:** a representative executable deployment run proves software
+  behavior, not reduced-assistance human learning or the 20-point transfer
+  target.
+- **Authorization:** operator review and sealing of the actual FDE files,
+  protected inventory and compatible catalog precede execution and were
+  completed in S22a. Participant contact or consent, live credentials and
+  spend each remain separately authorized.
 
-### Slice 23: optional Tavily curation
+### Slice 23: the GTM pack and its offline comparison
+
+- **Working result and demo:** the Go-To-Market Engineer board's reviewed
+  material lands: the Stonebridge Software fiction and revenue-team brief, the
+  signal records, the incident request and public state that expose the
+  mis-routed, dropped or duplicated record with its decision trace, three
+  paired public workloads with their manifest, a compatible catalog, the
+  expected-decision checks, the executable learner-editable workflow starter
+  and the two candidate drafts (rules-first with a review queue versus
+  model-assisted confidence thresholds with human review). The GTM comparison
+  family (at least six distinct protected variants whose expected owner and
+  qualification aspects are declared) is authored with its digest packet for
+  operator review and seal, because the eligibility proof fails closed without
+  a sealed family. Offline, the reviewed starter reproduces the incident, and
+  the six-slot comparison completes fairly against the sealed family, makes a
+  candidate eligible and writes nothing to the ledger; the GTM assist
+  declaration (two calls across HINT and DIAGNOSIS, no patch proposal) is
+  enforced from the pack declaration rather than a branch.
+- **Tests:** `python -m pytest tests/orchestrator/test_gtm_pipeline.py tests/packs/test_registry.py -q`;
+  the GTM arms of obligations 16, 17, 20, 23, 39, 40, 55, 57 and 60. Fault each
+  missing or unreviewed mission, incident, workload, manifest, state, catalog
+  and family prerequisite; a swap to Bellwether or FDE material; an unsealed
+  family; a protected or experimental write reaching the ledger; a widened
+  assist role and any patch proposal. Each must fail a named assertion.
+- **Limits:** the comparison and eligibility proof are offline policy
+  evidence; the consequence vocabulary, selection, operation, inheritance and
+  the live path follow in S24 and S25. Operator workload review precedes use.
+- **Authorization:** operator review and sealing of the GTM material and
+  family precede the comparison proof; no live call, credential or spend.
+
+### Slice 24: GTM consequences, operation and inheritance offline
+
+- **Working result and demo:** from the eligible comparison, explicitly select
+  one exact version, then operate and inherit it offline. The pipeline
+  consequence vocabulary reduces only from operational captures and checks:
+  one `OWNER_ASSIGNED` and one `SLA_CLOCK_STARTED` per processed signal,
+  `HANDOFF_ESCALATED` for the revenue team's review queue, and
+  `INCIDENT_OPENED` for a dropped, mis-owned or duplicate record with its
+  decision trace. The terminal action is a human handoff, and no surface
+  presents a sent message or a revenue quantity. Reprocessing the same batch
+  is idempotent: no duplicate owner, write or clock, and a second commitment
+  for one signal fails as `DUPLICATE_COMMITMENT` while an unowned required
+  signal fails as `REQUIRED_TASK_MISSING`. The next shift inherits the exact
+  selection, and a later-condition experiment (an enrichment provider outage,
+  or a new region or product line) runs both the selected and retained
+  versions without rewriting history. Experiments and selections write no
+  pipeline state.
+- **Tests:** `python -m pytest tests/orchestrator/test_gtm_pipeline.py tests/orchestrator/test_close_inheritance.py -q`;
+  obligation 58, the GTM arms of 25, 28, 29, 30 to 34 and 45's operation
+  clauses. Fault a duplicate owner or write, an unowned signal, a handoff
+  presented as a sent message, a revenue quantity, a missed-handoff incident
+  without its trace, an experimental pipeline write, a stale prior selection
+  and a second successful operation. Each must fail a named assertion.
+- **Limits:** synthetic pipeline state is deterministic, not real revenue, and
+  no customer message is ever sent. The room and the live-capable path follow
+  in S25.
+- **Authorization:** none beyond Gate 4 and the per-slice go-ahead; no live
+  call, credential or spend.
+
+### Slice 25: complete the GTM revenue floor
+
+- **Working result and demo:** serve the GTM revenue floor room stations
+  (signal intake, qualification rules, workflow bench, pipeline wall) with
+  real public API state, no illustrative mockup numbers and synthetic labels
+  throughout. The browser journey covers brief through inherited operation
+  with native keyboard/touch at 1280, 640 and 390 px, focus and selected-panel
+  reachability, no horizontal overflow and reduced motion; Experiment views
+  visibly state that history did not change; the pipeline wall shows owners,
+  clocks, escalations and incidents derived only from operational captures.
+  One real request/version ID binds room selection, workbench, output, checks
+  and operational event. With separate authorization, the same journey runs on
+  the live-capable path, and the sealed-needle and served-source scans cover
+  the GTM surfaces. Board 2 is complete.
+- **Tests:** `node tests/client/browser.mjs`, `node tests/client/render_faults.mjs`
+  and `python -m pytest tests/api/test_pivot_projection.py -q`; the GTM client
+  arms of obligation 39 and the GTM served-source fault assertions. Each
+  served-source fault must fail a value assertion against independently
+  fetched API data, including purpose, evidence mode, owners, clocks,
+  escalations, incidents, blocker, selected version and synthetic label.
+- **Limits:** browser mechanics do not prove learner comprehension or
+  transfer; the GTM board adds practice surface, not learning evidence. A live
+  arm needs its own credentials and spend.
+- **Authorization:** separate live credentials and spend for the live-capable
+  path; no framework or rendering-engine change is assumed.
+
+### Slice 26: optional Tavily curation
 
 - **Working result and demo:** the planned operator CLI
   `python -m shiftwork.curation.pipeline discover --manifest docs/plans/shiftwork/evidence/test3-manifest.json`
@@ -570,25 +726,26 @@ one.
   claimed only if it actually ships and qualifies; a link-only change is a DROP.
 - **Authorization:** separate Tavily credentials/calls and human source review.
 
-### Slice 24: full-pivot package and honest judge evidence
+### Slice 27: full-pivot package and honest judge evidence
 
-- **Future proof reminder (user request 2026-09-30; pending Gate 4 reconciliation):**
-  The judge path must show or link the single S20 Nemotron-backed evidence chain,
-  not assemble unrelated inference, comparison, operation and inheritance runs
-  into an end-to-end claim. If that chain is absent, label the missing link and
-  do not claim a successful live AI-powered learner repair.
+- **Future proof reminder (user request 2026-09-30; reconciled in the Gate 4
+  three-board revision):** The judge path must show or link the single S20
+  Nemotron-backed evidence chain, not assemble unrelated inference, comparison,
+  operation and inheritance runs into an end-to-end claim. If that chain is
+  absent, or was dropped at its 2026-10-20 drop point, label the missing link
+  and do not claim a successful live AI-powered learner repair.
 - **Working result and demo:** `python -m pytest tests/packaging/test_clean_env_install_and_run.py -q`
   installs only the approved lock in a clean environment and runs the **full
   offline pivot demo**. A downloadable test build includes source/assets,
   license, README, setup/run instructions, mode labels, limits and a judge path
   to a separately authorized live demo if available. Assemble model feedback
-  from observed S12 to S22 calls, never invented ratings. Record the required
+  from observed S12 to S25 calls, never invented ratings. Record the required
   model use, selected track, actual Nebius capabilities, and public video script
   showing real inference, learner repair, choice and inheritance.
 - **Tests:** obligation 47 completes here; run the relevant full suite and
   browser journey before packaging. Missing credentials produce a labelled
   offline skip, not a live PASS. The complete central-mechanism verdict requires
-  real S13 to S22 evidence and all hard no-go checks in section 5.
+  real S13 to S25 evidence and all hard no-go checks in section 5.
 - **Limits:** packaging cannot substitute an offline fixture for a working
   learner-code product or prove prize/learning impact. A download URL is the
   baseline; hosting remains conditional.
@@ -596,7 +753,7 @@ one.
   repository/build/video, YouTube upload and submission each require their own
   authorization. None is performed by Gate 4 approval alone.
 
-### Slice 25: conditional hosted demo
+### Slice 28: conditional hosted demo
 
 - **Working result and demo:** only if S12 proves a suitable delivery route and
   the user selects hosting, show a public HTTPS controller/client, restart it,
@@ -633,20 +790,20 @@ Every row includes the assertion clauses, not merely a test name.
 | 13 | S11 missing capture is missing evidence, never refusal or clarification; S13 live timeout and S16 missing slot keep that meaning | S16 (partial S11, S13) |
 | 14 | S11 validated envelope alone renders customer text; contradictory/free prose rejected; S13 live projection repeats | S13 (partial S11) |
 | 15 | S11 pure evaluator and orchestrator-only loader, including import/runtime I/O traps; S13/S14 new gateway/assist imports repeat | S14 (partial S11, S13) |
-| 16 | S15 Bellwether and S22 Northline atomically freeze both versions, their own reviewed mission bytes/hash, the reviewed comparison state against its own pin and three reviewed request batches with raw bytes, hashes, parsed counts and task-spec hashes, context, protected reservation and all six slots before result; fault every write, missing batch, caller-selected/cross-engagement manifest and mutable-path substitution | S22 (partial S15) |
-| 17 | S15 Bellwether and S22 Northline independently pinned manifests map each engagement's file 01/02/03 to pair 1/2/3; each pair's A/B slots share exact bytes/hash/count/task-spec hash and protected ref; whole-pair swap, B-only swap/count, dropped request, cross-engagement fallback and cache/booking/process leakage fail | S22 (partial S15) |
+| 16 | S15 Bellwether and S22b FDE atomically freeze both versions, their own reviewed mission bytes/hash, the reviewed comparison state against its own pin and three reviewed request batches with raw bytes, hashes, parsed counts and task-spec hashes, context, protected reservation and all six slots before result; fault every write, missing batch, caller-selected/cross-engagement manifest and mutable-path substitution | S22b (partial S15) |
+| 17 | S15 Bellwether and S22b FDE independently pinned manifests map each engagement's file 01/02/03 to pair 1/2/3; each pair's A/B slots share exact bytes/hash/count/task-spec hash and protected ref; whole-pair swap, B-only swap/count, dropped request, cross-engagement fallback and cache/booking/process leakage fail | S22b (partial S15) |
 | 18 | S15 predeclared A/B, B/A, hash-derived third order cannot change after first result | S15 |
 | 19 | S16 mutate candidates and every context field separately, including frozen mission bytes/hash, model/settings, requirements and starting state; all drift is Not comparable | S16 |
 | 20 | S15 failure retains slot/exposure; S16 each missing/failed slot blocks complete status without refund | S16 (partial S15) |
 | 21 | S11 ordinary public diagnostic cannot reserve protected material, open assist, write business state or become eligible; S13 safely runs one null-investigation legacy source bootstrap with public-only inputs, null POST/GET ID and no protected/business/help effect, rejecting repeat/ordinary null IDs; S15 repeats the guard against comparison reservation | S15 (partial S11, S13) |
 | 22 | S11 recorded inspection cannot earn fresh eligibility; S16 comparison rejects its mode | S16 (partial S11) |
-| 23 | S16 Bellwether and S22 Northline candidate public denominators equal their own three frozen public batch request counts, with the protected denominator kept separate and never merged; missing output counts, unknown usage/cost stays unknown, mandatory unknown budget blocks eligibility; justified/unjustified clarification have separate counts; `(request_ordinal, task_id)` stays distinct, useful completion needs all required tasks, and overlapping non-completion incidence is labelled non-additive, with faults for each arm | S22 (partial S16) |
+| 23 | S16 Bellwether and S22b FDE candidate public denominators equal their own three frozen public batch request counts, with the protected denominator kept separate and never merged; missing output counts, unknown usage/cost stays unknown, mandatory unknown budget blocks eligibility; justified/unjustified clarification have separate counts; `(request_ordinal, task_id)` stays distinct, useful completion needs all required tasks, and overlapping non-completion incidence is labelled non-additive, with faults for each arm | S22b (partial S16) |
 | 24 | S16 mandatory task/correctness/safety failure blocks candidate before efficiency; no aggregate score conceals it | S16 |
-| 25 | S17 Bellwether and S22 Northline choices bind an exact eligible version/hash, current requirements, uninvalidated exposure and expected prior selection atomically; null prior choice is valid only for an eligible first choice, while Northline's prior ID must be its labelled starter selection | S22 (partial S17) |
+| 25 | S17 Bellwether and S22b FDE choices bind an exact eligible version/hash, current requirements, uninvalidated exposure and expected prior selection atomically; null prior choice is valid only for an eligible first choice, while the FDE board's prior ID must be its labelled starter selection | S22b (partial S17) |
 | 26 | S10/S11 no-choice requalification cannot select implicitly; S17 save/freeze/test and failed comparison retain block/exposure without auto retake; S20 close does not select | S20 (partial S10, S11, S17) |
 | 27 | S17 invalid latest choice blocks without prior-choice fallback; S18 run start rechecks | S18 (partial S17) |
-| 28 | S11 public diagnostic, S15 Bellwether pairs and S22 Northline pairs cannot write ledger/incidents; S18 establishes import/call and reducer purpose/type/runtime traps | S22 (partial S11, S15, S18) |
-| 29 | S18 faults Bellwether checks/events/incidents/terminal writes, changes the current mission after run start without changing pinned check/event derivation, and retries one atomic finalization; S22 proves distinct Northline starter and selected-version operations across two shifts, rejecting a second successful operation in the starter shift | S22 (partial S18) |
+| 28 | S11 public diagnostic, S15 Bellwether pairs and S22b FDE pairs cannot write ledger/incidents; S18 establishes import/call and reducer purpose/type/runtime traps | S22b (partial S11, S15, S18) |
+| 29 | S18 faults Bellwether checks/events/incidents/terminal writes, changes the current mission after run start without changing pinned check/event derivation, and retries one atomic finalization; S22b proves distinct FDE starter and selected-version operations across two shifts, rejecting a second successful operation in the starter shift | S22b (partial S18) |
 | 30 | S18 saves newer unselected source, runs exact selected version/hash | S18 |
 | 31 | S18 only zero accepted outputs and zero reducer writes permit second operation; reject changed selection/context | S18 |
 | 32 | S18 experimental pass and unselected passing version cannot resolve; selected operational pinned regression can | S18 |
@@ -656,22 +813,28 @@ Every row includes the assertion clauses, not merely a test name.
 | 36 | S12 probes; S13 model, call, byte, token, deadline and controller-derived exact tool policy each fail independently; injected request field returns 422/no call, while prompt override, changed grant, unlisted model proposal and tool execution each fail a named assertion | S13 (partial S12) |
 | 37 | S12 real isolation probes; S13 real adapter canary cannot reach key, controller, host, sealed or other run | S13 (partial S12) |
 | 38 | S13 provider/transport failure retains raw evidence and usage; S18 proves zero business effect after finalizer exists | S18 (partial S13) |
-| 39 | S13 needle self-tests plus success/error/log/observation/bootstrap scans in raw, escaped and slash forms; S14 assist prompts; S18 operational event self-test and normal/error projections; S21 Bellwether client and S22 Northline client surfaces | S22 (partial S13, S14, S18, S21) |
-| 40 | S13 safe owned source and nested public views contain no internal locator; S15 Bellwether and S22 Northline reserved workload summaries expose only safe ID/hash/count before trial, never future bytes or protected refs | S22 (partial S13, S15) |
+| 39 | S13 needle self-tests plus success/error/log/observation/bootstrap scans in raw, escaped and slash forms; S14 assist prompts; S18 operational event self-test and normal/error projections; S21 Bellwether client, S22b FDE client and S25 GTM client surfaces, with each registered pack's family needles detected on every board's public surfaces | S25 (partial S13, S14, S18, S21, S22b) |
+| 40 | S13 safe owned source and nested public views contain no internal locator; S15 Bellwether and S22b FDE reserved workload summaries expose only safe ID/hash/count before trial, never future bytes or protected refs | S22b (partial S13, S15) |
 | 41 | S16 restart fails an interrupted experiment; S18 separately fails an interrupted operation, retaining each capture/usage/exposure with no paid retry/refund | S18 (partial S16) |
 | 42 | S19 original bytes/context, including frozen mission, and rules drive semantic replay despite changed current mission/other files/state; zero writes | S19 |
 | 43 | S10 preserves missing legacy inputs; S19 reports UNKNOWN_MISSING_INPUTS, never guessed replay | S19 (partial S10) |
 | 44 | S19 independent semantic divergence and chain-tamper faults prove both checks separately | S19 |
-| 45 | S11/S14/S15/S17/S18/S20 progressively wire Bellwether stations; S21 verifies five-station mechanics; S22 seeds reviewed Northline material, runs its blank starter, six A/B slots, explicit selection and next-shift operation, and separately proves an existing v5 Northline no-run shift gets no starter and bootstraps only its own reviewed request under isolation; faults missing mission/requests/manifest/state/catalog/protected review and Bellwether substitution, then completes the native six-station desktop/390px journey | S22 (partial S11 to S21) |
-| 46 | S13/S15/S16/S17/S18/S20 add real values; S21 Bellwether and S22 Northline served-source faults each fail independently fetched purpose, context, trial, blocker, choice, mode, outcome and synthetic-label assertions | S22 (partial S13 to S21) |
-| 47 | S10 retains old package skeleton; S24 approved-lock clean install and full offline pivot demo; missing live credentials labelled skip | S24 (partial S10) |
-| 48 | S23 frozen/polling/Tavily ablation, retained known URLs and DROP on every unmet pre-registered threshold | S23 |
+| 45 | S11/S14/S15/S17/S18/S20 progressively wire Bellwether stations; S21 verifies five-station mechanics; S22a authors, reviews and seals the FDE material and proves the offline reproduction; S22b runs its blank starter, six FDE A/B slots, explicit eligible selection and next-shift operation, and separately proves an existing v5 Northline no-run shift gets no starter and bootstraps only its own reviewed request under isolation; faults missing mission/requests/manifest/state/catalog/protected review and Bellwether substitution, then completes the native six-station desktop/390px journey | S22b (partial S11 to S21, S22a) |
+| 46 | S13/S15/S16/S17/S18/S20 add real values; S21 Bellwether and S22b FDE served-source faults each fail independently fetched purpose, context, trial, blocker, choice, mode, outcome and synthetic-label assertions | S22b (partial S13 to S21) |
+| 47 | S10 retains old package skeleton; S27 approved-lock clean install and full offline pivot demo; missing live credentials labelled skip | S27 (partial S10) |
+| 48 | S26 frozen/polling/Tavily ablation, retained known URLs and DROP on every unmet pre-registered threshold | S26 |
 | 49 | S12 raw capability matrix records exact model/image/settings, trials, latency, usage, failures and every trust probe | S12 |
 | 50 | S15 runs the public phase then the protected phase in frozen order, each in a fresh workspace, the protected line reaching the service through `load_single_request` and not `load_batch`, and all four guards restated against `executed_request_count` accept the protected ordinal while still rejecting one beyond it; faults phase order, swapped phase state, missing protected phase, protected-before-public, reused workspace and a two-line or wrong-ordinal protected batch | S15 |
 | 51 | S15 binds and snapshots each protected variant before any result, reads the bindings back through the reservation reconstruction, rejects a colliding `add_entities` key or `add_records` record id even though the colliding document still parses, and pins both protected canonicalizers with golden hash vectors including a decomposed-character text | S15 |
 | 52 | S15 proves each pair shares one byte-identical protected stimulus, one distinct variant per pair and one protected ordinal per slot equal to the public count plus one; faults a variant leaked into another pair, a second variant in one slot and a mismatched ordinal | S15 |
 | 53 | S15 proves protected content and captures never reach a public surface: each admitted distinctive scanner needle is present, absent from valid baseline route payloads and detected when injected; a valid public scalar `1` remains servable. Two valid protected variants vary short ids, expected strings and added scalars while public inputs stay fixed; public request, output and shop fields remain identical, excluding opaque hashes and run identities. Fault the public shop derivation and protected-ordinal response, observation and log filters separately. Scan `local_process` and `tokenfactory` routes before, during and after execution | S15 |
 | 54 | S15 proves the public and protected denominators reconcile to each slot's `executed_request_count` without merging; faults a protected step merged into a public counter, a hidden missing protected capture and a protected count reported before the experiment is terminal. The acceptance-reading arm is S16 | S16 (partial S15) |
+| 55 | S22a registers the slug-keyed pack declarations that fail closed on an unregistered slug, an incomplete declaration, a missing or unsealed family, a short inventory, a duplicate family name and two packs sharing variant refs, and re-verifies every reviewed pin; S22b proves a draw in one board cannot satisfy another board's comparison and an invalidation in one board leaves the others untouched, with the GTM registration repeating at S23 | S23 (partial S22a, S22b) |
+| 56 | S22b serves `/api/boards` with registered packs in declaration order, role, employer or client, room, station labels and availability only, refuses to partially offer an unsealed or unregistered board, passes the workplace payload scanner and keeps availability independent of learner progress; the GTM entry completes at S25 | S25 (partial S22b) |
+| 57 | S22a declares all three assistance levels and refuses a role outside the declaration or a disagreeing config row before any model call; the Bellwether three-call and FDE one-hint arms land with their boards, and the GTM two-call HINT and DIAGNOSIS level, with every patch proposal refused, completes at S23 | S23 (partial S22a) |
+| 58 | S24 proves one `OWNER_ASSIGNED` and one `SLA_CLOCK_STARTED` per completed GTM signal, a duplicate owner or write as `DUPLICATE_COMMITMENT`, an unowned required signal as `REQUIRED_TASK_MISSING`, the human-handoff record never presenting a sent message, one missed-handoff `INCIDENT_OPENED` per failing record with its decision trace, and no experimental, selection or revenue quantity write | S24 |
+| 59 | S22b proves the FDE all-or-nothing pilot arm: full acceptance emits the pilot-state events with exactly one `ROLLOUT_APPROVED`, a failing run opens incidents and writes no pilot state, `COUNTER_FOLLOWUP_RECORDED` stays a follow-up, and close refuses a missing declared runbook document and otherwise appends one `HANDOVER_DECLARED` carrying the runbook version, declared limits and unresolved incidents that a later experiment cannot alter | S22b |
+| 60 | S22a and S22b validate the typed acceptance-aspect schema with the FDE family: an absent or unparseable aspect, an unknown kind, a missing or unknown task id, an empty expected-outcomes tuple, a forbidden parameter for the kind and an out-of-vocabulary reason code are rejected with no exposure recorded, and a declared task-outcomes and a declared no-task reason code each pass and fail; the GTM family repeats at S23 | S23 (partial S22a, S22b) |
 
 ## 5. No-go conditions and evidence boundaries
 
@@ -688,8 +851,8 @@ Every row includes the assertion clauses, not merely a test name.
 | Three reviewed batches are not frozen to their pair's exact A/B bytes, hashes, counts and task specs | S15 manifest, slot and swap/drop-request faults stop before eligibility. No mutable-path or generic six-slot batch fallback. |
 | Experiment finalization reaches reducer/incident mutation | S11 public diagnostic is the first path; S15 repeats paired trials and S18 completes purpose/type and ledger proof. Stop on any write, backtrack Gate 2/3. |
 | Invalidated evidence remains selectable or operable | S16 invalidates, S17 selection rechecks, S18 operation rechecks; stop at first failure. |
-| Room hides selected version or operational history on desktop/mobile | S17/S18 expose values; S21 Bellwether and S22 six-station browser/rendered-fault acceptance complete. Rework client within approved Gates if possible; backtrack if a Gate 3 contract must change. |
-| Northline mission, initial or paired requests, manifest, state, compatible catalog or protected inventory lacks review; Bellwether material is substituted; or edited code operates without Northline comparison and choice | S22 refuses execution and a transfer claim until all distinct material is reviewed/frozen and its seed, pair, selection and blank-scaffold guards pass. No invented catalog version or protected case. |
+| Room hides selected version or operational history on desktop/mobile | S17/S18 expose values; S21 Bellwether, S22b FDE and S25 GTM browser/rendered-fault acceptance complete. Rework client within approved Gates if possible; backtrack if a Gate 3 contract must change. |
+| FDE mission, initial or paired requests, manifest, state, compatible catalog or protected inventory lacks review; Bellwether material is substituted; or edited code operates without FDE comparison and choice | S22a completes the material review and seal and refuses use until it passes; S22b refuses execution and a transfer claim until its seed, pair, selection and blank-scaffold guards pass. No invented catalog version or protected case. The GTM material holds to the same rule at S23. |
 | Curriculum has an obvious prescribed repair | S11 public rubric review and S15 case sealing/paired review; stop and revise incident before more UI. |
 
 Recorded inspection means reading captured bytes only. Trusted-local means executing
@@ -701,8 +864,8 @@ safe public reason is not a leaked answer. The selected version and consequences
 remain distinguishable from hypothetical later trials. Synthetic ledger values
 are not real sales, trust or skill.
 
-Tavily is optional. S24 depends on S23 only if a Tavily claim is made. Hosted
-S25 is conditional; the baseline is a downloadable test build with honest live
+Tavily is optional. S27 depends on S26 only if a Tavily claim is made. Hosted
+S28 is conditional; the baseline is a downloadable test build with honest live
 requirements. If S12/S13 cannot support a safe working learner service, an
 offline-only package is not presented as the approved product or a qualifying
 hackathon demonstration. Public release, judging availability, video upload and
@@ -711,17 +874,24 @@ participant studies each require separate authorization.
 ## 6. Approval boundary
 
 This plan preserves historical Slices 1 to 9 and changes only the unbuilt
-Slices 10 to 25. The user approved it on 2026-09-24 together with the scoped
-Gate 3 Northline correction, and authorized committing and pushing both to main
-without a co-author footer. That authorization covers these documents only.
+Slices 10 to 28 (S22 carries the S22a and S22b split). The user approved the
+final-pivot revision on 2026-09-24 together with the scoped Gate 3 Northline
+correction, and authorized committing and pushing both to main without a
+co-author footer. That authorization covers those documents only. The scoped
+three-board revision was drafted 2026-09-30 under the approved memo: it splits
+S22 into S22a and S22b, fixes the GTM pack at S23 to S25, shifts Tavily,
+package and hosting to S26 to S28, and reconciles the two Nemotron-chain
+reminders. It was RE-APPROVED by the user on 2026-09-30, after the Gate 3
+three-board re-approval.
 
 Gate 4 approval authorizes planning one slice at a time under the repository
 process. It does not authorize installs, credentials, external calls, the spike
 run, fixture authoring, sealed-case contents, ADR #4, participant contact,
 deployment, publication, submission or any further commit or push. Each slice
-still needs its own explicit go-ahead, and Slice 12, 13, 14, 22, 23, 24 and 25
-keep the separate authorizations named in their own Authorization lines.
+still needs its own explicit go-ahead, and Slice 12, 13, 14, 22a, 22b, 23, 24,
+25, 26, 27 and 28 keep the separate authorizations named in their own
+Authorization lines.
 
-The next planned slice is Slice 13 under section 3. Slices 10 through 12 are
-accepted; Slice 13 still needs its own go-ahead and live authorizations. See
+The next planned slice is Slice 19 under section 3. Slices 10 through 18 are
+accepted and published; Slice 19 still needs its own go-ahead. See
 `00-status.md` for the completion evidence and current gate state.
