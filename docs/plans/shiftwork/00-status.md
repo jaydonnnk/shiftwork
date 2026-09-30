@@ -1,5 +1,37 @@
 # Status: Shiftwork
 
+## Three-board scope direction, revision memo and approval: 2026-09-30
+
+The user directed a product scope expansion to three role boards in one workplace:
+applied AI engineer at Bellwether Books (existing), GTM engineer at a new fictional
+employer, and forward deployed engineer deployed at the Northline Bike Cooperative,
+which stops being the applied AI engineer's away shift.
+
+`shiftwork_three_boards.md` (repository root) records the direction; the user
+APPROVED it on 2026-09-30 after a second-opinion review and a read-only
+adjudication pass that verified every finding against the code and confirmed all
+of them. The approved parameters: each new board ships one complete journey
+before the October 30 submission and authors one operator-sealed comparison
+family (at least six distinct protected variants), superseding the earlier "no
+new sealed protected families initially" parameter because a comparison without
+a family fails closed and dead-ends the journey before selection; the FDE board
+is built first after Slice 21 as S22a (content written, reviewed and sealed,
+with an offline reproduction proof) and S22b (journey and workplace selector);
+the GTM pack is three fixed slices (S23 to S25); the S20 Nemotron chain is a
+stretch goal with an October 20 drop point; no further feature drops are planned.
+
+Role research with verified postings and sources is recorded in
+`references/role-scope-research-2026-09-30.md`. The approved slice restructure
+(11 remaining slices; Tavily, package and hosting shifted to S26 to S28) is part
+of that memo.
+
+This entry records the request, the revision, the approval and the parameters.
+It is not Gate 1, 2, 3 or 4 re-approval, implementation, credential or live-call
+authority, or S18 acceptance. Approval authorizes drafting the reconciling gate
+revisions only, in order: Gate 1 (product scope, screens, mockups) next, then
+scoped Gate 2 and Gate 3, then the Gate 4 slice revision. Slices 19 to 21 are
+unaffected by the scope change.
+
 ## Future S20 and S24 Nemotron proof request: 2026-09-30
 
 The user asked to retain a stronger end-to-end evidence target for the future
