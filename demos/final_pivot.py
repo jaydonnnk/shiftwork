@@ -9,6 +9,14 @@ against the pinned incident request and public state, then prints the exact
 request, the exact output, the independently assessed required tasks and the
 customer text rendered from the validated envelope. Every run is a temporary
 database of its own; no runtime file and no protected case is touched.
+
+The replay stage re-derives one finalized S18 operation from its captured bytes
+only and reports the comparison against the stored rows: replacing the current
+mission file or the public state file, and changing today's incident state,
+leaves the replay IDENTICAL with zero writes; a stored semantic divergence
+reports DIFFERENT; an independent chain tamper is caught by chain verification
+while the replay still reports IDENTICAL; and a migrated v5 run without captured
+inputs reports UNKNOWN_MISSING_INPUTS.
 """
 
 from __future__ import annotations
@@ -977,9 +985,216 @@ def comparison_stage(*, select: bool = False, operate: bool = False,
         sealed_store.load_reviewed_comparison_family = reviewed_family
 
 
+def replay_stage() -> int:
+    """Replay the S18 operational walkthrough from its captured bytes only (S19).
+
+    The operation run is produced over a temporary database through the real HTTP
+    surface. The current mission file, the public state file and today's incident
+    rows are then deliberately changed; the replay must stay IDENTICAL and write
+    nothing. A stored semantic divergence reports DIFFERENT, an independent chain
+    tamper breaks chain verification while the replay still reports IDENTICAL,
+    and a migrated v5 run without captured inputs reports UNKNOWN_MISSING_INPUTS.
+    Every change is made on temporary copies; the checked-in fixtures, the sealed
+    files and any live database are never touched.
+    """
+    admission = orchestrator._require_reviewed_comparison_material
+    reviewed_family = sealed_store.load_reviewed_comparison_family
+    original_mission = config.PIVOT_MISSION
+    original_state = config.PIVOT_PUBLIC_STATE
+    try:
+        orchestrator._require_reviewed_comparison_material = lambda *_: None
+        sealed_store.load_reviewed_comparison_family = sealed_store.load_family
+        with tempfile.TemporaryDirectory(prefix="shiftwork-s19-replay-") as directory:
+            db_file = Path(directory) / "replay.db"
+            with TestClient(create_app(str(db_file))) as client:
+                shift = client.post("/api/engagements/bookshop/shifts")
+                assert shift.status_code == 201, shift.text
+                shift_id = shift.json()["id"]
+                starter = client.post(f"/api/shifts/{shift_id}/artifact/versions",
+                                      json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+                assert starter.status_code == 201, starter.text
+                source = client.post(f"/api/shifts/{shift_id}/runs")
+                assert source.status_code == 202, source.text
+                source_deadline = time.monotonic() + 30
+                while time.monotonic() < source_deadline:
+                    source_run = client.get(f"/api/runs/{source.json()['id']}").json()
+                    if source_run["state"] in ("FINALIZED", "FAILED"):
+                        break
+                    time.sleep(0.05)
+                assert source_run["state"] == "FINALIZED", source_run
+                investigation = client.post(f"/api/shifts/{shift_id}/investigations", json={
+                    "source_run_id": source.json()["id"], "source_request_ordinal": 1,
+                    "cause": "the starter omits a required collection task",
+                    "falsifier": "the reviewed collection request still lacks that task result",
+                    "public_test": "require every declared task result",
+                    "revision_of_id": None, "client_request_id": "s19-demo-investigation",
+                })
+                assert investigation.status_code == 201, investigation.text
+                candidates = {}
+                for label in ("A", "B"):
+                    saved = client.put(f"/api/shifts/{shift_id}/artifact",
+                                       json={"files": config.comparison_candidate_files(label)})
+                    assert saved.status_code == 200, saved.text
+                    frozen = client.post(f"/api/shifts/{shift_id}/artifact/versions",
+                                         json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+                    assert frozen.status_code == 201, frozen.text
+                    candidates[label] = frozen.json()
+                created = client.post(f"/api/shifts/{shift_id}/experiments", json={
+                    "kind": "QUALIFYING_COMPARISON",
+                    "investigation_id": investigation.json()["id"],
+                    "candidate_a_version_id": candidates["A"]["id"],
+                    "candidate_b_version_id": candidates["B"]["id"],
+                    "declared_treatment": "A chooses lowest price; B chooses highest stock",
+                    "client_request_id": "s19-demo-comparison",
+                })
+                assert created.status_code == 202, created.text
+                deadline = time.monotonic() + 60
+                while time.monotonic() < deadline:
+                    view = client.get(f"/api/experiments/{created.json()['id']}").json()
+                    if view["state"] in ("FINALIZED", "FAILED"):
+                        break
+                    time.sleep(0.05)
+                assert view["outcome"] and view["outcome"]["status"] == "COMPLETE", view
+                prior = client.get("/api/engagements/bookshop/board").json()["operating_selection"]
+                choice = client.post(f"/api/shifts/{shift_id}/selections", json={
+                    "comparison_id": created.json()["id"],
+                    "selected_version_id": candidates["A"]["id"],
+                    "rationale": "A completed the required tasks under the shared conditions.",
+                    "expected_prior_selection_id": prior["id"] if prior else None,
+                    "client_request_id": "s19-demo-selection",
+                })
+                assert choice.status_code == 201, choice.text
+                closed = client.post(f"/api/shifts/{shift_id}/close")
+                assert closed.status_code == 200, closed.text
+                next_shift = client.post("/api/engagements/bookshop/shifts")
+                assert next_shift.status_code == 201, next_shift.text
+                next_id = next_shift.json()["id"]
+                newer = client.put(f"/api/shifts/{next_id}/artifact",
+                                   json={"files": config.comparison_candidate_files("B")})
+                assert newer.status_code == 200, newer.text
+                newer_version = client.post(f"/api/shifts/{next_id}/artifact/versions",
+                    json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+                assert newer_version.status_code == 201, newer_version.text
+                started = client.post(f"/api/shifts/{next_id}/runs",
+                                      json={"client_request_id": "s19-demo-operation"})
+                assert started.status_code == 202, started.text
+                operation_run = client.get(f"/api/runs/{started.json()['id']}").json()
+                assert operation_run["state"] == "FINALIZED", operation_run
+
+            conn = db.connect(db_file)
+            try:
+                slug = config.BOOKSHOP_SLUG
+                run_id = operation_run["id"]
+                before = snapshot_v5_rows(conn)
+                report = orchestrator.replay_assessment(conn, run_id)
+                zero_write_ok = snapshot_v5_rows(conn) == before
+                identical_ok = (report.status == "IDENTICAL" and report.wrote_rows is False
+                                and not report.check_differences
+                                and not report.event_draft_differences and zero_write_ok)
+
+                decoy_dir = Path(directory) / "decoys"
+                decoy_dir.mkdir()
+                decoy_mission = decoy_dir / "mission.json"
+                decoy_mission.write_text('{"not": "the captured mission"}', encoding="utf-8")
+                decoy_state = decoy_dir / "state.json"
+                decoy_state.write_text('{"not": "the captured state"}', encoding="utf-8")
+                config.PIVOT_MISSION = decoy_mission
+                config.PIVOT_PUBLIC_STATE = decoy_state
+                conn.execute("UPDATE incidents SET state = 'OPEN'")
+                conn.commit()
+                flipped = len(repo.list_incidents(conn, slug))
+                changed = snapshot_v5_rows(conn)
+                repeat = orchestrator.replay_assessment(conn, run_id)
+                changed_rows_ok = snapshot_v5_rows(conn) == changed
+                changed_ok = (repeat.status == "IDENTICAL" and changed_rows_ok and flipped > 0)
+                config.PIVOT_MISSION = original_mission
+                config.PIVOT_PUBLIC_STATE = original_state
+
+                checks = repo.list_check_results(conn, run_id)
+                assert checks, "the operation must have committed its task checks"
+                check_target = checks[0]
+                original_verdict = check_target.verdict
+                conn.execute("UPDATE check_results SET verdict = ? WHERE id = ?",
+                             ("fail" if original_verdict == "pass" else "pass", check_target.id))
+                conn.commit()
+                diverged = orchestrator.replay_assessment(conn, run_id)
+                divergence_ok = (diverged.status == "DIFFERENT"
+                                 and bool(diverged.check_differences))
+                conn.execute("UPDATE check_results SET verdict = ? WHERE id = ?",
+                             (original_verdict, check_target.id))
+                conn.commit()
+                restored = orchestrator.replay_assessment(conn, run_id)
+                restore_ok = restored.status == "IDENTICAL"
+
+                chain_before = chain.verify_chain(repo.list_ledger_events(conn, slug))
+                target_event = repo.list_ledger_events(conn, slug)[-1]
+                original_prev = target_event.prev_hash
+                conn.execute("UPDATE ledger_events SET prev_hash = ? WHERE seq = ?",
+                             ("0" * 64, target_event.seq))
+                conn.commit()
+                chain_broken = chain.verify_chain(repo.list_ledger_events(conn, slug))
+                replay_under_tamper = orchestrator.replay_assessment(conn, run_id)
+                conn.execute("UPDATE ledger_events SET prev_hash = ? WHERE seq = ?",
+                             (original_prev, target_event.seq))
+                conn.commit()
+                chain_restored = chain.verify_chain(repo.list_ledger_events(conn, slug))
+                chain_ok = (chain_before is chain.ChainStatus.VALID
+                            and chain_broken is chain.ChainStatus.BROKEN
+                            and replay_under_tamper.status == "IDENTICAL"
+                            and chain_restored is chain.ChainStatus.VALID)
+            finally:
+                conn.close()
+
+            legacy_file = Path(directory) / "legacy-v5.db"
+            create_v5_sample(legacy_file)
+            legacy_conn = db.connect(legacy_file)
+            try:
+                db.ensure_schema(legacy_conn)
+                legacy_before = snapshot_v5_rows(legacy_conn)
+                legacy_report = orchestrator.replay_assessment(legacy_conn, "run-v5-0001")
+                legacy_ok = (legacy_report.status == "UNKNOWN_MISSING_INPUTS"
+                             and legacy_report.wrote_rows is False
+                             and snapshot_v5_rows(legacy_conn) == legacy_before)
+            finally:
+                legacy_conn.close()
+
+        passed = (identical_ok and changed_ok and divergence_ok and restore_ok
+                  and chain_ok and legacy_ok)
+        print(json.dumps({
+            "stage": "replay", "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY",
+            "verdict": "PASS_OFFLINE_POLICY" if passed else "STOP_INCOMPLETE",
+            "operation_run_id": run_id,
+            "newer_unselected_version_id": newer_version.json()["id"],
+            "replay": {"status": report.status, "wrote_rows": report.wrote_rows,
+                       "check_differences": len(report.check_differences),
+                       "event_draft_differences": len(report.event_draft_differences),
+                       "rows_unchanged": zero_write_ok},
+            "changed_current_inputs": {
+                "mission_file_replaced": True, "public_state_file_replaced": True,
+                "incident_rows_flipped": flipped, "replay_status": repeat.status,
+                "rows_unchanged": changed_rows_ok},
+            "stored_semantic_divergence": {
+                "check_id": check_target.check_id, "replay_status": diverged.status,
+                "check_differences": len(diverged.check_differences),
+                "restored_status": restored.status},
+            "chain_independence": {
+                "chain_before": chain_before.value, "chain_under_tamper": chain_broken.value,
+                "replay_under_tamper": replay_under_tamper.status,
+                "chain_restored": chain_restored.value},
+            "legacy_replay": {"status": legacy_report.status,
+                              "wrote_rows": legacy_report.wrote_rows},
+        }, sort_keys=True))
+        return 0 if passed else 2
+    finally:
+        orchestrator._require_reviewed_comparison_material = admission
+        sealed_store.load_reviewed_comparison_family = reviewed_family
+        config.PIVOT_MISSION = original_mission
+        config.PIVOT_PUBLIC_STATE = original_state
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "selection", "operation", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
+    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "selection", "operation", "replay", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
     parser.add_argument("--operation-id")
     parser.add_argument("--expected-sha256")
     parser.add_argument("--preview-db", type=Path,
@@ -995,6 +1210,8 @@ def main() -> int:
         return comparison_stage(select=True)
     if args.stage == "operation":
         return comparison_stage(select=True, operate=True, preview_db=args.preview_db)
+    if args.stage == "replay":
+        return replay_stage()
     if args.stage == "s13-canary":
         return s13_canary_stage()
     if args.stage == "s13-inspect":
