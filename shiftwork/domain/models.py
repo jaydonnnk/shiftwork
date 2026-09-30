@@ -439,6 +439,25 @@ class OperationalAssessment(RunAssessment):
     selection_id: Id
 
 
+class ReplayReport(BaseModel):
+    """One read-only semantic replay of a finalized operational assessment (S19).
+
+    Differences compare the re-derived checks and ledger-event drafts against
+    the stored rows using only the run's captured inputs; a run whose captured
+    inputs are incomplete reports ``UNKNOWN_MISSING_INPUTS`` rather than a
+    guessed replay. Chain integrity stays a separate ``chain.verify_chain``
+    check; neither proof substitutes for the other.
+    """
+
+    model_config = _FROZEN
+
+    run_id: Id
+    status: Literal["IDENTICAL", "DIFFERENT", "UNKNOWN_MISSING_INPUTS"]
+    check_differences: tuple[dict[str, JsonValue], ...]
+    event_draft_differences: tuple[dict[str, JsonValue], ...]
+    wrote_rows: Literal[False]
+
+
 class ExperimentKind(StrEnum):
     DIAGNOSTIC = "DIAGNOSTIC"
     QUALIFYING_COMPARISON = "QUALIFYING_COMPARISON"

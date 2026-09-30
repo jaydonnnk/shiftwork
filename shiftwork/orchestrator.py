@@ -21,6 +21,7 @@ restart left nonterminal while keeping their captures and draws.
 import asyncio
 import base64
 import hashlib
+import itertools
 import json
 import os
 import sqlite3
@@ -79,6 +80,7 @@ from shiftwork.domain.models import (
     ReasonCode,
     ObservationKind,
     OperationalAssessment,
+    ReplayReport,
     ServiceResponse,
     Shift,
     ShiftOpeningMode,
@@ -920,6 +922,175 @@ def execute_run_task(db_path: str, run_id: str) -> None:
         execute_run(conn, run_id)
     finally:
         conn.close()
+
+
+_OPERATION_DRAFT_TYPES = (LedgerEventType.SALE_COMPLETED, LedgerEventType.INCIDENT_OPENED)
+
+
+def replay_assessment(conn: sqlite3.Connection, run_id: str) -> ReplayReport:
+    """Re-derive one finalized operation from its captured bytes, writing nothing (S19).
+
+    The captured context, captured outputs and captured public state are the only
+    inputs, so editing the current mission fixture, another fixture or today's
+    incident state cannot change the result. A legacy run that predates the
+    capture reports UNKNOWN_MISSING_INPUTS instead of a guessed replay. Chain
+    integrity stays a separate ``chain.verify_chain`` check; neither proof
+    substitutes for the other.
+    """
+    run = repo.get_run(conn, run_id)
+    if run is None:
+        raise LifecycleError("not_found", f"unknown run: {run_id}")
+    if run.purpose is RunPurpose.LEGACY_OPERATION or run.context_id is None:
+        return _unknown_inputs_report(run.id)
+    if run.purpose is not RunPurpose.OPERATION:
+        raise LifecycleError("conflict", "semantic replay is defined for operational runs")
+    if run.state is not RunState.FINALIZED:
+        raise LifecycleError("conflict", "replay needs a finalized assessment")
+    context = repo.get_execution_context(conn, run.context_id)
+    snapshot_bytes = repo.get_run_snapshot_bytes(conn, run.id)
+    outputs = repo.list_outputs(conn, run.id)
+    workload = (context.workloads[0]
+                if context is not None and len(context.workloads) == 1 else None)
+    if (context is None or workload is None or snapshot_bytes is None
+            or not outputs or run.selection_id is None):
+        return _unknown_inputs_report(run.id)
+    try:
+        mission_bytes = base64.b64decode(context.mission_bytes_base64, validate=True)
+        state_bytes = base64.b64decode(context.public_data_bytes_base64, validate=True)
+        batch_bytes = base64.b64decode(workload.request_batch_bytes_base64, validate=True)
+        if (_hash_bytes(mission_bytes) != context.mission_hash
+                or _hash_bytes(state_bytes) != context.public_data_hash
+                or snapshot_bytes != state_bytes
+                or canonical.content_hash(_encode(batch_bytes)) != workload.request_batch_hash):
+            return _unknown_inputs_report(run.id)
+        mission = task_contract.load_mission_bytes(mission_bytes)
+        snapshot = task_contract.load_public_state_bytes(state_bytes)
+    except (ValueError, ShiftworkDomainError):
+        return _unknown_inputs_report(run.id)
+    captured = {item.request_ordinal: item for item in outputs}
+    if set(captured) != set(range(1, workload.request_count + 1)):
+        return _unknown_inputs_report(run.id)
+    stored_checks = repo.list_check_results(conn, run.id)
+    stored_by_check_id = {check.check_id: check for check in stored_checks}
+    assessed: list[task_contract.TaskAssessment] = []
+    recomputed: dict[str, CheckResult] = {}
+    completed = 0
+    mandatory_pass = True
+    for index, spec in enumerate(mission.request_specs, start=1):
+        output = captured[index]
+        try:
+            response = task_contract.validate_response_envelope(spec, output.body)
+        except TaskEnvelopeInvalid:
+            response = None
+        rows = evaluator.assess_request(spec=spec, request_ordinal=index, mission=mission,
+                                        snapshot=snapshot, response=response)
+        assessed.extend(rows)
+        completed += int(evaluator.request_usefully_completed(spec, rows))
+        mandatory_pass &= all(row.mandatory_pass for row in rows)
+        for row in rows:
+            check_id = f"task:{row.request_id}:{row.task_id}"
+            stored = stored_by_check_id.get(check_id)
+            recomputed[check_id] = CheckResult(
+                # The stored id is provenance the replay must not re-allocate:
+                # re-deriving the global count would shift every later id.
+                id=(stored.id if stored is not None
+                    else f"replay-unstored-{len(recomputed) + 1:02d}"),
+                run_id=run.id,
+                check_id=check_id,
+                verdict="pass" if row.mandatory_pass else "fail",
+                observed_ref=output.id,
+                reason_code=(row.reason_codes[0] if row.reason_codes else
+                             (None if row.mandatory_pass else ReasonCode.REQUIRED_TASK_MISSING)),
+            )
+    assessment = OperationalAssessment(
+        run_id=run.id, context_hash=context.content_hash,
+        complete_request_count=completed, expected_request_count=len(mission.request_specs),
+        mandatory_pass=mandatory_pass, rule_version=context.reducer_version,
+        assessed_at=_now(), selection_id=run.selection_id,
+    )
+    drafts = reducer.reduce_operation(run, assessment, mission, tuple(assessed),
+                                      tuple(recomputed.values()))
+    check_differences = _check_differences(stored_checks, list(recomputed.values()))
+    event_draft_differences = _event_draft_differences(
+        _stored_operation_drafts(conn, run, context.engagement_slug), drafts)
+    status = "DIFFERENT" if check_differences or event_draft_differences else "IDENTICAL"
+    return ReplayReport(run_id=run.id, status=status,
+                        check_differences=tuple(check_differences),
+                        event_draft_differences=tuple(event_draft_differences),
+                        wrote_rows=False)
+
+
+def _unknown_inputs_report(run_id: str) -> ReplayReport:
+    """A run without captured inputs has no replayable evidence; never guess one."""
+    return ReplayReport(run_id=run_id, status="UNKNOWN_MISSING_INPUTS",
+                        check_differences=(), event_draft_differences=(), wrote_rows=False)
+
+
+def _check_differences(stored: list[CheckResult],
+                       replayed: list[CheckResult]) -> list[dict[str, JsonValue]]:
+    """Field-level differences between stored checks and their replay, by check id."""
+    stored_by_id = {check.check_id: check for check in stored}
+    replayed_by_id = {check.check_id: check for check in replayed}
+    differences: list[dict[str, JsonValue]] = []
+    for check_id in sorted(set(stored_by_id) | set(replayed_by_id)):
+        stored_check = stored_by_id.get(check_id)
+        replayed_check = replayed_by_id.get(check_id)
+        if stored_check is None or replayed_check is None:
+            differences.append({"check_id": check_id,
+                                "difference": "extra_stored" if stored_check else "missing_stored"})
+            continue
+        stored_view = stored_check.model_dump(mode="json")
+        replayed_view = replayed_check.model_dump(mode="json")
+        for field in ("verdict", "observed_ref", "reason_code"):
+            if stored_view[field] != replayed_view[field]:
+                differences.append({"check_id": check_id, "field": field,
+                                    "stored": stored_view[field],
+                                    "replayed": replayed_view[field]})
+    return differences
+
+
+def _stored_operation_drafts(conn: sqlite3.Connection, run: Run,
+                             slug: str) -> list[dict[str, JsonValue]]:
+    """The stored reduction output of one run: its own sale/incident-opened events.
+
+    An incident-resolution event also names the resolving run, but it derives
+    from the incident state at finalization, not from the run's captured bytes,
+    so it is not part of the semantic replay; chain verification covers its
+    integrity.
+    """
+    views: list[dict[str, JsonValue]] = []
+    for event in repo.list_ledger_events(conn, slug):
+        if (event.event_type in _OPERATION_DRAFT_TYPES and event.cause_refs
+                and event.cause_refs[0] == run.id):
+            view = event.model_dump(mode="json")
+            views.append({key: view[key]
+                          for key in ("event_type", "cause_refs", "payload", "synthetic")})
+    return views
+
+
+def _event_draft_differences(stored: list[dict[str, JsonValue]],
+                             replayed: list[LedgerEventDraft]) -> list[dict[str, JsonValue]]:
+    """Field-level differences between stored operation events and replayed drafts."""
+    replayed_views: list[dict[str, JsonValue]] = []
+    for draft in replayed:
+        view = draft.model_dump(mode="json")
+        replayed_views.append({key: view[key]
+                               for key in ("event_type", "cause_refs", "payload", "synthetic")})
+    differences: list[dict[str, JsonValue]] = []
+    for position, (first, second) in enumerate(
+            itertools.zip_longest(stored, replayed_views), start=1):
+        if first is None or second is None:
+            differences.append({
+                "position": position,
+                "difference": "missing_stored" if first is None else "extra_stored",
+                "stored": first, "replayed": second,
+            })
+            continue
+        for field in ("event_type", "cause_refs", "payload", "synthetic"):
+            if first[field] != second[field]:
+                differences.append({"position": position, "field": field,
+                                    "stored": first[field], "replayed": second[field]})
+    return differences
 
 
 def _public_records(snapshot_bytes: bytes) -> dict[str, JsonValue]:
