@@ -68,6 +68,47 @@ this draft and the scoped Gate 2 and Gate 3 revisions next, each with its own
 explicit approval; it authorizes no implementation, install, credential, live
 call, fixture authoring, sealing, deployment or submission.
 
+## Gate 2 scoped three-board revision drafted, awaiting approval: 2026-09-30
+
+Under the approved memo and the Gate 1 re-approval, the scoped Gate 2 revision
+was drafted in `02-architecture.md` section 21 and its supporting edits: the
+engagement pack as a declared concept (21.1, and what registration replaces,
+21.2), the GTM pipeline consequence vocabulary of owners, SLA clocks, escalations
+and missed-handoff incidents (21.3), where the FDE discovery and rollout records
+live (21.4), and the per-board extension of the ADR 0006 protected comparison
+boundary with per-engagement family registration replacing the hardcoded
+bookshop family list (`shiftwork/config.py:199`) and the bookshop-only workload
+loader (`shiftwork/orchestrator.py:2380-2381`) (21.5). Supporting edits: the
+header draft block, the sealed-store row, one board registry projection route
+plus the board-view document extension, three data-table rows (pack
+registration, per-board consequence state, FDE deployment records), the 8.1
+per-board extension, and the sections 19 and 20 reconciliations. The draft names
+current bookshop-only code as evidence of what registration replaces, from a
+read-only source inspection; nothing was executed. This entry records the draft
+only. It is not Gate 2 re-approval, implementation, runtime, fixture, sealing,
+credential, live-call, commit or push authority. The user approves or corrects
+it with the Gate 2 approval question; a re-approval is recorded in a new entry
+when it happens.
+
+## Gate 2 three-board reconciliation RE-APPROVED: 2026-09-30
+
+The user reviewed the drafted revision and approved it: "looks good commit now
+and push to main". Gate 2 is RE-APPROVED for the three-board scope: the
+engagement pack as a declared concept and what registration replaces (21.1 and
+21.2), the GTM pipeline consequence vocabulary of owners, SLA clocks,
+escalations and missed-handoff incidents (21.3), where the FDE discovery and
+rollout records live (21.4), the per-board ADR 0006 protected comparison
+boundary with per-engagement family registration replacing the hardcoded
+bookshop family list (`shiftwork/config.py:199`) and the bookshop-only workload
+loader (`shiftwork/orchestrator.py:2380-2381`) (21.5), and the draft's
+supporting edits. The same instruction authorizes the commit and the push to
+main without a co-author footer; the push also carries the pending Slice 18
+acceptance record commit `5a255c7`. This is architecture approval only: it is
+not Gate 3, implementation, install, credential, live call, fixture authoring,
+sealing, deployment, product publication or submission authority, and it
+changes no runtime behavior. The Gate 3 scoped revision is next under its own
+explicit approval, then the Gate 4 slice revision.
+
 ## Future S20 and S24 Nemotron proof request: 2026-09-30
 
 The user asked to retain a stronger end-to-end evidence target for the future
