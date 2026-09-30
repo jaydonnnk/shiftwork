@@ -173,6 +173,80 @@ instruction then authorized committing both gate revisions and their records
 in focused batches, with no push. The Gate 4 slice revision is next under its
 own explicit approval.
 
+## Gate 4 slice revision drafted, awaiting approval: 2026-09-30
+
+Under the approved memo, the re-approved Gate 1 and Gate 2 section 21 and the
+drafted Gate 3 three-board revision, the scoped Gate 4 slice revision was
+drafted in `04-slices.md`, the only gate document this draft touches. The
+scoped contents: the restructure to 11 remaining slices, with S22 split into
+S22a (FDE content written, reviewed and sealed, the engagement-pack
+registration, and an offline reproduction proof) and S22b (the FDE board
+journey, the workplace board selector and the Boards 2 and 3 entries); the
+Go-To-Market pack fixed at S23 to S25, where S23 lands the reviewed material,
+contract, checks and the offline comparison with the GTM comparison family
+authored for operator review and seal because the eligibility proof fails
+closed without one, S24 selects, operates and inherits offline with the
+pipeline consequence vocabulary and idempotent reprocessing, and S25 completes
+the revenue floor room and the live-capable path; and Tavily, package and
+hosting shifted to S26 to S28. The dependency table, slice contracts, trace
+table, no-go table and approval boundary were reconciled, with obligations 55
+to 60 newly mapped and obligations 39, 55 and 56 extended to the three packs
+per the Gate 3 draft. The two pending Nemotron-chain reminders are reconciled:
+the S20 chain is a stretch goal with a 2026-10-20 drop point, recorded as not
+achieved if missed, and no dependent slice or claim assumes it; the package
+slice keeps the judge-path honesty rule and names the drop point. The two text
+corrections the memo recorded are applied: S21's exit wording now names the FDE
+board journey at S22b instead of the retired Away shift, and the four
+browser-test citations now name `tests/client/browser.mjs` and
+`tests/client/render_faults.mjs`. Two stale facts in the committed document
+were corrected in the same draft: the section 1 obligation count (it read 49,
+already stale against the committed 54, and the drafted Gate 3 makes 60) and
+the section 6 closing line that still called Slice 13 the next planned slice
+(now Slice 19, the first unbuilt slice). The Gate 3 document still cites
+the two pivot-prefixed browser filenames at `03-program-design.md:252-253`,
+`:2300` and `:2320`; correcting them stays a recorded open documentation-only
+item rather than edited under this draft. The draft was grounded in
+read-only reads of the applied memo, the re-approved Gate 1 and Gate 2 text and
+the drafted Gate 3; nothing was executed and no test, install, seal,
+credential, external call or commit was involved. This entry records the draft
+only. It is not Gate 4 re-approval, implementation, runtime, fixture, sealing,
+credential, live-call, commit or push authority. The user approves or corrects
+it with the Gate 4 approval question, which follows the Gate 3 re-approval.
+
+## Gate 4 slice revision RE-APPROVED: 2026-09-30
+
+The user reviewed the drafted revision and approved it: "approve gate 4", with
+the same instruction authorizing the commits: "Commit both gate 3 and 4 in
+batches". Gate 4 is RE-APPROVED for the three-board scope: 11 remaining slices
+S19 to S28, with S22 split into S22a (FDE content written, reviewed and sealed,
+the engagement-pack registration and the offline reproduction proof, with the
+workplace selector client work allowed to start during the operator-review
+window) and S22b (the FDE board journey through inherited operation, the
+workplace board selector and the Boards 2 and 3 entries); the Go-To-Market pack
+fixed at S23 to S25, where S23 authors the reviewed material and the GTM
+comparison family for review and seal and proves the offline comparison and
+eligibility with no ledger write, S24 selects, operates and inherits offline
+with the pipeline consequence vocabulary and idempotent reprocessing, and S25
+completes the revenue floor room and the live-capable path; and Tavily, package
+and hosting shifted to S26 to S28. The dependency table, slice contracts, trace
+table (obligations 55 to 60 mapped, obligations 39, 55 and 56 extended to the
+three packs), no-go table and approval boundary are reconciled, and both
+Nemotron-chain reminders are reconciled: the S20 chain is a stretch goal with a
+2026-10-20 drop point and no dependent slice or claim assumes it, and the
+package slice keeps the judge-path honesty rule naming the single S20 chain.
+The two text corrections the memo recorded are applied (S21's exit wording
+names the FDE board journey at S22b; the four browser-test citations name
+`tests/client/browser.mjs` and `tests/client/render_faults.mjs`), plus two
+stale facts corrected in passing (the section 1 obligation count, now 60, and
+the section 6 closing line that still called Slice 13 the next planned slice,
+now Slice 19). The document header of `04-slices.md` was updated to the
+RE-APPROVED state. This is slice-plan approval only: it authorizes planning one
+slice at a time under the repository process, and no installs, credentials,
+external calls, the spike run, fixture authoring, sealed-case contents,
+ADR #4, participant contact, deployment, publication, submission or push. Each
+slice still needs its own explicit go-ahead; Slice 19 is the first slice under
+this plan.
+
 ## Future S20 and S24 Nemotron proof request: 2026-09-30
 
 The user asked to retain a stronger end-to-end evidence target for the future
