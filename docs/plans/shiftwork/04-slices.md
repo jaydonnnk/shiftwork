@@ -1,5 +1,14 @@
 # Vertical Slice Plan: Shiftwork final pivot
 
+**Approved scope change (memo approved 2026-09-30):** the user approved the
+three-board expansion memo `shiftwork_three_boards.md` (Applied AI Engineer, GTM
+Engineer, FDE; FDE-first build order; one operator-sealed comparison family per
+new board). The approved restructure is 11 remaining slices: S22 split into S22a
+(content, review and seal) and S22b (journey and board selector), GTM fixed at
+S23 to S25, and Tavily, package and hosting shifted to S26 to S28. The
+reconciling gate revisions are drafted in order (Gate 1 next, then scoped Gate 2
+and Gate 3, then this document's Gate 4 revision). Nothing below is changed yet.
+
 **Current slice state, 2026-09-30:** S17 is accepted and published. S18 has its
 own offline go-ahead and its review repairs are complete on
 `shiftwork/slice-18`, awaiting user acceptance. Live operation, publication and
