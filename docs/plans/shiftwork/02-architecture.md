@@ -1,6 +1,27 @@
 # Architecture: Shiftwork final pivot
 
-**Current Gate 2 state: RE-APPROVED 2026-09-28.** The user approved the repaired
+**GATE 2 SCOPED REVISION (THREE BOARDS): RE-APPROVED 2026-09-30.** The user
+reviewed the draft and approved it in chat: "looks good commit now and push to
+main". The same instruction authorizes the commit and the push to main, without
+a co-author footer. Under the approved direction memo
+(`../../../shiftwork_three_boards.md`) and the re-approved Gate 1 (2026-09-30),
+this revision extends Gate 2 for the second and third role boards. It does four
+things only: declare the engagement pack as the registered unit of per-engagement
+content (new section 21), add the Go-To-Market pipeline consequence vocabulary
+classes (21.3), name where the Forward Deployed Engineer board's discovery and
+rollout records live (21.4), and extend the protected comparison stimulus
+boundary (ADR 0006) to every registered board with per-engagement family
+registration, replacing the hardcoded bookshop family list and the bookshop-only
+workload loader (21.5; `shiftwork/config.py:199`,
+`shiftwork/orchestrator.py:2380-2381`). The endpoint part stays small: one board
+registry projection and one extension to the existing board view (section 3).
+Material not touched by these four items is unchanged. This approval is
+architecture only: it does not approve Gate 3, implementation, fixtures, sealing,
+installs, credentials, live calls, deployment, publication or submission. The
+Gate 3 scoped revision follows under its own explicit approval, then the Gate 4
+slice revision.
+
+**Gate 2 state before the three-board revision: RE-APPROVED 2026-09-28.** The user approved the repaired
 section 8.1 together with Gates 3 and 4 and ADR 0006 after the review round
 recorded below. Fixture review, sealing and live execution remain separate.
 
@@ -98,7 +119,7 @@ authoritative for assessment, selection or business history.
 | Assist gateway | Optional attributable orientation, hints and patch proposals | No diagnostic help before learner cause/falsifier; no silent selection or self-grading |
 | Pure evaluator / comparison policy | Independent task/correctness checks and evidence eligibility from explicit inputs | No files, database, network or model calls; no automatic winner |
 | Pure ledger reducer | Operational captures and checks to synthetic event drafts | No experiments or selections as business results |
-| Sealed store | Protected cases and historical assessment material, loaded only by orchestration | No browser, learner, executor, gateway or curation access |
+| Sealed store | Protected cases and historical assessment material, registered and resolved per engagement pack (section 21), loaded only by orchestration | No browser, learner, executor, gateway or curation access |
 | Curation tool | Offline, human-reviewed mission-source discovery | No runtime customer answering or live grading |
 
 Retain the controller-owned request-driver boundary in the implemented executor
@@ -116,7 +137,8 @@ changed semantics are below; request/response schemas belong to Gate 3.
 | Route | Verb | Purpose / status |
 | --- | --- | --- |
 | `/` | GET | Existing static client and room |
-| `/api/engagements/{slug}/board` | GET | Existing; project operating selection separately from draft/candidates and latest experiments |
+| `/api/engagements/{slug}/board` | GET | Existing; project operating selection separately from draft/candidates and latest experiments, and serve the registered pack's learner-visible documents and station metadata (section 21.4) |
+| `/api/boards` | GET | New: the workplace registry projection. Registered packs in display order with role, employer or client, station labels and availability, resolved from the operator registration by slug; carries no sealed locator, family or variant identity, protected byte, credential or host path |
 | `/api/engagements/{slug}/shifts` | POST | Existing; normally inherit the selected version. For an existing engagement whose latest v5 shift is closed and which has no selection, the controller instead opens a labelled non-operational requalification shift for first-choice work. The caller cannot request this exception or turn it into operation. |
 | `/api/shifts/{id}/artifact` | GET/PUT | Existing mutable draft; saving cannot select or operate |
 | `/api/shifts/{id}/artifact/versions` | POST | Existing freeze; record explicit parent/version ancestry, not promotion |
@@ -149,6 +171,7 @@ DDL or a migration implementation. Gate 3 owns fields, constraints and signature
 | Record | Data retained | Main reads/writes |
 | --- | --- | --- |
 | Existing engagements/config/shifts | Scenario identity, active requirements, separate execution/exposure/assist ceilings, and an explicit non-operational requalification state for legacy no-choice shifts | Resolve active policy; atomically open/close shifts and lift the operation block only with a valid explicit choice, never from a draft |
+| Engagement pack registration | Pack identity, schema version and reviewed content per engagement slug: mission, public and comparison state, workload manifest and request files, starter artifact and contract, learner-visible documents, family declarations with class, sealed locator, cycle and operator-seal state, and the board's consequence-rule source | Operator registration only; every engagement-scoped resolution (comparison, investigation, operation, client projection) reads the shift's registered pack by slug, never caller input; a missing, incomplete or invalid pack fails closed |
 | Existing drafts/artifact versions | Exact source, explicit parent, committed contract/catalog, attributable authorship | Save draft; freeze; retrieve by ID/hash, not latest for operation |
 | `investigations` | Cause, falsifier, public test, source run/request, revision parent and author/time | Append original/revision; gate diagnostic assistance |
 | `experiments` | Diagnostic vs comparison intent; candidate IDs; immutable shared context; declared treatment; complete trial schedule; optional observed-later-context ref | Reserve once; fetch all scheduled/completed/failed slots; derive status |
@@ -157,6 +180,8 @@ DDL or a migration implementation. Gate 3 owns fields, constraints and signature
 | `operating_selections` | Exact version/hash, comparison evidence, retained alternative, rationale, prior selection and original requirements | Append a deliberate choice; resolve the latest explicit selection and its validity, never fall back to an older choice |
 | Existing rotation draws/exposure records | Comparison- or operation-scoped reservation; family/cycle; invalidation; linkage to all dependent trials | Reserve unexposed inventory atomically; never recycle exposure |
 | Existing ledger/incidents | Operational event chain, run/output/check causes, incident state and selected resolving version | Operational finalization only; close retains explicit limit declarations |
+| Per-board consequence state | Board-declared synthetic records reduced from operational captures and checks: orders, refunds and incidents (Bellwether); owners, SLA clocks, escalations and missed-handoff incidents (Go-To-Market); pilot bookings, counter follow-ups and incidents (FDE) | Written only by operational finalization and close on a selected version; inherited by later shifts; experiments and selections write none; every quantity explicitly synthetic |
+| FDE deployment records | Learner-authored discovery record, permissions map, acceptance tests and runbook as artifact files; rollout decision and handover declaration as recorded operational history with known limits and unresolved incidents | Artifact files freeze and inherit under the existing version rules; rollout and handover records append at operation and close; never sealed material, assessment input or a model product |
 | `assist_events` | Role, prediction ref, prompt/response evidence, acceptance/rejection, consumed shared budget | Append calls; audit authorship without affecting eligibility |
 | `mission_sources` | Frozen source content/provenance and human verification | Operator curation only, as previously planned |
 
@@ -167,6 +192,10 @@ version, executor/harness/image identity, model/prompt settings and resource lim
 Store reconstructible content as well as hashes; a hash plus mutable pathname is
 not sufficient. Protected material stays in the restricted store, not in public
 manifests. Exact storage layout and historical scorer retention belong to Gate 3.
+Pack resolution is orchestration-side: the controller resolves mission, states,
+manifest, families, documents and consequence rules from the shift's registered
+pack, then supplies explicit inputs to the pure evaluator and comparison policy,
+which still read no file, database, network or model (section 21.5).
 
 The service receives only data it may legitimately consume. Authoritative records
 and independently authored expectations can intentionally differ from stale service
@@ -455,6 +484,19 @@ expected answer. The design:
    authorized correction, never roll history back. Existing invalidation
    readback is not this enforcement (`docs/adr/0001-sealed-evaluator-isolation.md:77`).
 
+**Per-board extension, drafted 2026-09-30:** the design above is bookshop-only in
+code today. The enabled comparison family list is a constant
+(`shiftwork/config.py:199`) and the workload loader refuses every other
+engagement (`shiftwork/orchestrator.py:2380-2381`). The boundary extends unchanged
+in kind to every registered board (section 21.5): each pack declares and
+operator-seals its own comparison families, each comparison reserves one
+never-exposed variant per pair from its own board's inventory, and a board with no
+declared and sealed family fails closed before selection rather than borrowing
+another board's. Family, variant, cycle, exposure and seal identities are
+pack-scoped. The stimulus and assessment classes, the two-phase order, freezing,
+privacy, leak invalidation and terminal-only aggregate counts of items 1 to 6
+apply per board exactly as written.
+
 The present protected inventory is a draft of labels over identical public
 stimuli and remains unsealed and ineligible. Its replacement (six variants with
 distinct request or state stimuli and a concrete failure each) is authored,
@@ -652,7 +694,9 @@ evidence:
   comparison case into stimulus that may reach a candidate workspace and
   controller-held assessment inputs that may not, names the resulting bounded leak channel
   rather than denying it, and records why the released aggregate protected counts
-  are not hidden counts. Gate 3 S3.9 and S6.4 carry the mechanism.
+  are not hidden counts. Gate 3 S3.9 and S6.4 carry the mechanism. The 2026-09-30
+  three-board revision extends this boundary to every registered board without
+  changing its clauses (section 21.5).
 - ADR #4: still unapproved, dependent on the authorized integration spike.
 
 ## 20. Handoff to the next gates
@@ -671,6 +715,10 @@ board projection, first-choice transition, bounded failed-comparison recovery an
 failing-capable tests that a closed v5 engagement can reach its first choice while
 every no-choice operation and implicit promotion is rejected. New curriculum cases
 require review/sealing; old evidence and catalog semantics are not silently repurposed.
+The three-board revision adds the engagement pack declaration and registration
+resolution, the GTM pack contract with its pipeline consequence classes, the FDE
+deployment and rollout and handover record schemas, the board registry projection
+and the third assistance regime to that list.
 
 **Gate 4, only after Gate 3 approval:** sequence visible vertical changes over the
 completed Slices 1 to 9; map every old outstanding and new test clause to a real
@@ -684,3 +732,184 @@ The user explicitly re-approved the earlier Gate 2 revision on 2026-09-24:
 "i approve gate 2, commit to main, and then go to gate 3". After the legacy
 first-choice backtrack, the user separately replied "Yep i approve gate 2,
 start with gate 3 now". Gate 3 is next and requires its own approval.
+
+## 21. Three-board engagement packs, consequence vocabulary and per-board comparison registration
+
+Drafted 2026-09-30 under the approved direction memo
+(`../../../shiftwork_three_boards.md`) and the re-approved Gate 1. This section
+carries the four scoped revisions for the second and third role boards. Until the
+user's explicit Gate 2 re-approval it is a draft, not implemented behavior and
+not authority for any slice.
+
+### 21.1 The engagement pack as a declared concept
+
+An **engagement pack** is the registered, operator-reviewed unit of
+per-engagement content. One pack binds one engagement slug to:
+
+- the reviewed mission rubric, public state and comparison state;
+- the reviewed workload manifest and its request files, including protected
+  comparison stimulus;
+- the attempt batches where the board uses the attempt mechanism;
+- the starter artifact and its initial contract;
+- the learner-visible documents its stations serve (the FDE deployment brief
+  with its conflicting requirements, tickets, schema notes and policies; the
+  Bellwether investigation material);
+- its family declarations: attempt families and comparison families, each with
+  its sealed file locator, class, cycle and required operator-seal state;
+- the consequence-rule source that maps observed checks and task assessments to
+  the board's synthetic consequences; and
+- display metadata: role name, fictional employer or client, station labels and
+  room identity, so the workplace and the room render from the registration.
+
+Rules:
+
+1. **Registration is operator-side, slug-keyed and fails closed.** The controller
+   resolves every engagement-scoped path (mission, states, manifest, families,
+   documents, consequence rules) through the registration of the shift's
+   engagement slug. Caller input never selects a pack, a family file or a
+   manifest. An unregistered engagement, an incomplete declaration or an invalid
+   pack refuses before any reservation or run.
+2. **Content is code-shipped, pinned and reviewed, never user- or
+   model-authored.** Packs ship with the repository and re-verify their reviewed
+   bytes under the existing guard pattern. Adding, editing or resealing pack
+   content is an operator action; the learner cannot upload, edit or substitute
+   it.
+3. **Bellwether is the first pack.** The existing bookshop constants and fixtures
+   (`config.BOOKSHOP_*`, `config.PIVOT_*`, the sealed case files) become the
+   first pack declaration with no behavior change for Board 1. Until a board's
+   pack is registered and its required seals exist, that board is not offered in
+   the workplace; availability comes from registration and its operator seals,
+   never from learner progress.
+4. **No new authority.** A pack carries no evaluator logic, no ledger rule, no
+   eligibility, promotion or credential authority and no external call. The
+   section 2 boundaries and the section 7 loader and purity rules are unchanged;
+   pack resolution happens in orchestration, and the evaluator and comparison
+   policy keep receiving explicit inputs.
+
+### 21.2 What the registration replaces
+
+Resolution by the shift's pack replaces these bookshop-only mechanisms; the
+engine and its boundaries do not change:
+
+1. the hardcoded comparison family constant (`BOOKSHOP_COMPARISON_FAMILIES`,
+   `shiftwork/config.py:199`) and the seeded attempt-family list become the
+   pack's declared family lists, with the enabled-family fallback
+   (`shiftwork/orchestrator.py:260-264`) resolving from the declaration;
+2. the bookshop-only workload loader (`_read_comparison_workloads` refusing every
+   other slug, `shiftwork/orchestrator.py:2380-2381`) resolves the pack's
+   manifest and request files, keeping every existing pin, byte, ordinal and
+   contract check;
+3. the bookshop mission, public state, comparison state and incident-request
+   reads (`PIVOT_MISSION`, `PIVOT_PUBLIC_STATE`, `PIVOT_COMPARE_STATE`,
+   `PIVOT_INCIDENT_REQUESTS`, read across the investigation, selection and
+   comparison paths) resolve per pack;
+4. the global sealed family file map and case index (`shiftwork/sealed/store.py`)
+   become pack-scoped; the comparison-stimulus rule (`load_family`) and the
+   content-bound variant identity (the `task_completion` name check,
+   `shiftwork/sealed/rotation.py:33`) become declared family-class properties, so
+   every comparison family gets content-bound identity and attempt families keep
+   their historic refs; and
+5. the public-projection scanner needles resolve from the pack's family
+   declarations instead of the global family tuple
+   (`shiftwork/orchestrator.py:1875`), retaining the scanner self-tests.
+
+Exact declaration schema, file map and migration belong to Gate 3 and the S22a,
+S22b and S23 to S25 slices.
+
+### 21.3 Go-To-Market pipeline consequence vocabulary
+
+The GTM board's consequences are synthetic pipeline-state records with four
+declared classes:
+
+- **owner assignment**: every processed signal ends owned exactly once under the
+  pinned routing rules; an unowned, dropped or multiply-owned record is a
+  failure;
+- **SLA clock**: one clock starts per owned record; a duplicated or missing clock
+  is a failure;
+- **escalation**: the workflow hands a record to the revenue team's review queue;
+  the terminal action is a human handoff, never a sent message;
+- **missed-handoff incident**: a dropped, mis-owned or duplicate record opens an
+  incident with its full decision trace.
+
+Where the vocabulary lives: the pack's consequence rules declare how observed
+checks and task assessments reduce to these classes, and the pure controller-side
+reduction writes them as ledger events and incident rows on the GTM engagement
+during operational finalization only. Later shifts inherit the pipeline state,
+and the pipeline wall projects it with explicit synthetic labelling. No model
+participates in the reduction; experiments and selections write no pipeline
+state; no quantity is presented as real revenue. Event names, thresholds, the
+visible GTM contract and the two-assist, no-patch-proposal budget belong to the
+Gate 3 revision.
+
+### 21.4 Forward Deployed Engineer discovery and rollout records
+
+Where the FDE board's records live:
+
+1. **Pinned source material** (deployment brief with conflicting requirements,
+   tickets, schema notes, policies and permission constraints): pack documents,
+   learner-visible and hash-pinned under the guard pattern. They are public by
+   design and carry no hidden rule and no expected answer.
+2. **Learner-authored records** (discovery record, permissions map, acceptance
+   tests, handover runbook): files inside the learner's artifact, frozen and
+   inherited under the existing version mechanism and shown in the board's
+   stations. They are learner work product: never sealed material, never
+   assessment input, never model-authored.
+3. **Rollout decision, handover declaration and pilot state** (bookings, counter
+   follow-ups, incidents, known limits): operational history records. The rollout
+   decision gates the pilot arm and is recorded only after the customer
+   acceptance checks pass; operation writes the pilot state; the handover record
+   carries the runbook reference, the known limits and the unresolved incidents.
+   Later experiments cannot rewrite any of it, and a different operating
+   integration is a new explicit action.
+4. The board's sealed comparison family follows sections 8.1 and 21.5 like any
+   other; the acceptance checks (no double bookings, escalation fires,
+   commitments honored, access boundaries held) are its public contract,
+   assessed by the independent evaluator and mirrored by visible learner tests.
+
+Gate 3 owns the exact record and event schemas and the FDE pack contract.
+
+### 21.5 Per-board protected comparison registration and the ADR 0006 boundary
+
+1. **Declared and sealed families.** Each pack declares at least one comparison
+   family. The loader admits only operator-sealed families (canonical payload
+   digest over the reviewed cases). A family holds at least six distinct reviewed
+   variants; a qualifying comparison reserves one never-exposed variant per pair
+   from its own board's family, and both candidates of a pair share it. Unsealed,
+   undeclared or insufficient inventory fails closed with no partial reservation,
+   so a board without a sealed family dead-ends before selection by design, not
+   by fallback.
+2. **The ADR 0006 boundary applies per board, verbatim.** The stimulus (protected
+   request row and the state resolved from the frozen comparison state plus the
+   variant's additive delta) reaches the candidate workspace only inside the
+   protected phase. The controller-held assessment inputs (task specification,
+   expected block, authored delta, derivation rule, variant identity) never enter
+   a workspace, prompt, learner payload, error or log. The leak channel stays
+   named and bounded; a suspected leak retires the affected group and invalidates
+   dependent evidence for that board; released aggregate protected counts stay
+   terminal-only and partition the already-public pair count.
+3. **Board-scoped isolation.** Families, variant refs, cycles, exposures and
+   seals are pack-scoped: a draw in one board cannot satisfy another board's
+   comparison, an invalidation in one board does not touch another, cross-pack
+   identity collisions are registration errors that fail closed, and run-scoped
+   draw resolution operates within the shift's pack.
+4. **Acceptance aspects are family material.** Each comparison family declares
+   the expected acceptance aspect its protected assessment checks, and the pure
+   comparison reading evaluates that aspect against controller-side task
+   assessments over explicit inputs. The current aspect vocabulary
+   (`shiftwork/domain/comparison.py`) is bookshop-shaped and generalizes here;
+   Gate 3 owns the aspect schema and its validation.
+5. **Unchanged.** The six-slot paired schedule with one comparison per shift, the
+   frozen-together rule, slot fail-closed handling, exposure and budget
+   accounting, eligibility and selection semantics, the single operational path
+   and synthetic labelling stay exactly as sections 5, 6 and 8 state. Demo
+   determinism still comes from the fixed, checked-in fixture corpus; the sealed
+   family serves the protected comparison only.
+
+### 21.6 Scope of this revision
+
+This revision adds the board registry projection and the board-view extension
+(section 3), the pack registration and the two per-board record classes (section
+4), and the boundary extensions above. It changes no runtime behavior by itself
+and adds no schema, external service, credential, fixture, seal or implementation
+authority. The Gate 3 scoped revision follows under its own explicit approval,
+then the Gate 4 slice revision.
