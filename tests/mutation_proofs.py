@@ -147,8 +147,8 @@ MUTATIONS = [
     {
         "name": "cycle_hardcoded_to_one",
         "file": "shiftwork/orchestrator.py",
-        "old": b"cycle=sealed_store.family_cycle(family),",
-        "new": b"cycle=1,",
+        "old": b"variant_ref=rotation.variant_ref(case),\n                    run_id=run.id,\n                    cycle=sealed_store.family_cycle(family),",
+        "new": b"variant_ref=rotation.variant_ref(case),\n                    run_id=run.id,\n                    cycle=1,",
         "tests": "tests/orchestrator/test_budget_rotation.py::test_rotation_exhaustion_fail_closed",
         "expect": "test_rotation_exhaustion_fail_closed",
     },

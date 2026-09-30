@@ -79,10 +79,10 @@ CASES = [
     {
         "name": "zero_recorded_calls_is_not_a_measured_zero",
         "file": "shiftwork/domain/comparison.py",
-        "old": "measured = bool(calls)",
-        "new": "measured = True",
-        "tests": f"{PURE}::test_no_recorded_model_call_reports_unknown_usage_not_a_measured_zero",
-        "expect": "test_no_recorded_model_call_reports_unknown_usage_not_a_measured_zero",
+        "old": "    measured = evidence_mode is EvidenceMode.TRUSTED_LOCAL or meter_complete",
+        "new": "    measured = True",
+        "tests": f"{PURE}::test_live_controller_meter_proves_zero_and_missing_one_marker_restores_unknown",
+        "expect": "test_live_controller_meter_proves_zero_and_missing_one_marker_restores_unknown",
     },
     {
         "name": "missing_model_result_keeps_usage_unknown",
