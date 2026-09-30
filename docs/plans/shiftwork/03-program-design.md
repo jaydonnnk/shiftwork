@@ -1,8 +1,32 @@
 # Program Design: Shiftwork final pivot
 
-**Current Gate 3 state: RE-APPROVED 2026-09-28.** The user approved the repaired
-protected-phase design together with Gate 2 S8.1, Gate 4 and ADR 0006. Fixture
-review, sealing and live execution remain separate.
+**GATE 3 SCOPED REVISION (THREE BOARDS): RE-APPROVED 2026-09-30.** The user
+reviewed the draft and approved it: "approve gate 3". Under the approved
+direction memo (`../../../shiftwork_three_boards.md`), the re-approved Gate 1
+and the RE-APPROVED Gate 2 section 21, this revision extends Gate 3 for the
+second and third role boards. The scoped changes: a new engagement-pack
+declaration and registration schema (3.10) with per-pack family declarations,
+assist policy and reviewed pins, replacing the hardcoded bookshop family list
+and the bookshop-versus-others assist branch; the Go-To-Market pack contract
+(3.11) with its artifact, independent checks, consequence vocabulary, event
+names and two-call no-patch budget; the FDE record and event schemas (3.11),
+with section 6.9 becoming the Forward Deployed Engineer board's ownership of
+the Northline deployment, which stops being a same-role away shift of the
+applied AI engineer, and a new 6.10 for the Go-To-Market board; the
+parameterized protected acceptance-aspect schema Gate 2 section 21.5 delegated
+here; and the clause-level test plan and learning-evidence wording, because the
+transfer north star is now read across boards. One correction stays recorded
+rather than applied: this document still cites `pivot-browser.mjs` and
+`pivot-render-faults.mjs` at lines 252-253, 2300 and 2320, while the repository
+holds `tests/client/browser.mjs` and `tests/client/render_faults.mjs`; the fix
+is documentation-only and the user was told before approving. This approval is
+program design only: it approves no implementation, fixture content, seal,
+install, credential, call, commit or push. The Gate 4 slice revision is next
+under its own explicit approval.
+
+**Gate 3 state before the three-board revision: RE-APPROVED 2026-09-28.** The
+user approved the repaired protected-phase design together with Gate 2 S8.1,
+Gate 4 and ADR 0006. Fixture review, sealing and live execution remain separate.
 
 **Gate 3: RE-APPROVED 2026-09-24 after the scoped Northline selection backtrack.**
 
@@ -90,7 +114,11 @@ install, commit or push is implied by this backtrack.
 | Comparison state | A qualifying comparison binds its own reviewed comparison state. The accepted Slice 11 state and its byte pins are unchanged and stay attached to the investigation path. |
 | Gateway tool policy | The controller derives a run-scoped tool allowlist from frozen policy. Learner code cannot widen it by request field or prompt text. |
 | Clarification | A captured clarification is assessed and reported separately from completion, refusal, referral and missing output. Its acceptability follows a public task rule, not the service's own label. |
-| Curriculum ownership | Bellwether has an executable failing starter plus reviewed incident/workload data. Northline has a distinct blank learner scaffold, mission, incident requests, three paired workloads with a reviewed manifest, state and protected assessment owned outside learner code. File contents and catalog identity require review before use. |
+| Curriculum ownership | Three registered engagement packs, one per role board. Bellwether has an executable failing starter plus reviewed incident/workload data. The FDE board (the Northline deployment) has a distinct blank learner scaffold, mission, deployment incident requests, three paired workloads with a reviewed manifest, state, compatible catalog and protected assessment owned outside learner code. The GTM board has its own executable failing workflow starter, signal records, incident request, three paired workloads with a reviewed manifest, comparison state and compatible catalog. File contents, catalogs and every seal require review before use. |
+| Engagement packs | One operator-registered pack per board binds the engagement slug to its reviewed content, family declarations, consequence rules, assist policy and display metadata. Resolution is slug-keyed from the shift's engagement; caller input never selects a pack, and an unregistered, incomplete or unsealed board is not offered in the workplace. |
+| Assistance levels | Three declared levels, enforced from the pack declaration rather than the engagement slug: Bellwether three assist calls across HINT, DIAGNOSIS and PATCH_PROPOSAL with one patch proposal maximum; Go-To-Market two calls across HINT and DIAGNOSIS with no patch proposal; FDE one HINT call. |
+| GTM consequences | Synthetic pipeline state reduced only from operational captures and checks: OWNER_ASSIGNED exactly once per processed signal, SLA_CLOCK_STARTED once per owned record, HANDOFF_ESCALATED for the revenue team's review queue, and INCIDENT_OPENED for a dropped, mis-owned or duplicate record with its decision trace. The terminal action is a human handoff; nothing sends a customer message, and no quantity is real revenue. |
+| FDE records | Learner-authored discovery record, permissions map, acceptance tests and handover runbook are artifact files that freeze and inherit under the existing version mechanism. The rollout decision (ROLLOUT_APPROVED) is reduced from an operational run only when the customer acceptance checks pass, and the close records the handover declaration (HANDOVER_DECLARED) with the runbook reference, declared limits and unresolved incidents. |
 | UI | The operational room remains the shell. The client must visibly separate investigation, experiment, selected version and operational history. |
 
 The three comparison pairs are the smallest approved product demonstration that
@@ -108,27 +136,27 @@ vertical slices, but it may not silently change their ownership.
 | File | Responsibility after reconciliation |
 | --- | --- |
 | `shiftwork/app.py` | Wire the revised configuration, gateway boundary, schema migration, reviewed Northline engagement seeding and startup reconciliation. |
-| `shiftwork/config.py` | Named experiment, operation, inference and assist ceilings; model/image config names; controller-owned per-engagement fixture and tool policy and reason render map. No secret values. |
-| `shiftwork/domain/models.py` | Durable shift opening mode, investigation, context, experiment, trial, gateway-event, selection and revised run types. Owns `ProtectedBinding`, which section 3.1 adds to `ExecutionContext`. |
+| `shiftwork/config.py` | Named experiment, operation and inference ceilings; model/image config names; reason render map. No secret values, and no per-engagement fixture, family or assist policy after the pack registry lands; the declarations in 3.10 own it. |
+| `shiftwork/domain/models.py` | Durable shift opening mode, investigation, context, experiment, trial, gateway-event, selection and revised run types. Owns `ProtectedBinding`, which section 3.1 adds to `ExecutionContext`. Gains the six board consequence event types in section 3.11 on `LedgerEventType` and the optional handover runbook reference on `CloseShiftFacts`. |
 | `shiftwork/domain/canonical.py` | Versioned canonical hashes for complete execution contexts and assessment snapshots, while retaining old artifact hashes. |
 | `shiftwork/domain/customer_answer.py` | Render customer text only from the validated task-aware envelope and public records. |
-| `shiftwork/domain/contract_catalog.py` | Keep the immutable per-engagement catalog loader; refuse a missing or incompatible reviewed Northline catalog rather than borrowing Bellwether options or guessing a version. |
+| `shiftwork/domain/contract_catalog.py` | Keep the immutable per-engagement catalog loader; refuse a missing or incompatible reviewed catalog rather than borrowing another board's options or guessing a version. |
 | `shiftwork/domain/errors.py` | Stable conflict, incomplete-evidence, invalid-selection, drift, budget and gateway failure kinds. |
-| `shiftwork/api/schemas.py` | Strict request models and safe public projections defined in section 3.7. |
-| `shiftwork/api/routes.py` | Final routes in section 5; handlers only validate, delegate and map typed failures. |
+| `shiftwork/api/schemas.py` | Strict request models and safe public projections defined in section 3.7, including the workplace registry projection. |
+| `shiftwork/api/routes.py` | Final routes in section 5, including `/api/boards`; handlers only validate, delegate and map typed failures. |
 | `shiftwork/store/schema.sql` | Fresh-database schema including the new pivot records and constraints. |
 | `shiftwork/store/db.py` | Transactional v5 to v6 migration and refusal of unknown versions. |
 | `shiftwork/store/repo.py` | Parameterized reads/writes for every new record and idempotent engagement seeding; no policy decisions. `list_protected_case_snapshots` extends to select the two new resolved-state columns so `load_reserved_comparison_cases` can return the reserved bytes, and the trial-slot writes carry the frozen `executed_request_count`. |
 | `shiftwork/evaluator/evaluator.py` | Pure assessment from explicit captured inputs, including entity and required-task checks. No loader or model access. |
-| `shiftwork/ledger/reducer.py` | Accept only an `OperationalAssessment`; reject experimental inputs by type and runtime guard. |
+| `shiftwork/ledger/reducer.py` | Accept only an `OperationalAssessment`; reject experimental inputs by type and runtime guard. `reduce_operation` emits the pack's declared `success_events` per usefully-completed required request instead of the hardcoded `SALE_COMPLETED`, and appends the declared rollout event once on full acceptance; `reduce_close` appends `HANDOVER_DECLARED` when the pack requires it. Reduction stays pure, deterministic and LLM-free. |
 | `shiftwork/executor/base.py` | Purpose/context-bound execution request, slot-selected workload and trusted request/tool driver, observation stream and trusted measurement fields. Required file-backed capture carries readback byte count/digest or an incomplete-evidence failure. Gains `load_single_request(ref, frozen_bytes, ordinal)`, the protected phase's only batch entry point: it requires caller-supplied bytes, never resolves `path_ref` against `fixtures/requests`, requires exactly one line and requires that line's ordinal to equal the declared one. `load_batch` and its consecutive-from-1 invariant are unchanged, so no public path is relaxed. See section 3.9. |
 | `shiftwork/executor/local_process.py` | Retain byte-pinned trusted-fixture restriction and implement the revised adapter protocol. |
 | `shiftwork/executor/recorded.py` | Retain transcript inspection and label it `RECORDED_INSPECTION`; never emit fresh eligibility. |
-| `shiftwork/sealed/store.py` | Orchestration-only loader for exact reserved protected workload refs. |
-| `shiftwork/sealed/rotation.py` | Comparison-scoped paired reservation and separate operational reservation policy. |
-| `shiftwork/orchestrator.py` | Investigation, experiment, selection and operation lifecycles; the only caller of the sealed loader. |
-| `shiftwork/client/index.html` | One accessible application shell for the approved six-station journey. |
-| `shiftwork/client/app.js` | State and interactions for investigation, comparison, selection, operation and inheritance. |
+| `shiftwork/sealed/store.py` | Per-pack family file map and orchestration-only loader for exact reserved protected workload refs. The family's class and required seal state come from the pack declaration (3.10); the loader keeps failing closed on an undeclared family, a missing seal or a reused protected request id. |
+| `shiftwork/sealed/rotation.py` | Comparison-scoped paired reservation and separate operational reservation policy. Variant identity is content-bound for declared comparison-class families and id-based for attempt families, replacing the `task_completion` name check with the declared family class. |
+| `shiftwork/orchestrator.py` | Investigation, experiment, selection and operation lifecycles; the only caller of the sealed loader. Resolves mission, public and comparison states, workload manifest, documents, family declarations, consequence rules and assist policy from the shift's registered pack; the workplace projection serves the registry. |
+| `shiftwork/client/index.html` | One accessible application shell for the approved station journeys and the workplace board selector. |
+| `shiftwork/client/app.js` | State and interactions for the workplace selector, per-board station labels, investigation, comparison, selection, operation and inheritance. |
 | `shiftwork/client/evidence.js` | Pure formatting of public evidence, metrics and reason codes. |
 | `shiftwork/client/styles.css` | Existing room direction plus clear purpose/status hierarchy and mobile access. |
 | `shiftwork/client/room.svg` | Keep the accepted room composition; add only state hooks needed by the approved stations. |
@@ -166,15 +194,30 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/fixtures/artifacts/bookshop/compare_repair_a_service.py` | Candidate A's draft repair: it completes every mandatory rule and picks the cheapest qualifying alternative, breaking ties by entity ref. Trusted-local fixture for offline verification only. |
 | `shiftwork/fixtures/artifacts/bookshop/compare_repair_b_service.py` | Candidate B's repair. REQUIRED NEW BYTES, NOT YET AUTHORED: the declared alternative preference for greatest current shelf stock, breaking ties by the lower price. The bytes in the tree today do not implement this; see the note under this table. Authoring them changes the file, so its `compare_candidate_b` pin in `config.TRUSTED_LOCAL_FIXTURES` must be recomputed in the same change and is not valid until it is. Trusted-local fixture for offline verification only. |
 | `shiftwork/sealed/cases/bookshop_task_completion.json` | Protected comparison variants, at least six, each carrying its own request row, task spec, additive-only state delta and the expected acceptance aspect with a concrete failure. Exact cases require a separate sealing review; nothing here is executable before reservation. The rule that a comparison-family case must carry a stimulus is enforced by `load_reviewed_comparison_family` and not by `load_family`, so the present unsealed six-case draft, which carries no stimulus, keeps loading for the private-needle collector and the public projections until the replacement is authored and sealed. See section 3.9. |
-| `shiftwork/templates/artifact/northline_blank_service.py` | Executable minimal service scaffold with no authored transfer solution; the away learner owns its logic and starts from a blank artifact. |
-| `shiftwork/fixtures/mission/northline_transfer.json` | Operator-reviewed public future-commitment, safety-escalation and retry-safe booking rules, allowed information/tool vocabulary and deterministic synthetic transitions. No Bellwether rules are borrowed. |
-| `shiftwork/fixtures/requests/northline_transfer.jsonl` | Operator-reviewed public away requests and required-task specifications, captured as exact bytes for execution. |
+| `shiftwork/packs/__init__.py` | Package boundary only. |
+| `shiftwork/packs/registry.py` | The three engagement pack declarations and the 3.10 resolution functions. Slug-keyed, caller-independent and fail-closed; imports no sealed, evaluator, store or network code. |
+| `shiftwork/fixtures/mission/gtm_pipeline_v1.json` | Operator-reviewed public qualification, routing, exactly-once ownership and human-handoff rules, allowed information/tool vocabulary and deterministic synthetic transitions. No Bellwether rules are borrowed. |
+| `shiftwork/fixtures/catalogs/gtm_v1.json` | The GTM engagement's compatible contract catalog. Version and contents require review; this design assigns no version. |
+| `shiftwork/fixtures/requests/gtm_pipeline_incident.jsonl` | Reviewed public mis-routed, dropped or duplicated signal incident for the first investigation, distinct from protected stimulus and the three paired workloads. |
+| `shiftwork/fixtures/state/gtm_pipeline_public_state.json` | Reviewed public starting pipeline records and dependency condition needed to reproduce that failure; exact bytes are captured with the run. |
+| `shiftwork/fixtures/state/gtm_compare_state_v1.json` | The GTM comparison's own reviewed state, base for its protected deltas. Reviewed pins follow the bookshop comparison-state precedent; the GTM incident state and this file are separate. |
+| `shiftwork/fixtures/artifacts/gtm/pipeline_starter_failure.py` | Executable learner-editable GTM starter whose reviewed incident request exposes the mis-route/duplicate failure. Contents and pin are not supplied by this design. |
+| `shiftwork/fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py` | Rules-first candidate draft: review-queue qualification and deterministic routing. REQUIRED NEW BYTES, NOT YET AUTHORED. Trusted-local fixture for offline verification only; contents and pin require review. |
+| `shiftwork/fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py` | Model-assisted candidate draft: confidence thresholds with human review. REQUIRED NEW BYTES, NOT YET AUTHORED. Trusted-local fixture for offline verification only; contents and pin require review. |
+| `shiftwork/fixtures/requests/gtm_compare_pair_0{1,2,3}.jsonl` | The three reviewed GTM paired public workloads; each requires review and sealing, and pair 1 is distinct from the incident request. |
+| `shiftwork/fixtures/requests/gtm_compare_pair_0{1,2,3}_specs.json` | The public task spec beside each GTM paired batch; the manifest pins each file's canonical parsed-spec digest. |
+| `shiftwork/fixtures/requests/gtm_compare_manifest.json` | Operator-reviewed ordinal 1/2/3 mapping with independently pinned file hashes, parsed request counts and task-spec hashes for the GTM board. |
+| `shiftwork/sealed/cases/gtm_pipeline_ownership.json` | The GTM board's operator-sealed comparison family, at least six distinct protected variants; unsealed or short inventory fails closed at reservation. Exact cases require a separate sealing review. |
+| `shiftwork/templates/artifact/northline_blank_service.py` | Executable minimal service scaffold with no authored deployment solution; the FDE learner owns its logic and starts from a blank artifact. |
+| `shiftwork/fixtures/mission/northline_deployment_v1.json` | Operator-reviewed public future-commitment, safety-escalation and retry-safe booking rules, allowed information/tool vocabulary and deterministic synthetic transitions. No Bellwether rules are borrowed. |
+| `shiftwork/fixtures/catalogs/northline_v1.json` | The FDE engagement's compatible contract catalog. Version and contents require review; this design assigns no version. |
+| `shiftwork/fixtures/requests/northline_deployment_incident.jsonl` | Operator-reviewed public deployment incident requests and required-task specifications, captured as exact bytes for execution. |
 | `shiftwork/fixtures/state/northline_start.json` | Reviewed public starting booking/dependency state, restored between trials. |
-| `shiftwork/fixtures/requests/northline_compare_pair_01.jsonl` | First reviewed public Northline qualifying workload, distinct from the initial transfer request. |
+| `shiftwork/fixtures/requests/northline_compare_pair_01.jsonl` | First reviewed public Northline qualifying workload, distinct from the initial deployment request. |
 | `shiftwork/fixtures/requests/northline_compare_pair_02.jsonl` | Second reviewed public Northline qualifying workload. |
 | `shiftwork/fixtures/requests/northline_compare_pair_03.jsonl` | Third reviewed public Northline qualifying workload. |
 | `shiftwork/fixtures/requests/northline_compare_manifest.json` | Operator-reviewed ordinal 1/2/3 mapping with independently pinned file hashes, parsed request counts and task-spec hashes. |
-| `shiftwork/sealed/cases/northline_transfer.json` | Operator-authored protected transfer acceptance cases, loaded only by orchestration and passed as explicit inputs to the pure evaluator; no case contents are set here. |
+| `shiftwork/sealed/cases/northline_deployment.json` | The FDE board's operator-sealed comparison family, at least six distinct protected variants whose expected acceptance aspects cover the customer acceptance checks; loaded only by orchestration and passed as explicit inputs to the pure evaluator. No case contents are set here. |
 | `demos/final_pivot.py` | Canonical offline walkthrough: inspect, predict, compare, choose, operate, inherit and test retained alternative. |
 | `demos/gateway_spike.py` | Separately authorized capability-spike driver. It is not part of normal offline verification. |
 
@@ -198,12 +241,14 @@ that passing test, which section 9 names rather than deletes.
 | --- | --- |
 | `tests/store/test_pivot_migration.py` | v5 preservation, v6 constraints and no invented history. |
 | `tests/domain/test_task_contract.py` | Request/entity/task envelope validation and customer rendering inputs. |
-| `tests/domain/test_comparison.py` | Completeness, comparability, eligibility and metric denominators. |
+| `tests/domain/test_comparison.py` | Completeness, comparability, eligibility, metric denominators and the parameterized acceptance-aspect schema and validation (3.11). |
 | `tests/evaluator/test_evaluator.py` | Extend pure evaluator coverage for requested-task completion and mandatory rules. |
 | `tests/orchestrator/test_investigation_assist.py` | Prediction gate, revisions, attribution and assist budget. |
 | `tests/orchestrator/test_experiment_lifecycle.py` | Frozen context, paired schedule, exposure, drift, failure and idempotency. |
 | `tests/orchestrator/test_selection_operation.py` | Exact selection, operation-only consequences, retry rules, inheritance and invalidation. |
-| `tests/orchestrator/test_northline_transfer.py` | Blank-scaffold ownership, reviewed mission/request/state/catalog/paired-workload/protected prerequisites, reduced help, cross-engagement substitution rejection and the qualifying comparison to explicit selection and selected-version operation path. |
+| `tests/packs/test_registry.py` | Pack declaration resolution by slug, reviewed-pin re-verification, fail-closed handling of an unregistered, incomplete or unsealed pack, and the workplace projection's absence of sealed locators, family identity, paths and credentials. |
+| `tests/orchestrator/test_gtm_pipeline.py` | GTM seeding and starter baseline, reviewed prerequisite refusal, the two-call no-patch policy, exactly-once ownership and consequence reduction, the no-send boundary, and the qualifying comparison to explicit selection and selected-version operation path. |
+| `tests/orchestrator/test_fde_deployment.py` | Blank-scaffold ownership, reviewed mission/request/state/catalog/paired-workload/protected prerequisites, declared one-hint policy, cross-engagement substitution rejection, acceptance-to-rollout gating, pilot consequences, handover-at-close records and the qualifying comparison to explicit selection and selected-version operation path. |
 | `tests/orchestrator/test_replay.py` | Historical semantic replay, unknown legacy inputs and zero mutation. |
 | `tests/executor/conformance.py` | Revised adapter contract shared by recorded, trusted-local and live adapters. |
 | `tests/executor/test_gateway_isolation.py` | Run binding, expiry, model allowlist, network boundary, credential absence and redaction probes. |
@@ -246,19 +291,23 @@ the dependency correction and does not authorize ADR #4, fixtures or publication
 
 The file map assigns ownership, not permission to invent executable contents.
 Current source has the old bookshop template, mission and catalog, plus the trusted
-Slice 8 repair-arc fixtures; none is the pivot starter or Northline transfer.
-The Northline catalog must be reviewed and frozen through the existing loader's
-`{slug}_v{version}.json` convention before any transfer execution. This design
-assigns no version or case content. If no compatible catalog is approved, Northline
-execution and any transfer claim stop. The same review and byte pins apply to the
-new Bellwether starter, incident request, public state, the comparison state and
-the three paired workloads, and every comparison variant needs an operator seal
-before reservation.
-Northline's three separate comparison batches and manifest also require review,
-byte pins and enough protected variants under the same reservation policy before
-its learner-edited version can qualify. The initial `northline_transfer.jsonl`
-request supports the starter and later operational run, never comparison
-eligibility by itself.
+Slice 8 repair-arc fixtures; none is the pivot starter or either new board's
+material.
+Each new board's catalog must be reviewed and frozen through the existing loader's
+`{slug}_v{version}.json` convention before it can execute. This design
+assigns no version or case content. If no compatible catalog is approved, that
+board's execution and any claim built on it stop. The same review and byte pins
+apply to the Bellwether starter, incident request, public state, the comparison
+state and the three paired workloads, and every comparison variant needs an
+operator seal before reservation; the GTM and FDE material follows the identical
+rule.
+Each new board's three separate comparison batches and manifest also require
+review, byte pins and enough protected variants under the same reservation policy
+before its learner-edited version can qualify; a comparison without a sealed
+family fails closed before selection by design. The initial
+`northline_deployment_incident.jsonl` and `gtm_pipeline_incident.jsonl` requests
+support the starter and later operational run, never comparison eligibility by
+itself.
 No placeholder hash or request count is treated as approved fixture data.
 
 ## 3. Types and signatures
@@ -408,9 +457,11 @@ def record_assist_decision(conn, event_id: Id, decision: AssistDecision) -> Assi
 ```
 
 An investigation revision never overwrites its parent. Every non-orientation
-assist role requires a complete investigation owned by the shift. Accepting a
-patch records attribution only. It does not edit code, freeze a version, prove a
-cause or affect eligibility.
+assist role requires a complete investigation owned by the shift. The shift's
+pack declares the allowed roles and the shared call budget (3.10); a role outside
+the declaration, a patch proposal where none is declared, or an exhausted budget
+is refused before any model call. Accepting a patch records attribution only. It
+does not edit code, freeze a version, prove a cause or affect eligibility.
 
 ### 3.3 Public task contract and service response
 
@@ -801,7 +852,7 @@ class ReplayReport(BaseModel):
     wrote_rows: Literal[False]
 
 def append_investigation(conn, shift_id: Id, request: InvestigationRequest) -> Investigation: ...
-def seed_reviewed_northline(conn) -> None: ...
+def seed_registered_engagements(conn) -> None: ...
 def open_next_shift(conn, slug: Slug) -> Shift: ...
 def freeze_version(conn, shift_id: Id, request: FreezeVersionRequest) -> ArtifactVersion: ...
 def create_experiment(conn, shift_id: Id, request: ExperimentRequest) -> Experiment: ...
@@ -923,7 +974,22 @@ class BoardView(BaseModel):
     ledger_totals: dict[str, int]
     chain_status: Literal["VALID"]
     synthetic: Literal[True]
+
+class WorkplaceBoardView(BaseModel):
+    engagement_slug: Slug
+    role_name: str
+    employer: str | None
+    client: str | None
+    room_id: str
+    station_labels: tuple[str, ...]
+    availability: Literal["AVAILABLE", "AWAITING_OPERATOR_REVIEW"]
 ```
+
+The workplace projection lists the registered packs in declaration order. It is
+the only surface that describes a board before it is opened; it carries no sealed
+locator, family or variant identity, protected byte, credential, host path or
+learner progress, and its availability status is a token, never a reason string
+that could name sealed material.
 
 Extend the existing `ShiftView` with the immutable
 `opening_mode: ShiftOpeningMode | None` (`None` means a historical v5 shift) and
@@ -1205,6 +1271,292 @@ classification below is ADR 0006 Decisions 1 and 2):
   and `output_body_base64`, `orchestrator.py:946-948`), the board and the
   investigations station.
 
+### 3.10 Engagement pack declaration and registration
+
+```python
+class FamilyClass(StrEnum):
+    ATTEMPT = "ATTEMPT"
+    COMPARISON = "COMPARISON"
+
+class FamilyDeclaration(BaseModel):
+    family: str
+    family_class: FamilyClass
+    case_file: str
+    cycle: int
+    min_variants: int
+
+class PackDocument(BaseModel):
+    doc_id: str
+    path: str
+    sha256: Sha256
+    station: str
+
+class ReviewedPin(BaseModel):
+    path: str
+    sha256: Sha256
+
+class AssistPolicy(BaseModel):
+    level_label: str
+    allowed_roles: tuple[AssistRole, ...]
+    total_calls_per_shift: int
+    max_patch_proposals: int
+
+class BoardDisplay(BaseModel):
+    role_name: str
+    employer: str | None
+    client: str | None
+    room_id: str
+    station_labels: tuple[str, ...]
+
+class ConsequenceRules(BaseModel):
+    success_events: tuple[str, ...]
+    rollout_event: str | None
+    handover_record_required: bool
+
+class EngagementPack(BaseModel):
+    slug: Slug
+    schema_version: Literal[1]
+    display: BoardDisplay
+    assist: AssistPolicy
+    mission_path: str
+    public_state_path: str
+    comparison_state_path: str
+    incident_request_path: str
+    manifest_path: str
+    documents: tuple[PackDocument, ...]
+    families: tuple[FamilyDeclaration, ...]
+    consequences: ConsequenceRules
+    reviewed_pins: tuple[ReviewedPin, ...]
+
+class BoardAvailability(BaseModel):
+    engagement_slug: Slug
+    display: BoardDisplay
+    availability: Literal["AVAILABLE", "AWAITING_OPERATOR_REVIEW"]
+
+def resolve_pack(slug: Slug) -> EngagementPack: ...
+def registered_packs() -> tuple[EngagementPack, ...]: ...
+def workplace_boards() -> tuple[BoardAvailability, ...]: ...
+def seed_registered_engagements(conn) -> None: ...
+```
+
+The declarations live in `shiftwork/packs/registry.py` in display order
+(Bellwether, Go-To-Market, FDE). Display strings spell the role names out, per
+the approved memo: "Go-To-Market Engineer" and "Forward Deployed Engineer" are
+written content, and the shorthand stays out of product surfaces.
+`resolve_pack` and `registered_packs` are pure declaration lookups;
+`workplace_boards` and `seed_registered_engagements` live in orchestration,
+which owns the store and the sealed loader, so the registry module itself
+imports no sealed, store, gateway or network code.
+
+1. **Content is code-shipped, pinned and reviewed.** `reviewed_pins` covers every
+   reviewed content file of the pack, including the learner-visible documents,
+   and a guard test re-verifies each pin; the comparison manifest verification
+   keeps recomputing its own hashes at reservation. A declaration edit is an
+   operator action; the learner cannot add, edit or substitute pack content.
+2. **Resolution is slug-keyed and orchestration-side.** Every engagement-scoped
+   resolution (mission, public and comparison states, manifest and request files,
+   documents, family declarations, consequence rules, assist policy, display
+   metadata) reads `resolve_pack(shift.engagement_slug)`. Caller input never
+   selects a pack, a family file, a manifest or a document, and the evaluator and
+   comparison policy keep receiving explicit inputs. An unknown slug resolves to
+   no pack: the workplace omits it and an engagement route refuses exactly as it
+   does for an unknown engagement today.
+3. **Registration fails closed.** A board is `AVAILABLE` only when its
+   registration and every declared required seal and pin verify. Resolution
+   refuses an unregistered engagement, an incomplete declaration, a declared
+   family whose case file is missing or unsealed where a seal is required, a
+   comparison family with fewer available variants than its declared minimum or
+   with a declared minimum below six, a duplicate family name, and two packs
+   claiming the same variant refs. Nothing partial is offered, and availability
+   never advances from learner progress.
+4. **Families are pack-scoped.** Attempt families are optional; an empty set
+   means the board does not use the attempt rotation. Every pack declares at
+   least one comparison family, and a comparison reserves exclusively within the
+   shift's pack: a draw in one board can never satisfy another board's comparison,
+   and an invalidation in one board leaves the others untouched. Cross-pack
+   identity collisions are registration errors.
+5. **Assist policy is declared, not branched.** `allowed_roles`,
+   `total_calls_per_shift` and `max_patch_proposals` are the enforcement source
+   for the assist route and the investigation view; the engagement-config columns
+   become a projection seeded from the declaration and verified at startup, and a
+   mismatch fails closed rather than diverging silently. A role outside the
+   declaration is refused before any model call.
+6. **No new authority.** A pack carries no evaluator logic, no ledger rule, no
+   eligibility, promotion or credential authority, no sealed content read and no
+   external call. `shiftwork/packs/registry.py` imports no sealed, evaluator,
+   store, gateway or network module; family seal reading stays in `sealed.store`
+   under orchestration, and the section 7 loader and purity rules are unchanged.
+7. **Minimal generality.** The registry replaces exactly the bookshop-only
+   mechanisms Gate 2 section 21.2 names: the hardcoded comparison family constant
+   (`BOOKSHOP_COMPARISON_FAMILIES`, `config.py:199`), the enabled-family fallback
+   whose default is the bookshop list, the bookshop-only comparison workload
+   loader (`orchestrator.py:2380-2381` refusing every other slug), the bookshop
+   mission, public state, comparison state and incident-request reads, the global
+   sealed family file map (`sealed/store.py`), the content-bound identity name
+   check (`sealed/rotation.py:33`), and the projection scanner needles whose
+   sources become the registered declarations. No other behavior changes.
+
+### 3.11 New-board pack contracts, consequence rules and acceptance aspects
+
+This section fixes what Gate 2 sections 21.3 and 21.4 delegated here: the GTM
+pack contract, the FDE record and event schemas, the per-board consequence event
+names and the acceptance-aspect schema with its validation. Fixture contents,
+briefs, checks, mission keys and weights remain reviewed pack material authored
+in S22a and S23 to S25; this section fixes their shapes, names and rules.
+
+**Shared envelope additions (section 3.3).** The GTM and FDE boards reuse the
+structured envelope; five task kinds and five claim kinds join the vocabulary
+and no existing member changes meaning:
+
+```python
+class TaskKind(StrEnum):
+    # existing members unchanged
+    QUALIFY_SIGNAL = "QUALIFY_SIGNAL"
+    ASSIGN_OWNER = "ASSIGN_OWNER"
+    WRITE_PIPELINE_RECORD = "WRITE_PIPELINE_RECORD"
+    HANDOFF_TO_REVIEW = "HANDOFF_TO_REVIEW"
+    ROUTE_SAFETY_QUESTION = "ROUTE_SAFETY_QUESTION"
+
+class Claim(BaseModel):
+    kind: Literal[
+        "price", "stock", "availability", "policy_answer", "booking", "none",
+        "qualification", "owner_assignment", "pipeline_write", "handoff",
+        "safety_route",
+    ]
+    # remaining fields as section 3.3 defines them
+```
+
+**Consequence event types.** Six names join `LedgerEventType`; the existing
+members do not change:
+
+```python
+class LedgerEventType(StrEnum):
+    # existing members unchanged
+    OWNER_ASSIGNED = "OWNER_ASSIGNED"
+    SLA_CLOCK_STARTED = "SLA_CLOCK_STARTED"
+    HANDOFF_ESCALATED = "HANDOFF_ESCALATED"
+    ROLLOUT_APPROVED = "ROLLOUT_APPROVED"
+    HANDOVER_DECLARED = "HANDOVER_DECLARED"
+    COUNTER_FOLLOWUP_RECORDED = "COUNTER_FOLLOWUP_RECORDED"
+```
+
+**Consequence rules declaration.** `success_events` and `rollout_event` entries
+use the mission-transition grammar `<EVENT_TYPE> <consequence_key>`, with the
+key resolving to a weight in the pack mission. `reduce_operation` emits, for
+each request spec whose required tasks are usefully completed, one draft per
+declared success event, carrying the consequence key, the mission version, the
+assessment rule version and the committed catalog version, labelled synthetic;
+a failing required task keeps the existing `INCIDENT_OPENED` branch with its
+reason code and cause refs, so each board's failure classes ride on the shared
+reason-code vocabulary rather than new reducer branches. When a pack declares a
+`rollout_event`, its operational run reduces all-or-nothing: on full acceptance
+(every check passes and every required task completes) the success events and
+the single rollout draft are emitted together; otherwise only incidents are
+written and the pilot arm records no pilot state. A pack without a declared
+rollout event keeps the per-request reduction. `reduce_close` appends
+`HANDOVER_DECLARED` when `handover_record_required` is true. Reduction stays
+pure, deterministic and LLM-free.
+
+**Go-To-Market pack contract.**
+
+1. Artifact: the signal-to-owner workflow edited in the artifact's `service.py`
+   under the existing executor protocol; qualification, routing and CRM write
+   logic live there, and the learner's two compared versions declare their
+   intended difference (rules-first review queue versus model-assisted
+   confidence thresholds) as the treatment.
+2. Checks (independent, not learner-authored): the pinned task spec beside each
+   GTM workload declares the expected qualification decision and owner for its
+   signal; every processed signal carries exactly one `ASSIGN_OWNER` completion
+   and one `WRITE_PIPELINE_RECORD` completion for the same signal ref; a second
+   owner assignment or write for one signal is `DUPLICATE_COMMITMENT`; a
+   required signal without one is `REQUIRED_TASK_MISSING`; a missing output is
+   `MISSING_OUTPUT`; an owner contradicting the pinned routing rules is
+   `WRONG_ACTION`; a disqualified signal that is still owned or written fails
+   its mandatory rule. Idempotent reprocessing is checked directly: a retry
+   request repeating an already-written signal in the same run must produce no
+   second write and no second owner.
+3. Consequence vocabulary: `OWNER_ASSIGNED` (one per owned signal),
+   `SLA_CLOCK_STARTED` (one per owned record), `HANDOFF_ESCALATED` (the revenue
+   team's review queue; a human handoff record, never a sent message), and
+   `INCIDENT_OPENED` for a dropped, mis-owned or duplicate record, carrying its
+   reason code and decision trace. There is no aggregation: every event is per
+   record, and the pipeline wall labels every total synthetic and never as
+   revenue. The terminal action is `HANDOFF_TO_REVIEW`; no claim kind expresses
+   a sent customer message, and the controller renders text only from the
+   validated envelope.
+4. Visible contract: mandatory rule ids for exactly-once ownership, pinned
+   routing and a human handoff on an ambiguous or low-confidence record. Learner
+   additions cannot waive them.
+5. Budgets: `AssistPolicy(level_label, (HINT, DIAGNOSIS), 2, 0)`. Every other
+   section 7 ceiling is unchanged, and the later condition (an enrichment
+   provider outage, or a new region or product line) uses the existing
+   retained-alternative experiment machinery on reviewed pack material.
+
+**Forward Deployed Engineer pack contract.**
+
+1. Artifact file set: the blank `service.py` plus four learner-authored records,
+   `discovery.md`, `permissions.json`, `acceptance_tests.py` and `runbook.md`.
+   Only `service.py` is executed by the executor. The four records freeze and
+   inherit with versions and are never assessment input. Freeze validates
+   structure only: `permissions.json` parses as
+   `{"reads": [str, ...], "writes": [str, ...]}`, and the other three files are
+   non-empty UTF-8 text. Content is learner work product, never sealed material
+   and never model-authored.
+2. Acceptance checks (public contract, assessed independently and mirrored by
+   learner visible tests): no double bookings (`DUPLICATE_COMMITMENT` absent),
+   escalation fires for a safety question (the safety task's assessed outcome),
+   commitments honored (`INVALID_COMMITMENT` absent), and access boundaries held
+   (no `WRONG_ACTION` against the declared boundary rules). The mandatory rule
+   ids live in the pack mission.
+3. Events: `BOOKING_COMMITTED` per completed booking request,
+   `ESCALATION_TO_HUMAN` for the mechanic route, `COUNTER_FOLLOWUP_RECORDED`
+   for a rollback resolved within the same counter visit (labelled a follow-up,
+   not a missed commitment), `INCIDENT_OPENED` and `INCIDENT_RESOLVED` unchanged,
+   `ROLLOUT_APPROVED` once and only on full acceptance under the all-or-nothing
+   rule above, and `HANDOVER_DECLARED` at close.
+4. Declaration: one `BOOKING_COMMITTED` success rule, one `ROLLOUT_APPROVED`
+   rollout rule, and `handover_record_required` true.
+5. Handover at close: `CloseShiftFacts` gains
+   `handover_runbook_version_id: Id | None`. When the pack requires the handover
+   record, close refuses unless the closing shift's selected version carries the
+   declared runbook document, and the appended `HANDOVER_DECLARED` payload
+   carries `{runbook_version_id, declared_limits, unresolved_incident_ids,
+   mission_version}`. The handover record never rewrites pilot history, and a
+   later alternative experiment cannot alter it (section 6.7).
+6. Budgets: `AssistPolicy(level_label, (HINT,), 1, 0)`. The later condition (a
+   schema change or a customer-side outage) uses the existing
+   retained-alternative experiment machinery on reviewed pack material.
+
+**Acceptance-aspect schema (Gate 2 section 21.5 item 4).**
+
+```python
+class AcceptanceAspectKind(StrEnum):
+    EVERY_REQUIRED_TASK_RETURNS_A_RESULT = "EVERY_REQUIRED_TASK_RETURNS_A_RESULT"
+    NAMED_TASK_OUTCOMES = "NAMED_TASK_OUTCOMES"
+    NO_TASK_REASON_CODE = "NO_TASK_REASON_CODE"
+
+class AcceptanceAspect(BaseModel):
+    kind: AcceptanceAspectKind
+    task_id: Id | None = None
+    expected_outcomes: tuple[TaskOutcome, ...] = ()
+    reason_code: ReasonCode | None = None
+```
+
+Reservation validates each reserved variant's `expected` block before any
+exposure is recorded. `NAMED_TASK_OUTCOMES` requires a non-empty
+`expected_outcomes` tuple and a `task_id` present in the case's own task spec;
+`NO_TASK_REASON_CODE` requires a `reason_code` and forbids the other parameters;
+`EVERY_REQUIRED_TASK_RETURNS_A_RESULT` forbids every parameter. An absent,
+unparseable, unknown-kind, unknown-task or out-of-vocabulary aspect is rejected
+with no exposure recorded. `protected_acceptance` reads the typed aspect; the
+existing named bookshop aspects become declared parameter values (the
+`collection` and `alternative` task ids with their outcome tuples) rather than
+code branches, and the mandatory-pass precondition and identity checks in
+section 3.9 stay exactly as stated. The present string-aspect draft does not
+parse and stays ineligible; it is replaced when the family is re-authored under
+this schema and sealed, and the needle collector is unaffected because it never
+parses aspects.
+
 ## 4. Storage and migration
 
 Schema version becomes 6. `migrations/v6.sql` runs with `BEGIN IMMEDIATE`; the
@@ -1241,6 +1593,14 @@ version marker changes only in the same successful transaction.
 - `rotation_draws` remains byte-preserved legacy exposure evidence. New pivot
   reservations use `exposure_reservations` and `exposure_items`; policy reads both.
 
+The pack registry adds no table. Declarations are code-shipped with reviewed
+pins, family declarations point at existing sealed files, and the three new
+boards' consequence state uses the existing engagement-scoped ledger and
+incident rows; the FDE records are artifact-version files, and the rollout and
+handover records are ledger events. No schema-version change and no new
+migration accompany the three-board revision, and the existing v6 tables,
+columns and migration rules are unchanged.
+
 ### v5 migration rules
 
 1. Copy no row and rewrite no blob, hash, event, incident, output or draw.
@@ -1271,6 +1631,7 @@ conflicts; a new key still requires an open shift.
 
 | Route | Verb | Request to response | Rules |
 | --- | --- | --- | --- |
+| `/api/boards` | GET | none to `WorkplaceBoardView[]` | The workplace registry projection: registered packs in declaration order with role, employer or client, room, station labels and availability, resolved from the operator registration and its required seals. Carries no sealed locator, family or variant identity, protected byte, credential, host path or learner progress. |
 | `/api/engagements/{slug}/board` | GET | none to `BoardView` | Separates latest saved, selected and latest experiment; a legacy no-choice engagement says `NEEDS_FIRST_CHOICE`. |
 | `/api/engagements/{slug}/shifts` | POST | key to `ShiftView` | For a reviewed newly seeded engagement with no shift, atomically open a standard initial shift with its own immutable starter and labelled `STARTER_BASELINE`; Northline's starter is the blank scaffold. With a valid prior selection, inherit it. With a closed v5 shift and no selection, open one non-operational first-choice shift. Caller cannot choose mode. Existing open shift or invalid selection returns 409. |
 | `/api/shifts/{id}/artifact` | GET/PUT | existing draft models | Save never selects. |
@@ -1561,50 +1922,78 @@ It writes nothing. Legacy runs missing required context return
 `UNKNOWN_MISSING_INPUTS`. `chain.verify_chain` remains a separate byte-integrity
 check; neither proof substitutes for the other.
 
-### 6.9 Northline transfer ownership
+### 6.9 Forward Deployed Engineer board ownership
 
-Startup asks orchestration to idempotently seed a Northline engagement and its
-one-hint config only after an operator has reviewed its mission, initial and
-three paired public request files, ordinal manifest, starting state, catalog, blank
-scaffold and protected inventory. The existing `repo.seed_engagement` and
-`repo.seed_engagement_config` calls are used with Northline values; no public
-engagement-creation route or caller-selected fixture is added. Missing review
-leaves Northline unavailable while Bellwether remains usable. If a previously
-seeded Northline package later goes missing or changes, new execution fails
-closed without rewriting its history. Only orchestration checks the sealed
-inventory; startup and persistence do not import the sealed loader. Existing
-v5 Northline engagements keep the no-choice migration path and never receive
-a new `STARTER_BASELINE` from this seed step.
+Startup asks orchestration, through `seed_registered_engagements`, to
+idempotently seed every registered pack whose reviewed content and required
+seals verify. The existing `repo.seed_engagement` and
+`repo.seed_engagement_config` calls are used with the declaration's values; no
+public engagement-creation route or caller-selected fixture is added. A board
+whose registration or review is missing is not offered in the workplace while
+the verified boards remain usable. If a previously seeded pack later goes
+missing or changes, new execution fails closed without rewriting its history.
+Only orchestration checks the sealed inventory; startup and persistence do not
+import the sealed loader. Existing v5 Northline engagements keep the no-choice
+migration path and never receive a new `STARTER_BASELINE` from this seed step.
 
-For that newly seeded engagement only, its first
+For that newly seeded FDE engagement only, its first
 `/api/engagements/northline/shifts` call atomically creates a standard shift,
 immutable blank starter version and labelled `STARTER_BASELINE` selection. An
 engagement that arrived through v5 migration takes the section 6.0 first-choice
 branch instead and receives no starter.
 The scaffold has no solution code and is not eligible repair evidence. Run that
-starter once against the reviewed initial request to capture a task-relevant
-failure; the learner then records a cause, falsifier and public test against
-that source run. Edit and freeze two distinct learner-owned
-versions, compare them in six A/B slots using only Northline's reviewed batches
-and protected reservation, then explicitly select an eligible exact version with
-`expected_prior_selection_id` set to the labelled starter selection's ID.
-No diagnostic trial or experimental pass selects it or writes business history.
-The starter's one successful operational finalization uses that shift's operation
-allowance; close and open the next shift before operating the chosen version.
-The next shift inherits only the explicit choice, not the latest saved source.
-Only operational runs of the labelled starter or later exact learner selection
-may derive Northline's deterministic synthetic booking, commitment and
-escalation consequences. Experiments cannot.
+starter once against the reviewed deployment incident request to capture a
+task-relevant failure; the learner then records a cause, falsifier and public
+test against that source run. Edit and freeze two distinct learner-owned
+versions, compare them in six A/B slots using only the FDE pack's reviewed
+batches and protected reservation, then explicitly select an eligible exact
+version with `expected_prior_selection_id` set to the labelled starter
+selection's ID. No diagnostic trial or experimental pass selects it or writes
+business history. The starter's one successful operational finalization uses
+that shift's operation allowance; close and open the next shift before
+operating the chosen version. The next shift inherits only the explicit choice,
+not the latest saved source.
 
-The Northline away shift uses its own reviewed mission, public requests, starting
-state and compatible contract catalog, not Bellwether source or inventory. No
+The next shift's operational run is the deployment pilot arm against the
+reviewed pilot requests. On full acceptance (3.11) the reduction appends the
+pilot-state events and the single `ROLLOUT_APPROVED` rollout decision; a
+failing run opens incidents and records no pilot state. Only operational runs
+of the labelled starter or a later exact learner selection may derive the
+board's deterministic synthetic booking, follow-up, escalation, incident and
+rollout records. Experiments cannot, and a later alternative experiment cannot
+rewrite them. Close records the handover declaration with the runbook
+reference, the declared limits and the unresolved incidents when the pack
+requires it.
+
+The FDE board uses its own reviewed mission, public requests, starting state
+and compatible contract catalog, never Bellwether source or inventory. No
 catalog version is assigned here. Orchestration owns the sealed-case loader and
 passes approved protected cases as explicit inputs to the pure evaluator.
-Reduced assistance remains controller policy; learner code owns the response
-and retry-safe behavior. A human, blinded to study condition, owns the learning-
-transfer rubric in section 10; service output or a model never grades that
-rubric. Missing mission, request, state, catalog, manifest or sealed review
-blocks execution and any transfer claim.
+Reduced assistance is the declared one-hint policy of 3.10; learner code owns
+the response and retry-safe behavior. A human, blinded to study condition, owns
+the learning-transfer rubric in section 10; service output or a model never
+grades that rubric. Missing mission, request, state, catalog, manifest or
+sealed review blocks execution and any transfer claim.
+
+### 6.10 Go-To-Market board ownership
+
+The GTM board seeds and opens through the same registered-pack path with its own
+mission, signal incident request, public and comparison states, compatible
+catalog, executable failing starter, ordinal manifest and sealed comparison
+family. Its first shift runs the labelled starter once against the reviewed
+incident to expose the mis-route, drop or duplicate failure, records the
+learner's cause, falsifier and public test, freezes two versions, executes six
+A/B slots against the GTM batches and protected reservation, and explicitly
+selects an eligible exact version. The next shift operates the chosen workflow
+against the reviewed requests and reduces the pipeline consequences of 3.11;
+the later condition is an enrichment provider outage or a new region or product
+line, exercised through the retained-alternative experiment.
+
+Nothing on this board sends a customer message: the terminal action is the
+human handoff to the revenue team's review queue, and every owner, clock,
+escalation and incident is synthetic pipeline state, never real revenue. The
+declared two-call, no-patch-proposal assistance policy is enforced from the
+pack declaration; missing review blocks execution and any pipeline claim.
 
 ## 7. Budgets and fixed limits
 
@@ -1624,7 +2013,7 @@ These are product ceilings, not measured vendor performance.
 | Gateway input per call | 8 KiB UTF-8 | Reject before provider call. |
 | Gateway output per call | 1,024 tokens | Provider request and local guard. |
 | Gateway deadline per call | 20 seconds | Trusted gateway measurement. |
-| Assist model calls per shift | 3 | Shared across hint, diagnosis and patch proposal; one patch proposal maximum. |
+| Assist model calls per shift | Declared per pack: 3 (Bellwether), 2 (Go-To-Market), 1 (FDE) | The pack declaration is the enforcement source (3.10). Bellwether shares its three calls across HINT, DIAGNOSIS and PATCH_PROPOSAL with one patch proposal maximum; Go-To-Market shares two across HINT and DIAGNOSIS with no patch proposal; the FDE board allows one HINT call. A role outside the declaration is refused before any model call. |
 | Public learner text fields | 2,000 Unicode scalar values each | API validation before storage/model use. |
 
 The live capability spike must measure whether these ceilings are feasible with the
@@ -1653,9 +2042,13 @@ and `NEBIUS_PROJECT_ID` is sent as the `Project` header (client aliases
 Secret values never enter repository config, prompts, sandboxes, captures or public
 errors. There is no `SHIFTWORK_LEARNER_INFERENCE_KEY`.
 
-Bellwether allows the three assist roles within its shared budget. Northline allows
-one `HINT` call and no `DIAGNOSIS` or `PATCH_PROPOSAL`; the API enforces that reduced
-configuration even if a client submits a hidden role value.
+The three assistance levels are declared, not branched: each pack's
+`AssistPolicy` (3.10) fixes its allowed roles, shared call budget and patch
+proposal maximum, and the API enforces the declaration even if a client submits
+a hidden role value. The two-assist Go-To-Market level and the one-hint FDE
+level replace the current engagement-slug branches
+(`orchestrator.py:1680-1682` and `:1796`) with the declared policy; every other
+ceiling in this table applies unchanged to all three boards.
 
 ## 8. Failure, invalidation and trust boundaries
 
@@ -1892,7 +2285,9 @@ not count as proof.
 39. `test_every_public_surface_detects_each_secret_and_protected_needle` first injects
    raw, JSON-escaped and forward-slash path forms into representative serialized data,
    requires scanner detection, then scans success and error responses, logs, events,
-   observations and client bootstrap payloads.
+   observations and client bootstrap payloads. Its needle sources are the registered
+   packs' declared families, so a needle from any board's inventory must be
+   detected on every board's public surfaces.
 40. `test_public_views_expose_safe_source_but_no_internal_locator` checks nested
    fields and requires workload summaries to reveal only ID/hash/count before
    trial execution, never future request bytes or protected pair refs.
@@ -1909,20 +2304,23 @@ not count as proof.
    substitutes for the other.
 45. `pivot-browser.mjs` exercises the six-station journey with native keyboard and
    touch at representative desktop and 390px mobile viewports, including focus and
-   selected-panel reachability. `test_northline_transfer.py` independently refuses
-   execution without reviewed Northline mission, initial and three paired public
-   requests, ordinal manifest, starting state, compatible catalog and
-   orchestration-owned protected inventory. It proves idempotent reviewed seeding,
-   a blank `STARTER_BASELINE`, initial failure/investigation, six Northline A/B
-   slots, explicit eligible selection and next-shift operation of the exact
-   learner-edited version. It rejects a second successful operation in the
+   selected-panel reachability. `test_fde_deployment.py` independently refuses
+   execution without the FDE pack's reviewed mission, deployment incident and
+   three paired public requests, ordinal manifest, starting state, compatible
+   catalog and orchestration-owned protected inventory. It proves idempotent
+   reviewed seeding, a blank `STARTER_BASELINE`, initial failure/investigation,
+   six FDE A/B slots, explicit eligible selection and next-shift operation of the
+   exact learner-edited version. It rejects a second successful operation in the
    starter's first shift after selection, then permits the selected-version
-   operation in the next shift. Fault missing review, Bellwether mission/source or
-   manifest substitution, unselected edited operation, implicit choice and
-   experimental business writes separately at named assertions. The Northline
+   operation in the next shift. It proves the all-or-nothing pilot arm: full
+   acceptance emits the pilot-state events with one `ROLLOUT_APPROVED`, and a
+   failing run opens incidents and writes no pilot state. Fault missing review,
+   Bellwether mission/source or manifest substitution, unselected edited
+   operation, implicit choice, a rollout record on a failing acceptance and
+   experimental business writes separately at named assertions. The FDE
    learner artifact starts without solution code. A separate existing v5
    Northline no-run fixture must open a non-operational first-choice shift,
-   receive no starter, and bootstrap only from Northline's reviewed initial
+   receive no starter, and bootstrap only from the FDE pack's reviewed incident
    request through the isolated adapter before investigation.
 46. `pivot-render-faults.mjs` removes or swaps purpose labels, context hashes, trial
    values, eligibility blockers, selected version, evidence mode and synthetic labels
@@ -2011,6 +2409,66 @@ not count as proof.
    captured or missing protected counts before the experiment is terminal must
    each fail its named assertion.
 
+### Three-board packs (sections 3.10 and 3.11)
+
+55. `test_pack_registration_resolves_by_slug_and_fails_closed` proves every
+   engagement-scoped resolution reads the shift's registered pack and that
+   caller input can never select a pack, family file, manifest or document. It
+   refuses, each at a named assertion: an unregistered slug, an incomplete
+   declaration, a declared family file that is missing or unsealed where a seal
+   is required, a comparison family below its declared minimum (at least six
+   distinct variants) or with a declared minimum below six, a duplicate family
+   name, and two packs claiming the same variant refs. It proves a draw in one
+   board cannot satisfy another board's comparison
+   and that an invalidation in one board leaves the others untouched. It proves
+   every declared `reviewed_pins` entry re-verifies and that a changed pin fails
+   the guard rather than being silently accepted.
+56. `test_workplace_lists_only_verified_packs_without_identity` serves
+   `/api/boards` and requires registered packs in declaration order with role,
+   employer or client, room, station labels and availability only; an unsealed
+   or unregistered board is `AWAITING_OPERATOR_REVIEW` or absent and never
+   partially offered. A planted sealed locator, family name, variant ref,
+   protected byte, credential or host path in any serialized workplace payload
+   must fail the scanner assertion, and learner progress must not change
+   availability.
+57. `test_assist_policy_is_declared_per_pack` exercises all three levels: the
+   Bellwether three-call budget with one patch maximum, the Go-To-Market
+   two-call HINT and DIAGNOSIS budget with any patch proposal refused, and the
+   FDE one-hint budget. Submitting a hidden or widened role value returns the
+   conflict before any model call, and a hand-edited engagement-config row that
+   disagrees with the declaration fails closed at startup.
+58. `test_gtm_consequence_classes_reduce_from_operational_captures_only` proves
+   one `OWNER_ASSIGNED` and one `SLA_CLOCK_STARTED` per completed signal, a
+   second owner or write for one signal failing as `DUPLICATE_COMMITMENT`, an
+   unowned required signal failing as `REQUIRED_TASK_MISSING`, the human-handoff
+   record never presenting a sent message, and one missed-handoff
+   `INCIDENT_OPENED` per failing record with its decision trace. Experiments and
+   selections write no pipeline state, and no quantity is presented as revenue.
+59. `test_fde_acceptance_gates_rollout_and_handover_records` proves the
+   all-or-nothing pilot arm: full acceptance emits the pilot-state events with
+   exactly one `ROLLOUT_APPROVED`; a failing run opens incidents, writes no
+   pilot state and records no rollout decision; `COUNTER_FOLLOWUP_RECORDED`
+   stays a follow-up rather than a missed commitment. Close refuses a missing
+   declared runbook document and otherwise appends one `HANDOVER_DECLARED`
+   carrying the runbook version, declared limits and unresolved incidents, and
+   a later alternative experiment cannot alter it. Experiments write no pilot
+   state.
+60. `test_protected_aspect_schema_validates_and_reads_per_family` rejects, at
+   reservation and with no exposure recorded, an absent or unparseable aspect,
+   an unknown kind, a missing or unknown `task_id`, an empty
+   `expected_outcomes` tuple, a forbidden parameter for the kind, and an
+   out-of-vocabulary `reason_code`; then proves a declared
+   `NAMED_TASK_OUTCOMES` and a declared `NO_TASK_REASON_CODE` each pass and fail
+   with their own board's variants under the frozen mandatory-pass
+   precondition.
+
+Obligations 55 to 60 are new with this draft. The three drawn aspect strings at
+`tests/orchestrator/test_experiment_lifecycle.py:633-647`, already named as
+invalidated by the 2026-09-28 revision, take their final shape from the typed
+aspect schema in 3.11 when that revision and this one land together. Obligation
+45's renamed test file and obligations 39, 55 and 56 extend the sealed-needle
+and per-board boundary rules to all three registered packs.
+
 Obligations 50 to 54 are new. Four obligations that exist and pass today are
 invalidated by this revision and must be revised in the same change rather than
 deleted or weakened to reach green: the six-case shape assertion at
@@ -2027,8 +2485,8 @@ The service checks above prove software behavior, not learning.
 
 ### Formative comprehension
 
-Run five moderated sessions on the working pivot journey before claiming that the
-room is understandable. Each participant must identify, without coaching:
+Run five moderated sessions on the working board journeys before claiming that
+the room is understandable. Each participant must identify, without coaching:
 
 - the original customer failure and what remains unexplained;
 - their own cause, falsifier and distinguishing test;
@@ -2041,10 +2499,14 @@ a redesign signal, not a percentage estimate or learning claim.
 
 ### Transfer comparison
 
-Primary outcome: independently complete the Northline transfer task without diagnosis
-or patch assistance, scored blind to condition. Compare Shiftwork with a strong static
-tutorial matched for time, visible requirements, tests and hint budget. Randomize only
-after consent and preregister exclusions, rubric and analysis.
+Primary outcome: independently complete a later board's task under less
+assistance than the board where the reasoning was practised, scored blind to
+condition. Transfer is read across role boards (Board 1 to Board 2, or to Board
+3), never as a same-role replay of the same engagement: the Northline
+deployment is Board 3's own continuing board, not an away shift of the applied
+AI engineer. Compare Shiftwork with a strong static tutorial matched for time,
+visible requirements, tests and hint budget. Randomize only after consent and
+preregister exclusions, rubric and analysis.
 
 Rubric dimensions, each scored 0, 1 or 2 from retained artifacts:
 
@@ -2088,15 +2550,37 @@ authorized work. No session has run.
    exposure bounded but may strand a learner after a transport failure. Preserve
    the evidence and stop operation; any retake policy needs a Gate 2/3 backtrack
    with reviewed inventory and budget rather than an invisible reset.
-8. **Northline material.** Its mission, catalog, initial request, three paired
-   workloads and manifest, starting state and protected cases are not authored
-   or reviewed by this document. The file map fixes ownership, not their
-   contents or an executable transfer claim.
+8. **FDE and Go-To-Market material.** Their missions, catalogs, incident
+   requests, three paired workloads and manifests, starting states, documents,
+   comparison states and protected cases are not authored or reviewed by this
+   document. The file map fixes ownership, not their contents or an executable
+   claim, and a comparison without a sealed family dead-ends before selection
+   by design.
 9. **Protected phase cost.** The two-phase slot doubles live sandbox operations
    per slot, from six to twelve. The S12 spike's cost estimate covered
    single-operation trials; a live comparison needs a revised estimate before it
    is authorized. If twelve operations are infeasible, backtrack rather than
    drop the protected phase or shrink the schedule.
+10. **Pack declarations in code.** Registration is a code-shipped declaration
+   with reviewed pins rather than a database table. This keeps content review
+   with the operator and the engine free of a second copy of the truth, but a
+   stray declaration edit is caught only by the guard tests and the startup
+   verification, not by a database constraint.
+11. **Assist policy projection.** Enforcement reads the pack declaration and the
+   engagement-config row is a verified projection; a hand-edited row mismatch
+   fails closed at startup. If the projection proves brittle across existing
+   databases, the fallback is to drop the duplicated columns in a later scoped
+   revision rather than to re-branch on the engagement slug.
+12. **Rollout gating reading.** The FDE rollout decision is reduced from the
+   operational run on full acceptance, in the same finalization that writes the
+   pilot state, and a pack with a rollout event reduces all-or-nothing. If the
+   intended reading is a separate deliberate learner rollout action gating a
+   later pilot run, this needs a Gate 2/3 backtrack before S22b.
+13. **Consequence keys and weights.** The event names are fixed here; the
+   consequence keys, weights and task-spec expectations are reviewed pack
+   material authored in S22a and S23 to S25. A wrong key is a fixture defect
+   caught by the mission weight check, not a design change, and the single
+   operator reviewer is the schedule bottleneck for both new families.
 
 Hard no-go conditions before dependent live claims:
 
@@ -2111,8 +2595,11 @@ Hard no-go conditions before dependent live claims:
   invented selection or an operational run before consent;
 - any A/B pair executes different request bytes/counts, or a slot takes its
   workload from a mutable path instead of the frozen context;
-- Northline seeding bypasses reviewed material, uses a Bellwether manifest or
-  operates edited code without its own qualifying comparison and explicit choice;
+- a board's seeding bypasses reviewed material, borrows another board's manifest
+  or source, or operates edited code without its own qualifying comparison and
+  explicit choice;
+- a pack declaration, family draw or seat of consequence crosses engagement
+  boundaries, or an unsealed family is offered as available;
 - learner input can widen a controller-owned gateway tool allowlist, or an
   unlisted model proposal reaches tool execution;
 - clarification is counted as useful completion, refusal, referral or missing
@@ -2123,10 +2610,10 @@ Hard no-go conditions before dependent live claims:
   and mobile; or
 - the curriculum has one obviously correct repair rather than a real tradeoff.
 
-Northline transfer also stops before execution if its reviewed mission, initial
-and three paired requests, manifest, state, compatible catalog or protected
-assessment is missing. This is an unmet prerequisite, not a reason to invent a
-catalog version or sealed case.
+Each board's journey also stops before execution if its reviewed mission,
+incident and three paired requests, manifest, state, compatible catalog or
+protected assessment is missing. This is an unmet prerequisite, not a reason to
+invent a catalog version or sealed case.
 
 ## 12. Gate boundary
 
@@ -2154,3 +2641,23 @@ Its clause trace maps every numbered obligation above to one prerequisite slice
 and keeps the capability spike before any live-dependent implementation or
 claim. The old Slice 10 to 17 instructions remain historical. Slice work
 proceeds one slice at a time and each slice still needs its own go-ahead.
+
+**Scoped three-board revision, DRAFTED 2026-09-30, AWAITING APPROVAL:**
+sections 1, 2, 3.2, 3.6, 3.7, 3.10 (new), 3.11 (new), 4, 5, 6.9, 6.10 (new),
+7, 9, 10, 11 and this section reconcile the approved direction memo
+(`../../../shiftwork_three_boards.md`), the re-approved Gate 1 and the
+RE-APPROVED Gate 2 section 21. The scoped contents: the engagement pack
+declaration and registration schema with per-pack families, assist policy and
+reviewed pins; the Go-To-Market pack contract with its artifact, independent
+checks, pipeline consequence vocabulary, event names and two-call
+no-patch budget; the FDE record and event schemas with section 6.9 as that
+board's ownership of the Northline deployment; the parameterized protected
+acceptance-aspect schema; the six new consequence event types; the workplace
+registry projection and route; the three declared assistance levels replacing
+the slug branches; and the clause-level test plan and cross-board
+transfer wording, including obligations 55 to 60. This revision approves no
+fixture content, parameter values, seal, implementation, install, credential,
+live call, commit or push, and it changes no runtime behavior by itself. The
+Gate 4 slice revision, including the clause trace over these obligations,
+follows under its own explicit approval; 04-slices.md and AGENTS.md are not
+edited by this draft.
