@@ -3,6 +3,11 @@
 **Composition selected by the user:** 2026-09-18.
 **Journey revision:** RE-APPROVED 2026-09-24 with Gate 1 after the final-pivot
 backtrack. The selected room composition is retained; new runtime UI is not delivered.
+**Three-board reconciliation:** APPROVED 2026-09-30 with Gate 1 under the approved
+direction memo (`shiftwork_three_boards.md`). One workplace holds a
+board selector above the journey navigation: Board 1 keeps the Bellwether service
+room, Board 2 adds a revenue floor and Board 3 adds the Northline deployment
+workshop.
 
 **Purpose:** visual acceptance brief for the revised product journey. The prior
 Slice 9 acceptance remains historical evidence. The new investigation, comparison,
@@ -15,7 +20,7 @@ This brief does not authorize implementation or change the rendering baseline.
 - [`references/shiftwork-operational-diorama.jpg`](references/shiftwork-operational-diorama.jpg)
   is the composition reference supplied by the user.
 - Use its fixed isometric room, station layout, evidence panel and causal path as
-  the visual target.
+  the visual target for every board's room.
 - Do not treat text inside the generated image as product copy or evidence. Some
   labels are malformed. All shipped labels and values must come from the approved
   copy or the real API projections.
@@ -28,11 +33,14 @@ This brief does not authorize implementation or change the rendering baseline.
 
 ## Product intent
 
-The bookshop becomes one persistent operational room. The room is the workplace of
-the learner, who is cast explicitly as a junior applied AI engineer on shift, and the
-business reads as a fictional client rather than the learner's own shop. The role is
-fiction, never a credential or job-readiness claim. The learner selects stations
-rather than opening unrelated dashboard cards. The room must make this chain legible:
+The workplace persists across three role boards. Board 1 is the bookshop's
+persistent operational room; Board 2 is a revenue floor; Board 3 is the Northline
+deployment workshop. The rooms are the workplace of the learner, who is cast
+explicitly as a junior engineer on shift, one role board at a time, and each
+business or employer reads as fictional rather than the learner's own. The roles
+are fiction, never a credential or job-readiness claim. The learner selects
+stations rather than opening unrelated dashboard cards. Every room must make this
+chain legible:
 
 `request -> interpretation and information/tool use -> output -> independent task and correctness checks -> synthetic operational consequence`
 
@@ -41,11 +49,13 @@ comparison. Only an explicit choice changes the operating version; only operatio
 produces business consequences. The experiment path must not visually flow into the
 operational ledger as though every trial changes the shop.
 
-The room is not an open-world game. Movement, characters and environmental detail
-must never hide the learner-owned artifact or replace recorded evidence with
-narrative animation.
+No room is an open-world game. Movement, characters and environmental detail must
+never hide the learner-owned artifact or replace recorded evidence with narrative
+animation.
 
 ## Station map
+
+### Board 1 · Bellwether service room
 
 | Station | Product responsibility | Required state |
 | --- | --- | --- |
@@ -57,6 +67,26 @@ narrative animation.
 | Incident and ledger wall | Operational incidents and synthetic consequences | Experiment results never masquerade as incidents resolved or sales completed |
 | Repair bench | Prediction, falsifier, learner code, fair experiment and explicit choice | Shows shared conditions, repetition/variation, eligibility, tradeoffs and selected version |
 
+### Board 2 · revenue floor
+
+| Station | Product responsibility | Required state |
+| --- | --- | --- |
+| Signal intake | Inbound signals and their pinned records | Shows the signal, its source and its recorded qualification, separate from any explanation |
+| Qualification rules | The visible contract both workflows must satisfy | Distinguishes mandatory ownership rules from learner additions; nothing sends a customer message |
+| Workflow bench | Learner-owned qualification, routing and CRM write logic | Shows candidate, tested and explicitly chosen workflows separately |
+| Pipeline wall | Owners, SLA clocks, escalations and missed-handoff incidents | Synthetic pipeline state; experiments never move an owner or start a clock |
+
+### Board 3 · Northline deployment workshop
+
+| Station | Product responsibility | Required state |
+| --- | --- | --- |
+| Deployment brief | Conflicting requirements and the pilot's rollout gate | Distinguishes the co-op's mandatory acceptance checks from learner choices; no candidate preselected |
+| System map | Discovery record, integration surface and permissions map | Access boundaries visible; the integration reads availability and writes slots only |
+| Integration bench | Learner-owned validation, escalation and retry-safe writes | Shows starter, candidate, explicitly chosen and changed-since-test states separately |
+| Acceptance | Customer acceptance checks and their results | Independently checked: no double bookings, escalation fires, commitments honored, access boundaries held |
+| Rollout | Pilot bookings, incidents and rollout decisions | Synthetic pilot state; experiments never change the pilot |
+| Handover | What the co-op team receives | Known limits, runbook, unresolved incidents and the retained alternative |
+
 Optional assistance stays visibly separate from the service under investigation
 and the evaluator. Show attribution and the applicable shared assistance limit;
 diagnostic help follows the learner's initial prediction. Future slice ownership
@@ -64,8 +94,13 @@ is deferred to the revised Gate 4.
 
 ## Interaction rules
 
-- The top journey navigation remains available: Shift board, Requirements,
-  Investigate, Compare and choose, Next shift and Away shift.
+- A workplace selector listing the three role boards sits above the journey
+  navigation; opening a board shows its own room and stations. Board 1's journey
+  navigation remains: Shift board, Requirements, Investigate, Compare and choose,
+  Next shift. The later boards carry the same loop under their own station labels
+  (revenue floor: signal intake, qualification rules, workflow bench, pipeline
+  wall; Northline deployment workshop: deployment brief, system map, integration
+  bench, acceptance, rollout, handover).
 - Selecting a journey step activates the matching station while keeping the same
   room identity visible. Selecting a station exposes its evidence or work panel.
 - Essential labels, controls and values are HTML overlays, not baked into the room
@@ -103,10 +138,14 @@ is deferred to the revised Gate 4.
    incidents and limits. Keep future requests hidden before operation. After the
    changed condition occurs, separate its operational consequences from a later
    experiment against the retained alternative; that experiment cannot rewrite history.
-6. **Away shift:** preserve the spatial grammar but create a genuinely different
-   Northline Bike Cooperative workshop. Start with a blank artifact, fewer assist
-   affordances and stations for future commitments, safety escalation and
-   retry-safe booking. Do not reskin bookshop shelves and rename the labels.
+6. **Later boards:** preserve the spatial grammar but make each board a different
+   kind of work. The revenue floor opens on a mis-routed, dropped or duplicated
+   record and its full decision trace; the Northline deployment workshop opens on
+   conflicting requirements and a pilot rollout. Do not reskin bookshop shelves and
+   rename the labels; each board keeps one persistent history and offers less
+   assistance than the one before (three assists and one optional patch proposal on
+   Board 1, two assists without patch proposals on Board 2, a single hint on
+   Board 3).
 
 ## Responsive and accessibility acceptance
 
@@ -124,8 +163,8 @@ is deferred to the revised Gate 4.
 
 ## Product comprehension acceptance
 
-A viewer should identify the learner's service and current activity within five
-seconds. After walking the six screens, they should explain without coaching:
+A viewer should identify the learner's board and current activity within five
+seconds. After walking the storyboard, they should explain without coaching:
 
 1. why a supported fact can still fail to answer the customer's question;
 2. how the learner's prediction affects the experiment;
@@ -133,7 +172,9 @@ seconds. After walking the six screens, they should explain without coaching:
 4. why experiments do not change operational history;
 5. which exact version was explicitly chosen and will return;
 6. why consequences are independently checked, synthetic and recorded; and
-7. why a later alternative experiment cannot erase what the chosen version did.
+7. why a later alternative experiment cannot erase what the chosen version did; and
+8. why the three boards are different kinds of engineering work, not three skins of
+   one board.
 
 These are proposed comprehension criteria, not observed human results. Gate 1
 mockups label all evidence as illustrative; future runtime views must use captured

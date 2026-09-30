@@ -1,12 +1,19 @@
 # Product: Shiftwork
 
-**Gate state:** RE-APPROVED 2026-09-24. After the same-day final-pivot backtrack,
-the user explicitly approved this product and its six static mockups and requested
-branch publication, merge to main and progression through Gates 2 to 4. The earlier
-approvals remain historical. Approval was given without human comprehension sessions;
-all unrun thresholds remain unmet. This is approved product behavior, not new
-implementation or evidence. Gates 2, 3 and 4 each require separate revision and
-explicit approval before implementation resumes.
+**Gate state:** RE-APPROVED 2026-09-30 for the three-board reconciliation, after an
+independent stress-test review and its required corrections. The approved direction
+memo (`shiftwork_three_boards.md`, 2026-09-30) widens the product from one role and
+two clients to three role boards in one workplace; this
+revision reconciles the problem framing, the scope boundary, the success metric's
+transfer wording, the screens and the announcement, and it adds the workplace and
+the two board screens to the mockups. Gate history: RE-APPROVED 2026-09-24 after
+the same-day final-pivot backtrack, with an explicit user approval of the product
+and its then-six static mockups and a request for branch publication, merge to main
+and progression through Gates 2 to 4; earlier approvals remain historical; approval
+was given without human comprehension sessions and all unrun thresholds remain
+unmet. Approved product behavior, not new implementation or evidence. Gates 2, 3
+and 4 each require separate revision and explicit approval before implementation
+resumes.
 
 ## Problem
 
@@ -18,9 +25,15 @@ Proposed learner need, not a participant quote:
 
 The learner knows basic coding and wants practice diagnosing and maintaining an
 actual AI program, not just completing prescribed fixes. They play a **junior
-applied AI engineer** responsible for a fictional client's service. Bellwether
-Books is the first client; the same service, decisions and unresolved incidents
-return across shifts.
+engineer on shift** across one workplace that holds three role boards: an
+**applied AI engineer** keeping the fictional Bellwether Books service running, a
+**Go-To-Market engineer** running a signal-to-owner workflow for the fictional
+Stonebridge Software revenue team, and a **forward deployed
+engineer** embedded with the fictional Northline Bike Cooperative to make a
+booking integration safe to roll out. Each board is one role, one fictional
+employer or client, one continuing artifact, one distinct failure class and one set
+of independently checked synthetic consequences; later shifts inherit the learner's
+artifact, decisions, incidents and business state.
 
 The job is engineering judgment: explain a failure, try to disprove the explanation,
 compare real code changes and maintain the selected solution. The fictional role
@@ -31,7 +44,9 @@ The room makes the work understandable; it is not the reason the product is usef
 
 **Retained north star, not an achieved result:** at least a **20 percentage-point
 increase in independently completed transfer tasks** against a strong matched
-static tutorial, without increasing median time or the hint budget.
+static tutorial, without increasing median time or the hint budget. Transfer is
+read across role boards: reasoning practised on one board and exercised on a later
+board with less assistance, not a same-role replay of the same engagement.
 
 Completion alone does not establish sound reasoning. The comparison must separately
 record whether the learner can:
@@ -52,7 +67,9 @@ A small manual mockup test is formative only. No learning-improvement claim is
 allowed without a sufficiently powered study. Rubric, sample size, repetition
 requirements and feasibility belong to the revised Gate 3, with execution planned
 at Gate 4 and outreach separately authorized. Existing study plans are not silently
-updated or treated as evidence for the pivot.
+updated or treated as evidence for the pivot. The three role boards broaden the
+practice surface; they do not by themselves demonstrate improved learning, employer
+relevance or an achieved transfer result.
 
 ## Approved product decisions
 
@@ -145,19 +162,31 @@ resolve them.
 
 ### S6. Keep the scope narrow
 
-One role and two fictional clients remain the product boundary: Bellwether first,
-then a reduced-assistance Northline Bike Cooperative engagement. The first proof
-should cover one complete Bellwether diagnosis, fair repair comparison, explicit
-choice and inherited consequence, including the retained alternative experiment.
-Northline tests fresh reasoning about future commitments, safety escalation and
-retry-safe bookings, not memorized bookshop answers. It starts with a blank learner
-artifact and a new brief, not copied bookshop solutions.
+Three role boards in one workplace remain the product boundary, in display order:
+**Applied AI Engineer** at Bellwether Books (built), **Go-To-Market Engineer** at
+the fictional Stonebridge Software, and **Forward Deployed
+Engineer** deployed at the fictional Northline Bike Cooperative. Each board is one
+role, one fictional employer or client, one continuing artifact, one distinct
+failure class and one set of independently checked synthetic consequences, and each
+new board ships one complete journey: brief, investigation, fair comparison,
+explicit selection, operation, consequences, inheritance and a later-alternative
+step. Failure classes and assessments must differ in kind, not cosmetics; three
+relabelled copies of Bellwether would miss the point.
+
+The first proof remains one complete Bellwether journey: diagnosis, fair repair
+comparison, explicit choice and inherited consequence, including the retained
+alternative experiment. The later boards test whether reasoning carries over: the
+Go-To-Market board starts from mis-routed, dropped or duplicated records with their
+full decision traces, and the Forward Deployed board starts from conflicting
+deployment requirements, retry-safe writes and safety escalation, each with one
+sealed comparison family of its own and less assistance than the board before.
 
 No arbitrary personal projects, multi-agent teams, autonomy school, marketplaces,
-AI-generated challenges, automatic permission growth or extra careers. Additional
-roles remain future scope requiring a new decision. No XP, competence meters, pets
-or cosmetic upgrades as substitutes for engineering progress. Synthetic orders,
-refunds and backlog never establish real revenue, customer trust or learning impact.
+AI-generated challenges, automatic permission growth or extra roles beyond these
+three. Further roles need a new decision. No XP, competence meters, pets or
+cosmetic upgrades as substitutes for engineering progress. Synthetic orders,
+refunds, pipeline state and backlog never establish real revenue, customer trust or
+learning impact.
 
 ## Concrete Bellwether example
 
@@ -189,42 +218,55 @@ knowable then, not the later event.
 
 ## Visual direction and screen journey
 
-Retain the selected fixed isometric operational room and station-based interaction
-in `client-visual-direction.md`. The service remains central; requests, inspected
-evidence and operational consequences stay linked. Add an unmistakable distinction
-between experiment results, a chosen version and actual operational history.
+Retain the selected fixed isometric operational rooms and station-based interaction
+in `client-visual-direction.md`. One workplace holds a board selector above the
+chosen board's journey navigation: the Bellwether service room for Board 1, a
+revenue floor for Board 2 and a Northline deployment workshop for Board 3. The
+current board's work remains central; requests, inspected evidence and operational
+consequences stay linked. Add an unmistakable distinction between experiment
+results, a chosen version and actual operational history.
 
-The six plain HTML mockups are navigable storyboards, not a working service. Native
-inputs and disclosure controls illustrate interaction but do not save, test or
-select an operating version. Every sample run, number and later history is labelled
-illustrative. Three-trial examples show how variation could be displayed; they are
-not an approved trial count, measured benchmark or study design. Separate A/B
-history previews must not pretend to reflect an unsaved radio choice.
+The eight plain HTML mockups are navigable storyboards, not a working service.
+Screen 00 is the workplace selector; screens 01 to 05 are Board 1 (Applied AI
+Engineer at Bellwether Books); screen 06 is Board 2 (Go-To-Market Engineer at
+Stonebridge Software); screen 07 is Board 3 (Forward Deployed Engineer at the
+Northline Bike Cooperative). Native inputs and disclosure controls illustrate
+interaction but do not save, test or select an operating version. Every sample
+run, number and later history is labelled illustrative. Three-trial examples show
+how variation could be displayed; they are not an approved trial count, measured
+benchmark or study design. Separate A/B history previews must not pretend to
+reflect an unsaved radio choice.
 
 | Screen | Product question and primary work |
 | --- | --- |
+| [Workplace](mockups/00-workplace.html) | Which role board do I open, and what does each board continue? |
 | [Shift board](mockups/01-shift-board.html) | What service and unfinished responsibility am I inheriting? |
 | [Requirements](mockups/02-owner-brief.html) | What must both repairs satisfy, and which test and tradeoff matter to me? |
 | [Investigate](mockups/03-customer-shift.html) | What happened, what might explain it, and what test could disprove that explanation? |
 | [Compare and choose](mockups/04-incident-review.html) | Are these trials comparable and eligible, and which exact repair will I retain? |
 | [Next shift](mockups/05-inherited-shift.html) | What did my chosen version cause, and how does the retained alternative behave now? |
-| [Away shift](mockups/06-away-shift.html) | Can I apply the reasoning to new commitments and failure modes with less help? |
+| [Revenue floor](mockups/06-revenue-floor.html) | Where did the record go, and which repair keeps every signal owned exactly once? |
+| [Northline deployment](mockups/07-northline-deployment.html) | Can this deployment earn customer acceptance, and what does the co-op inherit at handover? |
 
-Use the same room for Bellwether returns, a distinct Northline workshop, keyboard
-reachable stations and readable desktop/mobile evidence. Progressive disclosure
+Board 1 keeps its room for Bellwether returns; the revenue floor and the Northline
+deployment workshop are distinct rooms, not reskins. Stations stay keyboard
+reachable and evidence stays readable on desktop and mobile. Progressive disclosure
 should reduce initial load without hiding comparison validity or mandatory failures.
 
 ## Announcement: the blog post before the feature
 
 **Aspirational launch copy; the revised workflow is not built or demonstrated.**
 
-Meet Shiftwork, a place to practice engineering judgment on a continuing AI service.
-As a junior applied AI engineer for a fictional bookshop, inspect what a customer
-asked and what your program actually did. Test your explanation, compare repairs
-fairly and choose the code you will maintain. Return when conditions change to see
-what your choice caused, then test whether the alternative would behave differently
-without rewriting history. Take what you can explain to a new client with less
-help. Your work persists; the role is a simulation, not a credential.
+Meet Shiftwork, a place to practice engineering judgment on continuing AI systems.
+One workplace holds three junior-engineer boards: keep a bookshop's service
+answering real customer requests, keep a software company's signal-to-owner
+workflow owning every record exactly once, and make a bike co-op's booking
+integration safe to roll out. On each board: inspect what happened, state a cause
+and a falsifier, test it, repair the artifact, compare two fixes fairly and choose
+the one you will maintain. Return when conditions change to see what your choice
+caused, then test the retained alternative without rewriting history. Each board
+offers less help than the one before, and your work, incidents and consequences
+persist. The roles are a simulation, not a credential.
 
 ## Open product hypotheses and evidence questions
 
@@ -236,7 +278,8 @@ help. Your work persists; the role is a simulation, not a credential.
 5. Does the retained-alternative comparison teach anything beyond a saved project?
 6. Does the room help evidence comprehension rather than hide it?
 7. Does the integrated workflow improve on a strong course plus an existing debugger?
-8. Does Northline test fresh reasoning, and is the retained transfer target feasible?
+8. Do the later boards test reasoning in a different kind of work, and is the
+   cross-board transfer target feasible?
 
 The differentiation is a guided, connected workflow, not a proven exclusive category.
 Technology selection, execution isolation, credential protection, persistence
