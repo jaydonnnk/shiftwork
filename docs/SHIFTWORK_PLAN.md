@@ -2,14 +2,13 @@
 
 Updated: 2026-09-30.
 
-**Current slice state, 2026-09-30:** S17 is accepted and published. S18's
-offline implementation and review repairs are complete on
-`shiftwork/slice-18`, awaiting user acceptance. Its local browser walkthrough
-operated the selected version after a newer unselected save. The offline suite
-passed; model answer quality, Sandbox isolation and live cost remain unmeasured.
-No live operation, publication or S19 is authorized. See
-`plans/shiftwork/00-status.md` for evidence and limits. Older current-state
-paragraphs below are historical snapshots.
+**Current slice state, 2026-09-30:** S17 and S18 are accepted and published.
+S18's offline implementation, review repairs and browser walkthrough are
+complete; its publication record and acceptance are in
+`plans/shiftwork/00-status.md`. The offline suite passed; model answer quality,
+Sandbox isolation and live cost remain unmeasured. No live operation or S19 is
+authorized. See `plans/shiftwork/00-status.md` for evidence and limits. Older
+current-state paragraphs below are historical snapshots.
 
 **Direction:** Shiftwork remains the sole active project. The approved final pivot
 around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare

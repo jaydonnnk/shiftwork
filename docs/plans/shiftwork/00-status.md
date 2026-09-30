@@ -80,6 +80,42 @@ This records the request; it is not Gate 4 re-approval, live-call authority or
 S18 acceptance. Reconcile the stronger exit target with the approved gates
 before dependent S20 work.
 
+## Slice 18 branch and main publication and user acceptance: 2026-09-30
+
+The user authorized publishing the S18 branch and merging it to main, committing
+the working tree as written (including the user's own `04-slices.md` and
+`00-status.md` edits; no co-author footer). The authorization message was
+"Yep looks good, publish the branch and merge to main( i also changed
+04-slices and 00-status), but nothing to worry just commit as is." Four focused
+commits on `shiftwork/slice-18` (`42739d6`, `79716c2`, `0734fd0`, `66b77c5`)
+were fast-forwarded into local main at 2026-09-30 09:26 and pushed. Both
+`origin/main` and `origin/shiftwork/slice-18` received `66b77c5` at that minute;
+the later three-board gate commits advanced `origin/main` to `86391a9`, which
+still contains all four commits. The review repairs are inside this batch: the
+reducer completion predicate in `42739d6`, the API, room and walkthrough
+exposure in `79716c2`, the focused and mutation tests in `0734fd0`, and the
+evidence entries plus future proof reminders in `66b77c5`. The publication
+happened before any status entry recorded it; the pre-publication sentence that
+said publication had no authority was overtaken by this authorized merge, and
+the stale current-state lines in `04-slices.md` and `docs/SHIFTWORK_PLAN.md`
+are corrected in the same record. The Slice 17 checklist row's stale "awaiting
+user review" text is corrected to its recorded 2026-09-29 acceptance.
+
+On 2026-09-30 the user ACCEPTED Slice 18 with the instruction "accept S18 now
+and draft the missing record", after authorizing the same-day publication and
+then having the verified git state disclosed, including that the push had
+already happened without a record entry. Acceptance covers the repaired offline
+evidence: the final offline suite returned `601 passed, 1 skipped, 2 warnings`
+(packaging Test 51 excluded because it performs installation), the settled
+mutation harness returned **19 FAIL_CAUGHT, 0 SKIP, 0 UNPROVEN**, and the
+browser walkthrough showed selected `ver-0003` operating while a newer
+comment-only `ver-0005` stayed unselected. The carried limits: offline policy
+proof with local doubles only, not model answer quality, Sandbox isolation,
+vendor availability, actual billing or later inheritance; the operational live
+adapter is not enabled, and a live trial needs a separate proposal and
+authorization. Acceptance covers Slice 18 only; S19 onward need their own
+go-aheads.
+
 ## Slice 18 review repairs awaiting user acceptance: 2026-09-30
 
 The user rejected offline acceptance pending three behavior defects, the retry
@@ -3473,8 +3509,8 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
 - [x] Slice 14: prediction-gated attributable assist gateway; implemented and reviewed 2026-09-27, ACCEPTED by the user 2026-09-27. Offline implementation and tests passed (`457 passed, 1 skipped, 2 warnings`); three authorized live calls completed with a quality failure that prompted an offline-only repair; the review's six findings were adjudicated and repaired with failing-capable tests and six mutation proofs (stranded PENDING reconciliation, injected-client deadline bound, records). Live evidence and limits are in the Slice 14 section above; revised-prompt live quality stays open. The work is committed in focused batches on `shiftwork/slice-14`, merged to main as `fab497e..3f18669` and pushed, no co-author footer. Acceptance covers Slice 14 only; Slice 15 onward needs its own go-ahead and its own live authorizations.
 - [x] Slice 15: reviewed A/B workloads and six frozen paired trial slots; ACCEPTED by the user 2026-09-29 on offline and sealed evidence, with the live comparison still unrun (acceptance entry at top)
 - [x] Slice 16: fair comparison, exposure invalidation and restart recovery; accepted 2026-09-29 (dated evidence at top)
-- [x] Slice 17: explicit eligible exact-version selection; implemented and demonstrated offline 2026-09-29, awaiting user review (dated evidence at top)
-- [ ] Slice 18: selected-version operation and operation-only consequences
+- [x] Slice 17: explicit eligible exact-version selection; implemented, demonstrated and published 2026-09-29, ACCEPTED by the user 2026-09-29 (dated evidence at top)
+- [x] Slice 18: selected-version operation and operation-only consequences; review repairs completed, published to main 2026-09-30 and ACCEPTED by the user 2026-09-30 (dated evidence at top)
 - [ ] Slice 19: read-only semantic replay and legacy unknown handling
 - [ ] Slice 20: selected-version inheritance and later alternative experiment
 - [ ] Slice 21: complete five-station Bellwether room journey

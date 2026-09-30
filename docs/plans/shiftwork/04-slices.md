@@ -9,9 +9,9 @@ S23 to S25, and Tavily, package and hosting shifted to S26 to S28. The
 reconciling gate revisions are drafted in order (Gate 1 next, then scoped Gate 2
 and Gate 3, then this document's Gate 4 revision). Nothing below is changed yet.
 
-**Current slice state, 2026-09-30:** S17 is accepted and published. S18 has its
-own offline go-ahead and its review repairs are complete on
-`shiftwork/slice-18`, awaiting user acceptance. Live operation, publication and
+**Current slice state, 2026-09-30:** S17 and S18 are accepted and published.
+S18's review repairs are included in its four focused commits on main, and its
+publication and acceptance are recorded in `00-status.md`. Live operation and
 S19 have no authority. See `00-status.md` for evidence and limits. Older state
 descriptions below are historical.
 
