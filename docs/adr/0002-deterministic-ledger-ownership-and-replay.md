@@ -62,3 +62,14 @@ events through the same `chain.append` inside the close transaction, so an inher
 shift's declared limits enter the same verified chain
 (`tests/ledger/test_ledger.py`, `tests/orchestrator/test_close_inheritance.py`). The
 "Pending" sentence above is superseded; the decision body is unchanged.
+
+Update 2026-09-30 (Slice 19): read-only semantic replay landed.
+`orchestrator.replay_assessment` re-derives one finalized operation from the run's
+captured context, captured outputs and captured public state and returns an
+`IDENTICAL`, `DIFFERENT` or `UNKNOWN_MISSING_INPUTS` report with zero writes. The
+current mission file, other fixtures and today's incident state cannot change the
+result; stored semantic divergence reports `DIFFERENT`; chain integrity stays the
+separate `chain.verify_chain` check, so neither proof substitutes for the other;
+and a legacy v5 run without captured inputs reports `UNKNOWN_MISSING_INPUTS`
+instead of a guessed replay. The offline verification is recorded in
+`docs/plans/shiftwork/00-status.md`; acceptance is a separate user decision.

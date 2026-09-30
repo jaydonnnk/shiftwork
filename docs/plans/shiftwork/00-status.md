@@ -1,5 +1,147 @@
 # Status: Shiftwork
 
+## Slice 19 offline implementation and verification: 2026-09-30
+
+The user gave S19 its own go-ahead ("Start slice 19"). This entry records offline
+implementation and verification on `shiftwork/slice-19`, created from local main
+(then four commits ahead of `origin/main`; those Gate revision commits stay
+separate and unpushed, as recorded above). No live call, credential, install,
+fixture edit, seal, deployment, commit or push was involved; acceptance is the
+user's separate decision.
+
+`orchestrator.replay_assessment` (with the new `ReplayReport` model in
+`shiftwork/domain/models.py`) re-derives one finalized operation from the run's
+captured context bytes, captured outputs and captured public state, and returns
+`IDENTICAL`, `DIFFERENT` (field-level `check_differences` and
+`event_draft_differences`) or `UNKNOWN_MISSING_INPUTS` with `wrote_rows: false`.
+The current mission file, the public state file and today's incident rows are
+never consulted. Chain integrity stays the separate `chain.verify_chain` check:
+a hash-only tamper breaks the chain while the semantic replay still reports
+IDENTICAL, and a stored check divergence fails the replay while the chain still
+verifies. Legacy v5 runs without captured inputs report `UNKNOWN_MISSING_INPUTS`;
+a vanished context, a corrupted captured mission and a frozen-count mismatch
+report the same rather than a guessed replay. The run's own incident-resolution
+events are deliberately outside the draft comparison: their derivation reads
+incident state at finalization, not the run's captured bytes, so they stay
+covered by chain verification instead.
+
+The `replay` walkthrough (`python -m demos.final_pivot --stage replay`, temporary
+database, offline local_process executor) returned `PASS_OFFLINE_POLICY`, exit 0,
+verbatim:
+
+```json
+{"chain_independence": {"chain_before": "VALID", "chain_restored": "VALID", "chain_under_tamper": "BROKEN", "replay_under_tamper": "IDENTICAL"}, "changed_current_inputs": {"incident_rows_flipped": 3, "mission_file_replaced": true, "public_state_file_replaced": true, "replay_status": "IDENTICAL", "rows_unchanged": true}, "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY", "legacy_replay": {"status": "UNKNOWN_MISSING_INPUTS", "wrote_rows": false}, "newer_unselected_version_id": "ver-0005", "operation_run_id": "run-0008", "replay": {"check_differences": 0, "event_draft_differences": 0, "rows_unchanged": true, "status": "IDENTICAL", "wrote_rows": false}, "stage": "replay", "stored_semantic_divergence": {"check_differences": 1, "check_id": "task:bellwether-collection-001:price", "replay_status": "DIFFERENT", "restored_status": "IDENTICAL"}, "verdict": "PASS_OFFLINE_POLICY"}
+```
+
+Verification, all under `.venv313/Scripts/python.exe`:
+
+- The named S19 command
+  `python -m pytest tests/orchestrator/test_replay.py tests/ledger tests/store/test_pivot_migration.py -q`
+  returned **39 passed, 2 warnings**. Obligations 42 to 44 are pinned by
+  `test_semantic_replay_uses_original_inputs_and_writes_nothing`,
+  `test_legacy_replay_reports_unknown_missing_inputs`,
+  `test_chain_verification_and_semantic_replay_fail_independently` and
+  `test_stored_event_draft_divergence_reports_different`, plus the guard tests
+  for the typed refusals and the broken-capture unknowns. The S10 completion
+  clause (legacy replay reports `UNKNOWN_MISSING_INPUTS`) is pinned in
+  `tests/store/test_pivot_migration.py` by
+  `test_migrated_legacy_run_replay_reports_unknown_missing_inputs`.
+- The named fault harness `python tests/s19_mutation_proofs.py` returned
+  **16 FAIL_CAUGHT, 0 SKIP, 0 UNPROVEN**, including the two capture reads, the
+  zero-write guard, the captured-output read, the status derivation, both
+  difference engines, both list-shape engines, the legacy, missing-inputs,
+  purpose, finalized and unknown-run guards, and the capture-integrity and
+  workload-coverage fail-closed branches. Every target was restored
+  byte-identically and each row failed its named test at an assertion, never as
+  a crash or a syntax error.
+- Zero writes are measured, not asserted as a constant: every replay call whose
+  test or walkthrough claims zero writes serializes each table's rows before and
+  after and requires byte equality (`snapshot_v5_rows` /
+  `assert_v5_rows_preserved`); the divergence tests mutate rows by design and
+  therefore do not snapshot them.
+- Anchor check at drafting time: the four older harnesses hold 196 rows
+  (`tests/mutation_proofs.py` 42, `tests/slice16_mutation_proofs.py` 38,
+  `tests/s18_mutation_proofs.py` 19, `tests/pivot_mutation_proofs.py` 97). This
+  diff changed no existing row's match count: s18's scoped `captured_mission`
+  row is the only raw count that moved (3 to 4 whole-file matches, still 1
+  inside its scope). The review pass of 2026-09-30 found six rows that had
+  already lost their unique anchor before this slice; the drafting-time claim
+  that all rows still matched uniquely was wrong. The six rows are repaired in
+  the anchor-repair round recorded at the end of this entry.
+- Full offline suite `python -m pytest tests --ignore=tests/packaging -q`:
+  **612 passed, 1 skipped, 2 warnings in 255.91s**, exit 0. (Pre-change baseline
+  launched on the untouched tree: `601 passed, 1 skipped` with exit 0; the S19
+  additions are 10 tests in `tests/orchestrator/test_replay.py` plus one
+  legacy-replay test in `tests/store/test_pivot_migration.py`.) Packaging Test 51
+  stays excluded from offline commands.
+
+Mirror corrections in this record: the Slices checklist rows below Slice 18
+still carried the retired pre-three-board numbering and now name the approved
+Gate 4 slices (S22a/S22b, the GTM pack S23 to S25, Tavily/package/hosting
+S26 to S28). `docs/adr/0002-deterministic-ledger-ownership-and-replay.md` gained
+a dated implementation-status note for the replay landing; no ADR decision
+changed.
+
+Limits: replay re-evaluates captures; it is not fresh inference, a second
+customer outcome or an authority to edit historical rows. It is defined for
+finalized operational runs; experimental and unfinalized runs are typed
+conflicts. The evidence above is offline policy proof through local doubles,
+not model answer-quality, isolation or live-service evidence, and Slice 19 is
+not accepted until the user says so.
+
+### S19 anchor-repair round: 2026-09-30
+
+A review pass over the drafting-time anchor check found six rows whose anchors
+no longer matched uniquely (all six predate this slice) and one row whose
+failure mode had rotted from an assertion to a crash. All seven are repaired in
+this round; no product behavior changed.
+
+- `cycle_hardcoded_to_one` (`tests/mutation_proofs.py`) was the two-collision
+  the S16 round recorded as deliberately left pending its own authorization;
+  that authorization is this round. Its anchor now carries the three lines of
+  the rotation-draw site and faults only that site's `cycle=` line.
+- `zero_recorded_calls_is_not_a_measured_zero` (`tests/slice16_mutation_proofs.py`):
+  the faulted `measured = bool(calls)` line was replaced by `7ce12b3`
+  (2026-09-29) and the named test was later renamed; the row now faults the
+  current `measured = evidence_mode is EvidenceMode.TRUSTED_LOCAL or
+  meter_complete` line and names
+  `test_live_controller_meter_proves_zero_and_missing_one_marker_restores_unknown`.
+- `s10_latest_saved_promoted_for_operation` and `s10_legacy_run_guard_removed`
+  (`tests/pivot_mutation_proofs.py`): `42739d6` (S18, 2026-09-30) added a second
+  `_selected_operating_version(conn, shift)` call; both anchors now include the
+  preceding `_require_open_shift` line, and the two replacement texts were
+  minimally extended to satisfy the S18 `.kind` branch while keeping each row's
+  original claim.
+- `s15_protected_phase_executed_before_public` and `s15_protected_workspace_reused`
+  (pivot): `75d37f9` (2026-09-29) inserted `live_budget=live_budget` inside the
+  adapter construction the anchors carry; the line is now part of both anchors
+  and both replacements.
+- `s10_unknown_schema_version_accepted` (pivot): its anchor still matched, but
+  after S18 the removed guard falls through to the v6 completion DDL's
+  `runs.purpose` reference, so the named test failed with an `OperationalError`
+  crash, which the harness correctly refuses to count as a proof. The test now
+  fails explicitly (`pytest.fail`) when `db.ensure_schema` does not produce the
+  version-99 refusal; the unmutated test is unchanged (15 passed in its file).
+
+Verification, all under `.venv313/Scripts/python.exe`, with every harness
+results log redirected to an uncommitted path so the tracked S15 and S16
+records were never rewritten:
+
+- Per-row proofs: each repaired row re-ran through its own harness runner and
+  returned FAIL_CAUGHT with byte-identical restoration; the seven details are
+  listed in `docs/plans/shiftwork/evidence/slice19-anchor-repair-2026-09-30.txt`.
+- Full re-runs: `tests/mutation_proofs.py` 42 of 42 FAIL_CAUGHT, exit 0;
+  `tests/slice16_mutation_proofs.py` 38 of 38, exit 0;
+  `tests/pivot_mutation_proofs.py` 97 of 97, exit 0; zero SKIP, zero incidental
+  and zero not-caught rows. Verbatim output in the same evidence file.
+- Static check after the repairs: all 212 rows across the five harnesses
+  (`tests/mutation_proofs.py` 42, `tests/slice16_mutation_proofs.py` 38,
+  `tests/s18_mutation_proofs.py` 19, `tests/pivot_mutation_proofs.py` 97,
+  `tests/s19_mutation_proofs.py` 16) match their target file exactly once.
+- Full offline suite after the repairs:
+  `python -m pytest tests --ignore=tests/packaging -q` returned
+  **612 passed, 1 skipped, 2 warnings in 212.20s**, exit 0.
+
 ## Three-board scope direction, revision memo and approval: 2026-09-30
 
 The user directed a product scope expansion to three role boards in one workplace:
@@ -3690,13 +3832,17 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
 - [x] Slice 16: fair comparison, exposure invalidation and restart recovery; accepted 2026-09-29 (dated evidence at top)
 - [x] Slice 17: explicit eligible exact-version selection; implemented, demonstrated and published 2026-09-29, ACCEPTED by the user 2026-09-29 (dated evidence at top)
 - [x] Slice 18: selected-version operation and operation-only consequences; review repairs completed, published to main 2026-09-30 and ACCEPTED by the user 2026-09-30 (dated evidence at top)
-- [ ] Slice 19: read-only semantic replay and legacy unknown handling
-- [ ] Slice 20: selected-version inheritance and later alternative experiment
-- [ ] Slice 21: complete five-station Bellwether room journey
-- [ ] Slice 22: execute distinct Northline transfer and complete the six-station journey
-- [ ] Slice 23: optional Tavily curation and ablation
-- [ ] Slice 24: full-pivot package and judge evidence
-- [ ] Slice 25: conditional hosted demo
+- [ ] Slice 19: read-only semantic replay and legacy unknown handling; implemented and verified offline 2026-09-30 on `shiftwork/slice-19` (evidence at top); awaiting user acceptance
+- [ ] Slice 20: selected-version inheritance and the later retained-alternative experiment
+- [ ] Slice 21: complete the five-station Bellwether room journey
+- [ ] Slice 22a: FDE material, engagement-pack registration and the offline reproduction proof
+- [ ] Slice 22b: the FDE board journey and the workplace board selector (Boards 2 and 3)
+- [ ] Slice 23: GTM material, contract, checks and the offline comparison (family authored for review and seal)
+- [ ] Slice 24: GTM selection, operation and inheritance offline with the pipeline consequence vocabulary
+- [ ] Slice 25: the GTM revenue floor browser journey and live-capable path; Board 2 complete
+- [ ] Slice 26: optional reviewed Tavily curation and ablation
+- [ ] Slice 27: reproducible full-pivot test build and submission evidence
+- [ ] Slice 28: conditional hosted demo, only if the spike and delivery decision support it
 
 Slices 1, 2 and 3 are implemented, reviewed and merged to main (2026-09-17 and
 2026-09-18; Slice 3 published as commit `8df3d6b`, `--no-ff` merge `1f38220`);
