@@ -11,11 +11,11 @@ parameters after the 2026-09-30 adjudication:
   and each new board authors one operator-sealed comparison family (at least six
   distinct protected variants), because a comparison without a sealed family
   fails closed and dead-ends the journey before selection;
-- the Forward Deployed Engineer board is built first after Slice 21 by upgrading
-  the planned Slice 22 in place, now split into S22a (content written, reviewed
-  and sealed, with an offline reproduction proof) and S22b (the journey and the
-  workplace board selector), with the GTM pack following as three fixed slices
-  (S23 to S25);
+- the Forward Deployed Engineer (FDE) board is built first after Slice 21 by
+  upgrading the planned Slice 22 in place, now split into S22a (content written,
+  reviewed and sealed, with an offline reproduction proof) and S22b (the journey
+  and the workplace board selector), with the Go-To-Market (GTM) Engineer pack
+  following as three fixed slices (S23 to S25);
 - the S20 Nemotron chain is a stretch goal with an October 20 drop point, not a
   hard requirement; and
 - no feature drops are planned: full delivery is intended, and the S20 October
@@ -33,7 +33,7 @@ scope and mockups), scoped Gate 2 and Gate 3, then Gate 4 (slices).
 1. What changes
 One workplace holds three role boards, in this display order:
 1. Applied AI Engineer at Bellwether Books. Built. This is the current product.
-2. GTM Engineer at a newly authored fictional software employer.
+2. Go-To-Market Engineer at a newly authored fictional software employer.
 3. Forward Deployed Engineer deployed at the Northline Bike Cooperative, which
    stops being the applied AI engineer's away shift and becomes the FDE board's
    customer deployment.
@@ -54,8 +54,8 @@ cosmetics.
 
 2. The three boards
 
-| | Board 1: Applied AI Engineer | Board 2: GTM Engineer | Board 3: FDE |
-| Role and fiction | Junior applied AI engineer keeping the Bellwether Books service running (existing) | Junior GTM engineer at a fictional B2B software employer ("Stonebridge Software", working name); the client is the revenue team | Junior FDE at the platform vendor, deployed at the Northline Bike Cooperative |
+| | Board 1: Applied AI Engineer | Board 2: Go-To-Market Engineer | Board 3: Forward Deployed Engineer |
+| Role and fiction | Junior applied AI engineer keeping the Bellwether Books service running (existing) | Junior GTM engineer at a fictional B2B software employer ("Stonebridge Software"); the client is the revenue team | Junior FDE at the platform vendor, deployed at the Northline Bike Cooperative |
 | Learner artifact | The service: request interpretation, tool and data choice, response (existing) | The signal-to-owner workflow: qualification, routing, CRM write logic | The deployment integration: validation, escalation, retry-safe writes |
 | Failure to diagnose | Task-relevant wrong or missing answer (existing) | A mis-routed, dropped or duplicated record, with its full decision trace | A duplicated booking, or a safety question auto-answered |
 | Fair comparison | Two service policies under one contract (existing) | Rules-first with a review queue versus model-assisted with confidence thresholds and human review | Optimistic auto-confirm with rollback versus conservative validation with manual fallback |
@@ -78,6 +78,9 @@ Full postings, quotes and sources: references/role-scope-research-2026-09-30.md.
 3. What stays the same
 - The central mechanism, the room grammar, the evidence discipline, the sealed
   evaluator boundary and the synthetic labelling.
+- Written product content spells the role names out: screens, labels and copy
+  say "Go-To-Market Engineer" and "Forward Deployed Engineer"; "GTM" and "FDE"
+  are memo shorthand only.
 - No real people, no real outreach, no real customers. The GTM board's terminal
   action is a human handoff, never a sent message; synthetic pipeline changes are
   never presented as real revenue.
@@ -97,7 +100,7 @@ acceptance, rollout and handover). Each board keeps one persistent history.
 Boards unlock as their packs land; all three are expected playable before the
 package slice.
 Mockups (plain HTML, no framework) to be authored with the Gate 1
-reconciliation: 00-workplace (board selector), 06-gtm-floor, and
+reconciliation: 00-workplace (board selector), 06-revenue-floor, and
 07-northline-deployment (revised from 06-away-shift). Existing screens 01 to 05
 stay Board 1.
 
