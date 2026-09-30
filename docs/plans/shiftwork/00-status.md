@@ -109,6 +109,70 @@ sealing, deployment, product publication or submission authority, and it
 changes no runtime behavior. The Gate 3 scoped revision is next under its own
 explicit approval, then the Gate 4 slice revision.
 
+## Gate 3 scoped three-board revision drafted, awaiting approval: 2026-09-30
+
+Under the approved memo, the re-approved Gate 1 and the RE-APPROVED Gate 2
+section 21, the scoped Gate 3 revision was drafted in `03-program-design.md`.
+The scoped contents: the new engagement-pack declaration and registration
+schema (3.10) with per-pack family declarations, assist policy, reviewed pins
+and the slug-keyed fail-closed resolution replacing the hardcoded bookshop
+family list and the bookshop-versus-others assist branch; the Go-To-Market pack
+contract (3.11) with its artifact, independent checks, pipeline consequence
+vocabulary, event names and two-call no-patch budget; the FDE record and event
+schemas with section 6.9 rewritten as the Forward Deployed Engineer board's
+ownership of the Northline deployment and a new 6.10 for the GTM board; the
+parameterized protected acceptance-aspect schema; six new consequence event
+types; the workplace registry projection and `/api/boards` route; the three
+declared assistance levels in the budget table; the clause-level additions as
+obligations 55 to 60 with amended obligations 39 and 45; the cross-board
+transfer wording in the learning-evidence plan; four new least-confident
+decisions; and the revision scope note in section 12. Supporting renames: the
+FDE fixture names move from `northline_transfer*` to `northline_deployment*`
+and the FDE test file to `tests/orchestrator/test_fde_deployment.py`, with the
+GTM files and `tests/orchestrator/test_gtm_pipeline.py` and
+`tests/packs/test_registry.py` added to the file map. The draft was grounded in
+a read-only source inspection of the mechanisms it replaces
+(`config.py:199`, `orchestrator.py:1680-1682`, `:1796`, `:2380-2381`, the
+hardcoded `SALE_COMPLETED` reduction, `sealed/store.py`, `sealed/rotation.py`
+and the aspect branches in `domain/comparison.py`); nothing was executed and no
+test, install, seal, credential, external call or commit was involved.
+This entry records the draft only. It is not Gate 3 re-approval, implementation,
+runtime, fixture, sealing, credential, live-call, commit or push authority. The
+user approves or corrects it with the Gate 3 approval question; a re-approval is
+recorded in a new entry when it happens, and the Gate 4 slice revision follows
+under its own explicit approval.
+
+## Gate 3 three-board reconciliation RE-APPROVED: 2026-09-30
+
+The user reviewed the drafted revision and approved it: "approve gate 3". Gate 3
+is RE-APPROVED for the three-board scope: the engagement-pack declaration and
+registration schema (3.10) with per-pack family declarations, assist policy,
+reviewed pins and the slug-keyed fail-closed resolution replacing the hardcoded
+bookshop family list and the bookshop-versus-others assist branch; the
+Go-To-Market pack contract (3.11) with its artifact, independent checks,
+pipeline consequence vocabulary, event names and two-call no-patch budget; the
+FDE record and event schemas with section 6.9 rewritten as the Forward Deployed
+Engineer board's ownership of the Northline deployment and a new 6.10 for the
+Go-To-Market board; the parameterized protected acceptance-aspect schema; the
+six new consequence event types; the workplace registry projection and
+`/api/boards` route; the three declared assistance levels in the budget table;
+the clause-level additions as obligations 55 to 60 with amended obligations 39
+and 45; the cross-board transfer wording in the learning-evidence plan; and the
+revision scope note in section 12, together with the supporting FDE fixture and
+test-file renames and the GTM file-map additions. The document header of
+`03-program-design.md` was updated to the RE-APPROVED state. One correction
+stays recorded rather than applied: the document still cites `pivot-browser.mjs`
+and `pivot-render-faults.mjs` at lines 252-253, 2300 and 2320, while the
+repository holds `tests/client/browser.mjs` and `tests/client/render_faults.mjs`;
+the user was told before approving and the fix is documentation-only. This is
+program design approval only: it is not Gate 4, implementation, install,
+credential, live call, fixture authoring, sealing, deployment, product
+publication or submission authority, and it changes no runtime behavior. The
+commit question stayed open with this approval; the user's same-day Gate 4
+instruction then authorized committing both gate revisions and their records
+in focused batches, with no push. The Gate 4 slice revision is next under its
+own explicit approval.
+
 ## Future S20 and S24 Nemotron proof request: 2026-09-30
 
 The user asked to retain a stronger end-to-end evidence target for the future
