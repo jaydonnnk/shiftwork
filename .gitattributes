@@ -6,3 +6,14 @@ shiftwork/fixtures/runs/* text eol=lf
 shiftwork/sealed/cases/* text eol=lf
 shiftwork/fixtures/mission/bookshop_pivot_v1.json text eol=lf
 shiftwork/fixtures/catalogs/bookshop_v3.json text eol=lf
+
+# Preserve the byte digests in the S20 historical-evidence manifest on Windows.
+docs/plans/shiftwork/evidence/slice20-chain-live-preflight-2026-10-01.txt text eol=lf
+docs/plans/shiftwork/evidence/slice20-postchange-focused-2026-10-01.txt text eol=lf
+docs/plans/shiftwork/evidence/slice20-postchange-full-suite-2026-10-01.txt text eol=lf
+docs/plans/shiftwork/evidence/slice20-postchange-inheritance-demo-2026-10-01.txt text eol=lf
+docs/plans/shiftwork/evidence/slice20-postchange-mutation-round-2026-10-01.txt text eol=lf
+docs/plans/shiftwork/evidence/slice20-stretch-baseline-2026-10-01.txt text eol=lf
+# These two raw transcripts mix native stdout CRLF with wrapper LF.
+docs/plans/shiftwork/evidence/slice20-chain-live-2026-10-01.txt -text
+docs/plans/shiftwork/evidence/slice20-stretch-mutation-round-2026-10-01.txt -text

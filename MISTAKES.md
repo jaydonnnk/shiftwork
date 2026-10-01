@@ -1,5 +1,19 @@
 # Mistakes Log
 
+## 2026-10-02 S20 publication: checkout converted byte-hashed evidence endings
+
+- **What happened:** the first post-merge preservation assertion failed for
+  eight historical logs after Git's Windows checkout conversion. Six originally
+  used LF; two mixed wrapper LF and native stdout CRLF. The command wrapper
+  continued to a second check and returned its zero exit, and an uncommitted
+  publication note prematurely said the hashes passed. No altered business
+  record or failed live result was created. The note is corrected before commit.
+- **Root cause:** byte-hashed evidence had no checkout-ending attributes, and
+  the wrapper did not stop on the first verification failure.
+- **Prevention rule:** pin byte-hashed transcript endings before switching Git
+  branches. Restore only bytes verified against the prior manifest, and check
+  every command's exit before writing dependent completion claims.
+
 ## 2026-10-02 S20 publication: unstaged diff checks omitted new evidence files
 
 - **What happened:** readiness reported a clean `git diff --check`, but staging
