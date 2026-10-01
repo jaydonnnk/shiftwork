@@ -1,0 +1,190 @@
+S20 six-harness mutation round, 2026-09-30T15:08:39Z
+interpreter: .venv313/Scripts/python.exe ; sequential, one process at a time, repo root
+
+=== pivot 97 rows (includes the six re-anchored rows)
+command: .venv313/Scripts/python.exe tests/pivot_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-stdout-2026-09-30.txt
+exit code: 1
+elapsed seconds: 386
+summary lines:
+  284:s15_protected_ordinal_mismatch FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_each_pair_shares_one_identical_protected_stimulus.<l [1 failed, 2 warnings in 1.06s]
+  285:s15_protected_binding_hash_not_pinned FAIL_CAUGHT restored=True AssertionError: assert '765834743b04...4ea6cfde902f4' == '80641ca615b2...fa7c6f5514219'      - 80641ca615b2d4d [1 failed, 2 warnings in 0.84s]
+  286:s15_protected_collision_accepted FAIL_CAUGHT restored=True Failed: DID NOT RAISE Exception [1 failed, 2 warnings in 0.83s]
+  287:s15_protected_request_canonicalizer_denormalized FAIL_CAUGHT restored=True assert (b'Cafe\xcc\x81' not in b'{"entity_ref":"book:salt-roads:paperback","ordinal":3,"request_id":"bellwethe [1 failed, 2 warnings in 0.82s]
+  288:s15_protected_state_canonicalizer_unpinned FAIL_CAUGHT restored=True AssertionError: assert '40600e1e348b...0e15e88910876' == '765834743b04...4ea6cfde902f4'      - 765834743b04452 [1 failed, 2 warnings in 0.87s]
+  289:s15_protected_response_filter_removed FAIL_CAUGHT restored=True AssertionError: [409, 200, 200, 200, 200, 200] assert False  +  where False = all(<generator object test_prote [1 failed, 2 warnings in 1.49s]
+  290:s15_protected_observation_filter_removed FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_protected_content_and_captures_never_reach_public_su [1 failed, 2 warnings in 1.39s]
+  291:s15_protected_denominator_merged FAIL_CAUGHT restored=True assert 9 == 6 [1 failed, 2 warnings in 0.86s]
+  292:s15_protected_counts_before_terminal FAIL_CAUGHT restored=True AssertionError: assert {'A': {'reserved': 3, 'captured': 0, 'missing': 3}, 'B': {'reserved': 3, 'captured': 0, [1 failed, 2 warnings in 0.83s]
+  293:s15_candidate_b_prefers_lowest_price FAIL_CAUGHT restored=True AssertionError: assert ['book:tidal-...hs:paperback'] == ['book:tidal-...as:paperback']      At index 1 diff:  [1 failed, 2 warnings in 0.53s]
+  294:s15_frozen_context_hash_not_reverified FAIL_CAUGHT restored=True AssertionError: a tampered binding fails every slot closed instead of running another batch assert {'COMPLETE' [1 failed, 2 warnings in 3.58s]
+  Binary file docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-stdout-2026-09-30.txt matches
+tail of stdout:
+  s15_protected_observation_filter_removed FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_protected_content_and_captures_never_reach_public_su [1 failed, 2 warnings in 1.39s]
+  s15_protected_denominator_merged FAIL_CAUGHT restored=True assert 9 == 6 [1 failed, 2 warnings in 0.86s]
+  s15_protected_counts_before_terminal FAIL_CAUGHT restored=True AssertionError: assert {'A': {'reserved': 3, 'captured': 0, 'missing': 3}, 'B': {'reserved': 3, 'captured': 0, [1 failed, 2 warnings in 0.83s]
+  s15_candidate_b_prefers_lowest_price FAIL_CAUGHT restored=True AssertionError: assert ['book:tidal-...hs:paperback'] == ['book:tidal-...as:paperback']      At index 1 diff:  [1 failed, 2 warnings in 0.53s]
+  s15_frozen_context_hash_not_reverified FAIL_CAUGHT restored=True AssertionError: a tampered binding fails every slot closed instead of running another batch assert {'COMPLETE' [1 failed, 2 warnings in 3.58s]
+
+=== s20 16 rows (new harness)
+command: .venv313/Scripts/python.exe tests/s20_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-rerun-s20-mutation-2026-09-30.txt
+exit code: 0
+elapsed seconds: 164
+summary lines:
+  6:FAIL_CAUGHT dependency_variation_guard_removed: test_later_condition_needs_an_observed_change_and_its_own_world assertion=['E   AssertionError: {"id":"experiment-bookshop-shift-03-later-1","shift_id":"bookshop-shift-03","kind":"LATER_CONDITION_COMPARISON","investigation_id":null,"declared_treatment":"later-condition comparison in an unrelated world","context_hash":"4717cb5904de680a9649371d1b609ddeba863e76afa5c9084807fa6f891f5b64","context_evidence_class":"TRUSTED_LOCAL","condition":{"id":"condition-dependency-outage","kind":"dependency_unavailable","public_label":"Observed dependency outage: collection","content_hash":"4fc1afec8526a964578f20bb377a8c22b5663645f63d7be09c928f9ec3bf667b"},"observed_run_id":"run-0009","workloads":[{"id":"workload-01","ordinal":1,"request_batch_hash":"046d3914cc380c4405661fa0212fdf601d9565530a20bc60a2051cda2496d29c","request_count":2},{"id":"workload-02","ordinal":2,"request_batch_hash":"5f2f11b7fb51c5080fda580f223ac047d38821b0dea2bdae8efa9c0d50f5dd32","request_count":2},{"id":"workload-03","ordinal":3,"request_batch_hash":"e9f0a166f7b60ee5691aadf45032a124af9ff07a97386ad5f2a8349a1fcfb75c","request_count":2}],"candidates":[{"label":"A","artifact_version_id":"ver-0003","artifact_content_hash":"01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82"},{"label":"B","artifact_version_id":"ver-0004","artifact_content_hash":"21b9733dbffab5d1845edc3f0b4e5c8cd9b26aafca3edb57778bdd51e3000105"}],"trials":[{"pair_ordinal":1,"execution_ordinal":1,"candidate_label":"A","artifact_version_id":"ver-0003","artifact_content_hash":"01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82","workload_id":"workload-01","workload_ordinal":1,"request_batch_hash":"046d3914cc380c4405661fa0212fdf601d9565530a20bc60a2051cda2496d29c","request_count":2,"protected_request_count":1,"run_id":"run-0010","state":"RESERVED","evidence_mode":"TRUSTED_LOCAL","task_assessments":[],"observations":[],"outputs":[],"customer_text":null,"missing_evidence":["the reserved comparison run has not finished"],"metrics":null},{"pair_ordinal":1,"execution_ordinal":2,"candidate_label":"B","artifact_version_id":"ver-0004","artifact_content_hash":"21b9733dbffab5d1845edc3f0b4e5c8cd9b26aafca3edb57778bdd51e3000105","workload_id":"workload-01","workload_ordinal":1,"request_batch_hash":"046d3914cc380c4405661fa0212fdf601d9565530a20bc60a2051cda2496d29c","request_count":2,"protected_request_count":1,"run_id":"run-0011","state":"RESERVED","evidence_mode":"TRUSTED_LOCAL","task_assessments":[],"observations":[],"outputs":[],"customer_text":null,"missing_evidence":["the reserved comparison run has not finished"],"metrics":null},{"pair_ordinal":2,"execution_ordinal":3,"candidate_label":"B","artifact_version_id":"ver-0004","artifact_content_hash":"21b9733dbffab5d1845edc3f0b4e5c8cd9b26aafca3edb57778bdd51e3000105","workload_id":"workload-02","workload_ordinal":2,"request_batch_hash":"5f2f11b7fb51c5080fda580f223ac047d38821b0dea2bdae8efa9c0d50f5dd32","request_count":2,"protected_request_count":1,"run_id":"run-0012","state":"RESERVED","evidence_mode":"TRUSTED_LOCAL","task_assessments":[],"observations":[],"outputs":[],"customer_text":null,"missing_evidence":["the reserved comparison run has not finished"],"metrics":null},{"pair_ordinal":2,"execution_ordinal":4,"candidate_label":"A","artifact_version_id":"ver-0003","artifact_content_hash":"01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82","workload_id":"workload-02","workload_ordinal":2,"request_batch_hash":"5f2f11b7fb51c5080fda580f223ac047d38821b0dea2bdae8efa9c0d50f5dd32","request_count":2,"protected_request_count":1,"run_id":"run-0013","state":"RESERVED","evidence_mode":"TRUSTED_LOCAL","task_assessments":[],"observations":[],"outputs":[],"customer_text":null,"missing_evidence":["the reserved comparison run has not finished"],"metrics":null},{"pair_ordinal":3,"execution_ordinal":5,"candidate_label":"A","artifact_version_id":"ver-0003","artifact_content_hash":"01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82","workload_id":"workload-03","workload_ordinal":3,"request_batch_hash":"e9f0a166f7b60ee5691aadf45032a124af9ff07a97386ad5f2a8349a1fcfb75c","request_count":2,"protected_request_count":1,"run_id":"run-0014","state":"RESERVED","evidence_mode":"TRUSTED_LOCAL","task_assessments":[],"observations":[],"outputs":[],"customer_text":null,"missing_evidence":["the reserved comparison run has not finished"],"metrics":null},{"pair_ordinal":3,"execution_ordinal":6,"candidate_label":"B","artifact_version_id":"ver-0004","artifact_content_hash":"21b9733dbffab5d1845edc3f0b4e5c8cd9b26aafca3edb57778bdd51e3000105","workload_id":"workload-03","workload_ordinal":3,"request_batch_hash":"e9f0a166f7b60ee5691aadf45032a124af9ff07a97386ad5f2a8349a1fcfb75c","request_count":2,"protected_request_count":1,"run_id":"run-0015","state":"RESERVED","evidence_mode":"TRUSTED_LOCAL","task_assessments":[],"observations":[],"outputs":[],"customer_text":null,"missing_evidence":["the reserved comparison run has not finished"],"metrics":null}],"shared_public_denominator_requests":6,"protected_denominator_requests_per_candidate":3,"protected_counts":null,"outcome":null,"eligible":false,"eligibility_reason":"No winner is derived here. Candidate eligibility requires a complete comparable outcome, and selection is a separate learner action.","state":"PLANNED"}', 'E   assert 202 == 409']
+  7:FAIL_CAUGHT observed_context_not_linked: test_later_alternative_experiment_does_not_rewrite_original_history assertion=["E   AssertionError: assert None == 'run-0008'"]
+  8:FAIL_CAUGHT later_cap_removed: test_later_alternative_experiment_does_not_rewrite_original_history assertion=['E   AssertionError: a second later-condition comparison must be refused by the per-shift cap: {"kind":"conflict","detail":"rotation group \'task_completion\' holds 0 never-exposed variant(s); a qualifying comparison reserves 3"}', 'E   assert \'already reserved its later-condition comparison\' in "rotation group \'task_completion\' holds 0 never-exposed variant(s); a qualifying comparison reserves 3"']
+  9:FAIL_CAUGHT later_idempotency_replay_removed: test_later_alternative_experiment_does_not_rewrite_original_history assertion=['E   AssertionError: {"kind":"conflict","detail":"this shift already reserved its later-condition comparison (1 of 1)"}', 'E   assert 409 == 202']
+  10:FAIL_CAUGHT later_versions_swapped: test_later_alternative_experiment_does_not_rewrite_original_history assertion=["E   AssertionError: {'experiment_id': 'experiment-bookshop-shift-02-later-1', 'status': 'NOT_COMPARABLE', 'shared_public_denominator_reque...label': 'B', 'candidate_version_id': 'ver-0004', 'public_denominator_requests': 6, 'useful_completions': 2, ...}], ...}", "E   assert 'NOT_COMPARABLE' == 'COMPLETE'"]
+  11:FAIL_CAUGHT later_workloads_flattened: test_later_alternative_experiment_does_not_rewrite_original_history assertion=["E   AssertionError: {'experiment_id': 'experiment-bookshop-shift-02-later-1', 'status': 'NOT_COMPARABLE', 'shared_public_denominator_reque...label': 'B', 'candidate_version_id': 'ver-0004', 'public_denominator_requests': 6, 'useful_completions': 0, ...}], ...}", "E   assert 'NOT_COMPARABLE' == 'COMPLETE'"]
+  12:FAIL_CAUGHT later_context_bytes_from_config: test_later_alternative_experiment_does_not_rewrite_original_history assertion=['E   AssertionError: {"kind":"conflict","detail":"the observed context bytes do not verify"}', 'E   assert 409 == 202']
+  13:FAIL_CAUGHT inherit_base_from_newest_save: test_freeze_ancestry_follows_the_draft_base_and_explicit_restore assertion=['E   AssertionError: an inherited freeze must descend from the exact selection', "E   assert 'ver-0004' == 'ver-0003'"]
+  14:FAIL_CAUGHT restore_base_not_set: test_freeze_ancestry_follows_the_draft_base_and_explicit_restore assertion=['E   AssertionError: restoring A after saving B must record A as the parent, not the newest version', "E   assert 'ver-0006' == 'ver-0003'"]
+  15:FAIL_CAUGHT restore_closed_shift_allowed: test_freeze_ancestry_follows_the_draft_base_and_explicit_restore assertion=['E   Failed: DID NOT RAISE LifecycleError']
+  16:FAIL_CAUGHT inheritance_projection_dropped: test_next_shift_inherits_selection_rationale_alternative_tests_and_limits assertion=['E   assert None is not None']
+  17:S20_MUTATIONS caught=16 total=16 unproven=none
+tail of stdout:
+  FAIL_CAUGHT inherit_base_from_newest_save: test_freeze_ancestry_follows_the_draft_base_and_explicit_restore assertion=['E   AssertionError: an inherited freeze must descend from the exact selection', "E   assert 'ver-0004' == 'ver-0003'"]
+  FAIL_CAUGHT restore_base_not_set: test_freeze_ancestry_follows_the_draft_base_and_explicit_restore assertion=['E   AssertionError: restoring A after saving B must record A as the parent, not the newest version', "E   assert 'ver-0006' == 'ver-0003'"]
+  FAIL_CAUGHT restore_closed_shift_allowed: test_freeze_ancestry_follows_the_draft_base_and_explicit_restore assertion=['E   Failed: DID NOT RAISE LifecycleError']
+  FAIL_CAUGHT inheritance_projection_dropped: test_next_shift_inherits_selection_rationale_alternative_tests_and_limits assertion=['E   assert None is not None']
+  S20_MUTATIONS caught=16 total=16 unproven=none
+
+=== slice16 38 rows
+command: .venv313/Scripts/python.exe tests/slice16_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-rerun-slice16-mutation-stdout-2026-09-30.txt
+exit code: 0
+elapsed seconds: 152
+summary lines:
+  54:  FAIL_CAUGHT restored=True AssertionError: ('public_data_bytes_hash', ['condition']) assert 'public_data_bytes_hash' in ['condition'] [1 failed, 2 warnings in 4.97s]
+  56:  FAIL_CAUGHT restored=True AssertionError: ('condition', ['assessment_context', 'experiment_schedule']) assert 'condition' in ['assessmen [1 failed, 2 warnings in 5.28s]
+  58:  FAIL_CAUGHT restored=True AssertionError: ('visible_check_set', ['assessment_context', 'experiment_schedule']) assert 'visible_check_set [1 failed, 2 warnings in 5.35s]
+  60:  FAIL_CAUGHT restored=True AssertionError: ('workload_1', ['assessment_context', 'experiment_schedule']) assert 'workload_1' in ['assessm [1 failed, 2 warnings in 5.28s]
+  62:  FAIL_CAUGHT restored=True AssertionError: ('assessment_context', ['experiment_schedule', 'frozen_context']) assert 'assessment_context'  [1 failed, 2 warnings in 5.76s]
+  64:  FAIL_CAUGHT restored=True AssertionError: ('experiment_schedule', []) assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + CO [1 failed, 2 warnings in 6.12s]
+  66:  FAIL_CAUGHT restored=True AssertionError: ('candidate_A', []) assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 6.27s]
+  68:  FAIL_CAUGHT restored=True AssertionError: ('run_binding', []) assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 6.83s]
+  70:  FAIL_CAUGHT restored=True AssertionError: 1 assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 5.17s]
+  72:  FAIL_CAUGHT restored=True AssertionError: 3 assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 5.13s]
+  74:  FAIL_CAUGHT restored=True AssertionError: assert 'experiment-b...p-shift-01-c1' == 'experiment-b...p-shift-01-d1'      - experiment-book [1 failed, 2 warnings in 5.80s]
+  76:  FAIL_CAUGHT restored=True AssertionError: assert 'ACTIVE' == 'INVALIDATED'      - INVALIDATED   + ACTIVE [1 failed, 2 warnings in 5.12s]
+tail of stdout:
+    FAIL_CAUGHT restored=True AssertionError: 3 assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 5.13s]
+  [37/38] diagnostic_panel_never_projects_a_comparison ...
+    FAIL_CAUGHT restored=True AssertionError: assert 'experiment-b...p-shift-01-c1' == 'experiment-b...p-shift-01-d1'      - experiment-book [1 failed, 2 warnings in 5.80s]
+  [38/38] retired_reservation_state_is_invalidated ...
+    FAIL_CAUGHT restored=True AssertionError: assert 'ACTIVE' == 'INVALIDATED'      - INVALIDATED   + ACTIVE [1 failed, 2 warnings in 5.12s]
+
+=== main 42 rows
+command: .venv313/Scripts/python.exe tests/mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-rerun-main-mutation-2026-09-30.txt
+exit code: 0
+elapsed seconds: 129
+summary lines:
+  77:reconcile_marks_nothing                         FAIL_CAUGHT       True       AssertionError: assert set() == {'run-0001', ...', 'run-0003'}      Extra items in the right set:   'run-0001' [1 failed, 2 warnings in 1.42s]
+  78:resolution_ignores_closed_unresolved            FAIL_CAUGHT       True       AssertionError: inherited incidents did not resolve: [{'id': 'BWB-01', 'engagement_slug': 'bookshop', 'shift_i [1 failed, 2 warnings in 0.82s]
+  79:drawn_cases_skip_closed_unresolved              FAIL_CAUGHT       True       AssertionError: inherited incidents did not resolve: [{'id': 'BWB-01', 'engagement_slug': 'bookshop', 'shift_i [1 failed, 2 warnings in 0.80s]
+  80:resolve_incident_only_from_open                 FAIL_CAUGHT       True       AssertionError: inherited incidents did not resolve: [{'id': 'BWB-01', 'engagement_slug': 'bookshop', 'shift_i [1 failed, 2 warnings in 0.85s]
+  81:limits_projection_unions_all_declarations       FAIL_CAUGHT       True       AssertionError: a limit the latest close stopped declaring must leave the projection assert ['Shelf stock...ba [1 failed, 2 warnings in 0.75s]
+  82:close_leaves_incidents_open                     FAIL_CAUGHT       True       assert False  +  where False = all(<generator object test_close_shift_records_unresolved_limits.<locals>.<gene [1 failed, 2 warnings in 0.70s]
+  83:board_hides_closed_unresolved                   FAIL_CAUGHT       True       AssertionError: assert set() == {'CLOSED_UNRESOLVED'}      Extra items in the right set:   'CLOSED_UNRESOLVED' [1 failed, 2 warnings in 0.87s]
+  84:start_run_draws_one_variant_per_enabled_family  FAIL_CAUGHT       True       AssertionError: assert (['var-94ecd795caf80363'] and 1 == 3)  +  where 1 = len([{'family': 'stale_information' [1 failed, 2 warnings in 0.97s]
+  85:board_snapshot_inherited_version_fallback_removed FAIL_CAUGHT       True       AssertionError: the board showed no inherited version for the freshly opened shift; the inherited-version fall [1 failed, 2 warnings in 0.75s]
+  86:rotation_exhaustion_message_drops_the_refusal_detail FAIL_CAUGHT       True       AssertionError: {"kind":"conflict","detail":"rotation group 'stale_information' is exhausted; author and revie [1 failed, 2 warnings in 0.76s]
+  87:snapshot_capture_bypassed_for_the_mutable_path  FAIL_CAUGHT       True       AssertionError: assert [{'id': 'run-...shelf?', ...}] == [{'id': 'run-...shelf?', ...}]      At index 0 diff:  [1 failed, 2 warnings in 1.62s]
+  88:retrieval_aborts_when_the_comparison_source_is_missing FAIL_CAUGHT       True       AssertionError: Internal Server Error assert 500 == 200  +  where 500 = <Response [500 Internal Server Error]> [1 failed, 2 warnings in 1.63s]
+tail of stdout:
+  rotation_exhaustion_message_drops_the_refusal_detail FAIL_CAUGHT       True       AssertionError: {"kind":"conflict","detail":"rotation group 'stale_information' is exhausted; author and revie [1 failed, 2 warnings in 0.76s]
+  snapshot_capture_bypassed_for_the_mutable_path  FAIL_CAUGHT       True       AssertionError: assert [{'id': 'run-...shelf?', ...}] == [{'id': 'run-...shelf?', ...}]      At index 0 diff:  [1 failed, 2 warnings in 1.62s]
+  retrieval_aborts_when_the_comparison_source_is_missing FAIL_CAUGHT       True       AssertionError: Internal Server Error assert 500 == 200  +  where 500 = <Response [500 Internal Server Error]> [1 failed, 2 warnings in 1.63s]
+  
+  assertion-level catches: 42/42
+
+=== s18 19 rows
+command: .venv313/Scripts/python.exe tests/s18_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-rerun-s18-mutation-2026-09-30.txt
+exit code: 1
+elapsed seconds: 173
+summary lines:
+  9:FAIL_CAUGHT experiment_reducer: test_experiment_cannot_construct_operational_business_drafts assertion=['E   Failed: DID NOT RAISE ValueError']
+  10:FAIL_CAUGHT same_version_resolution: test_incident_resolves_only_after_selected_operational_regression assertion=['E   AssertionError: same version resolved an incident', 'E   assert False']
+  11:UNPROVEN pinned_rule_resolution: test_incident_resolves_only_after_selected_operational_regression assertion=["E   AssertionError: {'id': 'experiment-bookshop-shift-03-c1', 'shift_id': 'bookshop-shift-03', 'kind': 'QUALIFYING_COMPARISON', 'investigation_id': 'inv-0002', ...}", "E   assert 'INCOMPLETE' == 'COMPLETE'"]
+  40:FAIL_CAUGHT inflight_database: test_selected_operation_database_limits_and_zero_output_retry assertion=['E   Failed: DID NOT RAISE Exception']
+  41:FAIL_CAUGHT inflight_engagement_scope: test_selected_operation_database_limits_and_zero_output_retry assertion=['E   Failed: DID NOT RAISE IntegrityError']
+  42:FAIL_CAUGHT one_success_database: test_finalized_operation_unique_constraint_is_database_enforced assertion=['E   Failed: DID NOT RAISE IntegrityError']
+  43:FAIL_CAUGHT mandatory_sale: test_optional_unsupported_claim_cannot_create_synthetic_sale assertion=['E   assert not True', 'E    +  where True = any(<generator object test_optional_unsupported_claim_cannot_create_synthetic_sale.<locals>.<genexpr> at 0x0000012FDFF6BE00>)']
+  44:FAIL_CAUGHT frozen_requirement_recheck: test_changed_mission_between_selection_check_and_freeze_blocks_run assertion=['E   Failed: DID NOT RAISE LifecycleError']
+  45:FAIL_CAUGHT inflight_purpose_update: test_database_rejects_purpose_change_to_second_inflight_operation assertion=['E   Failed: DID NOT RAISE IntegrityError']
+  46:FAIL_CAUGHT partial_retry_board: test_selected_operation_partial_output_blocks_retry assertion=['E   assert 1 == 0']
+  47:FAIL_CAUGHT existing_v6_trigger_upgrade: test_existing_v6_database_replaces_old_inflight_update_trigger assertion=['E   Failed: DID NOT RAISE IntegrityError']
+  48:S18_MUTATIONS caught=18 total=19 unproven=pinned_rule_resolution
+tail of stdout:
+  FAIL_CAUGHT frozen_requirement_recheck: test_changed_mission_between_selection_check_and_freeze_blocks_run assertion=['E   Failed: DID NOT RAISE LifecycleError']
+  FAIL_CAUGHT inflight_purpose_update: test_database_rejects_purpose_change_to_second_inflight_operation assertion=['E   Failed: DID NOT RAISE IntegrityError']
+  FAIL_CAUGHT partial_retry_board: test_selected_operation_partial_output_blocks_retry assertion=['E   assert 1 == 0']
+  FAIL_CAUGHT existing_v6_trigger_upgrade: test_existing_v6_database_replaces_old_inflight_update_trigger assertion=['E   Failed: DID NOT RAISE IntegrityError']
+  S18_MUTATIONS caught=18 total=19 unproven=pinned_rule_resolution
+
+=== s19 16 rows
+command: .venv313/Scripts/python.exe tests/s19_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-rerun-s19-mutation-2026-09-30.txt
+exit code: 0
+elapsed seconds: 99
+summary lines:
+  6:FAIL_CAUGHT checks_not_compared: test_chain_verification_and_semantic_replay_fail_independently assertion=["E   AssertionError: assert 'IDENTICAL' == 'DIFFERENT'", 'E']
+  7:FAIL_CAUGHT events_not_compared: test_stored_event_draft_divergence_reports_different assertion=["E   AssertionError: assert 'IDENTICAL' == 'DIFFERENT'", 'E']
+  8:FAIL_CAUGHT event_fields_not_compared: test_stored_event_draft_divergence_reports_different assertion=["E   AssertionError: assert 'IDENTICAL' == 'DIFFERENT'", 'E']
+  9:FAIL_CAUGHT legacy_guessed: test_legacy_replay_reports_unknown_missing_inputs assertion=['E   shiftwork.orchestrator.LifecycleError: semantic replay is defined for operational runs', 'E   Failed: legacy replay raised LifecycleError: semantic replay is defined for operational runs']
+  10:FAIL_CAUGHT missing_inputs_guessed: test_replay_reports_unknown_when_the_captured_context_is_gone assertion=["E   AttributeError: 'NoneType' object has no attribute 'mission_bytes_base64'", "E   Failed: a vanished capture reported AttributeError instead of unknown inputs: 'NoneType' object has no attribute 'mission_bytes_base64'"]
+  11:FAIL_CAUGHT experiment_guard_removed: test_replay_refuses_experimental_and_unfinalized_runs assertion=['E   ValueError: business reduction requires the selected operational run', 'E   Failed: wrong failure type ValueError: business reduction requires the selected operational run']
+  12:FAIL_CAUGHT unfinalized_guard_removed: test_replay_refuses_experimental_and_unfinalized_runs assertion=['E   Failed: an unfinalized run replayed as if its assessment were committed']
+  13:FAIL_CAUGHT unknown_run_guessed: test_replay_refuses_unknown_runs assertion=["E   AttributeError: 'NoneType' object has no attribute 'purpose'", "E   Failed: wrong failure type AttributeError: 'NoneType' object has no attribute 'purpose'"]
+  14:FAIL_CAUGHT capture_integrity_unguarded: test_replay_reports_unknown_when_capture_integrity_is_broken assertion=["E   AssertionError: assert 'DIFFERENT' == 'UNKNOWN_MISSING_INPUTS'", 'E']
+  15:FAIL_CAUGHT workload_coverage_unguarded: test_replay_reports_unknown_when_captured_outputs_do_not_cover_the_workload assertion=["E   AssertionError: assert 'IDENTICAL' == 'UNKNOWN_MISSING_INPUTS'", 'E']
+  16:FAIL_CAUGHT check_inventory_unguarded: test_stored_check_inventory_divergence_reports_both_directions assertion=["E   AttributeError: 'NoneType' object has no attribute 'model_dump'", "E   Failed: a changed check inventory raised AttributeError instead of differences: 'NoneType' object has no attribute 'model_dump'"]
+  17:S19_MUTATIONS caught=16 total=16 unproven=none
+tail of stdout:
+  FAIL_CAUGHT unknown_run_guessed: test_replay_refuses_unknown_runs assertion=["E   AttributeError: 'NoneType' object has no attribute 'purpose'", "E   Failed: wrong failure type AttributeError: 'NoneType' object has no attribute 'purpose'"]
+  FAIL_CAUGHT capture_integrity_unguarded: test_replay_reports_unknown_when_capture_integrity_is_broken assertion=["E   AssertionError: assert 'DIFFERENT' == 'UNKNOWN_MISSING_INPUTS'", 'E']
+  FAIL_CAUGHT workload_coverage_unguarded: test_replay_reports_unknown_when_captured_outputs_do_not_cover_the_workload assertion=["E   AssertionError: assert 'IDENTICAL' == 'UNKNOWN_MISSING_INPUTS'", 'E']
+  FAIL_CAUGHT check_inventory_unguarded: test_stored_check_inventory_divergence_reports_both_directions assertion=["E   AttributeError: 'NoneType' object has no attribute 'model_dump'", "E   Failed: a changed check inventory raised AttributeError instead of differences: 'NoneType' object has no attribute 'model_dump'"]
+  S19_MUTATIONS caught=16 total=16 unproven=none
+
+=== post-round integrity check
+diff sha256 before: d4bf10627ba17c480caf7099eac41ff5948f220e279d567e40a9721cefd16827
+diff sha256 after : d4bf10627ba17c480caf7099eac41ff5948f220e279d567e40a9721cefd16827
+git status --short:
+ M MISTAKES.md
+ M demos/client.py
+ M demos/final_pivot.py
+ M shiftwork/api/routes.py
+ M shiftwork/api/schemas.py
+ M shiftwork/client/app.js
+ M shiftwork/client/index.html
+ M shiftwork/client/styles.css
+ M shiftwork/domain/models.py
+ M shiftwork/orchestrator.py
+ M shiftwork/store/migrations/v6_tables.sql
+ M shiftwork/store/repo.py
+ M tests/api/test_pivot_routes.py
+ M tests/client/browser.mjs
+ M tests/client/render_faults.mjs
+ M tests/orchestrator/test_close_inheritance.py
+ M tests/orchestrator/test_selection_operation.py
+ M tests/pivot_mutation_proofs.py
+ M tests/slice16_mutation_proofs.py
+?? docs/plans/shiftwork/evidence/slice20-mutation-round-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-render-faults-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-main-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-stdout-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-s18-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-s19-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-s20-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-slice16-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-slice16-mutation-stdout-2026-09-30.txt
+?? tests/orchestrator/pivot_flow.py
+?? tests/s20_mutation_proofs.py
+
+ROUND COMPLETE

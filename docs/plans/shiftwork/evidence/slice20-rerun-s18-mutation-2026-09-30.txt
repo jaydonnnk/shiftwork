@@ -1,0 +1,48 @@
+FAIL_CAUGHT invalid_selection: test_selected_operation_rejects_invalid_choice_even_with_active_exposure assertion=['E   assert 202 == 409', 'E    +  where 202 = <Response [202 Accepted]>.status_code']
+FAIL_CAUGHT selected_hash: test_selected_operation_rejects_changed_selected_hash assertion=['E   assert 202 == 409', 'E    +  where 202 = <Response [202 Accepted]>.status_code']
+FAIL_CAUGHT partial_retry: test_selected_operation_partial_output_blocks_retry assertion=['E   Failed: DID NOT RAISE LifecycleError']
+FAIL_CAUGHT changed_choice_retry: test_selected_operation_changed_choice_blocks_zero_output_retry assertion=['E   Failed: DID NOT RAISE LifecycleError']
+FAIL_CAUGHT changed_context_retry: test_selected_operation_changed_context_blocks_zero_output_retry assertion=['E   Failed: DID NOT RAISE LifecycleError']
+FAIL_CAUGHT business_write_retry: test_selected_operation_prior_business_write_blocks_zero_output_retry assertion=['E   Failed: DID NOT RAISE LifecycleError']
+FAIL_CAUGHT operation_key_replay: test_selected_operation_newer_save_and_exact_key_replay assertion=['E   assert (409 == 202)', 'E    +  where 409 = <Response [409 Conflict]>.status_code']
+FAIL_CAUGHT captured_mission: test_selected_operation_uses_captured_mission_after_file_change assertion=['E   shiftwork.orchestrator.LifecycleError: captured operational mission or state differs', 'E   Failed: captured mission was rejected after file change: captured operational mission or state differs']
+FAIL_CAUGHT experiment_reducer: test_experiment_cannot_construct_operational_business_drafts assertion=['E   Failed: DID NOT RAISE ValueError']
+FAIL_CAUGHT same_version_resolution: test_incident_resolves_only_after_selected_operational_regression assertion=['E   AssertionError: same version resolved an incident', 'E   assert False']
+UNPROVEN pinned_rule_resolution: test_incident_resolves_only_after_selected_operational_regression assertion=["E   AssertionError: {'id': 'experiment-bookshop-shift-03-c1', 'shift_id': 'bookshop-shift-03', 'kind': 'QUALIFYING_COMPARISON', 'investigation_id': 'inv-0002', ...}", "E   assert 'INCOMPLETE' == 'COMPLETE'"]
+F                                                                        [100%]
+================================== FAILURES ===================================
+______ test_incident_resolves_only_after_selected_operational_regression ______
+tests\orchestrator\test_selection_operation.py:240: in test_incident_resolves_only_after_selected_operational_regression
+    a, b, comparison = _comparison(client, next_id, same_version.json()["id"])
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\orchestrator\test_selection_operation.py:73: in _comparison
+    assert view["outcome"]["status"] == "COMPLETE", view
+E   AssertionError: {'id': 'experiment-bookshop-shift-03-c1', 'shift_id': 'bookshop-shift-03', 'kind': 'QUALIFYING_COMPARISON', 'investigation_id': 'inv-0002', ...}
+E   assert 'INCOMPLETE' == 'COMPLETE'
+E     
+E     - COMPLETE
+E     + INCOMPLETE
+E     ? ++
+============================== warnings summary ===============================
+.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/orchestrator/test_selection_operation.py::test_incident_resolves_only_after_selected_operational_regression
+1 failed, 2 warnings in 19.53s
+
+FAIL_CAUGHT inflight_database: test_selected_operation_database_limits_and_zero_output_retry assertion=['E   Failed: DID NOT RAISE Exception']
+FAIL_CAUGHT inflight_engagement_scope: test_selected_operation_database_limits_and_zero_output_retry assertion=['E   Failed: DID NOT RAISE IntegrityError']
+FAIL_CAUGHT one_success_database: test_finalized_operation_unique_constraint_is_database_enforced assertion=['E   Failed: DID NOT RAISE IntegrityError']
+FAIL_CAUGHT mandatory_sale: test_optional_unsupported_claim_cannot_create_synthetic_sale assertion=['E   assert not True', 'E    +  where True = any(<generator object test_optional_unsupported_claim_cannot_create_synthetic_sale.<locals>.<genexpr> at 0x0000012FDFF6BE00>)']
+FAIL_CAUGHT frozen_requirement_recheck: test_changed_mission_between_selection_check_and_freeze_blocks_run assertion=['E   Failed: DID NOT RAISE LifecycleError']
+FAIL_CAUGHT inflight_purpose_update: test_database_rejects_purpose_change_to_second_inflight_operation assertion=['E   Failed: DID NOT RAISE IntegrityError']
+FAIL_CAUGHT partial_retry_board: test_selected_operation_partial_output_blocks_retry assertion=['E   assert 1 == 0']
+FAIL_CAUGHT existing_v6_trigger_upgrade: test_existing_v6_database_replaces_old_inflight_update_trigger assertion=['E   Failed: DID NOT RAISE IntegrityError']
+S18_MUTATIONS caught=18 total=19 unproven=pinned_rule_resolution

@@ -1,0 +1,23 @@
+Running 2 baselines then 19 fault rows, each against its own preview on port 8137.
+baseline (no fault)                PASS   harness green against the unmutated client
+baseline (inherit, no fault)       PASS   harness green against the unmutated client
+fault: answer                       CAUGHT FAULT_CAUGHT answer: Error: Rendered customer answer does not match the executed output: REVIEW_WRONG_CUSTOMER_ANSWER
+fault: record                       CAUGHT FAULT_CAUGHT record: Error: Rendered public record value does not match: price: review wrong public value
+fault: verdict                      CAUGHT FAULT_CAUGHT verdict: Error: Rendered check row does not match result cr-0001: pass · MISSING_EVIDENCE is not fail · MISSING_EVIDENCE
+fault: event                        CAUGHT FAULT_CAUGHT event: Error: Rendered event row does not match event 1: sale completed
+fault: eligibility                  CAUGHT FAULT_CAUGHT eligibility: Error: Rendered eligibility statement does not state that the diagnostic cannot qualify a version: REVIEW_WRONG_ELIGIBILITY
+fault: stationFocus                 CAUGHT FAULT_CAUGHT stationFocus: Expected values to be strictly deep-equal:
+fault: incidentFocus                CAUGHT FAULT_CAUGHT incidentFocus: Expected values to be strictly deep-equal:
+fault: candidateFreeze              CAUGHT FAULT_CAUGHT candidateFreeze: Error: Timed out waiting for candidate A freeze
+fault: slotOrdinalText              CAUGHT FAULT_CAUGHT slotOrdinalText: Error: Slot 1 does not display the request ordinal for price
+fault: slotOrdinalKey               CAUGHT FAULT_CAUGHT slotOrdinalKey: Error: Slot 1 renders no price request 1 row with the payload verdict
+fault: slotProtectedCount           CAUGHT FAULT_CAUGHT slotProtectedCount: Error: Slot 1 renders the wrong protected step count
+fault: outcomeMetric                CAUGHT FAULT_CAUGHT outcomeMetric: Error: Candidate A renders the wrong useful_completions
+fault: outcomeEligibility           CAUGHT FAULT_CAUGHT outcomeEligibility: Error: Candidate A renders the wrong eligibility
+fault: outcomeLabelBinding          CAUGHT FAULT_CAUGHT outcomeLabelBinding: Error: The comparison renders no outcome card bound to candidate B
+fault: inheritRationale             CAUGHT FAULT_CAUGHT inheritRationale: Error: The station does not display the original rationale
+fault: inheritAlternative           CAUGHT FAULT_CAUGHT inheritAlternative: Error: The station does not display the retained alternative
+fault: inheritRequirementHash       CAUGHT FAULT_CAUGHT inheritRequirementHash: Error: The station does not display the inherited requirement hash
+fault: inheritObservedRun           CAUGHT FAULT_CAUGHT inheritObservedRun: Error: The hypothetical region does not show the observed operation
+fault: inheritSeparation            CAUGHT FAULT_CAUGHT inheritSeparation: Error: The recorded-history region presents the hypothetical experiment as operational history
+render-fault rows: 21 of 21 as expected

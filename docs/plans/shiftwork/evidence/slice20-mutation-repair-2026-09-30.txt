@@ -1,0 +1,88 @@
+S20 mutation repair round, 2026-09-30T15:36:12Z
+interpreter: .venv313/Scripts/python.exe ; sequential, one process at a time, repo root
+scope: the three harnesses the two repairs touch. main (42), slice16 (38) and
+s19 (16) already returned exit 0 with every row FAIL_CAUGHT in
+slice20-mutation-round-2026-09-30.txt and nothing in this repair affects them.
+
+=== s20 harness, 17 rows (16 plus the new later_reservation_rollback_removed)
+command: .venv313/Scripts/python.exe tests/s20_mutation_proofs.py 
+stdout file: docs/plans/shiftwork/evidence/slice20-repair-s20-mutation-2026-09-30.txt
+exit code: 0
+elapsed seconds: 85
+status tally:
+       17 FAIL_CAUGHT
+restored=False lines: 0
+final line:
+  S20_MUTATIONS caught=17 total=17 unproven=none
+
+=== pivot harness, 97 rows (s15_reservation_rollback_removed re-anchored)
+command: .venv313/Scripts/python.exe tests/pivot_mutation_proofs.py 
+stdout file: docs/plans/shiftwork/evidence/slice20-repair-pivot-mutation-stdout-2026-09-30.txt
+exit code: 0
+elapsed seconds: 197
+status tally:
+      194 FAIL_CAUGHT
+restored=False lines: 0
+final line:
+  s15_frozen_context_hash_not_reverified FAIL_CAUGHT restored=True AssertionError: a tampered binding fails every slot closed instead of running another batch assert {'COMPLETE' [1 failed, 2 warnings in 1.88s]
+
+=== s18 harness, 19 rows (pinned_rule_resolution re-run unloaded)
+command: .venv313/Scripts/python.exe tests/s18_mutation_proofs.py 
+stdout file: docs/plans/shiftwork/evidence/slice20-repair-s18-mutation-2026-09-30.txt
+exit code: 0
+elapsed seconds: 81
+status tally:
+       19 FAIL_CAUGHT
+restored=False lines: 0
+final line:
+  S18_MUTATIONS caught=19 total=19 unproven=none
+
+=== the re-anchored pivot row, verbatim from this round
+  [63/97] s15_reservation_rollback_removed ...
+  s15_reservation_rollback_removed FAIL_CAUGHT restored=True AssertionError: a faulted reservation left a partial row behind assert {'experiments...ions': 1, ...} == {'exp [1 failed, 2 warnings in 0.42s]
+
+=== the re-run s18 row, verbatim from this round
+  FAIL_CAUGHT pinned_rule_resolution: test_incident_resolves_only_after_selected_operational_regression assertion=['E   AssertionError: changed pinned rule resolved an incident', 'E   assert False']
+
+=== post-round integrity check
+orchestrator.py sha256: ed0d4feec0ab3fed60c1732a8aa033a81b9c5cd674e1c19ee3be6817370388cb
+expected (pre-round)  : ed0d4feec0ab3fed60c1732a8aa033a81b9c5cd674e1c19ee3be6817370388cb
+git status --short:
+ M MISTAKES.md
+ M demos/client.py
+ M demos/final_pivot.py
+ M shiftwork/api/routes.py
+ M shiftwork/api/schemas.py
+ M shiftwork/client/app.js
+ M shiftwork/client/index.html
+ M shiftwork/client/styles.css
+ M shiftwork/domain/models.py
+ M shiftwork/orchestrator.py
+ M shiftwork/store/migrations/v6_tables.sql
+ M shiftwork/store/repo.py
+ M tests/api/test_pivot_routes.py
+ M tests/client/browser.mjs
+ M tests/client/render_faults.mjs
+ M tests/orchestrator/test_close_inheritance.py
+ M tests/orchestrator/test_selection_operation.py
+ M tests/pivot_mutation_proofs.py
+ M tests/slice16_mutation_proofs.py
+?? docs/plans/shiftwork/evidence/slice20-mutation-repair-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-mutation-round-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-render-faults-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-repair-pivot-mutation-stdout-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-repair-s18-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-repair-s20-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-main-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-round1-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-stdout-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-s18-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-s19-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-s20-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-slice16-mutation-2026-09-30.txt
+?? docs/plans/shiftwork/evidence/slice20-rerun-slice16-mutation-stdout-2026-09-30.txt
+?? tests/orchestrator/pivot_flow.py
+?? tests/s20_mutation_proofs.py
+
+REPAIR ROUND COMPLETE

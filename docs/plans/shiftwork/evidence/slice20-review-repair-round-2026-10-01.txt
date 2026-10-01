@@ -1,0 +1,58 @@
+S20 review-repair round, 2026-10-01
+interpreter: .venv313/Scripts/python.exe ; sequential, one process at a time, repo root
+
+=== s20 20 rows (three rows added by this round: 2x observed-context triggers, 1x world shape)
+command: .venv313/Scripts/python.exe tests/s20_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-repair-s20-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 92 (wall clock estimate: redirect-file creation to last write)
+summary line: S20_MUTATIONS caught=20 total=20 unproven=none
+per-row statuses: 20 FAIL_CAUGHT, zero SKIP, zero NOT_CAUGHT, zero restored=False
+
+=== pivot 97 rows (s15_reservation_rollback_removed re-anchored from the qualifying-only
+=== candidate mapping through the slot loop to the rollback guard)
+command: .venv313/Scripts/python.exe tests/pivot_mutation_proofs.py
+per-row log: docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-2026-10-01.txt
+stdout file: docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-stdout-2026-10-01.txt
+exit code: 0
+elapsed seconds: 189 (wall clock estimate: stdout-file creation to last write)
+per-row statuses: 97 FAIL_CAUGHT, zero SKIP, zero UNPROVEN, zero NOT_CAUGHT,
+  zero CAUGHT_INCIDENTAL, zero restored=False
+row 63: s15_reservation_rollback_removed FAIL_CAUGHT restored=True
+  AssertionError: a faulted reservation left a partial row behind [1 failed, 2 warnings in 0.40s]
+Evidence-log preservation: RESULTS_LOG was re-pointed to the 2026-10-01 path before this
+run. docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-2026-09-30.txt is
+byte-unchanged, sha256 9cd37e045897ce25aea9c991ced61a617317169677f95c647ed9183bf8935b2d.
+
+=== inheritance demo re-run (prior_bytes_identical now derived from the prefix comparisons)
+command: .venv313/Scripts/python.exe -m demos.final_pivot --stage inheritance
+exit code: 0
+stdout JSON line sha256: 82c64ef9e335ebe57039f43423533bfc7187ce8edc9ee4badaa5e8dd3ebef651
+2026-09-30 evidence JSON line sha256: 82c64ef9e335ebe57039f43423533bfc7187ce8edc9ee4badaa5e8dd3ebef651
+identical: yes ; no demo evidence file changed
+
+=== named S20 command
+command: .venv313/Scripts/python.exe -m pytest tests/orchestrator/test_selection_operation.py
+  tests/orchestrator/test_close_inheritance.py tests/api/test_pivot_routes.py -q
+stdout file: docs/plans/shiftwork/evidence/slice20-review-named-command-2026-10-01.txt
+exit code: 0
+elapsed seconds: 92
+summary line: 57 passed, 2 warnings in 90.46s (0:01:30)
+
+=== full offline suite
+command: .venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q
+stdout file: docs/plans/shiftwork/evidence/slice20-review-full-suite-2026-10-01.txt
+exit code: 0
+elapsed seconds: 219
+summary line: 620 passed, 1 skipped, 2 warnings in 217.67s (0:03:37)
+
+=== post-round integrity
+shiftwork/orchestrator.py sha256:
+  ed0d4feec0ab3fed60c1732a8aa033a81b9c5cd674e1c19ee3be6817370388cb (matches the pre-repair baseline)
+docs/plans/shiftwork/evidence/slice20-rerun-pivot-mutation-2026-09-30.txt sha256:
+  9cd37e045897ce25aea9c991ced61a617317169677f95c647ed9183bf8935b2d (byte-unchanged)
+git diff --check: clean
+git status --porcelain entries: 49 after this file (42-entry round-start baseline, plus the
+  six new 2026-10-01 evidence files and the newly modified tests/store/test_pivot_migration.py)
+
+ROUND COMPLETE
