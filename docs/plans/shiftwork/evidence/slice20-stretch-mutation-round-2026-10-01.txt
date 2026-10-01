@@ -1,0 +1,75 @@
+S20 stretch-chain six-harness pre-change round, 2026-10-01T09:47:33Z
+interpreter: .venv313/Scripts/python.exe ; sequential, one process at a time, repo root
+modified files at start (expect only the two re-pointed harnesses):
+tests/pivot_mutation_proofs.py
+tests/slice16_mutation_proofs.py
+diff sha256 before: 3ea6bd277a74cd7048a705c8778595ea402a79601ec494123037e8b16fa5e491
+
+=== main (tests/mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-stretch-main-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 65
+tail of stdout:
+
+assertion-level catches: 42/42
+
+=== slice16 (tests/slice16_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/slice16_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-stretch-slice16-mutation-stdout-2026-10-01.txt
+exit code: 0
+elapsed seconds: 81
+tail of stdout:
+[38/38] retired_reservation_state_is_invalidated ...
+  FAIL_CAUGHT restored=True AssertionError: assert 'ACTIVE' == 'INVALIDATED'      - INVALIDATED   + ACTIVE [1 failed, 2 warnings in 2.75s]
+
+=== s18 (tests/s18_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/s18_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-stretch-s18-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 86
+tail of stdout:
+FAIL_CAUGHT existing_v6_trigger_upgrade: test_existing_v6_database_replaces_old_inflight_update_trigger assertion=['E   Failed: DID NOT RAISE IntegrityError']
+S18_MUTATIONS caught=19 total=19 unproven=none
+
+=== pivot (tests/pivot_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/pivot_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-stretch-pivot-mutation-stdout-2026-10-01.txt
+exit code: 0
+elapsed seconds: 205
+tail of stdout:
+s15_candidate_b_prefers_lowest_price FAIL_CAUGHT restored=True AssertionError: assert ['book:tidal-...hs:paperback'] == ['book:tidal-...as:paperback']      At index 1 diff:  [1 failed, 2 warnings in 0.22s]
+s15_frozen_context_hash_not_reverified FAIL_CAUGHT restored=True AssertionError: a tampered binding fails every slot closed instead of running another batch assert {'COMPLETE' [1 failed, 2 warnings in 1.87s]
+
+=== s19 (tests/s19_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/s19_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-stretch-s19-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 65
+tail of stdout:
+FAIL_CAUGHT check_inventory_unguarded: test_stored_check_inventory_divergence_reports_both_directions assertion=["E   AttributeError: 'NoneType' object has no attribute 'model_dump'", "E   Failed: a changed check inventory raised AttributeError instead of differences: 'NoneType' object has no attribute 'model_dump'"]
+S19_MUTATIONS caught=16 total=16 unproven=none
+
+=== s20 (tests/s20_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/s20_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-stretch-s20-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 101
+tail of stdout:
+FAIL_CAUGHT observed_context_delete_trigger_removed: test_observed_context_references_reject_update_and_delete assertion=['E   Failed: DID NOT RAISE IntegrityError']
+S20_MUTATIONS caught=20 total=20 unproven=none
+
+diff sha256 after : 3ea6bd277a74cd7048a705c8778595ea402a79601ec494123037e8b16fa5e491
+git status --short:
+ M tests/pivot_mutation_proofs.py
+ M tests/slice16_mutation_proofs.py
+?? docs/plans/shiftwork/evidence/slice20-stretch-main-mutation-2026-10-01.txt
+?? docs/plans/shiftwork/evidence/slice20-stretch-mutation-round-2026-10-01.txt
+?? docs/plans/shiftwork/evidence/slice20-stretch-pivot-mutation-2026-10-01.txt
+?? docs/plans/shiftwork/evidence/slice20-stretch-pivot-mutation-stdout-2026-10-01.txt
+?? docs/plans/shiftwork/evidence/slice20-stretch-s18-mutation-2026-10-01.txt
+?? docs/plans/shiftwork/evidence/slice20-stretch-s19-mutation-2026-10-01.txt
+?? docs/plans/shiftwork/evidence/slice20-stretch-s20-mutation-2026-10-01.txt
+?? docs/plans/shiftwork/evidence/slice20-stretch-slice16-mutation-2026-10-01.txt
+?? docs/plans/shiftwork/evidence/slice20-stretch-slice16-mutation-stdout-2026-10-01.txt
+ROUND COMPLETE

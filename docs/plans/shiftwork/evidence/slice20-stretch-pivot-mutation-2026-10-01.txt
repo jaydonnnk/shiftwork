@@ -1,0 +1,194 @@
+[1/97] s15_draft_manifest_review_gate_removed START
+[1/97] s15_draft_manifest_review_gate_removed FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.23s]
+[2/97] s15_draft_protected_review_gate_removed START
+[2/97] s15_draft_protected_review_gate_removed FAIL_CAUGHT restored=True Failed: DID NOT RAISE Exception [1 failed, 2 warnings in 0.24s]
+[3/97] s15_six_variant_admission_removed START
+[3/97] s15_six_variant_admission_removed FAIL_CAUGHT restored=True Failed: DID NOT RAISE RotationMisconfigured [1 failed, 2 warnings in 0.21s]
+[4/97] s15_protected_snapshot_immutability_removed START
+[4/97] s15_protected_snapshot_immutability_removed FAIL_CAUGHT restored=True Failed: DID NOT RAISE IntegrityError [1 failed, 2 warnings in 0.50s]
+[5/97] s15_missing_capture_success_flag START
+[5/97] s15_missing_capture_success_flag FAIL_CAUGHT restored=True AssertionError: assert 'FINALIZED' == 'FAILED'      - FAILED   + FINALIZED [1 failed, 2 warnings in 2.40s]
+[6/97] s15_starting_ledger_state_placeholder START
+[6/97] s15_starting_ledger_state_placeholder FAIL_CAUGHT restored=True assert 0 > 0 [1 failed, 2 warnings in 0.45s]
+[7/97] s15_live_adapter_rejects_multirequest START
+[7/97] s15_live_adapter_rejects_multirequest FAIL_CAUGHT restored=True AssertionError: assert <ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'> is None  +  where <ExecutorFailu [1 failed in 0.39s]
+[8/97] s15_live_gateway_accepts_wrong_ordinal START
+[8/97] s15_live_gateway_accepts_wrong_ordinal FAIL_CAUGHT restored=True Failed: DID NOT RAISE GatewayRejected [1 failed in 0.34s]
+[9/97] s15_live_second_capture_not_read_back START
+[9/97] s15_live_second_capture_not_read_back FAIL_CAUGHT restored=True assert <ExecutorFailure.CAPTURE_TRUNCATED: 'CAPTURE_TRUNCATED'> is None  +  where <ExecutorFailure.CAPTURE_TRU [1 failed in 0.86s]
+[10/97] s10_legacy_starter_insertion START
+[10/97] s10_legacy_starter_insertion FAIL_CAUGHT restored=True AssertionError: assert 1 == 0  +  where 1 = _count(WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-ja [1 failed, 2 warnings in 0.93s]
+[11/97] s10_legacy_shift_open_rejected START
+[11/97] s10_legacy_shift_open_rejected FAIL_CAUGHT restored=True AssertionError: {"kind":"conflict","detail":"an explicit operating selection is required"} assert 409 == 201   [1 failed, 2 warnings in 0.81s]
+[12/97] s10_latest_saved_promoted_for_operation START
+[12/97] s10_latest_saved_promoted_for_operation FAIL_CAUGHT restored=True AssertionError: assert 'ver-0002' == 'ver-0001'      - ver-0001   ?        ^   + ver-0002   ?        ^ [1 failed, 2 warnings in 0.83s]
+[13/97] s10_legacy_run_guard_removed START
+[13/97] s10_legacy_run_guard_removed FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.82s]
+[14/97] s10_legacy_close_guard_removed START
+[14/97] s10_legacy_close_guard_removed FAIL_CAUGHT restored=True AssertionError: {"id":"bookshop-shift-02","engagement_slug":"bookshop","seq":2,"state":"closed","opened_at":"2 [1 failed, 2 warnings in 0.89s]
+[15/97] s10_partial_shift_open_committed START
+[15/97] s10_partial_shift_open_committed FAIL_CAUGHT restored=True assert 1 == 0 [1 failed, 2 warnings in 0.82s]
+[16/97] s10_caller_controls_opening_mode START
+[16/97] s10_caller_controls_opening_mode FAIL_CAUGHT restored=True AssertionError: {"id":"bookshop-shift-02","engagement_slug":"bookshop","seq":2,"state":"open","opened_at":"202 [1 failed, 2 warnings in 1.00s]
+[17/97] s10_unknown_schema_version_accepted START
+[17/97] s10_unknown_schema_version_accepted FAIL_CAUGHT restored=True Failed: expected the version-99 refusal, got OperationalError: no such column: purpose [1 failed, 2 warnings in 0.62s]
+[18/97] s10_migration_transaction_removed START
+[18/97] s10_migration_transaction_removed FAIL_CAUGHT restored=True AssertionError: assert 'opening_mode' not in {'closed_at', 'engagement_slug', 'id', 'opened_at', 'opening_mode [1 failed, 2 warnings in 0.54s]
+[19/97] s10_version_marker_not_written START
+[19/97] s10_version_marker_not_written FAIL_CAUGHT restored=True assert 5 == 6 [1 failed, 2 warnings in 0.53s]
+[20/97] s10_rerun_reapplies_v6_ddl START
+[20/97] s10_rerun_reapplies_v6_ddl FAIL_CAUGHT restored=True assert (<sqlite3.Row...035F9D0>, ...) == (<sqlite3.Row...038DB40>, ...)      At index 63 diff: <sqlite3.Row ob [1 failed, 2 warnings in 0.61s]
+[21/97] s10_legacy_adapter_column_rewritten START
+[21/97] s10_legacy_adapter_column_rewritten FAIL_CAUGHT restored=True AssertionError: historical runs bytes changed [1 failed, 2 warnings in 0.60s]
+[22/97] s10_trusted_local_labelled_isolated_live START
+[22/97] s10_trusted_local_labelled_isolated_live FAIL_CAUGHT restored=True AssertionError: assert 'ISOLATED_LIVE' == 'TRUSTED_LOCAL'      - TRUSTED_LOCAL   + ISOLATED_LIVE [1 failed, 2 warnings in 0.57s]
+[23/97] s10_tokenfactory_gains_evidence_mode START
+[23/97] s10_tokenfactory_gains_evidence_mode FAIL_CAUGHT restored=True AssertionError: assert 'RECORDED_INSPECTION' == None [1 failed, 2 warnings in 0.59s]
+[24/97] s11_v6_reconcile_skipped START
+[24/97] s11_v6_reconcile_skipped FAIL_CAUGHT restored=True AssertionError: assert ['execution_c..._assessments'] == []      Left contains 5 more items, first extra item: [1 failed, 2 warnings in 0.61s]
+[25/97] s11_envelope_accepts_independent_prose START
+[25/97] s11_envelope_accepts_independent_prose FAIL_CAUGHT restored=True Failed: DID NOT RAISE TaskEnvelopeInvalid [1 failed in 0.18s]
+[26/97] s11_record_conflict_treated_as_agreed START
+[26/97] s11_record_conflict_treated_as_agreed FAIL_CAUGHT restored=True AssertionError: assert 'AGREED' == 'CONFLICT'      - CONFLICT   + AGREED [1 failed in 0.15s]
+[27/97] s11_collection_conflict_rule_removed START
+[27/97] s11_collection_conflict_rule_removed FAIL_CAUGHT restored=True AssertionError: assert False is True  +  where False = CollectionFacts(availability=RecordGroup(entity_ref='bo [1 failed in 0.16s]
+[28/97] s11_missing_required_task_accepted START
+[28/97] s11_missing_required_task_accepted FAIL_CAUGHT restored=True AssertionError: assert <ReasonCode.REQUIRED_TASK_MISSING: 'REQUIRED_TASK_MISSING'> in ()  +  where <ReasonCode [1 failed, 2 warnings in 0.58s]
+[29/97] s11_request_completion_ignores_required_tasks START
+[29/97] s11_request_completion_ignores_required_tasks FAIL_CAUGHT restored=True AssertionError: assert True is False  +  where True = <function request_usefully_completed at 0x0000021E213755 [1 failed, 2 warnings in 0.59s]
+[30/97] s11_result_labelled_with_the_wrong_entity_accepted START
+[30/97] s11_result_labelled_with_the_wrong_entity_accepted FAIL_CAUGHT restored=True AssertionError: assert <ReasonCode.WRONG_ENTITY: 'WRONG_ENTITY'> in ()  +  where <ReasonCode.WRONG_ENTITY: 'WR [1 failed, 2 warnings in 0.56s]
+[31/97] s11_claim_about_the_wrong_entity_accepted START
+[31/97] s11_claim_about_the_wrong_entity_accepted FAIL_CAUGHT restored=True AssertionError: assert <ReasonCode.WRONG_ENTITY: 'WRONG_ENTITY'> in ()  +  where <ReasonCode.WRONG_ENTITY: 'WR [1 failed, 2 warnings in 0.56s]
+[32/97] s11_unsupported_claim_value_accepted START
+[32/97] s11_unsupported_claim_value_accepted FAIL_CAUGHT restored=True AssertionError: assert <ReasonCode.UNSUPPORTED_CLAIM: 'UNSUPPORTED_CLAIM'> in ()  +  where <ReasonCode.UNSUPPO [1 failed, 2 warnings in 0.56s]
+[33/97] s11_fallback_always_justified START
+[33/97] s11_fallback_always_justified FAIL_CAUGHT restored=True AssertionError: MISSING_ENTITY_DETAIL assert <TaskOutcome.JUSTIFIED_CLARIFICATION: 'JUSTIFIED_CLARIFICATION'>  [1 failed, 2 warnings in 0.57s]
+[34/97] s11_missing_capture_becomes_a_justified_refusal START
+[34/97] s11_missing_capture_becomes_a_justified_refusal FAIL_CAUGHT restored=True AssertionError: price assert <TaskOutcome.JUSTIFIED_REFUSAL: 'JUSTIFIED_REFUSAL'> is <TaskOutcome.MISSING_OUTP [1 failed, 2 warnings in 0.57s]
+[35/97] s11_not_applicable_self_declared_by_the_service START
+[35/97] s11_not_applicable_self_declared_by_the_service FAIL_CAUGHT restored=True AssertionError: assert <TaskOutcome.JUSTIFIED_REFUSAL: 'JUSTIFIED_REFUSAL'> is <TaskOutcome.INCORRECT_OUTPUT:  [1 failed, 2 warnings in 0.54s]
+[36/97] s11_referral_borrows_another_candidates_data_problem START
+[36/97] s11_referral_borrows_another_candidates_data_problem FAIL_CAUGHT restored=True AssertionError: assert <TaskOutcome.JUSTIFIED_REFERRAL: 'JUSTIFIED_REFERRAL'> is <TaskOutcome.UNJUSTIFIED_REFE [1 failed, 2 warnings in 0.54s]
+[37/97] s11_availability_answer_creates_a_commitment START
+[37/97] s11_availability_answer_creates_a_commitment FAIL_CAUGHT restored=True AssertionError: assert <ReasonCode.INVALID_COMMITMENT: 'INVALID_COMMITMENT'> in ()  +  where <ReasonCode.INVAL [1 failed, 2 warnings in 0.61s]
+[38/97] s11_renderer_authors_its_own_fallback_sentence START
+[38/97] s11_renderer_authors_its_own_fallback_sentence FAIL_CAUGHT restored=True AssertionError: assert 'Your order i...r collection.' == 'A member of ...this request.'      - A member of sta [1 failed in 0.15s]
+[39/97] s11_renderer_invents_a_price START
+[39/97] s11_renderer_invents_a_price FAIL_CAUGHT restored=True AssertionError: assert 'Salt Roads (... costs £0.00.' == 'Salt Roads (...costs £18.00.'      - Salt Roads (pap [1 failed in 0.15s]
+[40/97] s11_renderer_leaks_an_unknown_entity_ref START
+[40/97] s11_renderer_leaks_an_unknown_entity_ref FAIL_CAUGHT restored=True Failed: DID NOT RAISE ServiceResponseInvalid [1 failed in 0.14s]
+[41/97] s11_diagnostic_reserves_a_protected_case START
+[41/97] s11_diagnostic_reserves_a_protected_case FAIL_CAUGHT restored=True AssertionError: assert 'reservation-0001' is None  +  where 'reservation-0001' = ExecutionContext(id='context- [1 failed, 2 warnings in 0.71s]
+[42/97] s11_diagnostic_candidate_pin_removed START
+[42/97] s11_diagnostic_candidate_pin_removed FAIL_CAUGHT restored=True AssertionError: {"id":"experiment-bookshop-shift-01-d1","shift_id":"bookshop-shift-01","kind":"DIAGNOSTIC","in [1 failed, 2 warnings in 0.44s]
+[43/97] s11_diagnostic_budget_ignored START
+[43/97] s11_diagnostic_budget_ignored FAIL_CAUGHT restored=True AssertionError: {"id":"experiment-bookshop-shift-01-d3","shift_id":"bookshop-shift-01","kind":"DIAGNOSTIC","in [1 failed, 2 warnings in 1.02s]
+[44/97] s11_null_investigation_bootstrap_allowed START
+[44/97] s11_null_investigation_bootstrap_allowed FAIL_CAUGHT restored=True AssertionError: assert 'only for a legacy first-choice shift' in 'the verified isolated executor and its contr [1 failed, 2 warnings in 0.34s]
+[45/97] s11_diagnostic_spends_the_operation_budget START
+[45/97] s11_diagnostic_spends_the_operation_budget FAIL_CAUGHT restored=True AssertionError: assert 2 == 1  +  where 2 = <function count_operation_runs at 0x000001A123BD8860>(<sqlite3.Con [1 failed, 2 warnings in 0.64s]
+[46/97] s11_diagnostic_claims_recorded_inspection START
+[46/97] s11_diagnostic_claims_recorded_inspection FAIL_CAUGHT restored=True AssertionError: assert 'RECORDED_INSPECTION' == 'TRUSTED_LOCAL'      - TRUSTED_LOCAL   + RECORDED_INSPECTION [1 failed, 2 warnings in 0.60s]
+[47/97] s11_completion_counted_without_the_required_tasks START
+[47/97] s11_completion_counted_without_the_required_tasks FAIL_CAUGHT restored=True assert (1, 1) == (0, 1)      At index 0 diff: 1 != 0   Use -v to get more diff [1 failed, 2 warnings in 0.60s]
+[48/97] s11_assessment_reads_the_live_fixture START
+[48/97] s11_assessment_reads_the_live_fixture FAIL_CAUGHT restored=True AssertionError: the stored assessment followed the edited fixture instead of the frozen bytes assert {'collect [1 failed, 2 warnings in 0.64s]
+[49/97] s11_help_accepts_a_foreign_shifts_investigation START
+[49/97] s11_help_accepts_a_foreign_shifts_investigation FAIL_CAUGHT restored=True AssertionError: help with another open shift's investigation must be refused as a conflict before the absent-g [1 failed, 2 warnings in 0.37s]
+[50/97] s11_diagnostic_accepts_a_foreign_shifts_investigation START
+[50/97] s11_diagnostic_accepts_a_foreign_shifts_investigation FAIL_CAUGHT restored=True AssertionError: assert 'owned by this shift' in 'a diagnostic candidate must belong to this shift' [1 failed, 2 warnings in 0.45s]
+[51/97] s14_absent_assist_gateway_claims_success START
+[51/97] s14_absent_assist_gateway_claims_success FAIL_CAUGHT restored=True Failed: DID NOT RAISE AssistGatewayUnavailable [3 failed, 2 warnings in 0.63s]
+[52/97] s15_pair_binding_collapsed START
+[52/97] s15_pair_binding_collapsed FAIL_CAUGHT restored=True AssertionError: a pair was bound to another pair's workload assert {'workload-01'} == {'workload-02'}      Ext [1 failed, 2 warnings in 0.47s]
+[53/97] s15_pair_two_b_workload_swapped START
+[53/97] s15_pair_two_b_workload_swapped FAIL_CAUGHT restored=True AssertionError: a pair was bound to another pair's workload assert {'workload-01', 'workload-02'} == {'workloa [1 failed, 2 warnings in 0.49s]
+[54/97] s15_schedule_pair_two_swapped START
+[54/97] s15_schedule_pair_two_swapped FAIL_CAUGHT restored=True AssertionError: assert [(2, 'A'), (2, 'B')] == [(2, 'B'), (2, 'A')]      At index 0 diff: (2, 'A') != (2, 'B') [1 failed, 2 warnings in 2.75s]
+[55/97] s15_pair_three_order_not_derived START
+[55/97] s15_pair_three_order_not_derived FAIL_CAUGHT restored=True AssertionError: assert ('A', 'B') == ('B', 'A')      At index 0 diff: 'A' != 'B'   Use -v to get more diff [1 failed, 2 warnings in 2.75s]
+[56/97] s15_manifest_hash_not_recomputed START
+[56/97] s15_manifest_hash_not_recomputed FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.45s]
+[57/97] s15_manifest_length_not_recomputed START
+[57/97] s15_manifest_length_not_recomputed FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.44s]
+[58/97] s15_manifest_specs_hash_not_recomputed START
+[58/97] s15_manifest_specs_hash_not_recomputed FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.45s]
+[59/97] s15_manifest_count_not_recomputed START
+[59/97] s15_manifest_count_not_recomputed FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.46s]
+[60/97] s15_blank_line_silently_removed_before_execution START
+[60/97] s15_blank_line_silently_removed_before_execution FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.48s]
+[61/97] s15_restart_omits_comparison_terminalization START
+[61/97] s15_restart_omits_comparison_terminalization FAIL_CAUGHT restored=True AssertionError: GET left an unclaimable comparison nonterminal assert 'RUNNING' == 'FAILED'      - FAILED   +  [1 failed, 2 warnings in 0.55s]
+[62/97] s15_manifest_engagement_unchecked START
+[62/97] s15_manifest_engagement_unchecked FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.47s]
+[63/97] s15_reservation_rollback_removed START
+[63/97] s15_reservation_rollback_removed FAIL_CAUGHT restored=True AssertionError: a faulted reservation left a partial row behind assert {'experiments...ions': 1, ...} == {'exp [1 failed, 2 warnings in 0.48s]
+[64/97] s15_execution_claim_bypassed START
+[64/97] s15_execution_claim_bypassed FAIL_CAUGHT restored=True AssertionError: a duplicate worker ran a reserved slot assert 11 == 1  +  where 11 = <class 'test_experiment_l [1 failed, 2 warnings in 2.73s]
+[65/97] s15_background_error_leaves_comparison_running START
+[65/97] s15_background_error_leaves_comparison_running FAIL_CAUGHT restored=True AssertionError: a background error stranded the comparison in RUNNING assert 'RUNNING' == 'FAILED'      - FAIL [1 failed, 2 warnings in 0.93s]
+[66/97] s15_pre_adapter_error_leaves_touched_slot_reserved START
+[66/97] s15_pre_adapter_error_leaves_touched_slot_reserved FAIL_CAUGHT restored=True AssertionError: the touched slot still looks unattempted assert 'RESERVED' == 'FAILED'      - FAILED   + RESER [1 failed, 2 warnings in 0.97s]
+[67/97] s15_incomplete_comparison_finalized START
+[67/97] s15_incomplete_comparison_finalized FAIL_CAUGHT restored=True AssertionError: assert 'FINALIZED' == 'FAILED'      - FAILED   + FINALIZED [1 failed, 2 warnings in 2.47s]
+[68/97] s15_slot_binding_not_reverified START
+[68/97] s15_slot_binding_not_reverified FAIL_CAUGHT restored=True AssertionError: a tampered binding fails every slot closed instead of running another batch assert {'COMPLETE' [1 failed, 2 warnings in 2.77s]
+[69/97] s15_request_line_identity_unchecked START
+[69/97] s15_request_line_identity_unchecked FAIL_CAUGHT restored=True Failed: DID NOT RAISE LifecycleError [1 failed, 2 warnings in 0.47s]
+[70/97] s15_slot_workspace_not_fresh START
+[70/97] s15_slot_workspace_not_fresh FAIL_CAUGHT restored=True AssertionError: the comparison did not give every slot its own workspace assert 0 == 6  +  where 0 = len([]) [1 failed, 2 warnings in 2.72s]
+[71/97] s15_executor_workspace_reused START
+[71/97] s15_executor_workspace_reused FAIL_CAUGHT restored=True assert b'sentinel_absent' in b'{"request_id": "probe-1", "task_results": [], "evidence_refs": [], "uncertainty [1 failed, 2 warnings in 0.63s]
+[72/97] s15_duplicate_pair_key_allowed START
+[72/97] s15_duplicate_pair_key_allowed FAIL_CAUGHT restored=True Failed: DID NOT RAISE IntegrityError [1 failed, 2 warnings in 2.81s]
+[73/97] s15_duplicate_order_key_allowed START
+[73/97] s15_duplicate_order_key_allowed FAIL_CAUGHT restored=True Failed: DID NOT RAISE IntegrityError [1 failed, 2 warnings in 2.81s]
+[74/97] s15_eligible_derived START
+[74/97] s15_eligible_derived FAIL_CAUGHT restored=True assert False == True  +  where True = any(<generator object test_the_compare_station_shows_all_six_slots_witho [1 failed, 2 warnings in 2.84s]
+[75/97] s15_protected_refs_projected START
+[75/97] s15_protected_refs_projected FAIL_CAUGHT restored=True AssertionError: the pre-execution comparison view leaked protected_ref assert 'var-1e0ab09a26ce1433' not in '{ [1 failed, 2 warnings in 0.48s]
+[76/97] s15_candidate_pin_ignored START
+[76/97] s15_candidate_pin_ignored FAIL_CAUGHT restored=True AssertionError: {"id":"experiment-bookshop-shift-01-c1","shift_id":"bookshop-shift-01","kind":"QUALIFYING_COMP [1 failed, 2 warnings in 2.87s]
+[77/97] s15_foreign_investigation_accepted START
+[77/97] s15_foreign_investigation_accepted FAIL_CAUGHT restored=True AssertionError: assert 'owned by this shift' in 'comparison candidates must belong to this shift' [1 failed, 2 warnings in 3.10s]
+[78/97] s15_protected_phase_skipped START
+[78/97] s15_protected_phase_skipped FAIL_CAUGHT restored=True AssertionError: assert 'FAILED' == 'FINALIZED'      - FINALIZED   + FAILED [1 failed, 2 warnings in 1.62s]
+[79/97] s15_protected_phase_state_swapped START
+[79/97] s15_protected_phase_state_swapped FAIL_CAUGHT restored=True assert b'{"currency"...rope/London"}' == b'{\n  "revie...  }\n  ]\n}\n'      At index 1 diff: b'"' != b'\n'    [1 failed, 2 warnings in 2.57s]
+[80/97] s15_protected_phase_executed_before_public START
+[80/97] s15_protected_phase_executed_before_public FAIL_CAUGHT restored=True AssertionError: assert ('protected', 'public') == ('public', 'protected')      At index 0 diff: 'protected' != [1 failed, 2 warnings in 2.71s]
+[81/97] s15_protected_workspace_reused START
+[81/97] s15_protected_workspace_reused FAIL_CAUGHT restored=True AssertionError: assert not True  +  where True = exists()  +    where exists = (WindowsPath('C:/Users/jayd0/Ap [1 failed, 2 warnings in 0.78s]
+[82/97] s15_protected_line_through_batch_loader START
+[82/97] s15_protected_line_through_batch_loader FAIL_CAUGHT restored=True AssertionError: assert 'FAILED' == 'FINALIZED'      - FINALIZED   + FAILED [1 failed, 2 warnings in 1.69s]
+[83/97] s15_single_request_multiline_accepted START
+[83/97] s15_single_request_multiline_accepted FAIL_CAUGHT restored=True Failed: DID NOT RAISE ValueError [1 failed, 2 warnings in 2.69s]
+[84/97] s15_single_request_ordinal_unchecked START
+[84/97] s15_single_request_ordinal_unchecked FAIL_CAUGHT restored=True Failed: DID NOT RAISE ValueError [1 failed, 2 warnings in 2.55s]
+[85/97] s15_protected_pair_variant_leaked START
+[85/97] s15_protected_pair_variant_leaked FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_each_pair_shares_one_identical_protected_stimulus.<l [1 failed, 2 warnings in 0.38s]
+[86/97] s15_protected_slot_second_variant START
+[86/97] s15_protected_slot_second_variant FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_each_pair_shares_one_identical_protected_stimulus.<l [1 failed, 2 warnings in 0.43s]
+[87/97] s15_protected_ordinal_mismatch START
+[87/97] s15_protected_ordinal_mismatch FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_each_pair_shares_one_identical_protected_stimulus.<l [1 failed, 2 warnings in 0.39s]
+[88/97] s15_protected_binding_hash_not_pinned START
+[88/97] s15_protected_binding_hash_not_pinned FAIL_CAUGHT restored=True AssertionError: assert '765834743b04...4ea6cfde902f4' == '80641ca615b2...fa7c6f5514219'      - 80641ca615b2d4d [1 failed, 2 warnings in 0.42s]
+[89/97] s15_protected_collision_accepted START
+[89/97] s15_protected_collision_accepted FAIL_CAUGHT restored=True Failed: DID NOT RAISE Exception [1 failed, 2 warnings in 0.36s]
+[90/97] s15_protected_request_canonicalizer_denormalized START
+[90/97] s15_protected_request_canonicalizer_denormalized FAIL_CAUGHT restored=True assert (b'Cafe\xcc\x81' not in b'{"entity_ref":"book:salt-roads:paperback","ordinal":3,"request_id":"bellwethe [1 failed, 2 warnings in 0.38s]
+[91/97] s15_protected_state_canonicalizer_unpinned START
+[91/97] s15_protected_state_canonicalizer_unpinned FAIL_CAUGHT restored=True AssertionError: assert '40600e1e348b...0e15e88910876' == '765834743b04...4ea6cfde902f4'      - 765834743b04452 [1 failed, 2 warnings in 0.39s]
+[92/97] s15_protected_response_filter_removed START
+[92/97] s15_protected_response_filter_removed FAIL_CAUGHT restored=True AssertionError: [409, 200, 200, 200, 200, 200] assert False  +  where False = all(<generator object test_prote [1 failed, 2 warnings in 0.75s]
+[93/97] s15_protected_observation_filter_removed START
+[93/97] s15_protected_observation_filter_removed FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_protected_content_and_captures_never_reach_public_su [1 failed, 2 warnings in 0.75s]
+[94/97] s15_protected_denominator_merged START
+[94/97] s15_protected_denominator_merged FAIL_CAUGHT restored=True assert 9 == 6 [1 failed, 2 warnings in 0.39s]
+[95/97] s15_protected_counts_before_terminal START
+[95/97] s15_protected_counts_before_terminal FAIL_CAUGHT restored=True AssertionError: assert {'A': {'reserved': 3, 'captured': 0, 'missing': 3}, 'B': {'reserved': 3, 'captured': 0, [1 failed, 2 warnings in 0.39s]
+[96/97] s15_candidate_b_prefers_lowest_price START
+[96/97] s15_candidate_b_prefers_lowest_price FAIL_CAUGHT restored=True AssertionError: assert ['book:tidal-...hs:paperback'] == ['book:tidal-...as:paperback']      At index 1 diff:  [1 failed, 2 warnings in 0.22s]
+[97/97] s15_frozen_context_hash_not_reverified START
+[97/97] s15_frozen_context_hash_not_reverified FAIL_CAUGHT restored=True AssertionError: a tampered binding fails every slot closed instead of running another batch assert {'COMPLETE' [1 failed, 2 warnings in 1.87s]

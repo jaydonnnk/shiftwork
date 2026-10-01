@@ -1,0 +1,76 @@
+[1/38] public_denominator_uses_all_frozen_requests START
+[1/38] public_denominator_uses_all_frozen_requests FAIL_CAUGHT restored=True assert [3, 3] == [6, 6]      At index 0 diff: 3 != 6   Use -v to get more diff [1 failed in 0.18s]
+[2/38] protected_denominator_one_per_pair START
+[2/38] protected_denominator_one_per_pair FAIL_CAUGHT restored=True assert [1, 1] == [3, 3]      At index 0 diff: 1 != 3   Use -v to get more diff [1 failed in 0.16s]
+[3/38] one_task_is_not_a_completed_multi_task_request START
+[3/38] one_task_is_not_a_completed_multi_task_request FAIL_CAUGHT restored=True AssertionError: assert 6 == 5  +  where 6 = CandidateMetrics(candidate_label='A', candidate_version_id='versio [1 failed in 0.16s]
+[4/38] overlapping_task_outcomes_are_both_counted START
+[4/38] overlapping_task_outcomes_are_both_counted FAIL_CAUGHT restored=True AssertionError: assert 0 == 1  +  where 0 = CandidateMetrics(candidate_label='A', candidate_version_id='versio [1 failed in 0.19s]
+[5/38] optional_missing_does_not_count_as_missing_request START
+[5/38] optional_missing_does_not_count_as_missing_request FAIL_CAUGHT restored=True AssertionError: assert 1 == 0  +  where 1 = CandidateMetrics(candidate_label='A', candidate_version_id='versio [1 failed in 0.15s]
+[6/38] justified_clarification_has_its_own_counter START
+[6/38] justified_clarification_has_its_own_counter FAIL_CAUGHT restored=True AssertionError: assert 0 == 1  +  where 0 = getattr(CandidateMetrics(candidate_label='A', candidate_version_id [1 failed in 0.16s]
+[7/38] unjustified_clarification_has_its_own_counter START
+[7/38] unjustified_clarification_has_its_own_counter FAIL_CAUGHT restored=True AssertionError: assert 0 == 1  +  where 0 = getattr(CandidateMetrics(candidate_label='A', candidate_version_id [1 failed in 0.17s]
+[8/38] unknown_cost_is_not_zero START
+[8/38] unknown_cost_is_not_zero FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_public_and_protected_denominators_and_unknown_cost_a [1 failed in 0.16s]
+[9/38] zero_recorded_calls_is_not_a_measured_zero START
+[9/38] zero_recorded_calls_is_not_a_measured_zero FAIL_CAUGHT restored=True AssertionError: assert 0 is None  +  where 0 = CandidateMetrics(candidate_label='A', candidate_version_id='ver [1 failed in 0.20s]
+[10/38] missing_model_result_keeps_usage_unknown START
+[10/38] missing_model_result_keeps_usage_unknown FAIL_CAUGHT restored=True AssertionError: assert 0 is None  +  where 0 = CandidateMetrics(candidate_label='A', candidate_version_id='ver [1 failed in 0.16s]
+[11/38] protected_failure_blocks_its_candidate START
+[11/38] protected_failure_blocks_its_candidate FAIL_CAUGHT restored=True AssertionError: assert () == ('collection.confirmed_only',)      Right contains one more item: 'collection.con [1 failed in 0.16s]
+[12/38] public_mandatory_failure_blocks_its_candidate START
+[12/38] public_mandatory_failure_blocks_its_candidate FAIL_CAUGHT restored=True AssertionError: assert True is False  +  where True = CandidateEligibility(candidate_label='A', candidate_vers [1 failed in 0.20s]
+[13/38] failed_slot_cannot_be_complete START
+[13/38] failed_slot_cannot_be_complete FAIL_CAUGHT restored=True AssertionError: assert 'COMPLETE' == 'INCOMPLETE'      - INCOMPLETE   ? --   + COMPLETE [1 failed in 0.17s]
+[14/38] task_identity_is_part_of_completeness START
+[14/38] task_identity_is_part_of_completeness FAIL_CAUGHT restored=True AssertionError: assert 'COMPLETE' == 'INCOMPLETE'      - INCOMPLETE   ? --   + COMPLETE [1 failed in 0.17s]
+[15/38] context_drift_blocks_both_candidates START
+[15/38] context_drift_blocks_both_candidates FAIL_CAUGHT restored=True AssertionError: assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed in 0.17s]
+[16/38] candidates_drift_returns_a_verdict_not_a_crash START
+[16/38] candidates_drift_returns_a_verdict_not_a_crash FAIL_CAUGHT restored=True AssertionError: assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed in 0.16s]
+[17/38] run_evidence_mode_must_match_frozen_execution START
+[17/38] run_evidence_mode_must_match_frozen_execution FAIL_CAUGHT restored=True AssertionError: evidence_mode assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed in 0.17s]
+[18/38] run_adapter_must_match_frozen_execution START
+[18/38] run_adapter_must_match_frozen_execution FAIL_CAUGHT restored=True AssertionError: adapter assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed in 0.17s]
+[19/38] run_purpose_must_match_frozen_execution START
+[19/38] run_purpose_must_match_frozen_execution FAIL_CAUGHT restored=True AssertionError: purpose assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed in 0.18s]
+[20/38] recorded_context_class_is_rejected START
+[20/38] recorded_context_class_is_rejected FAIL_CAUGHT restored=True AssertionError: assert 'executor_class' in ('run_evidence_class',)  +  where ('run_evidence_class',) = Compari [1 failed in 0.18s]
+[21/38] unknown_mandatory_budget_blocks START
+[21/38] unknown_mandatory_budget_blocks FAIL_CAUGHT restored=True assert False  +  where False = all(<generator object test_unknown_mandatory_cost_and_exceeded_call_budget_bloc [1 failed in 0.17s]
+[22/38] exceeded_mandatory_budget_blocks START
+[22/38] exceeded_mandatory_budget_blocks FAIL_CAUGHT restored=True AssertionError: assert () == ('mandatory_b...rvice_calls',)      Right contains one more item: 'mandatory_budg [1 failed in 0.18s]
+[23/38] stored_usage_counts_service_calls START
+[23/38] stored_usage_counts_service_calls FAIL_CAUGHT restored=True AssertionError: assert 0 == 1  +  where 0 = CandidateMetrics(candidate_label='A', candidate_version_id='versio [1 failed in 0.16s]
+[24/38] protected_usage_is_not_public_efficiency START
+[24/38] protected_usage_is_not_public_efficiency FAIL_CAUGHT restored=True assert (2, 108, 211, 314) == (1, 7, 9, 11)      At index 0 diff: 2 != 1   Use -v to get more diff [1 failed in 0.16s]
+[25/38] protected_mandatory_failure_is_never_accepted START
+[25/38] protected_mandatory_failure_is_never_accepted FAIL_CAUGHT restored=True AssertionError: assert True is False  +  where True = protected_acceptance(SealedCase(id='bookshop-task-comple [1 failed in 0.15s]
+[26/38] frozen_context_hash_is_verified_on_readback START
+[26/38] frozen_context_hash_is_verified_on_readback FAIL_CAUGHT restored=True AssertionError: requirement_set_id assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 3.24s]
+[27/38] readback_guard_public_data_bytes_hash_reports_its_own_field START
+[27/38] readback_guard_public_data_bytes_hash_reports_its_own_field FAIL_CAUGHT restored=True AssertionError: ('public_data_bytes_hash', ['condition']) assert 'public_data_bytes_hash' in ['condition'] [1 failed, 2 warnings in 2.71s]
+[28/38] readback_guard_condition_reports_its_own_field START
+[28/38] readback_guard_condition_reports_its_own_field FAIL_CAUGHT restored=True AssertionError: ('condition', ['assessment_context', 'experiment_schedule']) assert 'condition' in ['assessmen [1 failed, 2 warnings in 2.75s]
+[29/38] readback_guard_visible_check_set_reports_its_own_field START
+[29/38] readback_guard_visible_check_set_reports_its_own_field FAIL_CAUGHT restored=True AssertionError: ('visible_check_set', ['assessment_context', 'experiment_schedule']) assert 'visible_check_set [1 failed, 2 warnings in 2.81s]
+[30/38] readback_guard_workload_1_reports_its_own_field START
+[30/38] readback_guard_workload_1_reports_its_own_field FAIL_CAUGHT restored=True AssertionError: ('workload_1', ['assessment_context', 'experiment_schedule']) assert 'workload_1' in ['assessm [1 failed, 2 warnings in 3.02s]
+[31/38] readback_guard_assessment_context_reports_its_own_field START
+[31/38] readback_guard_assessment_context_reports_its_own_field FAIL_CAUGHT restored=True AssertionError: ('assessment_context', ['experiment_schedule', 'frozen_context']) assert 'assessment_context'  [1 failed, 2 warnings in 3.26s]
+[32/38] readback_guard_experiment_schedule_reports_its_own_field START
+[32/38] readback_guard_experiment_schedule_reports_its_own_field FAIL_CAUGHT restored=True AssertionError: ('experiment_schedule', []) assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + CO [1 failed, 2 warnings in 3.95s]
+[33/38] readback_guard_candidate_A_reports_its_own_field START
+[33/38] readback_guard_candidate_A_reports_its_own_field FAIL_CAUGHT restored=True AssertionError: ('candidate_A', []) assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 3.90s]
+[34/38] readback_guard_run_binding_reports_its_own_field START
+[34/38] readback_guard_run_binding_reports_its_own_field FAIL_CAUGHT restored=True AssertionError: ('run_binding', []) assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 4.14s]
+[35/38] public_assessments_are_recomputed_on_readback START
+[35/38] public_assessments_are_recomputed_on_readback FAIL_CAUGHT restored=True AssertionError: 1 assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 2.95s]
+[36/38] protected_assessments_are_recomputed_on_readback START
+[36/38] protected_assessments_are_recomputed_on_readback FAIL_CAUGHT restored=True AssertionError: 3 assert 'COMPLETE' == 'NOT_COMPARABLE'      - NOT_COMPARABLE   + COMPLETE [1 failed, 2 warnings in 2.94s]
+[37/38] diagnostic_panel_never_projects_a_comparison START
+[37/38] diagnostic_panel_never_projects_a_comparison FAIL_CAUGHT restored=True AssertionError: assert 'experiment-b...p-shift-01-c1' == 'experiment-b...p-shift-01-d1'      - experiment-book [1 failed, 2 warnings in 3.15s]
+[38/38] retired_reservation_state_is_invalidated START
+[38/38] retired_reservation_state_is_invalidated FAIL_CAUGHT restored=True AssertionError: assert 'ACTIVE' == 'INVALIDATED'      - INVALIDATED   + ACTIVE [1 failed, 2 warnings in 2.75s]
