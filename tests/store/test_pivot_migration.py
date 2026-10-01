@@ -409,3 +409,65 @@ def test_observations_and_run_assessments_reject_mutation(tmp_path):
             )
     finally:
         conn.close()
+
+
+def test_observed_context_references_reject_update_and_delete(tmp_path):
+    """An experiment's observed-context link is written once and never rewritten.
+
+    ``created_at`` has no other constraint behind it, so the two triggers are the
+    only guard that keeps the link stable for the comparison's life.
+    """
+    conn, _ = _migrated_v6(tmp_path)
+    try:
+        slug = conn.execute("SELECT engagement_slug FROM shifts ORDER BY seq LIMIT 1").fetchone()[0]
+        run_id = conn.execute("SELECT id FROM runs LIMIT 1").fetchone()[0]
+        conn.execute(
+            "INSERT INTO execution_contexts (id, engagement_slug, workloads_json,"
+            " mission_bytes, mission_hash, public_data_bytes, public_data_hash,"
+            " starting_business_state_json, starting_business_state_hash,"
+            " requirement_set_id, requirement_set_hash, visible_check_set_hash,"
+            " condition_json, evaluator_version, reducer_version, executor_class,"
+            " harness_hash, service_model_settings_json, resource_limits_json,"
+            " created_at, content_hash)"
+            " VALUES ('context-observed', ?, '[{}]', x'', 'mission-hash', x'',"
+            " 'public-hash', '{}', 'state-hash', 'requirement-set',"
+            " 'requirement-hash', 'check-hash', '{}', 'operation-task-v1',"
+            " 'operation-ledger-v1', 'TRUSTED_LOCAL', 'harness-hash', '{}', '{}',"
+            " '2026-10-01T09:00:00+00:00', 'context-observed-hash')",
+            (slug,),
+        )
+        conn.execute(
+            "INSERT INTO experiments (id, shift_id, kind, investigation_id,"
+            " candidates_json, declared_treatment, context_id, content_hash,"
+            " trial_count_per_candidate, state, client_request_id, created_at)"
+            " VALUES ('experiment-observed',"
+            " (SELECT id FROM shifts ORDER BY seq LIMIT 1),"
+            " 'LATER_CONDITION_COMPARISON', NULL, '[{}, {}]',"
+            " 're-test both candidates under the observed outage',"
+            " 'context-observed', 'experiment-observed-hash', 3, 'FINALIZED',"
+            " 's20-observed-context-test', '2026-10-01T09:00:00+00:00')",
+        )
+        conn.execute(
+            "INSERT INTO experiment_observed_contexts (experiment_id, observed_run_id,"
+            " observed_context_id, created_at)"
+            " VALUES ('experiment-observed', ?, 'context-observed',"
+            " '2026-10-01T09:00:00+00:00')",
+            (run_id,),
+        )
+        conn.commit()
+
+        with pytest.raises(sqlite3.IntegrityError, match="never rewritten"):
+            conn.execute(
+                "UPDATE experiment_observed_contexts"
+                " SET created_at = '2026-10-01T10:00:00+00:00'"
+            )
+        with pytest.raises(sqlite3.IntegrityError, match="never deleted"):
+            conn.execute("DELETE FROM experiment_observed_contexts")
+
+        row = conn.execute(
+            "SELECT observed_run_id, created_at FROM experiment_observed_contexts"
+        ).fetchone()
+        assert row["observed_run_id"] == run_id
+        assert row["created_at"] == "2026-10-01T09:00:00+00:00"
+    finally:
+        conn.close()
