@@ -443,6 +443,11 @@ def freeze_version(
 
     The hash covers the frozen files, the ContractParams and the catalog hash, so
     any later change to a stored version is detected on read (test 21).
+
+    Ancestry comes from the draft's base, never from the newest stored version:
+    a draft inherited from the selected version, or explicitly restored from one,
+    records that base as ``parent_id`` and ``restored_from_id`` (Gate 3 S3.6), so
+    saving or freezing a new candidate cannot substitute itself as an ancestor.
     """
     shift = _require_open_shift(conn, shift_id)
     draft = repo.get_draft(conn, shift_id)
@@ -457,13 +462,20 @@ def freeze_version(
         files, canonical.contract_params_json(contract), catalog.content_hash
     )
     ordinal = repo.count_versions(conn) + 1
-    parent = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
-        conn, shift.engagement_slug
-    )
+    base_version_id = repo.get_draft_base_version_id(conn, shift_id)
+    if base_version_id is not None:
+        base = repo.get_version(conn, base_version_id)
+        if base is None:
+            raise LifecycleError("conflict", "the draft base version is missing")
+    else:
+        base = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
+            conn, shift.engagement_slug
+        )
     version = ArtifactVersion(
         id=f"ver-{ordinal:04d}",
         shift_id=shift_id,
-        parent_id=parent.id if parent else None,
+        parent_id=base.id if base else None,
+        restored_from_id=base_version_id,
         content_hash=content_hash,
         storage_ref=f"inline:{content_hash}",
         files=dict(files),
@@ -473,8 +485,40 @@ def freeze_version(
         created_at=_now(),
     )
     repo.insert_version(conn, version)
+    # The draft now holds exactly this version, so it becomes the base a later
+    # freeze descends from; a subsequent restore points the base somewhere else.
+    repo.set_draft_base_version(conn, shift_id, version.id)
     conn.commit()
     return version
+
+
+def restore_version_to_draft(
+    conn: sqlite3.Connection, shift_id: str, version_id: str
+) -> dict[str, Any]:
+    """Replace the draft with one stored version and record it as the new base.
+
+    Restoring A after saving B makes the next freeze descend from A, not from the
+    newest stored version (Gate 3 S3.6). The version must belong to this
+    engagement, and its stored bytes are re-verified on read, so a restore cannot
+    seed the draft from a tampered or foreign version.
+    """
+    shift = _require_open_shift(conn, shift_id)
+    version = repo.get_version(conn, version_id)
+    if version is None:
+        raise LifecycleError("not_found", f"unknown artifact version: {version_id}")
+    owner = repo.get_shift(conn, version.shift_id)
+    if owner is None or owner.engagement_slug != shift.engagement_slug:
+        raise LifecycleError("conflict", "a restored version must belong to this engagement")
+    updated_at = _now()
+    repo.upsert_draft(conn, shift_id, dict(version.files), updated_at, version.id)
+    repo.set_draft_base_version(conn, shift_id, version.id)
+    conn.commit()
+    return {
+        "shift_id": shift_id,
+        "files": dict(version.files),
+        "updated_at": updated_at,
+        "restored_from_version_id": version.id,
+    }
 
 
 def start_run(
@@ -1653,6 +1697,19 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
     totals: dict[str, int] = {}
     for event in events:
         totals[event.event_type.value] = totals.get(event.event_type.value, 0) + 1
+    inherited_requirements = None
+    if selection is not None and selection.comparison_id is not None:
+        comparison = repo.get_experiment(conn, selection.comparison_id)
+        comparison_context = (
+            repo.get_execution_context(conn, comparison.context_id) if comparison else None
+        )
+        if comparison_context is not None:
+            inherited_requirements = {
+                "comparison_id": comparison.id,
+                "requirement_set_id": comparison_context.requirement_set_id,
+                "requirement_set_hash": comparison_context.requirement_set_hash,
+                "visible_check_set_hash": comparison_context.visible_check_set_hash,
+            }
     return {
         "engagement_slug": slug,
         "business_kind": engagement["business_kind"],
@@ -1665,6 +1722,7 @@ def board_snapshot(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -
         ),
         "latest_saved_version_id": latest_saved.id if latest_saved else None,
         "operating_selection": selection,
+        "inherited_requirements": inherited_requirements,
         "artifact_files": tuple(sorted(latest_version.files)) if latest_version else (),
         "requests_run": requests_run,
         "attempts_used": attempts_used,
@@ -2083,6 +2141,33 @@ def artifact_source(conn: sqlite3.Connection, version_id: str) -> dict[str, Any]
     return payload
 
 
+def observed_condition(state_bytes: bytes, dependencies: dict[str, str]) -> ContextCondition:
+    """Label the frozen public condition from the dependency state actually observed.
+
+    The condition kind is derived from the state bytes the assessment consumes, so
+    a later observed dependency outage (Gate 3 S3.1's ``dependency_unavailable``)
+    is recorded by the controller, never supplied by a caller. Condition bytes and
+    hash stay identical to the public state's, which keeps the frozen-context
+    reconstruction check (``_frozen_comparison_context_hash``) intact.
+    """
+    unavailable = sorted(
+        name for name, value in dependencies.items() if value != "available"
+    )
+    if unavailable:
+        kind, identifier = "dependency_unavailable", "condition-dependency-outage"
+        label = "Observed dependency outage: " + ", ".join(unavailable)
+    else:
+        kind, identifier = "normal", "condition-normal"
+        label = "Normal public conditions"
+    return ContextCondition(
+        id=identifier,
+        kind=kind,
+        public_label=label,
+        exact_bytes_base64=_encode(state_bytes),
+        content_hash=_hash_bytes(state_bytes),
+    )
+
+
 def _diagnostic_context_fields(
     shift: Shift,
     mission: task_contract.MissionSpec,
@@ -2164,13 +2249,7 @@ def freeze_diagnostic_context(
             "unresolved_incident_ids": [incident.id for incident in repo.list_incidents(
                 conn, shift.engagement_slug) if incident.state is not IncidentState.RESOLVED],
         }
-    condition = ContextCondition(
-        id="condition-normal",
-        kind="normal",
-        public_label="Normal public conditions",
-        exact_bytes_base64=_encode(snapshot_bytes),
-        content_hash=_hash_bytes(snapshot_bytes),
-    )
+    condition = observed_condition(snapshot_bytes, snapshot.dependencies)
     fields = _diagnostic_context_fields(
         shift, mission, mission_bytes, snapshot_bytes, specs_bytes, workload, condition, starting_state
     )
@@ -2527,6 +2606,9 @@ def execute_experiment_task(db_path: str, run_id: str) -> None:
 # --- Slice 15: the qualifying comparison ------------------------------------
 
 COMPARISONS_PER_SHIFT = 1
+# One retained-alternative re-test per shift, reserved separately from the
+# qualifying comparison (Gate 3 S6.7); it consumes its own protected exposure.
+LATER_COMPARISONS_PER_SHIFT = 1
 COMPARE_DEADLINE_S = 10
 COMPARE_EVALUATOR_VERSION = evaluator.RULE_VERSION
 COMPARE_REDUCER_VERSION = "no-reduction: a qualifying comparison writes no ledger event"
@@ -2717,6 +2799,7 @@ def _comparison_context_fields(
     isolated: bool,
     starting_state: dict[str, Any],
     protected_bindings: tuple[task_contract.ProtectedBinding, ...],
+    condition: ContextCondition,
 ) -> dict[str, Any]:
     fields: dict[str, Any] = {
         "engagement_slug": shift.engagement_slug,
@@ -2732,13 +2815,7 @@ def _comparison_context_fields(
                 for workload in workloads
             ]
         ),
-        "condition": ContextCondition(
-            id="condition-normal",
-            kind="normal",
-            public_label="Normal public conditions",
-            exact_bytes_base64=_encode(snapshot_bytes),
-            content_hash=_hash_bytes(snapshot_bytes),
-        ).model_dump(mode="json"),
+        "condition": condition.model_dump(mode="json"),
         "evaluator_version": COMPARE_EVALUATOR_VERSION,
         "reducer_version": COMPARE_REDUCER_VERSION,
         "executor_class": EvidenceMode.ISOLATED_LIVE.value if isolated else EvidenceMode.TRUSTED_LOCAL.value,
@@ -2993,7 +3070,7 @@ def create_qualifying_comparison(
         bindings = _reserved_protected_bindings(conn, reservation_id)
         fields = _comparison_context_fields(
             shift, mission, mission_bytes, snapshot_bytes, workloads, reservation_id, isolated,
-            starting_state, bindings,
+            starting_state, bindings, observed_condition(snapshot_bytes, snapshot.dependencies),
         )
         context_hash = canonical.content_hash(fields)
         existing_context = repo.get_execution_context_by_hash(conn, context_hash)
@@ -3066,6 +3143,355 @@ def create_qualifying_comparison(
             (experiment.id, reservation_id),
         )
         versions = {"A": candidate_a, "B": candidate_b}
+        for pair, label, ordinal in schedule:
+            workload = workloads[pair - 1]
+            slot = TrialSlot(
+                id=f"{experiment.id}-slot-{ordinal}",
+                experiment_id=experiment.id,
+                pair_ordinal=pair,
+                execution_ordinal=ordinal,
+                candidate_label=label,
+                artifact_version_id=versions[label].id,
+                workload_id=workload.id,
+                request_batch_hash=workload.request_batch_hash,
+                request_count=workload.request_count,
+                executed_request_count=workload.request_count + 1,
+                protected_variant_refs=reserved.get(pair, ()),
+                state="RESERVED",
+            )
+            repo.insert_trial_slot(conn, slot)
+            run = Run(
+                id=f"run-{repo.count_runs_all(conn) + 1:04d}",
+                shift_id=shift.id,
+                artifact_version_id=versions[label].id,
+                request_batch_ref=f"frozen-workload:{workload.id}",
+                shop_snapshot_ref=f"frozen-context:{context.id}",
+                attempt_number=repo.count_runs(conn, shift.id) + 1,
+                state=RunState.QUEUED,
+                adapter=adapter,
+                started_at=_now(),
+                purpose=RunPurpose.EXPERIMENT,
+                evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
+                context_id=context.id,
+                experiment_id=experiment.id,
+                trial_slot_id=slot.id,
+            )
+            repo.insert_run(conn, run)
+            repo.update_trial_slot(conn, slot.id, run_id=run.id)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    return experiment
+
+
+def _require_dependency_only_variation(reviewed_bytes: bytes, observed_bytes: bytes) -> None:
+    """The observed world may differ from the reviewed comparison world only in
+    dependency availability, so the reviewed workload manifest stays valid: every
+    record and entity the reviewed requests name is byte-identical after parsing,
+    and only feasibility flags were observed differently."""
+    try:
+        reviewed = json.loads(reviewed_bytes.decode("utf-8"))
+        observed = json.loads(observed_bytes.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise LifecycleError("conflict", "an observed or reviewed world is unreadable") from exc
+    if not isinstance(reviewed, dict) or not isinstance(observed, dict):
+        raise LifecycleError("conflict", "an observed or reviewed world is unreadable")
+    if set(reviewed) != set(observed):
+        raise LifecycleError(
+            "conflict", "the observed world is not the reviewed comparison world"
+        )
+    changed = sorted(
+        key for key in reviewed if key != "dependencies" and reviewed[key] != observed[key]
+    )
+    if changed:
+        raise LifecycleError(
+            "conflict",
+            "the observed world changes more than dependency availability: "
+            + ", ".join(changed)
+            + "; the reviewed comparison workloads do not apply",
+        )
+
+
+def create_later_condition_comparison(
+    conn: sqlite3.Connection,
+    shift_id: str,
+    *,
+    operation_run_id: str,
+    declared_treatment: str,
+    client_request_id: str,
+    adapter: str = "local_process",
+) -> Experiment:
+    """Re-test the selected and retained versions under an observed later condition.
+
+    The candidates are the current operating selection's exact selected version
+    and its retained alternative; both are re-executed in fresh matched A/B slots
+    under the public bytes of one already-observed operational context (Gate 2
+    section 3, Gate 3 S6.7). The preceding operational run is never one side of
+    the experiment: every slot is a new run, and the reservation is separate from
+    the selection's original comparison exposure. A later-condition comparison can
+    never back a selection. It cannot replace the operational run, edit the prior
+    choice, resolve an incident or rewrite the ledger.
+    """
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        shift = _require_open_shift(conn, shift_id)
+        isolated = adapter == TokenFactoryAdapter.name
+        if adapter not in (LocalProcessAdapter.name, TokenFactoryAdapter.name):
+            raise LifecycleError("conflict", "no safe comparison executor is configured")
+        if isolated and (
+            not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID")
+        ):
+            raise BootstrapBlocked(
+                "the verified isolated executor and its controller credentials are unavailable"
+            )
+        selection, selected_version = _selected_operating_version(conn, shift)
+        if selection.kind != "LEARNER_CHOICE":
+            raise LifecycleError(
+                "conflict", "a later-condition comparison requires an explicit learner choice"
+            )
+        # append_selection only records a learner choice from a completed
+        # qualifying comparison, so the retained alternative always exists and
+        # differs in content; the lookup still fails closed if it ever vanishes.
+        retained_version = repo.get_version(conn, selection.retained_alternative_version_id)
+        if retained_version is None:
+            raise LifecycleError("not_found", "the retained alternative version is missing")
+        observed_run = repo.get_run(conn, operation_run_id)
+        if observed_run is None:
+            raise LifecycleError("not_found", f"unknown run: {operation_run_id}")
+        if (
+            observed_run.purpose is not RunPurpose.OPERATION
+            or observed_run.state is not RunState.FINALIZED
+            or observed_run.shift_id != shift.id
+            or observed_run.selection_id != selection.id
+            or observed_run.context_id is None
+        ):
+            raise LifecycleError(
+                "conflict",
+                "the observed context must be this shift's finalized operation of the "
+                "current selection",
+            )
+        observed_context = repo.get_execution_context(conn, observed_run.context_id)
+        if observed_context is None or observed_context.engagement_slug != shift.engagement_slug:
+            raise LifecycleError("conflict", "the observed operational context is unavailable")
+        if observed_context.condition.kind == "normal":
+            raise LifecycleError(
+                "conflict", "no later condition was observed by that operational run"
+            )
+        for candidate_version in (selected_version, retained_version):
+            owner = repo.get_shift(conn, candidate_version.shift_id)
+            if owner is None or owner.engagement_slug != shift.engagement_slug:
+                raise LifecycleError(
+                    "conflict", "comparison candidates must belong to this engagement"
+                )
+        candidates = (
+            CandidateRef(label="A", artifact_version_id=selected_version.id,
+                         artifact_content_hash=selected_version.content_hash),
+            CandidateRef(label="B", artifact_version_id=retained_version.id,
+                         artifact_content_hash=retained_version.content_hash),
+        )
+        treatment = declared_treatment.strip()
+        if not treatment:
+            raise LifecycleError("conflict", "a later-condition comparison needs a declared treatment")
+        replay = repo.get_experiment_by_client_request_id(conn, client_request_id)
+        if replay is not None:
+            if (
+                replay.shift_id == shift.id
+                and replay.kind is ExperimentKind.LATER_CONDITION_COMPARISON
+                and replay.observed_run_id == observed_run.id
+                and replay.candidates == candidates
+                and replay.declared_treatment == treatment
+            ):
+                conn.rollback()
+                return replay
+            raise LifecycleError(
+                "conflict", "client_request_id was already used for a different experiment"
+            )
+        used = repo.count_experiments_for_shift(
+            conn, shift.id, ExperimentKind.LATER_CONDITION_COMPARISON
+        )
+        if used >= LATER_COMPARISONS_PER_SHIFT:
+            raise LifecycleError(
+                "conflict",
+                f"this shift already reserved its later-condition comparison ({used} of "
+                f"{LATER_COMPARISONS_PER_SHIFT})",
+            )
+        if not isolated:
+            pinned = {
+                config.TRUSTED_LOCAL_FIXTURES["compare_candidate_a"][0],
+                config.TRUSTED_LOCAL_FIXTURES["compare_candidate_b"][0],
+            }
+            if {selected_version.content_hash, retained_version.content_hash} != pinned:
+                raise LifecycleError(
+                    "conflict",
+                    "only the two pinned reviewed candidates are executable as an offline comparison",
+                )
+
+        mission_bytes = config.PIVOT_MISSION.read_bytes()
+        mission = task_contract.load_mission_bytes(mission_bytes, label=config.PIVOT_MISSION.name)
+        if mission.engagement_slug != shift.engagement_slug:
+            raise LifecycleError("conflict", "reviewed mission belongs to another engagement")
+        # The frozen public bytes are the ones the operation actually observed, so
+        # a later fixture edit cannot change the condition this experiment tested.
+        snapshot_bytes = base64.b64decode(observed_context.public_data_bytes_base64, validate=True)
+        if _hash_bytes(snapshot_bytes) != observed_context.public_data_hash:
+            raise LifecycleError("conflict", "the observed context bytes do not verify")
+        snapshot = task_contract.load_public_state_bytes(snapshot_bytes, label="observed-context")
+        if not snapshot.records:
+            raise LifecycleError("conflict", "the observed public state carries no record")
+        # The reviewed workload manifest binds to the reviewed comparison world.
+        # The observed world must be that world with only dependency availability
+        # observed differently, so the reviewed requests stay valid for it and
+        # the experiment runs under the exact bytes the operation observed.
+        reviewed_comparison_bytes = config.PIVOT_COMPARE_STATE.read_bytes()
+        _require_dependency_only_variation(reviewed_comparison_bytes, snapshot_bytes)
+        workloads = _read_comparison_workloads(
+            shift.engagement_slug, mission, reviewed_comparison_bytes
+        )
+        events = repo.list_ledger_events(conn, shift.engagement_slug)
+        chain_status = chain.verify_chain(events)
+        if chain_status is chain.ChainStatus.BROKEN:
+            raise LifecycleError("conflict", "ledger chain is BROKEN; refusing comparison")
+
+        reservation_id = f"reservation-{repo.count_exposure_reservations(conn) + 1:04d}"
+        repo.insert_exposure_reservation(conn, ExposureReservation(
+            id=reservation_id, engagement_slug=shift.engagement_slug,
+            scope="comparison", experiment_id=None, state="ACTIVE", created_at=_now(),
+        ))
+        reserved: dict[int, tuple[str, ...]] = {}
+        for family in config.BOOKSHOP_COMPARISON_FAMILIES:
+            drawn = rotation.select_pair_variants(
+                family,
+                sealed_store.load_reviewed_comparison_family(family).cases,
+                _exposure_refs(conn, shift.engagement_slug, family),
+            )
+            for pair_ordinal, case in enumerate(drawn, start=1):
+                stimulus = case.stimulus
+                workload = workloads[pair_ordinal - 1]
+                if (stimulus is None
+                        or stimulus.request.ordinal != workload.request_count + 1
+                        or stimulus.task_spec.id != stimulus.request.request_id
+                        or stimulus.task_spec.text != stimulus.request.text
+                        or stimulus.request.entity_ref not in stimulus.task_spec.requested_entities
+                        or not stimulus.task_spec.tasks
+                        or len({task.id for task in stimulus.task_spec.tasks}) != len(stimulus.task_spec.tasks)
+                        or any(task.requested_entity_ref != stimulus.request.entity_ref
+                               for task in stimulus.task_spec.tasks)
+                        or any(rule not in mission.public_rules
+                               for rule in stimulus.task_spec.mandatory_rule_ids)):
+                    raise LifecycleError("conflict", "protected comparison stimulus violates the frozen public contract")
+                resolved_state = task_contract.resolve_protected_state(snapshot_bytes, stimulus.state_delta)
+                ref = rotation.variant_ref(case)
+                exposure_item_id = f"{reservation_id}-{family}-p{pair_ordinal}"
+                repo.insert_exposure_item(conn, ExposureItem(
+                    id=exposure_item_id, reservation_id=reservation_id,
+                    engagement_slug=shift.engagement_slug, family=family,
+                    cycle=sealed_store.family_cycle(family), variant_ref=ref,
+                    pair_ordinal=pair_ordinal, drawn_at=_now(),
+                ))
+                case_json = json.dumps(
+                    case.model_dump(mode="json"), sort_keys=True, separators=(",", ":"),
+                    ensure_ascii=False,
+                )
+                repo.insert_protected_case_snapshot(
+                    conn, exposure_item_id, ref, case_json,
+                    hashlib.sha256(case_json.encode("utf-8")).hexdigest(),
+                    resolved_state, _hash_bytes(resolved_state),
+                )
+                reserved[pair_ordinal] = reserved.get(pair_ordinal, ()) + (ref,)
+
+        totals: dict[str, int] = {}
+        for event in events:
+            totals[event.event_type.value] = totals.get(event.event_type.value, 0) + 1
+        starting_state = {
+            "chain_status": chain_status.value,
+            "ledger_event_count": len(events),
+            "ledger_head_hash": events[-1].hash if events else None,
+            "ledger_totals": totals,
+            "unresolved_incidents": [
+                incident.model_dump(mode="json")
+                for incident in repo.list_incidents(conn, shift.engagement_slug)
+                if incident.state in (IncidentState.OPEN, IncidentState.CLOSED_UNRESOLVED)
+            ],
+            "unresolved_limits": repo.list_unresolved_limits(conn, shift.engagement_slug),
+        }
+        bindings = _reserved_protected_bindings(conn, reservation_id)
+        fields = _comparison_context_fields(
+            shift, mission, mission_bytes, snapshot_bytes, workloads, reservation_id, isolated,
+            starting_state, bindings, observed_condition(snapshot_bytes, snapshot.dependencies),
+        )
+        context_hash = canonical.content_hash(fields)
+        existing_context = repo.get_execution_context_by_hash(conn, context_hash)
+        if existing_context is not None:
+            context = existing_context
+        else:
+            context = ExecutionContext(
+                id=f"context-{repo.count_execution_contexts(conn) + 1:04d}",
+                schema_version=1,
+                engagement_slug=shift.engagement_slug,
+                workloads=workloads,
+                mission_bytes_base64=_encode(mission_bytes),
+                mission_hash=fields["mission_hash"],
+                public_data_bytes_base64=_encode(snapshot_bytes),
+                public_data_hash=fields["public_data_hash"],
+                starting_business_state_json=starting_state,
+                starting_business_state_hash=fields["starting_business_state_hash"],
+                requirement_set_id=fields["requirement_set_id"],
+                requirement_set_hash=fields["requirement_set_hash"],
+                visible_check_set_hash=fields["visible_check_set_hash"],
+                protected_reservation_id=reservation_id,
+                condition=ContextCondition.model_validate(fields["condition"]),
+                evaluator_version=fields["evaluator_version"],
+                reducer_version=fields["reducer_version"],
+                executor_class=EvidenceMode(fields["executor_class"]),
+                harness_hash=fields["harness_hash"],
+                image_ref=fields["image_ref"],
+                service_model=fields["service_model"],
+                service_model_settings_json=fields["service_model_settings_json"],
+                resource_limits_json=fields["resource_limits_json"],
+                created_at=_now(),
+                content_hash=context_hash,
+            )
+            repo.insert_execution_context(conn, context)
+        schedule = _comparison_schedule(
+            context.content_hash, (selected_version.content_hash, retained_version.content_hash)
+        )
+        experiment = Experiment(
+            id=f"experiment-{shift.id}-later-1",
+            shift_id=shift.id,
+            kind=ExperimentKind.LATER_CONDITION_COMPARISON,
+            investigation_id=None,
+            candidates=candidates,
+            declared_treatment=treatment,
+            context_id=context.id,
+            content_hash=canonical.content_hash(
+                {
+                    "shift_id": shift.id,
+                    "kind": ExperimentKind.LATER_CONDITION_COMPARISON.value,
+                    "candidates": [candidate.model_dump(mode="json") for candidate in candidates],
+                    "context_hash": context.content_hash,
+                    "trial_count_per_candidate": COMPARISON_PAIRS,
+                    "declared_treatment": treatment,
+                    "schedule": [
+                        {"pair_ordinal": pair, "candidate_label": label, "execution_ordinal": ordinal}
+                        for pair, label, ordinal in schedule
+                    ],
+                }
+            ),
+            trial_count_per_candidate=COMPARISON_PAIRS,
+            state="PLANNED",
+            client_request_id=client_request_id,
+            created_at=_now(),
+        )
+        repo.insert_experiment(conn, experiment)
+        repo.insert_observed_context(
+            conn, experiment.id, observed_run.id, observed_context.id, experiment.created_at
+        )
+        conn.execute(
+            "UPDATE exposure_reservations SET experiment_id = ? WHERE id = ?",
+            (experiment.id, reservation_id),
+        )
+        versions = {"A": selected_version, "B": retained_version}
         for pair, label, ordinal in schedule:
             workload = workloads[pair - 1]
             slot = TrialSlot(
@@ -3414,8 +3840,10 @@ def execute_comparison(conn: sqlite3.Connection, experiment_id: str,
     experiment = repo.get_experiment(conn, experiment_id)
     if experiment is None:
         raise LifecycleError("not_found", f"unknown experiment: {experiment_id}")
-    if experiment.kind is not ExperimentKind.QUALIFYING_COMPARISON:
-        raise LifecycleError("conflict", "only a qualifying comparison is executed by this path")
+    if experiment.kind not in (
+        ExperimentKind.QUALIFYING_COMPARISON, ExperimentKind.LATER_CONDITION_COMPARISON
+    ):
+        raise LifecycleError("conflict", "only a comparison is executed by this path")
     if live_budget is not None:
         slots = repo.list_trial_slots(conn, experiment.id)
         runs = [repo.get_run(conn, slot.run_id) if slot.run_id else None for slot in slots]
@@ -3567,7 +3995,9 @@ def experiment_view(conn: sqlite3.Connection, experiment_id: str) -> dict[str, A
     experiment = repo.get_experiment(conn, experiment_id)
     if experiment is None:
         raise LifecycleError("not_found", f"unknown experiment: {experiment_id}")
-    if experiment.kind is ExperimentKind.QUALIFYING_COMPARISON:
+    if experiment.kind in (
+        ExperimentKind.QUALIFYING_COMPARISON, ExperimentKind.LATER_CONDITION_COMPARISON
+    ):
         return comparison_view(conn, experiment)
     return _diagnostic_experiment_view(conn, experiment)
 
@@ -3872,6 +4302,13 @@ def comparison_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[st
         "declared_treatment": experiment.declared_treatment,
         "context_hash": context.content_hash,
         "context_evidence_class": context.executor_class.value,
+        "condition": {
+            "id": context.condition.id,
+            "kind": context.condition.kind,
+            "public_label": context.condition.public_label,
+            "content_hash": context.condition.content_hash,
+        },
+        "observed_run_id": experiment.observed_run_id,
         "workloads": [
             {
                 "id": workload.id,
