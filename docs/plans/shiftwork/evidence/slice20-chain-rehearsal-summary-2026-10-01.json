@@ -1,0 +1,164 @@
+{
+  "ceilings": {
+    "comparison": null,
+    "operation": null
+  },
+  "ended_utc": "2026-10-01T15:15:02Z",
+  "guards": {
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\fixtures\\artifacts\\bookshop\\compare_repair_model_service.py": {
+      "actual": "fd770c1d86707ae8b69043939316a5e44fedc721641ab86ff529033290f26248",
+      "expected": "fd770c1d86707ae8b69043939316a5e44fedc721641ab86ff529033290f26248"
+    },
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\fixtures\\requests\\bookshop_compare_manifest.json": {
+      "actual": "2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f",
+      "expected": "2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f"
+    },
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\sealed\\cases\\bookshop_task_completion.json": {
+      "actual": "170dd925880b035c3a999512c982aaccaa2deda96e8d55950f4b7c14f0ce9a24",
+      "expected": "170dd925880b035c3a999512c982aaccaa2deda96e8d55950f4b7c14f0ce9a24"
+    }
+  },
+  "mode": "rehearsal",
+  "phase_a": {
+    "candidate_a": {
+      "content_hash": "01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82",
+      "source": "pinned_offline_pair",
+      "version_id": "ver-0003"
+    },
+    "candidate_b": {
+      "content_hash": "21b9733dbffab5d1845edc3f0b4e5c8cd9b26aafca3edb57778bdd51e3000105",
+      "version_id": "ver-0004"
+    },
+    "incident_events": [
+      1,
+      2,
+      3
+    ],
+    "investigation_id": "inv-0001",
+    "sale_events_for_run": 0,
+    "shift_id": "bookshop-shift-01",
+    "starter_run": {
+      "evidence_mode": "RECORDED_INSPECTION",
+      "id": "run-0001",
+      "state": "FINALIZED"
+    },
+    "starter_version_hash": "a1c1093fcc456ebb5afc07241bb24f34ca4ca80877a7fff00fe5c82e2c542f28"
+  },
+  "phase_b": {
+    "candidate_metrics": [
+      {
+        "candidate_label": "A",
+        "candidate_version_id": "ver-0003",
+        "cost_minor_units": null,
+        "incorrect_outputs": 0,
+        "input_tokens": 0,
+        "justified_clarifications": 0,
+        "justified_referrals": 0,
+        "justified_refusals": 2,
+        "missing_outputs": 0,
+        "output_tokens": 0,
+        "protected_denominator": 3,
+        "protected_failed": 0,
+        "protected_missing": 0,
+        "protected_passed": 3,
+        "provisioning_latency_ms": null,
+        "public_denominator_requests": 6,
+        "service_calls": 0,
+        "service_latency_ms": 0,
+        "unjustified_clarifications": 0,
+        "unjustified_referrals": 0,
+        "unjustified_refusals": 0,
+        "useful_completions": 4
+      },
+      {
+        "candidate_label": "B",
+        "candidate_version_id": "ver-0004",
+        "cost_minor_units": null,
+        "incorrect_outputs": 0,
+        "input_tokens": 0,
+        "justified_clarifications": 0,
+        "justified_referrals": 0,
+        "justified_refusals": 2,
+        "missing_outputs": 0,
+        "output_tokens": 0,
+        "protected_denominator": 3,
+        "protected_failed": 0,
+        "protected_missing": 0,
+        "protected_passed": 3,
+        "provisioning_latency_ms": null,
+        "public_denominator_requests": 6,
+        "service_calls": 0,
+        "service_latency_ms": 0,
+        "unjustified_clarifications": 0,
+        "unjustified_referrals": 0,
+        "unjustified_refusals": 0,
+        "useful_completions": 4
+      }
+    ],
+    "drift_fields": [],
+    "eligibility": [
+      {
+        "blocking_reason_codes": [],
+        "candidate_label": "A",
+        "candidate_version_id": "ver-0003",
+        "eligible": true
+      },
+      {
+        "blocking_reason_codes": [],
+        "candidate_label": "B",
+        "candidate_version_id": "ver-0004",
+        "eligible": true
+      }
+    ],
+    "experiment_id": "experiment-bookshop-shift-01-c1",
+    "inference_results": [],
+    "outcome_status": "COMPLETE",
+    "slot_states": [
+      "COMPLETE",
+      "COMPLETE",
+      "COMPLETE",
+      "COMPLETE",
+      "COMPLETE",
+      "COMPLETE"
+    ],
+    "state": "FINALIZED",
+    "successful_inference_results": 0
+  },
+  "phase_c": {
+    "prior_selection_id": "sel-0001",
+    "retained_alternative_version_id": "ver-0004",
+    "selected_content_hash": "01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82",
+    "selected_version_id": "ver-0003",
+    "selection_id": "sel-0002"
+  },
+  "phase_d": {
+    "closed_shift": "bookshop-shift-01",
+    "opened_shift": "bookshop-shift-02"
+  },
+  "phase_e": {
+    "adapter": "local_process",
+    "artifact_version_id": "ver-0003",
+    "checks_passed": 3,
+    "checks_total": 3,
+    "evidence_mode": "TRUSTED_LOCAL",
+    "inference_results": [],
+    "run_id": "run-0008",
+    "sale_event_cause_refs": [
+      "run-0008",
+      "cr-0006",
+      "run-0008-out-1"
+    ],
+    "sale_event_seq": 5,
+    "selection_id": "sel-0002",
+    "state": "FINALIZED",
+    "successful_inference_results": 0
+  },
+  "phase_f": {
+    "closed_shift": "bookshop-shift-02",
+    "draft_matches_selected_version": true,
+    "opened_shift": "bookshop-shift-03",
+    "sale_event_seq": 5
+  },
+  "started_utc": "2026-10-01T15:14:58Z",
+  "verdict": "REHEARSAL_COMPLETE"
+}
