@@ -244,6 +244,25 @@ def create_experiment(
                 background.add_task(orchestrator.execute_comparison_task,
                                     request.app.state.db_path, experiment.id,
                                     request.app.state.live_comparison_budget)
+    elif body.kind == "LATER_CONDITION_COMPARISON":
+        if adapter == "tokenfactory" and request.app.state.live_comparison_budget is None:
+            raise orchestrator.LifecycleError("conflict", "live comparison requires a bounded run budget")
+        experiment = orchestrator.create_later_condition_comparison(
+            conn,
+            shift_id,
+            operation_run_id=body.observed_run_id,
+            declared_treatment=body.declared_treatment,
+            client_request_id=body.client_request_id,
+            adapter=adapter,
+        )
+        if experiment.state == "PLANNED" and orchestrator.comparison_run(conn, experiment.id) is not None:
+            if request.app.state.live_comparison_budget is None:
+                background.add_task(orchestrator.execute_comparison_task,
+                                    request.app.state.db_path, experiment.id)
+            else:
+                background.add_task(orchestrator.execute_comparison_task,
+                                    request.app.state.db_path, experiment.id,
+                                    request.app.state.live_comparison_budget)
     else:
         experiment = orchestrator.create_diagnostic_experiment(
             conn,

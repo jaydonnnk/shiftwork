@@ -306,6 +306,22 @@ class SelectionView(BaseModel):
         return cls.model_validate(selection)
 
 
+class InheritedRequirementsView(BaseModel):
+    """The exact requirement and visible-test identities the selection carries.
+
+    The next shift restores the selected version, rationale, alternative, visible
+    tests, limits and unresolved incidents (Gate 3 S1 inheritance row); these are
+    the IDs and hashes of the frozen comparison the choice was made against.
+    """
+
+    model_config = _FROZEN
+
+    comparison_id: str
+    requirement_set_id: str
+    requirement_set_hash: str
+    visible_check_set_hash: str
+
+
 class BoardView(BaseModel):
     model_config = _FROZEN
 
@@ -318,6 +334,7 @@ class BoardView(BaseModel):
     draft_base_version_id: str | None
     latest_saved_version_id: str | None
     operating_selection: SelectionView | None
+    inherited_requirements: InheritedRequirementsView | None = None
     artifact_files: tuple[str, ...]
     requests_run: int
     attempts_used: int
@@ -410,25 +427,41 @@ class ExperimentRequest(BaseModel):
 
     model_config = _FROZEN
 
-    kind: Literal["DIAGNOSTIC", "QUALIFYING_COMPARISON"]
+    kind: Literal["DIAGNOSTIC", "QUALIFYING_COMPARISON", "LATER_CONDITION_COMPARISON"]
     investigation_id: str | None = None
-    candidate_a_version_id: str
+    candidate_a_version_id: str | None = None
     candidate_b_version_id: str | None = None
+    observed_run_id: str | None = None
     declared_treatment: str | None = Field(default=None, max_length=2000)
     client_request_id: str
 
     @model_validator(mode="after")
     def _check_kind_shape(self) -> "ExperimentRequest":
         if self.kind == "QUALIFYING_COMPARISON":
-            if self.candidate_b_version_id is None:
+            if self.candidate_a_version_id is None or self.candidate_b_version_id is None:
                 raise ValueError("a qualifying comparison needs two candidate versions")
+            if self.observed_run_id is not None:
+                raise ValueError("a qualifying comparison carries no observed run")
             if self.declared_treatment is None or not self.declared_treatment.strip():
                 raise ValueError("a qualifying comparison needs a declared treatment")
+        elif self.kind == "LATER_CONDITION_COMPARISON":
+            if self.candidate_a_version_id is not None or self.candidate_b_version_id is not None:
+                raise ValueError(
+                    "a later-condition comparison derives its candidates from the selection"
+                )
+            if self.observed_run_id is None:
+                raise ValueError("a later-condition comparison needs the observed operation run")
+            if self.declared_treatment is None or not self.declared_treatment.strip():
+                raise ValueError("a later-condition comparison needs a declared treatment")
         else:
+            if self.candidate_a_version_id is None:
+                raise ValueError("a diagnostic names exactly one candidate")
             if self.candidate_b_version_id is not None:
                 raise ValueError("a diagnostic names exactly one candidate")
             if self.declared_treatment is not None:
                 raise ValueError("a diagnostic carries no declared treatment")
+            if self.observed_run_id is not None:
+                raise ValueError("a diagnostic carries no observed run")
         return self
 
 
@@ -513,6 +546,17 @@ class CandidateView(BaseModel):
     artifact_content_hash: str
 
 
+class ContextConditionView(BaseModel):
+    """The public label of the frozen condition one comparison ran under."""
+
+    model_config = _FROZEN
+
+    id: str
+    kind: str
+    public_label: str
+    content_hash: str
+
+
 class ExperimentView(BaseModel):
     model_config = _FROZEN
 
@@ -523,6 +567,8 @@ class ExperimentView(BaseModel):
     declared_treatment: str
     context_hash: str
     context_evidence_class: str
+    condition: ContextConditionView | None = None
+    observed_run_id: str | None = None
     workloads: tuple[FrozenWorkloadView, ...]
     candidates: tuple[CandidateView, ...]
     trials: tuple[ExperimentTrialView, ...]
