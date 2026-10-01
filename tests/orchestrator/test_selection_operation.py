@@ -15,6 +15,7 @@ from shiftwork.app import create_app
 from shiftwork.domain.errors import InvalidSealedCase
 from shiftwork.sealed import store as sealed_store
 from shiftwork.store import db, repo
+from tests.orchestrator import pivot_flow
 from shiftwork.domain.models import (ExecutorFailure, RunOutput, RunState,
                                      LedgerEventDraft, LedgerEventType,
                                       ExecutionObservation, ObservationKind,
@@ -1034,3 +1035,363 @@ def test_legacy_investigation_exception_is_narrow(tmp_path):
             assert repo.count_investigations(conn) == 2
         finally:
             conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Slice 20: the observed later condition re-tests both candidates without
+# rewriting history.
+# ---------------------------------------------------------------------------
+
+
+def test_later_alternative_experiment_does_not_rewrite_original_history(tmp_path, monkeypatch):
+    """Obligation 34: fresh matched slots under the observed condition, no rewrite.
+
+    The operation runs while a dependency is observed unavailable (a staged
+    derivation of the reviewed comparison state, labelled as staged). The later
+    comparison then re-executes the selected and retained versions in six fresh
+    slots under those exact observed bytes: the preceding operational run is
+    never one side of the experiment, and every prior selection, operation,
+    incident and ledger byte is unchanged afterwards.
+    """
+    db_file = tmp_path / "later-condition.db"
+    with TestClient(create_app(str(db_file))) as client:
+        flow = pivot_flow.qualified_shift(client)
+        successor = pivot_flow.open_successor(client)
+        successor_id = successor["id"]
+
+        outage = pivot_flow.staged_outage_state(tmp_path)
+        reviewed_state = config.PIVOT_PUBLIC_STATE
+        monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", outage)
+        started = client.post(
+            f"/api/shifts/{successor_id}/runs", json={"client_request_id": "s20-operation"}
+        )
+        assert started.status_code == 202, started.text
+        operation = pivot_flow.wait_run(client, started.json()["id"])
+        monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", reviewed_state)
+
+        assert operation["state"] == "FINALIZED", operation
+        assert operation["purpose"] == "OPERATION"
+        assert operation["artifact_version_id"] == flow["selected_version_id"]
+        outputs = client.get(f"/api/runs/{operation['id']}/outputs").json()
+        assert outputs, "the operation captured no output under the observed condition"
+        checks = client.get(f"/api/runs/{operation['id']}/checks").json()
+        assert checks, "the operation produced no task checks"
+
+        conn = db.connect(db_file)
+        try:
+            run_row = repo.get_run(conn, operation["id"])
+            context = repo.get_execution_context(conn, run_row.context_id)
+            assert context.condition.kind == "dependency_unavailable"
+            assert context.condition.public_label == "Observed dependency outage: collection"
+            assert base64.b64decode(context.public_data_bytes_base64) == outage.read_bytes()
+            assert context.executor_class.value == "TRUSTED_LOCAL"
+            observed_public_bytes = context.public_data_bytes_base64
+            inspected_context_public_hash = context.public_data_hash
+            prior_reservation = repo.get_exposure_reservation_for_experiment(
+                conn, flow["comparison"]["id"])
+            assert prior_reservation is not None and prior_reservation.state == "ACTIVE"
+            prior_refs = {
+                item.variant_ref
+                for item in repo.list_exposure_items(conn, prior_reservation.id)
+            }
+            before = pivot_flow.snapshot_rows(conn)
+            ledger_before = repo.list_ledger_events(conn, config.BOOKSHOP_SLUG)
+        finally:
+            conn.close()
+        operation_events = [
+            event for event in ledger_before if event.cause_refs == (operation["id"],)
+        ]
+        assert operation_events == [], (
+            "an outage-handled operation wrote a business event; the justified-referral "
+            "path is what this demonstration asserts"
+        )
+
+        created = client.post(f"/api/shifts/{successor_id}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": operation["id"],
+            "declared_treatment": "Re-test both candidates under the observed dependency outage",
+            "client_request_id": "s20-later-comparison",
+        })
+        assert created.status_code == 202, created.text
+        later = pivot_flow.wait_experiment(client, created.json()["id"])
+        assert later["state"] == "FINALIZED", later
+        assert later["kind"] == "LATER_CONDITION_COMPARISON"
+        assert later["condition"]["kind"] == "dependency_unavailable"
+        assert later["condition"]["public_label"] == "Observed dependency outage: collection"
+        assert later["observed_run_id"] == operation["id"]
+        assert later["outcome"]["status"] == "COMPLETE", later["outcome"]
+        assert {
+            candidate["artifact_version_id"] for candidate in later["candidates"]
+        } == {flow["selected_version_id"], flow["retained_version_id"]}
+        assert len(later["trials"]) == 6
+        assert {trial["run_id"] for trial in later["trials"]}.isdisjoint(
+            {operation["id"]}), "the preceding operational run must not be a trial"
+        assert all(trial["state"] == "COMPLETE" for trial in later["trials"])
+        assert all(trial["evidence_mode"] == "TRUSTED_LOCAL" for trial in later["trials"])
+        for pair_ordinal in (1, 2, 3):
+            labels = {
+                trial["candidate_label"] for trial in later["trials"]
+                if trial["pair_ordinal"] == pair_ordinal
+            }
+            assert labels == {"A", "B"}
+        version_by_label = {candidate["label"]: candidate["artifact_version_id"]
+                            for candidate in later["candidates"]}
+        assert version_by_label["A"] == flow["selected_version_id"]
+        assert version_by_label["B"] == flow["retained_version_id"]
+        for trial in later["trials"]:
+            expected = (flow["selected_version_id"] if trial["candidate_label"] == "A"
+                        else flow["retained_version_id"])
+            assert trial["artifact_version_id"] == expected, (
+                "a later-condition slot must execute the version its label names"
+            )
+        assert {trial["request_batch_hash"] for trial in later["trials"]} == {
+            workload["request_batch_hash"] for workload in later["workloads"]
+        }, "every later-condition slot must execute a reviewed comparison workload"
+
+        # A repeated identical request replays the recorded experiment, so a retry
+        # of this reservation cannot spend a second one.
+        replayed = client.post(f"/api/shifts/{successor_id}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": operation["id"],
+            "declared_treatment": "Re-test both candidates under the observed dependency outage",
+            "client_request_id": "s20-later-comparison",
+        })
+        assert replayed.status_code == 202, replayed.text
+        assert replayed.json()["id"] == later["id"], "the replay must return the recorded experiment"
+
+        conn = db.connect(db_file)
+        try:
+            pivot_flow.assert_prefix_unchanged(conn, before)
+            # The experiment ran under the exact bytes the operation observed,
+            # not under whatever the reviewed fixture says today.
+            later_context = repo.get_execution_context(
+                conn,
+                repo.get_run(conn, later["trials"][0]["run_id"]).context_id,
+            )
+            assert later_context.public_data_bytes_base64 == observed_public_bytes, (
+                "the later comparison must run under the exact observed bytes"
+            )
+            assert later_context.public_data_hash == inspected_context_public_hash
+            reservation = repo.get_exposure_reservation_for_experiment(conn, later["id"])
+            assert reservation is not None and reservation.id != prior_reservation.id
+            fresh_refs = {
+                item.variant_ref for item in repo.list_exposure_items(conn, reservation.id)
+            }
+            assert fresh_refs and fresh_refs.isdisjoint(prior_refs), (
+                "the later-condition comparison must consume its own never-exposed variants"
+            )
+        finally:
+            conn.close()
+
+        # The operating selection is untouched and the later comparison can never
+        # back a switch: switching needs a new eligible comparison and a choice.
+        board = client.get("/api/engagements/bookshop/board").json()
+        assert board["operating_selection"]["id"] == flow["choice"]["id"]
+        assert board["operating_selection"]["selected_version_id"] == flow["selected_version_id"]
+        refused = client.post(f"/api/shifts/{successor_id}/selections", json={
+            "comparison_id": later["id"],
+            "selected_version_id": flow["retained_version_id"],
+            "rationale": "switch after the later-condition experiment",
+            "expected_prior_selection_id": flow["choice"]["id"],
+            "client_request_id": "s20-switch",
+        })
+        assert refused.status_code == 409, refused.text
+        again = client.post(f"/api/shifts/{successor_id}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": operation["id"],
+            "declared_treatment": "second later-condition comparison",
+            "client_request_id": "s20-later-comparison-2",
+        })
+        assert again.status_code == 409, again.text
+        assert "already reserved its later-condition comparison" in again.json()["detail"], (
+            f"a second later-condition comparison must be refused by the per-shift cap: {again.text}"
+        )
+        missing = client.post(f"/api/shifts/{successor_id}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": "run-missing",
+            "declared_treatment": "later-condition comparison of an unknown run",
+            "client_request_id": "s20-later-comparison-3",
+        })
+        assert missing.status_code == 404, missing.text
+        # The observed run must be this shift's operation of the current
+        # selection: an identical operation from another shift is refused.
+        third = pivot_flow.open_successor(client)
+        wrong_shift = client.post(f"/api/shifts/{third['id']}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": operation["id"],
+            "declared_treatment": "later-condition comparison of another shift's operation",
+            "client_request_id": "s20-later-comparison-4",
+        })
+        assert wrong_shift.status_code == 409, wrong_shift.text
+        assert "finalized operation" in wrong_shift.json()["detail"], wrong_shift.text
+        # A reserved but unexecuted operation cannot be observed either; the run
+        # is not terminal, so its condition is not yet a recorded observation.
+        conn = db.connect(db_file)
+        try:
+            queued = orchestrator.start_run(conn, third["id"], client_request_id="s20-queued")
+        finally:
+            conn.close()
+        assert queued.state is RunState.QUEUED
+        assert queued.context_id is not None, "a queued operation must already freeze its context"
+        in_flight = client.post(f"/api/shifts/{third['id']}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": queued.id,
+            "declared_treatment": "later-condition comparison of an unexecuted operation",
+            "client_request_id": "s20-later-comparison-5",
+        })
+        assert in_flight.status_code == 409, in_flight.text
+        assert "finalized operation" in in_flight.json()["detail"], in_flight.text
+
+
+def _operate_under(client, monkeypatch, shift_id, world):
+    """Run one selected operation with the operation world pointed at ``world``."""
+    reviewed = config.PIVOT_PUBLIC_STATE
+    monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", world)
+    try:
+        started = client.post(
+            f"/api/shifts/{shift_id}/runs", json={"client_request_id": f"s20-world-{world.stem}"}
+        )
+        assert started.status_code == 202, started.text
+        run = pivot_flow.wait_run(client, started.json()["id"])
+    finally:
+        monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", reviewed)
+    assert run["state"] == "FINALIZED", run
+    return run
+
+
+def test_later_condition_needs_an_observed_change_and_its_own_world(tmp_path, monkeypatch):
+    """The refusals that guard the later-condition world.
+
+    An operation under the reviewed comparison world observed no change, so no
+    later-condition comparison may cite it; an operation under a world that
+    differs from the reviewed comparison world beyond dependency availability
+    cannot reuse the reviewed workloads; and a reviewed world of a different
+    shape is refused by key set before the workloads are read at all.
+    """
+    db_file = tmp_path / "later-worlds.db"
+    with TestClient(create_app(str(db_file))) as client:
+        pivot_flow.qualified_shift(client)
+        successor = pivot_flow.open_successor(client)
+        unchanged = _operate_under(
+            client, monkeypatch, successor["id"], config.PIVOT_COMPARE_STATE)
+        conn = db.connect(db_file)
+        try:
+            context = repo.get_execution_context(
+                conn, repo.get_run(conn, unchanged["id"]).context_id)
+            assert context.condition.kind == "normal", context.condition
+        finally:
+            conn.close()
+        no_change = client.post(f"/api/shifts/{successor['id']}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": unchanged["id"],
+            "declared_treatment": "later-condition comparison of an unchanged world",
+            "client_request_id": "s20-world-1",
+        })
+        assert no_change.status_code == 409, no_change.text
+        assert "no later condition was observed" in no_change.json()["detail"], no_change.text
+
+        # A later shift observes an outage, but in a world that is not the
+        # reviewed comparison world: the reviewed workloads do not apply.
+        third = pivot_flow.open_successor(client)
+        foreign = pivot_flow.staged_outage_state(
+            tmp_path, dependency="collection", source=config.PIVOT_PUBLIC_STATE)
+        operation = _operate_under(client, monkeypatch, third["id"], foreign)
+        refused = client.post(f"/api/shifts/{third['id']}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": operation["id"],
+            "declared_treatment": "later-condition comparison in an unrelated world",
+            "client_request_id": "s20-world-2",
+        })
+        assert refused.status_code == 409, refused.text
+        assert "dependency availability" in refused.json()["detail"], refused.text
+        conn = db.connect(db_file)
+        try:
+            assert not [
+                experiment
+                for experiment in repo.list_experiments_for_shift(conn, third["id"])
+                if experiment.kind.value == "LATER_CONDITION_COMPARISON"
+            ], "a refused later-condition comparison reserved an experiment"
+        finally:
+            conn.close()
+
+        # A differently shaped reviewed world cannot anchor the observed world
+        # either: the key sets must match exactly, and that refusal names the
+        # shape difference instead of reaching the workload manifest.
+        fourth = pivot_flow.open_successor(client)
+        operation = _operate_under(
+            client, monkeypatch, fourth["id"], pivot_flow.staged_outage_state(tmp_path))
+        reshaped = tmp_path / "reshaped-compare-world.json"
+        stored = json.loads(config.PIVOT_COMPARE_STATE.read_bytes().decode("utf-8"))
+        del stored["description"]
+        reshaped.write_bytes(json.dumps(stored, sort_keys=True).encode("utf-8"))
+        monkeypatch.setattr(config, "PIVOT_COMPARE_STATE", reshaped)
+        mismatched = client.post(f"/api/shifts/{fourth['id']}/experiments", json={
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": operation["id"],
+            "declared_treatment": "later-condition comparison under a reshaped reviewed world",
+            "client_request_id": "s20-world-3",
+        })
+        assert mismatched.status_code == 409, mismatched.text
+        assert "is not the reviewed comparison world" in mismatched.json()["detail"], (
+            mismatched.text)
+        conn = db.connect(db_file)
+        try:
+            assert not [
+                experiment
+                for experiment in repo.list_experiments_for_shift(conn, fourth["id"])
+                if experiment.kind.value == "LATER_CONDITION_COMPARISON"
+            ], "a shape-refused later-condition comparison reserved an experiment"
+        finally:
+            conn.close()
+
+
+def _row_counts(conn):
+    tables = [row[0] for row in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")]
+    return {name: conn.execute(f'SELECT COUNT(*) FROM "{name}"').fetchone()[0]
+            for name in sorted(tables)}
+
+
+def test_a_fault_mid_later_reservation_leaves_no_partial_comparison(tmp_path, monkeypatch):
+    """Obligation 34: the later-condition reservation is all-or-nothing as well.
+
+    The reservation body was copied from the qualifying comparison, so its
+    rollback guard is a separate branch the qualifying atomicity test cannot
+    reach. One faulted write mid-reservation must leave no experiment, no
+    observed-context link, no exposure and no slot behind, and must spend
+    nothing, so the same shift and the same request key can still reserve.
+    """
+    db_file = tmp_path / "later-atomic.db"
+    with TestClient(create_app(str(db_file))) as client:
+        pivot_flow.qualified_shift(client)
+        successor = pivot_flow.open_successor(client)
+        operation = _operate_under(
+            client, monkeypatch, successor["id"], pivot_flow.staged_outage_state(tmp_path))
+        request = {
+            "kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": operation["id"],
+            "declared_treatment": "Re-test both candidates under the observed dependency outage",
+            "client_request_id": "s20-later-atomic",
+        }
+
+        def fail(*args, **kwargs):
+            raise sqlite3.OperationalError("injected later-reservation write fault")
+
+        conn = db.connect(db_file)
+        try:
+            before = _row_counts(conn)
+            with monkeypatch.context() as patch:
+                patch.setattr(repo, "insert_trial_slot", fail)
+                with pytest.raises(sqlite3.Error, match="injected later-reservation write fault"):
+                    orchestrator.create_later_condition_comparison(
+                        conn, successor["id"],
+                        operation_run_id=operation["id"],
+                        declared_treatment=request["declared_treatment"],
+                        client_request_id=request["client_request_id"],
+                    )
+            assert _row_counts(conn) == before, (
+                "a faulted later reservation left a partial row behind")
+        finally:
+            conn.close()
+        reserved = client.post(f"/api/shifts/{successor['id']}/experiments", json=request)
+        assert reserved.status_code == 202, reserved.text

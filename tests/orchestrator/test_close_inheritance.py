@@ -21,6 +21,7 @@ from shiftwork.app import create_app
 from shiftwork.domain.models import IncidentState, RunState
 from shiftwork.ledger import chain
 from shiftwork.store import db, repo
+from tests.orchestrator import pivot_flow
 
 DECLARED = (
     "Shelf stock, price and availability answers only; no delivery or reservation promises.",
@@ -440,3 +441,193 @@ def test_inherited_unresolved_incident_resolves_on_a_later_passing_run(
         assert results and {result.verdict for result in results} == {"pass"}
     finally:
         conn.close()
+
+
+# ---------------------------------------------------------------------------
+# Slice 20: inheritance of the exact selection, restore ancestry and the
+# close-does-not-select clause.
+# ---------------------------------------------------------------------------
+
+
+def test_next_shift_inherits_selection_rationale_alternative_tests_and_limits(tmp_path):
+    """Obligation 33: exact IDs and hashes, not counts, survive close and open.
+
+    The retained alternative is deliberately the newest saved version, so the
+    inheritance proof would fail if the next shift took the latest save instead
+    of the exact selection, and the base ancestry is asserted directly.
+    """
+    db_file = tmp_path / "inherit-selection.db"
+    with TestClient(create_app(str(db_file))) as client:
+        flow = pivot_flow.qualified_shift(client)
+        before = _board(client)
+        assert before["latest_saved_version_id"] == flow["retained_version_id"], (
+            "the retained alternative must be the newest saved version for this proof"
+        )
+        assert before["operating_selection"]["id"] == flow["choice"]["id"]
+        assert before["inherited_requirements"] is not None
+
+        closed = _call(client, "POST", f"/api/shifts/{flow['shift_id']}/close")
+        assert closed["state"] == "closed"
+        closed_ledger = _ledger(client)["events"]
+        successor = _call(client, "POST", "/api/engagements/bookshop/shifts")
+        board = _board(client)
+        selection = board["operating_selection"]
+
+        assert board["latest_shift"]["id"] == successor["id"]
+        assert selection["id"] == flow["choice"]["id"]
+        assert selection["kind"] == "LEARNER_CHOICE"
+        assert selection["selected_version_id"] == flow["selected_version_id"]
+        assert selection["selected_content_hash"] == flow["candidates"][
+            flow["chosen_label"]]["content_hash"]
+        assert selection["comparison_id"] == flow["comparison"]["id"]
+        assert selection["retained_alternative_version_id"] == flow["retained_version_id"]
+        assert selection["rationale"] == flow["choice"]["rationale"]
+        assert selection["prior_selection_id"] == flow["choice"]["prior_selection_id"]
+        assert selection["state"] == "VALID"
+        assert selection["requirement_set_hash"] == flow["choice"]["requirement_set_hash"]
+
+        inherited = board["inherited_requirements"]
+        assert inherited == before["inherited_requirements"]
+        assert inherited["comparison_id"] == flow["comparison"]["id"]
+        assert inherited["requirement_set_id"].startswith("public-rubric:bookshop:v")
+        assert len(inherited["requirement_set_hash"]) == 64
+        assert len(inherited["visible_check_set_hash"]) == 64
+
+        draft = _call(client, "GET", f"/api/shifts/{successor['id']}/artifact")
+        assert draft["files"] == config.comparison_candidate_files(flow["chosen_label"])
+        assert board["draft_base_version_id"] == flow["selected_version_id"], (
+            "the inherited draft must descend from the exact selection, not the newest save"
+        )
+        # The newest saved version in the engagement is the retained alternative,
+        # so a latest-save substitution would visibly seed the draft from it; the
+        # successor itself has saved nothing.
+        assert board["latest_version"]["id"] == flow["retained_version_id"]
+        assert board["latest_saved_version_id"] is None
+
+        assert board["unresolved_limits"] == list(
+            config.PIVOT_STARTER_CONTRACT_JSON["declared_limits"]
+        )
+        assert board["operating_status"] == "SELECTED"
+        assert board["chain_status"] == "VALID"
+        # Opening the successor appends nothing: the ledger after the open is
+        # byte-identical to the ledger after the close.
+        assert _ledger(client)["events"] == closed_ledger
+        assert {incident["id"] for incident in board["incidents"]} == {
+            incident["id"] for incident in before["incidents"]}
+        assert {incident["state"] for incident in board["incidents"]} <= {"CLOSED_UNRESOLVED"}
+
+
+def test_close_declares_limits_without_selecting_or_selling(tmp_path):
+    """Obligation 26's close clause: closing never selects and writes no sale."""
+    db_file = tmp_path / "close-no-select.db"
+    with TestClient(create_app(str(db_file))) as client:
+        flow = pivot_flow.qualified_shift(client)
+        selections_before = _call(client, "GET", "/api/engagements/bookshop/selections")
+        ledger_before = _ledger(client)["events"]
+
+        closed = _call(client, "POST", f"/api/shifts/{flow['shift_id']}/close")
+        assert closed["state"] == "closed"
+
+        selections_after = _call(client, "GET", "/api/engagements/bookshop/selections")
+        assert selections_after == selections_before, "closing the shift appended a selection"
+        events = _ledger(client)["events"]
+        assert events[: len(ledger_before)] == ledger_before
+        appended = events[len(ledger_before):]
+        assert {event["event_type"] for event in appended} == {"LIMIT_DECLARED"}
+        assert len(appended) == len(config.PIVOT_STARTER_CONTRACT_JSON["declared_limits"])
+        assert all(event["synthetic"] is True for event in appended)
+
+        successor = _open(client)
+        board = _board(client)
+        assert board["latest_shift"]["id"] == successor
+        assert board["operating_selection"]["id"] == flow["choice"]["id"], (
+            "the next shift must inherit the prior selection; close made none"
+        )
+        assert board["unresolved_limits"] == list(
+            config.PIVOT_STARTER_CONTRACT_JSON["declared_limits"]
+        )
+
+
+def test_freeze_ancestry_follows_the_draft_base_and_explicit_restore(tmp_path):
+    """The Gate 3 S3.6 ancestry rule when A is restored after B was saved."""
+    db_file = tmp_path / "ancestry.db"
+    with TestClient(create_app(str(db_file))) as client:
+        flow = pivot_flow.qualified_shift(client)
+        successor = pivot_flow.open_successor(client)
+        board = _board(client)
+        assert board["latest_shift"]["id"] == successor["id"]
+        assert board["draft_base_version_id"] == flow["selected_version_id"]
+        # The pinned candidates were frozen under this contract; a frozen hash
+        # covers the contract too, so the restore proof must use the same one.
+        contract = config.PIVOT_STARTER_CONTRACT_JSON
+
+        inherited = _freeze(client, successor["id"], contract)
+        assert inherited["parent_id"] == flow["selected_version_id"], (
+            "an inherited freeze must descend from the exact selection"
+        )
+        conn = db.connect(db_file)
+        try:
+            version = repo.get_version(conn, inherited["id"])
+            assert version.restored_from_id == flow["selected_version_id"], (
+                "the inherited freeze must record the exact selection as its restore source"
+            )
+        finally:
+            conn.close()
+
+        # Editing the same draft further chains from the version just frozen.
+        _call(client, "PUT", f"/api/shifts/{successor['id']}/artifact", json={
+            "files": config.comparison_candidate_files(flow["retained_label"])})
+        saved = _freeze(client, successor["id"], contract)
+        assert saved["parent_id"] == inherited["id"]
+        conn = db.connect(db_file)
+        try:
+            assert repo.get_version(conn, saved["id"]).restored_from_id == inherited["id"]
+        finally:
+            conn.close()
+
+        # Restoring A after B was saved and frozen: the next freeze descends from
+        # A, not from the newest stored version (B's frozen copy).
+        conn = db.connect(db_file)
+        try:
+            restored = orchestrator.restore_version_to_draft(
+                conn, successor["id"], flow["selected_version_id"])
+        finally:
+            conn.close()
+        assert restored["files"] == config.comparison_candidate_files(flow["chosen_label"])
+        after_restore = _freeze(client, successor["id"], contract)
+        assert after_restore["content_hash"] == flow["candidates"][flow["chosen_label"]][
+            "content_hash"]
+        assert after_restore["parent_id"] == flow["selected_version_id"], (
+            "restoring A after saving B must record A as the parent, not the newest version"
+        )
+        conn = db.connect(db_file)
+        try:
+            version = repo.get_version(conn, after_restore["id"])
+            assert version.restored_from_id == flow["selected_version_id"]
+            assert repo.get_latest_version(conn, successor["id"]).id == after_restore["id"]
+        finally:
+            conn.close()
+
+        # An unknown version is refused before the draft is touched.
+        conn = db.connect(db_file)
+        try:
+            with pytest.raises(orchestrator.LifecycleError):
+                orchestrator.restore_version_to_draft(conn, successor["id"], "ver-missing")
+        finally:
+            conn.close()
+
+        # A closed shift's draft is history: a restore is refused, and the
+        # refused call leaves the stored base exactly where it was.
+        _call(client, "POST", f"/api/shifts/{successor['id']}/close")
+        conn = db.connect(db_file)
+        try:
+            base_before = repo.get_draft_base_version_id(conn, successor["id"])
+            assert base_before == after_restore["id"]
+            with pytest.raises(orchestrator.LifecycleError, match="closed"):
+                orchestrator.restore_version_to_draft(
+                    conn, successor["id"], flow["retained_version_id"])
+            assert repo.get_draft_base_version_id(conn, successor["id"]) == base_before, (
+                "a refused restore moved the draft base"
+            )
+        finally:
+            conn.close()
