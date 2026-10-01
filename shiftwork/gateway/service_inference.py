@@ -16,7 +16,7 @@ import httpx
 from pydantic import ValidationError
 
 from shiftwork.gateway.protocol import InferencePolicy, InferenceRequest
-from shiftwork.live_budget import LiveComparisonBudget
+from shiftwork.live_budget import LiveInferenceMeter
 
 PROVIDER_URL = "https://api.tokenfactory.nebius.com/v1/chat/completions"
 
@@ -31,7 +31,7 @@ class GatewayRejected(Exception):
 
 class ServiceInferenceGateway:
     def __init__(self, token: str, policy: InferencePolicy, *, http: httpx.AsyncClient | None = None,
-                 live_budget: LiveComparisonBudget | None = None):
+                 live_budget: LiveInferenceMeter | None = None):
         if not token or not policy.operation_id or not policy.run_id:
             raise ValueError("gateway credentials and run binding are required")
         if policy.max_calls != 1 or not 1 <= policy.request_ordinal <= 4 or not 0 < policy.max_output_tokens <= 1024:
@@ -79,7 +79,7 @@ class ServiceInferenceGateway:
             try:
                 self._live_budget.before_inference(self.policy.model)
             except ValueError:
-                self._reject("LIVE_COMPARISON_BUDGET_EXHAUSTED")
+                self._reject("LIVE_BUDGET_EXHAUSTED")
         self._calls += 1  # A provider failure still consumes the one call.
         self.observations.append((
             "INFERENCE_REQUEST",
