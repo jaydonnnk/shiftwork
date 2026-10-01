@@ -390,18 +390,26 @@ slice's go-ahead and live-call authorization.
   snapshot to change its label would break that pin and the S16 runner's byte
   pin, so the label was left as it is and the gap is recorded here instead.
 
-### Stretch chain: NOT ACHIEVED, not started
+### Stretch chain achieved: 2026-10-01 UTC, verified 2026-10-02
 
 The linked `ISOLATED_LIVE` chain that `04-slices.md` S20 carries as a stretch
 evidence target (one learner-owned repaired version making recorded Nemotron
 calls in its qualifying comparison, independently passing the customer task
 checks, explicitly selected by exact version and hash, then making a recorded
 Nemotron call as that same selected version in operation with independently
-checked synthetic consequences, and inherited by the next shift) is **not
-achieved** and was not started this session. Its drop point is 2026-10-20; no
-later slice or claim depends on it, and S20's exit contract is complete without
-it. Three concrete blockers were established by read-only research and are
-recorded here so the next session does not rediscover them:
+checked synthetic consequences, and inherited by the next shift) is **achieved**
+by the fresh SSE-recovery attempt on 2026-10-01 UTC. Its six comparison slots
+completed, candidate A was
+explicitly selected by exact version/hash, the selected live operation passed
+three checks and produced a synthetic sale, and the next shift inherited that
+version and history. A real SSE break in the selected operation was resumed
+successfully. The database verification was recorded on 2026-10-02 in
+Asia/Singapore. The first failed attempt and every earlier artifact remain
+unchanged. This proves the narrow stretch target, not learning impact or broad
+model quality. The original 2026-10-20 drop point remains historical; no later
+slice depends on the stretch target. The three blockers below and the failed
+attempt subsections are preserved as historical evidence, followed by the
+delegated decision and the successful run:
 
 1. The selected operation cannot run live today. `_reserve_selected_operation`
    hardcodes `adapter=LocalProcessAdapter.name` and
@@ -428,6 +436,237 @@ recorded here so the next session does not rediscover them:
 Live calls for this slice are authorized by the user, but each run still needs
 its own same-day rate-card preflight (the S16 runner's date guard is pinned to
 2026-09-29), its own one-shot marker discipline and its own recorded spend.
+That authorization was exercised once on 2026-10-01 (one attempt, marker burned,
+no retry); any further attempt needs a new one-shot marker, a new same-day
+preflight and new explicit user authorization. The repairs, the runner, the
+rehearsal and the live attempt are recorded in the next subsection.
+
+### Stretch chain pre-change anchor round and offline baseline: 2026-10-01
+
+The user directed the mechanical pre-change work for the S20 `ISOLATED_LIVE`
+stretch chain and left the three repairs' design and implementation to a
+continuation session. This subsection records that work; it changes no
+verdict, and no live call, credential, install, seal or fixture edit was
+involved. Nothing was committed or pushed.
+
+- `shiftwork/slice-20` was fast-forwarded locally to `651592f` (the S20
+  record commit on main). `origin/shiftwork/slice-20` remains at `0520141`;
+  no push was made.
+- `RESULTS_LOG` in `tests/pivot_mutation_proofs.py` and
+  `tests/slice16_mutation_proofs.py` was re-pointed to the fresh uncommitted
+  paths `slice20-stretch-pivot-mutation-2026-10-01.txt` and
+  `slice20-stretch-slice16-mutation-2026-10-01.txt`; both previous targets
+  were committed evidence that a re-run would have truncated.
+- Six-harness pre-change round, strictly serial under
+  `.venv313/Scripts/python.exe` from the repo root: `tests/mutation_proofs.py`
+  42 of 42, `tests/slice16_mutation_proofs.py` 38 of 38,
+  `tests/s18_mutation_proofs.py` 19 of 19 (the recorded flake did not recur),
+  `tests/pivot_mutation_proofs.py` 97 of 97, `tests/s19_mutation_proofs.py`
+  16 of 16 and `tests/s20_mutation_proofs.py` 20 of 20, all FAIL_CAUGHT,
+  zero unproven and zero `restored=False`, every harness exit 0. The
+  whole-worktree `git diff` hashed
+  `3ea6bd277a74cd7048a705c8778595ea402a79601ec494123037e8b16fa5e491` before
+  and after the round, byte-identical, and `git diff --check` is clean.
+  Evidence: `slice20-stretch-mutation-round-2026-10-01.txt` plus the
+  per-harness stdout files of the same prefix and date (the pivot and slice16
+  stdout files carry the `-stdout` suffix; their per-row logs are the two
+  re-pointed RESULTS_LOG files).
+- Offline baseline re-ran to the recorded figures: full suite 620 passed and
+  1 skipped (239.87s), the named S20 command 57 passed (89.61s),
+  `--collect-only` 621 collected, and `python -m demos.final_pivot --stage
+  inheritance` exited 0 with `PASS_OFFLINE_POLICY`; its stdout JSON line is
+  byte-identical apart from CR to `slice20-inheritance-demo-2026-09-30.txt`
+  (CR-stripped, no trailing LF,
+  `82c64ef9e335ebe57039f43423533bfc7187ce8edc9ee4badaa5e8dd3ebef651` on both
+  sides). Evidence: `slice20-stretch-baseline-2026-10-01.txt` and its four
+  per-command files plus the demo stderr file.
+- The anchor-rot trigger for the upcoming comparison and operation edits is
+  now anchored at this pre-change state; the post-change six-harness round is
+  owed by the continuation session, as is the design of the three recorded
+  blockers: the live selected-operation path (`_reserve_selected_operation`
+  and `execute_selected_operation`), an operation-shaped live budget beside
+  `LiveComparisonBudget`, and a model-calling candidate artifact whose
+  `request_ordinal` comes from a per-process request counter. At handoff the
+  tree holds only the intended pre-change state: the two re-pointed harness
+  files and this status record modified, and the new evidence files untracked,
+  all uncommitted. The continuation session completed all of this on
+  2026-10-01; the next subsection records the post-change round, the runner,
+  the offline rehearsal and the single live attempt.
+
+### Stretch chain post-change round, rehearsal and live attempt: 2026-10-01
+
+The three recorded blockers were repaired, the post-change proofs re-ran, a
+one-shot live-chain runner was written and rehearsed offline, and one
+authorized live attempt ran. Nothing is committed or pushed; this is
+uncommitted intended state on `shiftwork/slice-20` (local `651592f`,
+`origin/shiftwork/slice-20` `0520141`).
+
+- Repairs (offline; no live call): the selected-operation path now reserves
+  through the controller's configured adapter, freezes an isolated context and
+  fails closed without credentials (`orchestrator.py`
+  `_reserve_selected_operation` / `execute_selected_operation` / `start_run`),
+  the `/runs` route returns 409 for a live app with no operation budget, and a
+  separate `LiveOperationBudget` (1 operation, 1 call) cannot satisfy or be
+  satisfied by the comparison meter; the model-calling candidate
+  `compare_repair_model_service.py` (sha256 `fd770c1d...`) composes the
+  candidate-A guard rules with one recorded Nemotron tool-choice call per
+  served request, its `request_ordinal` from a per-process request counter, and
+  a recorded fallback to `public_record_lookup` when the gateway refuses.
+  Focused evidence: 13 budget/candidate tests plus 6 live-operation tests pass,
+  and a mutation of the ordinal trap fails its named test with a byte-identical
+  restore (`slice20-postchange-focused-2026-10-01.txt`). Full offline suite 636
+  passed, 1 skipped (`slice20-postchange-full-suite-2026-10-01.txt`), and the
+  inheritance demo's stdout JSON is byte-identical to the recorded digest
+  `82c64ef9...` (`slice20-postchange-inheritance-demo-2026-10-01.txt`).
+- Post-change six-harness anchor round (owed by the anchor-rot trigger):
+  `RESULTS_LOG` was re-pointed to fresh uncommitted paths before the round, and
+  all six harnesses ran strictly serially: 42 + 38 + 19 + 97 + 16 + 20 = 232
+  rows, all FAIL_CAUGHT, zero unproven, zero `restored=False`, exit 0 each (the
+  recorded s18 flake did not recur). The whole-worktree `git diff` hash
+  `26022cf6b35a5a2b09bbe1cc29c12c4155a96b1bf5fa7798871e16df41473988` is
+  identical before and after the round. Evidence:
+  `slice20-postchange-mutation-round-2026-10-01.txt` plus the six stdout files
+  and the two re-pointed `RESULTS_LOG` files of the same prefix.
+- Runner and rehearsal: `demos/slice20_live_chain.py` drives phases A to F
+  (starter operation and incidents, investigation, candidates A and B, the
+  qualifying comparison, explicit selection, shift close and inheritance, the
+  selected operation, then the next shift's draft and ledger) with a date
+  guard, a once.marker, locked model and rate constants and sha256 guards for
+  the sealed manifest, the sealed task-completion family and the model
+  candidate. `--preflight-only` passed (`slice20-chain-live-preflight-2026-10-01.txt`);
+  the offline rehearsal of the same sequence against the pinned A/B pair under
+  the local executor exited 0 with `REHEARSAL_COMPLETE` and the full phase
+  record (`slice20-chain-rehearsal-2026-10-01.txt`,
+  `slice20-chain-rehearsal-summary-2026-10-01.json`). The first rehearsal
+  failed and was reworked because the handoff named `local_process` for the
+  starter run while only the controller default `recorded` adapter produces the
+  expected incidents; logged in `MISTAKES.md`.
+- The single live attempt (2026-10-01, one-shot marker burned, no retry):
+  phase A reproduced the reviewed starter failure with three incidents and no
+  sale; phase B reserved the comparison and executed four of six slots
+  completely before slots 5 and 6 failed `PROVISION_FAILED`. Diagnosis from
+  the preserved records: both failed slots' public phases ended on a
+  server-sent SSE `sse_error` frame (surfaced by `contree_client` as a builtin
+  `ConnectionError` while the controller polled the operation event stream
+  around their second request), which the vendor documents as an in-band
+  stream break to be handled with a brief wait and a Last-Event-Id reconnect;
+  the controller adapter instead treats it as fatal and retains only the
+  exception type, not the server's message or the resume id. The comparison
+  ended `FAILED` / `INCOMPLETE`, both candidates ineligible, so no selection,
+  operation or inheritance followed and the chain remains **not achieved**.
+  Meters: 10 of 12 Sandbox operation attempts, 8 of 18 inference call attempts,
+  7 persisted successful inference results (all `public_record_lookup`;
+  recorded tokens 681 input / 911 output), and one metered call whose rows
+  never flushed because the stream died mid-flight. Projected inference
+  `0.01769472` of the `0.03981312` reservation at the checked rate; measured
+  recorded-token inference about `0.00026` USD. Sandbox runs are beta-free per
+  the recorded statement; the new checkpoint images were not enumerated (no
+  listing call is authorized). Evidence: `slice20-chain-live-2026-10-01.txt`,
+  `slice20-chain-live-summary-2026-10-01.json`; the run database stays under
+  `artifacts/slice20-live-chain-2026-10-01/` (gitignored).
+- Limits of this attempt, kept visible: the chain's online limbs were
+  exercised only partially (4 of 6 slots; no finalization); the failure
+  diagnosis rests on the client exception type plus the vendor's documented
+  frame semantics, while the server's exact error text, the resume event id,
+  the two failed operations' server-side end states and the new image count
+  are unrecorded; the adapter's any-stream-break-is-fatal behavior and its
+  type-only failure observation are untouched and would need their own
+  failing-capable repair round before a retry could be more robust; the
+  rehearsal proves the local API sequence, not the live adapter path (the
+  stub-gateway and fake-adapter suites cover those branches offline). A second
+  attempt has no authorization and would need a fresh one-shot run, a new
+  same-day preflight and the user's explicit go-ahead.
+
+### Stretch chain delegated decision and SSE repair: 2026-10-01
+
+The user delegated the pending A/B/C decision in chat. Decision A was selected:
+repair the adapter's SSE resume offline, prove it with failing-capable checks,
+then make one fresh chain attempt under the existing caps after a same-day
+preflight. This supersedes the first attempt's no-second-attempt authorization
+state above. It grants no further retry, acceptance, later slice, commit or push.
+
+The repair retains yielded events and split stdout lines, resumes the same
+operation from its last processed event ID, ignores duplicate events, limits
+recovery to three reconnects inside the original deadline, and flushes pending
+gateway records on failure. Internal raw diagnostics are bounded and redact the
+configured token/project; public projections retain allowlisted fields only.
+The pinned SDK has both sync and async reconnect helpers, correcting the
+handoff. The adapter retains non-follow polling to deliver gateway replies.
+
+Decision, caps, current rate-card sources, proof and result:
+`evidence/slice20-sse-recovery-2026-10-01.md`. The fresh run directory is
+`artifacts/slice20-live-chain-resume-2026-10-01/`; every first-attempt artifact
+remains preserved. At this entry's initial write the focused suite passed,
+mutation proof and the full suite were pending, and the fresh live marker had
+not been burned. Completion evidence follows in that linked record.
+
+### Stretch chain stored-record verification: 2026-10-02
+
+The one fresh attempt ran from 2026-10-01 15:55:08 to 15:56:56 UTC and exited 0
+with `CHAIN_COMPLETE`. Read-only SQLite verification confirmed six COMPLETE
+slots (`run-0002` through `run-0007`), `sel-0002` selecting `ver-0003` with
+verified artifact hash `fad72798...`, and `run-0008` operating that same version
+under `ISOLATED_LIVE`. All three operation checks pass. Synthetic sale seq 5
+references that operation, check `cr-0006` and capture `run-0008-out-1`;
+the ledger chain is VALID, comparison runs caused no business writes, and
+`bookshop-shift-03`'s draft equals the selected files.
+
+The selected operation retained one server-sent SSE break at last event ID 3,
+then resumed and finalized with verified checkpoint bytes. The run used 12 + 1
+Sandbox operations and 9 + 1 inference calls, all 10 persisted successful
+results, with 19 verified checkpoint readbacks. Recorded tokens are 968 input
+and 1451 output; their cost at the checked rates is USD 0.00040632, a token-based
+calculation rather than a billing receipt. Projected reservation usage is
+USD 0.02211840 of the USD 0.04202496 combined ceiling.
+
+Evidence: `slice20-sse-recovery-2026-10-01.md`, `slice20-sse-live-2026-10-01.txt`,
+`slice20-sse-live-summary-2026-10-01.json`,
+`slice20-sse-live-audit-2026-10-01.json` and
+`slice20-sse-live-resume-audit-2026-10-01.json`, all under `evidence/`.
+The audit verified all 35 first-attempt/earlier-evidence hashes unchanged.
+Offline evidence is separate: 643 passed, 1 skipped; 11/11 targeted mutations
+FAIL_CAUGHT with source restored; inheritance JSON unchanged. No new hostile
+isolation probes, human sessions, broad model-quality evaluation or UI review
+were performed. The scoped architect-reviewer scan found no orphan helper,
+fixture or evidence file requiring deletion in this repair.
+
+Git note: another session advanced local HEAD from `651592f` to `50d3a02`
+during this work, with four commits of prior evidence only. No production source
+changed in those commits, so they do not invalidate the suite. This session
+created no commit or push, and its recovery code and fresh evidence remain
+uncommitted. Remote main remains `651592f`; the remote S20 branch remains
+`0520141`. No further live attempt or later slice is authorized by this decision.
+
+### S20 stretch housekeeping and publication authorization: 2026-10-02
+
+The user instructed: "Do the housekeeping fix and then publish the branch and
+merge/push to main". This authorizes the two harness fixes, focused commits of
+the outstanding S20 implementation and evidence, branch publication and a
+fast-forward merge/push to main. It does not authorize another live attempt,
+later-slice work, installation or deployment, or add a learning-impact claim.
+
+Both `tests/pivot_mutation_proofs.py` and `tests/slice16_mutation_proofs.py` now
+use absent, untracked `slice20-next-*-2026-10-02.txt` output paths and exclusive
+log creation. Existing logs are refused before mutation execution instead of
+truncated. Fresh-output and existing-output checks passed for both; replacing
+only that guard with the original truncating write in memory fails the named
+preservation assertion. The committed post-change logs remain byte-identical.
+No real mutation row or live call was run for this housekeeping fix.
+
+Current-source focused verification immediately before housekeeping: 84 passed,
+2 existing warnings in 113.56s. The full 643-passed/1-skipped suite and the
+linked live-chain proof above remain valid: housekeeping changes only harness
+log creation, with no production source edit. Initial publication-file credential
+scan: 60 files, zero matches, serialized positive controls passed.
+Receipt: `evidence/slice20-publication-housekeeping-2026-10-02.txt`.
+Publication is in progress; completion and verified refs will be recorded here.
+
+The staged check subsequently exposed 49 trailing-whitespace diagnostics in the
+two original raw SSE mutation transcripts (5 in the aborted round, 44 in the
+completed round), exit 2. They were previously untracked and therefore absent
+from the earlier unstaged check. These raw proof bytes are preserved; all other
+staged files pass the strict check. This is a documented raw-evidence formatting
+exception, not a clean publication-wide check or a flaky test.
 
 ## Slice 19 branch and main publication and user acceptance: 2026-09-30
 

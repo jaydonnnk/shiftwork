@@ -1,14 +1,23 @@
 # Shiftwork: working brief and adjudication register
 
-Updated: 2026-09-30.
+Updated: 2026-10-02.
 
-**Current slice state, 2026-09-30:** S17, S18 and S19 are accepted and
-published. S19's semantic replay, independent review round and anchor-repair
-round are complete; its publication record and acceptance are in
-`plans/shiftwork/00-status.md`. The offline suite passed; model answer quality,
-Sandbox isolation and live cost remain unmeasured. No live operation or S20 is
-authorized. See `plans/shiftwork/00-status.md` for evidence and limits. Older
-current-state paragraphs below are historical snapshots.
+**Current slice state, 2026-10-02:** S17, S18 and S19 are accepted and
+published; S20's offline foundation is published. Its optional linked live chain
+is achieved by the fresh SSE-recovery attempt on 2026-10-01 UTC: six complete
+comparison slots, explicit selection, the same version's live operation, a
+checked synthetic sale and inheritance. A real SSE break in the selected
+operation resumed successfully. The first failed attempt remains preserved.
+The user delegated the pending decision, and decision A was completed after
+offline verification and a same-day preflight. On 2026-10-02 the user authorized
+the harness housekeeping fix, focused commits, branch publication and merge/push
+to main; publication is in progress. Another session committed only the earlier
+evidence before that authorization. This proves
+the narrow linked chain, not learning impact or broad model quality.
+See `plans/shiftwork/00-status.md` and
+`plans/shiftwork/evidence/slice20-sse-recovery-2026-10-01.md` for current evidence,
+authorization and limits. Older current-state paragraphs below are historical
+snapshots, including their narrower authorization statements.
 
 **Direction:** Shiftwork remains the sole active project. The approved final pivot
 around `../shiftwork_final_pivot.md` is to diagnose a real AI service, compare

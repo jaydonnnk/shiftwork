@@ -1,5 +1,114 @@
 # Mistakes Log
 
+## 2026-10-02 S20 publication: unstaged diff checks omitted new evidence files
+
+- **What happened:** readiness reported a clean `git diff --check`, but staging
+  the previously untracked mutation transcripts exposed 49 trailing-whitespace
+  diagnostics: 5 in the aborted SSE proof log and 44 in the completed round.
+  The staged check exited 2. These are the original pytest traceback lines;
+  the raw evidence is preserved. The check on every other staged file passed.
+- **Root cause:** the unstaged check does not inspect untracked files, so its
+  clean result was incorrectly treated as covering all publication files.
+- **Prevention rule:** inspect untracked files and run the staged check before
+  claiming publication-wide cleanliness. Report raw-transcript whitespace
+  explicitly; do not reformat historical proof or call a scoped check universal.
+
+## 2026-10-01 S20 demo proof: comparison included the evidence note wrapper
+
+- **What happened:** the demo exited 0 with PASS_OFFLINE_POLICY and the expected
+  JSON digest, while its wrapper check exited 1 because it compared that JSON
+  line with the entire historical evidence note. Comparing the JSON line from
+  both files confirms byte identity and digest `82c64ef9...`.
+- **Root cause:** the comparison treated a recorded evidence note as raw stdout.
+- **Prevention rule:** extract the same serialized surface from both artifacts
+  before comparing bytes; report the command exit separately from its wrapper.
+  A later read-only SQL probe also failed because shell-escaped double quotes
+  broke its inline Python. Put nontrivial probes in a temporary .py file and
+  bind SQL values instead of composing nested shell/SQL quoting. The corrected
+  stored-record probe ran read-only and passed.
+
+## 2026-10-01 S20 SSE proof runner: multiline anchors did not match CRLF source
+
+- **What happened:** the targeted mutation runner caught its first fault, then
+  stopped because its LF multiline anchor did not match the CRLF source. The
+  finally block restored the original bytes. The aborted log is preserved and
+  the corrected round uses a new log path.
+- **Root cause:** single-line anchors matched raw decoded bytes, masking the
+  newline mismatch until the first multiline anchor.
+- **Prevention rule:** normalize newlines for mutation matching, retain original
+  bytes for restoration, and verify the before/after digest. A partial round is
+  not a passing round. Test stream fixtures must yield real events after their
+  delay, so old behavior fails the intended deadline assertion, not an
+  incidental AttributeError from a yielded None.
+
+## 2026-10-01 S20 live chain: the comparison died on an SSE server-error frame the adapter cannot resume
+
+- **What happened:** the single authorized live attempt completed four of six
+  comparison slots, then slots 5 and 6 failed `PROVISION_FAILED` in their
+  public phases. The preserved observations show both ended on a server-sent
+  SSE `sse_error` frame, which `contree_client` surfaces as a builtin
+  `ConnectionError` while the controller polls the operation event stream
+  around the second request of the public batch. The vendor's own
+  `iter_operation_events` documentation defines that frame as an in-band
+  stream break to be handled with a brief wait and a Last-Event-Id reconnect,
+  and the client's sync `follow_operation_events` implements exactly that; the
+  controller adapter's catch-all classifies it as a fatal provisioning
+  failure, abandons the operation to its cancel path and records only the
+  exception type, so the server's one-line message and the resume event id are
+  lost. One inference call that the provider answered before the stream broke
+  left no persisted observation row (meter count 8, persisted rows 7).
+- **Root cause:** the adapter treats every event-stream break as terminal
+  instead of implementing the documented resume, and its failure observation
+  discards the exception detail that a later read needs to diagnose the
+  server side.
+- **Prevention rule:** when a client library documents a resume protocol for an
+  error frame, treat that frame as retryable control flow, not a fatal adapter
+  error; every typed failure observation should retain a bounded excerpt of
+  the exception message in the internal raw payload (never the public
+  projection) so a failed run can be diagnosed without another live call.
+
+## 2026-10-01 S20 chain runner: the local executor produced backlog events where the recipe said incidents
+
+- **What happened:** the first offline rehearsal of `demos/slice20_live_chain.py`
+  failed at its Phase A assertion "the starter operation should open incidents
+  and complete no sale". With `executor="local_process"` (as the stretch handoff
+  described), the fresh shift's starter run executes the legacy attempt batch
+  `bookshop_attempt_01.jsonl` (a legacy stimulus without `request_id` or
+  `entity_ref`), the pinned pivot starter answers HTTP 400, the legacy family
+  checks record `MALFORMED_RESPONSE`, and the reducer writes three
+  `BACKLOG_RECORDED` events instead of `INCIDENT_OPENED`. With the controller
+  default executor `recorded` (what `demos/final_pivot.py` uses), the same run
+  replays the reviewed S11 transcript and opens the three incidents, matching
+  the recorded S20 demo evidence.
+- **Root cause:** the executor was copied from the handoff text instead of
+  reproduced from the flow: the handoff's stated expectation (incidents opened)
+  and its stated executor (local_process) are mutually inconsistent, and only
+  a real run can say which one is right.
+- **Prevention rule:** before writing a flow assertion, reproduce the step under
+  each candidate configuration with one throwaway run and derive the expectation
+  from the observed evidence; when a handoff's expectation and its mechanism
+  disagree, keep the expectation its recorded evidence proves.
+
+## 2026-10-01 S20 stretch: test slips and a wrong-type meter crashed a guard
+
+- **What happened:** three slips in the new live-operation tests and one in the
+  code they exercised. (1) A test asserted `run.failure`; the frozen `Run` model
+  field is `failure_kind`, so the assertion raised AttributeError. (2) The
+  operation-spend preflight test set a $1 per-million rate and expected a spend
+  refusal, but one call reserves only 32,768 tokens, so its projection cannot
+  cross $0.10 below about $2.96 per million and the refusal never fired. (3) The
+  first live-operation guard called `live_budget.preflight(...)` on whatever
+  object it received, so a comparison-shaped meter (different signature) raised
+  TypeError and crashed the run instead of failing it closed; an isinstance gate
+  now marks the run FAILED PROVISION_FAILED.
+- **Root cause:** field names and arithmetic expectations were written from
+  memory of sibling code instead of the models and constants, and the guard
+  assumed its caller's type instead of gating it.
+- **Prevention rule:** derive assertion inputs from the models and constants
+  (read the model field, compute the projection) before writing the assertion;
+  a controller guard that receives an object must type-gate it and fail closed
+  on any mismatch, so no wrong type ever crashes a run.
+
 ## 2026-10-01 S20 review: a demo boolean that could never be false
 
 - **What happened:** the independent S20 review found `prior_bytes_identical` in
