@@ -637,7 +637,7 @@ created no commit or push, and its recovery code and fresh evidence remain
 uncommitted. Remote main remains `651592f`; the remote S20 branch remains
 `0520141`. No further live attempt or later slice is authorized by this decision.
 
-### S20 stretch housekeeping and publication authorization: 2026-10-02
+### S20 stretch housekeeping, publication authority and completion: 2026-10-02
 
 The user instructed: "Do the housekeeping fix and then publish the branch and
 merge/push to main". This authorizes the two harness fixes, focused commits of
@@ -659,7 +659,7 @@ linked live-chain proof above remain valid: housekeeping changes only harness
 log creation, with no production source edit. Initial publication-file credential
 scan: 60 files, zero matches, serialized positive controls passed.
 Receipt: `evidence/slice20-publication-housekeeping-2026-10-02.txt`.
-Publication is in progress; completion and verified refs will be recorded here.
+Publication completion and verified refs follow below.
 
 The staged check subsequently exposed 49 trailing-whitespace diagnostics in the
 two original raw SSE mutation transcripts (5 in the aborted round, 44 in the
@@ -667,6 +667,37 @@ completed round), exit 2. They were previously untracked and therefore absent
 from the earlier unstaged check. These raw proof bytes are preserved; all other
 staged files pass the strict check. This is a documented raw-evidence formatting
 exception, not a clean publication-wide check or a flaky test.
+
+Publication completed on 2026-10-02. Eight focused commits on S20, no co-author
+footers: `ca2c27e` operation meter, `37f125f` selected live operation,
+`4dfd336` pinned model candidate and one-shot runner, `8b45697` SSE recovery,
+`1bfd222` evidence-log housekeeping, `ba4d097` offline proof,
+`f9d4466` linked live receipts and `a93b712` decisions and evidence limits.
+The four prior-evidence commits `ca8bdf2..50d3a02` were retained unchanged.
+The branch was pushed as `0520141..a93b712`; main fast-forwarded and was
+pushed as `651592f..a93b712`. `git ls-remote` verified both remote heads at
+`a93b712db1e658bf17b39657cbe55c41e245abe0`, matching both local branches.
+The initial post-merge preservation check then caught checkout-ending conversion
+in eight logs. Six LF originals were restored from Git blobs; the two mixed
+LF/CRLF transcripts were recovered by matching the existing manifest digests,
+without changing their text. `.gitattributes` now pins the six LF paths and
+preserves the two mixed transcripts verbatim. Follow-up `db2183d` was pushed
+to both branches; `git ls-remote` verified both remote heads at
+`db2183d7225f50b1ef5f651423b673fa8511226d`. This final publication-record commit
+advances both heads once more.
+
+All 35 historical worktree digests now match the prior manifest. A fresh
+`git checkout-index` into a temporary directory reproduced all eight affected
+logs with those exact digests, and both mixed transcripts' committed blob
+digests also match. The exact pinned candidate bytes, tested adapter digest
+and live database digest remain unchanged. The final publication-file scan
+covered 62 files, zero configured credential matches, serialized controls passed.
+The full publication diff check exits 2 with 66 diagnostics confined to four
+raw transcripts: the original 49 plus 17 native CRLF endings restored for exact
+byte preservation. Source, documentation and every other artifact pass the
+strict check. No new live call, dependency install, deployment or later slice
+followed from publication. Git state was clean before the completion-note edits;
+all completion edits belong to this final record commit.
 
 ## Slice 19 branch and main publication and user acceptance: 2026-09-30
 

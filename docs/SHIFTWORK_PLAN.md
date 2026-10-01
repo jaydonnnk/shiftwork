@@ -11,8 +11,14 @@ operation resumed successfully. The first failed attempt remains preserved.
 The user delegated the pending decision, and decision A was completed after
 offline verification and a same-day preflight. On 2026-10-02 the user authorized
 the harness housekeeping fix, focused commits, branch publication and merge/push
-to main; publication is in progress. Another session committed only the earlier
-evidence before that authorization. This proves
+to main. Eight focused commits (`ca2c27e..a93b712`) and the earlier evidence
+commits were published on `shiftwork/slice-20`, fast-forwarded to main and
+pushed. A subsequent byte-preservation fix (`db2183d`) pins historical evidence
+endings after Windows checkout conversion; all 35 prior digests and a fresh
+checkout of the eight affected logs pass. Both remote heads were verified at
+`db2183d`; the final publication record follows it. Another session committed
+only the earlier evidence before
+that authorization. This proves
 the narrow linked chain, not learning impact or broad model quality.
 See `plans/shiftwork/00-status.md` and
 `plans/shiftwork/evidence/slice20-sse-recovery-2026-10-01.md` for current evidence,

@@ -32,3 +32,38 @@ install, full mutation round or full-suite rerun was performed for housekeeping.
 git diff --check: PASS.
 After git fetch origin, origin/main=651592f and origin/shiftwork/slice-20=0520141;
 both are ancestors of local S20 HEAD 50d3a02, with no staged changes.
+
+Subsequent staged check: exit 2, 49 trailing-whitespace diagnostics in the raw
+SSE mutation transcripts (5 aborted, 44 completed). These files were untracked
+during the earlier check and retain their original proof text. Every other
+publication change passed the strict check at that stage. This is an explicit
+raw-transcript formatting exception, not a clean universal result.
+
+Final pre-publication configured credential scan: 61 files, zero matches;
+serialized positive controls passed. Eight focused commits ca2c27e..a93b712
+were published, branch 0520141..a93b712 and main 651592f..a93b712 (fast-forward).
+git ls-remote confirmed both heads at a93b712db1e658bf17b39657cbe55c41e245abe0.
+The first post-merge preservation check failed for eight checkout-converted
+logs. The wrapper initially continued to another check; the failed assertion
+and premature uncommitted completion claim are recorded in MISTAKES.
+
+Follow-up db2183d restores the original bytes against the existing manifest and
+pins endings in .gitattributes. Six originals are LF; two mix wrapper LF and
+native stdout CRLF. Their text matches the prior blobs after newline comparison.
+The two committed mixed-transcript blobs now match the original digests.
+Both remote heads were verified at db2183d7225f50b1ef5f651423b673fa8511226d.
+
+Actual post-repair verification:
+fresh_checkout_pinned_evidence=8/8 PASS
+historical_worktree_manifest=35/35 PASS
+mixed_transcript_git_blob_digests=PASS
+pinned_candidate_and_tested_adapter_digests=PASS
+live_database_digest=PASS
+configured_credential_scan_files=62; leaks=0; serialized_controls=PASS
+full_publication_diff_check_exit=2; 66 diagnostics in four raw transcripts
+source_documentation_and_other_artifacts_check_exit=0
+
+The added 17 diagnostics are native CRLF endings in the two restored mixed
+transcripts. The original 49 traceback-whitespace diagnostics remain preserved.
+The final publication-record commit follows the verified follow-up publication.
+No co-author footers, new live call, dependency install or deployment.

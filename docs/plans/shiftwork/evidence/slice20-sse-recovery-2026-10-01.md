@@ -169,11 +169,19 @@ Fresh-output and refusal checks passed; an in-memory replacement with the old
 truncating write fails the byte-preservation assertion for each harness.
 Both archived post-change logs remain unchanged. No production source edit,
 real mutation round, live call or install followed from this housekeeping fix.
-Receipt: `slice20-publication-housekeeping-2026-10-02.txt`. Publication is in
-progress; `../00-status.md` will record the verified publication refs.
+Receipt: `slice20-publication-housekeeping-2026-10-02.txt`. Eight focused commits
+(`ca2c27e..a93b712`) were published on the S20 branch and fast-forwarded/pushed
+to main. Both remote heads were verified at `a93b712`. Follow-up `db2183d`
+restores eight checkout-converted logs to their existing manifest digests and
+pins their endings; both remote heads were verified at that follow-up. A fresh
+checkout reproduces all eight, and all 35 historical digests match. The final
+publication record advances both heads once more. `../00-status.md` records
+the ranges, verification and limits.
 
 Staging the original mutation transcripts exposed 49 trailing-whitespace
 diagnostics (5 aborted, 44 completed), exit 2; the earlier unstaged check did
 not include those new files. The raw proof is preserved, and every other staged
-file passes the strict check. The status and MISTAKES record this formatting
-exception explicitly.
+file passed the strict check at that stage. Restoring the two mixed transcripts
+adds 17 native-CRLF diagnostics; the final count is 66 across four raw transcripts.
+Source, documentation and other artifacts pass the strict check. The status and
+MISTAKES record the formatting exception and the checkout correction explicitly.
