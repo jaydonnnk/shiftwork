@@ -1,10 +1,12 @@
 """S17 exact selection and S18 selected-version operation proofs."""
 
 import base64
+import importlib.util
 import json
 import shutil
 import sqlite3
 import time
+from decimal import Decimal
 
 import pytest
 from fastapi.testclient import TestClient
@@ -19,7 +21,8 @@ from tests.orchestrator import pivot_flow
 from shiftwork.domain.models import (ExecutorFailure, RunOutput, RunState,
                                      LedgerEventDraft, LedgerEventType,
                                       ExecutionObservation, ObservationKind,
-                                      CheckResult, ReasonCode)
+                                      CheckResult, ReasonCode, EvidenceMode)
+from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
 from shiftwork.gateway.redaction import serialized_contains
 from shiftwork.ledger import chain
 from shiftwork.ledger import reducer
@@ -1395,3 +1398,174 @@ def test_a_fault_mid_later_reservation_leaves_no_partial_comparison(tmp_path, mo
             conn.close()
         reserved = client.post(f"/api/shifts/{successor['id']}/experiments", json=request)
         assert reserved.status_code == 202, reserved.text
+
+
+def _passing_operation_body() -> bytes:
+    """A candidate-A envelope for the frozen operational request, built offline."""
+    spec = importlib.util.spec_from_file_location(
+        "compare_repair_a_service", config.PIVOT_COMPARE_CANDIDATE_SOURCES["A"])
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    request = json.loads(config.PIVOT_INCIDENT_REQUESTS.read_bytes().splitlines()[0])
+    snapshot = json.loads(config.PIVOT_PUBLIC_STATE.read_bytes())
+    return json.dumps(module.answer(request, snapshot), separators=(",", ":")).encode()
+
+
+class _FakeTokenFactoryAdapter:
+    """A transport double: charges the meter, records kwargs and the request."""
+
+    name = "tokenfactory"
+    calls: list = []
+
+    def __init__(self, **kwargs):
+        self.kwargs = kwargs
+        self.requests = []
+        self.__class__.calls.append(self)
+
+    async def execute(self, request):
+        self.requests.append(request)
+        meter = self.kwargs.get("live_budget")
+        if meter is not None:
+            meter.before_operation()
+            meter.before_inference(self.kwargs.get("model"))
+        return RunResult(
+            captures=(RawCapture(request_ordinal=1, http_status=200,
+                                 body=_passing_operation_body(),
+                                 elapsed_ms=12, transport_error=None, log_ref=None),),
+            executor_ref="operation-test",
+            failure=None, wall_ms=12,
+            observations=(RawObservation(
+                kind="INTERPRETATION",
+                public_payload={"source": "controller_verified", "request_ordinal": 1,
+                                "operation_bound": True},
+                raw_payload={}),),
+        )
+
+
+def _live_credentials(monkeypatch):
+    monkeypatch.setenv("NEBIUS_API_KEY", "test-token")
+    monkeypatch.setenv("NEBIUS_PROJECT_ID", "aiproject-test")
+
+
+def test_live_selected_operation_reserves_an_isolated_context(selected_migrated, monkeypatch):
+    _, db_file, shift_id, _, _, _, _ = selected_migrated
+    _live_credentials(monkeypatch)
+    conn = db.connect(db_file)
+    try:
+        run = orchestrator.start_run(conn, shift_id, executor="tokenfactory",
+                                     client_request_id="live-reservation")
+        context = repo.get_execution_context(conn, run.context_id)
+        assert run.adapter == "tokenfactory"
+        assert run.evidence_mode is EvidenceMode.ISOLATED_LIVE
+        assert context is not None
+        assert context.executor_class is EvidenceMode.ISOLATED_LIVE
+        assert context.image_ref == config.TOKEN_FACTORY_IMAGE
+        assert context.service_model == config.SERVICE_MODEL
+        assert context.resource_limits_json["deadline_s"] == 45
+        assert context.workloads[0].request_count == 1
+    finally:
+        conn.close()
+
+
+def test_live_selected_operation_requires_controller_credentials(selected_migrated, monkeypatch):
+    _, db_file, shift_id, _, _, _, _ = selected_migrated
+    monkeypatch.delenv("NEBIUS_API_KEY", raising=False)
+    monkeypatch.delenv("NEBIUS_PROJECT_ID", raising=False)
+    conn = db.connect(db_file)
+    try:
+        with pytest.raises(orchestrator.BootstrapBlocked, match="credentials are unavailable"):
+            orchestrator.start_run(conn, shift_id, executor="tokenfactory",
+                                   client_request_id="live-no-credentials")
+    finally:
+        conn.close()
+
+
+def test_live_selected_operation_executes_with_the_bounded_meter(selected_migrated, monkeypatch):
+    _, db_file, shift_id, _, _, _, _ = selected_migrated
+    _live_credentials(monkeypatch)
+    _FakeTokenFactoryAdapter.calls = []
+    monkeypatch.setattr(orchestrator, "TokenFactoryAdapter", _FakeTokenFactoryAdapter)
+    meter = LiveOperationBudget(config.SERVICE_MODEL, Decimal("0.06"), Decimal("0.24"))
+    conn = db.connect(db_file)
+    try:
+        run = orchestrator.start_run(conn, shift_id, executor="tokenfactory",
+                                     client_request_id="live-execution")
+        finished = orchestrator.execute_run(conn, run.id, meter)
+        assert finished.state is RunState.FINALIZED, finished
+        assert len(_FakeTokenFactoryAdapter.calls) == 1
+        adapter = _FakeTokenFactoryAdapter.calls[0]
+        assert adapter.kwargs["run_id"] == run.id
+        assert adapter.kwargs["live_budget"] is meter
+        assert adapter.kwargs["model"] == config.SERVICE_MODEL
+        mission = task_contract.load_mission_bytes(config.PIVOT_MISSION.read_bytes())
+        assert adapter.kwargs["allowed_tool_names"] == tuple(mission.allowed_tool_vocabulary)
+        request = adapter.requests[0]
+        assert request.harness_ref == "sandbox-driver-v1"
+        assert request.image_ref == config.TOKEN_FACTORY_IMAGE
+        assert request.deadline_s == 45
+        assert meter.operations == 1 and meter.calls == 1
+        checks = repo.list_check_results(conn, run.id)
+        assert checks and all(check.verdict == "pass" for check in checks)
+        event_types = [event.event_type for event in repo.list_ledger_events(conn, "bookshop")]
+        assert LedgerEventType.SALE_COMPLETED in event_types
+        observations = repo.list_observations(conn, run.id)
+        assert any(item.public_payload_json.get("operation_bound") is True
+                   for item in observations)
+    finally:
+        conn.close()
+
+
+def test_live_selected_operation_without_a_meter_fails_closed(selected_migrated, monkeypatch):
+    _, db_file, shift_id, _, _, _, _ = selected_migrated
+    _live_credentials(monkeypatch)
+    _FakeTokenFactoryAdapter.calls = []
+    monkeypatch.setattr(orchestrator, "TokenFactoryAdapter", _FakeTokenFactoryAdapter)
+    conn = db.connect(db_file)
+    try:
+        run = orchestrator.start_run(conn, shift_id, executor="tokenfactory",
+                                     client_request_id="live-no-meter")
+        finished = orchestrator.execute_run(conn, run.id)
+        assert finished.state is RunState.FAILED
+        assert finished.failure_kind is ExecutorFailure.PROVISION_FAILED
+        assert _FakeTokenFactoryAdapter.calls == []
+        assert repo.list_outputs(conn, run.id) == []
+    finally:
+        conn.close()
+
+
+def test_live_selected_operation_refuses_the_comparison_meter(selected_migrated, monkeypatch):
+    _, db_file, shift_id, _, _, _, _ = selected_migrated
+    _live_credentials(monkeypatch)
+    _FakeTokenFactoryAdapter.calls = []
+    monkeypatch.setattr(orchestrator, "TokenFactoryAdapter", _FakeTokenFactoryAdapter)
+    comparison_meter = LiveComparisonBudget(config.SERVICE_MODEL, Decimal("0.06"), Decimal("0.24"))
+    conn = db.connect(db_file)
+    try:
+        run = orchestrator.start_run(conn, shift_id, executor="tokenfactory",
+                                     client_request_id="live-wrong-meter")
+        finished = orchestrator.execute_run(conn, run.id, comparison_meter)
+        assert finished.state is RunState.FAILED
+        assert finished.failure_kind is ExecutorFailure.PROVISION_FAILED
+        assert _FakeTokenFactoryAdapter.calls == []
+        assert comparison_meter.operations == comparison_meter.calls == 0
+    finally:
+        conn.close()
+
+
+def test_live_operation_route_requires_a_budget_and_executes_with_one(selected_migrated, monkeypatch):
+    _, db_file, shift_id, _, _, _, _ = selected_migrated
+    _live_credentials(monkeypatch)
+    _FakeTokenFactoryAdapter.calls = []
+    monkeypatch.setattr(orchestrator, "TokenFactoryAdapter", _FakeTokenFactoryAdapter)
+    path = f"/api/shifts/{shift_id}/runs"
+    with TestClient(create_app(str(db_file), executor="tokenfactory")) as live_client:
+        refused = live_client.post(path, json={"client_request_id": "live-route-no-budget"})
+        assert refused.status_code == 409, refused.text
+    meter = LiveOperationBudget(config.SERVICE_MODEL, Decimal("0.06"), Decimal("0.24"))
+    with TestClient(create_app(str(db_file), executor="tokenfactory",
+                               live_operation_budget=meter)) as live_client:
+        started = live_client.post(path, json={"client_request_id": "live-route"})
+        assert started.status_code == 202, started.text
+        run = pivot_flow.wait_run(live_client, started.json()["id"])
+        assert run["state"] == "FINALIZED", run
+    assert meter.operations == 1 and meter.calls == 1

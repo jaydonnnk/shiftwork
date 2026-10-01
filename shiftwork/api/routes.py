@@ -101,6 +101,12 @@ def start_run(
 ) -> schemas.RunView:
     # The controller's configured executor and shop snapshot are persisted on the
     # run row; the request body carries neither, so the learner cannot select them.
+    # A live configured executor needs its own bounded operation ceiling before a
+    # reservation exists, mirroring the live comparison gate.
+    live = request.app.state.executor == "tokenfactory"
+    live_budget = request.app.state.live_operation_budget if live else None
+    if live and live_budget is None:
+        raise orchestrator.LifecycleError("conflict", "live operation requires a bounded run budget")
     run = orchestrator.start_run(
         conn,
         shift_id,
@@ -108,7 +114,7 @@ def start_run(
         shop_snapshot=request.app.state.shop_snapshot,
         client_request_id=body.client_request_id if body else None,
     )
-    background.add_task(orchestrator.execute_run_task, request.app.state.db_path, run.id)
+    background.add_task(orchestrator.execute_run_task, request.app.state.db_path, run.id, live_budget)
     return schemas.RunView.of(run)
 
 

@@ -93,7 +93,7 @@ from shiftwork.executor.recorded import RecordedAdapter
 from shiftwork.executor.tokenfactory import TokenFactoryAdapter
 from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS
 from shiftwork.gateway.redaction import assert_public_safe
-from shiftwork.live_budget import LiveComparisonBudget
+from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
 from shiftwork.ledger import chain, reducer
 from shiftwork.sealed import rotation
 from shiftwork.sealed import store as sealed_store
@@ -542,14 +542,22 @@ def start_run(
     pass nothing get the shipped controller defaults.
 
     Operation uses the exact selected version. Saving or freezing another
-    candidate leaves the operating pointer unchanged.
+    candidate leaves the operating pointer unchanged. The controller's executor
+    choice carries into a selected-operation reservation: only the isolated
+    executor freezes an isolated context, and every other configured executor
+    keeps the shipped trusted-local reservation.
     """
     conn.execute("BEGIN IMMEDIATE")
     try:
         shift = _require_open_shift(conn, shift_id)
         selection, version = _selected_operating_version(conn, shift)
+        adapter = executor or config.EXECUTOR_ADAPTER
         if selection.kind == "LEARNER_CHOICE" and selection.comparison_id is not None:
-            run = _reserve_selected_operation(conn, shift, selection, version, client_request_id)
+            run = _reserve_selected_operation(
+                conn, shift, selection, version, client_request_id,
+                adapter=(TokenFactoryAdapter.name if adapter == TokenFactoryAdapter.name
+                         else LocalProcessAdapter.name),
+            )
             conn.commit()
             return run
         used = repo.count_operation_runs(conn, shift_id)
@@ -564,7 +572,6 @@ def start_run(
         request_batch = _attempt_batch(rotation.shared_ordinal(drawn))
 
         ordinal = repo.count_runs_all(conn) + 1
-        adapter = executor or config.EXECUTOR_ADAPTER
         run = Run(
             id=f"run-{ordinal:04d}",
             shift_id=shift_id,
@@ -609,8 +616,22 @@ def start_run(
 def _reserve_selected_operation(
     conn: sqlite3.Connection, shift: Shift, selection: OperatingSelection,
     version: ArtifactVersion, client_request_id: str | None,
+    adapter: str = LocalProcessAdapter.name,
 ) -> Run:
-    """Reserve an exact choice and frozen current conditions in the caller's transaction."""
+    """Reserve an exact choice and frozen current conditions in the caller's transaction.
+
+    ``adapter`` is the controller's configured executor, never a learner input:
+    the isolated adapter freezes an isolated context and fails closed without
+    controller credentials, every other configured executor keeps the shipped
+    trusted-local reservation.
+    """
+    isolated = adapter == TokenFactoryAdapter.name
+    if adapter not in (LocalProcessAdapter.name, TokenFactoryAdapter.name):
+        raise LifecycleError("conflict", "no safe operation executor is configured")
+    if isolated and (not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID")):
+        raise BootstrapBlocked(
+            "the verified isolated executor and its controller credentials are unavailable"
+        )
     if not client_request_id or not client_request_id.strip():
         raise LifecycleError("conflict", "selected operation needs a request key")
     replay = conn.execute(
@@ -646,7 +667,7 @@ def _reserve_selected_operation(
             raise LifecycleError("conflict", "retry requires zero captured outputs and no business write")
         if previous.selection_id != selection.id or previous.context_id is None:
             raise LifecycleError("conflict", "retry selection or context changed")
-    context = freeze_diagnostic_context(conn, shift, operation=True)
+    context = freeze_diagnostic_context(conn, shift, operation=True, isolated=isolated)
     if context.mission_hash != selection.requirement_set_hash:
         raise LifecycleError("conflict", "selected requirements changed before operation")
     if prior_operations and prior_operations[0].context_id != context.id:
@@ -657,8 +678,9 @@ def _reserve_selected_operation(
         request_batch_ref=f"frozen-workload:{context.workloads[0].id}",
         shop_snapshot_ref="pivot:frozen",
         attempt_number=repo.count_runs(conn, shift.id) + 1, state=RunState.QUEUED,
-        adapter=LocalProcessAdapter.name, started_at=_now(), purpose=RunPurpose.OPERATION,
-        evidence_mode=EvidenceMode.TRUSTED_LOCAL, selection_id=selection.id,
+        adapter=adapter, started_at=_now(), purpose=RunPurpose.OPERATION,
+        evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
+        selection_id=selection.id,
         context_id=context.id,
     )
     repo.insert_run(conn, run)
@@ -670,7 +692,8 @@ def _reserve_selected_operation(
     return run
 
 
-def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
+def execute_run(conn: sqlite3.Connection, run_id: str,
+                live_budget: LiveOperationBudget | None = None) -> Run:
     """Execute a queued run against the snapshot bytes it captures here.
 
     The controller reads the configured snapshot once, persists those exact bytes
@@ -682,7 +705,7 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
     if run is None:
         raise LifecycleError("not_found", f"unknown run: {run_id}")
     if run.context_id is not None and run.purpose is RunPurpose.OPERATION:
-        return execute_selected_operation(conn, run_id)
+        return execute_selected_operation(conn, run_id, live_budget)
     if run.state is not RunState.QUEUED:
         return run
     try:
@@ -750,8 +773,14 @@ def execute_run(conn: sqlite3.Connection, run_id: str) -> Run:
     return repo.get_run(conn, run_id)
 
 
-def execute_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
-    """Run only the frozen public workload, retaining captures before consequences."""
+def execute_selected_operation(conn: sqlite3.Connection, run_id: str,
+                               live_budget: LiveOperationBudget | None = None) -> Run:
+    """Run only the frozen public workload, retaining captures before consequences.
+
+    The run row names the executor. The isolated executor gets the run-bound
+    gateway and needs the controller's bounded operation ceiling; every other
+    executor keeps the shipped trusted-local path.
+    """
     run = get_run(conn, run_id)
     if run.purpose is not RunPurpose.OPERATION or run.context_id is None:
         raise LifecycleError("conflict", "selected operation required")
@@ -780,6 +809,18 @@ def execute_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
         repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
         conn.commit()
         return repo.get_run(conn, run.id)
+    if run.adapter == TokenFactoryAdapter.name:
+        # The live operation refuses to run without its own bounded ceiling: the
+        # comparison meter is a different frozen shape and never covers a spawn.
+        try:
+            if not isinstance(live_budget, LiveOperationBudget):
+                raise ValueError("a live selected operation requires its own operation budget")
+            live_budget.preflight(model=context.service_model or config.SERVICE_MODEL,
+                                  requests=workload.request_count)
+        except ValueError:
+            repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
+            conn.commit()
+            return repo.get_run(conn, run.id)
     repo.update_run(conn, run.id, RunState.RUNNING)
     repo.set_run_snapshot_bytes(conn, run.id, state_bytes)
     conn.commit()
@@ -788,11 +829,20 @@ def execute_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
             state_path = Path(directory) / "public_state.json"
             state_path.write_bytes(state_bytes)
             request = request.model_copy(update={"shop_snapshot_ref": str(state_path)})
-            # S18 is offline only. A live operational adapter needs a separately
-            # authorized run and its bounded service controls.
-            if run.adapter != LocalProcessAdapter.name:
-                raise LifecycleError("conflict", "selected operation has no offline executor")
-            result = asyncio.run(LocalProcessAdapter().execute(request))
+            if run.adapter == TokenFactoryAdapter.name:
+                adapter = TokenFactoryAdapter(
+                    run_id=run.id,
+                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),
+                    token=os.environ.get("NEBIUS_API_KEY", ""),
+                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),
+                    model=context.service_model or config.SERVICE_MODEL,
+                    live_budget=live_budget,
+                )
+            elif run.adapter == LocalProcessAdapter.name:
+                adapter = LocalProcessAdapter()
+            else:
+                raise LifecycleError("conflict", "selected operation has no safe executor")
+            result = asyncio.run(adapter.execute(request))
         for ordinal, observation in enumerate(result.observations, start=1):
             raw = json.dumps(observation.raw_payload, sort_keys=True, default=str).encode("utf-8")
             repo.insert_observation(conn, ExecutionObservation(
@@ -960,10 +1010,11 @@ def finalize_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
     return get_run(conn, run.id)
 
 
-def execute_run_task(db_path: str, run_id: str) -> None:
+def execute_run_task(db_path: str, run_id: str,
+                     live_budget: LiveOperationBudget | None = None) -> None:
     conn = db.connect(db_path)
     try:
-        execute_run(conn, run_id)
+        execute_run(conn, run_id, live_budget)
     finally:
         conn.close()
 
