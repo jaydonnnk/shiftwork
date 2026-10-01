@@ -356,3 +356,25 @@ BEGIN
           AND r.purpose = 'OPERATION' AND r.state NOT IN ('FINALIZED', 'FAILED')
     );
 END;
+
+-- Slice 20: a later-condition comparison's reference to the already-observed
+-- operational context it re-tests under. Created here, not in v6.sql, so an
+-- already-v6 database gains it on reopen (Gate 2 S4, Gate 3 S6.7).
+CREATE TABLE IF NOT EXISTS experiment_observed_contexts (
+    experiment_id TEXT PRIMARY KEY REFERENCES experiments(id),
+    observed_run_id TEXT NOT NULL REFERENCES runs(id),
+    observed_context_id TEXT NOT NULL REFERENCES execution_contexts(id),
+    created_at TEXT NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS experiment_observed_contexts_no_update
+BEFORE UPDATE ON experiment_observed_contexts
+BEGIN
+    SELECT RAISE(ABORT, 'an observed-context reference is never rewritten');
+END;
+
+CREATE TRIGGER IF NOT EXISTS experiment_observed_contexts_no_delete
+BEFORE DELETE ON experiment_observed_contexts
+BEGIN
+    SELECT RAISE(ABORT, 'an observed-context reference is never deleted');
+END;

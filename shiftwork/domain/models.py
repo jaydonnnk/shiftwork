@@ -204,6 +204,7 @@ class ArtifactVersion(BaseModel):
     id: Id
     shift_id: Id
     parent_id: Id | None
+    restored_from_id: Id | None = None
     content_hash: str
     storage_ref: str
     files: dict[str, str]
@@ -490,6 +491,8 @@ class Experiment(BaseModel):
     candidates: tuple[CandidateRef, ...]
     declared_treatment: str
     context_id: Id
+    observed_run_id: Id | None = None
+    observed_context_id: Id | None = None
     content_hash: str
     trial_count_per_candidate: Literal[1, 3]
     state: Literal["PLANNED", "RUNNING", "FINALIZED", "FAILED", "INVALIDATED"]

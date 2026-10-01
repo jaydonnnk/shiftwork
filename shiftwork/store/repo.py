@@ -200,6 +200,18 @@ def get_draft_base_version_id(conn: sqlite3.Connection, shift_id: str) -> str | 
     return row["base_version_id"] if row else None
 
 
+def set_draft_base_version(conn: sqlite3.Connection, shift_id: str, version_id: str) -> None:
+    """Point the mutable draft's recorded base at one stored version.
+
+    Only a freeze (which advances the base to the version it just stored) and an
+    explicit restore write this; a plain save keeps the base it was edited from.
+    """
+    conn.execute(
+        "UPDATE draft_artifacts SET base_version_id = ? WHERE shift_id = ?",
+        (version_id, shift_id),
+    )
+
+
 # --- artifact_versions -----------------------------------------------------
 
 
@@ -223,6 +235,7 @@ def _version(row: sqlite3.Row) -> ArtifactVersion:
         id=row["id"],
         shift_id=row["shift_id"],
         parent_id=row["parent_id"],
+        restored_from_id=row["restored_from_id"],
         content_hash=recorded_hash,
         storage_ref=row["storage_ref"],
         files=files,
@@ -235,13 +248,14 @@ def _version(row: sqlite3.Row) -> ArtifactVersion:
 
 def insert_version(conn: sqlite3.Connection, version: ArtifactVersion) -> None:
     conn.execute(
-        "INSERT INTO artifact_versions (id, shift_id, parent_id, content_hash, storage_ref, "
-        "files_json, contract_json, contract_catalog_hash, created_by, created_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO artifact_versions (id, shift_id, parent_id, restored_from_id, content_hash, "
+        "storage_ref, files_json, contract_json, contract_catalog_hash, created_by, created_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             version.id,
             version.shift_id,
             version.parent_id,
+            version.restored_from_id,
             version.content_hash,
             version.storage_ref,
             _dump(version.files),
@@ -1233,6 +1247,7 @@ def count_execution_contexts(conn: sqlite3.Connection) -> int:
 
 
 def _experiment(row: sqlite3.Row) -> Experiment:
+    keys = set(row.keys())
     return Experiment(
         id=row["id"],
         shift_id=row["shift_id"],
@@ -1243,11 +1258,40 @@ def _experiment(row: sqlite3.Row) -> Experiment:
         ),
         declared_treatment=row["declared_treatment"],
         context_id=row["context_id"],
+        observed_run_id=row["observed_run_id"] if "observed_run_id" in keys else None,
+        observed_context_id=(
+            row["observed_context_id"] if "observed_context_id" in keys else None
+        ),
         content_hash=row["content_hash"],
         trial_count_per_candidate=row["trial_count_per_candidate"],
         state=row["state"],
         client_request_id=row["client_request_id"],
         created_at=row["created_at"],
+    )
+
+
+_EXPERIMENT_SELECT = (
+    "SELECT e.*, link.observed_run_id AS observed_run_id, "
+    "link.observed_context_id AS observed_context_id "
+    "FROM experiments e LEFT JOIN experiment_observed_contexts link "
+    "ON link.experiment_id = e.id"
+)
+
+
+def insert_observed_context(
+    conn: sqlite3.Connection, experiment_id: str, observed_run_id: str,
+    observed_context_id: str, created_at: datetime,
+) -> None:
+    """Bind one later-condition comparison to the observed operational context.
+
+    Write-once: the reference is append-only like every other reservation row, so
+    a later re-point cannot relabel which condition an experiment was run under.
+    """
+    conn.execute(
+        "INSERT INTO experiment_observed_contexts "
+        "(experiment_id, observed_run_id, observed_context_id, created_at) "
+        "VALUES (?, ?, ?, ?)",
+        (experiment_id, observed_run_id, observed_context_id, created_at.isoformat()),
     )
 
 
@@ -1275,7 +1319,9 @@ def insert_experiment(conn: sqlite3.Connection, experiment: Experiment) -> None:
 
 
 def get_experiment(conn: sqlite3.Connection, experiment_id: str) -> Experiment | None:
-    row = conn.execute("SELECT * FROM experiments WHERE id = ?", (experiment_id,)).fetchone()
+    row = conn.execute(
+        _EXPERIMENT_SELECT + " WHERE e.id = ?", (experiment_id,)
+    ).fetchone()
     return _experiment(row) if row else None
 
 
@@ -1283,24 +1329,29 @@ def get_experiment_by_client_request_id(
     conn: sqlite3.Connection, client_request_id: str
 ) -> Experiment | None:
     row = conn.execute(
-        "SELECT * FROM experiments WHERE client_request_id = ?", (client_request_id,)
+        _EXPERIMENT_SELECT + " WHERE e.client_request_id = ?", (client_request_id,)
     ).fetchone()
     return _experiment(row) if row else None
 
 
 def list_experiments_for_shift(conn: sqlite3.Connection, shift_id: str) -> list[Experiment]:
     rows = conn.execute(
-        "SELECT * FROM experiments WHERE shift_id = ? ORDER BY rowid", (shift_id,)
+        _EXPERIMENT_SELECT + " WHERE e.shift_id = ? ORDER BY e.rowid", (shift_id,)
     ).fetchall()
     return [_experiment(row) for row in rows]
 
 
 def list_nonterminal_comparisons(conn: sqlite3.Connection) -> list[Experiment]:
-    """Comparison reservations that a restarted process must terminalize."""
+    """Comparison reservations that a restarted process must terminalize.
+
+    A later-condition comparison is reconciled the same way: a crash mid-run may
+    not leave it RUNNING forever, and it retains every captured slot.
+    """
     rows = conn.execute(
-        "SELECT * FROM experiments WHERE kind = ? AND state IN ('PLANNED', 'RUNNING') "
-        "ORDER BY rowid",
-        (ExperimentKind.QUALIFYING_COMPARISON.value,),
+        _EXPERIMENT_SELECT + " WHERE e.kind IN (?, ?) AND e.state IN ('PLANNED', 'RUNNING') "
+        "ORDER BY e.rowid",
+        (ExperimentKind.QUALIFYING_COMPARISON.value,
+         ExperimentKind.LATER_CONDITION_COMPARISON.value),
     ).fetchall()
     return [_experiment(row) for row in rows]
 
@@ -1324,7 +1375,8 @@ def claim_comparison_execution(conn: sqlite3.Connection, experiment_id: str) -> 
     """Let exactly one worker move a reserved comparison into execution."""
     changed = conn.execute(
         "UPDATE experiments SET state = 'RUNNING' "
-        "WHERE id = ? AND kind = 'QUALIFYING_COMPARISON' AND state = 'PLANNED'",
+        "WHERE id = ? AND kind IN ('QUALIFYING_COMPARISON', 'LATER_CONDITION_COMPARISON') "
+        "AND state = 'PLANNED'",
         (experiment_id,),
     )
     return changed.rowcount == 1
