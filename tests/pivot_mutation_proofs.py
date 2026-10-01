@@ -1161,13 +1161,9 @@ CASES = [
 ]
 
 
-# Must stay an uncommitted path for the round in progress. main() truncates this
-# file on every run; it previously pointed at the committed S15 record (destroyed
-# 2026-09-29), then at the committed slice16-pivot record, so the S20 re-run would
-# have destroyed that recorded evidence too. Re-pointed for the S20 round. It was
-# re-pointed again on 2026-10-01 for the S20 review-repair round, so re-running
-# this harness cannot truncate the 2026-09-30 round's per-row log.
-RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice20-rerun-pivot-mutation-2026-10-01.txt"
+# Use a fresh, uncommitted path for each round. Exclusive creation refuses to
+# overwrite archived evidence, including logs committed after their first run.
+RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice20-next-pivot-mutation-2026-10-02.txt"
 
 
 def append_result(line: str) -> None:
@@ -1180,7 +1176,7 @@ def main() -> int:
     # after each row, so a crash keeps every completed row and names the row
     # that died (MISTAKES.md 2026-09-28: a buffered 96-row run lost all row
     # output when the restore write failed at row 95).
-    RESULTS_LOG.write_text("", encoding="utf-8")
+    RESULTS_LOG.touch(exist_ok=False)
     print(f"results file: {RESULTS_LOG}", flush=True)
     results = []
     for index, case in enumerate(CASES, start=1):

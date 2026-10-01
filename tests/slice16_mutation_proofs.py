@@ -313,14 +313,13 @@ CASES = [
 ]
 
 
-# Must stay an uncommitted path. main() truncates this file on every run; it
-# previously pointed at the committed 2026-09-28 record, so the S20 re-run would
-# have destroyed that recorded evidence.
-RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice20-rerun-slice16-mutation-2026-09-30.txt"
+# Use a fresh, uncommitted path for each round. Exclusive creation refuses to
+# overwrite archived evidence, including logs committed after their first run.
+RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice20-next-slice16-mutation-2026-10-02.txt"
 
 
 def main() -> int:
-    RESULTS_LOG.write_text("", encoding="utf-8")
+    RESULTS_LOG.touch(exist_ok=False)
     failures = 0
     for index, case in enumerate(CASES, 1):
         label = f"[{index}/{len(CASES)}] {case['name']}"

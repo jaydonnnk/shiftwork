@@ -1,0 +1,34 @@
+S20 publication housekeeping verification, 2026-10-02 Asia/Singapore
+
+Command: .venv313/Scripts/python.exe C:/Users/jayd0/AppData/Local/Temp/s20-publication-check-20261002.py
+Exit: 0
+
+tests/pivot_mutation_proofs.py: fresh_output=PASS; existing_output_refused=PASS; guard_before_mutations=PASS; truncation_fault=FAIL_CAUGHT (in memory)
+tests/slice16_mutation_proofs.py: fresh_output=PASS; existing_output_refused=PASS; guard_before_mutations=PASS; truncation_fault=FAIL_CAUGHT (in memory)
+archived_log_sha256_preservation=PASS
+configured_credential_scan_files=60; leaks=0; serialized_controls=PASS
+
+Both RESULTS_LOG paths now name absent, untracked slice20-next-*-2026-10-02.txt files.
+Both main functions exclusively create their log with RESULTS_LOG.touch(exist_ok=False).
+Output smoke checks substitute one successful dummy row for the mutation runner;
+they verify START and result logging without modifying production source. A
+second call raises FileExistsError before the dummy runner is called and leaves
+the first log byte-identical. Replacing only exclusive creation with the former
+truncating write in an in-memory copy fails the named preservation assertion:
+"archived log must remain byte-identical". Neither real mutation harness ran.
+
+The two committed post-change logs retain their measured SHA256 values. The
+scan includes all changed publication files since main 651592f and all untracked
+files, testing the configured credential values, base64 and JSON-escaped forms
+with matching serialized positive controls. Values were not emitted.
+
+Readiness proof immediately preceding this change: 84 focused tests passed,
+2 existing deprecation warnings in 113.56s. Command:
+.venv313/Scripts/python.exe -m pytest tests/executor/test_gateway_isolation.py tests/executor/test_live_comparison_budget.py tests/executor/test_model_candidate_service.py tests/orchestrator/test_selection_operation.py -q
+
+Existing full-suite and live-chain results remain in slice20-sse-recovery-2026-10-01.md.
+No production source changed after that readiness check. No new live run,
+install, full mutation round or full-suite rerun was performed for housekeeping.
+git diff --check: PASS.
+After git fetch origin, origin/main=651592f and origin/shiftwork/slice-20=0520141;
+both are ancestors of local S20 HEAD 50d3a02, with no staged changes.
