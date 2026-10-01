@@ -35,11 +35,13 @@ async function waitReachable() {
   throw new Error(`Preview on ${port} did not answer as this preview (is the port already in use?)`);
 }
 
-function startPreview() {
-  const preview = spawn(python, ['tests/client/draft_review_preview.py', '--port', String(port)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+function startPreview(previewArgs = []) {
+  const preview = spawn(python, ['tests/client/draft_review_preview.py', '--port', String(port), ...previewArgs], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
   let previewLog = '';
   const started = new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error(`Preview did not start in 30s:\n${previewLog}`)), 30000);
+    // The inherit preview builds the Slice 20 world through the offline
+    // walkthrough before uvicorn starts, so it needs a longer budget.
+    const timeout = setTimeout(() => reject(new Error(`Preview did not start in 120s:\n${previewLog}`)), 120000);
     preview.stdout.on('data', data => {
       previewLog += data;
       if (previewLog.includes(`Preview: http://127.0.0.1:${port}`)) { clearTimeout(timeout); resolve(); }
@@ -70,25 +72,38 @@ function harness(fault, args = []) {
   });
 }
 
-const FAULTS = ['answer', 'record', 'verdict', 'event', 'eligibility', 'stationFocus', 'incidentFocus', 'candidateFreeze', 'slotOrdinalText', 'slotOrdinalKey', 'slotProtectedCount', 'outcomeMetric', 'outcomeEligibility', 'outcomeLabelBinding'];
-// The compare-path rows need the flag that exercises them, and the baseline runs that flag too so a red row cannot be vacuous.
-const FAULT_ARGS = { candidateFreeze: ['--compare-demo'], slotOrdinalText: ['--compare-demo'], slotOrdinalKey: ['--compare-demo'], slotProtectedCount: ['--compare-demo'], outcomeMetric: ['--compare-demo'], outcomeEligibility: ['--compare-demo'], outcomeLabelBinding: ['--compare-demo'] };
-const BASELINE_ARGS = ['--compare-demo'];
+const FAULTS = ['answer', 'record', 'verdict', 'event', 'eligibility', 'stationFocus', 'incidentFocus', 'candidateFreeze', 'slotOrdinalText', 'slotOrdinalKey', 'slotProtectedCount', 'outcomeMetric', 'outcomeEligibility', 'outcomeLabelBinding', 'inheritRationale', 'inheritAlternative', 'inheritRequirementHash', 'inheritObservedRun', 'inheritSeparation'];
+// The compare-path rows need the flag that exercises them, and each baseline runs
+// the same flags against its own unmutated preview so a red row cannot be vacuous.
+const FAULT_ARGS = { candidateFreeze: ['--compare-demo'], slotOrdinalText: ['--compare-demo'], slotOrdinalKey: ['--compare-demo'], slotProtectedCount: ['--compare-demo'], outcomeMetric: ['--compare-demo'], outcomeEligibility: ['--compare-demo'], outcomeLabelBinding: ['--compare-demo'], inheritRationale: ['--inherit-demo'], inheritAlternative: ['--inherit-demo'], inheritRequirementHash: ['--inherit-demo'], inheritObservedRun: ['--inherit-demo'], inheritSeparation: ['--inherit-demo'] };
+// The next-shift rows need the preview that builds the Slice 20 inheritance and
+// staged-outage world; the baseline pair mirrors the two worlds.
+const PREVIEW_ARGS = { inheritRationale: ['--inherit'], inheritAlternative: ['--inherit'], inheritRequirementHash: ['--inherit'], inheritObservedRun: ['--inherit'], inheritSeparation: ['--inherit'] };
+const BASELINE_ROWS = [
+  { label: 'baseline (no fault)', args: ['--compare-demo'], preview: [] },
+  { label: 'baseline (inherit, no fault)', args: ['--inherit-demo'], preview: ['--inherit'] },
+];
 const results = [];
 let failures = 0;
-console.log(`Running baseline then ${FAULTS.length} fault rows, each against its own preview on port ${port}.`);
-for (const [label, fault] of [['baseline (no fault)', null], ...FAULTS.map(name => [`fault: ${name}`, name])]) {
-  const { preview, started } = startPreview();
+console.log(`Running ${BASELINE_ROWS.length} baselines then ${FAULTS.length} fault rows, each against its own preview on port ${port}.`);
+const rows = [
+  ...BASELINE_ROWS.map(baseline => ({ ...baseline, fault: null })),
+  ...FAULTS.map(name => ({ label: `fault: ${name}`, fault: name,
+                           args: FAULT_ARGS[name] ?? [], preview: PREVIEW_ARGS[name] ?? [] })),
+];
+for (const row of rows) {
+  const { label, fault } = row;
+  const { preview, started } = startPreview(row.preview);
   try {
     await started;
     await waitReachable();
-    const run = await harness(fault, fault === null ? BASELINE_ARGS : (FAULT_ARGS[fault] ?? []));
+    const run = await harness(fault, row.args);
     if (fault === null) {
       if (run.code === 0) {
-        results.push('baseline (no fault)                PASS   harness green against the unmutated client');
+        results.push(`${label.padEnd(34)} PASS   harness green against the unmutated client`);
       } else {
         failures += 1;
-        results.push(`baseline (no fault)                FAIL   exit ${run.code}\n${(run.out + run.err).slice(-1500)}`);
+        results.push(`${label.padEnd(34)} FAIL   exit ${run.code}\n${(run.out + run.err).slice(-1500)}`);
       }
     } else {
       const caughtLine = run.out.match(new RegExp(`FAULT_CAUGHT ${fault}:[^\\n]*`))?.[0];
@@ -108,4 +123,4 @@ for (const [label, fault] of [['baseline (no fault)', null], ...FAULTS.map(name 
 }
 console.log(results.join('\n'));
 console.log(`render-fault rows: ${results.length - failures} of ${results.length} as expected`);
-process.exitCode = failures === 0 && results.length === FAULTS.length + 1 ? 0 : 1;
+process.exitCode = failures === 0 && results.length === FAULTS.length + BASELINE_ROWS.length ? 0 : 1;

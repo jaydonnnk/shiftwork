@@ -35,7 +35,7 @@ def _execute_attempts(client: TestClient, shift_id: str, count: int = 2) -> None
             raise RuntimeError(f"Preview fixture did not finalize: {run['state']}")
 
 
-def create_preview(db_path: str, *, empty: bool = False,
+def create_preview(db_path: str, *, empty: bool = False, inherit: bool = False,
                    recorded_assist: bool = False, live_assist: bool = False):
     """Build an isolated preview database and return its app.
 
@@ -46,6 +46,12 @@ def create_preview(db_path: str, *, empty: bool = False,
 
     The preview starts with the labelled baseline and two recorded inspections.
     The learner can compare and explicitly choose through the real selection route.
+
+    ``inherit`` builds the Slice 20 world instead: the offline inheritance
+    walkthrough runs once over the preview database, so the served board opens on
+    a shift that inherited an exact selection and already holds one staged-outage
+    operation and its later-condition experiment. The staged outage world is a
+    labelled test derivation, never reviewed product material.
     """
     if Path(db_path).exists():
         raise ValueError("Preview requires a new database; existing work is never overwritten.")
@@ -55,6 +61,12 @@ def create_preview(db_path: str, *, empty: bool = False,
         raise ValueError("NEBIUS_API_KEY is required for --live-assist")
     gateway = (RecordedAssistGateway() if recorded_assist else
                LiveAssistGateway(os.environ["NEBIUS_API_KEY"]) if live_assist else None)
+    if inherit:
+        from demos.final_pivot import inheritance_stage
+
+        if inheritance_stage(preview_db=Path(db_path)) != 0:
+            raise RuntimeError("the S20 inheritance walkthrough did not pass offline")
+        return create_app(db_path, assist_gateway=gateway)
     app = create_app(db_path, assist_gateway=gateway)
     with TestClient(app) as client:
         if not empty:
@@ -69,6 +81,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--port", type=int, default=8009)
     parser.add_argument("--empty", action="store_true")
+    parser.add_argument("--inherit", action="store_true",
+                        help="Build the Slice 20 inheritance, staged-outage operation and later-condition world")
     parser.add_argument("--recorded-assist", action="store_true",
                         help="Enable labelled recorded help for an offline UI demonstration")
     parser.add_argument("--live-assist", action="store_true",
@@ -76,10 +90,14 @@ def main():
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="shiftwork-client-") as directory:
         app = create_preview(str(Path(directory) / "preview.db"), empty=args.empty,
+                             inherit=args.inherit,
                              recorded_assist=args.recorded_assist, live_assist=args.live_assist)
         print(f"Preview: http://127.0.0.1:{args.port}", flush=True)
         print("Isolated temporary scenario. Service inspections are recorded. Ctrl+C stops it.", flush=True)
-        print("The reviewed failing starter is the operating baseline; the Investigate station runs it against its pinned incident request.", flush=True)
+        if args.inherit:
+            print("Slice 20 world: the Next shift station inherits an exact selection; the staged-outage operation and its later-condition experiment are labelled staged derivations, not reviewed material.", flush=True)
+        else:
+            print("The reviewed failing starter is the operating baseline; the Investigate station runs it against its pinned incident request.", flush=True)
         if args.recorded_assist:
             print("Assist is a recorded double; no model call or model-quality evidence is produced.", flush=True)
         if args.live_assist:

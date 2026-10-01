@@ -985,6 +985,357 @@ def comparison_stage(*, select: bool = False, operate: bool = False,
         sealed_store.load_reviewed_comparison_family = reviewed_family
 
 
+def inheritance_stage(*, preview_db: Path | None = None) -> int:
+    """S20: inherit the exact selection, observe an outage, re-test both versions later.
+
+    Offline over the shipped local_process executor. The observed dependency
+    outage is a staged derivation of the reviewed comparison state: one
+    dependency's observed availability flips, every record and entity stays
+    unchanged, and the derivation is labelled as staged wherever it is printed.
+    No reviewed fixture is modified, no live call is made, and the historical
+    selection, operation, incident and ledger bytes are compared before and after
+    the later-condition experiment.
+    """
+    if preview_db and preview_db.exists():
+        raise FileExistsError(f"preview database already exists: {preview_db}")
+    with (nullcontext(preview_db.parent) if preview_db else
+          tempfile.TemporaryDirectory(prefix="shiftwork-s20-inheritance-")) as directory:
+        db_file = preview_db or Path(directory) / "inheritance.db"
+        with TestClient(create_app(str(db_file))) as client:
+            # One qualification: starter, source run, investigation, both pinned
+            # candidates, the six-slot comparison and an explicit choice of A.
+            shift = client.post("/api/engagements/bookshop/shifts")
+            assert shift.status_code == 201, shift.text
+            shift_id = shift.json()["id"]
+            starter = client.post(f"/api/shifts/{shift_id}/artifact/versions",
+                                  json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+            assert starter.status_code == 201, starter.text
+            source = client.post(f"/api/shifts/{shift_id}/runs")
+            assert source.status_code == 202, source.text
+            source_deadline = time.monotonic() + 30
+            while True:
+                source_run = client.get(f"/api/runs/{source.json()['id']}").json()
+                if source_run["state"] in ("FINALIZED", "FAILED") or time.monotonic() > source_deadline:
+                    break
+                time.sleep(0.05)
+            assert source_run["state"] == "FINALIZED", source_run
+            investigation = client.post(f"/api/shifts/{shift_id}/investigations", json={
+                "source_run_id": source.json()["id"], "source_request_ordinal": 1,
+                "cause": "the starter omits a required collection task",
+                "falsifier": "the reviewed collection request still lacks that task result",
+                "public_test": "require every declared task result",
+                "revision_of_id": None, "client_request_id": "s20-demo-investigation",
+            })
+            assert investigation.status_code == 201, investigation.text
+            candidates = {}
+            for label in ("A", "B"):
+                saved = client.put(f"/api/shifts/{shift_id}/artifact",
+                                   json={"files": config.comparison_candidate_files(label)})
+                assert saved.status_code == 200, saved.text
+                frozen = client.post(f"/api/shifts/{shift_id}/artifact/versions",
+                                     json={"contract": config.PIVOT_STARTER_CONTRACT_JSON})
+                assert frozen.status_code == 201, frozen.text
+                candidates[label] = frozen.json()
+            created = client.post(f"/api/shifts/{shift_id}/experiments", json={
+                "kind": "QUALIFYING_COMPARISON",
+                "investigation_id": investigation.json()["id"],
+                "candidate_a_version_id": candidates["A"]["id"],
+                "candidate_b_version_id": candidates["B"]["id"],
+                "declared_treatment": "A chooses lowest price; B chooses highest stock",
+                "client_request_id": "s20-demo-comparison",
+            })
+            assert created.status_code == 202, created.text
+            comparison_id = created.json()["id"]
+            deadline = time.monotonic() + 60
+            while True:
+                comparison = client.get(f"/api/experiments/{comparison_id}").json()
+                if comparison["state"] in ("FINALIZED", "FAILED") or time.monotonic() > deadline:
+                    break
+                time.sleep(0.05)
+            assert comparison["outcome"] and comparison["outcome"]["status"] == "COMPLETE", comparison
+            prior = client.get("/api/engagements/bookshop/board").json()["operating_selection"]
+            choice = client.post(f"/api/shifts/{shift_id}/selections", json={
+                "comparison_id": comparison_id,
+                "selected_version_id": candidates["A"]["id"],
+                "rationale": "A completed the required tasks under the shared conditions.",
+                "expected_prior_selection_id": prior["id"] if prior else None,
+                "client_request_id": "s20-demo-selection",
+            })
+            assert choice.status_code == 201, choice.text
+            board_before_close = client.get("/api/engagements/bookshop/board").json()
+            ledger_before_close = client.get("/api/engagements/bookshop/ledger").json()["events"]
+
+            # Close and open: the next shift inherits the exact selection, never
+            # the newest save.
+            closed = client.post(f"/api/shifts/{shift_id}/close")
+            assert closed.status_code == 200, closed.text
+            ledger_after_close = client.get("/api/engagements/bookshop/ledger").json()["events"]
+            successor = client.post("/api/engagements/bookshop/shifts")
+            assert successor.status_code == 201, successor.text
+            successor_id = successor.json()["id"]
+            board = client.get("/api/engagements/bookshop/board").json()
+            draft = client.get(f"/api/shifts/{successor_id}/artifact").json()
+            selection = board["operating_selection"]
+
+            # A staged dependency outage, derived from the reviewed comparison
+            # state, then the selected version operated under it.
+            staged = json.loads(config.PIVOT_COMPARE_STATE.read_bytes().decode("utf-8"))
+            staged["dependencies"] = {**staged["dependencies"], "collection": "unavailable"}
+            staged_path = db_file.parent / "staged-outage-collection.json"
+            staged_path.write_bytes(json.dumps(staged, indent=2, sort_keys=True).encode("utf-8"))
+            reviewed_public = config.PIVOT_PUBLIC_STATE
+            try:
+                config.PIVOT_PUBLIC_STATE = staged_path
+                started = client.post(f"/api/shifts/{successor_id}/runs",
+                                      json={"client_request_id": "s20-demo-operation"})
+                assert started.status_code == 202, started.text
+                run_deadline = time.monotonic() + 60
+                while True:
+                    operation = client.get(f"/api/runs/{started.json()['id']}").json()
+                    if operation["state"] in ("FINALIZED", "FAILED") or time.monotonic() > run_deadline:
+                        break
+                    time.sleep(0.05)
+            finally:
+                config.PIVOT_PUBLIC_STATE = reviewed_public
+            assert operation["state"] == "FINALIZED", operation
+            outputs = client.get(f"/api/runs/{operation['id']}/outputs").json()
+            checks = client.get(f"/api/runs/{operation['id']}/checks").json()
+
+            conn = db.connect(db_file)
+            try:
+                run_row = repo.get_run(conn, operation["id"])
+                operation_context = repo.get_execution_context(conn, run_row.context_id)
+                ledger = repo.list_ledger_events(conn, config.BOOKSHOP_SLUG)
+                operation_events = [
+                    event for event in ledger if event.cause_refs == (operation["id"],)
+                ]
+                qualification_reservation = repo.get_exposure_reservation_for_experiment(
+                    conn, comparison_id)
+                qualification_refs = {
+                    item.variant_ref
+                    for item in repo.list_exposure_items(conn, qualification_reservation.id)
+                }
+                before = snapshot_v5_rows(conn)
+            finally:
+                conn.close()
+
+            # The separate later-condition comparison: the same two versions in
+            # fresh matched A/B slots under the observed bytes.
+            later_created = client.post(f"/api/shifts/{successor_id}/experiments", json={
+                "kind": "LATER_CONDITION_COMPARISON",
+                "observed_run_id": operation["id"],
+                "declared_treatment": "Re-test both candidates under the observed dependency outage",
+                "client_request_id": "s20-demo-later-comparison",
+            })
+            assert later_created.status_code == 202, later_created.text
+            later_id = later_created.json()["id"]
+            later_deadline = time.monotonic() + 60
+            while True:
+                later = client.get(f"/api/experiments/{later_id}").json()
+                if later["state"] in ("FINALIZED", "FAILED") or time.monotonic() > later_deadline:
+                    break
+                time.sleep(0.05)
+            conn = db.connect(db_file)
+            try:
+                appended = {}
+                prefix_identical = {}
+                for table, (columns, expected) in before.items():
+                    rows = conn.execute(
+                        f"SELECT {', '.join(columns)} FROM {table} ORDER BY rowid"
+                    ).fetchall()
+                    serialized = tuple(b"".join(_bytes(value) for value in row) for row in rows)
+                    prefix_identical[table] = serialized[: len(expected)] == expected
+                    assert prefix_identical[table], (
+                        f"historical {table} bytes changed under the later comparison"
+                    )
+                    appended[table] = len(serialized) - len(expected)
+                later_reservation = repo.get_exposure_reservation_for_experiment(conn, later_id)
+                later_refs = {
+                    item.variant_ref for item in repo.list_exposure_items(conn, later_reservation.id)
+                }
+            finally:
+                conn.close()
+
+            # Switching needs a new eligible comparison and an explicit choice: a
+            # selection citing the later-condition comparison is refused, and the
+            # one-per-shift reservation is spent.
+            switch = client.post(f"/api/shifts/{successor_id}/selections", json={
+                "comparison_id": later_id,
+                "selected_version_id": candidates["B"]["id"],
+                "rationale": "switch to the retained alternative after the later experiment",
+                "expected_prior_selection_id": selection["id"],
+                "client_request_id": "s20-demo-switch",
+            })
+            again = client.post(f"/api/shifts/{successor_id}/experiments", json={
+                "kind": "LATER_CONDITION_COMPARISON",
+                "observed_run_id": operation["id"],
+                "declared_treatment": "second later-condition comparison",
+                "client_request_id": "s20-demo-later-comparison-2",
+            })
+            final_board = client.get("/api/engagements/bookshop/board").json()
+
+        inherited = {
+            "selection_id": selection["id"],
+            "kind": selection["kind"],
+            "selected_version_id": selection["selected_version_id"],
+            "selected_content_hash": selection["selected_content_hash"],
+            "retained_alternative_version_id": selection["retained_alternative_version_id"],
+            "rationale": selection["rationale"],
+            "prior_selection_id": selection["prior_selection_id"],
+            "requirement_set_hash": selection["requirement_set_hash"],
+            "comparison_id": selection["comparison_id"],
+            "inherited_requirements": board["inherited_requirements"],
+            "draft_base_version_id": board["draft_base_version_id"],
+            "latest_saved_version_id": board["latest_saved_version_id"],
+            "latest_version_id": board["latest_version"]["id"],
+            "draft_files_match_selected": draft["files"] == config.comparison_candidate_files("A"),
+            "incident_ids": sorted(item["id"] for item in board["incidents"]),
+            "unresolved_limits": board["unresolved_limits"],
+            "ledger_event_count": board["ledger_event_count"],
+            "ledger_totals": board["ledger_totals"],
+            "chain_status": board["chain_status"],
+        }
+        closed_events = ledger_after_close[len(ledger_before_close):]
+        operation_under_outage = {
+            "run_id": operation["id"],
+            "state": operation["state"],
+            "purpose": operation["purpose"],
+            "artifact_version_id": operation["artifact_version_id"],
+            "selected_version_id": selection["selected_version_id"],
+            "adapter": operation["adapter"],
+            "evidence_mode": operation["evidence_mode"],
+            "context_condition_kind": operation_context.condition.kind,
+            "context_condition_label": operation_context.condition.public_label,
+            "context_bytes_match_staged": (
+                base64.b64decode(operation_context.public_data_bytes_base64)
+                == staged_path.read_bytes()
+            ),
+            "output_count": len(outputs),
+            "check_count": len(checks),
+            "business_events": [
+                {"seq": event.seq, "event_type": event.event_type.value}
+                for event in operation_events
+            ],
+        }
+        later_versions = {candidate["label"]: candidate["artifact_version_id"]
+                          for candidate in later["candidates"]}
+        later_summary = {
+            "experiment_id": later["id"],
+            "kind": later["kind"],
+            "state": later["state"],
+            "observed_run_id": later["observed_run_id"],
+            "condition": later["condition"],
+            "candidate_a_version_id": later_versions["A"],
+            "candidate_b_version_id": later_versions["B"],
+            "trial_states": [trial["state"] for trial in later["trials"]],
+            "trial_run_ids": [trial["run_id"] for trial in later["trials"]],
+            "outcome_status": later["outcome"]["status"] if later["outcome"] else None,
+            "operational_run_is_a_trial": operation["id"] in {
+                trial["run_id"] for trial in later["trials"]},
+            "qualification_reservation_id": qualification_reservation.id,
+            "later_reservation_id": later_reservation.id,
+            "fresh_variants": sorted(later_refs),
+            "variants_disjoint_from_qualification": later_refs.isdisjoint(qualification_refs),
+        }
+        refusals = {
+            "switch_citing_the_later_comparison": {
+                "status": switch.status_code, "detail": switch.json().get("detail")},
+            "second_later_comparison": {
+                "status": again.status_code, "detail": again.json().get("detail")},
+        }
+        # Measured from the per-table prefix comparisons above, never from the
+        # appended-row counts: appended counts are structurally >= 0 once the
+        # prefix check passes, so they cannot disprove byte-identity.
+        prior_bytes_identical = all(prefix_identical.values())
+        passed = (
+            board["latest_shift"]["id"] == successor_id
+            and board["operating_selection"]["id"] == final_board["operating_selection"]["id"]
+            and inherited["selected_version_id"] == candidates["A"]["id"]
+            and inherited["selected_content_hash"] == candidates["A"]["content_hash"]
+            and inherited["retained_alternative_version_id"] == candidates["B"]["id"]
+            and inherited["rationale"] == choice.json()["rationale"]
+            and inherited["draft_base_version_id"] == candidates["A"]["id"]
+            and inherited["draft_files_match_selected"]
+            and inherited["latest_saved_version_id"] is None
+            and inherited["inherited_requirements"]["comparison_id"] == comparison_id
+            and inherited["inherited_requirements"]["requirement_set_hash"]
+                == choice.json()["requirement_set_hash"]
+            and [event["event_type"] for event in closed_events] and
+                {event["event_type"] for event in closed_events} == {"LIMIT_DECLARED"}
+            and operation_under_outage["state"] == "FINALIZED"
+            and operation_under_outage["purpose"] == "OPERATION"
+            and operation_under_outage["artifact_version_id"] == candidates["A"]["id"]
+            and operation_under_outage["context_condition_kind"] == "dependency_unavailable"
+            and operation_under_outage["context_bytes_match_staged"]
+            and operation_under_outage["business_events"] == []
+            and operation_under_outage["output_count"] > 0
+            and operation_under_outage["check_count"] > 0
+            and later_summary["state"] == "FINALIZED"
+            and later_summary["outcome_status"] == "COMPLETE"
+            and later_summary["trial_states"] == ["COMPLETE"] * 6
+            and later_summary["observed_run_id"] == operation["id"]
+            and later_summary["condition"]["kind"] == "dependency_unavailable"
+            and later_summary["candidate_a_version_id"] == candidates["A"]["id"]
+            and later_summary["candidate_b_version_id"] == candidates["B"]["id"]
+            and later_summary["operational_run_is_a_trial"] is False
+            and later_summary["later_reservation_id"] != later_summary["qualification_reservation_id"]
+            and later_summary["variants_disjoint_from_qualification"]
+            and prior_bytes_identical
+            and refusals["switch_citing_the_later_comparison"]["status"] == 409
+            and refusals["second_later_comparison"]["status"] == 409
+        )
+        print(json.dumps({
+            "stage": "inheritance",
+            "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY",
+            "verdict": "PASS_OFFLINE_POLICY" if passed else "STOP_INCOMPLETE",
+            "staged_world": {
+                "label": "staged derivation, not reviewed product material",
+                "source": config.PIVOT_COMPARE_STATE.name,
+                "file": staged_path.name,
+                "dependency_flipped": "collection: unavailable",
+            },
+            "shift_before": shift_id,
+            "shift_after": successor_id,
+            "closed_events": [
+                {"seq": event["seq"], "event_type": event["event_type"],
+                 "declared_limit": event["payload"].get("declared_limit")}
+                for event in closed_events
+            ],
+            "inherited": inherited,
+            "operational_run": operation_under_outage,
+            "later_condition_comparison": later_summary,
+            "prior_bytes_identical": prior_bytes_identical,
+            "rows_appended_by_the_experiment": {
+                table: count for table, count in sorted(appended.items()) if count},
+            "refusals": refusals,
+            "next_shift_station": {
+                "operational_history": {
+                    "ledger_event_count": final_board["ledger_event_count"],
+                    "ledger_totals": final_board["ledger_totals"],
+                    "incident_ids": [incident["id"] for incident in final_board["incidents"]],
+                    "unresolved_limits": final_board["unresolved_limits"],
+                    "latest_run": (final_board["latest_run"] or {}).get("id"),
+                    "latest_run_belongs_to_the_later_experiment": (
+                        (final_board["latest_run"] or {}).get("id")
+                        in later_summary["trial_run_ids"]
+                    ),
+                },
+                "hypothetical_experiment": {
+                    "experiment_id": later_summary["experiment_id"],
+                    "state": later_summary["state"],
+                    "outcome_status": later_summary["outcome_status"],
+                },
+            },
+            "preview": ({"db": str(preview_db), "url": "http://127.0.0.1:<port>/",
+                         "command": (f"SHIFTWORK_DB_PATH={preview_db} "
+                                     ".venv313/Scripts/python.exe -m uvicorn "
+                                     "shiftwork.app:create_app --factory "
+                                     "--host 127.0.0.1 --port 8181")}
+                        if preview_db else None),
+        }, sort_keys=True))
+        return 0 if passed else 2
+
+
 def replay_stage() -> int:
     """Replay the S18 operational walkthrough from its captured bytes only (S19).
 
@@ -1194,7 +1545,7 @@ def replay_stage() -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "selection", "operation", "replay", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
+    parser.add_argument("--stage", choices=("migration", "investigation", "comparison", "selection", "operation", "replay", "inheritance", "s13-canary", "s13-inspect", "s13-code", "s13-model"), required=True)
     parser.add_argument("--operation-id")
     parser.add_argument("--expected-sha256")
     parser.add_argument("--preview-db", type=Path,
@@ -1212,6 +1563,8 @@ def main() -> int:
         return comparison_stage(select=True, operate=True, preview_db=args.preview_db)
     if args.stage == "replay":
         return replay_stage()
+    if args.stage == "inheritance":
+        return inheritance_stage(preview_db=args.preview_db)
     if args.stage == "s13-canary":
         return s13_canary_stage()
     if args.stage == "s13-inspect":

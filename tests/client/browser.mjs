@@ -80,10 +80,38 @@ const FAULTS = {
     replacement: "      card.dataset.candidateLabel = 'A';",
     expect: 'renders no outcome card bound to candidate B',
   },
+  inheritRationale: {
+    needle: "      ['Recorded rationale', 'rationale', choice.rationale],",
+    replacement: "      ['Recorded rationale', 'rationale', 'REVIEW_WRONG_RATIONALE'],",
+    expect: 'does not display the original rationale',
+  },
+  inheritAlternative: {
+    needle: "      ['Retained alternative', 'retained-alternative', choice.retained_alternative_version_id],",
+    replacement: "      ['Retained alternative', 'retained-alternative', 'REVIEW_WRONG_ALTERNATIVE'],",
+    expect: 'does not display the retained alternative',
+  },
+  inheritRequirementHash: {
+    needle: "      ['Frozen requirement hash', 'requirement-hash', requirements.requirement_set_hash],",
+    replacement: "      ['Frozen requirement hash', 'requirement-hash', requirements.visible_check_set_hash],",
+    expect: 'does not display the inherited requirement hash',
+  },
+  inheritObservedRun: {
+    needle: "    experiment.dataset.observedRunId = later.observed_run_id ?? '';",
+    replacement: "    experiment.dataset.observedRunId = '';",
+    expect: 'does not show the observed operation',
+  },
+  inheritSeparation: {
+    // Must append after replaceChildren() wipes the region; a fault inserted
+    // before it is erased by the render and never reaches the assertion.
+    needle: '    history.replaceChildren();',
+    replacement: "    history.replaceChildren();\n    history.append(element('p', state.stationView?.latest_experiment?.id ?? '', 'evidence-meta'));",
+    expect: 'presents the hypothetical experiment as operational history',
+  },
 };
 
 const url = process.argv[2] ?? 'http://127.0.0.1:8009';
 assert.ok(['127.0.0.1', 'localhost'].includes(new URL(url).hostname), 'Browser checks target a local preview only');
+const inheritDemo = process.argv.includes('--inherit-demo');
 const fault = process.env.SHIFTWORK_FAULT ?? null;
 if (fault) {
   assert.ok(FAULTS[fault], `Unknown fault: ${fault}`);
@@ -252,7 +280,7 @@ try {
   await send('Page.navigate', { url });
   try { await ready(); }
   catch (error) { throw new Error(`${error.message}; page exceptions: ${exceptions.map(item => item.exception?.description ?? item.text).join(' | ')}`); }
-  assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 9);
+  assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 10);
   const matrix = [];
   for (const width of [1280, 640, 390]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -540,7 +568,12 @@ try {
     await screenshot('assist-390');
     await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   }
-  const diagnostic = await evaluate(async investigateShift => {
+  // The inherit-demo world carries a later-condition comparison as the shift's
+  // latest experiment instead of a public diagnostic, so the diagnostic panel is
+  // not exercised in that mode; the Next shift assertions below are.
+  const diagnostic = inheritDemo ? {
+    skipped: 'inherit-demo mode asserts the Next shift station instead of running a public diagnostic',
+  } : await evaluate(async investigateShift => {
     const humanize = value => value.toLowerCase().replaceAll('_', ' ');
     const panel = document.getElementById('investigate-view');
     const stepFor = label => [...panel.querySelectorAll('#diagnostic-result .evidence-step')].find(node => node.querySelector('.step-label')?.textContent.includes(label));
@@ -729,6 +762,81 @@ try {
     await screenshot('investigate-diagnostic-after-comparison-reload-1280');
     await evaluate(() => document.querySelector('[data-station="service"]').click());
   }
+  let inheritDemoReport = null;
+  if (inheritDemo) {
+    const inherit = await evaluate(async () => {
+      const humanize = value => value.toLowerCase().replaceAll('_', ' ');
+      const wait = async (label, check) => {
+        const deadline = Date.now() + 60000;
+        while (Date.now() < deadline) { if (check()) return; await new Promise(resolve => setTimeout(resolve, 60)); }
+        throw new Error(`Timed out waiting for ${label}`);
+      };
+      const boardOf = async () => (await (await fetch('/api/engagements/bookshop/board')).json());
+      document.querySelector('[data-station="next"]').click();
+      if (document.getElementById('next-view').hidden) throw new Error('The Next shift station does not open its own panel');
+      const board = await boardOf();
+      const shiftId = board.latest_shift.id;
+      const stationView = await (await fetch(`/api/shifts/${encodeURIComponent(shiftId)}/investigations`)).json();
+      const selected = board.operating_selection;
+      if (!selected) throw new Error('The inherit preview carries no operating selection to display');
+      const inheritField = name => document.querySelector(`#next-inheritance [data-inherit-field="${name}"] strong`)?.textContent ?? '';
+      if (!inheritField('operating-choice').includes(selected.id) || !inheritField('operating-choice').includes(selected.selected_version_id)) throw new Error('The station does not display the inherited operating choice');
+      if (inheritField('rationale') !== selected.rationale) throw new Error('The station does not display the original rationale');
+      if (inheritField('selected-hash') !== selected.selected_content_hash) throw new Error('The station does not display the selected content hash');
+      if (inheritField('retained-alternative') !== selected.retained_alternative_version_id) throw new Error('The station does not display the retained alternative');
+      if (inheritField('draft-base') !== board.draft_base_version_id || board.draft_base_version_id !== selected.selected_version_id) throw new Error('The displayed draft base is not the exact selection');
+      if (!inheritField('latest-saved').includes('none in this shift')) throw new Error('The station hides that no latest save exists in the inherited shift');
+      const testsField = name => document.querySelector(`#next-tests [data-inherit-field="${name}"] strong`)?.textContent ?? '';
+      if (testsField('requirement-set') !== board.inherited_requirements.requirement_set_id) throw new Error('The station does not display the inherited requirement set id');
+      if (testsField('requirement-hash') !== board.inherited_requirements.requirement_set_hash) throw new Error('The station does not display the inherited requirement hash');
+      if (testsField('visible-check-hash') !== board.inherited_requirements.visible_check_set_hash) throw new Error('The station does not display the inherited visible check set hash');
+      const history = document.getElementById('next-history');
+      if (history.dataset.ledgerEvents !== String(board.ledger_event_count) || history.dataset.incidents !== String(board.incidents.length)) throw new Error('The recorded-history region does not match the board counters');
+      if (history.dataset.chainStatus !== board.chain_status) throw new Error('The recorded-history region does not report the verified chain');
+      for (const limit of board.unresolved_limits) if (!history.textContent.includes(limit)) throw new Error(`The recorded-history region hides the limit in force: ${limit}`);
+      const later = stationView.latest_experiment?.kind === 'LATER_CONDITION_COMPARISON' ? stationView.latest_experiment : null;
+      if (!later) throw new Error('The inherit preview holds no later-condition experiment to separate');
+      const laterRuns = new Set(later.trials.map(trial => trial.run_id).filter(Boolean));
+      if (laterRuns.has(board.latest_run?.id)) {
+        if (history.dataset.latestRun !== '' || history.textContent.includes(board.latest_run.id)) throw new Error('The recorded-history region shows the hypothetical experiment slot run as operational history');
+        if (!history.textContent.includes('hypothetical experiment below')) throw new Error('The recorded-history region does not point its missing newest run at the hypothetical experiment');
+      } else if (board.latest_run?.id) {
+        if (history.dataset.latestRun !== board.latest_run.id || !history.textContent.includes(board.latest_run.id)) throw new Error('The recorded-history region does not show the latest recorded run');
+      }
+      const experiment = document.getElementById('next-experiment');
+      if (experiment.dataset.experimentId !== later.id) throw new Error('The hypothetical region does not carry the later-condition experiment');
+      if (experiment.dataset.observedRunId !== later.observed_run_id) throw new Error('The hypothetical region does not show the observed operation');
+      if (experiment.dataset.outcomeStatus !== later.outcome.status) throw new Error('The hypothetical region does not show the experiment outcome');
+      if (!experiment.textContent.includes(later.condition.public_label)) throw new Error('The hypothetical region does not show the observed condition label');
+      if (history.textContent.includes(later.id)) throw new Error('The recorded-history region presents the hypothetical experiment as operational history');
+      if (!document.getElementById('next-view').textContent.includes('hypothetical')) throw new Error('The station does not label the later-condition experiment as hypothetical');
+      const refused = await fetch(`/api/shifts/${encodeURIComponent(shiftId)}/selections`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ comparison_id: later.id, selected_version_id: selected.retained_alternative_version_id, rationale: 'switch after the later-condition experiment', expected_prior_selection_id: selected.id, client_request_id: `inherit-switch-${Date.now()}` }) });
+      if (refused.status !== 409) throw new Error(`A switch citing the later-condition experiment returned ${refused.status} instead of 409`);
+      document.getElementById('close-shift').click();
+      await wait('the closed shift to offer the next one', () => !document.getElementById('open-next-shift').disabled);
+      document.getElementById('open-next-shift').click();
+      const deadline = Date.now() + 60000;
+      let after = board;
+      while (Date.now() < deadline && after.latest_shift.id === shiftId) { await new Promise(resolve => setTimeout(resolve, 80)); after = await boardOf(); }
+      if (after.latest_shift.id === shiftId) throw new Error('Opening the next shift did not change the board shift');
+      await wait('the Next shift station to show the new shift', () => document.getElementById('next-state').textContent.includes(after.latest_shift.id));
+      if (after.operating_selection?.selected_version_id !== selected.selected_version_id || after.operating_selection?.selected_content_hash !== selected.selected_content_hash) throw new Error('The next shift did not inherit the exact selected version and hash');
+      if (after.operating_selection?.rationale !== selected.rationale || after.operating_selection?.retained_alternative_version_id !== selected.retained_alternative_version_id) throw new Error('The next shift did not inherit the rationale or retained alternative');
+      if (inheritField('rationale') !== selected.rationale || inheritField('retained-alternative') !== selected.retained_alternative_version_id) throw new Error('The station lost the inherited rationale or alternative after the shift change');
+      if (document.getElementById('next-experiment').dataset.experimentState !== 'none') throw new Error('The hypothetical region still shows the previous shift experiment as current');
+      if (document.getElementById('next-history').textContent.includes(shiftId)) throw new Error('The recorded-history region mixes the previous shift identity into the new shift');
+      return { shift: shiftId, nextShift: after.latest_shift.id, experiment: later.id, observedRun: later.observed_run_id, rationale: selected.rationale, retained: selected.retained_alternative_version_id, limits: board.unresolved_limits.length };
+    });
+    await evaluate(() => document.getElementById('next-inheritance').scrollIntoView({ block: 'start' }));
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '1280px next-shift panel overflows');
+    await screenshot('next-shift-1280');
+    await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 900, deviceScaleFactor: 1, mobile: false });
+    await evaluate(() => document.getElementById('next-inheritance').scrollIntoView({ block: 'start' }));
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '390px next-shift panel overflows');
+    await screenshot('next-shift-390');
+    await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+    inheritDemoReport = inherit;
+  }
   if (process.argv.includes('--exercise-run')) {
     const beforeRun = await evaluate(async () => (await (await fetch('/api/engagements/bookshop/board')).json()).latest_run.id);
     assert.equal(await evaluate(() => document.getElementById('metric-attempts').textContent), '1', 'Run-button proof needs a fresh preview with one remaining attempt');
@@ -745,7 +853,7 @@ try {
     assert.equal(await evaluate(() => document.querySelectorAll('.customer-button').length), 3);
   }
   assert.equal(exceptions.length, 0, JSON.stringify(exceptions));
-  const report = { matrix, investigateStation: { ...investigateView, diagnostic }, assistDemo: process.argv.includes('--assist-demo') ? 'recorded double, hint and accepted patch attribution' : 'not enabled', compareDemo: comparison ?? 'not enabled', navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
+  const report = { matrix, investigateStation: { ...investigateView, diagnostic }, assistDemo: process.argv.includes('--assist-demo') ? 'recorded double, hint and accepted patch attribution' : 'not enabled', compareDemo: comparison ?? 'not enabled', nextShiftDemo: inheritDemoReport ?? 'not enabled', navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
   await writeFile(path.join(artifacts, 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
