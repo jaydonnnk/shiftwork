@@ -314,7 +314,11 @@ byte-identically at
 `1686e5b7abf0daa660deacd5157e10472205d342a3b96bd7913c0a52845057ab`. The six
 harness rounds from the repair round stand; this round did not re-run them. The
 user directed this repair and the commit, merge and push of Slice 20 in chat on
-2026-10-01.
+2026-10-01. Ten focused commits on `shiftwork/slice-20` were then pushed as a
+new branch (`ad3ffe8..0520141`, no co-author footer) and fast-forwarded into
+local main, which was pushed; `origin/main` advanced to `0520141`. This record
+commit advances `origin/main` once more. Acceptance remains the user's separate
+decision.
 
 ### Mirror and ADR corrections in this record
 
