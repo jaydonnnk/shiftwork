@@ -422,3 +422,157 @@ def test_adapter_stamps_second_gateway_result_with_its_current_ordinal(tmp_path,
     assert [(obs.kind, obs.public_payload["request_ordinal"]) for obs in result.observations
             if obs.kind == "INFERENCE_RESULT"] == [
                 ("INFERENCE_RESULT", 1), ("INFERENCE_RESULT", 2)]
+
+
+def _inference_event(event_id=1):
+    return Event(event_id, "stdout", {"value": json.dumps({
+        "kind": "inference_request", "request": {
+            "request_ordinal": 1, "input_text": "choose a tool"},
+    }) + "\n", "encoding": "ascii"})
+
+
+def _sse_break(last_id):
+    # Use the pinned SDK decoder, including its exception metadata.
+    from contree_client.runtime import SSEFrame, decode_event_frame
+
+    return decode_event_frame(SSEFrame(event="sse_error", data=(
+        "resume diagnostic TEST_PROVIDER_TOKEN aiproject-test " + "x" * 700)), last_id)
+
+
+def _fake_adapter_gateway(monkeypatch):
+    from shiftwork.executor import tokenfactory
+
+    http = FakeHTTP()
+    factory = tokenfactory.ServiceInferenceGateway
+    monkeypatch.setattr(tokenfactory, "ServiceInferenceGateway",
+                        lambda token, policy: factory(token, policy, http=http))
+    return http
+
+
+@pytest.mark.parametrize("break_before_event,split_line", [(True, False), (False, False), (False, True)])
+def test_adapter_resumes_sse_without_losing_events_or_repeating_inference(
+        tmp_path, monkeypatch, break_before_event, split_line):
+    http = _fake_adapter_gateway(monkeypatch)
+
+    class BrokenStream(FakeSandbox):
+        def __init__(self):
+            super().__init__(capture())
+            self.polls = []
+            self.sent = []
+            self.spawns = 0
+
+        async def spawn_instance(self, **kwargs):
+            self.spawns += 1
+            return await super().spawn_instance(**kwargs)
+
+        async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+            self.polls.append((operation_id, follow, last_event_id))
+            event = _inference_event()
+            value = event.data["value"]
+            if len(self.polls) == 1:
+                if not break_before_event:
+                    yield Event(1, "stdout", {"value": value[:20] if split_line else value})
+                _sse_break(None if break_before_event else 1)
+            else:
+                if break_before_event:
+                    yield event
+                elif split_line:
+                    yield Event(2, "stdout", {"value": value[20:]})
+                else:
+                    yield event  # A replay must never issue a second provider call.
+                async for item in super().iter_operation_events(operation_id, follow=follow, last_event_id=None):
+                    yield dataclasses.replace(item, id=item.id + 2)
+
+        async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+            self.sent.append(json.loads(value))
+
+    sandbox = BrokenStream()
+    result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+    assert result.failure is None, "SSE recovery must complete verified checkpoint readback"
+    assert len(result.captures) == 1 and result.captures[0].body == b'{"request_id":"one"}'
+    assert len(http.calls) == len(sandbox.sent) == sandbox.spawns == 1
+    assert len(sandbox.polls) == 2 and sandbox.cancelled == []
+    assert sandbox.polls[1] == ("operation-1", False, None if break_before_event else 1)
+    assert sum(obs.kind == "INFERENCE_RESULT" for obs in result.observations) == 1
+
+
+def test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic(tmp_path, monkeypatch):
+    http = _fake_adapter_gateway(monkeypatch)
+
+    class PersistentBreak(FakeSandbox):
+        polls = 0
+        sent = []
+
+        async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+            self.polls += 1
+            if self.polls == 1:
+                yield _inference_event()
+            _sse_break(1)
+
+        async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+            self.sent.append(json.loads(value))
+
+    sandbox = PersistentBreak(capture())
+    result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+    assert result.failure is ExecutorFailure.PROVISION_FAILED
+    assert sandbox.polls == 4, "only three event-stream reconnects are permitted"
+    assert len(http.calls) == len(sandbox.sent) == 1
+    assert sandbox.cancelled == ["operation-1"] and result.captures == ()
+    assert sum(obs.kind == "INFERENCE_RESULT" for obs in result.observations) == 1
+    public = json.dumps([obs.public_payload for obs in result.observations])
+    raw = json.dumps([obs.raw_payload for obs in result.observations])
+    # Positive control: the exact needles match this serialized surface.
+    control = json.dumps([{"diagnostic": "resume diagnostic TEST_PROVIDER_TOKEN aiproject-test"}])
+    assert all(needle in control for needle in ("resume diagnostic", "TEST_PROVIDER_TOKEN", "aiproject-test"))
+    assert "resume diagnostic" in raw and "resume diagnostic" not in public
+    assert "TEST_PROVIDER_TOKEN" not in raw + public and "aiproject-test" not in raw + public
+    assert all(len(obs.raw_payload.get("error_message", "")) <= 512 for obs in result.observations)
+
+
+def test_adapter_does_not_retry_an_untyped_connection_failure(tmp_path):
+    class TransportBreak(FakeSandbox):
+        polls = 0
+
+        async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+            self.polls += 1
+            raise ConnectionError("plain transport failure")
+            yield
+
+    sandbox = TransportBreak(capture())
+    result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+    assert result.failure is ExecutorFailure.PROVISION_FAILED
+    assert sandbox.polls == 1 and sandbox.cancelled == ["operation-1"]
+
+
+def test_adapter_keeps_terminal_event_received_before_sse_break(tmp_path):
+    class TerminalBreak(FakeSandbox):
+        polls = 0
+
+        async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+            self.polls += 1
+            async for event in super().iter_operation_events(operation_id, follow=follow, last_event_id=last_event_id):
+                yield event
+            _sse_break(2)
+
+    sandbox = TerminalBreak(capture())
+    result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+    assert result.failure is None and len(result.captures) == 1
+    assert sandbox.polls == 1 and sandbox.cancelled == []
+
+
+def test_adapter_stream_wait_respects_deadline_and_cancels(tmp_path):
+    class StalledStream(FakeSandbox):
+        async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+            await asyncio.sleep(10)
+            yield Event(1, "completion")
+
+    sandbox = StalledStream(capture())
+    frozen = request(tmp_path).model_copy(update={"deadline_s": 0.1})
+    result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(frozen))
+    assert result.failure is ExecutorFailure.REQUEST_TIMEOUT, "a blocked poll must respect the run deadline"
+    assert sandbox.cancelled == ["operation-1"] and result.wall_ms < 1000

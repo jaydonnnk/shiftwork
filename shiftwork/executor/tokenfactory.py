@@ -15,6 +15,7 @@ import dataclasses
 import hashlib
 import json
 import time
+from contextlib import aclosing
 from pathlib import Path
 from typing import Any
 
@@ -26,12 +27,13 @@ from shiftwork.domain.models import ExecutorFailure
 from shiftwork.executor.base import RawCapture, RawObservation, RunRequest, RunResult, load_batch, load_single_request, provisioning_manifest
 from shiftwork.gateway.protocol import InferencePolicy
 from shiftwork.gateway.service_inference import GatewayRejected, ServiceInferenceGateway
-from shiftwork.live_budget import LiveComparisonBudget
+from shiftwork.live_budget import LiveInferenceMeter
 
 
 MODEL = "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B"
 MAX_BODY_BYTES = 1024 * 1024
 MAX_LAYER_BYTES = 16 * 1024 * 1024
+MAX_SSE_RECONNECTS = 3
 
 # This is controller code uploaded as a root-owned file, not part of the
 # learner-editable artifact. The learner process drops to uid/gid 65534 and
@@ -209,7 +211,7 @@ class TokenFactoryAdapter:
 
     def __init__(self, *, run_id: str, allowed_tool_names: tuple[str, ...], token: str, project: str,
                  model: str = MODEL, client: ContreeAsyncClient | None = None,
-                 live_budget: LiveComparisonBudget | None = None):
+                 live_budget: LiveInferenceMeter | None = None):
         self.run_id = run_id
         self.allowed_tool_names = allowed_tool_names
         self.token = token
@@ -226,8 +228,27 @@ class TokenFactoryAdapter:
         client = self.client
         terminal = False
         gateway: ServiceInferenceGateway | None = None
+        gateway_observations_recorded = False
+
+        def record_gateway_observations() -> None:
+            nonlocal gateway_observations_recorded
+            if gateway is not None and not gateway_observations_recorded:
+                for kind, public, raw in gateway.observations:
+                    observations.append(RawObservation(kind=kind,
+                        public_payload={**public, "request_ordinal": gateway.policy.request_ordinal},
+                        raw_payload=raw))
+                gateway_observations_recorded = True
+
+        def error_detail(exc: Exception) -> dict[str, Any]:
+            message = str(exc)
+            for secret in (self.token, self.project):
+                if secret:
+                    message = message.replace(secret, "[redacted]")
+            return {"error_message": message[:512],
+                    "last_event_id": getattr(exc, "last_event_id", None)}
 
         def failure(kind: ExecutorFailure) -> RunResult:
+            record_gateway_observations()
             return RunResult(captures=tuple(captures), executor_ref=operation_id, failure=kind,
                              wall_ms=round((time.monotonic() - started) * 1000),
                              observations=tuple(observations))
@@ -298,10 +319,30 @@ class TokenFactoryAdapter:
             processed_lines = 0
             capture_summaries: list[dict[str, Any]] = []
             gateway_failure = False
+            reconnects = 0
             while time.monotonic() - started < request.deadline_s:
-                batch_events = [event async for event in client.iter_operation_events(
-                    operation_id, follow=False, last_event_id=seen)]
+                # Retain yielded events even when a later SSE frame breaks the poll.
+                batch_events = []
+                stream_broken = False
+                try:
+                    async with asyncio.timeout(request.deadline_s - (time.monotonic() - started)):
+                        async with aclosing(client.iter_operation_events(
+                                operation_id, follow=False, last_event_id=seen)) as source:
+                            async for event in source:
+                                batch_events.append(event)
+                except TimeoutError:
+                    return failure(ExecutorFailure.REQUEST_TIMEOUT)
+                except ConnectionError as exc:
+                    # Only the pinned SDK's in-band sse_error carries this metadata.
+                    if not hasattr(exc, "last_event_id"):
+                        raise
+                    stream_broken = True
+                    observations.append(RawObservation(kind="INTERPRETATION",
+                        public_payload={"source": "controller_verified", "event_stream_break": True},
+                        raw_payload=error_detail(exc)))
                 for event in batch_events:
+                    if seen is not None and event.id <= seen:
+                        continue
                     seen = event.id
                     if event.type == "stdout":
                         stdout += _event_text(event.data)
@@ -329,10 +370,7 @@ class TokenFactoryAdapter:
                         if ordinal != len(capture_summaries) + 1 or ordinal > len(batch):
                             return failure(ExecutorFailure.CAPTURE_TRUNCATED)
                         capture_summaries.append(event_body)
-                        for kind, public, raw in gateway.observations:
-                            observations.append(RawObservation(kind=kind,
-                                public_payload={**public, "request_ordinal": gateway.policy.request_ordinal},
-                                raw_payload=raw))
+                        record_gateway_observations()
                         observations.append(RawObservation(kind="INTERPRETATION",
                             public_payload={"source": "controller_verified",
                                             "request_ordinal": gateway.policy.request_ordinal,
@@ -358,12 +396,14 @@ class TokenFactoryAdapter:
                             raw_payload=event_body))
                 if terminal:
                     break
-                await asyncio.sleep(0.25)
-            if gateway is not None and not gateway_observations_recorded:
-                for kind, public, raw in gateway.observations:
-                    observations.append(RawObservation(kind=kind,
-                        public_payload={**public, "request_ordinal": gateway.policy.request_ordinal},
-                        raw_payload=raw))
+                if stream_broken:
+                    if reconnects >= MAX_SSE_RECONNECTS:
+                        return failure(ExecutorFailure.PROVISION_FAILED)
+                    reconnects += 1
+                # Resume the same operation from the last processed event, never respawn.
+                delay = 0.25 * (2 ** (reconnects - 1)) if stream_broken else 0.25
+                await asyncio.sleep(min(delay, max(0, request.deadline_s - (time.monotonic() - started))))
+            record_gateway_observations()
             if not terminal:
                 return failure(ExecutorFailure.REQUEST_TIMEOUT)
             status = await client.get_operation_status(operation_id)
@@ -423,12 +463,12 @@ class TokenFactoryAdapter:
         except (OSError, ValueError, KeyError, UnicodeDecodeError, TypeError) as exc:
             observations.append(RawObservation(kind="INTERPRETATION",
                 public_payload={"source": "controller_verified", "adapter_error_type": type(exc).__name__},
-                raw_payload={}))
+                raw_payload=error_detail(exc)))
             return failure(ExecutorFailure.PROVISION_FAILED)
         except Exception as exc:
             observations.append(RawObservation(kind="INTERPRETATION",
                 public_payload={"source": "controller_verified", "adapter_error_type": type(exc).__name__},
-                raw_payload={}))
+                raw_payload=error_detail(exc)))
             return failure(ExecutorFailure.INTERNAL)
         finally:
             if gateway is not None:
