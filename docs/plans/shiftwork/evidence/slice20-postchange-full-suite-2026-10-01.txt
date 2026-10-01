@@ -1,0 +1,8 @@
+S20 stretch-chain post-change full offline suite, 2026-10-01
+command: .venv313/Scripts/python.exe -m pytest tests --ignore=tests/packaging -q
+baseline (pre-change): 620 passed, 1 skipped
+post-change verbatim tail:
+636 passed, 1 skipped, 2 warnings in 280.49s (0:04:40)
+delta: +16 tests (6 model-candidate service, 4 operation-budget and gateway, 6 live-operation reservation/execution/route)
+tests/packaging excluded (Test 51 installs; installs not authorized).
+note: no em dashes per repo rule.

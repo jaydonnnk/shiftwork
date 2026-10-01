@@ -1,0 +1,90 @@
+  mutating: budget_comparison_off_by_one... FAIL_CAUGHT
+  mutating: exposure_filter_removed... FAIL_CAUGHT
+  mutating: select_variant_tiebreak_reversed... FAIL_CAUGHT
+  mutating: shared_ordinal_misconfig_not_raised... FAIL_CAUGHT
+  mutating: shared_ordinal_multi_ordinal_not_raised... FAIL_CAUGHT
+  mutating: rollback_except_path_removed... FAIL_CAUGHT
+  mutating: resolution_gate_version_removed... FAIL_CAUGHT
+  mutating: resolution_gate_regression_removed... FAIL_CAUGHT
+  mutating: resolution_gate_acceptance_removed... FAIL_CAUGHT
+  mutating: invalidate_state_filter_removed... FAIL_CAUGHT
+  mutating: cycle_hardcoded_to_one... FAIL_CAUGHT
+  mutating: validate_refill_exposed_rejection_removed... FAIL_CAUGHT
+  mutating: validate_refill_repeated_rejection_removed... FAIL_CAUGHT
+  mutating: sealed_store_schema_validation_removed... FAIL_CAUGHT
+  mutating: sealed_store_ordinal_validation_removed... FAIL_CAUGHT
+  mutating: load_drawn_cases_resolved_filter_removed... FAIL_CAUGHT
+  mutating: migration_v2_log_ref_skipped... FAIL_CAUGHT
+  mutating: migration_v2_runs_columns_skipped... FAIL_CAUGHT
+  mutating: migration_v3_runs_columns_skipped... FAIL_CAUGHT
+  mutating: migration_backfill_removed... FAIL_CAUGHT
+  mutating: resolution_ignores_run_row... FAIL_CAUGHT
+  mutating: unimplemented_adapter_falls_through... FAIL_CAUGHT
+  mutating: unmapped_pairing_falls_back_to_the_batch... FAIL_CAUGHT
+  mutating: pairing_key_ignores_the_snapshot... FAIL_CAUGHT
+  mutating: route_ignores_the_configured_executor... FAIL_CAUGHT
+  mutating: route_drops_the_configured_snapshot... FAIL_CAUGHT
+  mutating: snapshot_pin_edited... FAIL_CAUGHT
+  mutating: close_declares_limits_only_from_the_version_in_force... FAIL_CAUGHT
+  mutating: close_in_flight_refusal_removed... FAIL_CAUGHT
+  mutating: close_idempotency_removed... FAIL_CAUGHT
+  mutating: reconcile_marks_nothing... FAIL_CAUGHT
+  mutating: resolution_ignores_closed_unresolved... FAIL_CAUGHT
+  mutating: drawn_cases_skip_closed_unresolved... FAIL_CAUGHT
+  mutating: resolve_incident_only_from_open... FAIL_CAUGHT
+  mutating: limits_projection_unions_all_declarations... FAIL_CAUGHT
+  mutating: close_leaves_incidents_open... FAIL_CAUGHT
+  mutating: board_hides_closed_unresolved... FAIL_CAUGHT
+  mutating: start_run_draws_one_variant_per_enabled_family... FAIL_CAUGHT
+  mutating: board_snapshot_inherited_version_fallback_removed... FAIL_CAUGHT
+  mutating: rotation_exhaustion_message_drops_the_refusal_detail... FAIL_CAUGHT
+  mutating: snapshot_capture_bypassed_for_the_mutable_path... FAIL_CAUGHT
+  mutating: retrieval_aborts_when_the_comparison_source_is_missing... FAIL_CAUGHT
+
+=== MUTATION PROOF TABLE ===
+mutation                                        status            sha256 ok  catch
+------------------------------------------------------------------------------------------------------------------------------------------------------
+budget_comparison_off_by_one                    FAIL_CAUGHT       True       AssertionError: {"id":"run-0004","shift_id":"bookshop-shift-01","artifact_version_id":"ver-0002","attempt_numb [1 failed, 2 warnings in 0.78s]
+exposure_filter_removed                         FAIL_CAUGHT       True       AssertionError: assert (SealedCase(i...timulus=None)) == (SealedCase(i...imulus=None),)      At index 0 diff:  [1 failed, 2 warnings in 0.26s]
+select_variant_tiebreak_reversed                FAIL_CAUGHT       True       AssertionError: tiebreak did not use file order: got tiebreak-b assert 'tiebreak-b' == 'tiebreak-a'      - tie [1 failed, 2 warnings in 0.24s]
+shared_ordinal_misconfig_not_raised             FAIL_CAUGHT       True       AssertionError: expected RotationMisconfigured, got ValueError('too many values to unpack (expected 1)') asser [1 failed, 2 warnings in 0.21s]
+shared_ordinal_multi_ordinal_not_raised         FAIL_CAUGHT       True       AssertionError: expected RotationMisconfigured, got None assert False  +  where False = isinstance(None, Rotat [1 failed, 2 warnings in 0.22s]
+rollback_except_path_removed                    FAIL_CAUGHT       True       AssertionError: the failed reservation left a transaction open assert not True  +  where True = <sqlite3.Conne [1 failed, 2 warnings in 0.39s]
+resolution_gate_version_removed                 FAIL_CAUGHT       True       AssertionError: same-version run resolved incidents: [] assert 0 == 3  +  where 0 = len([]) [1 failed, 2 warnings in 0.59s]
+resolution_gate_regression_removed              FAIL_CAUGHT       True       AssertionError: failing regression resolved incidents: [] assert 0 == 3  +  where 0 = len([]) [1 failed, 2 warnings in 0.53s]
+resolution_gate_acceptance_removed              FAIL_CAUGHT       True       AssertionError: failing acceptance resolved incidents from run_one: set() assert 0 == 3  +  where 0 = len(set( [1 failed, 2 warnings in 0.52s]
+invalidate_state_filter_removed                 FAIL_CAUGHT       True       AssertionError: the state filter must scope to active draws only: retired 2 rows, expected 1 assert 2 == 1 [1 failed, 2 warnings in 0.42s]
+cycle_hardcoded_to_one                          FAIL_CAUGHT       True       assert 1 == 2 [1 failed, 2 warnings in 0.50s]
+validate_refill_exposed_rejection_removed       FAIL_CAUGHT       True       Failed: DID NOT RAISE RotationMisconfigured [1 failed, 2 warnings in 0.44s]
+validate_refill_repeated_rejection_removed      FAIL_CAUGHT       True       Failed: DID NOT RAISE RotationMisconfigured [1 failed, 2 warnings in 0.42s]
+sealed_store_schema_validation_removed          FAIL_CAUGHT       True       Failed: DID NOT RAISE UnsupportedSealedSchema [1 failed, 4 passed in 0.25s]
+sealed_store_ordinal_validation_removed         FAIL_CAUGHT       True       Failed: DID NOT RAISE InvalidSealedCase [3 failed, 2 passed in 0.34s]
+load_drawn_cases_resolved_filter_removed        FAIL_CAUGHT       True       AssertionError: load_drawn_cases included extra cases beyond the persisted draws: {'var-5a04e517c891b61d', 'va [1 failed, 2 warnings in 0.64s]
+migration_v2_log_ref_skipped                    FAIL_CAUGHT       True       AssertionError: assert 'log_ref' in {'body', 'elapsed_ms', 'http_status', 'id', 'request_ordinal', 'request_te [1 failed in 0.38s]
+migration_v2_runs_columns_skipped               FAIL_CAUGHT       True       AssertionError: assert 'request_batch_ref' in {'adapter', 'artifact_version_id', 'attempt_number', 'client_req [1 failed in 0.36s]
+migration_v3_runs_columns_skipped               FAIL_CAUGHT       True       AssertionError: assert 'request_batch_ref' in {'adapter', 'artifact_version_id', 'attempt_number', 'client_req [1 failed in 0.37s]
+migration_backfill_removed                      FAIL_CAUGHT       True       AssertionError: assert (None, None) == ('thin.jsonl'...napshot.json')      At index 0 diff: None != 'thin.json [1 failed in 0.38s]
+resolution_ignores_run_row                      FAIL_CAUGHT       True       AssertionError: {'id': 'run-0001', 'shift_id': 'bookshop-shift-01', 'artifact_version_id': 'ver-0002', 'attemp [1 failed, 2 warnings in 0.38s]
+unimplemented_adapter_falls_through             FAIL_CAUGHT       True       AssertionError: {'id': 'run-0001', 'shift_id': 'bookshop-shift-01', 'artifact_version_id': 'ver-0002', 'attemp [1 failed, 2 warnings in 0.35s]
+unmapped_pairing_falls_back_to_the_batch        FAIL_CAUGHT       True       AssertionError: an adapter was invoked for an unmapped pairing assert [RunRequest(a...ordinal=None)] == []     [1 failed, 2 warnings in 0.38s]
+pairing_key_ignores_the_snapshot                FAIL_CAUGHT       True       AssertionError: assert 'FAILED' == 'FINALIZED'      - FINALIZED   + FAILED [1 failed, 2 warnings in 0.80s]
+route_ignores_the_configured_executor           FAIL_CAUGHT       True       AssertionError: {'id': 'run-0001', 'shift_id': 'bookshop-shift-01', 'artifact_version_id': 'ver-0002', 'attemp [1 failed, 2 warnings in 0.33s]
+route_drops_the_configured_snapshot             FAIL_CAUGHT       True       AssertionError: assert None == 5400000  +  where None = <built-in method get of dict object at 0x000002621D001 [1 failed, 2 warnings in 0.75s]
+snapshot_pin_edited                             FAIL_CAUGHT       True       AssertionError: bookshop_snapshot.json no longer matches its pinned hash assert 'bd66a4136c8d...76d3ea168933f' [1 failed, 2 warnings in 0.21s]
+close_declares_limits_only_from_the_version_in_force FAIL_CAUGHT       True       AssertionError: assert [] == ['Shelf stock...batch grows.']      Right contains 2 more items, first extra item [1 failed, 2 warnings in 0.45s]
+close_in_flight_refusal_removed                 FAIL_CAUGHT       True       AssertionError: {"id":"bookshop-shift-02","engagement_slug":"bookshop","seq":2,"state":"closed","opened_at":"2 [1 failed, 2 warnings in 0.51s]
+close_idempotency_removed                       FAIL_CAUGHT       True       AssertionError: assert [{'seq': 1, '...'}, ...}, ...] == [{'seq': 1, '...rows.'}, ...}]      Left contains 2 m [1 failed, 2 warnings in 0.51s]
+reconcile_marks_nothing                         FAIL_CAUGHT       True       AssertionError: assert set() == {'run-0001', ...', 'run-0003'}      Extra items in the right set:   'run-0001' [1 failed, 2 warnings in 0.74s]
+resolution_ignores_closed_unresolved            FAIL_CAUGHT       True       AssertionError: inherited incidents did not resolve: [{'id': 'BWB-01', 'engagement_slug': 'bookshop', 'shift_i [1 failed, 2 warnings in 0.59s]
+drawn_cases_skip_closed_unresolved              FAIL_CAUGHT       True       AssertionError: inherited incidents did not resolve: [{'id': 'BWB-01', 'engagement_slug': 'bookshop', 'shift_i [1 failed, 2 warnings in 0.82s]
+resolve_incident_only_from_open                 FAIL_CAUGHT       True       AssertionError: inherited incidents did not resolve: [{'id': 'BWB-01', 'engagement_slug': 'bookshop', 'shift_i [1 failed, 2 warnings in 0.52s]
+limits_projection_unions_all_declarations       FAIL_CAUGHT       True       AssertionError: a limit the latest close stopped declaring must leave the projection assert ['Shelf stock...ba [1 failed, 2 warnings in 0.53s]
+close_leaves_incidents_open                     FAIL_CAUGHT       True       assert False  +  where False = all(<generator object test_close_shift_records_unresolved_limits.<locals>.<gene [1 failed, 2 warnings in 0.45s]
+board_hides_closed_unresolved                   FAIL_CAUGHT       True       AssertionError: assert set() == {'CLOSED_UNRESOLVED'}      Extra items in the right set:   'CLOSED_UNRESOLVED' [1 failed, 2 warnings in 0.49s]
+start_run_draws_one_variant_per_enabled_family  FAIL_CAUGHT       True       AssertionError: assert (['var-94ecd795caf80363'] and 1 == 3)  +  where 1 = len([{'family': 'stale_information' [1 failed, 2 warnings in 0.61s]
+board_snapshot_inherited_version_fallback_removed FAIL_CAUGHT       True       AssertionError: the board showed no inherited version for the freshly opened shift; the inherited-version fall [1 failed, 2 warnings in 0.44s]
+rotation_exhaustion_message_drops_the_refusal_detail FAIL_CAUGHT       True       AssertionError: {"kind":"conflict","detail":"rotation group 'stale_information' is exhausted; author and revie [1 failed, 2 warnings in 0.51s]
+snapshot_capture_bypassed_for_the_mutable_path  FAIL_CAUGHT       True       AssertionError: assert [{'id': 'run-...shelf?', ...}] == [{'id': 'run-...shelf?', ...}]      At index 0 diff:  [1 failed, 2 warnings in 0.80s]
+retrieval_aborts_when_the_comparison_source_is_missing FAIL_CAUGHT       True       AssertionError: Internal Server Error assert 500 == 200  +  where 500 = <Response [500 Internal Server Error]> [1 failed, 2 warnings in 0.95s]
+
+assertion-level catches: 42/42

@@ -1,0 +1,102 @@
+S20 stretch-chain six-harness post-change round, completed 2026-10-01T15:07:41Z
+interpreter: .venv313/Scripts/python.exe ; sequential, one process at a time, repo root
+modified files at start (the intended stretch-change set, nothing else):
+MISTAKES.md
+docs/plans/shiftwork/00-status.md
+shiftwork/api/routes.py
+shiftwork/app.py
+shiftwork/executor/tokenfactory.py
+shiftwork/gateway/service_inference.py
+shiftwork/live_budget.py
+shiftwork/orchestrator.py
+tests/executor/test_live_comparison_budget.py
+tests/orchestrator/test_selection_operation.py
+tests/pivot_mutation_proofs.py
+tests/slice16_mutation_proofs.py
+diff sha256 before: 26022cf6b35a5a2b09bbe1cc29c12c4155a96b1bf5fa7798871e16df41473988
+note: RESULTS_LOG was re-pointed before this round from the slice20-stretch-*
+paths to fresh slice20-postchange-* paths, so the pre-change stretch logs keep
+their rows; the two re-pointed files are part of the modified set above.
+
+=== main (tests/mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-postchange-main-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 72
+tail of stdout:
+
+assertion-level catches: 42/42
+
+=== slice16 (tests/slice16_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/slice16_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-postchange-slice16-mutation-stdout-2026-10-01.txt
+per-row log: docs/plans/shiftwork/evidence/slice20-postchange-slice16-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 96
+row statuses: 38 of 38 FAIL_CAUGHT, 0 restored=False
+tail of stdout:
+[38/38] retired_reservation_state_is_invalidated ...
+  FAIL_CAUGHT restored=True AssertionError: assert 'ACTIVE' == 'INVALIDATED'      - INVALIDATED   + ACTIVE [1 failed, 2 warnings in 3.58s]
+
+=== s18 (tests/s18_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/s18_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-postchange-s18-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 94
+row statuses: 19 of 19 FAIL_CAUGHT, unproven=none
+tail of stdout:
+FAIL_CAUGHT frozen_requirement_recheck: test_changed_mission_between_selection_check_and_freeze_blocks_run assertion=['E   Failed: DID NOT RAISE LifecycleError']
+FAIL_CAUGHT inflight_purpose_update: test_database_rejects_purpose_change_to_second_inflight_operation assertion=['E   Failed: DID NOT RAISE IntegrityError']
+FAIL_CAUGHT partial_retry_board: test_selected_operation_partial_output_blocks_retry assertion=['E   assert 1 == 0']
+FAIL_CAUGHT existing_v6_trigger_upgrade: test_existing_v6_database_replaces_old_inflight_update_trigger assertion=['E   Failed: DID NOT RAISE IntegrityError']
+S18_MUTATIONS caught=19 total=19 unproven=none
+note: the recorded pinned_rule_resolution flake (2026-09-30) did not recur.
+
+=== pivot (tests/pivot_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/pivot_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-postchange-pivot-mutation-stdout-2026-10-01.txt
+per-row log: docs/plans/shiftwork/evidence/slice20-postchange-pivot-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 239
+row statuses: 97 of 97 FAIL_CAUGHT, 0 restored=False
+tail of stdout:
+s15_protected_denominator_merged FAIL_CAUGHT restored=True assert 9 == 6 [1 failed, 2 warnings in 0.50s]
+s15_protected_counts_before_terminal FAIL_CAUGHT restored=True AssertionError: assert {'A': {'reserved': 3, 'captured': 0, 'missing': 3}, 'B': {'reserved': 3, 'captured': 0, [1 failed, 2 warnings in 0.55s]
+s15_candidate_b_prefers_lowest_price FAIL_CAUGHT restored=True AssertionError: assert ['book:tidal-...hs:paperback'] == ['book:tidal-...as:paperback']      At index 1 diff:  [1 failed, 2 warnings in 0.35s]
+s15_frozen_context_hash_not_reverified FAIL_CAUGHT restored=True AssertionError: a tampered binding fails every slot closed instead of running another batch assert {'COMPLETE' [1 failed, 2 warnings in 2.07s]
+
+=== s19 (tests/s19_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/s19_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-postchange-s19-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 70
+row statuses: 16 of 16 FAIL_CAUGHT, unproven=none
+tail of stdout:
+FAIL_CAUGHT capture_integrity_unguarded: test_replay_reports_unknown_when_capture_integrity_is_broken assertion=["E   AssertionError: assert 'DIFFERENT' == 'UNKNOWN_MISSING_INPUTS'", 'E']
+FAIL_CAUGHT workload_coverage_unguarded: test_replay_reports_unknown_when_captured_outputs_do_not_cover_the_workload assertion=["E   AssertionError: assert 'IDENTICAL' == 'UNKNOWN_MISSING_INPUTS'", 'E']
+FAIL_CAUGHT check_inventory_unguarded: test_stored_check_inventory_divergence_reports_both_directions assertion=["E   AttributeError: 'NoneType' object has no attribute 'model_dump'", "E   Failed: a changed check inventory raised AttributeError instead of differences: 'NoneType' object has no attribute 'model_dump'"]
+S19_MUTATIONS caught=16 total=16 unproven=none
+
+=== s20 (tests/s20_mutation_proofs.py)
+command: .venv313/Scripts/python.exe tests/s20_mutation_proofs.py
+stdout file: docs/plans/shiftwork/evidence/slice20-postchange-s20-mutation-2026-10-01.txt
+exit code: 0
+elapsed seconds: 109
+row statuses: 20 of 20 FAIL_CAUGHT, unproven=none
+tail of stdout:
+FAIL_CAUGHT inheritance_projection_dropped: test_next_shift_inherits_selection_rationale_alternative_tests_and_limits assertion=['E   assert None is not None']
+FAIL_CAUGHT observed_context_update_trigger_removed: test_observed_context_references_reject_update_and_delete assertion=['E   Failed: DID NOT RAISE IntegrityError']
+FAIL_CAUGHT observed_context_delete_trigger_removed: test_observed_context_references_reject_update_and_delete assertion=['E   Failed: DID NOT RAISE IntegrityError']
+S20_MUTATIONS caught=20 total=20 unproven=none
+
+round totals: 42 + 38 + 19 + 97 + 16 + 20 = 232 rows, all FAIL_CAUGHT,
+zero unproven and zero restored=False; every harness exit 0. A whole-round scan
+of the eight round outputs recorded before this summary (the six stdout files
+and the two re-pointed RESULTS_LOG files) found no NOT_CAUGHT, UNPROVEN or
+INCIDENTAL marker.
+diff sha256 after : 26022cf6b35a5a2b09bbe1cc29c12c4155a96b1bf5fa7798871e16df41473988
+git status --short delta versus before: exactly the nine new round output files
+(the six stdout files above, the two re-pointed RESULTS_LOG files, and this
+summary); no tracked file changed and no other file appeared. The pre-change
+stretch logs and all handoff evidence remain untouched.
+ROUND COMPLETE

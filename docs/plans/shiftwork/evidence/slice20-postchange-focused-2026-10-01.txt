@@ -1,0 +1,16 @@
+S20 stretch-chain post-change focused verification, 2026-10-01
+interpreter: .venv313/Scripts/python.exe ; repo root
+
+command: .venv313/Scripts/python.exe -m pytest tests/executor/test_live_comparison_budget.py tests/executor/test_model_candidate_service.py -q
+result: 13 passed in 3.26s
+
+command: .venv313/Scripts/python.exe -m pytest tests/orchestrator/test_selection_operation.py -q -k "live_selected_operation or live_operation_route"
+result: 6 passed, 36 deselected, 2 warnings in 14.42s
+
+model candidate ordinal-trap failing-capable proof:
+  mutation: "request_ordinal": ordinal -> "request_ordinal": 3 in compare_repair_model_service.py
+  result: test_protected_batch_ordinal_comes_from_the_served_request_counter FAILED (1 failed in 0.65s)
+  restore: byte-identical, sha256 fd770c1d86707ae8b69043939316a5e44fedc721641ab86ff529033290f26248
+fixture sha256 pinned for the runner: fd770c1d86707ae8b69043939316a5e44fedc721641ab86ff529033290f26248
+companion stub-gateway negative control: gated by the same test module (13 passed includes both candidate-tool branches and the recorded fallback)
+note: no em dashes per repo rule.
