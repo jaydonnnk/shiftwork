@@ -143,8 +143,40 @@ CASES = [
     {
         "name": "s15_starting_ledger_state_placeholder",
         "file": "shiftwork/orchestrator.py",
-        "old": '            "ledger_event_count": len(events),\n',
-        "new": '            "ledger_event_count": 0,\n',
+        # Re-anchored for Slice 20: the later-condition path carries its own copy
+        # of this starting-state block, so the anchor runs through the
+        # qualifying-only reservation construction to stay unique. The row still
+        # faults the qualification reservation's placeholder reading.
+        "old": (
+            '            "ledger_event_count": len(events),\n'
+            '            "ledger_head_hash": events[-1].hash if events else None,\n'
+            '            "ledger_totals": totals,\n'
+            '            "unresolved_incidents": [\n'
+            '                incident.model_dump(mode="json")\n'
+            '                for incident in repo.list_incidents(conn, shift.engagement_slug)\n'
+            '                if incident.state in (IncidentState.OPEN, IncidentState.CLOSED_UNRESOLVED)\n'
+            '            ],\n'
+            '            "unresolved_limits": repo.list_unresolved_limits(conn, shift.engagement_slug),\n'
+            '        }\n'
+            '\n'
+            '        reservation_id = f"reservation-{repo.count_exposure_reservations(conn) + 1:04d}"\n'
+            '        reservation = ExposureReservation(\n'
+        ),
+        "new": (
+            '            "ledger_event_count": 0,\n'
+            '            "ledger_head_hash": events[-1].hash if events else None,\n'
+            '            "ledger_totals": totals,\n'
+            '            "unresolved_incidents": [\n'
+            '                incident.model_dump(mode="json")\n'
+            '                for incident in repo.list_incidents(conn, shift.engagement_slug)\n'
+            '                if incident.state in (IncidentState.OPEN, IncidentState.CLOSED_UNRESOLVED)\n'
+            '            ],\n'
+            '            "unresolved_limits": repo.list_unresolved_limits(conn, shift.engagement_slug),\n'
+            '        }\n'
+            '\n'
+            '        reservation_id = f"reservation-{repo.count_exposure_reservations(conn) + 1:04d}"\n'
+            '        reservation = ExposureReservation(\n'
+        ),
         "tests": f"{LIFECYCLE}::test_a_comparison_freezes_two_candidates_three_workloads_and_six_slots_before_results",
         "expect": "test_a_comparison_freezes_two_candidates_three_workloads_and_six_slots_before_results",
     },
@@ -541,16 +573,34 @@ CASES = [
     {
         "name": "s15_pair_binding_collapsed",
         "file": "shiftwork/orchestrator.py",
-        "old": "            workload = workloads[pair - 1]\n",
-        "new": "            workload = workloads[0]\n",
+        # Anchored from the qualifying-only candidate mapping (Slice 20 re-anchor).
+        "old": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+        ),
+        "new": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[0]\n"
+        ),
         "tests": f"{LIFECYCLE}::test_each_pair_shares_one_workload_and_the_reviewed_bytes_are_pinned",
         "expect": "test_each_pair_shares_one_workload_and_the_reviewed_bytes_are_pinned",
     },
     {
         "name": "s15_pair_two_b_workload_swapped",
         "file": "shiftwork/orchestrator.py",
-        "old": "            workload = workloads[pair - 1]\n",
-        "new": "            workload = workloads[0] if (pair == 2 and label == \"B\") else workloads[pair - 1]\n",
+        # Anchored from the qualifying-only candidate mapping (Slice 20 re-anchor).
+        "old": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+        ),
+        "new": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[0] if (pair == 2 and label == \"B\") else workloads[pair - 1]\n"
+        ),
         "tests": f"{LIFECYCLE}::test_each_pair_shares_one_workload_and_the_reviewed_bytes_are_pinned",
         "expect": "test_each_pair_shares_one_workload_and_the_reviewed_bytes_are_pinned",
     },
@@ -629,8 +679,99 @@ CASES = [
     {
         "name": "s15_reservation_rollback_removed",
         "file": "shiftwork/orchestrator.py",
-        "old": "    except Exception:\r\n        conn.rollback()\r\n        raise\r\n    return experiment\r\n\r\n\r\ndef _comparison_run_request(",
-        "new": "    except Exception:\r\n        raise\r\n    return experiment\r\n\r\n\r\ndef _comparison_run_request(",
+        # The rollback guard is byte-identical in the qualifying and later
+        # reservation bodies, so neither the guard alone nor a neighbouring def
+        # can pin this row: S20 inserted create_later_condition_comparison and
+        # this row silently migrated onto the new copy through its follower def,
+        # while still matching exactly once. The anchor now starts at the
+        # qualifying-only candidate mapping and runs through the slot loop to
+        # the guard, so its location is fixed by content only this function
+        # contains. The later copy is proved by its own S20 row instead.
+        "old": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+            "            slot = TrialSlot(\n"
+            '                id=f"{experiment.id}-slot-{ordinal}",\n'
+            "                experiment_id=experiment.id,\n"
+            "                pair_ordinal=pair,\n"
+            "                execution_ordinal=ordinal,\n"
+            "                candidate_label=label,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            "                workload_id=workload.id,\n"
+            "                request_batch_hash=workload.request_batch_hash,\n"
+            "                request_count=workload.request_count,\n"
+            "                executed_request_count=workload.request_count + 1,\n"
+            "                protected_variant_refs=reserved.get(pair, ()),\n"
+            '                state="RESERVED",\n'
+            "            )\n"
+            "            repo.insert_trial_slot(conn, slot)\n"
+            "            run = Run(\n"
+            '                id=f"run-{repo.count_runs_all(conn) + 1:04d}",\n'
+            "                shift_id=shift.id,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            '                request_batch_ref=f"frozen-workload:{workload.id}",\n'
+            '                shop_snapshot_ref=f"frozen-context:{context.id}",\n'
+            "                attempt_number=repo.count_runs(conn, shift.id) + 1,\n"
+            "                state=RunState.QUEUED,\n"
+            "                adapter=adapter,\n"
+            "                started_at=_now(),\n"
+            "                purpose=RunPurpose.EXPERIMENT,\n"
+            "                evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,\n"
+            "                context_id=context.id,\n"
+            "                experiment_id=experiment.id,\n"
+            "                trial_slot_id=slot.id,\n"
+            "            )\n"
+            "            repo.insert_run(conn, run)\n"
+            "            repo.update_trial_slot(conn, slot.id, run_id=run.id)\n"
+            "        conn.commit()\n"
+            "    except Exception:\n"
+            "        conn.rollback()\n"
+            "        raise\n"
+            "    return experiment\n"
+        ),
+        "new": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+            "            slot = TrialSlot(\n"
+            '                id=f"{experiment.id}-slot-{ordinal}",\n'
+            "                experiment_id=experiment.id,\n"
+            "                pair_ordinal=pair,\n"
+            "                execution_ordinal=ordinal,\n"
+            "                candidate_label=label,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            "                workload_id=workload.id,\n"
+            "                request_batch_hash=workload.request_batch_hash,\n"
+            "                request_count=workload.request_count,\n"
+            "                executed_request_count=workload.request_count + 1,\n"
+            "                protected_variant_refs=reserved.get(pair, ()),\n"
+            '                state="RESERVED",\n'
+            "            )\n"
+            "            repo.insert_trial_slot(conn, slot)\n"
+            "            run = Run(\n"
+            '                id=f"run-{repo.count_runs_all(conn) + 1:04d}",\n'
+            "                shift_id=shift.id,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            '                request_batch_ref=f"frozen-workload:{workload.id}",\n'
+            '                shop_snapshot_ref=f"frozen-context:{context.id}",\n'
+            "                attempt_number=repo.count_runs(conn, shift.id) + 1,\n"
+            "                state=RunState.QUEUED,\n"
+            "                adapter=adapter,\n"
+            "                started_at=_now(),\n"
+            "                purpose=RunPurpose.EXPERIMENT,\n"
+            "                evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,\n"
+            "                context_id=context.id,\n"
+            "                experiment_id=experiment.id,\n"
+            "                trial_slot_id=slot.id,\n"
+            "            )\n"
+            "            repo.insert_run(conn, run)\n"
+            "            repo.update_trial_slot(conn, slot.id, run_id=run.id)\n"
+            "        conn.commit()\n"
+            "    except Exception:\n"
+            "        raise\n"
+            "    return experiment\n"
+        ),
         "tests": f"{LIFECYCLE}::test_a_fault_mid_reservation_leaves_no_partial_comparison[insert_experiment]",
         "expect": "test_a_fault_mid_reservation_leaves_no_partial_comparison[insert_experiment]",
     },
@@ -811,24 +952,121 @@ CASES = [
     {
         "name": "s15_protected_pair_variant_leaked",
         "file": "shiftwork/orchestrator.py",
-        "old": "                protected_variant_refs=reserved.get(pair, ()),\n",
-        "new": '                protected_variant_refs=reserved.get(1 if (pair == 2 and label == "B") else pair, ()),\n',
+        # Anchored from the qualifying-only slot construction (Slice 20 re-anchor).
+        "old": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+            "            slot = TrialSlot(\n"
+            '                id=f"{experiment.id}-slot-{ordinal}",\n'
+            "                experiment_id=experiment.id,\n"
+            "                pair_ordinal=pair,\n"
+            "                execution_ordinal=ordinal,\n"
+            "                candidate_label=label,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            "                workload_id=workload.id,\n"
+            "                request_batch_hash=workload.request_batch_hash,\n"
+            "                request_count=workload.request_count,\n"
+            "                executed_request_count=workload.request_count + 1,\n"
+            "                protected_variant_refs=reserved.get(pair, ()),\n"
+        ),
+        "new": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+            "            slot = TrialSlot(\n"
+            '                id=f"{experiment.id}-slot-{ordinal}",\n'
+            "                experiment_id=experiment.id,\n"
+            "                pair_ordinal=pair,\n"
+            "                execution_ordinal=ordinal,\n"
+            "                candidate_label=label,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            "                workload_id=workload.id,\n"
+            "                request_batch_hash=workload.request_batch_hash,\n"
+            "                request_count=workload.request_count,\n"
+            "                executed_request_count=workload.request_count + 1,\n"
+            '                protected_variant_refs=reserved.get(1 if (pair == 2 and label == "B") else pair, ()),\n'
+        ),
         "tests": f"{LIFECYCLE}::test_each_pair_shares_one_identical_protected_stimulus",
         "expect": "test_each_pair_shares_one_identical_protected_stimulus",
     },
     {
         "name": "s15_protected_slot_second_variant",
         "file": "shiftwork/orchestrator.py",
-        "old": "                protected_variant_refs=reserved.get(pair, ()),\n",
-        "new": "                protected_variant_refs=reserved.get(pair, ()) + reserved.get(1 if pair != 1 else 2, ()),\n",
+        # Anchored from the qualifying-only slot construction (Slice 20 re-anchor).
+        "old": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+            "            slot = TrialSlot(\n"
+            '                id=f"{experiment.id}-slot-{ordinal}",\n'
+            "                experiment_id=experiment.id,\n"
+            "                pair_ordinal=pair,\n"
+            "                execution_ordinal=ordinal,\n"
+            "                candidate_label=label,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            "                workload_id=workload.id,\n"
+            "                request_batch_hash=workload.request_batch_hash,\n"
+            "                request_count=workload.request_count,\n"
+            "                executed_request_count=workload.request_count + 1,\n"
+            "                protected_variant_refs=reserved.get(pair, ()),\n"
+        ),
+        "new": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+            "            slot = TrialSlot(\n"
+            '                id=f"{experiment.id}-slot-{ordinal}",\n'
+            "                experiment_id=experiment.id,\n"
+            "                pair_ordinal=pair,\n"
+            "                execution_ordinal=ordinal,\n"
+            "                candidate_label=label,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            "                workload_id=workload.id,\n"
+            "                request_batch_hash=workload.request_batch_hash,\n"
+            "                request_count=workload.request_count,\n"
+            "                executed_request_count=workload.request_count + 1,\n"
+            "                protected_variant_refs=reserved.get(pair, ()) + reserved.get(1 if pair != 1 else 2, ()),\n"
+        ),
         "tests": f"{LIFECYCLE}::test_each_pair_shares_one_identical_protected_stimulus",
         "expect": "test_each_pair_shares_one_identical_protected_stimulus",
     },
     {
         "name": "s15_protected_ordinal_mismatch",
         "file": "shiftwork/orchestrator.py",
-        "old": "                executed_request_count=workload.request_count + 1,\n",
-        "new": "                executed_request_count=workload.request_count,\n",
+        # Anchored from the qualifying-only slot construction (Slice 20 re-anchor).
+        "old": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+            "            slot = TrialSlot(\n"
+            '                id=f"{experiment.id}-slot-{ordinal}",\n'
+            "                experiment_id=experiment.id,\n"
+            "                pair_ordinal=pair,\n"
+            "                execution_ordinal=ordinal,\n"
+            "                candidate_label=label,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            "                workload_id=workload.id,\n"
+            "                request_batch_hash=workload.request_batch_hash,\n"
+            "                request_count=workload.request_count,\n"
+            "                executed_request_count=workload.request_count + 1,\n"
+        ),
+        "new": (
+            '        versions = {"A": candidate_a, "B": candidate_b}\n'
+            "        for pair, label, ordinal in schedule:\n"
+            "            workload = workloads[pair - 1]\n"
+            "            slot = TrialSlot(\n"
+            '                id=f"{experiment.id}-slot-{ordinal}",\n'
+            "                experiment_id=experiment.id,\n"
+            "                pair_ordinal=pair,\n"
+            "                execution_ordinal=ordinal,\n"
+            "                candidate_label=label,\n"
+            "                artifact_version_id=versions[label].id,\n"
+            "                workload_id=workload.id,\n"
+            "                request_batch_hash=workload.request_batch_hash,\n"
+            "                request_count=workload.request_count,\n"
+            "                executed_request_count=workload.request_count,\n"
+        ),
         "tests": f"{LIFECYCLE}::test_each_pair_shares_one_identical_protected_stimulus",
         "expect": "test_each_pair_shares_one_identical_protected_stimulus",
     },
@@ -924,9 +1162,12 @@ CASES = [
 
 
 # Must stay an uncommitted path for the round in progress. main() truncates this
-# file on every run, and it previously pointed at the committed S15 record, so a
-# single run destroyed the recorded 97-of-97 evidence (2026-09-29).
-RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice16-pivot-mutation-2026-09-29.txt"
+# file on every run; it previously pointed at the committed S15 record (destroyed
+# 2026-09-29), then at the committed slice16-pivot record, so the S20 re-run would
+# have destroyed that recorded evidence too. Re-pointed for the S20 round. It was
+# re-pointed again on 2026-10-01 for the S20 review-repair round, so re-running
+# this harness cannot truncate the 2026-09-30 round's per-row log.
+RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice20-rerun-pivot-mutation-2026-10-01.txt"
 
 
 def append_result(line: str) -> None:

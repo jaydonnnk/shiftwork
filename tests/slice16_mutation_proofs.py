@@ -313,7 +313,10 @@ CASES = [
 ]
 
 
-RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice16-mutation-2026-09-28.txt"
+# Must stay an uncommitted path. main() truncates this file on every run; it
+# previously pointed at the committed 2026-09-28 record, so the S20 re-run would
+# have destroyed that recorded evidence.
+RESULTS_LOG = ROOT / "docs" / "plans" / "shiftwork" / "evidence" / "slice20-rerun-slice16-mutation-2026-09-30.txt"
 
 
 def main() -> int:
