@@ -1,0 +1,552 @@
+source_before_sha256=3ea43335556925b0dda35053c837e14a4bc6f3a6d49b69f2d70cf59c273ca2e5
+
+no_resume: FAIL_CAUGHT; pytest_exit=1
+old='if not hasattr(exc, "last_event_id"):'
+new='if True:'
+expected_assertion='SSE recovery must complete'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-False] _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5629/test_adapter_resumes_sse_witho0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000018D75452650>
+break_before_event = False, split_line = False
+
+    @pytest.mark.parametrize("break_before_event,split_line", [(True, False), (False, False), (False, True)])
+    def test_adapter_resumes_sse_without_losing_events_or_repeating_inference(
+            tmp_path, monkeypatch, break_before_event, split_line):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class BrokenStream(FakeSandbox):
+            def __init__(self):
+                super().__init__(capture())
+                self.polls = []
+                self.sent = []
+                self.spawns = 0
+    
+            async def spawn_instance(self, **kwargs):
+                self.spawns += 1
+                return await super().spawn_instance(**kwargs)
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls.append((operation_id, follow, last_event_id))
+                event = _inference_event()
+                value = event.data["value"]
+                if len(self.polls) == 1:
+                    if not break_before_event:
+                        yield Event(1, "stdout", {"value": value[:20] if split_line else value})
+                    _sse_break(None if break_before_event else 1)
+                else:
+                    if break_before_event:
+                        yield event
+                    elif split_line:
+                        yield Event(2, "stdout", {"value": value[20:]})
+                    else:
+                        yield event  # A replay must never issue a second provider call.
+                    async for item in super().iter_operation_events(operation_id, follow=follow, last_event_id=None):
+                        yield dataclasses.replace(item, id=item.id + 2)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = BrokenStream()
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+>       assert result.failure is None, "SSE recovery must complete verified checkpoint readback"
+E       AssertionError: SSE recovery must complete verified checkpoint readback
+E       assert <ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'> is None
+E        +  where <ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'> = RunResult(captures=(), executor_ref='operation-1', failure=<ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'>, wal...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'last_event_id': 1}))).failure
+
+tests\executor\test_gateway_isolation.py:492: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-False]
+1 failed in 3.15s
+
+
+discard_partial: FAIL_CAUGHT; pytest_exit=1
+old='                    stream_broken = True\n'
+new='                    stream_broken = True\n                    batch_events = []\n'
+expected_assertion='SSE recovery must complete'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-True] _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5630/test_adapter_resumes_sse_witho0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001B98AC62650>
+break_before_event = False, split_line = True
+
+    @pytest.mark.parametrize("break_before_event,split_line", [(True, False), (False, False), (False, True)])
+    def test_adapter_resumes_sse_without_losing_events_or_repeating_inference(
+            tmp_path, monkeypatch, break_before_event, split_line):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class BrokenStream(FakeSandbox):
+            def __init__(self):
+                super().__init__(capture())
+                self.polls = []
+                self.sent = []
+                self.spawns = 0
+    
+            async def spawn_instance(self, **kwargs):
+                self.spawns += 1
+                return await super().spawn_instance(**kwargs)
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls.append((operation_id, follow, last_event_id))
+                event = _inference_event()
+                value = event.data["value"]
+                if len(self.polls) == 1:
+                    if not break_before_event:
+                        yield Event(1, "stdout", {"value": value[:20] if split_line else value})
+                    _sse_break(None if break_before_event else 1)
+                else:
+                    if break_before_event:
+                        yield event
+                    elif split_line:
+                        yield Event(2, "stdout", {"value": value[20:]})
+                    else:
+                        yield event  # A replay must never issue a second provider call.
+                    async for item in super().iter_operation_events(operation_id, follow=follow, last_event_id=None):
+                        yield dataclasses.replace(item, id=item.id + 2)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = BrokenStream()
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+>       assert result.failure is None, "SSE recovery must complete verified checkpoint readback"
+E       AssertionError: SSE recovery must complete verified checkpoint readback
+E       assert <ExecutorFailure.CAPTURE_TRUNCATED: 'CAPTURE_TRUNCATED'> is None
+E        +  where <ExecutorFailure.CAPTURE_TRUNCATED: 'CAPTURE_TRUNCATED'> = RunResult(captures=(), executor_ref='operation-1', failure=<ExecutorFailure.CAPTURE_TRUNCATED: 'CAPTURE_TRUNCATED'>, w...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'last_event_id': 1}))).failure
+
+tests\executor\test_gateway_isolation.py:492: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-True]
+1 failed in 2.40s
+
+
+wrong_cursor: FAIL_CAUGHT; pytest_exit=1
+old='operation_id, follow=False, last_event_id=seen))'
+new='operation_id, follow=False, last_event_id=None))'
+expected_assertion='sandbox.polls[1]'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-False] _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5631/test_adapter_resumes_sse_witho0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000021232E12650>
+break_before_event = False, split_line = False
+
+    @pytest.mark.parametrize("break_before_event,split_line", [(True, False), (False, False), (False, True)])
+    def test_adapter_resumes_sse_without_losing_events_or_repeating_inference(
+            tmp_path, monkeypatch, break_before_event, split_line):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class BrokenStream(FakeSandbox):
+            def __init__(self):
+                super().__init__(capture())
+                self.polls = []
+                self.sent = []
+                self.spawns = 0
+    
+            async def spawn_instance(self, **kwargs):
+                self.spawns += 1
+                return await super().spawn_instance(**kwargs)
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls.append((operation_id, follow, last_event_id))
+                event = _inference_event()
+                value = event.data["value"]
+                if len(self.polls) == 1:
+                    if not break_before_event:
+                        yield Event(1, "stdout", {"value": value[:20] if split_line else value})
+                    _sse_break(None if break_before_event else 1)
+                else:
+                    if break_before_event:
+                        yield event
+                    elif split_line:
+                        yield Event(2, "stdout", {"value": value[20:]})
+                    else:
+                        yield event  # A replay must never issue a second provider call.
+                    async for item in super().iter_operation_events(operation_id, follow=follow, last_event_id=None):
+                        yield dataclasses.replace(item, id=item.id + 2)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = BrokenStream()
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+        assert result.failure is None, "SSE recovery must complete verified checkpoint readback"
+        assert len(result.captures) == 1 and result.captures[0].body == b'{"request_id":"one"}'
+        assert len(http.calls) == len(sandbox.sent) == sandbox.spawns == 1
+        assert len(sandbox.polls) == 2 and sandbox.cancelled == []
+>       assert sandbox.polls[1] == ("operation-1", False, None if break_before_event else 1)
+E       AssertionError: assert ('operation-1', False, None) == ('operation-1', False, 1)
+E         
+E         At index 2 diff: None != 1
+E         Use -v to get more diff
+
+tests\executor\test_gateway_isolation.py:496: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-False]
+1 failed in 1.49s
+
+
+replay_duplicate: FAIL_CAUGHT; pytest_exit=1
+old='event.id <= seen:'
+new='event.id < seen:'
+expected_assertion='SSE recovery must complete'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-False] _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5632/test_adapter_resumes_sse_witho0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001BAF80F2650>
+break_before_event = False, split_line = False
+
+    @pytest.mark.parametrize("break_before_event,split_line", [(True, False), (False, False), (False, True)])
+    def test_adapter_resumes_sse_without_losing_events_or_repeating_inference(
+            tmp_path, monkeypatch, break_before_event, split_line):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class BrokenStream(FakeSandbox):
+            def __init__(self):
+                super().__init__(capture())
+                self.polls = []
+                self.sent = []
+                self.spawns = 0
+    
+            async def spawn_instance(self, **kwargs):
+                self.spawns += 1
+                return await super().spawn_instance(**kwargs)
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls.append((operation_id, follow, last_event_id))
+                event = _inference_event()
+                value = event.data["value"]
+                if len(self.polls) == 1:
+                    if not break_before_event:
+                        yield Event(1, "stdout", {"value": value[:20] if split_line else value})
+                    _sse_break(None if break_before_event else 1)
+                else:
+                    if break_before_event:
+                        yield event
+                    elif split_line:
+                        yield Event(2, "stdout", {"value": value[20:]})
+                    else:
+                        yield event  # A replay must never issue a second provider call.
+                    async for item in super().iter_operation_events(operation_id, follow=follow, last_event_id=None):
+                        yield dataclasses.replace(item, id=item.id + 2)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = BrokenStream()
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+>       assert result.failure is None, "SSE recovery must complete verified checkpoint readback"
+E       AssertionError: SSE recovery must complete verified checkpoint readback
+E       assert <ExecutorFailure.SANDBOX_TERMINATED: 'SANDBOX_TERMINATED'> is None
+E        +  where <ExecutorFailure.SANDBOX_TERMINATED: 'SANDBOX_TERMINATED'> = RunResult(captures=(RawCapture(request_ordinal=1, http_status=200, body=b'{"request_id":"one"}', elapsed_ms=0, transpo...0dfdbf821ce2bc78049b20dc735e95cd45d64500a', 'checkpoint_readback': True}, raw_payload={'checkpoint': 'checkpoint-1'}))).failure
+
+tests\executor\test_gateway_isolation.py:492: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-False]
+1 failed in 1.26s
+
+
+extra_reconnect: FAIL_CAUGHT; pytest_exit=1
+old='MAX_SSE_RECONNECTS = 3'
+new='MAX_SSE_RECONNECTS = 4'
+expected_assertion='only three event-stream reconnects'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5633/test_adapter_sse_retry_limit_k0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000182FA572650>
+
+    def test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic(tmp_path, monkeypatch):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class PersistentBreak(FakeSandbox):
+            polls = 0
+            sent = []
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls += 1
+                if self.polls == 1:
+                    yield _inference_event()
+                _sse_break(1)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = PersistentBreak(capture())
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+        assert result.failure is ExecutorFailure.PROVISION_FAILED
+>       assert sandbox.polls == 4, "only three event-stream reconnects are permitted"
+E       AssertionError: only three event-stream reconnects are permitted
+E       assert 5 == 4
+E        +  where 5 = <test_gateway_isolation.test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic.<locals>.PersistentBreak object at 0x00000182FA5A8EC0>.polls
+
+tests\executor\test_gateway_isolation.py:520: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic
+1 failed in 4.78s
+
+
+lost_pending_inference: FAIL_CAUGHT; pytest_exit=1
+old='            record_gateway_observations()\n            return RunResult'
+new='            # injected missing flush\n            return RunResult'
+expected_assertion='sum(obs.kind == "INFERENCE_RESULT"'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5634/test_adapter_sse_retry_limit_k0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000025F9DA62650>
+
+    def test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic(tmp_path, monkeypatch):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class PersistentBreak(FakeSandbox):
+            polls = 0
+            sent = []
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls += 1
+                if self.polls == 1:
+                    yield _inference_event()
+                _sse_break(1)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = PersistentBreak(capture())
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+        assert result.failure is ExecutorFailure.PROVISION_FAILED
+        assert sandbox.polls == 4, "only three event-stream reconnects are permitted"
+        assert len(http.calls) == len(sandbox.sent) == 1
+        assert sandbox.cancelled == ["operation-1"] and result.captures == ()
+>       assert sum(obs.kind == "INFERENCE_RESULT" for obs in result.observations) == 1
+E       assert 0 == 1
+E        +  where 0 = sum(<generator object test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic.<locals>.<genexpr> at 0x0000025F9DAD1CB0>)
+
+tests\executor\test_gateway_isolation.py:523: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic
+1 failed in 2.27s
+
+
+raw_diagnostic_unbounded: FAIL_CAUGHT; pytest_exit=1
+old='"error_message": message[:512]'
+new='"error_message": message[:1024]'
+expected_assertion='len(obs.raw_payload.get("error_message"'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5635/test_adapter_sse_retry_limit_k0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001EDC58A2650>
+
+    def test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic(tmp_path, monkeypatch):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class PersistentBreak(FakeSandbox):
+            polls = 0
+            sent = []
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls += 1
+                if self.polls == 1:
+                    yield _inference_event()
+                _sse_break(1)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = PersistentBreak(capture())
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+        assert result.failure is ExecutorFailure.PROVISION_FAILED
+        assert sandbox.polls == 4, "only three event-stream reconnects are permitted"
+        assert len(http.calls) == len(sandbox.sent) == 1
+        assert sandbox.cancelled == ["operation-1"] and result.captures == ()
+        assert sum(obs.kind == "INFERENCE_RESULT" for obs in result.observations) == 1
+        public = json.dumps([obs.public_payload for obs in result.observations])
+        raw = json.dumps([obs.raw_payload for obs in result.observations])
+        # Positive control: the exact needles match this serialized surface.
+        control = json.dumps([{"diagnostic": "resume diagnostic TEST_PROVIDER_TOKEN aiproject-test"}])
+        assert all(needle in control for needle in ("resume diagnostic", "TEST_PROVIDER_TOKEN", "aiproject-test"))
+        assert "resume diagnostic" in raw and "resume diagnostic" not in public
+        assert "TEST_PROVIDER_TOKEN" not in raw + public and "aiproject-test" not in raw + public
+>       assert all(len(obs.raw_payload.get("error_message", "")) <= 512 for obs in result.observations)
+E       assert False
+E        +  where False = all(<generator object test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic.<locals>.<genexpr> at 0x000001EDC58DD120>)
+
+tests\executor\test_gateway_isolation.py:531: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic
+1 failed in 2.24s
+
+
+raw_diagnostic_secret: FAIL_CAUGHT; pytest_exit=1
+old='message = message.replace(secret, "[redacted]")'
+new='message = message'
+expected_assertion='"TEST_PROVIDER_TOKEN" not in raw'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5636/test_adapter_sse_retry_limit_k0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x0000021DE5712650>
+
+    def test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic(tmp_path, monkeypatch):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class PersistentBreak(FakeSandbox):
+            polls = 0
+            sent = []
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls += 1
+                if self.polls == 1:
+                    yield _inference_event()
+                _sse_break(1)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = PersistentBreak(capture())
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+        assert result.failure is ExecutorFailure.PROVISION_FAILED
+        assert sandbox.polls == 4, "only three event-stream reconnects are permitted"
+        assert len(http.calls) == len(sandbox.sent) == 1
+        assert sandbox.cancelled == ["operation-1"] and result.captures == ()
+        assert sum(obs.kind == "INFERENCE_RESULT" for obs in result.observations) == 1
+        public = json.dumps([obs.public_payload for obs in result.observations])
+        raw = json.dumps([obs.raw_payload for obs in result.observations])
+        # Positive control: the exact needles match this serialized surface.
+        control = json.dumps([{"diagnostic": "resume diagnostic TEST_PROVIDER_TOKEN aiproject-test"}])
+        assert all(needle in control for needle in ("resume diagnostic", "TEST_PROVIDER_TOKEN", "aiproject-test"))
+        assert "resume diagnostic" in raw and "resume diagnostic" not in public
+>       assert "TEST_PROVIDER_TOKEN" not in raw + public and "aiproject-test" not in raw + public
+E       assert ('TEST_PROVIDER_TOKEN' not in '[{"operatio...rdinal": 1}]'
+E         
+E         'TEST_PROVIDER_TOKEN' is contained here:
+E         ?          ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------...
+E         
+E         ...Full output truncated (3 lines hidden), use '-vv' to show)
+
+tests\executor\test_gateway_isolation.py:530: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_sse_retry_limit_keeps_pending_inference_and_private_diagnostic
+1 failed in 2.27s
+
+
+retry_untyped: FAIL_CAUGHT; pytest_exit=1
+old='if not hasattr(exc, "last_event_id"):'
+new='if False:'
+expected_assertion='sandbox.polls == 1'
+F                                                                        [100%]
+================================== FAILURES ===================================
+__________ test_adapter_does_not_retry_an_untyped_connection_failure __________
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5637/test_adapter_does_not_retry_an0')
+
+    def test_adapter_does_not_retry_an_untyped_connection_failure(tmp_path):
+        class TransportBreak(FakeSandbox):
+            polls = 0
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls += 1
+                raise ConnectionError("plain transport failure")
+                yield
+    
+        sandbox = TransportBreak(capture())
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+        assert result.failure is ExecutorFailure.PROVISION_FAILED
+>       assert sandbox.polls == 1 and sandbox.cancelled == ["operation-1"]
+E       assert (4 == 1)
+E        +  where 4 = <test_gateway_isolation.test_adapter_does_not_retry_an_untyped_connection_failure.<locals>.TransportBreak object at 0x00000284924E0590>.polls
+
+tests\executor\test_gateway_isolation.py:547: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_does_not_retry_an_untyped_connection_failure
+1 failed in 2.23s
+
+
+unbounded_stream_wait: FAIL_CAUGHT; pytest_exit=1
+old='asyncio.timeout(request.deadline_s - (time.monotonic() - started))'
+new='asyncio.timeout(20)'
+expected_assertion='a blocked poll must respect'
+F                                                                        [100%]
+================================== FAILURES ===================================
+___________ test_adapter_stream_wait_respects_deadline_and_cancels ____________
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5638/test_adapter_stream_wait_respe0')
+
+    def test_adapter_stream_wait_respects_deadline_and_cancels(tmp_path):
+        class StalledStream(FakeSandbox):
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                await asyncio.sleep(10)
+                yield Event(1, "completion")
+    
+        sandbox = StalledStream(capture())
+        frozen = request(tmp_path).model_copy(update={"deadline_s": 0.1})
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(frozen))
+>       assert result.failure is ExecutorFailure.REQUEST_TIMEOUT, "a blocked poll must respect the run deadline"
+E       AssertionError: a blocked poll must respect the run deadline
+E       assert <ExecutorFailure.CAPTURE_TRUNCATED: 'CAPTURE_TRUNCATED'> is <ExecutorFailure.REQUEST_TIMEOUT: 'REQUEST_TIMEOUT'>
+E        +  where <ExecutorFailure.CAPTURE_TRUNCATED: 'CAPTURE_TRUNCATED'> = RunResult(captures=(), executor_ref='operation-1', failure=<ExecutorFailure.CAPTURE_TRUNCATED: 'CAPTURE_TRUNCATED'>, w...s': 'SUCCESS', 'wall_ms': 10001}, raw_payload={'status': {'status': 'SUCCESS', 'result_image_uuid': 'checkpoint-1'}}))).failure
+E        +  and   <ExecutorFailure.REQUEST_TIMEOUT: 'REQUEST_TIMEOUT'> = ExecutorFailure.REQUEST_TIMEOUT
+
+tests\executor\test_gateway_isolation.py:577: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_stream_wait_respects_deadline_and_cancels
+1 failed in 10.50s
+
+
+lose_terminal: FAIL_CAUGHT; pytest_exit=1
+old='                if terminal:\n                    break\n'
+new='                if terminal and not stream_broken:\n                    break\n'
+expected_assertion='result.failure is None'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________ test_adapter_keeps_terminal_event_received_before_sse_break _________
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5639/test_adapter_keeps_terminal_ev0')
+
+    def test_adapter_keeps_terminal_event_received_before_sse_break(tmp_path):
+        class TerminalBreak(FakeSandbox):
+            polls = 0
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls += 1
+                async for event in super().iter_operation_events(operation_id, follow=follow, last_event_id=last_event_id):
+                    yield event
+                _sse_break(2)
+    
+        sandbox = TerminalBreak(capture())
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+>       assert result.failure is None and len(result.captures) == 1
+E       AssertionError: assert (<ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'> is None)
+E        +  where <ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'> = RunResult(captures=(), executor_ref='operation-1', failure=<ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'>, wal...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'last_event_id': 2}))).failure
+
+tests\executor\test_gateway_isolation.py:563: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_keeps_terminal_event_received_before_sse_break
+1 failed in 2.24s
+
+
+source_after_sha256=3ea43335556925b0dda35053c837e14a4bc6f3a6d49b69f2d70cf59c273ca2e5
+restored=True

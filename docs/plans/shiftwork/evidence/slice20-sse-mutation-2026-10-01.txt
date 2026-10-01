@@ -1,0 +1,67 @@
+source_before_sha256=3ea43335556925b0dda35053c837e14a4bc6f3a6d49b69f2d70cf59c273ca2e5
+
+no_resume: FAIL_CAUGHT; pytest_exit=1
+old='if not hasattr(exc, "last_event_id"):'
+new='if True:'
+expected_assertion='SSE recovery must complete'
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-False] _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-5628/test_adapter_resumes_sse_witho0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x00000199F84E2650>
+break_before_event = False, split_line = False
+
+    @pytest.mark.parametrize("break_before_event,split_line", [(True, False), (False, False), (False, True)])
+    def test_adapter_resumes_sse_without_losing_events_or_repeating_inference(
+            tmp_path, monkeypatch, break_before_event, split_line):
+        http = _fake_adapter_gateway(monkeypatch)
+    
+        class BrokenStream(FakeSandbox):
+            def __init__(self):
+                super().__init__(capture())
+                self.polls = []
+                self.sent = []
+                self.spawns = 0
+    
+            async def spawn_instance(self, **kwargs):
+                self.spawns += 1
+                return await super().spawn_instance(**kwargs)
+    
+            async def iter_operation_events(self, operation_id, *, follow, last_event_id):
+                self.polls.append((operation_id, follow, last_event_id))
+                event = _inference_event()
+                value = event.data["value"]
+                if len(self.polls) == 1:
+                    if not break_before_event:
+                        yield Event(1, "stdout", {"value": value[:20] if split_line else value})
+                    _sse_break(None if break_before_event else 1)
+                else:
+                    if break_before_event:
+                        yield event
+                    elif split_line:
+                        yield Event(2, "stdout", {"value": value[20:]})
+                    else:
+                        yield event  # A replay must never issue a second provider call.
+                    async for item in super().iter_operation_events(operation_id, follow=follow, last_event_id=None):
+                        yield dataclasses.replace(item, id=item.id + 2)
+    
+            async def operation_subprocess_stdin(self, operation_id, process_id, value, *, close):
+                self.sent.append(json.loads(value))
+    
+        sandbox = BrokenStream()
+        result = run(TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+            token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox).execute(request(tmp_path)))
+>       assert result.failure is None, "SSE recovery must complete verified checkpoint readback"
+E       AssertionError: SSE recovery must complete verified checkpoint readback
+E       assert <ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'> is None
+E        +  where <ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'> = RunResult(captures=(), executor_ref='operation-1', failure=<ExecutorFailure.PROVISION_FAILED: 'PROVISION_FAILED'>, wal...xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'last_event_id': 1}))).failure
+
+tests\executor\test_gateway_isolation.py:492: AssertionError
+=========================== short test summary info ===========================
+FAILED tests/executor/test_gateway_isolation.py::test_adapter_resumes_sse_without_losing_events_or_repeating_inference[False-False]
+1 failed in 0.68s
+
+
+source_after_sha256=3ea43335556925b0dda35053c837e14a4bc6f3a6d49b69f2d70cf59c273ca2e5
+restored=True
