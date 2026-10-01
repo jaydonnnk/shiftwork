@@ -1,0 +1,214 @@
+{
+  "ceilings": {
+    "comparison": "0.03981312",
+    "operation": "0.00221184"
+  },
+  "ended_utc": "2026-10-01T15:17:38Z",
+  "error": {
+    "message": "comparison did not complete: FAILED/INCOMPLETE",
+    "type": "RuntimeError"
+  },
+  "guards": {
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\fixtures\\artifacts\\bookshop\\compare_repair_model_service.py": {
+      "actual": "fd770c1d86707ae8b69043939316a5e44fedc721641ab86ff529033290f26248",
+      "expected": "fd770c1d86707ae8b69043939316a5e44fedc721641ab86ff529033290f26248"
+    },
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\fixtures\\requests\\bookshop_compare_manifest.json": {
+      "actual": "2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f",
+      "expected": "2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f"
+    },
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\sealed\\cases\\bookshop_task_completion.json": {
+      "actual": "170dd925880b035c3a999512c982aaccaa2deda96e8d55950f4b7c14f0ce9a24",
+      "expected": "170dd925880b035c3a999512c982aaccaa2deda96e8d55950f4b7c14f0ce9a24"
+    }
+  },
+  "mode": "live",
+  "phase_a": {
+    "candidate_a": {
+      "content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd",
+      "source": "model_candidate",
+      "version_id": "ver-0003"
+    },
+    "candidate_b": {
+      "content_hash": "21b9733dbffab5d1845edc3f0b4e5c8cd9b26aafca3edb57778bdd51e3000105",
+      "version_id": "ver-0004"
+    },
+    "incident_events": [
+      1,
+      2,
+      3
+    ],
+    "investigation_id": "inv-0001",
+    "sale_events_for_run": 0,
+    "shift_id": "bookshop-shift-01",
+    "starter_run": {
+      "evidence_mode": "RECORDED_INSPECTION",
+      "id": "run-0001",
+      "state": "FINALIZED"
+    },
+    "starter_version_hash": "a1c1093fcc456ebb5afc07241bb24f34ca4ca80877a7fff00fe5c82e2c542f28"
+  },
+  "phase_b": {
+    "candidate_metrics": [
+      {
+        "candidate_label": "A",
+        "candidate_version_id": "ver-0003",
+        "cost_minor_units": null,
+        "incorrect_outputs": 0,
+        "input_tokens": null,
+        "justified_clarifications": 0,
+        "justified_referrals": 0,
+        "justified_refusals": 1,
+        "missing_outputs": 2,
+        "output_tokens": null,
+        "protected_denominator": 3,
+        "protected_failed": 0,
+        "protected_missing": 1,
+        "protected_passed": 2,
+        "provisioning_latency_ms": null,
+        "public_denominator_requests": 6,
+        "service_calls": null,
+        "service_latency_ms": null,
+        "unjustified_clarifications": 0,
+        "unjustified_referrals": 0,
+        "unjustified_refusals": 0,
+        "useful_completions": 3
+      },
+      {
+        "candidate_label": "B",
+        "candidate_version_id": "ver-0004",
+        "cost_minor_units": null,
+        "incorrect_outputs": 0,
+        "input_tokens": null,
+        "justified_clarifications": 0,
+        "justified_referrals": 0,
+        "justified_refusals": 1,
+        "missing_outputs": 2,
+        "output_tokens": null,
+        "protected_denominator": 3,
+        "protected_failed": 0,
+        "protected_missing": 1,
+        "protected_passed": 2,
+        "provisioning_latency_ms": null,
+        "public_denominator_requests": 6,
+        "service_calls": null,
+        "service_latency_ms": null,
+        "unjustified_clarifications": 0,
+        "unjustified_referrals": 0,
+        "unjustified_refusals": 0,
+        "useful_completions": 3
+      }
+    ],
+    "drift_fields": [],
+    "eligibility": [
+      {
+        "blocking_reason_codes": [
+          "INCOMPLETE",
+          "mandatory_public_rule"
+        ],
+        "candidate_label": "A",
+        "candidate_version_id": "ver-0003",
+        "eligible": false
+      },
+      {
+        "blocking_reason_codes": [
+          "INCOMPLETE",
+          "mandatory_public_rule"
+        ],
+        "candidate_label": "B",
+        "candidate_version_id": "ver-0004",
+        "eligible": false
+      }
+    ],
+    "experiment_id": "experiment-bookshop-shift-01-c1",
+    "inference_call_attempts": 8,
+    "inference_results": [
+      {
+        "failure": null,
+        "finish_reason": "stop",
+        "input_tokens": 96,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "output_tokens": 130,
+        "request_ordinal": 1,
+        "run_id": "run-0002",
+        "selected_tool": "public_record_lookup"
+      },
+      {
+        "failure": null,
+        "finish_reason": "stop",
+        "input_tokens": 96,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "output_tokens": 140,
+        "request_ordinal": 2,
+        "run_id": "run-0002",
+        "selected_tool": "public_record_lookup"
+      },
+      {
+        "failure": null,
+        "finish_reason": "stop",
+        "input_tokens": 101,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "output_tokens": 141,
+        "request_ordinal": 3,
+        "run_id": "run-0002",
+        "selected_tool": "public_record_lookup"
+      },
+      {
+        "failure": null,
+        "finish_reason": "stop",
+        "input_tokens": 96,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "output_tokens": 146,
+        "request_ordinal": 1,
+        "run_id": "run-0005",
+        "selected_tool": "public_record_lookup"
+      },
+      {
+        "failure": null,
+        "finish_reason": "stop",
+        "input_tokens": 93,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "output_tokens": 89,
+        "request_ordinal": 2,
+        "run_id": "run-0005",
+        "selected_tool": "public_record_lookup"
+      },
+      {
+        "failure": null,
+        "finish_reason": "stop",
+        "input_tokens": 106,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "output_tokens": 139,
+        "request_ordinal": 3,
+        "run_id": "run-0005",
+        "selected_tool": "public_record_lookup"
+      },
+      {
+        "failure": null,
+        "finish_reason": "stop",
+        "input_tokens": 93,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "output_tokens": 126,
+        "request_ordinal": 1,
+        "run_id": "run-0007",
+        "selected_tool": "public_record_lookup"
+      }
+    ],
+    "outcome_status": "INCOMPLETE",
+    "projected_inference_usd": "0.01769472",
+    "reservation_ceiling_usd": "0.03981312",
+    "sandbox_operations": 10,
+    "slot_states": [
+      "COMPLETE",
+      "COMPLETE",
+      "COMPLETE",
+      "COMPLETE",
+      "FAILED",
+      "FAILED"
+    ],
+    "state": "FAILED",
+    "successful_inference_results": 7
+  },
+  "started_utc": "2026-10-01T15:16:10Z",
+  "verdict": "ERROR"
+}
