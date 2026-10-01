@@ -88,6 +88,7 @@ body[data-evidence="finalized"] .station-service { border-color: var(--amber); b
 .station-repair { left: 72%; top: 62%; }
 .station-investigate { left: 5%; top: 43%; }
 .station-compare { left: 22%; top: 62%; }
+.station-next { right: 0; top: 52%; }
 .comparison-slot { border: 1px solid #ffffff14; border-left: 2px solid #edbd68; border-radius: 3px; padding: 9px 11px; margin-bottom: 8px; background: #ffffff05; }
 .comparison-slot strong { display: block; font-size: 12px; }
 .comparison-slot .result-row { margin-top: 6px; }

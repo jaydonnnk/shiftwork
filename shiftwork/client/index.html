@@ -44,6 +44,7 @@
           <button class="station station-repair" data-station="repair"><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small></span></button>
           <button class="station station-investigate" data-station="investigate"><span class="station-marker" aria-hidden="true">◎</span><span>Investigate<small id="investigation-tag">Not loaded</small></span></button>
           <button class="station station-compare" data-station="compare"><span class="station-marker" aria-hidden="true">⇄</span><span>Compare<small id="compare-tag">Not loaded</small></span></button>
+          <button class="station station-next" data-station="next"><span class="station-marker" aria-hidden="true">▷</span><span>Next shift<small id="next-tag">Not loaded</small></span></button>
         </div>
         <div class="room-caption"><span class="tiny-square"></span>A real output. An independent check. A recorded consequence.</div>
       </div>
@@ -146,6 +147,34 @@
           <div class="panel-actions"><button id="select-candidate-a" class="button secondary" disabled>Choose A</button><button id="select-candidate-b" class="button secondary" disabled>Choose B</button></div>
           <p id="selection-error" class="denial" role="status"></p>
         </section>
+      </section>
+      <section id="next-view" hidden>
+        <p id="next-state" class="mono evidence-meta">No shift loaded</p>
+        <section class="panel-section">
+          <h3>Inherited from the last shift</h3>
+          <p class="help-text">The next shift starts from the exact selected version and its recorded rationale, never from the newest save.</p>
+          <div id="next-inheritance" class="artifact-detail"></div>
+        </section>
+        <section class="panel-section">
+          <h3>Requirements in force</h3>
+          <div id="next-tests" class="artifact-detail"></div>
+        </section>
+        <section class="panel-section" data-synthetic-region="next-history">
+          <div class="section-heading"><h3>Recorded operational history</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p class="help-text">Real recorded state: runs, incidents, limits and ledger events caused by operating a version.</p>
+          <div id="next-history" class="artifact-detail"></div>
+        </section>
+        <section class="panel-section" data-synthetic-region="next-experiment">
+          <div class="section-heading"><h3>Later-condition experiment · hypothetical</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p class="help-text">A later-condition comparison re-tests the selected and the retained version under an observed condition. It writes no business consequence, never rewrites the history above, and cannot be cited to switch versions on its own.</p>
+          <div id="next-experiment" class="artifact-detail"></div>
+        </section>
+        <div class="panel-actions">
+          <button id="close-shift" class="button secondary" disabled>Close this shift</button>
+          <button id="open-next-shift" class="button primary" disabled>Open the next shift</button>
+        </div>
+        <p id="next-help" class="help-text">Loading shift actions…</p>
+        <p id="next-error" class="denial" role="status"></p>
       </section>
       <section id="deferred-view" hidden><div class="deferred-symbol" aria-hidden="true">◇</div><h3 id="deferred-title"></h3><p id="deferred-copy"></p><button id="back-board" class="button secondary">Back to your service</button></section>
       <footer class="panel-footer"><span class="tiny-square"></span>Evidence, not a narrated outcome.</footer>

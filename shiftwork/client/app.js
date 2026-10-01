@@ -65,6 +65,12 @@ function clearData(message) {
   text('compare-summary', '');
   $('comparison-outcome').replaceChildren();
   text('compare-error', '');
+  text('next-state', 'No shift loaded');
+  text('next-tag', 'Not loaded');
+  text('next-help', 'Loading shift actions…');
+  text('next-error', '');
+  for (const id of ['next-inheritance', 'next-tests', 'next-history', 'next-experiment']) empty($(id), 'No verified data loaded.');
+  $('close-shift').disabled = true; $('open-next-shift').disabled = true;
   text('selection-note', 'A complete eligible comparison is required.');
   text('selection-error', '');
   empty($('candidate-list'), 'No candidates loaded.');
@@ -595,6 +601,106 @@ function renderCompare() {
     return row;
   }));
 }
+function renderNext() {
+  const board = state.board;
+  const shift = board?.latest_shift ?? null;
+  const choice = board?.operating_selection ?? null;
+  const requirements = board?.inherited_requirements ?? null;
+  const later = state.stationView?.latest_experiment?.kind === 'LATER_CONDITION_COMPARISON'
+    ? state.stationView.latest_experiment : null;
+  text('next-state', shift ? `${shift.id} · ${shift.state === 'open' ? 'open' : 'closed'} · ${humanize(board.operating_status)}` : 'No shift loaded');
+  text('next-tag', !shift ? 'Not loaded' : choice ? `${choice.selected_version_id} · ${humanize(board.operating_status)}` : 'No selection yet');
+  const inheritance = $('next-inheritance');
+  if (!shift || !choice) empty(inheritance, 'No inherited selection. Make an explicit choice in a comparison first.');
+  else {
+    inheritance.replaceChildren();
+    for (const [label, field, value] of [
+      ['Operating choice', 'operating-choice', `${choice.id} · ${choice.selected_version_id} · ${humanize(choice.state)}`],
+      ['Recorded rationale', 'rationale', choice.rationale],
+      ['Selected content hash', 'selected-hash', choice.selected_content_hash],
+      ['Retained alternative', 'retained-alternative', choice.retained_alternative_version_id],
+      ['Prior choice', 'prior-choice', choice.prior_selection_id ?? 'none'],
+      ['Comparison', 'comparison', choice.comparison_id],
+      ['Draft descends from', 'draft-base', board.draft_base_version_id ?? 'none'],
+      ['Newest saved version', 'latest-saved', board.latest_saved_version_id ?? `none in this shift (newest in the engagement: ${board.latest_version?.id ?? 'none'})`],
+    ]) {
+      const row = element('div', null, 'contract-line');
+      row.dataset.inheritField = field;
+      row.append(element('span', label), element('strong', value));
+      inheritance.append(row);
+    }
+  }
+  const tests = $('next-tests');
+  if (!requirements) empty(tests, 'No inherited requirement set. The visible checks load with an explicit choice.');
+  else {
+    tests.replaceChildren();
+    for (const [label, field, value] of [
+      ['Requirement set', 'requirement-set', requirements.requirement_set_id],
+      ['Frozen requirement hash', 'requirement-hash', requirements.requirement_set_hash],
+      ['Visible check set hash', 'visible-check-hash', requirements.visible_check_set_hash],
+    ]) {
+      const row = element('div', null, 'contract-line');
+      row.dataset.inheritField = field;
+      row.append(element('span', label), element('strong', value));
+      tests.append(row);
+    }
+  }
+  const history = $('next-history');
+  if (!shift) empty(history, 'No verified data loaded.');
+  else {
+    history.dataset.ledgerEvents = String(board.ledger_event_count);
+    history.dataset.incidents = String(board.incidents.length);
+    history.dataset.chainStatus = board.chain_status;
+    const laterRuns = new Set(later ? later.trials.map(trial => trial.run_id).filter(Boolean) : []);
+    const run = board.latest_run && !laterRuns.has(board.latest_run.id) ? board.latest_run : null;
+    history.dataset.latestRun = run?.id ?? '';
+    history.replaceChildren();
+    for (const [label, value] of [
+      ['Latest recorded run', run ? `${run.id} · ${humanize(run.purpose)} · ${humanize(run.state)} · ${run.evidence_mode ?? 'evidence mode unknown'}` : 'The newest run is a slot of the hypothetical experiment below, not operational history.'],
+      ['Unresolved incidents', board.incidents.map(incident => `${incident.id} · ${humanize(incident.state)}`).join(' · ') || 'none'],
+      ['Declared limits in force', board.unresolved_limits.join(' · ') || 'none'],
+      ['Ledger', `${board.ledger_event_count} recorded events · chain ${humanize(board.chain_status)}`],
+      ['Ledger totals', Object.entries(board.ledger_totals).map(([name, count]) => `${humanize(name)} ${count}`).join(' · ') || 'no events'],
+    ]) {
+      const row = element('div', null, 'contract-line');
+      row.append(element('span', label), element('strong', value));
+      history.append(row);
+    }
+  }
+  const experiment = $('next-experiment');
+  if (!shift) empty(experiment, 'No verified data loaded.');
+  else if (!later) {
+    delete experiment.dataset.experimentId;
+    experiment.dataset.experimentState = 'none';
+    empty(experiment, 'No later-condition experiment on this shift. One becomes available after an operation records an observed condition change, such as a dependency outage, and it never replaces that operation.');
+  } else {
+    experiment.dataset.experimentId = later.id;
+    experiment.dataset.experimentState = later.state;
+    experiment.dataset.outcomeStatus = later.outcome?.status ?? 'INCOMPLETE';
+    experiment.dataset.observedRunId = later.observed_run_id ?? '';
+    experiment.replaceChildren();
+    const versions = Object.fromEntries(later.candidates.map(candidate => [candidate.label, candidate.artifact_version_id]));
+    for (const [label, value] of [
+      ['Experiment', `${later.id} · ${humanize(later.state)}`],
+      ['Observed operation', later.observed_run_id ?? 'none'],
+      ['Observed condition', later.condition ? `${later.condition.public_label} (${later.condition.kind})` : 'not recorded'],
+      ['Re-tested versions', `A ${versions.A ?? 'none'} (selected) · B ${versions.B ?? 'none'} (retained alternative)`],
+      ['Outcome', later.outcome?.status ?? 'INCOMPLETE'],
+      ['Slots', `${later.trials.filter(trial => trial.state === 'COMPLETE').length} of ${later.trials.length} complete`],
+    ]) {
+      const row = element('div', null, 'contract-line');
+      row.append(element('span', label), element('strong', value));
+      experiment.append(row);
+    }
+  }
+  const open = shift?.state === 'open';
+  $('close-shift').disabled = state.pending || !shift || !open;
+  $('open-next-shift').disabled = state.pending || !shift || open;
+  text('next-help', !shift ? 'No shift loaded.'
+    : open ? (choice ? `Closing writes the declared limits to the ledger and never selects a version. The next shift starts from ${choice.selected_version_id} and keeps ${choice.retained_alternative_version_id} in history.`
+      : 'This shift has no explicit choice. Close it to open the next shift, but no version is inherited as operating.')
+    : 'This shift is closed. Open the next shift to inherit the exact selection and continue the history.');
+}
 async function freezeCandidate(label) {
   const shiftId = state.board?.latest_shift?.id;
   const contract = state.board?.latest_version?.contract;
@@ -762,6 +868,7 @@ const stations = {
   evaluator: ['Independent evaluator', 'LOCKED · NOT EDITABLE', 'Neither the learner nor an assistant can edit the scoring rules or see sealed expected values.'],
   investigate: ['Investigate a failure', 'REVIEW THE EXECUTED REQUEST', 'Read the exact request and output, then write your cause, falsifier and public test. A diagnostic cannot qualify a version.'],
   compare: ['Compare two repairs', 'PAIRED CANDIDATE EXECUTION', 'Both candidates run the same frozen workloads under shared requirements and ceilings. This station shows every slot and its missing evidence; it never picks a winner.'],
+  next: ['Next shift', 'INHERITED EXACTLY, TESTED LATER', 'Close this shift and open the next one from the exact selection. Recorded operational history and a later-condition experiment are shown as two separate things: the experiment is hypothetical and never rewrites the history.'],
 };
 function bringStationPanelIntoReach() {
   // Narrow layouts stack the panel below the room, so a station selection can
@@ -788,6 +895,7 @@ function activateStation(name, userIntent = true) {
   $('customer-view').hidden = !['customers', 'pipeline'].includes(name);
   $('investigate-view').hidden = name !== 'investigate';
   $('compare-view').hidden = name !== 'compare';
+  $('next-view').hidden = name !== 'next';
   $('board-view').hidden = !['service', 'owner', 'ledger', 'repair'].includes(name);
   if (name === 'evaluator') {
     text('deferred-title', 'Separate by design.');
@@ -800,6 +908,7 @@ function activateStation(name, userIntent = true) {
   renderCustomers();
   renderInvestigate();
   renderCompare();
+  renderNext();
   const view = name === 'owner' ? 'contract' : name === 'repair' ? 'repair' : ['customers', 'pipeline', 'evaluator'].includes(name) ? 'customers' : 'board';
   state.view = view;
   if (userIntent) history.replaceState(null, '', `#${view}`);
@@ -854,6 +963,16 @@ $('freeze-candidate-a').addEventListener('click', () => freezeCandidate('A'));
 $('freeze-candidate-b').addEventListener('click', () => freezeCandidate('B'));
 $('run-comparison').addEventListener('click', runComparison);
 $('treatment-input').addEventListener('input', () => renderCompare());
+async function shiftAction(path) {
+  if (state.pending || !path) return;
+  state.pending = true; renderBoard(); renderNext();
+  text('next-error', '');
+  try { await api(path, { method: 'POST' }); await refresh(); }
+  catch (error) { await refresh(); text('next-error', error.message); }
+  finally { state.pending = false; if (state.board) { renderBoard(); renderNext(); } }
+}
+$('close-shift').addEventListener('click', () => shiftAction(state.board?.latest_shift ? `/shifts/${encodeURIComponent(state.board.latest_shift.id)}/close` : null));
+$('open-next-shift').addEventListener('click', () => shiftAction('/engagements/bookshop/shifts'));
 $('select-candidate-a').addEventListener('click', () => chooseCandidate('A'));
 $('select-candidate-b').addEventListener('click', () => chooseCandidate('B'));
 $('selection-rationale').addEventListener('input', () => renderCompare());
