@@ -1,0 +1,37 @@
+{
+  "comparison_business_writes": 0,
+  "comparison_id": "experiment-bookshop-shift-01-c1",
+  "complete_slots": 6,
+  "database_sha256": "cc3e36f12cc205b83fc8bdd076f53c6b21df4330e404e182b7fe6d992b8f0691",
+  "inference_results": 10,
+  "input_tokens": 968,
+  "ledger_chain": "VALID",
+  "next_draft_matches_selected": true,
+  "operation_checks_passed": 3,
+  "operation_run_id": "run-0008",
+  "output_tokens": 1451,
+  "prior_files_verified_unchanged": 35,
+  "recorded_token_cost_usd": "0.00040632",
+  "sale_cause_refs": [
+    "run-0008",
+    "cr-0006",
+    "run-0008-out-1"
+  ],
+  "sale_hash": "e1d4f3117777d3c0361cecbb0ea5d775f515bce0eaa93d5435bca57425a443d2",
+  "sale_is_synthetic": true,
+  "sale_seq": 5,
+  "selected_version_id": "ver-0003",
+  "selection_id": "sel-0002",
+  "sse_break_observations": 1,
+  "trial_run_ids": [
+    "run-0002",
+    "run-0003",
+    "run-0004",
+    "run-0005",
+    "run-0006",
+    "run-0007"
+  ],
+  "verdict": "VERIFIED_LINKED_LIVE_CHAIN",
+  "verified_checkpoint_readbacks": 19,
+  "verified_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+}

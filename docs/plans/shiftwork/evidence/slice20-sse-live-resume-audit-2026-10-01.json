@@ -1,0 +1,11 @@
+[
+  {
+    "checkpoint_readbacks": 1,
+    "diagnostic_chars": 40,
+    "diagnostic_sha256": "315428be9a866458b2e70bccdcad9b2d8ff69e67ec2dd36de297e5b1298f8176",
+    "last_event_id": 3,
+    "observation_id": "run-0008-obs-2",
+    "run_id": "run-0008",
+    "run_state": "FINALIZED"
+  }
+]
