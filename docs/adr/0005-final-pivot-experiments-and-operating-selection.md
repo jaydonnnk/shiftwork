@@ -66,3 +66,63 @@ vertical changes, so implementation may resume one approved slice at a time unde
 its own go-ahead. No live integration, learning result,
 installation, credential use, deployment or publication is
 established by this record.
+
+## Implementation note 2026-09-30 (Slice 20)
+
+Decision 7's later-condition limb and decision 3's inheritance projection landed
+offline. No decision body above changed.
+
+- `orchestrator.observed_condition(state_bytes, dependencies)` derives a
+  `ContextCondition` from the public bytes one operational run actually consumed,
+  and persists it on that run's execution context. All-available dependencies
+  yield `condition-normal`, so a run that observed no change can never be cited
+  as the basis of a later-condition comparison.
+- `orchestrator.create_later_condition_comparison` re-tests the current operating
+  selection's exact selected version and its retained alternative in fresh matched
+  A/B slots under those observed bytes. It requires a `LEARNER_CHOICE` selection,
+  a `FINALIZED` `OPERATION` run of this shift under this selection, and an observed
+  condition whose kind is not `normal`; it is capped at one per shift and replays
+  idempotently on its client request key. The preceding operational run is never
+  one side of the experiment, since every slot is a new run, and a later-condition
+  comparison can never back a selection.
+- The comparison's workloads are read from the reviewed manifest against the
+  `config.PIVOT_COMPARE_STATE` bytes, while its context and exposure use the
+  observed world bytes. `_require_dependency_only_variation` permits only
+  dependency availability to differ between the two, names every other changed key
+  in the refusal, and refuses an unreadable or differently shaped world, so the
+  reviewed workloads stay valid under the observed condition.
+- The observed reference is durable and immutable: `experiment_observed_contexts`
+  carries no-update and no-delete triggers, is written once by
+  `repo.insert_observed_context`, and is read back on the experiment select as
+  `observed_run_id` and `observed_context_id`. The table is added in
+  `v6_tables.sql` rather than `v6.sql`, so an already-v6 database gains it on
+  reopen instead of needing a column SQLite cannot add idempotently.
+- `board_snapshot` projects `inherited_requirements` (the selection's comparison
+  id plus its requirement set id, requirement set hash and visible check set hash)
+  so a successor shift shows the contract it inherited rather than only the version
+  it inherited. The client's Next shift station keeps recorded operational history
+  and the hypothetical later-condition experiment in separate regions, and a board
+  whose `latest_run` is a later-experiment slot run excludes that run from
+  operational history.
+
+Evidence limit: this is offline policy proof through local doubles and the
+recorded executor. It is not model answer quality, Sandbox isolation or
+live-service evidence, and no later-condition trial has run against a live
+dependency outage. The linked `ISOLATED_LIVE` chain that decisions 1, 2, 3 and 6
+would need for end-to-end evidence (recorded Nemotron calls in a qualifying
+comparison, explicit selection of that exact version, a recorded Nemotron call as
+that selected version in operation, and exact-version inheritance) remains an
+unachieved stretch target with its own credential and spend authorization; see
+`docs/plans/shiftwork/04-slices.md` Slice 20. Failing-capable proofs:
+`tests/orchestrator/test_selection_operation.py`
+(`test_later_alternative_experiment_does_not_rewrite_original_history`,
+`test_later_condition_needs_an_observed_change_and_its_own_world`,
+`test_a_fault_mid_later_reservation_leaves_no_partial_comparison`),
+`tests/orchestrator/test_close_inheritance.py`
+(`test_next_shift_inherits_selection_rationale_alternative_tests_and_limits`,
+`test_close_declares_limits_without_selecting_or_selling`),
+`tests/api/test_pivot_routes.py`,
+`tests/store/test_pivot_migration.py`
+(`test_observed_context_references_reject_update_and_delete`) and the twenty
+`tests/s20_mutation_proofs.py` rows. The offline verification is recorded in
+`docs/plans/shiftwork/00-status.md`; acceptance is a separate user decision.

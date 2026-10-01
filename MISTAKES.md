@@ -1,5 +1,38 @@
 # Mistakes Log
 
+## 2026-10-01 S20 review: a demo boolean that could never be false
+
+- **What happened:** the independent S20 review found `prior_bytes_identical` in
+  `demos/final_pivot.py` computed from `all(appended.get(table, 0) >= 0 ...)`.
+  The appended counts come from a loop that already asserted every table's byte
+  prefix is unchanged, so each count is structurally >= 0 and the expression
+  could never be false. The demo printed a byte-identity claim that no input
+  could contradict.
+- **Root cause:** the flag was derived from the counts the loop happened to
+  compute instead of from the prefix comparisons themselves, and no one named an
+  input that should make it False.
+- **Prevention rule:** for every boolean a report, demo or gate prints, name the
+  measured inputs that can make it False and derive the value from those inputs.
+  A condition true in every reachable state is a restatement of the control
+  flow, not evidence.
+
+## 2026-10-01 S20 review: the record stated a mechanism and an attribution its captured evidence contradicts
+
+- **What happened:** the S20 status entry claimed the S18 flake died because
+  `_comparison`'s 90-second poll expired under load; the captured run shows the
+  failure at `test_selection_operation.py:73` with `INCOMPLETE == COMPLETE` in a
+  19.53s run, so the poll (line 67) cannot have expired. The same entry credited
+  the Next-station history/experiment separation to a client-shell pin that only
+  asserts attribute presence; the separation is proved by the browser
+  `inheritSeparation` fault instead.
+- **Root cause:** the mechanism was written from the shape of the failure rather
+  than from the captured bytes, and a coverage attribution was carried over from
+  an earlier draft without checking what the cited test actually asserts.
+- **Prevention rule:** every mechanism or coverage sentence in an evidence
+  record must cite the artifact that demonstrates it and name what would fail if
+  the claim were wrong; re-derive the sentence from the cited evidence, never
+  from the failure's appearance or an earlier round's prose.
+
 ## 2026-09-30 S18 mutation classifier missed bare pytest assertions
 
 - What happened: the first stricter mutation run called six rows UNPROVEN even
@@ -1355,3 +1388,21 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **What happened:** the full pivot re-run of the S19 anchor-repair round returned 96 FAIL_CAUGHT plus one CAUGHT_INCIDENTAL: `s10_unknown_schema_version_accepted` faults the unknown-schema guard in `db.ensure_schema`, and after `42739d6` (S18, 2026-09-30) the accepted version falls through to the v6 completion DDL's `runs.purpose` reference, so the named test failed with `sqlite3.OperationalError: no such column: purpose`. The runner classifies a crash as no proof, so the row had silently stopped being proof-grade. The row's anchor still matched exactly once, so no anchor check could have seen this.
 - **Root cause:** the test proved the refusal only through `pytest.raises(RuntimeError)`, so when the fault's downstream consequence changed from "no raise" to "a different exception", the failure arrived as a crash rather than an assertion. The pivot harness had not been re-run since S18 landed.
 - **Prevention rule:** a named assertion or `pytest.fail` must own the regression outcome so an unexpected exception cannot decide it, and a guard proof is only current when its harness has been re-run against the changed code. The S19 round hardened `test_unknown_schema_version_fails_closed` accordingly.
+
+## 2026-09-30 S20 duplicated the qualifying comparison block and rotted six pivot harness anchors
+
+- **What happened:** the first pivot harness round after the S20 orchestration change reported six rows unproven because their anchors were no longer unique: `create_later_condition_comparison` was written by adapting the existing qualifying-comparison slot setup, so the text those six rows match now appears twice, once in each function. The six rows had to be re-anchored onto qualifying-only context and re-proved. This is the same failure shape the S19 round repaired, triggered again by copying an existing block into a new function. The repair was still incomplete: the S20 verification round then found a seventh row, `s15_reservation_rollback_removed`, NOT_CAUGHT. Its anchor kept matching exactly once, so the count check passed, but it had **migrated** onto the new copy. The row disambiguated its four-line rollback guard (byte-identical in three reservation bodies) by naming the follower `def _comparison_run_request(`, and S20 inserted the new function between that guard and the follower, so the anchor silently re-bound to the copy while still naming the qualifying test, which cannot see the fault.
+- **Root cause:** the new function was written from the existing body, and no anchor measurement ran between the copy and the first harness round. The harness's own matcher (exactly-one match) is the only thing that can see this, and only when measured. The second failure has a different root cause: a match **count** is not a match **location**. An anchor whose uniqueness comes from a neighbouring `def` re-binds whenever a function is inserted on the other side of it, and the exactly-one-match check reports that as healthy.
+- **Prevention rule:** duplicating an existing orchestration block is an anchor-rot trigger. After such an edit, measure every row of every harness naming that file (42/38/19/16/97/16 rows for main/s16/s18/s19/pivot/s20) before the harness round and treat any count change as a repair obligation. Re-anchor onto context unique to the original site (for example the candidate dict and slot-loop lines), never onto text the copy shares. A count check alone is not sufficient: also verify each row still lands **inside the function it claims**. For harnesses with a scope column (`tests/s20_mutation_proofs.py`, and the `captured_mission` special case in `tests/s18_mutation_proofs.py`) the scope is checked, so add one; for the pivot and main harnesses, which have no scope, prefer an anchor line from inside the intended function over a neighbouring `def`, and when a neighbouring `def` is the only disambiguator available, re-verify it after any insertion between the anchor and that `def`. Where the duplicated guard is itself a policy guard, the copy needs its own row and its own test: the qualifying atomicity test cannot reach the later-condition rollback, so `later_reservation_rollback_removed` and `test_a_fault_mid_later_reservation_leaves_no_partial_comparison` now prove that branch separately. Follow-up 2026-10-01: the seventh row's repair still disambiguated itself by a neighbouring `def`; the independent review flagged it and the row now anchors from the qualifying-only candidate mapping through the slot loop to the guard, so no follower can re-bind it.
+
+## 2026-09-30 a harness results path had been committed, so the next round would have truncated recorded evidence
+
+- **What happened:** preparing the S20 verification round, `tests/pivot_mutation_proofs.py` and `tests/slice16_mutation_proofs.py` still wrote and truncated their RESULTS_LOG at `docs/plans/shiftwork/evidence/slice16-pivot-mutation-2026-09-29.txt` and `slice16-mutation-2026-09-28.txt`. Both files had since been committed as evidence, so one run of either harness would have truncated records that took a full harness round to produce. The standing rule (log path must stay uncommitted) held when the S19 round chose the paths; committing the logs silently invalidated it for the next round.
+- **Root cause:** the rule was checked when the path was chosen, not when the round that truncates it was started. Tracked status is a property that changes when an evidence file is committed, and nothing in the harness checks it.
+- **Prevention rule:** at the start of any round that runs a harness writing a results file, check the path against git ls-files and re-point it at a fresh, never-reused, dated path if it is tracked (this round: slice20-rerun-*-2026-09-30.txt). Never point a truncating writer at a path that a previous round's status entry records as evidence.
+
+## 2026-10-01 the S20 Limits enumeration claimed completeness but omitted two later-path guards
+
+- **What happened:** the fix round's new Limits bullet in `00-status.md` said "the remaining untested later-path guards are enumerated in one Limits bullet", but the later copy of the stimulus-contract check (`orchestrator.py:3371-3382`) and the orchestrator-level empty-treatment re-check (`orchestrator.py:3295`) were untested, had no mutation row and were not listed. The second independent review round found both by enumerating every fail-closed raise on the new paths against the bullet.
+- **Root cause:** the enumeration was written from the guards the review's own findings happened to name, not from an enumeration of the code's fail-closed raises, so guards nobody had flagged stayed invisible to it.
+- **Prevention rule:** an enumeration labelled complete must be built by listing every fail-closed raise site in the changed paths from the code, then marking each one as proven by test, proven by mutation row or listed with its reason. Never enumerate only the guards a finding named.

@@ -1,5 +1,430 @@
 # Status: Shiftwork
 
+## Slice 20 offline implementation and verification: 2026-09-30
+
+The user gave S20 its own go-ahead and separately authorized live calls for this
+slice in chat on 2026-09-30. This entry records offline implementation and
+verification on `shiftwork/slice-20`, created from local main (`ad3ffe8`). No
+live call, credential use, install, fixture edit, seal, deployment, commit or
+push was involved; commits still need an explicit ask, and acceptance is the
+user's separate decision.
+
+Authority note: `AGENTS.md` section 3 still ends at the Slice 16 acceptance, so
+it records neither the S17, S18 and S19 acceptances nor this go-ahead and live
+authorization. Those exist in chat and in this file, which remains authoritative
+for slices. The mirror correction is owed and is listed at the end of this entry.
+
+### What landed
+
+**Explicit restore and freeze ancestry** (ADR 0003).
+`orchestrator.restore_version_to_draft(conn, shift_id, version_id)` replaces one
+open shift's draft with a stored version's bytes and records that version as the
+draft's new base through `repo.set_draft_base_version`. It refuses a closed
+shift, refuses a version owned by another engagement, and re-verifies the stored
+bytes on read, so a restore cannot seed the draft from a tampered or foreign
+version. `freeze_version` now reads `repo.get_draft_base_version_id` and records
+that base as both `parent_id` and the new `restored_from_id` column on
+`artifact_versions`. Before this slice `parent_id` came from the newest stored
+version, so restoring A after saving B froze a version that descended from B.
+
+**The derived observed condition.** `orchestrator.observed_condition(state_bytes,
+dependencies)` derives a `ContextCondition` from the public bytes an operational
+run actually consumed and persists it on that run's execution context. All
+dependencies available yields `condition-normal`, so a run that observed no
+change can never later be cited as the basis of a later-condition comparison.
+
+**The later-condition comparison** (ADR 0005 decision 7).
+`orchestrator.create_later_condition_comparison(conn, shift_id, *,
+operation_run_id, declared_treatment, client_request_id, adapter)` re-tests the
+current operating selection's exact selected version and its retained
+alternative in fresh matched A/B slots under those observed bytes. It requires a
+`LEARNER_CHOICE` selection, a `FINALIZED` `OPERATION` run of this shift under
+this selection, and an observed condition whose kind is not `normal`; it is
+capped at one per shift by `LATER_COMPARISONS_PER_SHIFT` and replays
+idempotently on its client request key. Its workloads are read from the reviewed
+manifest against `config.PIVOT_COMPARE_STATE` bytes while its context and
+exposure use the observed world bytes, and `_require_dependency_only_variation`
+permits only dependency availability to differ between the two, naming every
+other changed key in the refusal. The preceding operational run is never one side
+of the experiment, since every slot is a new run, and a later-condition
+comparison can never back a selection.
+
+**The observed-context link.** `experiment_observed_contexts` carries no-update
+and no-delete triggers, is written once by `repo.insert_observed_context`, and is
+read back on the experiment select as `observed_run_id` and
+`observed_context_id`. The table is added in `v6_tables.sql` rather than
+`v6.sql`, so an already-v6 database gains it on reopen instead of needing a
+column SQLite cannot add idempotently; a duplicate definition in `schema.sql` was
+removed for that reason.
+
+**Route, projection and room.** `POST /api/shifts/{id}/experiments` accepts
+`kind: LATER_CONDITION_COMPARISON`, and a live adapter with no bounded run budget
+is refused 409 before any reservation exists. `board_snapshot` projects
+`inherited_requirements` (the selection's comparison id plus its requirement set
+id, requirement set hash and visible check set hash) beside the existing
+`draft_base_version_id`, so a successor shift shows the contract it inherited and
+not only the version it inherited. The client gained a Next shift station
+(`data-station="next"`) whose two labelled regions `next-history` and
+`next-experiment` keep recorded operational history and the hypothetical
+experiment apart; because the board's `latest_run` may be a later-experiment slot
+run, the station excludes those run ids from operational history and points at
+the hypothetical region.
+
+### Working result and demo
+
+`python -m demos.final_pivot --stage inheritance` returned `PASS_OFFLINE_POLICY`,
+exit 0. Verbatim stdout JSON, also saved in
+`docs/plans/shiftwork/evidence/slice20-inheritance-demo-2026-09-30.txt`:
+
+```json
+{"closed_events": [{"declared_limit": "Public collection and alternative answers only; no reservations or business writes.", "event_type": "LIMIT_DECLARED", "seq": 4}], "evidence_class": "TRUSTED_LOCAL_DRAFT_POLICY_ONLY", "inherited": {"chain_status": "VALID", "comparison_id": "experiment-bookshop-shift-01-c1", "draft_base_version_id": "ver-0003", "draft_files_match_selected": true, "incident_ids": ["BWB-01", "BWB-02", "BWB-03"], "inherited_requirements": {"comparison_id": "experiment-bookshop-shift-01-c1", "requirement_set_hash": "aebe89555a72688eedfb564088f57b78328c184d0a4e378918c46d13d1e6c12a", "requirement_set_id": "public-rubric:bookshop:v1", "visible_check_set_hash": "ae957828e79a9fb471467bf15adcf91517269c3281ddd4909cf16e833abb01c7"}, "kind": "LEARNER_CHOICE", "latest_saved_version_id": null, "latest_version_id": "ver-0004", "ledger_event_count": 4, "ledger_totals": {"INCIDENT_OPENED": 3, "LIMIT_DECLARED": 1}, "prior_selection_id": "sel-0001", "rationale": "A completed the required tasks under the shared conditions.", "requirement_set_hash": "aebe89555a72688eedfb564088f57b78328c184d0a4e378918c46d13d1e6c12a", "retained_alternative_version_id": "ver-0004", "selected_content_hash": "01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82", "selected_version_id": "ver-0003", "selection_id": "sel-0002", "unresolved_limits": ["Public collection and alternative answers only; no reservations or business writes."]}, "later_condition_comparison": {"candidate_a_version_id": "ver-0003", "candidate_b_version_id": "ver-0004", "condition": {"content_hash": "d6d8ca66812f8637f14a92f45ac8deef1db8b5a5140c6203f8e25dd5bb4c1851", "id": "condition-dependency-outage", "kind": "dependency_unavailable", "public_label": "Observed dependency outage: collection"}, "experiment_id": "experiment-bookshop-shift-02-later-1", "fresh_variants": ["var-3faca6a51ddd1445", "var-5abf392cba5975d8", "var-ffa478cf74a4ceea"], "kind": "LATER_CONDITION_COMPARISON", "later_reservation_id": "reservation-0003", "observed_run_id": "run-0008", "operational_run_is_a_trial": false, "outcome_status": "COMPLETE", "qualification_reservation_id": "reservation-0001", "state": "FINALIZED", "trial_run_ids": ["run-0009", "run-0010", "run-0011", "run-0012", "run-0013", "run-0014"], "trial_states": ["COMPLETE", "COMPLETE", "COMPLETE", "COMPLETE", "COMPLETE", "COMPLETE"], "variants_disjoint_from_qualification": true}, "next_shift_station": {"hypothetical_experiment": {"experiment_id": "experiment-bookshop-shift-02-later-1", "outcome_status": "COMPLETE", "state": "FINALIZED"}, "operational_history": {"incident_ids": ["BWB-01", "BWB-02", "BWB-03"], "latest_run": "run-0014", "latest_run_belongs_to_the_later_experiment": true, "ledger_event_count": 4, "ledger_totals": {"INCIDENT_OPENED": 3, "LIMIT_DECLARED": 1}, "unresolved_limits": ["Public collection and alternative answers only; no reservations or business writes."]}}, "operational_run": {"adapter": "local_process", "artifact_version_id": "ver-0003", "business_events": [], "check_count": 3, "context_bytes_match_staged": true, "context_condition_kind": "dependency_unavailable", "context_condition_label": "Observed dependency outage: collection", "evidence_mode": "TRUSTED_LOCAL", "output_count": 1, "purpose": "OPERATION", "run_id": "run-0008", "selected_version_id": "ver-0003", "state": "FINALIZED"}, "preview": null, "prior_bytes_identical": true, "refusals": {"second_later_comparison": {"detail": "this shift already reserved its later-condition comparison (1 of 1)", "status": 409}, "switch_citing_the_later_comparison": {"detail": "a completed owned comparison is required", "status": 409}}, "rows_appended_by_the_experiment": {"execution_contexts": 1, "experiment_observed_contexts": 1, "experiments": 1, "exposure_items": 3, "exposure_reservations": 1, "protected_case_snapshots": 3, "run_assessments": 6, "run_outputs": 18, "runs": 6, "task_assessments": 50, "trial_slots": 6}, "shift_after": "bookshop-shift-02", "shift_before": "bookshop-shift-01", "stage": "inheritance", "staged_world": {"dependency_flipped": "collection: unavailable", "file": "staged-outage-collection.json", "label": "staged derivation, not reviewed product material", "source": "bookshop_compare_state_v1.json"}, "verdict": "PASS_OFFLINE_POLICY"}
+```
+
+The load-bearing values: the operational run is `run-0008` of the exact selected
+`ver-0003` under `context_condition_kind: dependency_unavailable` with
+`business_events: []`; `operational_run_is_a_trial` is false and the six trial
+runs `run-0009` to `run-0014` are all new and all `COMPLETE`;
+`prior_bytes_identical` is true and `rows_appended_by_the_experiment` lists only
+the experiment's own tables; both refusals are 409, the second later-condition
+comparison with `this shift already reserved its later-condition comparison
+(1 of 1)` and a switch citing the later comparison with `a completed owned
+comparison is required`; `next_shift_station.operational_history.latest_run` is
+`run-0014` with `latest_run_belongs_to_the_later_experiment` true, so the station
+reports the hypothetical run as hypothetical; and `staged_world.label` is
+`staged derivation, not reviewed product material`.
+
+### Verification, all under `.venv313/Scripts/python.exe`
+
+- The named S20 command
+  `python -m pytest tests/orchestrator/test_selection_operation.py tests/orchestrator/test_close_inheritance.py tests/api/test_pivot_routes.py -q`
+  returned **57 passed, 2 warnings in 89.64s**, exit 0. Obligation 33 is pinned
+  by `test_next_shift_inherits_selection_rationale_alternative_tests_and_limits`,
+  obligation 34 by `test_later_alternative_experiment_does_not_rewrite_original_history`
+  and `test_later_condition_needs_an_observed_change_and_its_own_world`, and the
+  obligation 26 close clause by `test_close_declares_limits_without_selecting_or_selling`.
+  The count is 57 rather than the 56 recorded earlier this slice because the
+  repair round below added one test.
+- The named S20 fault harness `python tests/s20_mutation_proofs.py` returned
+  **17 of 17 FAIL_CAUGHT, zero unproven** (the harness carries 20 rows since the
+  2026-10-01 repairs; see the review-round subsection), exit 0, with every
+  target restored byte-identically and every row failing its named test at an
+  assertion rather than as a crash, a timeout or a syntax error.
+- The six-harness round ran sequentially, one interpreter, from the repository
+  root, and nothing that imports `shiftwork` ran concurrently with it because the
+  harnesses write mutated source for the duration of each row. The first round
+  found two defects, recorded below; the repair round then returned
+  `tests/s20_mutation_proofs.py` 17 of 17, `tests/pivot_mutation_proofs.py`
+  97 of 97 and `tests/s18_mutation_proofs.py` 19 of 19, each exit 0. Standing
+  total: **232 rows across the six harnesses** (`tests/mutation_proofs.py` 42,
+  `tests/slice16_mutation_proofs.py` 38, `tests/s18_mutation_proofs.py` 19,
+  `tests/pivot_mutation_proofs.py` 97, `tests/s19_mutation_proofs.py` 16,
+  `tests/s20_mutation_proofs.py` 20). The 2026-09-30 round returned every
+  then-current row FAIL_CAUGHT with zero SKIP, zero UNPROVEN, zero NOT_CAUGHT
+  and zero `restored=False` rows; the 2026-10-01 review-repair round added the
+  three rows closing the coverage gaps below and re-ran the s20 and pivot
+  harnesses in full (see the review-round subsection). Zero SKIP checks anchor
+  counts only: every row matched its target the expected number of times. A
+  count is not a location, and zero SKIP is therefore not anchor health: in the
+  same round the pivot row `s15_reservation_rollback_removed` matched exactly
+  once while bound to the wrong copy (repaired below), so it is the per-row
+  location check, not the tally, that makes the count meaningful.
+- Restoration is measured, not assumed. The whole-worktree `git diff` hashed to
+  `d4bf10627ba17c480caf7099eac41ff5948f220e279d567e40a9721cefd16827` before and
+  after the first round, and `shiftwork/orchestrator.py` hashed to
+  `ed0d4feec0ab3fed60c1732a8aa033a81b9c5cd674e1c19ee3be6817370388cb` before and
+  after the repair round. `git diff --check` is clean.
+- Full offline suite `python -m pytest tests --ignore=tests/packaging -q`:
+  **620 passed, 1 skipped, 2 warnings in 217.67s**, exit 0 as re-run on
+  2026-10-01 after the review repairs (the 2026-09-30 measurement was 619 passed
+  and 1 skipped). The S19 recorded figure of 612 passed and 1 skipped is the
+  baseline and the eight tests this slice added account for the difference
+  exactly. The first run of the 2026-09-30 session returned `1 failed, 618
+  passed, 1 skipped in 216.20s`; the single failure was the client-shell station
+  pin repaired below, and no other test changed status between those two runs.
+  Packaging Test 51 stays excluded from offline commands.
+- Browser evidence, recorded earlier this slice and unaffected by the two repairs
+  below, which touched only Python test files and documentation: the
+  `--inherit-demo` run passed, and the render-fault round finished **21 of 21 as
+  expected**, exit 0, with 2 baselines PASS and 19 faults CAUGHT including the
+  re-anchored `inheritSeparation`. Verbatim output in
+  `docs/plans/shiftwork/evidence/slice20-render-faults-2026-09-30.txt`.
+
+Round evidence: `slice20-mutation-round-2026-09-30.txt` (per-harness commands,
+exit codes, elapsed seconds and status tallies),
+`slice20-mutation-repair-2026-09-30.txt`, the per-harness stdout files
+`slice20-rerun-{main,s18,s19,s20}-mutation-2026-09-30.txt`,
+`slice20-rerun-{pivot,slice16}-mutation-stdout-2026-09-30.txt`, the two
+self-written per-row logs `slice20-rerun-pivot-mutation-2026-09-30.txt` and
+`slice20-rerun-slice16-mutation-2026-09-30.txt`, the preserved first-round
+per-row log `slice20-rerun-pivot-mutation-round1-2026-09-30.txt`, and the repair
+round's `slice20-repair-{s20,s18}-mutation-2026-09-30.txt` and
+`slice20-repair-pivot-mutation-stdout-2026-09-30.txt`, all under
+`docs/plans/shiftwork/evidence/`.
+
+### Two proof defects this round found, and their repairs
+
+**1. A pivot row's anchor had migrated onto the S20 duplicate, and the duplicate
+had no proof at all.** `s15_reservation_rollback_removed` returned NOT_CAUGHT:
+its named test passed under the fault. The rollback guard
+`except Exception: conn.rollback(); raise; return experiment` is byte-identical
+in three reservation bodies, so that row disambiguated itself by carrying the
+follower `def _comparison_run_request(`. S20 inserted
+`create_later_condition_comparison` between the qualifying guard and that
+follower, so the anchor still matched exactly once but now bound the new copy,
+while still naming a qualifying test that cannot see the fault. Repaired by
+re-anchoring the row onto `def _require_dependency_only_variation(`, the follower
+that now bounds the qualifying body; row 63 of 97 is FAIL_CAUGHT again with
+`a faulted reservation left a partial row behind`.
+
+The migration also exposed a real coverage hole: the copied guard in
+`create_later_condition_comparison` had no proof, because the only row targeting
+that text named a test that cannot reach it. It now has both.
+`tests/orchestrator/test_selection_operation.py::test_a_fault_mid_later_reservation_leaves_no_partial_comparison`
+faults `repo.insert_trial_slot` mid-reservation on one connection and requires
+every table's row count to be unchanged, then requires the same shift and the
+same client request key to still reserve; the scoped harness row
+`later_reservation_rollback_removed` faults only that copy and is FAIL_CAUGHT.
+The general rule is now in `MISTAKES.md`: a match **count** is not a match
+**location**, so an anchor whose uniqueness comes from a neighbouring `def`
+re-binds whenever a function is inserted on the other side of it, and the
+exactly-one-match check reports that as healthy.
+
+**2. The client-shell station pin did not include the new station.**
+`tests/api/test_client_shell.py::test_served_client_has_keyboard_station_controls_and_labelled_regions`
+asserts an exact set of `data-station` values and failed with `next` as an extra
+item. The pin was extended to the ten stations this slice deliberately ships, and
+the labelled-region minimum was extended to include `next-history` and
+`next-experiment`. The pin asserts that those region names exist as attributes
+only; it does not exercise the separation behaviour. The separation itself is
+covered by the `--inherit-demo` browser run and the `inheritSeparation` render
+fault, which fails when the recorded-history region presents the hypothetical
+experiment as operational history (`slice20-render-faults-2026-09-30.txt` lines
+18-22). This is not a weakening: the station assertion is an exact set equality
+and it demonstrably failed against the pre-repair inventory, which is the
+failing-capable proof.
+
+**One flaky row, reported as flaky.** `tests/s18_mutation_proofs.py`
+`pinned_rule_resolution` returned UNPROVEN in the first round: the mutation is
+valid and its anchor unique, but the test failed at
+`test_selection_operation.py:73` (`assert 'INCOMPLETE' == 'COMPLETE'`) inside
+`_comparison` called from line 240. The captured run lasted 19.53s, so the
+helper's 90-second poll for the background comparison worker (line 67) cannot
+have expired: the experiment reached a terminal state with an incomplete
+outcome, and why that one qualifying comparison did not complete is not
+explained by the captured output. Re-running the same mutation alone failed
+correctly at `test_selection_operation.py:274` with the expected assertion
+`changed pinned rule resolved an incident`, and the unloaded repair round caught
+it as row 19 of 19. Per the house rule this is reported as flaky, not as clean
+proof, and the round was not run concurrently with any other heavy work after
+that. See the matching Limits entry below for the unexplained non-completion.
+
+### Independent review round and repairs: 2026-10-01
+
+An independent adversarial review re-ran the offline verification on 2026-10-01
+and returned ISSUES FOUND: every headline claim reproduced (the six mutation
+harnesses' then-current 229 rows FAIL_CAUGHT, the full suite 619 passed and 1
+skipped, the named S20 command 57 passed, the demo byte-identical, the tree
+hash-stable), and six findings needed repairs. All repairs are offline: no live
+call, credential, install, seal or fixture edit was involved, and no commit or
+push is authorized or made.
+
+- F1, a record mechanism contradicted by its own captured evidence: the flaky
+  paragraph above now states the observed mechanism (a terminal state with an
+  `INCOMPLETE` outcome inside a 19.53s run, so the 90-second poll cannot have
+  expired), keeps the flake classification and the not-clean-proof caveat, and
+  the new Limits entry records the unexplained non-completion.
+- F3, zero-SKIP wording: the standing-total paragraph now says zero SKIP checks
+  anchor counts only and that a count is not a location.
+- F5, a coverage attribution: the pin paragraph above now says the client-shell
+  check asserts attribute presence only and credits the history/experiment
+  separation to the `--inherit-demo` browser run and the `inheritSeparation`
+  render fault.
+- F4, a vacuous demo measurement: `prior_bytes_identical` in
+  `demos/final_pivot.py` was `all(appended >= 0)`, which cannot be false once
+  the prefix assertion passes. It now derives from the per-table prefix
+  comparisons while the assertion still fails loudly on any changed table. The
+  demo re-run exited 0 with stdout JSON byte-identical to
+  `slice20-inheritance-demo-2026-09-30.txt` (both JSON lines hash to
+  `82c64ef9e335ebe57039f43423533bfc7187ce8edc9ee4badaa5e8dd3ebef651`), so no
+  demo evidence file changed.
+- F6, a pivot anchor still pinned by a neighbour: `s15_reservation_rollback_removed`
+  now anchors from the qualifying-only `versions = {"A": candidate_a, "B":
+  candidate_b}` literal through the slot loop to the rollback guard, so no
+  follower `def` can re-bind it. `RESULTS_LOG` was re-pointed to
+  `slice20-rerun-pivot-mutation-2026-10-01.txt` before the run; the 2026-09-30
+  per-row log is byte-unchanged (sha256 `9cd37e04...`).
+- F2a, a coverage gap: `tests/store/test_pivot_migration.py` gained
+  `test_observed_context_references_reject_update_and_delete` (the UPDATE's
+  `created_at` carries no other constraint, so the two triggers are the entire
+  guard), and two s20 rows fault each trigger to a no-op independently.
+- F2b, a coverage gap: the world test gained a third arm: a reviewed comparison
+  world with one key removed is refused 409 "the observed world is not the
+  reviewed comparison world" before the workloads are read, and the s20 row
+  `later_world_shape_check_removed` proves the test fails when that check is
+  removed. With the check removed the request is still refused 409, but by the
+  manifest's pinned state hash with a different message, so the row's failing
+  assertion is the refusal-detail assertion; the two-layer defence is recorded
+  as such rather than presenting the key-set check as the only guard.
+- F2 limits: the unreadable-bytes limb is reachable only by replacing the
+  operator's reviewed-world file (no learner request can produce it), and the
+  remaining untested later-path guards are enumerated in one Limits bullet
+  instead of being covered by weak tests.
+
+Re-verification, all strictly serial under `.venv313/Scripts/python.exe`, with
+the round summary and integrity hashes in
+`slice20-review-repair-round-2026-10-01.txt`:
+
+- `tests/s20_mutation_proofs.py`: **20 of 20 FAIL_CAUGHT**, zero unproven,
+  exit 0 (evidence `slice20-repair-s20-mutation-2026-10-01.txt`).
+- `tests/pivot_mutation_proofs.py`: **97 of 97 FAIL_CAUGHT**, exit 0, every row
+  restored byte-identically (per-row log
+  `slice20-rerun-pivot-mutation-2026-10-01.txt`, stdout
+  `slice20-rerun-pivot-mutation-stdout-2026-10-01.txt`).
+- Named S20 command: **57 passed, 2 warnings in 90.46s**, exit 0
+  (`slice20-review-named-command-2026-10-01.txt`).
+- Full offline suite: **620 passed, 1 skipped, 2 warnings in 217.67s**, exit 0;
+  the one added test is the migration test above
+  (`slice20-review-full-suite-2026-10-01.txt`).
+- `shiftwork/orchestrator.py` is byte-identical to its pre-repair hash
+  `ed0d4fee...` and `git diff --check` is clean.
+
+### Second independent review round and Limits repair: 2026-10-01
+
+A second independent adversarial review re-ran the recorded offline commands and
+returned ISSUES FOUND with one documentary finding: the Limits bullet below
+claimed the remaining untested later-path guards were enumerated, but two were
+missing: the later copy of the stimulus-contract check
+(`orchestrator.py:3371-3382`) and the orchestrator-level empty-treatment
+re-check (`orchestrator.py:3295`). The bullet now names both, adds the
+freeze-ancestry draft-base-missing limb (`orchestrator.py:468`), covers
+non-object reviewed-world bytes, and no longer claims a later-path-only scope.
+Everything else reproduced: the named S20 command 57 passed, exit 0 (98.55s);
+the full offline suite 620 passed, 1 skipped, exit 0 (262.38s); `--collect-only`
+collected 621; the demo exited 0 with its stdout JSON line byte-identical to
+`slice20-inheritance-demo-2026-09-30.txt` apart from the Windows CR (both hash
+`82c64ef9e335ebe57039f43423533bfc7187ce8edc9ee4badaa5e8dd3ebef651`); the
+`prior_bytes_identical` measurement was falsified both ways (a one-row history
+tamper fails the per-table assert loudly at `demos/final_pivot.py:1149`, and
+with that assert removed the printed value is false with verdict
+`STOP_INCOMPLETE`); the 312-file manifest hash set is byte-identical before and
+after; and the worktree `git diff` hash
+`9359c4e7b621ec70638e36e795d75f5d0afb1967b14cde41bebb67e472bcaa29` is stable
+across the falsification edits, with `demos/final_pivot.py` restored
+byte-identically at
+`1686e5b7abf0daa660deacd5157e10472205d342a3b96bd7913c0a52845057ab`. The six
+harness rounds from the repair round stand; this round did not re-run them. The
+user directed this repair and the commit, merge and push of Slice 20 in chat on
+2026-10-01.
+
+### Mirror and ADR corrections in this record
+
+`docs/adr/0003-artifact-versioning-and-restoration.md` gained a dated
+2026-09-30 (Slice 20) note for explicit restoration and freeze ancestry, and
+`docs/adr/0005-final-pivot-experiments-and-operating-selection.md` gained its
+first dated implementation note, covering decision 7's later-condition limb and
+decision 3's inheritance projection. No ADR decision body changed.
+`docs/plans/shiftwork/04-slices.md`'s closing status line now names Slice 21 as
+next and records Slice 20 as implemented, verified offline, uncommitted and
+awaiting acceptance. `MISTAKES.md`'s 2026-09-30 duplicated-block entry was
+extended with the migration failure mode and the count-is-not-location rule.
+The 2026-10-01 review round added `MISTAKES.md` entries for the vacuous demo
+measurement and for the record's contradicted mechanism and attribution,
+extended the duplicated-block entry with the completed re-anchor, and updated
+ADR 0005's failing-proof list to twenty s20 rows plus the new migration test.
+No ADR decision body changed.
+
+Still owed: `AGENTS.md` section 3 stops at the Slice 16 acceptance and does not
+record the S17, S18 and S19 acceptances, the three-board gate revisions, or this
+slice's go-ahead and live-call authorization.
+
+### Limits
+
+- A later outage cannot retroactively mark the original decision wrong. A new
+  experiment neither resolves old incidents nor proves how an unchosen version
+  would have operated in the past.
+- The observed dependency outage is a staged derivation of the reviewed
+  comparison state, labelled as staged in the demo output and in the room. It is
+  not a real dependency outage and not reviewed product material.
+- The later-condition comparison's `COMPLETE` outcome re-executes the pinned
+  trusted-local candidate pair through the recorded executor. It measures the
+  history rule, not model answer quality, and it is not a second customer
+  outcome.
+- The evidence above is offline policy proof through local doubles. It is not
+  model answer-quality, Sandbox isolation or live-service evidence.
+- One observed non-completion stays unexplained: in the 2026-09-30 first round,
+  one qualifying comparison intermittently reached a terminal state with an
+  `INCOMPLETE` outcome under load (the S18 harness's `pinned_rule_resolution`
+  UNPROVEN), so the helper's `COMPLETE` assertion failed without its 90-second
+  poll expiring. It did not reproduce in isolation or in the repair round, and
+  no mechanism is attributed to it.
+- Untested guards the new paths carry, listed instead of papered over: the
+  restore-foreign-engagement refusal (`orchestrator.py:510`; a foreign engagement
+  is not cheaply constructible in the existing fixtures), the freeze-ancestry
+  draft-base-missing limb (`orchestrator.py:468`), the retained-version-missing
+  readback (`orchestrator.py:3257`), the observed-context-unavailable refusal
+  (`orchestrator.py:3275`), the observed-run purpose and selection clauses beyond
+  the aggregate s20 guard row, candidate ownership, the mission-engagement check,
+  records-empty and the non-dict observed-world limb (both blocked earlier for
+  any operation by `load_public_state_bytes`), the unreadable or non-object
+  reviewed-world limb (reachable only by replacing the operator's reviewed file
+  with unparseable bytes), chain-BROKEN, the pinned-candidates check's later
+  copy, the later copy of the stimulus-contract check
+  (`orchestrator.py:3371-3382`), the orchestrator-level empty-treatment re-check
+  (`orchestrator.py:3295`; the route schema already rejects blank treatments),
+  the idempotency-mismatch refusal, the adapter whitelist and isolated-credential
+  bootstrap refusal, and the route's live-budget copy in
+  `shiftwork/api/routes.py`. None has a failing-capable test or a mutation row
+  yet; closing them by assertion would need new scenarios, not weaker checks on
+  the existing ones.
+- Noted, not repaired: `bookshop_compare_state_v1.json` carries
+  `review_status: AWAITING_OPERATOR_REVIEW`, and no code compares a public state
+  snapshot's `review_status` to a required value. The only two `OPERATOR_SEALED`
+  gates are the comparison workload manifest (`orchestrator.py:2753`) and the
+  sealed case family (`sealed/store.py:98`). The enforced control over those
+  bytes is therefore the sealed manifest's `comparison_state_sha256` pin, which
+  the manifest's own seal covers, rather than the snapshot's label. Editing the
+  snapshot to change its label would break that pin and the S16 runner's byte
+  pin, so the label was left as it is and the gap is recorded here instead.
+
+### Stretch chain: NOT ACHIEVED, not started
+
+The linked `ISOLATED_LIVE` chain that `04-slices.md` S20 carries as a stretch
+evidence target (one learner-owned repaired version making recorded Nemotron
+calls in its qualifying comparison, independently passing the customer task
+checks, explicitly selected by exact version and hash, then making a recorded
+Nemotron call as that same selected version in operation with independently
+checked synthetic consequences, and inherited by the next shift) is **not
+achieved** and was not started this session. Its drop point is 2026-10-20; no
+later slice or claim depends on it, and S20's exit contract is complete without
+it. Three concrete blockers were established by read-only research and are
+recorded here so the next session does not rediscover them:
+
+1. The selected operation cannot run live today. `_reserve_selected_operation`
+   hardcodes `adapter=LocalProcessAdapter.name` and
+   `evidence_mode=EvidenceMode.TRUSTED_LOCAL`, freezes its context without
+   `isolated=True` (so `image_ref` stays `local-python-stdlib` and `deadline_s`
+   stays 5, which `TokenFactoryAdapter` fails closed on), and
+   `execute_selected_operation` refuses any non-local adapter with
+   `selected operation has no offline executor`. Both halves must change
+   together, and the operation path has no `live_budget` plumbing at all.
+2. `LiveComparisonBudget.preflight` is comparison-shaped: it requires
+   `slots == 6 and requests == 18` and refuses `max_operations != 12` or
+   `max_calls != 18`, so a one-operation, one-call selected operation can never
+   satisfy it. A separate operation budget is needed; reusing that class
+   unchanged is impossible.
+3. No model-calling candidate artifact exists. The only real one in the
+   repository is `S13_MODEL_SERVICE`, an inline string in `demos/final_pivot.py`,
+   and its recorded call returned `MISSING_OUTPUT` for the price, collection and
+   alternative tasks, so it did not pass the customer checks a qualifying
+   comparison needs. A new artifact must derive `request_ordinal` from a
+   per-process request counter rather than from the request body's ordinal,
+   because the protected phase spawns a one-request batch whose stimulus ordinal
+   is 3 while the gateway policy ordinal is 1.
+
+Live calls for this slice are authorized by the user, but each run still needs
+its own same-day rate-card preflight (the S16 runner's date guard is pinned to
+2026-09-29), its own one-shot marker discipline and its own recorded spend.
+
 ## Slice 19 branch and main publication and user acceptance: 2026-09-30
 
 The user authorized publishing the S19 branch and merging it to main with the

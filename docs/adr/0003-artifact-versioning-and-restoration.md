@@ -99,3 +99,25 @@ are retained verbatim, so they still fail if the snapshot stops being an older
 shape. ADR 0005 owns the v6 additions (`opening_mode`, `operating_selections`,
 `experiments`, run purpose and evidence mode) and supersedes this file's
 latest-version inheritance semantics.
+
+Update 2026-09-30 (Slice 20): explicit restoration and freeze ancestry landed,
+and this ADR's decision body is unchanged. `orchestrator.restore_version_to_draft`
+replaces one open shift's draft with a stored version's bytes and records that
+version as the draft's new base through `repo.set_draft_base_version`. It refuses
+a closed shift, refuses a version owned by another engagement, and re-verifies the
+stored bytes on read, so a restore cannot seed the draft from a tampered or
+foreign version. `freeze_version` now reads `repo.get_draft_base_version_id` and
+records that base as both `parent_id` and the new `restored_from_id` column on
+`artifact_versions`; before this slice `parent_id` came from the newest stored
+version, so restoring A after saving B froze a version that descended from B.
+Ancestry therefore follows the draft the learner is actually working from.
+Restoration stays controller-store only: no sandbox checkpoint is consulted and
+no history is reset, since a restore writes a draft base and never edits a frozen
+version. ADR 0005's explicit operating selection remains the authority for which
+version is operated and inherited by the next shift; this update changes only how
+a freeze inside one open shift records its parent. Failing-capable proofs:
+`tests/orchestrator/test_close_inheritance.py::test_freeze_ancestry_follows_the_draft_base_and_explicit_restore`
+and the `tests/s20_mutation_proofs.py` rows `inherit_base_from_newest_save`,
+`restore_base_not_set` and `restore_closed_shift_allowed`. The offline
+verification is recorded in `docs/plans/shiftwork/00-status.md`; acceptance is a
+separate user decision.
