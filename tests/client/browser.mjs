@@ -10,6 +10,9 @@ import { once } from 'node:events';
 // run to fail at the named rendered-evidence assertion. The repository file is
 // never modified. Each needle must match exactly one production behavior.
 const FAULTS = {
+  candidateRace: { needle: 'const previousShiftId = state.loadedShiftId;', replacement: 'const previousShiftId = state.board?.latest_shift?.id;', expect: 'Overlapping refresh retained a previous shift candidate' },
+  unloadWarning: { needle: "  if (!hasUnsavedDraft()) return;\n  event.preventDefault();\n  event.returnValue = '';", replacement: '  return;', expect: 'Dirty browser reload did not show a beforeunload warning' },
+  transientErrorLeak: { needle: 'clearData(error.message);', replacement: "clearData(error.message + ' S21_TEST_PROVIDER_SECRET');", expect: 'Client DOM contains private material (refresh-error)' },
   invalidatedPolling: { needle: "while (!['FINALIZED', 'FAILED', 'INVALIDATED'].includes(experiment.state) && Date.now() < deadline)", replacement: "while (!['FINALIZED', 'FAILED'].includes(experiment.state) && Date.now() < deadline)", expect: 'Timed out waiting for terminal comparison to release the draft editor' },
   draftSave: { needle: "[$('draft-file').value]: $('draft-source').value", replacement: "[$('draft-file').value]: $('draft-source').value + '\\n# wrong saved bytes'", expect: 'Draft editor saved different bytes' },
   unsavedFreeze: { needle: "function hasUnsavedDraft() { return $('draft-source').dataset.dirty === 'true'; }", replacement: 'function hasUnsavedDraft() { return false; }', expect: 'Unsaved draft can freeze a candidate' },
@@ -138,7 +141,8 @@ if (fault) {
 const browser = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const profile = await mkdtemp(path.join(tmpdir(), 'shiftwork-browser-'));
 const artifacts = path.resolve(process.env.SHIFTWORK_ARTIFACT_DIR ?? (fault ? `artifacts/slice21-faults/${fault}` : 'artifacts/slice21'));
-await mkdir(artifacts, { recursive: true });
+await mkdir(path.dirname(artifacts), { recursive: true });
+await mkdir(artifacts);
 const child = spawn(browser, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
 const endpoint = await new Promise((resolve, reject) => {
   let stderr = '';
@@ -187,8 +191,8 @@ async function ready(expected = 'ready') {
     }
   }, expected);
 }
-async function screenshot(name) {
-  if (fault) return;
+async function screenshot(name, force = false) {
+  if (fault && !force) return;
   const { data } = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true });
   await writeFile(path.join(artifacts, `${name}.png`), Buffer.from(data, 'base64'));
 }
@@ -215,15 +219,16 @@ async function labels() {
   });
 }
 
-async function assertPublicDOM() {
+async function assertPublicDOM(label = 'final') {
   const surface = await evaluate(() => ({ rendered_text: document.body.innerText, serialized_dom: document.body.outerHTML }));
+  await writeFile(path.join(artifacts, `dom-${label}.json`), JSON.stringify(surface), { flag: 'wx' });
   const script = `import json,sys
 sys.path.insert(0,'tests')
 from leakscan import sealed_identity_strings
 from shiftwork.gateway.redaction import serialized_contains
 needles=(*sealed_identity_strings(),'S21_TEST_PROVIDER_SECRET','S21_TEST_SANDBOX_SECRET')
-controls=all(serialized_contains({'client_text':form},needle) for needle in needles for form in (needle,needle.replace('\\\\','/'),json.dumps(needle)[1:-1]))
 surface=json.load(sys.stdin)
+controls=all(serialized_contains({**surface,'serialized_dom':surface['serialized_dom']+form},needle) for needle in needles for form in (needle,needle.replace('\\\\','/'),json.dumps(needle)[1:-1]))
 print(json.dumps({'needles':len(needles),'controls':controls,'clean':not any(serialized_contains(surface,needle) for needle in needles)}))`;
   const scanned = await new Promise((resolve, reject) => {
     const scan = spawn(path.resolve('.venv313/Scripts/python.exe'), ['-c', script], { stdio: ['pipe', 'pipe', 'pipe'] });
@@ -235,8 +240,9 @@ print(json.dumps({'needles':len(needles),'controls':controls,'clean':not any(ser
     scan.once('exit', code => { clearTimeout(timeout); if (code !== 0) reject(new Error(`DOM scanner failed: ${err}`)); else { try { resolve(JSON.parse(out)); } catch (error) { reject(error); } } });
     scan.stdin.end(JSON.stringify(surface));
   });
+  await writeFile(path.join(artifacts, `dom-scan-${label}.json`), JSON.stringify(scanned, null, 2), { flag: 'wx' });
   assert.ok(scanned.controls, 'DOM scanner controls did not detect every serialized needle form');
-  assert.ok(scanned.clean, 'Client DOM contains private material');
+  assert.ok(scanned.clean, `Client DOM contains private material (${label})`);
   return scanned.needles;
 }
 
@@ -323,6 +329,144 @@ async function verifyRenderedRequirements() {
   if (field('frozen-requirement-hash') !== (board.inherited_requirements?.requirement_set_hash ?? 'No qualifying comparison selected yet')) throw new Error('Requirements show the wrong frozen hash');
 }
 
+async function verifyReloadWarning() {
+  const dialogs = [];
+  let navigations = 0;
+  const listener = ({ data }) => {
+    const message = JSON.parse(data);
+    if (message.sessionId !== session) return;
+    if (message.method === 'Page.frameNavigated' && !message.params.frame.parentId) navigations++;
+    if (message.method === 'Page.javascriptDialogOpening') {
+      dialogs.push(message.params);
+      send('Page.handleJavaScriptDialog', { accept: false }).catch(error => console.error(error));
+    }
+  };
+  socket.addEventListener('message', listener);
+  const reload = async () => {
+    const before = { dialogs: dialogs.length, navigations };
+    await send('Page.reload');
+    const deadline = Date.now() + 10000;
+    while (dialogs.length === before.dialogs && navigations === before.navigations && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 25));
+    assert.ok(dialogs.length > before.dialogs || navigations > before.navigations, 'Reload neither navigated nor showed a dialog');
+    await ready();
+    return dialogs.slice(before.dialogs);
+  };
+  const activateEditor = async () => {
+    const box = await evaluate(() => {
+      document.querySelector('[data-view="compare"]').click();
+      const source = document.getElementById('draft-source');
+      source.scrollIntoView({ block: 'center' });
+      const rect = source.getBoundingClientRect();
+      return { x: rect.x + 20, y: rect.y + 20 };
+    });
+    await send('Input.dispatchMouseEvent', { type: 'mousePressed', ...box, button: 'left', clickCount: 1 });
+    await send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...box, button: 'left', clickCount: 1 });
+    assert.ok(await evaluate(() => navigator.userActivation.hasBeenActive), 'Reload warning proof needs native user activation');
+  };
+  const edit = async () => {
+    await activateEditor();
+    await evaluate(() => { const source = document.getElementById('draft-source'); source.setSelectionRange(source.value.length, source.value.length); });
+    await send('Input.insertText', { text: '\n# native unsaved reload probe' });
+    const actual = await evaluate(() => ({ active: navigator.userActivation.hasBeenActive, dirty: document.getElementById('draft-source').dataset.dirty, text: document.getElementById('draft-source').value }));
+    assert.ok(actual.active, 'Reload warning proof needs native user activation');
+    assert.equal(actual.dirty, 'true');
+    return actual.text;
+  };
+  try {
+    await activateEditor();
+    assert.deepEqual(await reload(), [], 'Clean reload showed an unnecessary warning');
+    const edited = await edit();
+    await evaluate(() => document.getElementById('refresh').click()); await ready();
+    assert.equal(await evaluate(() => document.getElementById('draft-source').value), edited, 'In-app Refresh lost dirty text');
+    await evaluate(() => {
+      window.__saveFetch = window.fetch;
+      window.fetch = (...args) => args[1]?.method === 'PUT' ? Promise.resolve(new Response(JSON.stringify({ detail: 'Offline save 503' }), { status: 503 })) : window.__saveFetch(...args);
+      document.getElementById('save-draft').click();
+    });
+    await evaluate(async () => {
+      const deadline = Date.now() + 10000;
+      while (!document.getElementById('draft-error').textContent.includes('Offline save 503') && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 25));
+      if (!document.getElementById('draft-error').textContent.includes('Offline save 503')) throw new Error('Save 503 was not rendered');
+      window.fetch = window.__saveFetch;
+    });
+    assert.equal(await evaluate(() => document.getElementById('draft-source').value), edited, 'Save 503 lost dirty text');
+    await assertPublicDOM('draft-save-error');
+    const warning = await reload();
+    assert.equal(warning.length, 1, 'Dirty browser reload did not show a beforeunload warning');
+    assert.equal(warning[0].type, 'beforeunload');
+    assert.equal(await evaluate(() => document.getElementById('draft-source').value), edited, 'Dismissing the warning lost dirty text');
+    assert.equal(await evaluate(() => document.getElementById('draft-source').dataset.dirty), 'true');
+    await screenshot('dirty-reload-dismissed', true);
+    await evaluate(() => document.getElementById('discard-draft-edit').click());
+    assert.deepEqual(await reload(), [], 'Discarded edit retained an unnecessary warning');
+    const saved = await edit();
+    await evaluate(() => document.getElementById('save-draft').click());
+    await evaluate(async () => {
+      const deadline = Date.now() + 10000;
+      while ((document.getElementById('draft-source').dataset.dirty !== 'false' || document.body.dataset.loadState !== 'ready') && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 25));
+      if (document.getElementById('draft-source').dataset.dirty !== 'false') throw new Error('Successful save stayed dirty');
+    });
+    assert.deepEqual(await reload(), [], 'Successful save retained an unnecessary warning');
+    assert.equal(await evaluate(() => document.getElementById('draft-source').value), saved, 'Clean reload did not restore saved server text');
+    const report = { nativeActivation: true, dirtyDialog: warning[0], dismissedEditRetained: true, refreshRetained: true, save503Retained: true, cleanReloadWarnings: 0, discardWarnings: 0, savedReloadWarnings: 0, protection: 'warning only, no browser-local persistence' };
+    await writeFile(path.join(artifacts, 'reload-warning.json'), JSON.stringify(report, null, 2), { flag: 'wx' });
+    return report;
+  } finally { socket.removeEventListener('message', listener); }
+}
+
+async function verifyCandidateRace() {
+  const result = await evaluate(async () => {
+    const wait = async check => {
+      const deadline = Date.now() + 10000;
+      while (!check()) { if (Date.now() > deadline) throw new Error('Candidate race setup did not settle'); await new Promise(resolve => setTimeout(resolve, 10)); }
+    };
+    const boardOf = async () => (await (await fetch('/api/engagements/bookshop/board')).json());
+    document.querySelector('[data-view="compare"]').click();
+    document.getElementById('freeze-candidate-a').click();
+    await wait(() => !document.getElementById('freeze-candidate-a').disabled);
+    const old = { shift: (await boardOf()).latest_shift.id, candidate: document.querySelector('#candidate-list strong').textContent };
+    if (old.candidate === 'not frozen yet') throw new Error('Candidate race requires a frozen candidate');
+    // Refresh and error/reconnect in the SAME shift must retain this candidate.
+    document.getElementById('refresh').click(); await wait(() => document.body.dataset.loadState === 'ready');
+    if (document.querySelector('#candidate-list strong').textContent !== old.candidate) throw new Error('Same-shift refresh lost its frozen candidate');
+    const original = window.fetch;
+    window.fetch = async () => { throw new Error('Offline race reconnect'); };
+    document.getElementById('refresh').click(); await wait(() => document.body.dataset.loadState === 'error');
+    window.fetch = original;
+    document.getElementById('refresh').click(); await wait(() => document.body.dataset.loadState === 'ready');
+    if (document.querySelector('#candidate-list strong').textContent !== old.candidate) throw new Error('Same-shift reconnect lost its frozen candidate');
+    document.querySelector('[data-view="next"]').click(); document.getElementById('close-shift').click();
+    await wait(() => !document.getElementById('open-next-shift').disabled);
+    let calls = 0;
+    let firstFinished;
+    const finished = new Promise(resolve => { firstFinished = resolve; });
+    window.fetch = async (...args) => {
+      if (!String(args[0]).endsWith('/board') || ++calls !== 1) return original(...args);
+      await new Promise(resolve => setTimeout(resolve, 400));
+      try { return await original(...args); } finally { firstFinished(); }
+    };
+    document.getElementById('open-next-shift').click();
+    await wait(() => document.body.dataset.loadState === 'loading' && calls === 1);
+    document.getElementById('refresh').click(); await wait(() => document.body.dataset.loadState === 'ready');
+    await finished;
+    // Allow the discarded older refresh's dependent requests to complete.
+    await new Promise(resolve => setTimeout(resolve, 200));
+    window.fetch = original;
+    const board = await boardOf();
+    document.querySelector('[data-view="compare"]').click();
+    const actual = [...document.querySelectorAll('#candidate-list strong')].map(node => node.textContent);
+    document.getElementById('refresh').click(); await wait(() => document.body.dataset.loadState === 'ready');
+    return { old, shift: board.latest_shift.id, latestSaved: board.latest_saved_version_id, actual, afterRefresh: [...document.querySelectorAll('#candidate-list strong')].map(node => node.textContent), sameShiftRefresh: true, reconnect: true, delayedBoardGets: 1 };
+  });
+  await writeFile(path.join(artifacts, 'candidate-race.json'), JSON.stringify(result, null, 2), { flag: 'wx' });
+  await screenshot('candidate-race', true);
+  assert.notEqual(result.old.shift, result.shift);
+  assert.equal(result.latestSaved, null);
+  assert.deepEqual(result.actual, ['not frozen yet', 'not frozen yet'], 'Overlapping refresh retained a previous shift candidate');
+  assert.deepEqual(result.afterRefresh, ['not frozen yet', 'not frozen yet'], 'Ordinary refresh retained a previous shift candidate');
+  return result;
+}
+
 let faultOutcome = null;
 try {
   const { targetId } = await send('Target.createTarget', { url: 'about:blank' }, false);
@@ -348,7 +492,7 @@ try {
   await send('Page.navigate', { url });
   try { await ready(); }
   catch (error) { throw new Error(`${error.message}; page exceptions: ${exceptions.map(item => item.exception?.description ?? item.text).join(' | ')}`); }
-  const publicDOMNeedles = await assertPublicDOM();
+  const publicDOMNeedles = await assertPublicDOM('initial');
   assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 10);
   const matrix = [];
   for (const width of [1280, 778, 640, 390]) {
@@ -554,6 +698,7 @@ try {
     document.getElementById('refresh').click();
   });
   await ready('loading');
+  await assertPublicDOM('loading');
   assert.equal(await evaluate(() => document.getElementById('selected-evidence').hasAttribute('data-run-id')), false);
   await labels(); await screenshot('loading');
   await evaluate(() => { window.fetch = window.__fetch; window.__release(); });
@@ -562,6 +707,8 @@ try {
   await ready('error');
   assert.equal(await evaluate(() => document.querySelectorAll('[data-body-base64], .customer-button').length), 0);
   await labels(); await screenshot('error');
+  await screenshot('refresh-error', true);
+  await assertPublicDOM('refresh-error');
   await evaluate(() => { window.fetch = window.__fetch; document.getElementById('refresh').click(); });
   await ready();
   await evaluate(() => {
@@ -575,6 +722,7 @@ try {
     document.querySelector('[data-station="service"]').click(); document.getElementById('refresh').click();
   });
   await ready('empty');
+  await assertPublicDOM('empty');
   await labels();
   assert.equal(await evaluate(() => document.getElementById('run-shift').disabled), true);
   assert.equal(await evaluate(() => document.getElementById('open-shift').disabled), false);
@@ -600,6 +748,7 @@ try {
     return { literal: panel.querySelector('.request-quote').textContent, image: !!panel.querySelector('img'), injected: !!window.__injected, bytes: [...bytes], noRecord: panel.textContent.includes('No public comparison record'), rawFallback: panel.textContent.includes('not valid UTF-8'), sealedDigest: panel.textContent.includes('sealed:') };
   });
   assert.deepEqual(malformed, { literal: '<img src=x onerror="window.__injected=true">', image: false, injected: false, bytes: [255, 0], noRecord: true, rawFallback: true, sealedDigest: false });
+  await assertPublicDOM('malformed-output');
   await evaluate(() => { window.fetch = window.__fetch; document.getElementById('refresh').click(); });
   await ready();
   await evaluate(() => document.querySelector('[data-station="investigate"]').click());
@@ -673,6 +822,7 @@ try {
     } else denials.withEntry = await checkDenial(latest.id);
     return { shift: shiftId, entries: recorded.investigations.length, revision: Boolean(latest.revision_of_id), denials };
   }, process.argv.includes('--assist-demo'));
+  await assertPublicDOM('assist-denial');
   const investigateLabels = await labels();
   assert.deepEqual(investigateLabels, ['board', 'source', 'diagnostic']);
   for (const journey of ['compare', 'next']) {
@@ -758,6 +908,7 @@ try {
   await screenshot('investigate-diagnostic-1280');
   await evaluate(() => document.querySelector('[data-station="service"]').click());
   const selectionDemo = process.argv.includes('--selection-demo');
+  const reloadWarning = process.argv.includes('--reload-warning-demo') ? await verifyReloadWarning() : null;
   const comparison = (process.argv.includes('--compare-demo') || selectionDemo) ? await evaluate(async (candidateA, candidateB, choose, blocked) => {
     const humanize = value => value.toLowerCase().replaceAll('_', ' ');
     const shiftId = (await (await fetch('/api/engagements/bookshop/board')).json()).latest_shift.id;
@@ -1094,11 +1245,14 @@ try {
     assert.equal(await evaluate(() => document.querySelectorAll('.customer-button').length), 3);
   }
   assert.equal(exceptions.length, 0, JSON.stringify(exceptions));
+  const candidateRace = process.argv.includes('--candidate-race-demo') ? await verifyCandidateRace() : null;
   await assertPublicDOM();
+  await writeFile(path.join(artifacts, 'review-regressions.json'), JSON.stringify({ reloadWarning, candidateRace }, null, 2), { flag: 'wx' });
   const report = { matrix, journey, operationJourney, publicDOMNeedles, investigateStation: { ...investigateView, diagnostic }, assistDemo: process.argv.includes('--assist-demo') ? 'recorded double, hint and accepted patch attribution' : 'not enabled', compareDemo: comparison ?? 'not enabled', nextShiftDemo: inheritDemoReport ?? 'not enabled', navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: operationJourney ? 'PASS (selected operation via native Enter)' : process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
   await writeFile(path.join(artifacts, 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
+  await screenshot('assertion-failure', true).catch(() => {});
   if (!fault) throw error;
   const message = String(error?.message ?? error);
   faultOutcome = { message, caught: message.includes(FAULTS[fault].expect) };
