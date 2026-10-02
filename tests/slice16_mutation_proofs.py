@@ -205,7 +205,7 @@ CASES = [
     },
     {
         "name": "frozen_context_hash_is_verified_on_readback",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "elif _frozen_comparison_context_hash(context, bindings) != context.content_hash:",
         "new": "elif False:",
         "tests": f"{LIFECYCLE}::test_every_claim_defining_context_field_blocks_a_stale_outcome",
@@ -214,7 +214,7 @@ CASES = [
     *(
         {
             "name": f"readback_guard_{guard}_reports_its_own_field",
-            "file": "shiftwork/orchestrator.py",
+            "file": "shiftwork/comparison_flow.py",
             "old": anchor,
             "new": replacement,
             "tests": f"{LIFECYCLE}::test_each_named_readback_drift_guard_reports_its_own_field",
@@ -280,7 +280,7 @@ CASES = [
     ),
     {
         "name": "public_assessments_are_recomputed_on_readback",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "if (tuple(expected_public) != recorded_public",
         "new": "if (False",
         "tests": f"{LIFECYCLE}::test_public_and_protected_assessment_tampering_blocks_outcome",
@@ -288,7 +288,7 @@ CASES = [
     },
     {
         "name": "protected_assessments_are_recomputed_on_readback",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "if expected_protected != protected_assessments:",
         "new": "if False:",
         "tests": f"{LIFECYCLE}::test_public_and_protected_assessment_tampering_blocks_outcome",
@@ -296,7 +296,7 @@ CASES = [
     },
     {
         "name": "diagnostic_panel_never_projects_a_comparison",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/experiments.py",
         "old": "diagnostics = [item for item in experiments if item.kind is ExperimentKind.DIAGNOSTIC]",
         "new": "diagnostics = list(experiments)",
         "tests": f"{LIFECYCLE}::test_the_investigate_station_projects_a_comparison_only_as_a_comparison",
@@ -304,7 +304,7 @@ CASES = [
     },
     {
         "name": "retired_reservation_state_is_invalidated",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "repo.update_exposure_reservation_state(conn, reservation.id, \"INVALIDATED\")",
         "new": "repo.update_exposure_reservation_state(conn, reservation.id, \"ACTIVE\")",
         "tests": f"{LIFECYCLE}::test_retiring_a_compromised_comparison_keeps_evidence_and_blocks_reuse",

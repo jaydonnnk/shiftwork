@@ -102,7 +102,7 @@ ADAPTER = "test_legacy_adapter_label_does_not_claim_fresh_live_execution"
 CASES = [
     {
         "name": "s15_draft_manifest_review_gate_removed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '    if data.get("review_status") != "OPERATOR_SEALED" or data.get("sealed_payload_sha256") != digest:\n',
         "new": '    if False:\n',
         "tests": f"{LIFECYCLE}::test_a_status_label_without_an_exact_seal_cannot_admit_material",
@@ -134,7 +134,7 @@ CASES = [
     },
     {
         "name": "s15_missing_capture_success_flag",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '        retired = repo.get_exposure_reservation(conn, reservation.id).state != "ACTIVE"\n        failure = (ExecutorFailure.INTERNAL if retired else public_result.failure\n                   or (protected_result.failure if protected_result else None)\n                   or (None if capture_complete else ExecutorFailure.CAPTURE_TRUNCATED))\n',
         "new": '        retired = repo.get_exposure_reservation(conn, reservation.id).state != "ACTIVE"\n        failure = (ExecutorFailure.INTERNAL if retired else public_result.failure\n                   or (protected_result.failure if protected_result else None))\n',
         "tests": f"{LIFECYCLE}::test_success_flag_without_captures_fails_the_slot_without_refunding_exposure",
@@ -142,7 +142,7 @@ CASES = [
     },
     {
         "name": "s15_starting_ledger_state_placeholder",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         # Re-anchored for Slice 20: the later-condition path carries its own copy
         # of this starting-state block, so the anchor runs through the
         # qualifying-only reservation construction to stay unique. The row still
@@ -479,7 +479,7 @@ CASES = [
     },
     {
         "name": "s11_diagnostic_candidate_pin_removed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/experiments.py",
         "old": '        if not isolated and version.content_hash != config.TRUSTED_LOCAL_FIXTURES["pivot_starter"][0]:\n            raise LifecycleError(\n                "conflict",\n                "only the pinned reviewed starter is executable as a public diagnostic candidate",\n            )\n',
         "new": '        if False:\n            raise LifecycleError(\n                "conflict",\n                "only the pinned reviewed starter is executable as a public diagnostic candidate",\n            )\n',
         "tests": f"{LIFECYCLE}::test_only_the_pinned_reviewed_starter_is_executable",
@@ -487,7 +487,7 @@ CASES = [
     },
     {
         "name": "s11_diagnostic_budget_ignored",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/experiments.py",
         "old": "        if used >= DIAGNOSTIC_EXPERIMENTS_PER_SHIFT:",
         "new": "        if False:",
         "tests": f"{LIFECYCLE}::test_the_diagnostic_budget_is_two_per_shift",
@@ -515,7 +515,7 @@ CASES = [
     },
     {
         "name": "s11_diagnostic_claims_recorded_inspection",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/experiments.py",
         # Re-anchored for Slice 15: the diagnostic run row now carries the
         # isolated/offline split, and the comparison loop repeats the offline
         # spelling byte-identically, so the anchor carries the diagnostic run's
@@ -527,7 +527,7 @@ CASES = [
     },
     {
         "name": "s11_completion_counted_without_the_required_tasks",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/experiments.py",
         # The comparison slot repeats these two lines, so the anchor carries the
         # diagnostic-only assessment tail to stay unambiguous.
         "old": "            if evaluator.request_usefully_completed(spec, request_assessments):\n                completed += 1\n        repo.insert_run_assessment(\n            conn,\n            RunAssessment(\n                run_id=run.id,\n                context_hash=context.content_hash,\n                complete_request_count=completed,\n                expected_request_count=len(mission.request_specs),\n",
@@ -537,7 +537,7 @@ CASES = [
     },
     {
         "name": "s11_assessment_reads_the_live_fixture",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/experiments.py",
         "old": "    workload = context.workloads[0]\r\n    try:\n        snapshot_bytes = base64.b64decode(context.public_data_bytes_base64)\n        mission = task_contract.load_mission_bytes(base64.b64decode(context.mission_bytes_base64))\n",
         "new": "    workload = context.workloads[0]\r\n    try:\n        snapshot_bytes = base64.b64decode(context.public_data_bytes_base64)\n        mission = task_contract.load_mission(config.PIVOT_MISSION)\n",
         "tests": f"{LIFECYCLE}::test_a_fixture_edit_after_reservation_cannot_rewrite_the_assessment",
@@ -553,7 +553,7 @@ CASES = [
     },
     {
         "name": "s11_diagnostic_accepts_a_foreign_shifts_investigation",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/experiments.py",
         "old": '        if investigation is not None and investigation.shift_id != shift.id:\n            raise LifecycleError(\n                "conflict", "a diagnostic must cite an investigation owned by this shift"\n            )\n',
         "new": '        if False:\n            raise LifecycleError(\n                "conflict", "a diagnostic must cite an investigation owned by this shift"\n            )\n',
         "tests": f"{LIFECYCLE}::test_an_investigation_from_another_shift_cannot_authorise_a_diagnostic",
@@ -572,7 +572,7 @@ CASES = [
     # the proof runs (that is the fault); nothing in the repository changes.
     {
         "name": "s15_pair_binding_collapsed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         # Anchored from the qualifying-only candidate mapping (Slice 20 re-anchor).
         "old": (
             '        versions = {"A": candidate_a, "B": candidate_b}\n'
@@ -589,7 +589,7 @@ CASES = [
     },
     {
         "name": "s15_pair_two_b_workload_swapped",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         # Anchored from the qualifying-only candidate mapping (Slice 20 re-anchor).
         "old": (
             '        versions = {"A": candidate_a, "B": candidate_b}\n'
@@ -606,7 +606,7 @@ CASES = [
     },
     {
         "name": "s15_schedule_pair_two_swapped",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '    order = [(1, "A"), (1, "B"), (2, "B"), (2, "A"), (3, pair_three[0]), (3, pair_three[1])]\n',
         "new": '    order = [(1, "A"), (1, "B"), (2, "A"), (2, "B"), (3, pair_three[0]), (3, pair_three[1])]\n',
         "tests": f"{LIFECYCLE}::test_the_precommitted_schedule_is_stored_executed_once_and_not_reorderable",
@@ -614,7 +614,7 @@ CASES = [
     },
     {
         "name": "s15_pair_three_order_not_derived",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '    pair_three = ("A", "B") if decision[-1] & 1 == 0 else ("B", "A")\n',
         "new": '    pair_three = ("B", "A") if decision[-1] & 1 == 0 else ("A", "B")\n',
         "tests": f"{LIFECYCLE}::test_the_precommitted_schedule_is_stored_executed_once_and_not_reorderable",
@@ -622,7 +622,7 @@ CASES = [
     },
     {
         "name": "s15_manifest_hash_not_recomputed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '            hashlib.sha256(batch_bytes).hexdigest() != entry.get("request_bytes_sha256")\n',
         "new": "            False\n",
         "tests": f"{LIFECYCLE}::test_a_manifest_mismatch_fails_closed_and_reserves_nothing[wrong_claimed_hash]",
@@ -630,7 +630,7 @@ CASES = [
     },
     {
         "name": "s15_manifest_length_not_recomputed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '            hashlib.sha256(batch_bytes).hexdigest() != entry.get("request_bytes_sha256")\n            or len(batch_bytes) != entry.get("request_bytes_length")\n',
         "new": '            hashlib.sha256(batch_bytes).hexdigest() != entry.get("request_bytes_sha256")\n',
         "tests": f"{LIFECYCLE}::test_a_manifest_mismatch_fails_closed_and_reserves_nothing[wrong_claimed_length]",
@@ -638,7 +638,7 @@ CASES = [
     },
     {
         "name": "s15_manifest_specs_hash_not_recomputed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '        if hashlib.sha256(canonical_specs).hexdigest() != entry.get("task_specs_sha256"):\n',
         "new": "        if False:\n",
         "tests": f"{LIFECYCLE}::test_a_manifest_mismatch_fails_closed_and_reserves_nothing[wrong_claimed_specs_hash]",
@@ -646,7 +646,7 @@ CASES = [
     },
     {
         "name": "s15_manifest_count_not_recomputed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '            len(batch) != entry.get("request_count")\n            or len(specs) != entry.get("request_count")\n            or not 1 <= len(specs) <= 4\n',
         "new": "            False\n",
         "tests": f"{LIFECYCLE}::test_a_manifest_mismatch_fails_closed_and_reserves_nothing[extra_request_with_recomputed_pin]",
@@ -654,7 +654,7 @@ CASES = [
     },
     {
         "name": "s15_blank_line_silently_removed_before_execution",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "            batch = executor.load_batch(\n",
         "new": "            batch_bytes = b''.join(line for line in batch_bytes.splitlines(keepends=True) if line.strip())\n            batch = executor.load_batch(\n",
         "tests": f"{LIFECYCLE}::test_executor_incompatible_blank_line_fails_before_exposure",
@@ -670,7 +670,7 @@ CASES = [
     },
     {
         "name": "s15_manifest_engagement_unchecked",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '    if (data.get("engagement_slug") != slug or data.get("schema_version") != 1\n            or data.get("comparison_state_sha256") != _hash_bytes(snapshot_bytes)):\n',
         "new": "    if False:\n",
         "tests": f"{LIFECYCLE}::test_a_manifest_mismatch_fails_closed_and_reserves_nothing[cross_engagement]",
@@ -678,7 +678,7 @@ CASES = [
     },
     {
         "name": "s15_reservation_rollback_removed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         # The rollback guard is byte-identical in the qualifying and later
         # reservation bodies, so neither the guard alone nor a neighbouring def
         # can pin this row: S20 inserted create_later_condition_comparison and
@@ -777,7 +777,7 @@ CASES = [
     },
     {
         "name": "s15_execution_claim_bypassed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "    if not repo.claim_comparison_execution(conn, experiment.id):\n        conn.rollback()\n        return repo.get_experiment(conn, experiment.id)\n    conn.commit()\n",
         "new": "    repo.update_experiment_state(conn, experiment.id, \"RUNNING\")\n    conn.commit()\n",
         "tests": f"{LIFECYCLE}::test_a_repeated_comparison_worker_cannot_execute_reserved_slots_twice",
@@ -785,7 +785,7 @@ CASES = [
     },
     {
         "name": "s15_background_error_leaves_comparison_running",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "        repo.update_experiment_state(conn, experiment.id, \"FAILED\")\n        conn.commit()\n        raise\n",
         "new": "        conn.commit()\n        raise\n",
         "tests": f"{LIFECYCLE}::test_an_unexpected_slot_error_fails_the_comparison_without_retry",
@@ -793,7 +793,7 @@ CASES = [
     },
     {
         "name": "s15_pre_adapter_error_leaves_touched_slot_reserved",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "        if active_slot_id is not None:\n",
         "new": "        if False:\n",
         "tests": f"{LIFECYCLE}::test_a_pre_adapter_slot_error_fails_the_touched_slot_without_retry",
@@ -801,7 +801,7 @@ CASES = [
     },
     {
         "name": "s15_incomplete_comparison_finalized",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '    final = "FINALIZED" if slots and all(slot.state == "COMPLETE" for slot in slots) else "FAILED"\n',
         "new": '    final = "FINALIZED"\n',
         "tests": f"{LIFECYCLE}::test_a_failed_slot_stays_visible_and_the_comparison_is_never_refunded",
@@ -809,7 +809,7 @@ CASES = [
     },
     {
         "name": "s15_slot_binding_not_reverified",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "        or workload.request_batch_hash != slot.request_batch_hash\n",
         "new": "",
         "tests": f"{LIFECYCLE}::test_a_tampered_workload_binding_fails_the_slot_instead_of_running_another_batch[slot_hash]",
@@ -817,7 +817,7 @@ CASES = [
     },
     {
         "name": "s15_request_line_identity_unchecked",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '                or parsed_line.get("request_id") != spec.id\n',
         "new": "                or False\n",
         "tests": f"{LIFECYCLE}::test_a_manifest_mismatch_fails_closed_and_reserves_nothing[wrong_request_id_with_recomputed_pin]",
@@ -825,7 +825,7 @@ CASES = [
     },
     {
         "name": "s15_slot_workspace_not_fresh",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n',
         "new": '        import contextlib\n        directory = os.path.join(tempfile.gettempdir(), f"shiftwork-compare-{slot.pair_ordinal}-shared")\n        os.makedirs(directory, exist_ok=True)\n        with contextlib.nullcontext(directory) as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n',
         "tests": f"{LIFECYCLE}::test_every_slot_gets_its_own_fresh_reset_workspace",
@@ -857,7 +857,7 @@ CASES = [
     },
     {
         "name": "s15_eligible_derived",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '        "eligible": bool(outcome and any(item.eligible for item in outcome.eligibility)),\n        "eligibility_reason": (\n            "No winner is derived here. Candidate eligibility requires a complete "\n',
         "new": '        "eligible": False,\n        "eligibility_reason": (\n            "No winner is derived here. Candidate eligibility requires a complete "\n',
         "tests": f"{LIFECYCLE}::test_the_compare_station_shows_all_six_slots_without_a_winner",
@@ -865,7 +865,7 @@ CASES = [
     },
     {
         "name": "s15_protected_refs_projected",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '            "workload_ordinal": slot.pair_ordinal,\n',
         "new": '            "workload_ordinal": slot.pair_ordinal,\n            "protected_variant_refs": list(slot.protected_variant_refs),\n',
         "tests": f"{LIFECYCLE}::test_the_workload_summary_exposes_no_future_request_bytes_or_protected_refs",
@@ -873,7 +873,7 @@ CASES = [
     },
     {
         "name": "s15_candidate_pin_ignored",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "            if {candidate_a.content_hash, candidate_b.content_hash} != pinned:\n",
         "new": "            if False:\n",
         "tests": f"{LIFECYCLE}::test_a_comparison_requires_two_distinct_reviewed_candidates_and_an_owned_entry",
@@ -881,7 +881,7 @@ CASES = [
     },
     {
         "name": "s15_foreign_investigation_accepted",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '        if investigation.shift_id != shift.id:\n            raise LifecycleError(\n                "conflict", "a qualifying comparison requires an investigation owned by this shift"\n            )\n',
         "new": '        if False:\n            raise LifecycleError(\n                "conflict", "a qualifying comparison requires an investigation owned by this shift"\n            )\n',
         "tests": f"{LIFECYCLE}::test_a_comparison_requires_two_distinct_reviewed_candidates_and_an_owned_entry",
@@ -892,7 +892,7 @@ CASES = [
     # pairing, privacy or denominator test to fail with an assertion-level catch.
     {
         "name": "s15_protected_phase_skipped",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '        protected_result = None\n        if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":\n',
         "new": '        protected_result = None\n        if False:\n',
         "tests": f"{LIFECYCLE}::test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
@@ -900,7 +900,7 @@ CASES = [
     },
     {
         "name": "s15_protected_phase_state_swapped",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\r\n            snapshot_path = Path(directory) / "public_state.json"\r\n            snapshot_path.write_bytes(snapshot_bytes)\r\n',
         "new": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\r\n            snapshot_path = Path(directory) / "public_state.json"\r\n            snapshot_path.write_bytes(protected_state_bytes)\r\n',
         "tests": f"{LIFECYCLE}::test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
@@ -908,17 +908,17 @@ CASES = [
     },
     {
         "name": "s15_protected_phase_executed_before_public",
-        "file": "shiftwork/orchestrator.py",
-        "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == TokenFactoryAdapter.name:\n                adapter = TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                    live_budget=live_budget,\n                )\n            elif run.adapter == LocalProcessAdapter.name:\n                adapter = LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":\n            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
-        "new": '        if run.adapter == TokenFactoryAdapter.name:\n            adapter = TokenFactoryAdapter(\n                run_id=run.id,\n                allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                token=os.environ.get("NEBIUS_API_KEY", ""),\n                project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                model=context.service_model or config.SERVICE_MODEL,\n                live_budget=live_budget,\n            )\n        elif run.adapter == LocalProcessAdapter.name:\n            adapter = LocalProcessAdapter()\n        else:\n            raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n        protected_result = None\n        with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n            protected_path = Path(directory) / "protected_state.json"\n            protected_path.write_bytes(protected_state_bytes)\n            protected_request = request.model_copy(update={\n                "shop_snapshot_ref": str(protected_path),\n                "request_batch": protected_ref,\n                "request_batch_bytes": protected_line,\n                "single_request_ordinal": slot.executed_request_count,\n            })\n            protected_result = asyncio.run(adapter.execute(protected_request))\n        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n',
+        "file": "shiftwork/comparison_flow.py",
+        "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == orchestrator.TokenFactoryAdapter.name:\n                adapter = orchestrator.TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                    live_budget=live_budget,\n                )\n            elif run.adapter == orchestrator.LocalProcessAdapter.name:\n                adapter = orchestrator.LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":\n            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
+        "new": '        if run.adapter == orchestrator.TokenFactoryAdapter.name:\n            adapter = orchestrator.TokenFactoryAdapter(\n                run_id=run.id,\n                allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                token=os.environ.get("NEBIUS_API_KEY", ""),\n                project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                model=context.service_model or config.SERVICE_MODEL,\n                live_budget=live_budget,\n            )\n        elif run.adapter == orchestrator.LocalProcessAdapter.name:\n            adapter = orchestrator.LocalProcessAdapter()\n        else:\n            raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n        protected_result = None\n        with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n            protected_path = Path(directory) / "protected_state.json"\n            protected_path.write_bytes(protected_state_bytes)\n            protected_request = request.model_copy(update={\n                "shop_snapshot_ref": str(protected_path),\n                "request_batch": protected_ref,\n                "request_batch_bytes": protected_line,\n                "single_request_ordinal": slot.executed_request_count,\n            })\n            protected_result = asyncio.run(adapter.execute(protected_request))\n        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n',
         "tests": f"{LIFECYCLE}::test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
         "expect": "test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
     },
     {
         "name": "s15_protected_workspace_reused",
-        "file": "shiftwork/orchestrator.py",
-        "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == TokenFactoryAdapter.name:\n                adapter = TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                    live_budget=live_budget,\n                )\n            elif run.adapter == LocalProcessAdapter.name:\n                adapter = LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":\n            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
-        "new": '        import contextlib\n        shared_workspace = tempfile.mkdtemp(prefix=f"shiftwork-compare-shared-{slot.executed_request_count}-")\n        with contextlib.nullcontext(shared_workspace) as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == TokenFactoryAdapter.name:\n                adapter = TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                    live_budget=live_budget,\n                )\n            elif run.adapter == LocalProcessAdapter.name:\n                adapter = LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete:\n            with contextlib.nullcontext(shared_workspace) as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
+        "file": "shiftwork/comparison_flow.py",
+        "old": '        with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == orchestrator.TokenFactoryAdapter.name:\n                adapter = orchestrator.TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                    live_budget=live_budget,\n                )\n            elif run.adapter == orchestrator.LocalProcessAdapter.name:\n                adapter = orchestrator.LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":\n            with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
+        "new": '        import contextlib\n        shared_workspace = tempfile.mkdtemp(prefix=f"shiftwork-compare-shared-{slot.executed_request_count}-")\n        with contextlib.nullcontext(shared_workspace) as directory:\n            snapshot_path = Path(directory) / "public_state.json"\n            snapshot_path.write_bytes(snapshot_bytes)\n            request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})\n            if run.adapter == orchestrator.TokenFactoryAdapter.name:\n                adapter = orchestrator.TokenFactoryAdapter(\n                    run_id=run.id,\n                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),\n                    token=os.environ.get("NEBIUS_API_KEY", ""),\n                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),\n                    model=context.service_model or config.SERVICE_MODEL,\n                    live_budget=live_budget,\n                )\n            elif run.adapter == orchestrator.LocalProcessAdapter.name:\n                adapter = orchestrator.LocalProcessAdapter()\n            else:\n                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")\n            public_result = asyncio.run(adapter.execute(request))\n        public_complete = (\n            public_result.failure is None\n            and len(public_result.captures) == workload.request_count\n            and {capture.request_ordinal for capture in public_result.captures}\n                == set(range(1, workload.request_count + 1))\n            and all(capture.transport_error is None and capture.body for capture in public_result.captures)\n        )\n        protected_result = None\n        if public_complete:\n            with contextlib.nullcontext(shared_workspace) as directory:\n                protected_path = Path(directory) / "protected_state.json"\n                protected_path.write_bytes(protected_state_bytes)\n                protected_request = request.model_copy(update={\n                    "shop_snapshot_ref": str(protected_path),\n                    "request_batch": protected_ref,\n                    "request_batch_bytes": protected_line,\n                    "single_request_ordinal": slot.executed_request_count,\n                })\n                protected_result = asyncio.run(adapter.execute(protected_request))\n',
         "tests": f"{LIFECYCLE}::test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
         "expect": "test_slot_runs_public_phase_then_protected_phase_in_frozen_order",
     },
@@ -951,7 +951,7 @@ CASES = [
     },
     {
         "name": "s15_protected_pair_variant_leaked",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         # Anchored from the qualifying-only slot construction (Slice 20 re-anchor).
         "old": (
             '        versions = {"A": candidate_a, "B": candidate_b}\n'
@@ -992,7 +992,7 @@ CASES = [
     },
     {
         "name": "s15_protected_slot_second_variant",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         # Anchored from the qualifying-only slot construction (Slice 20 re-anchor).
         "old": (
             '        versions = {"A": candidate_a, "B": candidate_b}\n'
@@ -1033,7 +1033,7 @@ CASES = [
     },
     {
         "name": "s15_protected_ordinal_mismatch",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         # Anchored from the qualifying-only slot construction (Slice 20 re-anchor).
         "old": (
             '        versions = {"A": candidate_a, "B": candidate_b}\n'
@@ -1072,7 +1072,7 @@ CASES = [
     },
     {
         "name": "s15_protected_binding_hash_not_pinned",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "            protected_state_hash=reserved.resolved_state_sha256,\n",
         "new": "            protected_state_hash=canonical.content_hash(reserved.resolved_state_sha256),\n",
         "tests": f"{LIFECYCLE}::test_protected_variant_is_bound_and_snapshotted_before_any_result",
@@ -1117,7 +1117,7 @@ CASES = [
     },
     {
         "name": "s15_protected_observation_filter_removed",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "        for observation in repo.list_observations(conn, run.id)\n"
                "        if observation.request_ordinal <= public_count\n    ]\r\n",
         "new": "        for observation in repo.list_observations(conn, run.id)\n    ]\r\n",
@@ -1126,7 +1126,7 @@ CASES = [
     },
     {
         "name": "s15_protected_denominator_merged",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '        "shared_public_denominator_requests": sum(item.request_count for item in context.workloads),\n',
         "new": '        "shared_public_denominator_requests": sum(item.request_count for item in context.workloads) + len(context.workloads),\n',
         "tests": f"{LIFECYCLE}::test_public_and_protected_counts_reconcile_without_merging",
@@ -1134,7 +1134,7 @@ CASES = [
     },
     {
         "name": "s15_protected_counts_before_terminal",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": '    if experiment.state in ("FINALIZED", "FAILED", "INVALIDATED"):\n        outcome = _comparison_outcome(conn, experiment, context, slots)\n        protected_counts = {\n',
         "new": '    if True:\n        outcome = _comparison_outcome(conn, experiment, context, slots)\n        protected_counts = {\n',
         "tests": f"{LIFECYCLE}::test_public_and_protected_counts_reconcile_without_merging",
@@ -1152,7 +1152,7 @@ CASES = [
     # by this frozen context-hash re-verification; it is faulted on its own now.
     {
         "name": "s15_frozen_context_hash_not_reverified",
-        "file": "shiftwork/orchestrator.py",
+        "file": "shiftwork/comparison_flow.py",
         "old": "                or _frozen_comparison_context_hash(context, bindings) != context.content_hash\n",
         "new": "                or False\n",
         "tests": f"{LIFECYCLE}::test_a_tampered_workload_binding_fails_the_slot_instead_of_running_another_batch[swap_bytes]",

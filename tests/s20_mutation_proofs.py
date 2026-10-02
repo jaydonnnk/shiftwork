@@ -14,6 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 ORCH = "shiftwork/orchestrator.py"
+CMP = "shiftwork/comparison_flow.py"
 ROUTES = "tests/api/test_pivot_routes.py::test_later_condition_experiment_shape_is_controller_enforced"
 LATER = "tests/orchestrator/test_selection_operation.py::test_later_alternative_experiment_does_not_rewrite_original_history"
 WORLDS = "tests/orchestrator/test_selection_operation.py::test_later_condition_needs_an_observed_change_and_its_own_world"
@@ -21,11 +22,11 @@ INHERIT = "tests/orchestrator/test_close_inheritance.py::test_next_shift_inherit
 ANCESTRY = "tests/orchestrator/test_close_inheritance.py::test_freeze_ancestry_follows_the_draft_base_and_explicit_restore"
 ATOMIC = "tests/orchestrator/test_selection_operation.py::test_a_fault_mid_later_reservation_leaves_no_partial_comparison"
 CASES = (
-    ("later_choice_guard_removed", ORCH,
+    ("later_choice_guard_removed", CMP,
      'if selection.kind != "LEARNER_CHOICE":',
      "if False:",
      ROUTES, 1, "create_later_condition_comparison"),
-    ("observed_run_guard_removed", ORCH,
+    ("observed_run_guard_removed", CMP,
      "        if (\n"
      "            observed_run.purpose is not RunPurpose.OPERATION\n"
      "            or observed_run.state is not RunState.FINALIZED\n"
@@ -35,59 +36,59 @@ CASES = (
      "        ):",
      "        if False:",
      LATER, 1, "create_later_condition_comparison"),
-    ("observed_run_shift_clause_removed", ORCH,
+    ("observed_run_shift_clause_removed", CMP,
      "            or observed_run.shift_id != shift.id\n",
      "",
      LATER, 1, "create_later_condition_comparison"),
-    ("observed_run_state_clause_removed", ORCH,
+    ("observed_run_state_clause_removed", CMP,
      "            or observed_run.state is not RunState.FINALIZED\n",
      "",
      LATER, 1, "create_later_condition_comparison"),
-    ("normal_condition_guard_removed", ORCH,
+    ("normal_condition_guard_removed", CMP,
      'if observed_context.condition.kind == "normal":',
      "if False:",
      WORLDS, 1, "create_later_condition_comparison"),
-    ("dependency_variation_guard_removed", ORCH,
+    ("dependency_variation_guard_removed", CMP,
      "    if changed:",
      "    if False:",
      WORLDS, 1, "_require_dependency_only_variation"),
     # Added 2026-10-01: the key-set limb lacked a failing-capable test. The
     # world test now runs a differently shaped reviewed world and requires the
     # shape refusal by name, before the workload manifest is ever read.
-    ("later_world_shape_check_removed", ORCH,
+    ("later_world_shape_check_removed", CMP,
      "    if set(reviewed) != set(observed):\n",
      "    if False:\n",
      WORLDS, 1, "_require_dependency_only_variation"),
-    ("observed_context_not_linked", ORCH,
+    ("observed_context_not_linked", CMP,
      "        repo.insert_observed_context(\n"
      "            conn, experiment.id, observed_run.id, observed_context.id, experiment.created_at\n"
      "        )",
      "        pass",
      LATER, 1, "create_later_condition_comparison"),
-    ("later_cap_removed", ORCH,
+    ("later_cap_removed", CMP,
      "        if used >= LATER_COMPARISONS_PER_SHIFT:",
      "        if False:",
      LATER, 1, "create_later_condition_comparison"),
-    ("later_idempotency_replay_removed", ORCH,
+    ("later_idempotency_replay_removed", CMP,
      "        replay = repo.get_experiment_by_client_request_id(conn, client_request_id)",
      "        replay = None",
      LATER, 1, "create_later_condition_comparison"),
-    ("later_versions_swapped", ORCH,
+    ("later_versions_swapped", CMP,
      '        versions = {"A": selected_version, "B": retained_version}',
      '        versions = {"A": retained_version, "B": selected_version}',
      LATER, 1, "create_later_condition_comparison"),
-    ("later_workloads_flattened", ORCH,
+    ("later_workloads_flattened", CMP,
      "            workload = workloads[pair - 1]",
      "            workload = workloads[0]",
      LATER, 1, "create_later_condition_comparison"),
-    ("later_context_bytes_from_config", ORCH,
+    ("later_context_bytes_from_config", CMP,
      "        snapshot_bytes = base64.b64decode(observed_context.public_data_bytes_base64, validate=True)",
      "        snapshot_bytes = config.PIVOT_COMPARE_STATE.read_bytes()",
      LATER, 1, "create_later_condition_comparison"),
     # The rollback guard is byte-identical in the qualifying body this one was
     # copied from, so the scope is what keeps the two proofs separate: the
     # qualifying atomicity row cannot see this copy and this row cannot see that.
-    ("later_reservation_rollback_removed", ORCH,
+    ("later_reservation_rollback_removed", CMP,
      "    except Exception:\n        conn.rollback()\n        raise\n    return experiment\n",
      "    except Exception:\n        raise\n    return experiment\n",
      ATOMIC, 1, "create_later_condition_comparison"),
