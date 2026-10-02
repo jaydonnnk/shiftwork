@@ -1,0 +1,13 @@
+{
+  "command": [
+    ".venv313/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests/api/test_pivot_projection.py",
+    "tests/api/test_client_shell.py",
+    "tests/api/test_client_evidence.py",
+    "-q"
+  ],
+  "exit_code": 0,
+  "seconds": 11.415388299996266
+}

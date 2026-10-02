@@ -1,0 +1,12 @@
+{
+  "command": [
+    ".venv313/Scripts/python.exe",
+    "-m",
+    "pytest",
+    "tests",
+    "--ignore=tests/packaging",
+    "-q"
+  ],
+  "exit_code": 0,
+  "seconds": 409.0121138000104
+}
