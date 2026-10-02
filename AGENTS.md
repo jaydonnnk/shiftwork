@@ -344,6 +344,8 @@ Rules:
 
 - Inspect `git status`. Treat existing changes as the user's work unless proven
   otherwise. Never stash, discard, rewrite or stage unrelated changes.
+- Copy patch anchors from the current file, including complete inline statements.
+  Verify every anchor before a multi-file edit; never append guessed context.
 - For a non-trivial task outside the gate workflow, write a short actionable plan
   before editing. Re-plan when evidence invalidates the approach. Skip process
   ceremony for a small, obvious, one-file change.

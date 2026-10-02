@@ -1529,3 +1529,51 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **What happened:** the fix round's new Limits bullet in `00-status.md` said "the remaining untested later-path guards are enumerated in one Limits bullet", but the later copy of the stimulus-contract check (`orchestrator.py:3371-3382`) and the orchestrator-level empty-treatment re-check (`orchestrator.py:3295`) were untested, had no mutation row and were not listed. The second independent review round found both by enumerating every fail-closed raise on the new paths against the bullet.
 - **Root cause:** the enumeration was written from the guards the review's own findings happened to name, not from an enumeration of the code's fail-closed raises, so guards nobody had flagged stayed invisible to it.
 - **Prevention rule:** an enumeration labelled complete must be built by listing every fail-closed raise site in the changed paths from the code, then marking each one as proven by test, proven by mutation row or listed with its reason. Never enumerate only the guards a finding named.
+
+## 2026-10-02 S21 desktop focus changed an existing station keyboard path
+
+- **What happened:** the first updated browser run failed the existing evaluator-to-ledger Tab assertion because activating a desktop room hotspot moved focus to the detail panel.
+- **Root cause:** the new journey-navigation focus requirement was applied to every station activation, altering the desktop hotspot sequence.
+- **Prevention rule:** scope new focus movement to journey navigation; retain desktop hotspot focus and the existing narrow-screen panel movement. Re-run both native journey and historical station keyboard checks.
+
+## 2026-10-02 S21 patch anchors were incomplete
+
+- **What happened:** five edit attempts were rejected before application because their contexts abbreviated a long initializer, omitted a ternary branch or named a standalone statement that only existed inline, or guessed a reload API call. No rejected patch changed source. The repeated anchor rule is now graduated into AGENTS.md.
+- **Root cause:** patch context was reconstructed instead of copied from the current file.
+- **Prevention rule:** use exact current lines for replacements; for whole-function removal, locate both measured function boundaries and verify syntax immediately.
+
+## 2026-10-02 S21 browser retained a removed journey link
+
+- **What happened:** the next browser run reached the investigation visibility check and failed on a null control because its historical return/away loop still queried removed top-navigation links.
+- **Root cause:** the first harness update replaced the primary navigation checks but missed a second visibility check using the retired links.
+- **Prevention rule:** search every navigation selector after changing the shell. Preserve the visibility assertion using the actual Compare and Next shift links.
+
+## 2026-10-02 S21 empty board entered candidate restoration
+
+- **What happened:** both fresh browser baselines failed the empty-board check with `Cannot read properties of null (reading 'candidates')`. Candidate restoration now requires an existing comparison.
+- **Root cause:** optional chaining on both comparison and shift produced equal undefined values, allowing the body to dereference a null comparison.
+- **Prevention rule:** require the owning object before comparing optional IDs. Preserve the empty-board browser regression. A rejected multi-file repair also guessed the MISTAKES heading; no patch applied until the actual source anchor was read.
+
+## 2026-10-02 S21 demos ignored offline candidate and operation boundaries
+
+- **What happened:** the blocked browser scenario substituted the failing starter for reviewed candidate B and timed out after the production admission guard refused it. The selected journey also tried to operate in a shift whose starter operations were already complete. Both failures remain in the browser logs. A separate fresh blocked-only run reproduced the admission refusal.
+- **Root cause:** the harness assumed any trusted starter could qualify as an offline comparison and treated the preview's recorded inspections as budget-free. Production permits only the two pinned comparison sources, and a chosen version must move into a new shift after completed operation history.
+- **Prevention rule:** keep the reviewed candidates unchanged; exercise genuine nonempty blockers with the production exposure-retirement operation in a clearly labelled disposable controller fixture. Advance through the UI before operating the inherited exact choice. Do not weaken admission or rewrite history for a demo.
+
+## 2026-10-02 S21 comparison polling omitted invalidation
+
+- **What happened:** inspection while preparing the real invalidated comparison found that the client polling loop recognized FINALIZED and FAILED but would keep an invalidated comparison pending until its 180-second deadline. INVALIDATED is now terminal too.
+- **Root cause:** the polling terminal list was narrower than the controller comparison lifecycle.
+- **Prevention rule:** test that a production-invalidated comparison renders its actual blocker and releases the editor; mutate the invalidation terminal branch independently.
+
+## 2026-10-02 S21 blocked fixture added middleware after startup
+
+- **What happened:** the disposable invalidation preview crashed before binding because create_preview had already started its returned FastAPI instance during seeding. Middleware cannot be added after startup.
+- **Root cause:** the helper reused the seeding app as the serving app.
+- **Prevention rule:** seed the disposable database with the existing preview, then construct a fresh production app against those same bytes before attaching test-only middleware. Preserve the failed startup log.
+
+## 2026-10-02 S21 operation proof read before capture refresh
+
+- **What happened:** the journey reached a genuinely finalized operation but verified the customer panel while its asynchronous capture refresh was still loading, finding zero buttons for one API output.
+- **Root cause:** the wait required the run ID in the UI, which was already present during QUEUED or RUNNING. It did not require the exact FINALIZED UI state or loaded captures.
+- **Prevention rule:** wait for the API run to finalize and the public client to show that exact finalized run with ready captures before checking request identity. A server completion is not rendered completion.
