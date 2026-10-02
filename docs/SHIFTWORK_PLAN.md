@@ -27,6 +27,9 @@ baselines plus 37 served-source faults matched their expected outcomes.
 The user directed S21 branch publication and merge/push to main on 2026-10-02,
 approving shipment on this offline evidence. Its evidence is in
 `plans/shiftwork/evidence/slice21-room-2026-10-02.md`.
+Seven focused S21 commits (`7d35eb3..1c437f4`) were published and main was
+fast-forwarded and pushed, including the previously local split commits.
+Both remote heads were verified at `1c437f4` before the publication receipt.
 See `plans/shiftwork/00-status.md` and
 `plans/shiftwork/evidence/slice20-sse-recovery-2026-10-01.md` for current evidence,
 authorization and limits. Older current-state paragraphs below are historical

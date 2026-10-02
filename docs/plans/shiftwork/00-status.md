@@ -1,5 +1,22 @@
 # Status: Shiftwork
 
+## S21 publication and main integration: 2026-10-02
+
+The user directed publishing the branch and merging/pushing main. Seven focused
+S21 commits (`7d35eb3..1c437f4`) were published on `shiftwork/slice-21`; local main
+was fast-forwarded from `926d269` without replacing the orchestration split,
+then pushed. Both remote heads were verified at `1c437f4` before this receipt.
+The push also published the six previously local split commits above remote
+main `7f0dc92`. No co-author footer was added.
+
+All seven raw S21 receipts match their committed blobs byte-for-byte. Their
+Git attributes preserve native line endings and terminal spaces; raw transcript
+whitespace is retained deliberately, while code/documentation diff checks pass.
+The other chat's uncommitted split incident entry in `MISTAKES.md` was excluded
+from staging and retained unchanged. S21 shipped on its recorded offline proof:
+644 tests passed, one existing live-only skip, packaging excluded, and all 37
+rendered faults caught. No new live execution or S22a work was authorized.
+
 ## S21 implementation and offline verification: 2026-10-02
 
 The user's "Lets start S21" authorized this slice's implementation. Work started
