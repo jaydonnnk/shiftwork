@@ -1,5 +1,52 @@
 # Status: Shiftwork
 
+## S21 implementation and offline verification: 2026-10-02
+
+The user's "Lets start S21" authorized this slice's implementation. Work started
+on `shiftwork/slice-21` from clean main `7f0dc92`. The separately authorized
+orchestrator split interrupted dependent verification; after the user confirmed
+its merge complete, main and this branch both resolved to `926d269` and the
+ancestor check passed. The user directed branch publication and merge/push to
+main on 2026-10-02, approving shipment on the offline evidence below.
+
+The fixed Bellwether room now exposes Shift board, Requirements, Investigate,
+Compare and choose, and Next shift through real public APIs. Requirements bind
+to the operating version; output evidence names its run/version, purpose, mode
+and public snapshot value. The draft editor saves code and visible checks,
+guards unsaved edits, restores compared candidate IDs after reload and clears
+them across shifts. Invalidated comparisons terminate polling promptly.
+
+The continuous UI journey compared six slots, chose `ver-0002` while retaining
+newer `ver-0003`, opened shift 2, operated the exact choice as `run-0010` under
+`sel-0002`, linked request/output/checks to checked synthetic event sequence 5,
+and inherited the same choice and rationale into `bookshop-shift-03`. That
+operation is TRUSTED_LOCAL, not new live model evidence. Experiments and choice
+left ledger and incident bytes unchanged. A separate test-only production
+exposure-retirement scenario rendered genuine NOT_COMPARABLE blockers.
+
+Verification: **24 named API tests passed, 2 warnings**; final offline suite
+**644 passed, 1 skipped, 2 warnings** with packaging excluded; browser matrix
+**41 of 41 as expected**, four baselines PASS plus all 37 named faults CAUGHT,
+zero wrong failures, survivors or preview failures. Every baseline exercised
+40 native keyboard/touch activations at 1280, 778, 640 and 390 px by 900 px,
+refresh/deep links, focus/reachability, no overflow and reduced motion. Serialized
+DOM/API leak scans include detection controls for every needle. Prior 99 evidence
+files retain their starting SHA-256 digests; final diff and JavaScript syntax
+checks pass. The surviving Test 29 skip needs separate live Sandbox authority.
+
+The architect-reviewer cleanup scan found no required deletion or architecture
+change. Keep the historical review-bypass preview as referenced S16 evidence;
+S21 uses production admission. ADRs 0001, 0003, 0005 and 0006 remain consistent.
+The plan is in `slice21-implementation-plan.md`; evidence and preserved failure
+records are in `evidence/slice21-room-2026-10-02.md`, alongside byte-identical
+final test receipts and the four baseline JSON reports. The actual inherited
+room is open at `http://127.0.0.1:8143/#next`.
+
+S21 implementation and verification are complete, with publication authorized.
+No new live call, credential use, install, reviewed fixture edit, seal,
+outreach or later slice followed. Gate 3 obligations 39, 45 and 46
+remain partial until S22b's distinct board journey. S22a needs its own go-ahead.
+
 ## Slice 20 offline implementation and verification: 2026-09-30
 
 The user gave S20 its own go-ahead and separately authorized live calls for this

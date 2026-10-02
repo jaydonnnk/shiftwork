@@ -892,8 +892,11 @@ still needs its own explicit go-ahead, and Slice 12, 13, 14, 22a, 22b, 23, 24,
 25, 26, 27 and 28 keep the separate authorizations named in their own
 Authorization lines.
 
-The next planned slice is Slice 21 under section 3. Slices 10 through 19 are
-accepted and published; Slice 20 is implemented, verified offline and published
-on `shiftwork/slice-20` at the user's direction on 2026-10-01 and merged to
-main, and its stretch `ISOLATED_LIVE` chain is not achieved. See
-`00-status.md` for the completion evidence and current gate state.
+S21 was implemented and verified offline under its 2026-10-02 go-ahead, with
+the user directing publication and merge/push on that evidence on the same date.
+Its evidence is recorded in `00-status.md`.
+Slices 10 through 19 are accepted and published; S20's offline foundation and
+its bounded stretch `ISOLATED_LIVE` chain are published and merged to main.
+The fresh SSE-recovery chain achieved on 2026-10-01 UTC retains its narrow
+evidence limits. See `00-status.md` for current evidence and acceptance state.
+S22a remains the next planned slice and needs its own go-ahead.

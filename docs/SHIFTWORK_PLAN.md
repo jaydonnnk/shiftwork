@@ -20,6 +20,13 @@ checkout of the eight affected logs pass. Both remote heads were verified at
 only the earlier evidence before
 that authorization. This proves
 the narrow linked chain, not learning impact or broad model quality.
+S21 received its own go-ahead on 2026-10-02. Its Bellwether room journey is
+implemented and verified offline after the separately authorized orchestration
+split was merged: 644 tests passed with one existing skip, and all four browser
+baselines plus 37 served-source faults matched their expected outcomes.
+The user directed S21 branch publication and merge/push to main on 2026-10-02,
+approving shipment on this offline evidence. Its evidence is in
+`plans/shiftwork/evidence/slice21-room-2026-10-02.md`.
 See `plans/shiftwork/00-status.md` and
 `plans/shiftwork/evidence/slice20-sse-recovery-2026-10-01.md` for current evidence,
 authorization and limits. Older current-state paragraphs below are historical
