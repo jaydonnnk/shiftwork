@@ -1,0 +1,304 @@
+{
+  "matrix": [
+    {
+      "width": 1280,
+      "outputs": 2,
+      "run": "run-0014",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    },
+    {
+      "width": 778,
+      "outputs": 2,
+      "run": "run-0014",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    },
+    {
+      "width": 640,
+      "outputs": 2,
+      "run": "run-0014",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    },
+    {
+      "width": 390,
+      "outputs": 2,
+      "run": "run-0014",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    }
+  ],
+  "journey": [
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "board"
+    },
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "contract"
+    },
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "investigate"
+    },
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "compare"
+    },
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "next"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "board"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "contract"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "investigate"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "compare"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "next"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "board"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "contract"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "investigate"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "compare"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "next"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "board"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "contract"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "investigate"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "compare"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "next"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "board"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "contract"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "investigate"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "compare"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "next"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "board"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "contract"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "investigate"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "compare"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "next"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "board"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "contract"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "investigate"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "compare"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "next"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "board"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "contract"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "investigate"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "compare"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "next"
+    }
+  ],
+  "operationJourney": null,
+  "publicDOMNeedles": 4406,
+  "investigateStation": {
+    "shift": "bookshop-shift-02",
+    "entries": 1,
+    "revision": false,
+    "denials": {
+      "beforeEntry": "Diagnostic help needs your own cause, falsifier and public test first.",
+      "withEntry": "assist gateway is not configured for this session; HINT is unavailable"
+    },
+    "diagnostic": {
+      "skipped": "inherit-demo mode asserts the Next shift station instead of running a public diagnostic"
+    }
+  },
+  "assistDemo": "not enabled",
+  "compareDemo": "not enabled",
+  "nextShiftDemo": {
+    "shift": "bookshop-shift-02",
+    "nextShift": "bookshop-shift-03",
+    "experiment": "experiment-bookshop-shift-02-later-1",
+    "observedRun": "run-0008",
+    "rationale": "A completed the required tasks under the shared conditions.",
+    "retained": "ver-0004",
+    "limits": 1
+  },
+  "navigationAndStaleIncident": "PASS",
+  "keyboard": "PASS (evaluator and customer Enter/Tab)",
+  "reducedMotion": "PASS",
+  "states": [
+    "loading",
+    "error",
+    "empty",
+    "no incidents",
+    "malformed body",
+    "no public record"
+  ],
+  "repairWithoutIncident": "blocked",
+  "literalUntrustedText": "PASS",
+  "realRunButton": "not exercised in this run",
+  "labelRemovalMutations": "caught in every visible region",
+  "ordinalMutation": "caught",
+  "renderedEvidence": "exact answer, public record, verdict, event, investigation and diagnostic text against the API payload",
+  "narrowStationReach": "native touch brings the panel into reach at 640/390",
+  "incidentNavigationFocus": "keyboard activation focuses the selected request",
+  "downloadedBytes": "exact",
+  "uncaughtExceptions": 0
+}

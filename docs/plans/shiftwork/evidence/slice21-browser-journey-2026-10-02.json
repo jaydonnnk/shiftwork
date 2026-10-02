@@ -1,0 +1,342 @@
+{
+  "matrix": [
+    {
+      "width": 1280,
+      "outputs": 2,
+      "run": "run-0002",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    },
+    {
+      "width": 778,
+      "outputs": 2,
+      "run": "run-0002",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    },
+    {
+      "width": 640,
+      "outputs": 2,
+      "run": "run-0002",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    },
+    {
+      "width": 390,
+      "outputs": 2,
+      "run": "run-0002",
+      "labels": [
+        "board",
+        "incidents",
+        "ledger",
+        "board",
+        "run",
+        "event"
+      ]
+    }
+  ],
+  "journey": [
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "board"
+    },
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "contract"
+    },
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "investigate"
+    },
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "compare"
+    },
+    {
+      "width": 1280,
+      "input": "keyboard",
+      "view": "next"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "board"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "contract"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "investigate"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "compare"
+    },
+    {
+      "width": 1280,
+      "input": "touch",
+      "view": "next"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "board"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "contract"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "investigate"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "compare"
+    },
+    {
+      "width": 778,
+      "input": "keyboard",
+      "view": "next"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "board"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "contract"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "investigate"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "compare"
+    },
+    {
+      "width": 778,
+      "input": "touch",
+      "view": "next"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "board"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "contract"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "investigate"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "compare"
+    },
+    {
+      "width": 640,
+      "input": "keyboard",
+      "view": "next"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "board"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "contract"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "investigate"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "compare"
+    },
+    {
+      "width": 640,
+      "input": "touch",
+      "view": "next"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "board"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "contract"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "investigate"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "compare"
+    },
+    {
+      "width": 390,
+      "input": "keyboard",
+      "view": "next"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "board"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "contract"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "investigate"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "compare"
+    },
+    {
+      "width": 390,
+      "input": "touch",
+      "view": "next"
+    }
+  ],
+  "operationJourney": {
+    "run": "run-0010",
+    "version": "ver-0002",
+    "mode": "TRUSTED_LOCAL",
+    "selection": "sel-0002",
+    "events": [
+      5
+    ],
+    "evidence": {
+      "outputs": 1,
+      "run": "run-0010"
+    },
+    "nextShift": "bookshop-shift-03"
+  },
+  "publicDOMNeedles": 4406,
+  "investigateStation": {
+    "shift": "bookshop-shift-01",
+    "entries": 1,
+    "revision": false,
+    "denials": {
+      "beforeEntry": "Diagnostic help needs your own cause, falsifier and public test first.",
+      "withEntry": "assist gateway is not configured for this session; HINT is unavailable"
+    },
+    "diagnostic": {
+      "experiment": "experiment-bookshop-shift-01-d1",
+      "started": true,
+      "state": "COMPLETE",
+      "tasks": 3,
+      "observations": 0,
+      "customerText": "Salt Roads (paperback) costs £18.00."
+    }
+  },
+  "assistDemo": "not enabled",
+  "compareDemo": {
+    "experiment": "experiment-bookshop-shift-01-c1",
+    "state": "FINALIZED",
+    "outcome": "COMPLETE",
+    "blockers": [
+      {
+        "candidate": "A",
+        "reasons": []
+      },
+      {
+        "candidate": "B",
+        "reasons": []
+      }
+    ],
+    "slots": "1:1A/workload-01/2 2:1B/workload-01/2 3:2B/workload-02/2 4:2A/workload-02/2 5:3B/workload-03/2 6:3A/workload-03/2",
+    "selection": {
+      "id": "sel-0002",
+      "kind": "LEARNER_CHOICE",
+      "selected_version_id": "ver-0002",
+      "selected_content_hash": "01df104ffd8fc974ae90e733e14ffb7e7af13260452a701f7567cd86b2342c82",
+      "comparison_id": "experiment-bookshop-shift-01-c1",
+      "retained_alternative_version_id": "ver-0003",
+      "rationale": "A answered the required tasks in the shared trial.",
+      "requirement_set_hash": "aebe89555a72688eedfb564088f57b78328c184d0a4e378918c46d13d1e6c12a",
+      "prior_selection_id": "sel-0001",
+      "state": "VALID",
+      "created_at": "2026-10-02T04:07:03.379952Z"
+    }
+  },
+  "nextShiftDemo": "not enabled",
+  "navigationAndStaleIncident": "PASS",
+  "keyboard": "PASS (evaluator and customer Enter/Tab)",
+  "reducedMotion": "PASS",
+  "states": [
+    "loading",
+    "error",
+    "empty",
+    "no incidents",
+    "malformed body",
+    "no public record"
+  ],
+  "repairWithoutIncident": "blocked",
+  "literalUntrustedText": "PASS",
+  "realRunButton": "PASS (selected operation via native Enter)",
+  "labelRemovalMutations": "caught in every visible region",
+  "ordinalMutation": "caught",
+  "renderedEvidence": "exact answer, public record, verdict, event, investigation and diagnostic text against the API payload",
+  "narrowStationReach": "native touch brings the panel into reach at 640/390",
+  "incidentNavigationFocus": "keyboard activation focuses the selected request",
+  "downloadedBytes": "exact",
+  "uncaughtExceptions": 0
+}
