@@ -15,11 +15,10 @@
     <a class="brand" href="#board" aria-label="Shiftwork shift board"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 3 12 7v13l-12 7-12-7V10Zm0 13L4 10m12 6 12-6M16 16v14"/></svg>Shiftwork<span class="brand-divider"></span><span class="workspace-label">THE WORKPLACE</span></a>
     <nav class="journey" aria-label="Shift journey">
       <a href="#board" data-view="board" aria-current="page"><span>01</span>Shift board</a>
-      <a href="#contract" data-view="contract"><span>02</span>Contract <small>Next slice</small></a>
-      <a href="#customers" data-view="customers"><span>03</span>Customer shift</a>
-      <a href="#repair" data-view="repair"><span>04</span>Repair <small>Next slice</small></a>
-      <a href="#return" data-view="return"><span>05</span>Return <small>Later</small></a>
-      <a href="#away" data-view="away"><span>06</span>Away shift <small>Later</small></a>
+      <a href="#contract" data-view="contract"><span>02</span>Requirements</a>
+      <a href="#investigate" data-view="investigate"><span>03</span>Investigate</a>
+      <a href="#compare" data-view="compare"><span>04</span>Compare and choose</a>
+      <a href="#next" data-view="next"><span>05</span>Next shift</a>
     </nav>
     <div class="session-label"><span class="status-dot"></span><span id="session-state">Connecting to your shift</span></div>
     <button class="icon-button" id="refresh" aria-label="Refresh shift and evidence" title="Refresh shift and evidence">↻</button>
@@ -117,7 +116,16 @@
         <p id="investigate-error" class="denial" role="status"></p>
       </section>
       <section id="compare-view" hidden>
+        <div id="compare-evidence" class="artifact-detail"></div>
         <p id="compare-state" class="mono evidence-meta">No shift loaded</p>
+        <section class="panel-section">
+          <h3>Edit your draft</h3>
+          <p id="draft-note" class="help-text">Saving keeps your work. Freezing creates a candidate; choosing sets the operating version.</p>
+          <div class="field"><label for="draft-file">Draft file</label><select id="draft-file" disabled></select></div>
+          <div class="field"><label for="draft-source">Your code or visible checks</label><textarea id="draft-source" rows="12" spellcheck="false" disabled></textarea></div>
+          <div class="panel-actions"><button id="save-draft" class="button secondary" disabled>Save draft</button><button id="discard-draft-edit" class="button secondary" disabled>Discard unsaved edit</button></div>
+          <p id="draft-error" class="denial" role="status"></p>
+        </section>
         <section class="panel-section">
           <h3>Freeze the two candidates</h3>
           <p class="help-text">A qualifying comparison needs two distinct frozen versions. Freeze the draft you are looking at as one candidate, edit it, then freeze the other.</p>

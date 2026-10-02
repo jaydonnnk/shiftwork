@@ -33,6 +33,7 @@ function clearEvidence() {
   empty($('selected-evidence'), 'No executed customer request selected.');
 }
 function clearData(message) {
+  state.operatingVersion = null;
   state.board = null; state.draft = null; state.stationView = null; state.run = null;
   state.outputs = []; state.checks = []; state.events = []; state.selected = null; state.diagnostic = null;
   clearEvidence();
@@ -80,9 +81,11 @@ function clearData(message) {
   for (const id of ['append-investigation', 'request-assist', 'run-diagnostic', 'freeze-candidate-a', 'freeze-candidate-b', 'run-comparison', 'select-candidate-a', 'select-candidate-b']) $(id).disabled = true;
   $('open-shift').disabled = true; $('run-shift').disabled = true;
   text('run-help', 'Refresh to load available actions.');
+  renderDraftEditor();
 }
 
 async function refresh(runId = null) {
+  const previousShiftId = state.board?.latest_shift?.id;
   const generation = ++state.generation;
   const selected = state.selected;
   clearTimeout(pollTimer);
@@ -91,26 +94,33 @@ async function refresh(runId = null) {
   try {
     const board = await api('/engagements/bookshop/board');
     const run = runId ? await api(`/runs/${encodeURIComponent(runId)}`) : board.latest_run;
-    const [draft, stationView, ledger, outputs, checks] = await Promise.all([
+    const [draft, stationView, ledger, outputs, checks, operatingVersion] = await Promise.all([
       board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/artifact`) : null,
       board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/investigations`) : null,
       api('/engagements/bookshop/ledger'),
       run ? api(`/runs/${encodeURIComponent(run.id)}/outputs`) : [],
       run ? api(`/runs/${encodeURIComponent(run.id)}/checks`) : [],
+      board.operating_selection ? api(`/artifact-versions/${encodeURIComponent(board.operating_selection.selected_version_id)}`) : null,
     ]);
     if (generation !== state.generation) return;
-    Object.assign(state, { board, draft, stationView, run, outputs, checks, events: ledger.events });
+    Object.assign(state, { board, draft, stationView, run, outputs, checks, operatingVersion, events: ledger.events });
+    if (previousShiftId && previousShiftId !== board.latest_shift?.id) {
+      state.comparison = null;
+      state.candidates = { A: null, B: null };
+    }
     if (stationView?.latest_experiment?.kind === 'QUALIFYING_COMPARISON') state.comparison = stationView.latest_experiment;
     else if (state.comparison) {
       try { state.comparison = await api(`/experiments/${encodeURIComponent(state.comparison.id)}`); }
       catch { state.comparison = null; }
     }
+    if (state.comparison && state.comparison.shift_id === board.latest_shift?.id) for (const candidate of state.comparison.candidates) {
+      state.candidates[candidate.label] ??= { id: candidate.artifact_version_id, content_hash: candidate.artifact_content_hash };
+    }
     state.selected = outputs.some(output => output.id === selected) ? selected : outputs[0]?.id ?? null;
     document.body.dataset.loadState = board.latest_shift ? 'ready' : 'empty';
     text('load-message', board.latest_shift ? '' : 'No shift yet. Open one to begin your service history.');
     renderBoard();
-    if (['return', 'away'].includes(state.view)) navigate(state.view, false);
-    else activateStation(state.station, false);
+    activateStation(state.station, false);
     if (!terminal(run)) pollTimer = setTimeout(() => refresh(run.id), 1000);
     return true;
   } catch (error) {
@@ -152,6 +162,7 @@ function renderBoard() {
     ['Retained alternative', choice?.retained_alternative_version_id ?? 'none'],
     ['Comparison', choice?.comparison_id ?? 'none'],
     ['Original requirement hash', choice?.requirement_set_hash ?? 'none'],
+    ['Executed version', state.run ? `${state.run.artifact_version_id} · ${state.run.id}` : 'none'],
   ]) {
     const row = element('div', null, 'contract-line');
     row.dataset.selectionField = label.toLowerCase().replaceAll(' ', '-');
@@ -160,8 +171,10 @@ function renderBoard() {
   }
   const adapter = state.run?.adapter;
   const liveDiagnostic = state.stationView?.latest_experiment?.trials?.some(trial => trial.evidence_mode === 'ISOLATED_LIVE');
-  text('execution-note', liveDiagnostic
-    ? 'A real isolated diagnostic ran this saved service. Its result is evidence only; no version was selected or operated. The simulated role is not a credential.'
+  text('execution-note', state.run?.evidence_mode === 'ISOLATED_LIVE'
+    ? `Isolated live ${humanize(state.run.purpose)} · ${state.run.id} · ${state.run.artifact_version_id}. Synthetic business consequences are independently checked. The simulated role is not a credential.`
+    : liveDiagnostic
+    ? `An isolated ${humanize(state.stationView.latest_experiment.kind)} ran. Experiments leave operational history unchanged. The simulated role is not a credential.`
     : state.run?.purpose === 'LEGACY_OPERATION'
     ? `Legacy operation · ${state.run.evidence_mode ?? 'evidence mode unknown'}. Missing historical inputs remain unknown; old captures are not a fresh test. No live model or sandbox is established.`
     : adapter === 'local_process'
@@ -216,15 +229,19 @@ function renderArtifact() {
   const files = state.draft?.files ?? {};
   target.replaceChildren();
   if (state.file === 'contract') {
-    const contract = state.board.latest_version?.contract;
+    const version = state.operatingVersion ?? state.board.latest_version;
+    const contract = version?.contract;
     if (!contract) return empty(target, 'No committed contract. Authoring is not available in this build; no stance is preselected.');
     for (const [label, value] of [
+      ['Requirement version', `${version.id} · ${version.content_hash}`],
       ['Committed constraint', contract.must_never.map(humanize).join(', ')],
-      [state.board.operating_selection?.selected_version_id === state.board.latest_version?.id ? 'Operating stance' : 'Latest saved stance', Object.values(contract.selections).map(humanize).join(', ')],
+      [state.operatingVersion ? 'Operating stance' : 'Latest saved stance', Object.values(contract.selections).map(humanize).join(', ')],
       ['Response time limit', `${contract.response_time_limit_ms} ms`],
       ['Contract catalog', `Version ${contract.catalog_version}`],
+      ['Frozen requirement hash', state.board.inherited_requirements?.requirement_set_hash ?? 'No qualifying comparison selected yet'],
     ]) {
       const row = element('div', null, 'contract-line');
+      row.dataset.requirementField = label.toLowerCase().replaceAll(' ', '-');
       row.append(element('span', label), element('strong', value)); target.append(row);
     }
   } else if (state.file === 'files') {
@@ -274,6 +291,17 @@ function renderCustomers() {
   selected.dataset.runId = output.run_id;
   selected.dataset.requestOrdinal = output.request_ordinal;
   selected.replaceChildren();
+  for (const [field, label, value] of [
+    ['purpose', 'Execution purpose', humanize(run.purpose)],
+    ['mode', 'Evidence mode', run.evidence_mode ?? 'unknown'],
+    ['version', 'Executed version', run.artifact_version_id],
+    ['snapshot', 'Frozen public snapshot', output.public_shop_snapshot_hash ?? 'unknown'],
+  ]) {
+    const row = element('div', null, 'contract-line');
+    row.dataset.executionField = field;
+    row.append(element('span', label), element('strong', value));
+    selected.append(row);
+  }
   const request = evidenceStep(1, 'Executed customer request');
   request.append(element('p', output.request_text, 'evidence-text request-quote'), element('p', `${output.run_id} · request ${output.request_ordinal} · artifact ${run.artifact_version_id}`, 'evidence-meta'));
   const answer = evidenceStep(2, 'Exact service output');
@@ -489,9 +517,23 @@ function renderInvestigate() {
   renderDiagnostic(station);
 }
 function renderCompare() {
+  renderDraftEditor();
   const board = state.board;
   const shift = board?.latest_shift ?? null;
   const compare = state.comparison;
+  const evidence = $('compare-evidence');
+  evidence.replaceChildren();
+  if (compare) for (const [field, label, value] of [
+    ['purpose', 'Purpose', humanize(compare.kind)],
+    ['mode', 'Evidence mode', compare.context_evidence_class],
+    ['context', 'Frozen context', compare.context_hash],
+    ['history', 'Operational history', 'Unchanged by experiments'],
+  ]) {
+    const row = element('div', null, 'contract-line');
+    row.dataset.comparisonField = field;
+    row.append(element('span', label), element('strong', value));
+    evidence.append(row);
+  }
   const candidates = state.candidates;
   text('compare-state', shift ? `${shift.id} · ${compare ? `${compare.id} · ${humanize(compare.state)}` : 'no comparison reserved'}` : 'No shift loaded');
   text('compare-tag', !shift ? 'Not loaded' : compare ? `${compare.trials.length} slots · ${humanize(compare.state)}` : 'Not reserved');
@@ -518,7 +560,7 @@ function renderCompare() {
   }));
   const editable = shift?.state === 'open';
   const treatment = $('treatment-input').value.trim();
-  for (const id of ['freeze-candidate-a', 'freeze-candidate-b']) $(id).disabled = state.pending || !shift || !editable;
+  for (const id of ['freeze-candidate-a', 'freeze-candidate-b']) $(id).disabled = state.pending || !shift || !editable || hasUnsavedDraft();
   $('run-comparison').disabled = state.pending || !shift || !editable || !candidates.A || !candidates.B || candidates.A.id === candidates.B.id || !state.stationView?.latest_investigation_id || !treatment;
   text('compare-note', !shift ? 'Open a shift to compare candidates.'
     : !editable ? 'This shift is closed. Its recorded comparison evidence stays available.'
@@ -600,6 +642,51 @@ function renderCompare() {
     if (trial.missing_evidence.length) row.append(element('p', `Missing evidence: ${trial.missing_evidence.join('; ')}`, 'denial'));
     return row;
   }));
+}
+function hasUnsavedDraft() { return $('draft-source').dataset.dirty === 'true'; }
+function renderDraftEditor() {
+  const shift = state.board?.latest_shift;
+  const files = state.draft?.files;
+  const file = $('draft-file'), source = $('draft-source');
+  if (!shift || !files) {
+    for (const id of ['draft-file', 'draft-source', 'save-draft', 'discard-draft-edit']) $(id).disabled = true;
+    text('draft-note', 'No verified draft loaded. Unsaved text stays in this tab while you reconnect.');
+    return;
+  }
+  const changedShift = source.dataset.shiftId !== shift.id;
+  if (changedShift || !file.options.length) {
+    file.replaceChildren(...[...new Set([...Object.keys(files), 'checks.json', 'change_log.md'])].map(name => {
+      const option = element('option', name); option.value = name; return option;
+    }));
+    if ('service.py' in files) file.value = 'service.py';
+  }
+  if (changedShift || source.dataset.file !== file.value || !hasUnsavedDraft()) {
+    source.value = files[file.value] ?? '';
+    source.dataset.shiftId = shift.id;
+    source.dataset.file = file.value;
+    source.dataset.dirty = 'false';
+  }
+  const editable = shift.state === 'open' && !state.pending;
+  file.disabled = !editable || hasUnsavedDraft();
+  source.disabled = !editable;
+  $('save-draft').disabled = !editable || !hasUnsavedDraft();
+  $('discard-draft-edit').disabled = !editable || !hasUnsavedDraft();
+  text('draft-note', hasUnsavedDraft() ? 'Unsaved edit. Save or discard it before switching files, freezing candidates or changing shifts.'
+    : file.value in files ? 'Saved draft from this shift. Saving does not select a version or change operational history.'
+    : `${file.value} is not in this draft yet. Add content and save to create it.`);
+}
+async function saveDraft() {
+  if (state.pending || !state.board?.latest_shift || !hasUnsavedDraft()) return;
+  const shiftId = state.board.latest_shift.id;
+  const files = { ...state.draft.files, [$('draft-file').value]: $('draft-source').value };
+  state.pending = true; renderDraftEditor(); renderCompare(); renderNext();
+  text('draft-error', '');
+  try {
+    state.draft = await api(`/shifts/${encodeURIComponent(shiftId)}/artifact`, { method: 'PUT', body: JSON.stringify({ files }) });
+    $('draft-source').dataset.dirty = 'false';
+    await refresh();
+  } catch (error) { text('draft-error', error.message); }
+  finally { state.pending = false; renderDraftEditor(); renderCompare(); renderNext(); }
 }
 function renderNext() {
   const board = state.board;
@@ -694,8 +781,8 @@ function renderNext() {
     }
   }
   const open = shift?.state === 'open';
-  $('close-shift').disabled = state.pending || !shift || !open;
-  $('open-next-shift').disabled = state.pending || !shift || open;
+  $('close-shift').disabled = state.pending || !shift || !open || hasUnsavedDraft();
+  $('open-next-shift').disabled = state.pending || !shift || open || hasUnsavedDraft();
   text('next-help', !shift ? 'No shift loaded.'
     : open ? (choice ? `Closing writes the declared limits to the ledger and never selects a version. The next shift starts from ${choice.selected_version_id} and keeps ${choice.retained_alternative_version_id} in history.`
       : 'This shift has no explicit choice. Close it to open the next shift, but no version is inherited as operating.')
@@ -736,7 +823,7 @@ async function runComparison() {
     state.comparison = experiment;
     renderCompare();
     const deadline = Date.now() + 180000;
-    while (!['FINALIZED', 'FAILED'].includes(experiment.state) && Date.now() < deadline) {
+    while (!['FINALIZED', 'FAILED', 'INVALIDATED'].includes(experiment.state) && Date.now() < deadline) {
       await new Promise(resolve => setTimeout(resolve, 500));
       experiment = await api(`/experiments/${encodeURIComponent(experiment.id)}`);
       state.comparison = experiment;
@@ -860,14 +947,14 @@ async function runDiagnostic() {
 
 const stations = {
   service: ['Service workbench', 'YOUR WORKING ARTIFACT', 'Your version, contract and files belong to you. Independent scoring stays separate.'],
-  owner: ['Committed contract', 'OWNER DESK', 'Inspect your committed contract. Contract editing and visible-check authoring are not available in this build.'],
+  owner: ['Requirements', 'OWNER DESK', 'Inspect the operating version\'s committed requirements and frozen requirement hash. Saved candidates keep their own contracts.'],
   customers: ['Customer evidence', 'FOLLOW AN EXECUTED REQUEST', 'Select a customer. Every output, public record, check and event below belongs to that request.'],
   pipeline: ['Evidence trail', 'OUTPUT → CHECK → LEDGER', 'This path traces recorded evidence, not a prediction of success.'],
   ledger: ['Incident & ledger wall', 'RECORDED CONSEQUENCES', 'Synthetic scenario. Select an incident to inspect the output and result that opened it.'],
   repair: ['Repair review', 'REPAIR BENCH · READ ONLY', 'Inspect an actual incident below. Repair authoring and rerunning a new version are not available in this build.'],
   evaluator: ['Independent evaluator', 'LOCKED · NOT EDITABLE', 'Neither the learner nor an assistant can edit the scoring rules or see sealed expected values.'],
   investigate: ['Investigate a failure', 'REVIEW THE EXECUTED REQUEST', 'Read the exact request and output, then write your cause, falsifier and public test. A diagnostic cannot qualify a version.'],
-  compare: ['Compare two repairs', 'PAIRED CANDIDATE EXECUTION', 'Both candidates run the same frozen workloads under shared requirements and ceilings. This station shows every slot and its missing evidence; it never picks a winner.'],
+  compare: ['Compare and choose', 'PAIRED CANDIDATE EXECUTION', 'Both candidates run the same frozen workloads under shared requirements and ceilings. Experiments leave operational history unchanged. Choose an eligible exact version and record your rationale.'],
   next: ['Next shift', 'INHERITED EXACTLY, TESTED LATER', 'Close this shift and open the next one from the exact selection. Recorded operational history and a later-condition experiment are shown as two separate things: the experiment is hypothetical and never rewrites the history.'],
 };
 function bringStationPanelIntoReach() {
@@ -909,7 +996,7 @@ function activateStation(name, userIntent = true) {
   renderInvestigate();
   renderCompare();
   renderNext();
-  const view = name === 'owner' ? 'contract' : name === 'repair' ? 'repair' : ['customers', 'pipeline', 'evaluator'].includes(name) ? 'customers' : 'board';
+  const view = { owner: 'contract', investigate: 'investigate', compare: 'compare', next: 'next' }[name] ?? 'board';
   state.view = view;
   if (userIntent) history.replaceState(null, '', `#${view}`);
   document.querySelectorAll('[data-view]').forEach(link => {
@@ -924,21 +1011,8 @@ function selectFile(name) {
 }
 function navigate(view, userIntent = true) {
   if (view === 'station-panel') return;
-  if (['return', 'away'].includes(view)) {
-    if (userIntent) { state.intent += 1; history.replaceState(null, '', `#${view}`); }
-    state.view = view;
-    document.querySelectorAll('[data-station]').forEach(button => button.setAttribute('aria-pressed', 'false'));
-    text('station-context', 'This journey view is planned for Slice 11; no later shift is started here.');
-    delete document.body.dataset.evidence;
-    $('board-view').hidden = true; $('customer-view').hidden = true; $('investigate-view').hidden = true; $('deferred-view').hidden = false;
-    text('panel-title', view === 'return' ? 'Return to your work' : 'Northline workshop');
-    text('panel-kicker', 'PLANNED FOR SLICE 11');
-    text('deferred-title', 'Not part of this client slice yet.');
-    text('deferred-copy', view === 'return' ? 'The inherited-room view arrives in Slice 11. This preview does not start a later shift or disclose its customer requests.' : 'The distinct bike-cooperative workshop arrives in Slice 11. No bookshop results are presented as away-shift work.');
-    document.querySelectorAll('[data-view]').forEach(link => {
-      if (link.dataset.view === view) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
-    });
-  } else activateStation({ board: 'service', contract: 'owner', customers: 'customers', repair: 'repair' }[view] ?? 'service', userIntent);
+  activateStation({ board: 'service', contract: 'owner', investigate: 'investigate', compare: 'compare', next: 'next', return: 'next', customers: 'customers', repair: 'repair' }[view] ?? 'service', userIntent);
+  if (userIntent && state.board) $('station-panel').focus({ preventScroll: true });
 }
 async function act(action) {
   if (state.pending) return;
@@ -959,6 +1033,17 @@ $('refresh').addEventListener('click', () => refresh());
 $('append-investigation').addEventListener('click', appendInvestigation);
 $('request-assist').addEventListener('click', requestAssist);
 $('run-diagnostic').addEventListener('click', runDiagnostic);
+$('save-draft').addEventListener('click', saveDraft);
+$('draft-file').addEventListener('change', renderDraftEditor);
+$('draft-source').addEventListener('input', () => {
+  $('draft-source').dataset.dirty = String($('draft-source').value !== state.draft?.files[$('draft-file').value]);
+  renderCompare(); renderNext();
+});
+$('discard-draft-edit').addEventListener('click', () => {
+  $('draft-source').dataset.dirty = 'false';
+  text('draft-error', '');
+  renderCompare(); renderNext();
+});
 $('freeze-candidate-a').addEventListener('click', () => freezeCandidate('A'));
 $('freeze-candidate-b').addEventListener('click', () => freezeCandidate('B'));
 $('run-comparison').addEventListener('click', runComparison);
@@ -978,6 +1063,10 @@ $('select-candidate-b').addEventListener('click', () => chooseCandidate('B'));
 $('selection-rationale').addEventListener('input', () => renderCompare());
 $('back-board').addEventListener('click', () => { location.hash = 'board'; navigate('board'); });
 document.querySelectorAll('[data-station]').forEach(button => button.addEventListener('click', () => activateStation(button.dataset.station)));
+document.querySelectorAll('[data-view]').forEach(link => link.addEventListener('click', event => {
+  event.preventDefault();
+  navigate(link.dataset.view);
+}));
 document.querySelectorAll('[data-file]').forEach(button => button.addEventListener('click', () => selectFile(button.dataset.file)));
 window.addEventListener('hashchange', () => navigate(location.hash.slice(1)));
 window.addEventListener('pagehide', () => { clearTimeout(pollTimer); if (downloadUrl) URL.revokeObjectURL(downloadUrl); });
