@@ -1,5 +1,32 @@
 # Status: Shiftwork
 
+## S21 independent-review repair round: 2026-10-02
+
+The user authorized narrow fixes and regression proofs for the overlapping-refresh
+candidate race, missing transient error-DOM scans and silent dirty browser reload.
+Main and `shiftwork/slice-21` matched reviewed `5039b7b` at entry, with only the
+pre-existing orchestration incident unstaged in `MISTAKES.md`. Work is on the
+existing slice branch. Offline closeout complete, 2026-10-03 Asia/Singapore:
+the repairs and targeted failing-capability proofs are implemented. The combined
+audit verifies seven clean baselines, all 40 intended raw fault assertions with
+unique anchors, matching clean/injected scanner controls, exact journey IDs and
+matching final source digests. Stable-source offline tests passed 644 with one
+existing skip and two warnings; named API checks passed 24. Final diff, scope,
+new-document and preview checks pass. All 1,337 pre-existing files outside the six
+edited paths, the original MISTAKES prefix and 1,409 pinned repair artifacts retain
+their bytes. Historical document bodies and CRLF remain intact. Preview ports
+18821/18822 are free; 8143 was untouched and no listener was observed there.
+The invalidatedPolling server log contains one Windows socket callback reset;
+the intended browser assertion was reached, while timing/cause remain unproven.
+See `evidence/slice21-review-fixes-2026-10-02.md` for receipts and historical claim
+corrections. Reload protection warns after native activation; it does not persist
+unsaved edits. At closeout, HEAD and main were
+`5039b7b225b23a6d2cde526d09d474936dfbdcf2` and the repairs were uncommitted.
+The user separately authorized focused commits and push to main on 2026-10-03,
+with no co-author footer. Publication uses the recorded offline evidence only.
+Installation, live calls, credentials, fixture/seal changes and S22a remain outside
+that authorization. Closeout is complete; the authorized publication proceeds.
+
 ## S21 publication and main integration: 2026-10-02
 
 The user directed publishing the branch and merging/pushing main. Seven focused

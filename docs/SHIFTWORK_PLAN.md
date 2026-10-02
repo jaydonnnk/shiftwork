@@ -1,6 +1,28 @@
 # Shiftwork: working brief and adjudication register
 
-Updated: 2026-10-02.
+Updated: 2026-10-03.
+
+**Current S21 repair round, 2026-10-02:** the independent review of
+`926d269..5039b7b` found an overlapping-refresh candidate reset defect, transient
+error-DOM scan coverage gap and silent loss of unsaved text on browser reload.
+The user authorized narrowly scoped fixes and failing-capable proofs on the
+existing `shiftwork/slice-21`, which matched main at `5039b7b` at entry. Targeted
+proofs pass. Offline closeout complete, 2026-10-03 Asia/Singapore: the combined
+audit verified seven baselines, 40 intended raw fault assertions with unique
+anchors, scanner controls, exact journey IDs and matching final source digests.
+The stable-source suite passed 644 tests with one existing skip and two warnings;
+the named API checks passed 24. All 1,337 pre-existing files outside the six edited
+paths and all 1,409 repair artifacts pinned at closeout entry retain their bytes.
+Final diff, new-document, scope and preview-port checks pass; 18821/18822 are free.
+One invalidatedPolling preview log contains a Windows socket callback reset;
+its browser receipt reaches the intended assertion, and timing/cause remain unproven.
+Reload protection warns after native activation and supplies no draft persistence.
+The user authorized focused commits and publication to main on 2026-10-03.
+Shipment uses the verified offline evidence and retains the stated limits.
+The historical publication and receipt claims below retain their original scope;
+current corrections and new evidence are in
+`plans/shiftwork/evidence/slice21-review-fixes-2026-10-02.md`. Publication authority adds no install, credential, live call, fixture/seal edit
+or S22a work.
 
 **Current slice state, 2026-10-02:** S17, S18 and S19 are accepted and
 published; S20's offline foundation is published. Its optional linked live chain

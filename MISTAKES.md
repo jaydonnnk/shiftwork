@@ -1577,3 +1577,43 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **What happened:** the journey reached a genuinely finalized operation but verified the customer panel while its asynchronous capture refresh was still loading, finding zero buttons for one API output.
 - **Root cause:** the wait required the run ID in the UI, which was already present during QUEUED or RUNNING. It did not require the exact FINALIZED UI state or loaded captures.
 - **Prevention rule:** wait for the API run to finalize and the public client to show that exact finalized run with ready captures before checking request identity. A server completion is not rendered completion.
+
+## 2026-10-02 S21 independent review: candidate ownership depended on a cleared board
+
+- **What happened:** overlapping refreshes across a shift transition retained the old frozen candidate; the reviewed client failed the new 400 ms board-GET regression. The repair now retains the successfully loaded shift identity independently of temporary loading/error clears.
+- **Root cause:** the newer refresh captured an undefined shift ID after clearData nulled state.board, bypassing the truthy reset guard.
+- **Prevention rule:** keep candidate ownership outside disposable projections; prove same-shift refresh, reconnect, sequential and overlapping transitions, and compared-candidate restoration separately.
+
+## 2026-10-02 S21 independent review: transient serialized error DOM was never scanned
+
+- **What happened:** a served-source provider sentinel appeared only during refresh error and survived the old harness because recovery erased it before the final scan. This was a coverage defect, not an observed production secret leak.
+- **Root cause:** scanner needle controls were mistaken for coverage of every exercised lifecycle surface.
+- **Prevention rule:** capture and scan exercised transient surfaces before recovery; pair each permanent mutation with a clean baseline and require the named serialized-surface failure, retaining raw output and exits.
+
+## 2026-10-02 S21 independent review: page reload silently discarded dirty editor text
+
+- **What happened:** browser reload replaced an unsaved edit with saved server text. The repair now requests a dirty-only unload warning; native Chrome activation proves the actual dialog and cancellation behavior.
+- **Root cause:** the in-tab dirty guard did not cover page departure, and in-app Refresh preservation was broader in prose than its proven boundary.
+- **Prevention rule:** distinguish in-app refresh, browser reload and persistence. Prove a real activated-browser dialog and warning removal after clean reload, save and discard; do not claim persistence for warning-only protection.
+
+## 2026-10-02 S21 repair inspection: reset followed the winning comparison assignment
+
+- **What happened:** the first ownership repair still cleared state.comparison after assigning the newly resolved current comparison. Static inspection caught that ordering defect before the final matrix; the redundant comparison clear was removed while keeping candidate reset.
+- **Root cause:** the old reset block was carried over after moving comparison resolution ahead of state application.
+- **Prevention rule:** apply a winning refresh as one coherent projection; reset only the old local assignments and retain a comparison resolved for the current shift.
+
+
+## 2026-10-03 S21 closeout helper misclassified a new-file diff exit
+
+- **What happened:** the closeout preflight stopped on the untracked evidence document because its Git no-index whitespace check returned 1 with no whitespace diagnostics. The raw command and failed preflight receipts remain preserved.
+- **Root cause:** the helper assumed a no-index difference must return 0 when whitespace is clean. Git returned the ordinary difference exit instead.
+- **Prevention rule:** inspect no-index diagnostics as well as the status: accept 0 or 1 only with no whitespace output and no unexpected stderr; reject actual check diagnostics. Keep new-document checks separate from the tracked working-tree diff.
+
+
+## 2026-10-03 S21 publication helper parsed raw transcript content as a Git diagnostic
+
+- **What happened:** the receipt whitespace helper treated a plus-prefixed source-location warning inside the preserved transcript as an out-of-scope Git diagnostic. The evidence commit then ran before that helper completed; no push followed. The raw diagnostic file is preserved and the committed receipt bytes are checked before further publication.
+- **Root cause:** a loose colon-and-line-number match included added-content lines, and the tool orchestration did not stop dependent commands on a nonzero helper exit.
+- **Prevention rule:** parse only Git diagnostic header lines, excluding plus-prefixed transcript content. Inspect every exit status and stop before any dependent commit or push when a verification command fails; verify already-created commits explicitly before continuing.
+
+- **Count-check follow-up:** the next helper asserted five receipt files although the five-file commit includes `.gitattributes` outside the four-file receipt package. Derive expected path sets explicitly instead of copying a total commit count into a scoped check.
