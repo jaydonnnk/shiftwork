@@ -2,6 +2,8 @@ import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { once } from 'node:events';
+import { mkdir, writeFile, readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 
 // Failing-capability proof for the rendered-evidence harness. Every row serves a
 // mutated in-memory copy of the production app.js to the browser and requires
@@ -19,6 +21,16 @@ const root = path.resolve(here, '..', '..');
 const portIndex = process.argv.indexOf('--port');
 const port = portIndex === -1 ? 8137 : Number(process.argv[portIndex + 1]);
 const python = path.join(root, '.venv313', 'Scripts', 'python.exe');
+const artifactIndex = process.argv.indexOf('--artifact-dir');
+const artifactRoot = path.resolve(root, artifactIndex === -1 ? 'artifacts/slice21-checks' : process.argv[artifactIndex + 1]);
+await mkdir(path.dirname(artifactRoot), { recursive: true });
+// Refuse reused output roots BEFORE starting any preview or browser.
+await mkdir(artifactRoot);
+const onlyIndex = process.argv.indexOf('--only');
+const only = onlyIndex === -1 ? null : process.argv[onlyIndex + 1].split(',');
+const sourceDigests = {};
+for (const file of ['shiftwork/client/app.js', 'tests/client/browser.mjs', 'tests/client/render_faults.mjs']) sourceDigests[file] = createHash('sha256').update(await readFile(path.join(root, file))).digest('hex');
+await writeFile(path.join(artifactRoot, 'sources.json'), JSON.stringify(sourceDigests, null, 2), { flag: 'wx' });
 
 // The preview prints its banner before uvicorn binds, so the banner is not
 // proof the port answers: a foreign process holding the port leaves every row
@@ -69,6 +81,9 @@ with tempfile.TemporaryDirectory(prefix='shiftwork-blocked-browser-') as directo
   const args = previewArgs.includes('--blocked-preview') ? ['-c', blockedSource]
     : ['-m', 'demos.client', '--port', String(port), ...previewArgs];
   const preview = spawn(python, args, { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+  const stdout = [], stderr = [];
+  preview.stdout.on('data', data => stdout.push(data));
+  preview.stderr.on('data', data => stderr.push(data));
   let previewLog = '';
   const started = new Promise((resolve, reject) => {
     // The inherit preview builds the Slice 20 world through the offline
@@ -81,7 +96,7 @@ with tempfile.TemporaryDirectory(prefix='shiftwork-blocked-browser-') as directo
     preview.stderr.on('data', data => { previewLog += data; });
     preview.once('exit', code => { clearTimeout(timeout); reject(new Error(`Preview exited ${code}:\n${previewLog}`)); });
   });
-  return { preview, started };
+  return { preview, started, stdout, stderr };
 }
 
 async function stopPreview(preview) {
@@ -90,17 +105,26 @@ async function stopPreview(preview) {
   if (preview.exitCode === null) preview.kill();
 }
 
-function harness(fault, args = []) {
+function harness(fault, args = [], key) {
   return new Promise(resolve => {
     const child = spawn(process.execPath, ['tests/client/browser.mjs', `http://127.0.0.1:${port}`, ...args], {
       cwd: root,
-      env: { ...process.env, SHIFTWORK_ARTIFACT_DIR: `artifacts/slice21-checks/${fault ?? (args.includes('--inherit-demo') ? 'baseline-inherit' : args.includes('--journey-demo') ? 'baseline-journey' : args.includes('--blocked-demo') ? 'baseline-blocked' : 'baseline-compare')}`, ...(fault ? { SHIFTWORK_FAULT: fault } : {}) },
+      env: { ...process.env, SHIFTWORK_ARTIFACT_DIR: path.join(artifactRoot, key), SHIFTWORK_FAULT: fault ?? '' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
-    let out = '', err = '';
-    child.stdout.on('data', data => { out += data; });
-    child.stderr.on('data', data => { err += data; });
-    child.once('exit', code => resolve({ code, out, err }));
+    const stdout = [], stderr = [];
+    child.stdout.on('data', data => stdout.push(data));
+    child.stderr.on('data', data => stderr.push(data));
+    child.once('exit', async code => {
+      const outBytes = Buffer.concat(stdout), errBytes = Buffer.concat(stderr);
+      const out = outBytes.toString('utf8'), err = errBytes.toString('utf8');
+      const directory = path.join(artifactRoot, key);
+      await mkdir(directory, { recursive: true });
+      await writeFile(path.join(directory, 'stdout.txt'), outBytes, { flag: 'wx' });
+      await writeFile(path.join(directory, 'stderr.txt'), errBytes, { flag: 'wx' });
+      await writeFile(path.join(directory, 'exit.json'), JSON.stringify({ code, args, fault }, null, 2), { flag: 'wx' });
+      resolve({ code, out, err });
+    });
   });
 }
 
@@ -112,6 +136,9 @@ const FAULT_ARGS = { candidateFreeze: ['--compare-demo'], slotOrdinalText: ['--c
 // staged-outage world; the baseline pair mirrors the two worlds.
 const PREVIEW_ARGS = { inheritRationale: ['--inherit'], inheritAlternative: ['--inherit'], inheritRequirementHash: ['--inherit'], inheritObservedRun: ['--inherit'], inheritSeparation: ['--inherit'] };
 const BASELINE_ROWS = [
+  { label: 'baseline (transient surfaces)', key: 'baseline-transient', args: [], preview: [] },
+  { label: 'baseline (reload warning)', key: 'baseline-reload', args: ['--reload-warning-demo'], preview: [] },
+  { label: 'baseline (candidate race)', key: 'baseline-race', args: ['--selection-demo', '--journey-demo', '--candidate-race-demo'], preview: [] },
   { label: 'baseline (no fault)', args: ['--compare-demo'], preview: [] },
   { label: 'baseline (invalidated exposure)', args: ['--compare-demo', '--blocked-demo'], preview: ['--blocked-preview'] },
   { label: 'baseline (selected journey)', args: ['--compare-demo', '--selection-demo', '--journey-demo'], preview: [] },
@@ -128,21 +155,26 @@ for (const name of ['selectedVersion', 'requirementVersion']) FAULT_ARGS[name] =
 FAULTS.push('draftSave', 'unsavedFreeze', 'candidateReload', 'candidateReset');
 for (const name of ['draftSave', 'unsavedFreeze', 'candidateReload']) FAULT_ARGS[name] = ['--compare-demo'];
 FAULT_ARGS.candidateReset = ['--selection-demo', '--journey-demo'];
+FAULTS.push('transientErrorLeak', 'candidateRace', 'unloadWarning');
+FAULT_ARGS.candidateRace = ['--selection-demo', '--journey-demo', '--candidate-race-demo'];
+FAULT_ARGS.unloadWarning = ['--reload-warning-demo'];
 const results = [];
 let failures = 0;
-console.log(`Running ${BASELINE_ROWS.length} baselines then ${FAULTS.length} fault rows, each against its own preview on port ${port}.`);
-const rows = [
-  ...BASELINE_ROWS.map(baseline => ({ ...baseline, fault: null })),
+const allRows = [
+  ...BASELINE_ROWS.map(baseline => ({ ...baseline, key: baseline.key ?? (baseline.args.includes('--inherit-demo') ? 'baseline-inherit' : baseline.args.includes('--journey-demo') ? 'baseline-journey' : baseline.args.includes('--blocked-demo') ? 'baseline-blocked' : 'baseline-compare'), fault: null })),
   ...FAULTS.map(name => ({ label: `fault: ${name}`, fault: name,
-                           args: FAULT_ARGS[name] ?? [], preview: PREVIEW_ARGS[name] ?? [] })),
+                           key: name, args: FAULT_ARGS[name] ?? [], preview: PREVIEW_ARGS[name] ?? [] })),
 ];
+if (only) for (const key of only) if (!allRows.some(row => row.key === key)) throw new Error(`Unknown row: ${key}`);
+const rows = only ? allRows.filter(row => only.includes(row.key)) : allRows;
+console.log(`Running ${rows.filter(row => !row.fault).length} baselines then ${rows.filter(row => row.fault).length} fault rows, each against its own preview on port ${port}.`);
 for (const row of rows) {
   const { label, fault } = row;
-  const { preview, started } = startPreview(row.preview);
+  const { preview, started, stdout, stderr } = startPreview(row.preview);
   try {
     await started;
     await waitReachable();
-    const run = await harness(fault, row.args);
+    const run = await harness(fault, row.args, row.key);
     if (fault === null) {
       if (run.code === 0) {
         results.push(`${label.padEnd(34)} PASS   harness green against the unmutated client`);
@@ -164,8 +196,14 @@ for (const row of rows) {
     results.push(`${label.padEnd(36)} PREVIEW FAILED ${error.message}`);
   } finally {
     await stopPreview(preview);
+    const directory = path.join(artifactRoot, row.key);
+    await mkdir(directory, { recursive: true });
+    await writeFile(path.join(directory, 'preview-stdout.txt'), Buffer.concat(stdout), { flag: 'wx' });
+    await writeFile(path.join(directory, 'preview-stderr.txt'), Buffer.concat(stderr), { flag: 'wx' });
+    await writeFile(path.join(directory, 'preview-exit.json'), JSON.stringify({ code: preview.exitCode, signal: preview.signalCode }, null, 2), { flag: 'wx' });
   }
   console.log(results.at(-1));
 }
 console.log(`render-fault rows: ${results.length - failures} of ${results.length} as expected`);
-process.exitCode = failures === 0 && results.length === FAULTS.length + BASELINE_ROWS.length ? 0 : 1;
+await writeFile(path.join(artifactRoot, 'results.json'), JSON.stringify({ results, failures }, null, 2), { flag: 'wx' });
+process.exitCode = failures === 0 && results.length === rows.length ? 0 : 1;
