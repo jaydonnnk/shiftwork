@@ -10,6 +10,24 @@ import { once } from 'node:events';
 // run to fail at the named rendered-evidence assertion. The repository file is
 // never modified. Each needle must match exactly one production behavior.
 const FAULTS = {
+  invalidatedPolling: { needle: "while (!['FINALIZED', 'FAILED', 'INVALIDATED'].includes(experiment.state) && Date.now() < deadline)", replacement: "while (!['FINALIZED', 'FAILED'].includes(experiment.state) && Date.now() < deadline)", expect: 'Timed out waiting for terminal comparison to release the draft editor' },
+  draftSave: { needle: "[$('draft-file').value]: $('draft-source').value", replacement: "[$('draft-file').value]: $('draft-source').value + '\\n# wrong saved bytes'", expect: 'Draft editor saved different bytes' },
+  unsavedFreeze: { needle: "function hasUnsavedDraft() { return $('draft-source').dataset.dirty === 'true'; }", replacement: 'function hasUnsavedDraft() { return false; }', expect: 'Unsaved draft can freeze a candidate' },
+  candidateReload: { needle: 'state.candidates[candidate.label] ??= { id: candidate.artifact_version_id, content_hash: candidate.artifact_content_hash };', replacement: 'void candidate;', expect: 'Reload lost an API-backed frozen candidate' },
+  candidateReset: { needle: 'state.candidates = { A: null, B: null };', replacement: 'void state.candidates;', expect: 'Next shift presents the previous comparison as current' },
+  clientLeak: { needle: "document.body.dataset.loadState = board.latest_shift ? 'ready' : 'empty';", replacement: "document.body.dataset.loadState = board.latest_shift ? 'ready' : 'empty'; document.body.dataset.privateMaterial = 'S21_TEST_PROVIDER_SECRET';", expect: 'Client DOM contains private material' },
+  executionPurpose: { needle: "['purpose', 'Execution purpose', humanize(run.purpose)]", replacement: "['purpose', 'Execution purpose', 'experiment']", expect: 'Execution purpose differs from the run API' },
+  executionMode: { needle: "['mode', 'Evidence mode', run.evidence_mode ?? 'unknown']", replacement: "['mode', 'Evidence mode', 'ISOLATED_LIVE']", expect: 'Execution mode differs from the run API' },
+  executionVersion: { needle: "['version', 'Executed version', run.artifact_version_id]", replacement: "['version', 'Executed version', 'ver-wrong']", expect: 'Execution version differs from the run API' },
+  executionSnapshot: { needle: "['snapshot', 'Frozen public snapshot', output.public_shop_snapshot_hash ?? 'unknown']", replacement: "['snapshot', 'Frozen public snapshot', 'wrong-snapshot']", expect: 'Execution snapshot differs from the run API' },
+  comparisonPurpose: { needle: "['purpose', 'Purpose', humanize(compare.kind)]", replacement: "['purpose', 'Purpose', 'operation']", expect: 'Comparison purpose differs from the experiment API' },
+  comparisonMode: { needle: "['mode', 'Evidence mode', compare.context_evidence_class]", replacement: "['mode', 'Evidence mode', 'ISOLATED_LIVE']", expect: 'Comparison mode differs from the experiment API' },
+  comparisonContext: { needle: "['context', 'Frozen context', compare.context_hash]", replacement: "['context', 'Frozen context', 'wrong-context']", expect: 'Comparison context differs from the experiment API' },
+  comparisonHistory: { needle: "['history', 'Operational history', 'Unchanged by experiments']", replacement: "['history', 'Operational history', 'changed']", expect: 'Comparison hides unchanged operational history' },
+  outcomeBlocker: { needle: "eligibility.blocking_reason_codes.join(', ')", replacement: "'WRONG_BLOCKER'", expect: 'renders the wrong blocking reasons' },
+  selectedVersion: { needle: "`${choice.selected_version_id} · ${choice.selected_content_hash} · ${humanize(choice.state)}`", replacement: "`wrong-version · ${choice.selected_content_hash} · ${humanize(choice.state)}`", expect: 'Workbench selected version differs from the board API' },
+  requirementVersion: { needle: 'const version = state.operatingVersion ?? state.board.latest_version;', replacement: 'const version = state.board.latest_version;', expect: 'Requirements differ from the exact operating version' },
+  syntheticEvent: { needle: "ledger.append(element('span', 'Synthetic scenario', 'synthetic'))", replacement: "ledger.append(element('span', 'unlabelled', 'synthetic'))", expect: 'Missing rendered label: event' },
   answer: {
     needle: "output.customer_answer?.display_text ?? 'No validated customer answer. Inspect the captured bytes below.'",
     replacement: "'REVIEW_WRONG_CUSTOMER_ANSWER'",
@@ -119,7 +137,7 @@ if (fault) {
 }
 const browser = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const profile = await mkdtemp(path.join(tmpdir(), 'shiftwork-browser-'));
-const artifacts = path.resolve(fault ? `artifacts/slice9-faults/${fault}` : 'artifacts/slice9');
+const artifacts = path.resolve(process.env.SHIFTWORK_ARTIFACT_DIR ?? (fault ? `artifacts/slice21-faults/${fault}` : 'artifacts/slice21'));
 await mkdir(artifacts, { recursive: true });
 const child = spawn(browser, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
 const endpoint = await new Promise((resolve, reject) => {
@@ -170,6 +188,7 @@ async function ready(expected = 'ready') {
   }, expected);
 }
 async function screenshot(name) {
+  if (fault) return;
   const { data } = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true });
   await writeFile(path.join(artifacts, `${name}.png`), Buffer.from(data, 'base64'));
 }
@@ -196,6 +215,31 @@ async function labels() {
   });
 }
 
+async function assertPublicDOM() {
+  const surface = await evaluate(() => ({ rendered_text: document.body.innerText, serialized_dom: document.body.outerHTML }));
+  const script = `import json,sys
+sys.path.insert(0,'tests')
+from leakscan import sealed_identity_strings
+from shiftwork.gateway.redaction import serialized_contains
+needles=(*sealed_identity_strings(),'S21_TEST_PROVIDER_SECRET','S21_TEST_SANDBOX_SECRET')
+controls=all(serialized_contains({'client_text':form},needle) for needle in needles for form in (needle,needle.replace('\\\\','/'),json.dumps(needle)[1:-1]))
+surface=json.load(sys.stdin)
+print(json.dumps({'needles':len(needles),'controls':controls,'clean':not any(serialized_contains(surface,needle) for needle in needles)}))`;
+  const scanned = await new Promise((resolve, reject) => {
+    const scan = spawn(path.resolve('.venv313/Scripts/python.exe'), ['-c', script], { stdio: ['pipe', 'pipe', 'pipe'] });
+    let out = '', err = '';
+    const timeout = setTimeout(() => { scan.kill(); reject(new Error('DOM scanner timed out')); }, 30000);
+    scan.stdout.on('data', data => { out += data; });
+    scan.stderr.on('data', data => { err += data; });
+    scan.once('error', error => { clearTimeout(timeout); reject(error); });
+    scan.once('exit', code => { clearTimeout(timeout); if (code !== 0) reject(new Error(`DOM scanner failed: ${err}`)); else { try { resolve(JSON.parse(out)); } catch (error) { reject(error); } } });
+    scan.stdin.end(JSON.stringify(surface));
+  });
+  assert.ok(scanned.controls, 'DOM scanner controls did not detect every serialized needle form');
+  assert.ok(scanned.clean, 'Client DOM contains private material');
+  return scanned.needles;
+}
+
 // Page-side verification: the customer station's rendered evidence must equal the
 // API payload for the run's exact captures. This runs inside the browser through
 // evaluate(), so the matrix rows and the failing incident run share one body.
@@ -208,6 +252,11 @@ async function verifyRenderedCustomerEvidence(runId, minimumOutputs) {
     buttons.find(button => button.dataset.outputId === output.id).click();
     const panel = document.getElementById('selected-evidence');
     const verify = () => {
+      for (const [field, value] of Object.entries({ purpose: humanize(run.purpose), mode: run.evidence_mode ?? 'unknown', version: run.artifact_version_id, snapshot: output.public_shop_snapshot_hash ?? 'unknown' })) {
+        if (panel.querySelector(`[data-execution-field="${field}"] strong`)?.textContent !== value) throw new Error(`Execution ${field} differs from the run API`);
+      }
+      const workbench = document.querySelector('[data-selection-field="executed-version"] strong');
+      if (workbench?.textContent !== `${run.artifact_version_id} · ${run.id}`) throw new Error('Workbench execution differs from the run API');
       if (panel.dataset.runId !== output.run_id || Number(panel.dataset.requestOrdinal) !== output.request_ordinal) throw new Error('Customer identity mismatch');
       if (panel.querySelector('.request-quote').textContent !== output.request_text) throw new Error('Wrong request text');
       if (panel.querySelector('[data-body-base64]').dataset.bodyBase64 !== output.body_base64) throw new Error('Body byte mismatch');
@@ -225,7 +274,12 @@ async function verifyRenderedCustomerEvidence(runId, minimumOutputs) {
         const expectedValue = `${humanize(record.kind)}: ${value}`;
         if (recordStep.querySelector('.public-value')?.textContent !== expectedValue) throw new Error(`Rendered public record value does not match: ${recordStep.querySelector('.public-value')?.textContent}`);
         if (!recordStep.textContent.includes(`Record age ${record.record_age_ms} ms`)) throw new Error('Rendered public record age does not match');
-      } else if (!recordStep.textContent.includes('No public comparison record')) throw new Error('Rendered no-record state is missing');
+      } else {
+        const expected = run.purpose === 'LEGACY_OPERATION' ? 'Historical public context unknown.'
+          : checks.some(check => check.run_id === run.id && check.public_check_id?.startsWith('task:'))
+            ? 'Task checks use the frozen public state' : 'No public comparison record';
+        if (!recordStep.textContent.includes(expected)) throw new Error('Rendered no-record state is missing');
+      }
       const linked = checks.filter(c => c.run_id === output.run_id && c.observed_ref === output.id);
       const ids = new Set(linked.map(c => c.id));
       const events = ledger.events.filter(e => e.derivation?.run_id === output.run_id && e.derivation?.request_ordinal === output.request_ordinal && ids.has(e.derivation.check_id));
@@ -255,6 +309,20 @@ async function verifyRenderedCustomerEvidence(runId, minimumOutputs) {
   return { outputs: outputs.length, run: run.id };
 }
 
+async function verifyRenderedRequirements() {
+  const board = await (await fetch('/api/engagements/bookshop/board')).json();
+  const id = board.operating_selection?.selected_version_id ?? board.latest_version?.id;
+  if (!id) return;
+  const version = await (await fetch(`/api/artifact-versions/${encodeURIComponent(id)}`)).json();
+  const field = name => document.querySelector(`[data-requirement-field="${name}"] strong`)?.textContent;
+  const humanize = value => value.toLowerCase().replaceAll('_', ' ');
+  if (field('requirement-version') !== `${version.id} · ${version.content_hash}`) throw new Error('Requirements differ from the exact operating version');
+  if (field('committed-constraint') !== version.contract.must_never.map(humanize).join(', ')) throw new Error('Requirements hide a committed constraint');
+  if (field(board.operating_selection ? 'operating-stance' : 'latest-saved-stance') !== Object.values(version.contract.selections).map(humanize).join(', ')) throw new Error('Requirements show the wrong stance');
+  if (field('response-time-limit') !== `${version.contract.response_time_limit_ms} ms`) throw new Error('Requirements show the wrong response limit');
+  if (field('frozen-requirement-hash') !== (board.inherited_requirements?.requirement_set_hash ?? 'No qualifying comparison selected yet')) throw new Error('Requirements show the wrong frozen hash');
+}
+
 let faultOutcome = null;
 try {
   const { targetId } = await send('Target.createTarget', { url: 'about:blank' }, false);
@@ -280,41 +348,99 @@ try {
   await send('Page.navigate', { url });
   try { await ready(); }
   catch (error) { throw new Error(`${error.message}; page exceptions: ${exceptions.map(item => item.exception?.description ?? item.text).join(' | ')}`); }
+  const publicDOMNeedles = await assertPublicDOM();
   assert.equal(await evaluate(() => document.querySelectorAll('[data-station]').length), 10);
   const matrix = [];
-  for (const width of [1280, 640, 390]) {
+  for (const width of [1280, 778, 640, 390]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
     await evaluate(() => { document.querySelector('[data-station="service"]').click(); window.scrollTo(0, 0); });
     const boardLabels = await labels();
     assert.deepEqual(boardLabels, ['board', 'incidents', 'ledger']);
-    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${width}px page overflows`);
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, `${width}px page overflows`);
     await screenshot(`board-${width}`);
     await evaluate(() => document.querySelector('[data-station="customers"]').click());
     const latestRunId = await evaluate(async () => (await (await fetch('/api/engagements/bookshop/board')).json()).latest_run.id);
     const result = await evaluate(verifyRenderedCustomerEvidence, latestRunId, 2);
     const customerLabels = await labels();
     assert.deepEqual(customerLabels, ['board', 'run', 'event']);
-    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${width}px evidence overflows`);
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, `${width}px evidence overflows`);
     await screenshot(`customers-${width}`);
     matrix.push({ width, ...result, labels: [...boardLabels, ...customerLabels] });
   }
   await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+  const journey = [];
+  // Full native mechanics run in every baseline. A value fault reuses that
+  // proven harness and runs its own value assertions without repeated captures.
+  if (!fault || fault === 'stationFocus') {
+  await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
+  await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+  for (const width of [1280, 778, 640, 390]) {
+    await send('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: false });
+    for (const input of ['keyboard', 'touch']) for (const [view, station, panelId] of [
+      ['board', 'service', 'board-view'], ['contract', 'owner', 'board-view'],
+      ['investigate', 'investigate', 'investigate-view'], ['compare', 'compare', 'compare-view'],
+      ['next', 'next', 'next-view'],
+    ]) {
+      const point = await evaluate(view => {
+        const link = document.querySelector(`[data-view="${view}"]`);
+        if (!link) throw new Error(`Missing journey link ${view}`);
+        link.scrollIntoView({ block: 'center', behavior: 'instant' });
+        link.focus({ preventScroll: true });
+        const rect = link.getBoundingClientRect();
+        return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      }, view);
+      if (input === 'keyboard') {
+        await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
+        await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+      } else {
+        await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
+        await send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+      }
+      await evaluate(async (view, station, panelId, width) => {
+        const panel = document.getElementById('station-panel');
+        const deadline = Date.now() + 5000;
+        while (Date.now() < deadline && (location.hash !== `#${view}` || document.activeElement !== panel)) await new Promise(resolve => setTimeout(resolve, 20));
+        if (location.hash !== `#${view}` || document.querySelector('[data-view][aria-current]')?.dataset.view !== view) throw new Error(`Journey ${view} loses its URL or active link`);
+        if (document.querySelector('[data-station][aria-pressed="true"]')?.dataset.station !== station || document.getElementById(panelId).hidden) throw new Error(`Journey ${view} opens the wrong station`);
+        if (document.activeElement !== panel) throw new Error(`Journey ${view} does not focus its panel`);
+        if (width <= 760 && (panel.getBoundingClientRect().top < -2 || panel.getBoundingClientRect().top > innerHeight - 100)) throw new Error('Narrow station selection does not bring the panel into reach');
+        if (document.documentElement.scrollWidth > document.documentElement.clientWidth) throw new Error(`Journey ${view} overflows at ${width}px`);
+        if (getComputedStyle(panel).scrollBehavior !== 'auto' || !matchMedia('(prefers-reduced-motion: reduce)').matches) throw new Error('Journey ignores reduced motion');
+      }, view, station, panelId, width);
+      if (view === 'contract') await evaluate(verifyRenderedRequirements);
+      if (input === 'touch') await screenshot(`journey-${view}-${width}`);
+      journey.push({ width, input, view });
+    }
+  }
+  await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+  for (const view of ['board', 'contract', 'investigate', 'compare', 'next']) {
+    await send('Page.navigate', { url: `${url}/#${view}` });
+    await ready();
+    await evaluate(() => document.getElementById('refresh').click());
+    await ready();
+    assert.equal(await evaluate(() => document.querySelector('[data-view][aria-current]')?.dataset.view), view, `Deep link/refresh loses ${view}`);
+  }
+  await evaluate(() => { document.querySelector('[data-view="board"]').focus(); });
+  await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9 });
+  assert.equal(await evaluate(() => document.activeElement?.dataset.view), 'contract', 'Journey Tab order skips Requirements');
+  }
   const navigationErrors = await evaluate(async () => {
     const errors = [];
     const tick = () => new Promise(resolve => setTimeout(resolve, 20));
-    document.querySelector('[data-view="customers"]').click(); await tick();
+    document.querySelector('[data-station="customers"]').click(); await tick();
     document.querySelector('[data-station="service"]').click();
-    document.querySelector('[data-view="customers"]').click(); await tick();
+    document.querySelector('[data-station="customers"]').click(); await tick();
     if (document.getElementById('customer-view').hidden) errors.push('journey link does not reopen after station navigation');
     document.querySelector('[data-station="customers"]').click();
     document.querySelector('.skip-link').click(); await tick();
     if (document.getElementById('customer-view').hidden) errors.push('skip link changes selected view');
     return errors;
   });
-  await evaluate(async () => { document.querySelector('[data-view="away"]').click(); await new Promise(resolve => setTimeout(resolve, 20)); document.getElementById('refresh').click(); });
+  await evaluate(async () => { document.querySelector('[data-view="next"]').click(); await new Promise(resolve => setTimeout(resolve, 20)); document.getElementById('refresh').click(); });
   await ready();
-  if (!(await evaluate(() => !document.getElementById('deferred-view').hidden && document.getElementById('panel-title').textContent === 'Northline workshop'))) navigationErrors.push('refresh loses away placeholder');
+  if (!(await evaluate(() => !document.getElementById('next-view').hidden && document.getElementById('panel-title').textContent === 'Next shift'))) navigationErrors.push('refresh loses Next shift');
   await evaluate(() => document.querySelector('[data-station="customers"]').click());
   await evaluate(() => document.querySelectorAll('.customer-button')[1].focus());
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r', unmodifiedText: '\r' });
@@ -549,7 +675,7 @@ try {
   }, process.argv.includes('--assist-demo'));
   const investigateLabels = await labels();
   assert.deepEqual(investigateLabels, ['board', 'source', 'diagnostic']);
-  for (const journey of ['return', 'away']) {
+  for (const journey of ['compare', 'next']) {
     await evaluate(journey => document.querySelector(`[data-view="${journey}"]`).click(), journey);
     assert.equal(await evaluate(() => document.getElementById('investigate-view').hidden), true,
       `${journey} must hide the live Investigate form and diagnostic result`);
@@ -557,14 +683,14 @@ try {
     assert.equal(await evaluate(() => document.getElementById('investigate-view').hidden), false,
       'Investigate must reopen after a journey placeholder');
   }
-  assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '1280px investigate panel overflows');
+  assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, '1280px investigate panel overflows');
   await screenshot('investigate-1280');
   if (process.argv.includes('--assist-demo')) {
     await evaluate(() => document.getElementById('assist-events').scrollIntoView({ block: 'center' }));
     await screenshot('assist-1280');
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 900, deviceScaleFactor: 1, mobile: false });
     await evaluate(() => document.getElementById('assist-events').scrollIntoView({ block: 'center' }));
-    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '390px assist panel overflows');
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, '390px assist panel overflows');
     await screenshot('assist-390');
     await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
   }
@@ -632,17 +758,29 @@ try {
   await screenshot('investigate-diagnostic-1280');
   await evaluate(() => document.querySelector('[data-station="service"]').click());
   const selectionDemo = process.argv.includes('--selection-demo');
-  const comparison = (process.argv.includes('--compare-demo') || selectionDemo) ? await evaluate(async (candidateA, candidateB, choose) => {
+  const comparison = (process.argv.includes('--compare-demo') || selectionDemo) ? await evaluate(async (candidateA, candidateB, choose, blocked) => {
     const humanize = value => value.toLowerCase().replaceAll('_', ' ');
     const shiftId = (await (await fetch('/api/engagements/bookshop/board')).json()).latest_shift.id;
-    const put = files => fetch(`/api/shifts/${encodeURIComponent(shiftId)}/artifact`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ files }) }).then(response => {
-      if (!response.ok) throw new Error(`Artifact save failed: ${response.status}`);
-      return response.json();
-    });
+    const historyBefore = await (await fetch('/api/engagements/bookshop/ledger')).json();
+    const incidentsBefore = (await (await fetch('/api/engagements/bookshop/board')).json()).incidents;
+    const put = async files => {
+      document.querySelector('[data-view="compare"]').click();
+      document.getElementById('draft-file').value = 'service.py';
+      document.getElementById('draft-file').dispatchEvent(new Event('change'));
+      document.getElementById('draft-source').value = files['service.py'];
+      document.getElementById('draft-source').dispatchEvent(new Event('input'));
+      if (!document.getElementById('freeze-candidate-a').disabled || !document.getElementById('freeze-candidate-b').disabled) throw new Error('Unsaved draft can freeze a candidate');
+      if (document.getElementById('save-draft').disabled) throw new Error('Draft editor does not offer to save the edit');
+      document.getElementById('save-draft').click();
+      await wait('the draft save', () => document.getElementById('draft-source').dataset.dirty === 'false' && document.getElementById('save-draft').disabled);
+      const saved = await (await fetch(`/api/shifts/${encodeURIComponent(shiftId)}/artifact`)).json();
+      if (Object.keys(saved.files).length !== Object.keys(files).length || Object.entries(files).some(([name,value]) => saved.files[name] !== value)) throw new Error('Draft editor saved different bytes');
+      return saved;
+    };
     const wait = async (label, check) => {
       const deadline = Date.now() + 60000;
       while (Date.now() < deadline) { if (check()) return; await new Promise(resolve => setTimeout(resolve, 60)); }
-      throw new Error(`Timed out waiting for ${label}`);
+      throw new Error(`Timed out waiting for ${label}: ${document.getElementById('compare-error').textContent}`);
     };
     document.querySelector('[data-station="compare"]').click();
     if (document.getElementById('compare-view').hidden) throw new Error('The Compare station does not open its own panel');
@@ -665,9 +803,14 @@ try {
     if (document.getElementById('run-comparison').disabled) throw new Error('The comparison button stays disabled after two distinct candidates, a treatment and a recorded investigation');
     document.getElementById('run-comparison').click();
     await wait('the six rendered comparison slots', () => document.querySelectorAll('#comparison-slots .comparison-slot').length === 6);
-    await wait('the comparison to reach a terminal state', () => ['FINALIZED', 'FAILED'].map(humanize).includes(document.getElementById('compare-state').textContent.split('·').pop().trim()));
+    await wait('the comparison to reach a terminal state', () => ['FINALIZED', 'FAILED', 'INVALIDATED'].map(humanize).includes(document.getElementById('compare-state').textContent.split('·').pop().trim()));
+    await wait('terminal comparison to release the draft editor', () => !document.getElementById('draft-source').disabled);
     const experimentId = document.getElementById('compare-state').textContent.match(/experiment-[^\s]+/)?.[0];
     const payload = await (await fetch(`/api/experiments/${encodeURIComponent(experimentId)}`)).json();
+    for (const [field, value] of Object.entries({ purpose: humanize(payload.kind), mode: payload.context_evidence_class, context: payload.context_hash })) {
+      if (document.querySelector(`[data-comparison-field="${field}"] strong`)?.textContent !== value) throw new Error(`Comparison ${field} differs from the experiment API`);
+    }
+    if (document.querySelector('[data-comparison-field="history"] strong')?.textContent !== 'Unchanged by experiments') throw new Error('Comparison hides unchanged operational history');
     if (payload.kind !== 'QUALIFYING_COMPARISON' || payload.trials.length !== 6) throw new Error('The Compare station payload is not a six-slot qualifying comparison');
     const rows = [...document.querySelectorAll('#comparison-slots .comparison-slot')];
     const seenVersions = new Set();
@@ -696,7 +839,8 @@ try {
     const pairs = payload.trials.reduce((acc, trial) => { (acc[trial.pair_ordinal] ??= new Set()).add(trial.workload_id); return acc; }, {});
     if (Object.values(pairs).some(workloads => workloads.size !== 1)) throw new Error('A pair does not share one frozen workload');
     if (!document.getElementById('compare-summary').textContent.includes('no winner derived here')) throw new Error('The Compare station does not state that it derives no winner');
-    if (payload.outcome?.status !== 'COMPLETE') throw new Error('The terminal comparison has no complete outcome reading');
+    if (payload.outcome?.status !== (blocked ? 'NOT_COMPARABLE' : 'COMPLETE')) throw new Error('The terminal comparison has the wrong outcome status');
+    if (blocked && !payload.outcome.eligibility.every(item => !item.eligible && item.blocking_reason_codes.length)) throw new Error('The blocked preview has no genuine API blocker');
     const cards = [...document.querySelectorAll('#comparison-outcome .comparison-outcome-card')];
     if (cards.length !== 2) throw new Error('The comparison does not show both candidate outcome cards');
     for (const label of ['A', 'B']) {
@@ -706,6 +850,8 @@ try {
       if (!card) throw new Error(`The comparison renders no outcome card bound to candidate ${label}`);
       if (!metrics || !eligibility) throw new Error(`The outcome payload carries no candidate_label binding for ${label}`);
       if (card.dataset.eligible !== String(eligibility.eligible)) throw new Error(`Candidate ${label} renders the wrong eligibility`);
+      const expectedHeading = `Candidate ${label} · ${eligibility.eligible ? 'eligible' : 'blocked'}${eligibility.blocking_reason_codes.length ? ` · ${eligibility.blocking_reason_codes.join(', ')}` : ''}`;
+      if (card.querySelector('h4')?.textContent !== expectedHeading) throw new Error(`Candidate ${label} renders the wrong blocking reasons`);
       for (const [key, value] of Object.entries(metrics)) {
         if (key === 'candidate_version_id' || key === 'candidate_label') continue;
         const rendered = card.querySelector(`[data-metric="${key}"]`)?.textContent;
@@ -720,27 +866,32 @@ try {
       document.getElementById('selection-rationale').dispatchEvent(new Event('input'));
       await wait('eligible A to become selectable', () => !document.getElementById('select-candidate-a').disabled);
       document.getElementById('select-candidate-a').click();
-      await wait('the selected version on the board', () => document.querySelector('[data-selection-field="operating-choice"] strong')?.textContent.includes(payload.candidates[0].artifact_version_id));
+      await wait('the recorded choice', () => document.getElementById('selection-note').textContent.startsWith('Choice '));
       const after = await (await fetch('/api/engagements/bookshop/board')).json();
       selection = after.operating_selection;
       if (selection?.selected_version_id !== payload.candidates[0].artifact_version_id || selection.selected_content_hash !== payload.candidates[0].artifact_content_hash) throw new Error('The choice did not bind exact A bytes');
       if (selection.retained_alternative_version_id !== payload.candidates[1].artifact_version_id || selection.comparison_id !== experimentId || selection.prior_selection_id !== before.operating_selection.id) throw new Error('The choice lost its alternative, comparison, or prior selection');
       if (!after.latest_shift.operation_allowed || after.operating_status !== 'SELECTED') throw new Error('The choice did not unlock operation');
       const summary = document.getElementById('selection-summary').textContent;
+      if (document.querySelector('[data-selection-field="operating-choice"] strong')?.textContent !== `${selection.selected_version_id} · ${selection.selected_content_hash} · ${humanize(selection.state)}`) throw new Error('Workbench selected version differs from the board API');
       if (![selection.selected_content_hash, selection.retained_alternative_version_id, selection.comparison_id, selection.requirement_set_hash, after.latest_saved_version_id].every(value => summary.includes(value))) throw new Error('The board hides selected or saved evidence');
       if (!document.getElementById('select-candidate-a').disabled || !document.getElementById('select-candidate-b').disabled) throw new Error('The same comparison offers a second choice');
     }
-    return { experiment: experimentId, state: payload.state, slots: payload.trials.map(trial => `${trial.execution_ordinal}:${trial.pair_ordinal}${trial.candidate_label}/${trial.workload_id}/${trial.request_count}`).join(' '), selection };
-  }, await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_a_service.py', 'utf8'), await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_b_service.py', 'utf8'), selectionDemo) : null;
+    if (JSON.stringify(await (await fetch('/api/engagements/bookshop/ledger')).json()) !== JSON.stringify(historyBefore) || JSON.stringify((await (await fetch('/api/engagements/bookshop/board')).json()).incidents) !== JSON.stringify(incidentsBefore)) throw new Error('Comparison or choice changed operational history');
+    return { experiment: experimentId, state: payload.state, outcome: payload.outcome.status, blockers: payload.outcome.eligibility.map(item => ({ candidate: item.candidate_label, reasons: item.blocking_reason_codes })), slots: payload.trials.map(trial => `${trial.execution_ordinal}:${trial.pair_ordinal}${trial.candidate_label}/${trial.workload_id}/${trial.request_count}`).join(' '), selection };
+  }, await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_a_service.py', 'utf8'), await readFile('shiftwork/fixtures/artifacts/bookshop/compare_repair_b_service.py', 'utf8'), selectionDemo, process.argv.includes('--blocked-demo')) : null;
   if (comparison) {
     await evaluate(() => document.getElementById('comparison-slots').scrollIntoView({ block: 'start' }));
-    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '1280px compare panel overflows');
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, '1280px compare panel overflows');
     await screenshot('compare-1280');
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 900, deviceScaleFactor: 1, mobile: false });
     await evaluate(() => document.getElementById('comparison-slots').scrollIntoView({ block: 'start' }));
-    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '390px compare panel overflows');
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, '390px compare panel overflows');
     await screenshot('compare-390');
     if (selectionDemo) {
+      await evaluate(() => document.querySelector('[data-view="contract"]').click());
+      await evaluate(verifyRenderedRequirements);
+      await screenshot('selected-requirements-390');
       await evaluate(() => { document.querySelector('[data-station="service"]').click(); document.getElementById('selection-summary').scrollIntoView({ block: 'start' }); });
       await screenshot('selection-390');
     }
@@ -759,8 +910,98 @@ try {
       const statement = eligibility.querySelector('strong')?.textContent;
       if (statement !== 'Not eligible · this diagnostic cannot qualify a version') throw new Error(`After a reload the diagnostic panel prints the wrong eligibility statement: ${statement}`);
     }, diagnostic.experiment);
+    await evaluate(async () => {
+      document.querySelector('[data-view="compare"]').click();
+      const id = document.getElementById('compare-state').textContent.match(/experiment-[^\s]+/)?.[0];
+      const payload = await (await fetch(`/api/experiments/${encodeURIComponent(id)}`)).json();
+      for (const candidate of payload.candidates) {
+        const row = document.querySelector(`#candidate-list [data-candidate-label="${candidate.label}"] strong`);
+        if (row?.textContent !== `${candidate.artifact_version_id} · content hash ${candidate.artifact_content_hash}`) throw new Error('Reload lost an API-backed frozen candidate');
+      }
+      document.querySelector('[data-view="investigate"]').click();
+    });
     await screenshot('investigate-diagnostic-after-comparison-reload-1280');
     await evaluate(() => document.querySelector('[data-station="service"]').click());
+  }
+  let operationJourney = null;
+  if (process.argv.includes('--journey-demo')) {
+    assert.ok(selectionDemo, 'The continuous journey needs an explicit eligible choice');
+    // The preview's starter inspections are already completed operations. A new
+    // learner choice inherits into the next shift before it can operate there.
+    await evaluate(() => { document.querySelector('[data-view="next"]').click(); document.getElementById('close-shift').click(); });
+    await evaluate(async () => {
+      const deadline = Date.now() + 10000;
+      while (document.getElementById('open-next-shift').disabled && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 30));
+      if (document.getElementById('open-next-shift').disabled) throw new Error('The chosen version cannot advance to its operating shift');
+      document.getElementById('open-next-shift').click();
+    });
+    await evaluate(async priorShift => {
+      const deadline = Date.now() + 10000;
+      while (Date.now() < deadline) {
+        const board = await (await fetch('/api/engagements/bookshop/board')).json();
+        if (board.latest_shift.id !== priorShift && document.getElementById('next-state').textContent.includes(board.latest_shift.id)) return;
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
+      throw new Error('The operating shift did not open');
+    }, investigateView.shift);
+    const before = await evaluate(async () => (await (await fetch('/api/engagements/bookshop/board')).json()));
+    await evaluate(() => {
+      document.querySelector('[data-view="board"]').click();
+      const button = document.getElementById('run-shift');
+      if (button.disabled) throw new Error('The selected version cannot operate');
+      button.focus();
+    });
+    await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
+    await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    operationJourney = await evaluate(async before => {
+      const deadline = Date.now() + 60000;
+      let board;
+      while (Date.now() < deadline) {
+        board = await (await fetch('/api/engagements/bookshop/board')).json();
+        if (board.latest_run?.id !== before.latest_run?.id && board.latest_run?.state === 'FINALIZED'
+            && document.body.dataset.loadState === 'ready'
+            && document.getElementById('run-state').textContent === `${board.latest_run.id} · FINALIZED`
+            && document.querySelectorAll('.customer-button').length) break;
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+      const run = board.latest_run;
+      if (run?.id === before.latest_run?.id || run?.state !== 'FINALIZED') throw new Error('Selected operation did not finalize');
+      if (document.body.dataset.loadState !== 'ready' || document.getElementById('run-state').textContent !== `${run.id} · FINALIZED` || !document.querySelectorAll('.customer-button').length) throw new Error('The finalized operation evidence did not finish loading');
+      if (run.purpose !== 'OPERATION' || run.artifact_version_id !== before.operating_selection.selected_version_id || run.selection_id !== before.operating_selection.id) throw new Error('Operation did not use the exact choice');
+      const ledger = await (await fetch('/api/engagements/bookshop/ledger')).json();
+      const events = ledger.events.filter(event => event.derivation?.run_id === run.id);
+      if (!events.length) throw new Error('Operation has no independently checked synthetic event');
+      return { run: run.id, version: run.artifact_version_id, mode: run.evidence_mode, selection: run.selection_id, events: events.map(event => event.seq) };
+    }, before);
+    await evaluate(() => document.querySelector('[data-station="customers"]').click());
+    operationJourney.evidence = await evaluate(verifyRenderedCustomerEvidence, operationJourney.run, 1);
+    await labels();
+    await screenshot('selected-operation-1280');
+    await evaluate(() => { document.querySelector('[data-view="next"]').click(); document.getElementById('close-shift').click(); });
+    await evaluate(async () => {
+      const deadline = Date.now() + 10000;
+      while (document.getElementById('open-next-shift').disabled && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 30));
+      if (document.getElementById('open-next-shift').disabled) throw new Error('Closed shift offers no next shift');
+      document.getElementById('open-next-shift').click();
+    });
+    operationJourney.nextShift = await evaluate(async before => {
+      const deadline = Date.now() + 10000;
+      let board;
+      while (Date.now() < deadline) {
+        board = await (await fetch('/api/engagements/bookshop/board')).json();
+        if (board.latest_shift.id !== before.latest_shift.id && document.getElementById('next-state').textContent.includes(board.latest_shift.id)) break;
+        await new Promise(resolve => setTimeout(resolve, 30));
+      }
+      if (board.latest_shift.id === before.latest_shift.id || board.operating_selection.selected_version_id !== before.operating_selection.selected_version_id || board.operating_selection.rationale !== before.operating_selection.rationale) throw new Error('Next shift lost the exact choice or rationale');
+      if (!document.querySelector('[data-inherit-field="operating-choice"] strong')?.textContent.includes(before.operating_selection.selected_version_id)) throw new Error('Next shift hides its inherited choice');
+      return board.latest_shift.id;
+    }, before);
+    await screenshot('continuous-next-shift-1280');
+    await evaluate(() => {
+      document.querySelector('[data-view="compare"]').click();
+      if (document.querySelectorAll('#comparison-slots .comparison-slot').length || document.querySelector('#candidate-list strong')?.textContent !== 'not frozen yet') throw new Error('Next shift presents the previous comparison as current');
+      document.querySelector('[data-view="next"]').click();
+    });
   }
   let inheritDemoReport = null;
   if (inheritDemo) {
@@ -828,11 +1069,11 @@ try {
       return { shift: shiftId, nextShift: after.latest_shift.id, experiment: later.id, observedRun: later.observed_run_id, rationale: selected.rationale, retained: selected.retained_alternative_version_id, limits: board.unresolved_limits.length };
     });
     await evaluate(() => document.getElementById('next-inheritance').scrollIntoView({ block: 'start' }));
-    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '1280px next-shift panel overflows');
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, '1280px next-shift panel overflows');
     await screenshot('next-shift-1280');
     await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 900, deviceScaleFactor: 1, mobile: false });
     await evaluate(() => document.getElementById('next-inheritance').scrollIntoView({ block: 'start' }));
-    assert.equal(await evaluate(() => document.documentElement.scrollWidth > innerWidth), false, '390px next-shift panel overflows');
+    assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, '390px next-shift panel overflows');
     await screenshot('next-shift-390');
     await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
     inheritDemoReport = inherit;
@@ -853,7 +1094,8 @@ try {
     assert.equal(await evaluate(() => document.querySelectorAll('.customer-button').length), 3);
   }
   assert.equal(exceptions.length, 0, JSON.stringify(exceptions));
-  const report = { matrix, investigateStation: { ...investigateView, diagnostic }, assistDemo: process.argv.includes('--assist-demo') ? 'recorded double, hint and accepted patch attribution' : 'not enabled', compareDemo: comparison ?? 'not enabled', nextShiftDemo: inheritDemoReport ?? 'not enabled', navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
+  await assertPublicDOM();
+  const report = { matrix, journey, operationJourney, publicDOMNeedles, investigateStation: { ...investigateView, diagnostic }, assistDemo: process.argv.includes('--assist-demo') ? 'recorded double, hint and accepted patch attribution' : 'not enabled', compareDemo: comparison ?? 'not enabled', nextShiftDemo: inheritDemoReport ?? 'not enabled', navigationAndStaleIncident: 'PASS', keyboard: 'PASS (evaluator and customer Enter/Tab)', reducedMotion: 'PASS', states: ['loading', 'error', 'empty', 'no incidents', 'malformed body', 'no public record'], repairWithoutIncident: 'blocked', literalUntrustedText: 'PASS', realRunButton: operationJourney ? 'PASS (selected operation via native Enter)' : process.argv.includes('--exercise-run') ? 'PASS' : 'not exercised in this run', labelRemovalMutations: 'caught in every visible region', ordinalMutation: 'caught', renderedEvidence: 'exact answer, public record, verdict, event, investigation and diagnostic text against the API payload', narrowStationReach: 'native touch brings the panel into reach at 640/390', incidentNavigationFocus: 'keyboard activation focuses the selected request', downloadedBytes: 'exact', uncaughtExceptions: exceptions.length };
   await writeFile(path.join(artifacts, 'browser-report.json'), JSON.stringify(report, null, 2));
   console.log(JSON.stringify(report, null, 2));
 } catch (error) {
