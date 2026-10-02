@@ -1,7 +1,7 @@
 import { bodyBytes, selectEvidence } from './evidence.js';
 
 const $ = id => document.getElementById(id);
-const state = { board: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
+const state = { board: null, loadedShiftId: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
 let downloadUrl = null;
 let pollTimer = null;
 const terminal = run => !run || ['FINALIZED', 'FAILED'].includes(run.state);
@@ -85,7 +85,8 @@ function clearData(message) {
 }
 
 async function refresh(runId = null) {
-  const previousShiftId = state.board?.latest_shift?.id;
+  // Candidate ownership outlives the temporary loading/error board clear.
+  const previousShiftId = state.loadedShiftId;
   const generation = ++state.generation;
   const selected = state.selected;
   clearTimeout(pollTimer);
@@ -103,15 +104,16 @@ async function refresh(runId = null) {
       board.operating_selection ? api(`/artifact-versions/${encodeURIComponent(board.operating_selection.selected_version_id)}`) : null,
     ]);
     if (generation !== state.generation) return;
-    Object.assign(state, { board, draft, stationView, run, outputs, checks, operatingVersion, events: ledger.events });
-    if (previousShiftId && previousShiftId !== board.latest_shift?.id) {
-      state.comparison = null;
-      state.candidates = { A: null, B: null };
+    let comparison = stationView?.latest_experiment?.kind === 'QUALIFYING_COMPARISON' ? stationView.latest_experiment
+      : previousShiftId === board.latest_shift?.id ? state.comparison : null;
+    if (comparison && comparison !== stationView?.latest_experiment) {
+      try { comparison = await api(`/experiments/${encodeURIComponent(comparison.id)}`); }
+      catch { comparison = null; }
     }
-    if (stationView?.latest_experiment?.kind === 'QUALIFYING_COMPARISON') state.comparison = stationView.latest_experiment;
-    else if (state.comparison) {
-      try { state.comparison = await api(`/experiments/${encodeURIComponent(state.comparison.id)}`); }
-      catch { state.comparison = null; }
+    if (generation !== state.generation) return;
+    Object.assign(state, { board, loadedShiftId: board.latest_shift?.id ?? null, draft, stationView, run, outputs, checks, operatingVersion, comparison, events: ledger.events });
+    if (previousShiftId && previousShiftId !== board.latest_shift?.id) {
+      state.candidates = { A: null, B: null };
     }
     if (state.comparison && state.comparison.shift_id === board.latest_shift?.id) for (const candidate of state.comparison.candidates) {
       state.candidates[candidate.label] ??= { id: candidate.artifact_version_id, content_hash: candidate.artifact_content_hash };
@@ -1069,6 +1071,11 @@ document.querySelectorAll('[data-view]').forEach(link => link.addEventListener('
 }));
 document.querySelectorAll('[data-file]').forEach(button => button.addEventListener('click', () => selectFile(button.dataset.file)));
 window.addEventListener('hashchange', () => navigate(location.hash.slice(1)));
+window.addEventListener('beforeunload', event => {
+  if (!hasUnsavedDraft()) return;
+  event.preventDefault();
+  event.returnValue = '';
+});
 window.addEventListener('pagehide', () => { clearTimeout(pollTimer); if (downloadUrl) URL.revokeObjectURL(downloadUrl); });
 navigate(location.hash.slice(1) || 'board');
 refresh();
