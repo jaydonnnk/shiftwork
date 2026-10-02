@@ -1,0 +1,12 @@
+{
+  "command": [
+    "node",
+    "tests/client/render_faults.mjs",
+    "--port",
+    "18822",
+    "--artifact-dir",
+    "artifacts/s21-review-fixes-20261002/final-matrix"
+  ],
+  "exit_code": 0,
+  "seconds": 1644.1122975999897
+}

@@ -1,0 +1,40 @@
+{
+  "phase": "final",
+  "branch": "shiftwork/slice-21",
+  "HEAD_and_main": "5039b7b225b23a6d2cde526d09d474936dfbdcf2",
+  "staged_files": 0,
+  "tracked_diff_check": "PASS",
+  "new_document_diff_check": "PASS",
+  "scope": [
+    "MISTAKES.md",
+    "docs/SHIFTWORK_PLAN.md",
+    "docs/plans/shiftwork/00-status.md",
+    "shiftwork/client/app.js",
+    "tests/client/browser.mjs",
+    "tests/client/render_faults.mjs",
+    "docs/plans/shiftwork/evidence/slice21-review-fixes-2026-10-02.md"
+  ],
+  "preExistingFilesUnchanged": 1337,
+  "repairArtifactFilesUnchanged": 1409,
+  "originalMistakesPrefixPreserved": true,
+  "historicalDocumentBodiesAndCRLFPreserved": true,
+  "sourceDigestsMatchFinalMatrix": true,
+  "cleanSerializedScans": 50,
+  "threeFaultPairsRawAssertions": "PASS",
+  "receiptCountsMatch": true,
+  "previewDiagnostics": [
+    {
+      "row": "invalidatedPolling",
+      "kind": "Windows asyncio ConnectionResetError, timing/cause unproven",
+      "sha256": "47467c7e7577e135b5d73b7a2eafe9d6a76f2728f95eaaae16a8faca0d2ac652"
+    }
+  ],
+  "credentialPatternScan": "PASS (added content; fixed high-confidence patterns)",
+  "literalDOMIdsAndNamedFunctions": "PASS",
+  "repairPreviewPortsFree": [
+    18821,
+    18822
+  ],
+  "observedListeners": [],
+  "port8143Touched": false
+}

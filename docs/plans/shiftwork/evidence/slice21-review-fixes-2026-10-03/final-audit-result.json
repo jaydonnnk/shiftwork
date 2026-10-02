@@ -1,0 +1,8 @@
+{
+  "command": [
+    "node",
+    "artifacts/s21-review-fixes-20261002/audit.mjs"
+  ],
+  "exit_code": 0,
+  "seconds": 3.279349100019317
+}

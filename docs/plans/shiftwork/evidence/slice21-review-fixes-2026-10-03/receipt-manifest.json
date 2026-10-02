@@ -1,0 +1,72 @@
+{
+  "audit.json": {
+    "source": "audit.json",
+    "bytes": 7900,
+    "sha256": "068ebb3050b9cb10720f61a61a0f46cff4ce6ad3272a955e152e1b133bfdc74d"
+  },
+  "matrix-sources.json": {
+    "source": "final-matrix/sources.json",
+    "bytes": 301,
+    "sha256": "0d9dfa0567a3637155a8d20f2de5314edb473dbc69915ddf339227176e94b149"
+  },
+  "preview-reset-stderr.txt": {
+    "source": "final-matrix/invalidatedPolling/preview-stderr.txt",
+    "bytes": 1032,
+    "sha256": "47467c7e7577e135b5d73b7a2eafe9d6a76f2728f95eaaae16a8faca0d2ac652"
+  },
+  "final-api-stdout.txt": {
+    "source": "final-api-stdout.txt",
+    "bytes": 971,
+    "sha256": "07e8eb8908b9cbaaa65297d606ec99eddcbe0383031e74351248d2dd23e71eda"
+  },
+  "final-api-result.json": {
+    "source": "final-api-result.json",
+    "bytes": 274,
+    "sha256": "03a38777a746355d2f6bbe2a00d46b4b827fb59b27ad41addf1a160bf2a95505"
+  },
+  "final-full-suite-stdout.txt": {
+    "source": "final-full-suite-stdout.txt",
+    "bytes": 4113,
+    "sha256": "a4ba2e9dc81d4463660a98ac948f67afbd85bea4e4d59a5c8968a842ee2945ba"
+  },
+  "final-full-suite-result.json": {
+    "source": "final-full-suite-result.json",
+    "bytes": 196,
+    "sha256": "a127882ecd754a9384e33c07411e036e45f61de258b18cc30faee385b0f0d971"
+  },
+  "rendered-matrix-stdout.txt": {
+    "source": "rendered-matrix-stdout.txt",
+    "bytes": 6090,
+    "sha256": "ee98795d9c0f087521b7dbf51a09344cc900c9958c0174334f3d4ee9b6382fa3"
+  },
+  "rendered-matrix-result.json": {
+    "source": "rendered-matrix-result.json",
+    "bytes": 238,
+    "sha256": "7514ff385fe61cb808cc1f8659fef133bbee70a714058a6a65d9d12e7009f588"
+  },
+  "final-audit-stdout.txt": {
+    "source": "final-audit-stdout.txt",
+    "bytes": 981,
+    "sha256": "c156922f59aa6248100662542e279f31db75570fb74d2a7339009caa5ba4cd4b"
+  },
+  "final-audit-result.json": {
+    "source": "final-audit-result.json",
+    "bytes": 143,
+    "sha256": "3d74de2ce711788e8f2b83fca3d7c1577a45f09f8b0171c9aa23b1aa7e167c1b"
+  },
+  "closeout-final-stdout.txt": {
+    "source": "closeout-final-stdout.txt",
+    "bytes": 1321,
+    "sha256": "3f88c2e2149839f637389c0bd83a7efba17def491bb57473b0f881d3fddab8b5"
+  },
+  "closeout-final-result.json": {
+    "source": "closeout-final-result.json",
+    "bytes": 188,
+    "sha256": "47f2fb2fafacdec11b917f6a453354eb23d2c51890288e5bfdf795c32bff49f5"
+  },
+  "raw-browser-audit.json": {
+    "source": "generated lossless bundle of final-matrix, targeted and prechange receipts",
+    "bytes": 296069,
+    "sha256": "7f94a045e1f844a56cc09f222b24e02e569dc885e04daee07a68b6bb4a5f0d74"
+  }
+}

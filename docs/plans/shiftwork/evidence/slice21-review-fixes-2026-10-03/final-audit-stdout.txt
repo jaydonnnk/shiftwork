@@ -1,0 +1,45 @@
+{
+  "baselineRows": 7,
+  "faultRows": 40,
+  "rows": "40 intended assertions, each unique anchor, zero stderr",
+  "exactJourney": {
+    "run": "run-0010",
+    "version": "ver-0002",
+    "mode": "TRUSTED_LOCAL",
+    "selection": "sel-0002",
+    "events": [
+      5
+    ],
+    "evidence": {
+      "outputs": 1,
+      "run": "run-0010"
+    },
+    "nextShift": "bookshop-shift-03"
+  },
+  "prechangeIntendedFailures": 2,
+  "leakScanner": {
+    "clean": {
+      "needles": 4406,
+      "controls": true,
+      "clean": true
+    },
+    "injected": {
+      "needles": 4406,
+      "controls": true,
+      "clean": false
+    }
+  },
+  "preExistingFiles": 1343,
+  "changed": [
+    "MISTAKES.md",
+    "docs/SHIFTWORK_PLAN.md",
+    "docs/plans/shiftwork/00-status.md",
+    "shiftwork/client/app.js",
+    "tests/client/browser.mjs",
+    "tests/client/render_faults.mjs"
+  ],
+  "unchanged": 1337,
+  "missing": [],
+  "originalMistakesPrefixPreserved": true,
+  "finalMatrixSourceDigestsMatch": true
+}
