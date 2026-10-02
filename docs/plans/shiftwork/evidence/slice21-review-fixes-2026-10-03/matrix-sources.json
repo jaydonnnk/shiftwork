@@ -1,0 +1,5 @@
+{
+  "shiftwork/client/app.js": "e9dd85a3f4da5360ec2ab674c5e3393b125e3fb17c36b264e458664388773e40",
+  "tests/client/browser.mjs": "fbb5ad94f1918f5611c01d6e94e38d5c76dbeb1b5ea1652eddfb1ebff7b480c7",
+  "tests/client/render_faults.mjs": "6db1d173fa4f9a4a93a78b3060b5cedb0ba865d4090179c5e71464b1c3bcf8a5"
+}

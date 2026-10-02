@@ -1,0 +1,326 @@
+{
+  "baselineRows": 7,
+  "faultRows": 40,
+  "rows": [
+    {
+      "name": "candidateRace",
+      "expect": "Overlapping refresh retained a previous shift candidate",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "unloadWarning",
+      "expect": "Dirty browser reload did not show a beforeunload warning",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "transientErrorLeak",
+      "expect": "Client DOM contains private material (refresh-error)",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "invalidatedPolling",
+      "expect": "Timed out waiting for terminal comparison to release the draft editor",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "draftSave",
+      "expect": "Draft editor saved different bytes",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "unsavedFreeze",
+      "expect": "Unsaved draft can freeze a candidate",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "candidateReload",
+      "expect": "Reload lost an API-backed frozen candidate",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "candidateReset",
+      "expect": "Next shift presents the previous comparison as current",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "clientLeak",
+      "expect": "Client DOM contains private material",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "executionPurpose",
+      "expect": "Execution purpose differs from the run API",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "executionMode",
+      "expect": "Execution mode differs from the run API",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "executionVersion",
+      "expect": "Execution version differs from the run API",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "executionSnapshot",
+      "expect": "Execution snapshot differs from the run API",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "comparisonPurpose",
+      "expect": "Comparison purpose differs from the experiment API",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "comparisonMode",
+      "expect": "Comparison mode differs from the experiment API",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "comparisonContext",
+      "expect": "Comparison context differs from the experiment API",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "comparisonHistory",
+      "expect": "Comparison hides unchanged operational history",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "outcomeBlocker",
+      "expect": "renders the wrong blocking reasons",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "selectedVersion",
+      "expect": "Workbench selected version differs from the board API",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "requirementVersion",
+      "expect": "Requirements differ from the exact operating version",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "syntheticEvent",
+      "expect": "Missing rendered label: event",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "answer",
+      "expect": "Rendered customer answer does not match the executed output",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "record",
+      "expect": "Rendered public record value does not match",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "verdict",
+      "expect": "Rendered check row does not match result",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "event",
+      "expect": "Rendered event row does not match event",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "eligibility",
+      "expect": "does not state that the diagnostic cannot qualify a version",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "stationFocus",
+      "expect": "Narrow station selection does not bring the panel into reach",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "incidentFocus",
+      "expect": "Incident navigation does not move focus into the selected request",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "candidateFreeze",
+      "expect": "Timed out waiting for candidate A freeze",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "slotOrdinalText",
+      "expect": "does not display the request ordinal",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "slotOrdinalKey",
+      "expect": "row with the payload verdict",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "slotProtectedCount",
+      "expect": "renders the wrong protected step count",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "outcomeMetric",
+      "expect": "renders the wrong useful_completions",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "outcomeEligibility",
+      "expect": "renders the wrong eligibility",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "outcomeLabelBinding",
+      "expect": "renders no outcome card bound to candidate B",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "inheritRationale",
+      "expect": "does not display the original rationale",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "inheritAlternative",
+      "expect": "does not display the retained alternative",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "inheritRequirementHash",
+      "expect": "does not display the inherited requirement hash",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "inheritObservedRun",
+      "expect": "does not show the observed operation",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    },
+    {
+      "name": "inheritSeparation",
+      "expect": "presents the hypothetical experiment as operational history",
+      "code": 0,
+      "stderrBytes": 0,
+      "anchorCount": 1
+    }
+  ],
+  "exactJourney": {
+    "run": "run-0010",
+    "version": "ver-0002",
+    "mode": "TRUSTED_LOCAL",
+    "selection": "sel-0002",
+    "events": [
+      5
+    ],
+    "evidence": {
+      "outputs": 1,
+      "run": "run-0010"
+    },
+    "nextShift": "bookshop-shift-03"
+  },
+  "prechangeIntendedFailures": 2,
+  "leakScanner": {
+    "clean": {
+      "needles": 4406,
+      "controls": true,
+      "clean": true
+    },
+    "injected": {
+      "needles": 4406,
+      "controls": true,
+      "clean": false
+    }
+  },
+  "preExistingFiles": 1343,
+  "changed": [
+    "MISTAKES.md",
+    "docs/SHIFTWORK_PLAN.md",
+    "docs/plans/shiftwork/00-status.md",
+    "shiftwork/client/app.js",
+    "tests/client/browser.mjs",
+    "tests/client/render_faults.mjs"
+  ],
+  "unchanged": 1337,
+  "missing": [],
+  "originalMistakesPrefixPreserved": true,
+  "finalMatrixSourceDigestsMatch": true
+}

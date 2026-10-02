@@ -21,3 +21,6 @@ docs/plans/shiftwork/evidence/slice20-stretch-mutation-round-2026-10-01.txt -tex
 # Preserve S21 raw verification receipts byte-for-byte on Windows.
 docs/plans/shiftwork/evidence/slice21-*.txt -text
 docs/plans/shiftwork/evidence/slice21-browser-*.json -text
+
+# Preserve the S21 review-fix publication receipt package byte-for-byte.
+docs/plans/shiftwork/evidence/slice21-review-fixes-2026-10-03/* -text
