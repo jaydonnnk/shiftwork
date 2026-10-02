@@ -1,0 +1,43 @@
+Running 4 baselines then 37 fault rows, each against its own preview on port 8141.
+baseline (no fault)                PASS   harness green against the unmutated client
+baseline (invalidated exposure)    PASS   harness green against the unmutated client
+baseline (selected journey)        PASS   harness green against the unmutated client
+baseline (inherit, no fault)       PASS   harness green against the unmutated client
+fault: answer                       CAUGHT FAULT_CAUGHT answer: Error: Rendered customer answer does not match the executed output: REVIEW_WRONG_CUSTOMER_ANSWER
+fault: record                       CAUGHT FAULT_CAUGHT record: Error: Rendered public record value does not match: price: review wrong public value
+fault: verdict                      CAUGHT FAULT_CAUGHT verdict: Error: Rendered check row does not match result cr-0001: pass · MISSING_EVIDENCE is not fail · MISSING_EVIDENCE
+fault: event                        CAUGHT FAULT_CAUGHT event: Error: Rendered event row does not match event 1: sale completed
+fault: eligibility                  CAUGHT FAULT_CAUGHT eligibility: Error: Rendered eligibility statement does not state that the diagnostic cannot qualify a version: REVIEW_WRONG_ELIGIBILITY
+fault: stationFocus                 CAUGHT FAULT_CAUGHT stationFocus: Error: Narrow station selection does not bring the panel into reach
+fault: incidentFocus                CAUGHT FAULT_CAUGHT incidentFocus: Expected values to be strictly deep-equal:
+fault: candidateFreeze              CAUGHT FAULT_CAUGHT candidateFreeze: Error: Timed out waiting for candidate A freeze: 
+fault: slotOrdinalText              CAUGHT FAULT_CAUGHT slotOrdinalText: Error: Slot 1 does not display the request ordinal for price
+fault: slotOrdinalKey               CAUGHT FAULT_CAUGHT slotOrdinalKey: Error: Slot 1 renders no price request 1 row with the payload verdict
+fault: slotProtectedCount           CAUGHT FAULT_CAUGHT slotProtectedCount: Error: Slot 1 renders the wrong protected step count
+fault: outcomeMetric                CAUGHT FAULT_CAUGHT outcomeMetric: Error: Candidate A renders the wrong useful_completions
+fault: outcomeEligibility           CAUGHT FAULT_CAUGHT outcomeEligibility: Error: Candidate A renders the wrong eligibility
+fault: outcomeLabelBinding          CAUGHT FAULT_CAUGHT outcomeLabelBinding: Error: The comparison renders no outcome card bound to candidate B
+fault: inheritRationale             CAUGHT FAULT_CAUGHT inheritRationale: Error: The station does not display the original rationale
+fault: inheritAlternative           CAUGHT FAULT_CAUGHT inheritAlternative: Error: The station does not display the retained alternative
+fault: inheritRequirementHash       CAUGHT FAULT_CAUGHT inheritRequirementHash: Error: The station does not display the inherited requirement hash
+fault: inheritObservedRun           CAUGHT FAULT_CAUGHT inheritObservedRun: Error: The hypothetical region does not show the observed operation
+fault: inheritSeparation            CAUGHT FAULT_CAUGHT inheritSeparation: Error: The recorded-history region presents the hypothetical experiment as operational history
+fault: executionPurpose             CAUGHT FAULT_CAUGHT executionPurpose: Error: Execution purpose differs from the run API
+fault: executionMode                CAUGHT FAULT_CAUGHT executionMode: Error: Execution mode differs from the run API
+fault: executionVersion             CAUGHT FAULT_CAUGHT executionVersion: Error: Execution version differs from the run API
+fault: executionSnapshot            CAUGHT FAULT_CAUGHT executionSnapshot: Error: Execution snapshot differs from the run API
+fault: comparisonPurpose            CAUGHT FAULT_CAUGHT comparisonPurpose: Error: Comparison purpose differs from the experiment API
+fault: comparisonMode               CAUGHT FAULT_CAUGHT comparisonMode: Error: Comparison mode differs from the experiment API
+fault: comparisonContext            CAUGHT FAULT_CAUGHT comparisonContext: Error: Comparison context differs from the experiment API
+fault: comparisonHistory            CAUGHT FAULT_CAUGHT comparisonHistory: Error: Comparison hides unchanged operational history
+fault: outcomeBlocker               CAUGHT FAULT_CAUGHT outcomeBlocker: Error: Candidate A renders the wrong blocking reasons
+fault: selectedVersion              CAUGHT FAULT_CAUGHT selectedVersion: Error: Workbench selected version differs from the board API
+fault: requirementVersion           CAUGHT FAULT_CAUGHT requirementVersion: Error: Requirements differ from the exact operating version
+fault: syntheticEvent               CAUGHT FAULT_CAUGHT syntheticEvent: Error: Missing rendered label: event
+fault: clientLeak                   CAUGHT FAULT_CAUGHT clientLeak: Client DOM contains private material
+fault: invalidatedPolling           CAUGHT FAULT_CAUGHT invalidatedPolling: Error: Timed out waiting for terminal comparison to release the draft editor: 
+fault: draftSave                    CAUGHT FAULT_CAUGHT draftSave: Error: Draft editor saved different bytes
+fault: unsavedFreeze                CAUGHT FAULT_CAUGHT unsavedFreeze: Error: Unsaved draft can freeze a candidate
+fault: candidateReload              CAUGHT FAULT_CAUGHT candidateReload: Error: Reload lost an API-backed frozen candidate
+fault: candidateReset               CAUGHT FAULT_CAUGHT candidateReset: Error: Next shift presents the previous comparison as current
+render-fault rows: 41 of 41 as expected

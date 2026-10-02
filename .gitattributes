@@ -17,3 +17,7 @@ docs/plans/shiftwork/evidence/slice20-stretch-baseline-2026-10-01.txt text eol=l
 # These two raw transcripts mix native stdout CRLF with wrapper LF.
 docs/plans/shiftwork/evidence/slice20-chain-live-2026-10-01.txt -text
 docs/plans/shiftwork/evidence/slice20-stretch-mutation-round-2026-10-01.txt -text
+
+# Preserve S21 raw verification receipts byte-for-byte on Windows.
+docs/plans/shiftwork/evidence/slice21-*.txt -text
+docs/plans/shiftwork/evidence/slice21-browser-*.json -text
