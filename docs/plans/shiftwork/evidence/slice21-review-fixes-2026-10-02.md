@@ -235,7 +235,28 @@ check subsequently verified all four committed package blobs and all 55 decoded
 raw rows before further commits. These helper failures are not product test
 failures and do not erase the earlier passing offline proof.
 
-The first client commit attempt failed to write Git's index without advancing
-HEAD. No index lock or running Git process was observed afterward; the retry
-succeeded. The cause remains unproven. Publication records actual commit/push
-results separately from the preserved closeout receipts at the old HEAD.
+Two commit attempts, the initial client commit and the completion-record commit,
+failed to write Git's index without advancing HEAD. No index lock or running Git
+process was observed afterward; both retries succeeded. Their cause remains
+unproven. Publication records actual commit/push results separately from the
+preserved closeout receipts at the old HEAD.
+
+## Publication and main integration: 2026-10-03
+
+Seven focused core commits (`f6df2cb..aee1fe5`) were pushed on `shiftwork/slice-21`.
+Local main was fast-forwarded with an ancestor check and a compare-and-swap against
+its original `5039b7b` ref, preserving the dirty worktree, then pushed. Both remote
+heads were verified at `aee1fe5246f8114ccdf8133a25f20d1e7fe72e99` before this
+publication record; this record follows the core commits. There are no co-author
+footers. The original six-line MISTAKES orchestration incident remains unstaged
+and outside the published changes.
+
+Publication checks verify all 15 package files against their Git blobs and all
+55 decoded browser output pairs against the local originals. The raw transcript
+range retains 155 whitespace diagnostics from its original CRLF/terminal spaces;
+all headers are confined to this receipt package. The strict source/document
+check passes. All 1,336 old files outside the seven authorized edited paths and
+all 1,409 pinned repair artifacts remain byte-identical. Source digests still
+match the exercised final matrix, so no passing suite was rerun for publication.
+The user's publication instruction authorizes shipment on that offline evidence;
+it creates no live, learning, transfer, install, fixture/seal or S22a authority.

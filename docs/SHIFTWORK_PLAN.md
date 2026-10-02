@@ -2,6 +2,16 @@
 
 Updated: 2026-10-03.
 
+**S21 review-fix publication, 2026-10-03:** seven focused core commits
+(`f6df2cb..aee1fe5`) were pushed on `shiftwork/slice-21`, fast-forwarded to main
+and pushed under the user's separate publication authority. Both remote heads
+were verified at `aee1fe5246f8114ccdf8133a25f20d1e7fe72e99` before this
+publication record. No co-author footer was added. The original MISTAKES
+orchestration incident remains the sole unstaged change. The 15-file repository
+receipt package preserves its bytes and all 55 bundled raw browser rows; verified
+offline evidence and the documented limits remain the shipment basis. This
+publication record follows the core commits; no live call or S22a work followed.
+
 **Current S21 repair round, 2026-10-02:** the independent review of
 `926d269..5039b7b` found an overlapping-refresh candidate reset defect, transient
 error-DOM scan coverage gap and silent loss of unsaved text on browser reload.

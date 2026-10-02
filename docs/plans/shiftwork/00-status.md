@@ -1,5 +1,34 @@
 # Status: Shiftwork
 
+## S21 review-fix publication and main integration: 2026-10-03
+
+The user authorized focused commits and push to main without co-author footers.
+Seven core commits (`f6df2cb..aee1fe5`) separate the client lifecycle repair,
+browser regression proofs, raw-receipt runner, lossless browser audit, API/offline
+receipts, matrix/closeout receipts and completion records. They were pushed on
+`shiftwork/slice-21`; local main was fast-forwarded using a guarded ancestor and
+old-ref check, without rewriting the dirty worktree, then pushed. Both remote
+heads were verified at `aee1fe5246f8114ccdf8133a25f20d1e7fe72e99` before this
+publication record. This record follows those core commits.
+
+All 15 repository receipt-package files equal their committed bytes. All 55
+bundled browser stdout/stderr pairs and both error-DOM captures decode to their
+original bytes. The working source digests still match the final exercised
+matrix. All 1,336 pre-existing files outside the seven deliberately edited paths
+and all 1,409 repair artifacts pinned at closeout entry retain their bytes.
+The original MISTAKES prefix is preserved; its pre-existing six-line orchestration
+incident is the sole remaining unstaged change and was excluded from every commit.
+No co-author footer appears in the core commit range.
+
+The strict source/document check passes. The full new range reports 155 whitespace
+diagnostics confined to deliberately byte-preserved raw receipts; CRLF and terminal
+spaces are retained. Publication reuses the checked 24-test API, 644-pass offline
+suite with one existing skip/two warnings, and seven baselines plus 40 intended
+fault failures. It adds no live execution, model quality, learning or transfer
+claim. Warning-only reload protection, the unmutated delayed comparison-read limb
+and the one preview connection-reset diagnostic retain their stated limits.
+No install, provider/Sandbox call, fixture/seal change or S22a work followed.
+
 ## S21 independent-review repair round: 2026-10-02
 
 The user authorized narrow fixes and regression proofs for the overlapping-refresh
@@ -25,7 +54,8 @@ unsaved edits. At closeout, HEAD and main were
 The user separately authorized focused commits and push to main on 2026-10-03,
 with no co-author footer. Publication uses the recorded offline evidence only.
 Installation, live calls, credentials, fixture/seal changes and S22a remain outside
-that authorization. Closeout is complete; the authorized publication proceeds.
+that authorization. Closeout, publication and main integration are complete as recorded above.
+Await user instructions.
 
 ## S21 publication and main integration: 2026-10-02
 
