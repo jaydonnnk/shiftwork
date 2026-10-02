@@ -11,6 +11,7 @@ from typing import Any
 
 from shiftwork import config
 from shiftwork import orchestrator
+# Adapter classes resolve via orchestrator at call time so monkeypatch replacements stay effective.
 from shiftwork.assist.gateway import AssistGateway
 from shiftwork.comparison_flow import comparison_view
 from shiftwork.domain import canonical, customer_answer, task_contract

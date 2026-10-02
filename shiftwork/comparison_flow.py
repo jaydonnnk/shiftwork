@@ -12,6 +12,7 @@ from typing import Any
 
 from shiftwork import config
 from shiftwork import orchestrator
+# Adapter classes resolve via orchestrator at call time so monkeypatch replacements stay effective.
 from shiftwork.domain import canonical, comparison, task_contract
 from shiftwork.domain.errors import BootstrapBlocked, ShiftworkDomainError, TaskEnvelopeInvalid
 from shiftwork.domain.models import (
