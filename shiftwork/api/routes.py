@@ -6,6 +6,7 @@ from collections.abc import Iterator
 from fastapi import APIRouter, BackgroundTasks, Body, Depends, Request
 from fastapi.responses import JSONResponse
 
+from shiftwork import comparison_flow, experiments
 from shiftwork import orchestrator
 from shiftwork.api import schemas
 from shiftwork.domain.errors import ShiftworkDomainError
@@ -171,7 +172,7 @@ def close_shift(shift_id: str, conn: sqlite3.Connection = Depends(get_conn)) -> 
 def get_investigate_station(
     shift_id: str, request: Request, conn: sqlite3.Connection = Depends(get_conn)
 ) -> schemas.InvestigateStationView:
-    return schemas.InvestigateStationView.of(orchestrator.investigate_station(
+    return schemas.InvestigateStationView.of(experiments.investigate_station(
         conn, shift_id, adapter=request.app.state.executor,
         assist_gateway=request.app.state.assist_gateway,
     ))
@@ -232,7 +233,7 @@ def create_experiment(
     if body.kind == "QUALIFYING_COMPARISON":
         if adapter == "tokenfactory" and request.app.state.live_comparison_budget is None:
             raise orchestrator.LifecycleError("conflict", "live comparison requires a bounded run budget")
-        experiment = orchestrator.create_qualifying_comparison(
+        experiment = comparison_flow.create_qualifying_comparison(
             conn,
             shift_id,
             candidate_a_version_id=body.candidate_a_version_id,
@@ -242,18 +243,18 @@ def create_experiment(
             client_request_id=body.client_request_id,
             adapter=adapter,
         )
-        if experiment.state == "PLANNED" and orchestrator.comparison_run(conn, experiment.id) is not None:
+        if experiment.state == "PLANNED" and comparison_flow.comparison_run(conn, experiment.id) is not None:
             if request.app.state.live_comparison_budget is None:
-                background.add_task(orchestrator.execute_comparison_task,
+                background.add_task(comparison_flow.execute_comparison_task,
                                     request.app.state.db_path, experiment.id)
             else:
-                background.add_task(orchestrator.execute_comparison_task,
+                background.add_task(comparison_flow.execute_comparison_task,
                                     request.app.state.db_path, experiment.id,
                                     request.app.state.live_comparison_budget)
     elif body.kind == "LATER_CONDITION_COMPARISON":
         if adapter == "tokenfactory" and request.app.state.live_comparison_budget is None:
             raise orchestrator.LifecycleError("conflict", "live comparison requires a bounded run budget")
-        experiment = orchestrator.create_later_condition_comparison(
+        experiment = comparison_flow.create_later_condition_comparison(
             conn,
             shift_id,
             operation_run_id=body.observed_run_id,
@@ -261,16 +262,16 @@ def create_experiment(
             client_request_id=body.client_request_id,
             adapter=adapter,
         )
-        if experiment.state == "PLANNED" and orchestrator.comparison_run(conn, experiment.id) is not None:
+        if experiment.state == "PLANNED" and comparison_flow.comparison_run(conn, experiment.id) is not None:
             if request.app.state.live_comparison_budget is None:
-                background.add_task(orchestrator.execute_comparison_task,
+                background.add_task(comparison_flow.execute_comparison_task,
                                     request.app.state.db_path, experiment.id)
             else:
-                background.add_task(orchestrator.execute_comparison_task,
+                background.add_task(comparison_flow.execute_comparison_task,
                                     request.app.state.db_path, experiment.id,
                                     request.app.state.live_comparison_budget)
     else:
-        experiment = orchestrator.create_diagnostic_experiment(
+        experiment = experiments.create_diagnostic_experiment(
             conn,
             shift_id,
             candidate_version_id=body.candidate_a_version_id,
@@ -278,19 +279,19 @@ def create_experiment(
             client_request_id=body.client_request_id,
             adapter=adapter,
         )
-        run = orchestrator.experiment_run(conn, experiment.id)
+        run = experiments.experiment_run(conn, experiment.id)
         if run is not None:
             background.add_task(
-                orchestrator.execute_experiment_task, request.app.state.db_path, run.id
+                experiments.execute_experiment_task, request.app.state.db_path, run.id
             )
-    return schemas.ExperimentView.of(orchestrator.experiment_view(conn, experiment.id))
+    return schemas.ExperimentView.of(experiments.experiment_view(conn, experiment.id))
 
 
 @router.get("/experiments/{experiment_id}", response_model=schemas.ExperimentView)
 def get_experiment(
     experiment_id: str, conn: sqlite3.Connection = Depends(get_conn)
 ) -> schemas.ExperimentView:
-    return schemas.ExperimentView.of(orchestrator.experiment_view(conn, experiment_id))
+    return schemas.ExperimentView.of(experiments.experiment_view(conn, experiment_id))
 
 
 @router.post("/shifts/{shift_id}/selections", response_model=schemas.SelectionView, status_code=201)

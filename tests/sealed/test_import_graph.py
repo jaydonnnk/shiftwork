@@ -53,7 +53,7 @@ FORBIDDEN_DIRS = ("executor", "assist", "api", "client", "store", "ledger", "dom
 # The only modules permitted to import the sealed store: the controller lifecycle
 # and the sealed package itself. Deliberately exact, so a new importer fails.
 # Paths are package-relative to shiftwork/, matching _relative_path().
-PERMITTED_IMPORTERS = frozenset({"orchestrator.py"})
+PERMITTED_IMPORTERS = frozenset({"orchestrator.py", "comparison_flow.py"})
 
 # Catches plain literal references the AST import scan would miss; the dynamic-call
 # analysis below covers the mechanisms a regex cannot see.
