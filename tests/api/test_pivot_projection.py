@@ -12,6 +12,7 @@ from shiftwork.app import create_app
 from shiftwork.gateway.redaction import serialized_contains
 from shiftwork.orchestrator import LifecycleError
 from shiftwork.store import db, repo
+from leakscan import sealed_identity_strings
 
 
 def test_source_route_exposes_owned_files_without_storage_locator(tmp_path):
@@ -67,3 +68,30 @@ def test_injected_experiment_request_field_returns_422_without_a_run(tmp_path):
             assert repo.list_runs_for_shift(conn, shift["id"]) == []
         finally:
             conn.close()
+
+
+def test_bellwether_client_surfaces_exclude_private_material_with_scanner_controls(tmp_path, monkeypatch):
+    """S21's Bellwether arm; other boards remain future obligations."""
+    monkeypatch.setenv("NEBIUS_API_KEY", "S21_TEST_PROVIDER_SECRET")
+    monkeypatch.setenv("CONTREE_TOKEN", "S21_TEST_SANDBOX_SECRET")
+    needles = (*sealed_identity_strings(), "S21_TEST_PROVIDER_SECRET",
+               "S21_TEST_SANDBOX_SECRET")
+    for needle in needles:
+        for form in (needle, needle.replace("\\", "/"), json.dumps(needle)[1:-1]):
+            assert serialized_contains({"client_text": form}, needle), needle
+    with TestClient(create_app(str(tmp_path / "client-surfaces.db"))) as client:
+        shift = client.post("/api/engagements/bookshop/shifts").json()
+        started = client.post(f"/api/shifts/{shift['id']}/runs")
+        assert started.status_code == 202, started.text
+        run = started.json()
+        paths = ("/", "/app.js", "/evidence.js", "/styles.css", "/room.svg",
+                 "/api/engagements/bookshop/board", "/api/engagements/bookshop/ledger",
+                 f"/api/shifts/{shift['id']}/investigations",
+                 f"/api/artifact-versions/{run['artifact_version_id']}",
+                 f"/api/runs/{run['id']}", f"/api/runs/{run['id']}/outputs",
+                 f"/api/runs/{run['id']}/checks")
+        for path in paths:
+            response = client.get(path)
+            assert response.status_code == 200, (path, response.text)
+            for needle in needles:
+                assert not serialized_contains({"client_text": response.text}, needle), (path, needle)

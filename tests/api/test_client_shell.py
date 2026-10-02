@@ -10,12 +10,15 @@ class Shell(HTMLParser):
         super().__init__()
         self.stations = set()
         self.regions = set()
+        self.journey = []
         self.feed(html)
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         if tag == "button" and "data-station" in attrs:
             self.stations.add(attrs["data-station"])
+        if tag == "a" and "data-view" in attrs:
+            self.journey.append((attrs["data-view"], attrs.get("href")))
         if "data-synthetic-region" in attrs:
             self.regions.add(attrs["data-synthetic-region"])
 
@@ -29,5 +32,7 @@ def test_served_client_has_keyboard_station_controls_and_labelled_regions(tmp_pa
         assert shell.regions >= {"board", "run", "incidents", "ledger", "source", "diagnostic", "comparison", "comparison-slots", "next-history", "next-experiment"}
         assert "Synthetic scenario" in response.text
         assert "junior applied AI engineer" in response.text
+        assert shell.journey == [(view, "#" + view) for view in
+                                 ("board", "contract", "investigate", "compare", "next")]
         for asset in ("app.js", "styles.css", "room.svg"):
             assert client.get("/" + asset).status_code == 200
