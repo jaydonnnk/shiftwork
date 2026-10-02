@@ -21,7 +21,7 @@ from pathlib import Path
 import pytest
 from conftest import BookshopShift
 
-from shiftwork import config, orchestrator
+from shiftwork import comparison_flow, config, experiments, orchestrator
 from shiftwork.domain import canonical, task_contract
 from shiftwork.domain.errors import BootstrapBlocked
 from shiftwork.domain.models import (
@@ -35,14 +35,14 @@ from shiftwork.sealed import store as sealed_store
 from shiftwork.sealed import rotation
 from shiftwork.domain.errors import RotationMisconfigured
 
-_REVIEW_GATE = orchestrator._require_reviewed_comparison_material
+_REVIEW_GATE = comparison_flow._require_reviewed_comparison_material
 _REVIEWED_FAMILY = sealed_store.load_reviewed_comparison_family
 
 
 @pytest.fixture(autouse=True)
 def _synthetic_comparison_review(monkeypatch):
     """Only this offline test module can exercise the draft comparison mechanics."""
-    monkeypatch.setattr(orchestrator, "_require_reviewed_comparison_material", lambda *_: None)
+    monkeypatch.setattr(comparison_flow, "_require_reviewed_comparison_material", lambda *_: None)
     monkeypatch.setattr(sealed_store, "load_reviewed_comparison_family", sealed_store.load_family)
 
 CAUSE = "the router answers only the optional price task and never reads collection records"
@@ -461,14 +461,14 @@ def test_a_fixture_edit_after_reservation_cannot_rewrite_the_assessment(
     investigation = _append_investigation(session, session.attempt()["id"])
     conn = db.connect(session.db_file)
     try:
-        experiment = orchestrator.create_diagnostic_experiment(
+        experiment = experiments.create_diagnostic_experiment(
             conn,
             session.shift_id,
             candidate_version_id=version["id"],
             investigation_id=investigation["id"],
             client_request_id="exp-frozen",
         )
-        reserved = orchestrator.experiment_run(conn, experiment.id)
+        reserved = experiments.experiment_run(conn, experiment.id)
     finally:
         conn.close()
 
@@ -480,10 +480,10 @@ def test_a_fixture_edit_after_reservation_cannot_rewrite_the_assessment(
     edited.write_text(json.dumps(tampered), encoding="utf-8")
     monkeypatch.setattr(config, "PIVOT_MISSION", edited)
 
-    orchestrator.execute_experiment_task(str(session.db_file), reserved.id)
+    experiments.execute_experiment_task(str(session.db_file), reserved.id)
     conn = db.connect(session.db_file)
     try:
-        view = orchestrator.experiment_view(conn, experiment.id)
+        view = experiments.experiment_view(conn, experiment.id)
     finally:
         conn.close()
     assert {entry["task_id"] for entry in view["trials"][0]["task_assessments"]} == {
@@ -553,7 +553,7 @@ def _reserve_comparison(session, candidate_a, candidate_b, investigation, key: s
     """Reserve through the orchestrator so nothing executes yet."""
     conn = db.connect(session.db_file)
     try:
-        experiment = orchestrator.create_qualifying_comparison(
+        experiment = comparison_flow.create_qualifying_comparison(
             conn,
             session.shift_id,
             candidate_a_version_id=candidate_a["id"],
@@ -562,7 +562,7 @@ def _reserve_comparison(session, candidate_a, candidate_b, investigation, key: s
             declared_treatment=TREATMENT,
             client_request_id=key,
         )
-        view = orchestrator.experiment_view(conn, experiment.id)
+        view = experiments.experiment_view(conn, experiment.id)
         return experiment, view
     finally:
         conn.close()
@@ -604,7 +604,7 @@ def test_draft_material_cannot_reserve_a_production_comparison(session, monkeypa
     draft_path = tmp_path / "draft_compare_manifest.json"
     draft_path.write_bytes(json.dumps(draft, indent=2, ensure_ascii=False).encode("utf-8"))
     monkeypatch.setattr(config, "PIVOT_COMPARE_MANIFEST", draft_path)
-    monkeypatch.setattr(orchestrator, "_require_reviewed_comparison_material", _REVIEW_GATE)
+    monkeypatch.setattr(comparison_flow, "_require_reviewed_comparison_material", _REVIEW_GATE)
     monkeypatch.setattr(sealed_store, "load_reviewed_comparison_family", _REVIEWED_FAMILY)
     conn = db.connect(session.db_file)
     try:
@@ -987,7 +987,7 @@ def test_a_manifest_mismatch_fails_closed_and_reserves_nothing(session, tmp_path
         entry["request_bytes_sha256"] = hashlib.sha256(raw).hexdigest()
         entry["request_bytes_length"] = len(raw)
         entry["task_specs_sha256"] = hashlib.sha256(
-            orchestrator._canonical_specs_bytes(
+            comparison_flow._canonical_specs_bytes(
                 tuple(task_contract.CustomerRequestSpec.model_validate(item) for item in specs)
             )
         ).hexdigest()
@@ -1000,7 +1000,7 @@ def test_a_manifest_mismatch_fails_closed_and_reserves_nothing(session, tmp_path
     try:
         before = _counts(conn)
         with pytest.raises(orchestrator.LifecycleError) as excinfo:
-            orchestrator.create_qualifying_comparison(
+            comparison_flow.create_qualifying_comparison(
                 conn,
                 session.shift_id,
                 candidate_a_version_id=candidate_a["id"],
@@ -1037,7 +1037,7 @@ def test_executor_incompatible_blank_line_fails_before_exposure(session, tmp_pat
     try:
         before = _counts(conn)
         with pytest.raises(orchestrator.LifecycleError, match="malformed|unusable"):
-            orchestrator.create_qualifying_comparison(
+            comparison_flow.create_qualifying_comparison(
                 conn, session.shift_id,
                 candidate_a_version_id=candidate_a["id"],
                 candidate_b_version_id=candidate_b["id"],
@@ -1084,7 +1084,7 @@ def test_a_fault_mid_reservation_leaves_no_partial_comparison(session, monkeypat
             conn.commit()
         before = _counts(conn)
         with pytest.raises(sqlite3.Error, match="injected reservation write fault"):
-            orchestrator.create_qualifying_comparison(
+            comparison_flow.create_qualifying_comparison(
                 conn,
                 session.shift_id,
                 candidate_a_version_id=candidate_a["id"],
@@ -1162,7 +1162,7 @@ def test_comparison_writes_no_business_state_and_guard_detects_an_insert(
 
     experiment, _ = _reserve_comparison(session, candidate_a, candidate_b, investigation)
     if injected_write is None:
-        orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+        comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     after = business_rows()
 
     def assert_no_business_write():
@@ -1200,7 +1200,7 @@ def test_a_repeated_comparison_worker_cannot_execute_reserved_slots_twice(sessio
 
     def work():
         try:
-            orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+            comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
         except Exception as exc:
             errors.append(exc)
 
@@ -1307,7 +1307,7 @@ def test_two_http_posts_can_dispatch_workers_before_claim_without_duplicate_exec
     dispatches = []
     responses = []
     errors = []
-    original_task = orchestrator.execute_comparison_task
+    original_task = comparison_flow.execute_comparison_task
 
     class CountingAdapter(LocalProcessAdapter):
         calls = 0
@@ -1333,7 +1333,7 @@ def test_two_http_posts_can_dispatch_workers_before_claim_without_duplicate_exec
         except Exception as exc:
             errors.append(exc)
 
-    monkeypatch.setattr(orchestrator, "execute_comparison_task", held_task)
+    monkeypatch.setattr(comparison_flow, "execute_comparison_task", held_task)
     monkeypatch.setattr(orchestrator, "LocalProcessAdapter", CountingAdapter)
     first = threading.Thread(target=post)
     second = threading.Thread(target=post)
@@ -1429,7 +1429,7 @@ def test_restart_terminalizes_comparison_without_retry_and_keeps_capture(
             ]
     finally:
         conn.close()
-    orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+    comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     assert restarted.client.get(f"/api/experiments/{experiment.id}").json() == view
 
 
@@ -1448,17 +1448,17 @@ def test_an_unexpected_slot_error_fails_the_comparison_without_retry(session, mo
 
     monkeypatch.setattr(orchestrator, "LocalProcessAdapter", RaisingFirst)
     with pytest.raises(RuntimeError, match="injected slot error"):
-        orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+        comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     conn = db.connect(session.db_file)
     try:
-        view = orchestrator.experiment_view(conn, experiment.id)
+        view = experiments.experiment_view(conn, experiment.id)
         assert view["state"] == "FAILED", "a background error stranded the comparison in RUNNING"
         assert view["trials"][0]["state"] == "FAILED"
         assert all(trial["state"] == "RESERVED" for trial in view["trials"][1:])
         assert repo.get_run(conn, view["trials"][0]["run_id"]).failure_kind is ExecutorFailure.INTERNAL
     finally:
         conn.close()
-    orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+    comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     assert RaisingFirst.calls == 1, "a repeated worker retried the failed slot"
 
 
@@ -1475,10 +1475,10 @@ def test_a_pre_adapter_slot_error_fails_the_touched_slot_without_retry(session, 
 
     monkeypatch.setattr(repo, "set_run_snapshot_bytes", fail_before_adapter)
     with pytest.raises(RuntimeError, match="injected pre-adapter slot error"):
-        orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+        comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     conn = db.connect(session.db_file)
     try:
-        view = orchestrator.experiment_view(conn, experiment.id)
+        view = experiments.experiment_view(conn, experiment.id)
         assert view["state"] == "FAILED"
         assert view["trials"][0]["state"] == "FAILED", "the touched slot still looks unattempted"
         assert all(trial["state"] == "RESERVED" for trial in view["trials"][1:])
@@ -1487,7 +1487,7 @@ def test_a_pre_adapter_slot_error_fails_the_touched_slot_without_retry(session, 
     finally:
         conn.close()
     monkeypatch.setattr(repo, "set_run_snapshot_bytes", original)
-    orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+    comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     assert calls == 1, "a repeated worker retried the touched slot"
 
 
@@ -1495,13 +1495,13 @@ def test_the_precommitted_schedule_is_stored_executed_once_and_not_reorderable(s
     """Obligation 18: pair 3 order is derived before results and never rewritten."""
     candidate_a, candidate_b, investigation = _comparison_session(session)
     calls: list[tuple[int, str]] = []
-    original = orchestrator.execute_comparison_slot
+    original = comparison_flow.execute_comparison_slot
 
     def spy(conn, slot):
         calls.append((slot.pair_ordinal, slot.candidate_label))
         return original(conn, slot)
 
-    monkeypatch.setattr(orchestrator, "execute_comparison_slot", spy)
+    monkeypatch.setattr(comparison_flow, "execute_comparison_slot", spy)
     created = _create_comparison(session, candidate_a, candidate_b, investigation)
     assert created.status_code == 202, created.text
     view = _wait_comparison(session, created.json()["id"])
@@ -1604,7 +1604,7 @@ def test_a_failed_slot_stays_visible_and_the_comparison_is_never_refunded(sessio
     assert failed_run.failure_kind is ExecutorFailure.SERVICE_UNREACHABLE
     assert len(items) == 3 and all(item.state.value == "active" for item in items)
     monkeypatch.setattr(orchestrator, "LocalProcessAdapter", LocalProcessAdapter)
-    orchestrator.execute_comparison_task(str(session.db_file), view["id"])
+    comparison_flow.execute_comparison_task(str(session.db_file), view["id"])
     conn = db.connect(session.db_file)
     try:
         after = repo.list_trial_slots(conn, view["id"])
@@ -1717,10 +1717,10 @@ def test_a_tampered_workload_binding_fails_the_slot_instead_of_running_another_b
         conn.commit()
     finally:
         conn.close()
-    orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+    comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     conn = db.connect(session.db_file)
     try:
-        view = orchestrator.experiment_view(conn, experiment.id)
+        view = experiments.experiment_view(conn, experiment.id)
         slots = repo.list_trial_slots(conn, experiment.id)
         assert {slot.state for slot in slots} == {"FAILED"}, (
             "a tampered binding fails every slot closed instead of running another batch"
@@ -2061,10 +2061,10 @@ def _recompute_frozen_context_hash(conn, context_id: str) -> str:
     stays silent and the named guard reports the drift itself.
     """
     context = repo.get_execution_context(conn, context_id)
-    bindings = orchestrator._reserved_protected_bindings(
+    bindings = comparison_flow._reserved_protected_bindings(
         conn, context.protected_reservation_id
     )
-    return orchestrator._frozen_comparison_context_hash(context, bindings)
+    return comparison_flow._frozen_comparison_context_hash(context, bindings)
 
 
 def test_each_named_readback_drift_guard_reports_its_own_field(session):
@@ -2288,8 +2288,8 @@ def test_retiring_a_compromised_comparison_keeps_evidence_and_blocks_reuse(sessi
         captures = {slot.id: [(out.request_ordinal, out.body)
                               for out in repo.list_outputs(conn, slot.run_id)] for slot in slots}
         ledger_before = tuple(repo.list_ledger_events(conn, config.BOOKSHOP_SLUG))
-        orchestrator.retire_comparison_exposure(conn, reservation.id)
-        orchestrator.retire_comparison_exposure(conn, reservation.id)
+        comparison_flow.retire_comparison_exposure(conn, reservation.id)
+        comparison_flow.retire_comparison_exposure(conn, reservation.id)
         assert repo.get_exposure_reservation(conn, reservation.id).state == "INVALIDATED"
         assert all(item.state.value == "invalidated"
                    for item in repo.list_exposure_items(conn, reservation.id))
@@ -2305,7 +2305,7 @@ def test_retiring_a_compromised_comparison_keeps_evidence_and_blocks_reuse(sessi
     assert [item["protected_passed"] for item in after["outcome"]["candidate_metrics"]] == [
         item["protected_passed"] for item in before["outcome"]["candidate_metrics"]
     ]
-    orchestrator.execute_comparison_task(str(session.db_file), experiment_id)
+    comparison_flow.execute_comparison_task(str(session.db_file), experiment_id)
     assert session.client.get(f"/api/experiments/{experiment_id}").json() == after
 
 
@@ -2547,7 +2547,7 @@ def test_slot_runs_public_phase_then_protected_phase_in_frozen_order(session, mo
             return await super().execute(request)
 
     monkeypatch.setattr(orchestrator, "LocalProcessAdapter", RecordingAdapter)
-    orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+    comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     conn = db.connect(session.db_file)
     try:
         context = repo.get_execution_context(conn, experiment.context_id)
@@ -2557,7 +2557,7 @@ def test_slot_runs_public_phase_then_protected_phase_in_frozen_order(session, mo
                      conn, context.protected_reservation_id)}
         states = {pair: sealed_store.load_reserved_protected_state(
             conn, context.protected_reservation_id, pair) for pair in (1, 2, 3)}
-        view = orchestrator.experiment_view(conn, experiment.id)
+        view = experiments.experiment_view(conn, experiment.id)
         assert view["state"] == "FINALIZED"
         assert len(seen) == 12
         for index, slot in enumerate(slots):
@@ -2600,10 +2600,10 @@ def test_protected_variant_is_bound_and_snapshotted_before_any_result(session):
     conn = db.connect(session.db_file)
     try:
         context = repo.get_execution_context(conn, experiment.context_id)
-        bindings = orchestrator._reserved_protected_bindings(conn, context.protected_reservation_id)
+        bindings = comparison_flow._reserved_protected_bindings(conn, context.protected_reservation_id)
         rows = repo.list_protected_case_snapshots(conn, context.protected_reservation_id)
         assert len(rows) == len(bindings) == 3
-        assert orchestrator._frozen_comparison_context_hash(context, bindings) == context.content_hash
+        assert comparison_flow._frozen_comparison_context_hash(context, bindings) == context.content_hash
         for row, binding in zip(rows, bindings, strict=True):
             assert hashlib.sha256(row["payload_json"].encode()).hexdigest() == row["payload_sha256"]
             assert hashlib.sha256(row["resolved_state_bytes"]).hexdigest() == binding.protected_state_hash
@@ -2669,7 +2669,7 @@ def test_each_pair_shares_one_identical_protected_stimulus(session):
     try:
         context = repo.get_execution_context(conn, experiment.context_id)
         slots = repo.list_trial_slots(conn, experiment.id)
-        bindings = orchestrator._reserved_protected_bindings(conn, context.protected_reservation_id)
+        bindings = comparison_flow._reserved_protected_bindings(conn, context.protected_reservation_id)
         assert [binding.pair_ordinal for binding in bindings] == [1, 2, 3]
         assert len({binding.variant_ref for binding in bindings}) == 3
         assert len({binding.stimulus_hash for binding in bindings}) == 3
@@ -2698,10 +2698,10 @@ def test_public_and_protected_counts_reconcile_without_merging(session):
     assert before["protected_counts"] is None
     assert all(trial["request_count"] == 2 and trial["protected_request_count"] == 1
                for trial in before["trials"])
-    orchestrator.execute_comparison_task(str(session.db_file), experiment.id)
+    comparison_flow.execute_comparison_task(str(session.db_file), experiment.id)
     conn = db.connect(session.db_file)
     try:
-        after = orchestrator.experiment_view(conn, experiment.id)
+        after = experiments.experiment_view(conn, experiment.id)
         assert after["state"] == "FINALIZED"
         assert after["shared_public_denominator_requests"] == 6
         assert after["protected_denominator_requests_per_candidate"] == 3
@@ -2809,13 +2809,13 @@ def test_protected_content_and_captures_never_reach_public_surfaces(tmp_path, mo
             conn = db.connect(db_file)
             try:
                 first_slot = repo.list_trial_slots(conn, experiment.id)[0]
-                orchestrator.execute_comparison_slot(conn, first_slot)
-                during = orchestrator.experiment_view(conn, experiment.id)
+                comparison_flow.execute_comparison_slot(conn, first_slot)
+                during = experiments.experiment_view(conn, experiment.id)
                 assert during["protected_counts"] is None
                 assert [item["request_ordinal"] for item in during["trials"][0]["outputs"]] == [1, 2]
             finally:
                 conn.close()
-            orchestrator.execute_comparison_task(str(db_file), experiment.id)
+            comparison_flow.execute_comparison_task(str(db_file), experiment.id)
             after_route = client.get(f"/api/experiments/{experiment.id}")
             assert after_route.status_code == 200, after_route.text
             after = after_route.json()
@@ -2852,7 +2852,7 @@ def test_protected_content_and_captures_never_reach_public_surfaces(tmp_path, mo
                 assert repo.get_run_snapshot_bytes(conn, run_id) == config.PIVOT_COMPARE_STATE.read_bytes()
                 assert b"protected-capture-marker" in stored[2].body
                 assert "protected-log-marker" in base64.b64decode(stored[2].log_ref.split(",", 1)[1]).decode()
-                binding = orchestrator._reserved_protected_bindings(conn,
+                binding = comparison_flow._reserved_protected_bindings(conn,
                     repo.get_execution_context(conn, experiment.context_id).protected_reservation_id)[0]
                 protected_state = sealed_store.load_reserved_protected_state(
                     conn, repo.get_execution_context(conn, experiment.context_id).protected_reservation_id, 1)

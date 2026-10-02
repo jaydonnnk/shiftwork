@@ -37,7 +37,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 from contree_client.httpx import ContreeAsyncClient
 
-from shiftwork import config, orchestrator
+from shiftwork import comparison_flow, config, orchestrator
 from shiftwork.app import create_app
 from shiftwork.domain import canonical
 from shiftwork.domain.models import ContractParams
@@ -785,12 +785,12 @@ def s13_inspect_stage(operation_id: str, expected_sha256: str) -> int:
 def comparison_stage(*, select: bool = False, operate: bool = False,
                      preview_db: Path | None = None) -> int:
     """Exercise comparison policy and optionally append an offline learner choice."""
-    admission = orchestrator._require_reviewed_comparison_material
+    admission = comparison_flow._require_reviewed_comparison_material
     reviewed_family = sealed_store.load_reviewed_comparison_family
     try:
         # This demo is an explicit draft-review seam. Production admission and
         # the on-disk review flags are unchanged after this process exits.
-        orchestrator._require_reviewed_comparison_material = lambda *_: None
+        comparison_flow._require_reviewed_comparison_material = lambda *_: None
         sealed_store.load_reviewed_comparison_family = sealed_store.load_family
         with (nullcontext(preview_db.parent) if preview_db else
               tempfile.TemporaryDirectory(prefix="shiftwork-s16-offline-")) as directory:
@@ -864,7 +864,7 @@ def comparison_stage(*, select: bool = False, operate: bool = False,
                         for run in runs if run.adapter == "tokenfactory"
                     )
                     if not select:
-                        orchestrator.retire_comparison_exposure(conn, reservation.id)
+                        comparison_flow.retire_comparison_exposure(conn, reservation.id)
                     captured_after = sum(len(repo.list_outputs(conn, slot.run_id))
                                          for slot in repo.list_trial_slots(conn, experiment_id))
                 finally:
@@ -981,7 +981,7 @@ def comparison_stage(*, select: bool = False, operate: bool = False,
         }, sort_keys=True))
         return 0 if passed else 2
     finally:
-        orchestrator._require_reviewed_comparison_material = admission
+        comparison_flow._require_reviewed_comparison_material = admission
         sealed_store.load_reviewed_comparison_family = reviewed_family
 
 
@@ -1348,12 +1348,12 @@ def replay_stage() -> int:
     Every change is made on temporary copies; the checked-in fixtures, the sealed
     files and any live database are never touched.
     """
-    admission = orchestrator._require_reviewed_comparison_material
+    admission = comparison_flow._require_reviewed_comparison_material
     reviewed_family = sealed_store.load_reviewed_comparison_family
     original_mission = config.PIVOT_MISSION
     original_state = config.PIVOT_PUBLIC_STATE
     try:
-        orchestrator._require_reviewed_comparison_material = lambda *_: None
+        comparison_flow._require_reviewed_comparison_material = lambda *_: None
         sealed_store.load_reviewed_comparison_family = sealed_store.load_family
         with tempfile.TemporaryDirectory(prefix="shiftwork-s19-replay-") as directory:
             db_file = Path(directory) / "replay.db"
@@ -1537,7 +1537,7 @@ def replay_stage() -> int:
         }, sort_keys=True))
         return 0 if passed else 2
     finally:
-        orchestrator._require_reviewed_comparison_material = admission
+        comparison_flow._require_reviewed_comparison_material = admission
         sealed_store.load_reviewed_comparison_family = reviewed_family
         config.PIVOT_MISSION = original_mission
         config.PIVOT_PUBLIC_STATE = original_state

@@ -12,7 +12,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from demos.final_pivot import create_v5_sample
-from shiftwork import config, orchestrator
+from shiftwork import comparison_flow, config, orchestrator
 from shiftwork.app import create_app
 from shiftwork.domain.errors import InvalidSealedCase
 from shiftwork.sealed import store as sealed_store
@@ -334,7 +334,7 @@ def test_selected_operation_invalidated_at_run_start(selected_migrated):
     conn = db.connect(db_file)
     try:
         reservation = repo.get_exposure_reservation_for_experiment(conn, comparison["id"])
-        orchestrator.retire_comparison_exposure(conn, reservation.id)
+        comparison_flow.retire_comparison_exposure(conn, reservation.id)
     finally:
         conn.close()
     refused = client.post(f"/api/shifts/{shift_id}/runs",
@@ -748,7 +748,7 @@ def test_exact_choice_revalidates_and_never_changes_on_save_or_retry(session):
     conn = db.connect(session.db_file)
     try:
         reservation = repo.get_exposure_reservation_for_experiment(conn, comparison["id"])
-        orchestrator.retire_comparison_exposure(conn, reservation.id)
+        comparison_flow.retire_comparison_exposure(conn, reservation.id)
     finally:
         conn.close()
     invalid = session.board()
@@ -808,7 +808,7 @@ def test_failed_first_choice_comparison_keeps_exposure_and_operation_block(tmp_p
         try:
             reservation = repo.get_exposure_reservation_for_experiment(conn, comparison["id"])
             before = repo.count_exposure_reservations(conn)
-            orchestrator.retire_comparison_exposure(conn, reservation.id)
+            comparison_flow.retire_comparison_exposure(conn, reservation.id)
         finally:
             conn.close()
         refused = client.post(f"/api/shifts/{shift_id}/selections", json=_choice(comparison, a, None))
@@ -928,7 +928,7 @@ def test_choice_refuses_an_ineligible_candidate_and_still_accepts_the_eligible_o
     a, b, comparison = _comparison(session.client, session.shift_id, source["id"])
     prior = session.board()["operating_selection"]["id"]
     path = f"/api/shifts/{session.shift_id}/selections"
-    real_outcome = orchestrator._comparison_outcome
+    real_outcome = comparison_flow._comparison_outcome
 
     def ineligible_a(conn, experiment, context, slots):
         outcome = real_outcome(conn, experiment, context, slots)
@@ -943,7 +943,7 @@ def test_choice_refuses_an_ineligible_candidate_and_still_accepts_the_eligible_o
             for item in outcome.eligibility
         )})
 
-    monkeypatch.setattr(orchestrator, "_comparison_outcome", ineligible_a)
+    monkeypatch.setattr(comparison_flow, "_comparison_outcome", ineligible_a)
     refused = session.client.post(
         path, json=_choice(comparison, a, prior, key="choice-ineligible"))
     assert refused.status_code == 409, refused.text
@@ -1386,7 +1386,7 @@ def test_a_fault_mid_later_reservation_leaves_no_partial_comparison(tmp_path, mo
             with monkeypatch.context() as patch:
                 patch.setattr(repo, "insert_trial_slot", fail)
                 with pytest.raises(sqlite3.Error, match="injected later-reservation write fault"):
-                    orchestrator.create_later_condition_comparison(
+                    comparison_flow.create_later_condition_comparison(
                         conn, successor["id"],
                         operation_run_id=operation["id"],
                         declared_treatment=request["declared_treatment"],
