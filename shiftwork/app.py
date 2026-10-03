@@ -1,5 +1,5 @@
 """FastAPI factory. The controller opens the DB, ensures the schema, seeds the
-bookshop engagement, reconciles work a restart left nonterminal and mounts the
+admitted engagements, reconciles work a restart left nonterminal and mounts the
 static client."""
 
 from contextlib import asynccontextmanager
@@ -14,7 +14,7 @@ from shiftwork.api.routes import domain_error_handler, lifecycle_error_handler, 
 from shiftwork.domain.errors import ShiftworkDomainError
 from shiftwork.orchestrator import LifecycleError
 from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
-from shiftwork.store import db, repo
+from shiftwork.store import db
 
 
 @asynccontextmanager
@@ -22,20 +22,8 @@ async def lifespan(app: FastAPI):
     conn = db.connect(app.state.db_path)
     try:
         db.ensure_schema(conn)
-        repo.seed_engagement(
-            conn, config.BOOKSHOP_SLUG, config.BOOKSHOP_BUSINESS_KIND, config.BOOKSHOP_DISPLAY_NAME
-        )
-        repo.seed_engagement_config(
-            conn,
-            config.BOOKSHOP_SLUG,
-            business_kind=config.BOOKSHOP_BUSINESS_KIND,
-            assist_level="scaffolded",
-            allowed_assist_roles=("HINT", "DIAGNOSIS", "PATCH_PROPOSAL"),
-            total_assist_budget_per_shift=config.BOOKSHOP_TOTAL_ASSIST_BUDGET,
-            enabled_check_families=config.BOOKSHOP_FAMILIES,
-            attempt_limit=config.DEFAULT_ATTEMPT_LIMIT,
-            rotation_group_size=config.BOOKSHOP_ROTATION_GROUP_SIZE,
-        )
+        orchestrator.seed_registered_engagements(conn)
+        orchestrator.verify_assist_policy_projections(conn)
         # Startup recovery (Slices 8 and 14): runs and assist events a restart
         # left nonterminal are failed, with captures and draws retained and no
         # checks or events written.

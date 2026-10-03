@@ -162,7 +162,8 @@ def create_diagnostic_experiment(
             id=f"run-{repo.count_runs_all(conn) + 1:04d}",
             shift_id=shift.id,
             artifact_version_id=version.id,
-            request_batch_ref=config.PIVOT_INCIDENT_REQUESTS.name,
+            request_batch_ref=Path(orchestrator.pack_registry.resolve_pack(
+                shift.engagement_slug).incident_request_path).name,
             shop_snapshot_ref=f"frozen-context:{context.id}",
             attempt_number=repo.count_runs(conn, shift.id) + 1,
             state=RunState.QUEUED,

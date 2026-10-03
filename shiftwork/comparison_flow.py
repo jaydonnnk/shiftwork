@@ -42,6 +42,7 @@ from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS
 from shiftwork.gateway.redaction import assert_public_safe
 from shiftwork.ledger import chain
 from shiftwork.live_budget import LiveComparisonBudget
+from shiftwork.packs.registry import FamilyClass
 from shiftwork.orchestrator import (
     COMPARE_DEADLINE_S,
     DIAGNOSTIC_HARNESS_REF,
@@ -87,10 +88,10 @@ def _read_comparison_workloads(
     a replaced batch, a swapped pair assignment, a changed count or a file edited
     after review fails before any reservation exists.
     """
-    if slug != config.BOOKSHOP_SLUG:
-        raise LifecycleError("conflict", "this engagement has no reviewed comparison workloads")
+    pack = orchestrator.admit_pack(slug)
+    manifest_path = config.PACKAGE_DIR / pack.manifest_path
     try:
-        data = json.loads(config.PIVOT_COMPARE_MANIFEST.read_bytes().decode("utf-8"))
+        data = json.loads(manifest_path.read_bytes().decode("utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise LifecycleError("conflict", "the reviewed comparison manifest is unreadable") from exc
     _require_reviewed_comparison_material(data, "comparison workload manifest", "workloads")
@@ -108,10 +109,10 @@ def _read_comparison_workloads(
     for entry in entries:
         try:
             batch_bytes = (
-                config.PIVOT_COMPARE_REQUEST_DIR / str(entry["request_file"])
+                manifest_path.parent / str(entry["request_file"])
             ).read_bytes()
             specs_bytes = (
-                config.PIVOT_COMPARE_REQUEST_DIR / str(entry["task_spec_file"])
+                manifest_path.parent / str(entry["task_spec_file"])
             ).read_bytes()
         except (OSError, KeyError, TypeError) as exc:
             raise LifecycleError(
@@ -363,6 +364,7 @@ def create_qualifying_comparison(
     conn.execute("BEGIN IMMEDIATE")
     try:
         shift = _require_open_shift(conn, shift_id)
+        pack = orchestrator.admit_pack(shift.engagement_slug)
         isolated = adapter == orchestrator.TokenFactoryAdapter.name
         if adapter not in (orchestrator.LocalProcessAdapter.name, orchestrator.TokenFactoryAdapter.name):
             raise LifecycleError("conflict", "no safe comparison executor is configured")
@@ -434,13 +436,15 @@ def create_qualifying_comparison(
                 f"{COMPARISONS_PER_SHIFT})",
             )
 
-        mission_bytes = config.PIVOT_MISSION.read_bytes()
-        mission = task_contract.load_mission_bytes(mission_bytes, label=config.PIVOT_MISSION.name)
+        mission_path = config.PACKAGE_DIR / pack.mission_path
+        mission_bytes = mission_path.read_bytes()
+        mission = task_contract.load_mission_bytes(mission_bytes, label=mission_path.name)
         if mission.engagement_slug != shift.engagement_slug:
             raise LifecycleError("conflict", "reviewed mission belongs to another engagement")
-        snapshot_bytes = config.PIVOT_COMPARE_STATE.read_bytes()
+        state_path = config.PACKAGE_DIR / pack.comparison_state_path
+        snapshot_bytes = state_path.read_bytes()
         snapshot = task_contract.load_public_state_bytes(
-            snapshot_bytes, label=config.PIVOT_COMPARE_STATE.name
+            snapshot_bytes, label=state_path.name
         )
         if not snapshot.records:
             raise LifecycleError("conflict", "the reviewed public state carries no record")
@@ -476,10 +480,13 @@ def create_qualifying_comparison(
         )
         repo.insert_exposure_reservation(conn, reservation)
         reserved: dict[int, tuple[str, ...]] = {}
-        for family in config.BOOKSHOP_COMPARISON_FAMILIES:
+        for declaration in pack.families:
+            if declaration.family_class is not FamilyClass.COMPARISON:
+                continue
+            family = declaration.family
             drawn = rotation.select_pair_variants(
                 family,
-                sealed_store.load_reviewed_comparison_family(family).cases,
+                sealed_store.load_declared_family(declaration, slug=pack.slug).cases,
                 _exposure_refs(conn, shift.engagement_slug, family),
             )
             for pair_ordinal, case in enumerate(drawn, start=1):
@@ -507,7 +514,7 @@ def create_qualifying_comparison(
                         reservation_id=reservation_id,
                         engagement_slug=shift.engagement_slug,
                         family=family,
-                        cycle=sealed_store.family_cycle(family),
+                        cycle=declaration.cycle,
                         variant_ref=ref,
                         pair_ordinal=pair_ordinal,
                         drawn_at=_now(),
@@ -693,6 +700,7 @@ def create_later_condition_comparison(
     conn.execute("BEGIN IMMEDIATE")
     try:
         shift = _require_open_shift(conn, shift_id)
+        pack = orchestrator.admit_pack(shift.engagement_slug)
         isolated = adapter == orchestrator.TokenFactoryAdapter.name
         if adapter not in (orchestrator.LocalProcessAdapter.name, orchestrator.TokenFactoryAdapter.name):
             raise LifecycleError("conflict", "no safe comparison executor is configured")
@@ -784,8 +792,9 @@ def create_later_condition_comparison(
                     "only the two pinned reviewed candidates are executable as an offline comparison",
                 )
 
-        mission_bytes = config.PIVOT_MISSION.read_bytes()
-        mission = task_contract.load_mission_bytes(mission_bytes, label=config.PIVOT_MISSION.name)
+        mission_path = config.PACKAGE_DIR / pack.mission_path
+        mission_bytes = mission_path.read_bytes()
+        mission = task_contract.load_mission_bytes(mission_bytes, label=mission_path.name)
         if mission.engagement_slug != shift.engagement_slug:
             raise LifecycleError("conflict", "reviewed mission belongs to another engagement")
         # The frozen public bytes are the ones the operation actually observed, so
@@ -800,7 +809,7 @@ def create_later_condition_comparison(
         # The observed world must be that world with only dependency availability
         # observed differently, so the reviewed requests stay valid for it and
         # the experiment runs under the exact bytes the operation observed.
-        reviewed_comparison_bytes = config.PIVOT_COMPARE_STATE.read_bytes()
+        reviewed_comparison_bytes = (config.PACKAGE_DIR / pack.comparison_state_path).read_bytes()
         _require_dependency_only_variation(reviewed_comparison_bytes, snapshot_bytes)
         workloads = _read_comparison_workloads(
             shift.engagement_slug, mission, reviewed_comparison_bytes
@@ -816,10 +825,13 @@ def create_later_condition_comparison(
             scope="comparison", experiment_id=None, state="ACTIVE", created_at=_now(),
         ))
         reserved: dict[int, tuple[str, ...]] = {}
-        for family in config.BOOKSHOP_COMPARISON_FAMILIES:
+        for declaration in pack.families:
+            if declaration.family_class is not FamilyClass.COMPARISON:
+                continue
+            family = declaration.family
             drawn = rotation.select_pair_variants(
                 family,
-                sealed_store.load_reviewed_comparison_family(family).cases,
+                sealed_store.load_declared_family(declaration, slug=pack.slug).cases,
                 _exposure_refs(conn, shift.engagement_slug, family),
             )
             for pair_ordinal, case in enumerate(drawn, start=1):
@@ -843,7 +855,7 @@ def create_later_condition_comparison(
                 repo.insert_exposure_item(conn, ExposureItem(
                     id=exposure_item_id, reservation_id=reservation_id,
                     engagement_slug=shift.engagement_slug, family=family,
-                    cycle=sealed_store.family_cycle(family), variant_ref=ref,
+                    cycle=declaration.cycle, variant_ref=ref,
                     pair_ordinal=pair_ordinal, drawn_at=_now(),
                 ))
                 case_json = json.dumps(

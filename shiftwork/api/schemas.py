@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from shiftwork.domain.comparison import ComparisonOutcome
 from shiftwork.domain.models import (
     ArtifactVersion,
+    AssistRole,
     CheckResult,
     Claim,
     Incident,
@@ -597,6 +598,7 @@ class InvestigateStationView(BaseModel):
     assist_reason: str
     assist_used: int
     assist_limit: int
+    assist_allowed_roles: tuple[AssistRole, ...]
     assist_events: tuple[AssistEventView, ...]
     bootstrap_available: bool
     bootstrap_reason: str

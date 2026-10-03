@@ -95,6 +95,7 @@ from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS
 from shiftwork.gateway.redaction import assert_public_safe
 from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
 from shiftwork.ledger import chain, reducer
+from shiftwork.packs import registry as pack_registry
 from shiftwork.sealed import rotation
 from shiftwork.sealed import store as sealed_store
 from shiftwork.store import db, repo
@@ -107,6 +108,157 @@ class LifecycleError(Exception):
         super().__init__(message)
         self.kind = kind
         self.message = message
+
+
+def _verify_pack_material(pack: pack_registry.EngagementPack) -> frozenset[str]:
+    """Verify all reviewed bytes and required seals without writes or exposure."""
+    pins = {pin.path: pin.sha256 for pin in pack.reviewed_pins}
+    if not set(pack.required_paths()).issubset(pins):
+        raise pack_registry.PackUnavailable("engagement material awaits operator review")
+    for document in pack.documents:
+        if pins.get(document.path) != document.sha256:
+            raise pack_registry.PackUnavailable("document pin disagrees with the reviewed content pin")
+    for name, digest in pins.items():
+        path = config.PACKAGE_DIR / name
+        # Declarations cannot traverse a symlink or otherwise leave the package.
+        if not path.resolve().is_relative_to(config.PACKAGE_DIR.resolve()):
+            raise pack_registry.PackUnavailable("content path leaves the package")
+        if hashlib.sha256(path.read_bytes()).hexdigest() != digest:
+            raise pack_registry.PackUnavailable("reviewed content pin mismatch")
+    mission = task_contract.load_mission(config.PACKAGE_DIR / pack.mission_path)
+    if mission.engagement_slug != pack.slug:
+        raise pack_registry.PackUnavailable("mission belongs to another engagement")
+    catalog_name = f"fixtures/catalogs/{pack.slug}_v{mission.contract_catalog_version}.json"
+    if catalog_name not in pins:
+        raise pack_registry.PackUnavailable("compatible catalog lacks its reviewed pin")
+    catalog = contract_catalog.load_catalog(pack.slug, mission.contract_catalog_version)
+    if catalog.content_hash != mission.contract_catalog_hash:
+        raise pack_registry.PackUnavailable("mission catalog binding mismatch")
+    task_contract.load_public_state(config.PACKAGE_DIR / pack.public_state_path)
+    task_contract.load_public_state(config.PACKAGE_DIR / pack.comparison_state_path)
+    manifest = json.loads((config.PACKAGE_DIR / pack.manifest_path).read_bytes())
+    payload = manifest.get("workloads")
+    sealed_digest = hashlib.sha256(json.dumps(
+        payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False,
+    ).encode("utf-8")).hexdigest()
+    if (manifest.get("review_status") != "OPERATOR_SEALED"
+            or manifest.get("sealed_payload_sha256") != sealed_digest):
+        raise pack_registry.PackUnavailable("comparison manifest awaits operator review and sealing")
+    if (manifest.get("engagement_slug") != pack.slug or manifest.get("schema_version") != 1
+            or manifest.get("comparison_state_sha256") != pins[pack.comparison_state_path]):
+        raise pack_registry.PackUnavailable("comparison manifest binding mismatch")
+    if not isinstance(payload, list) or [entry.get("ordinal") for entry in payload] != [1, 2, 3]:
+        raise pack_registry.PackUnavailable("comparison manifest needs ordinals 1, 2 and 3")
+    request_dir = Path(pack.manifest_path).parent
+    for entry in payload:
+        for field in ("request_file", "task_spec_file"):
+            name = entry[field]
+            if not isinstance(name, str) or Path(name).name != name or "\\" in name:
+                raise pack_registry.PackUnavailable("comparison manifest contains an invalid path")
+            if (request_dir / name).as_posix() not in pins:
+                raise pack_registry.PackUnavailable("comparison workload lacks its reviewed pin")
+    refs: set[str] = set()
+    for declaration in pack.families:
+        loaded = sealed_store.load_declared_family(declaration, slug=pack.slug)
+        family_refs = {rotation.variant_ref(case) for case in loaded.cases}
+        if refs & family_refs:
+            raise pack_registry.PackUnavailable("declared families share variant refs")
+        refs.update(family_refs)
+    return frozenset(refs)
+
+
+def admit_pack(slug: str) -> pack_registry.EngagementPack:
+    """Resolve operator declarations and fail closed on any required material.
+
+    Unreviewed declarations remain unavailable. A collision with another
+    declared, readable sealed family refuses admission in either display order.
+    """
+    pack = pack_registry.resolve_pack(slug)
+    try:
+        refs = _verify_pack_material(pack)
+    except (OSError, ValueError, KeyError, TypeError, ShiftworkDomainError) as exc:
+        raise pack_registry.PackUnavailable("engagement material is unavailable") from exc
+    for other in pack_registry.registered_packs():
+        if other.slug == slug:
+            continue
+        other = pack_registry.resolve_pack(other.slug)
+        for declaration in other.families:
+            try:
+                loaded = sealed_store.load_declared_family(declaration, slug=other.slug)
+            except (OSError, ValueError, KeyError, TypeError, ShiftworkDomainError):
+                continue
+            if refs & {rotation.variant_ref(case) for case in loaded.cases}:
+                raise pack_registry.PackUnavailable("registered packs share variant refs")
+    return pack
+
+
+def workplace_boards() -> tuple[pack_registry.BoardAvailability, ...]:
+    """Safe declaration-only display plus whole-pack material availability."""
+    boards = []
+    for declaration in pack_registry.registered_packs():
+        try:
+            pack = pack_registry.resolve_pack(declaration.slug)
+        except (ValueError, ShiftworkDomainError):
+            continue
+        try:
+            admit_pack(pack.slug)
+            status = "AVAILABLE"
+        except pack_registry.PackUnavailable:
+            status = "AWAITING_OPERATOR_REVIEW"
+        boards.append(pack_registry.BoardAvailability(
+            engagement_slug=pack.slug, display=pack.display, availability=status,
+        ))
+    return tuple(boards)
+
+
+def seed_registered_engagements(conn: sqlite3.Connection) -> None:
+    """Seed admitted declarations only; preserve every existing row and shift."""
+    for declaration in pack_registry.registered_packs():
+        try:
+            pack = admit_pack(declaration.slug)
+        except pack_registry.PackUnavailable:
+            continue
+        repo.seed_engagement(conn, pack.slug, pack.slug,
+                             pack.display.client or pack.display.employer)
+        repo.seed_engagement_config(
+            conn, pack.slug,
+            business_kind=pack.slug,
+            assist_level=pack.assist.level_label,
+            allowed_assist_roles=tuple(role.value for role in pack.assist.allowed_roles),
+            total_assist_budget_per_shift=pack.assist.total_calls_per_shift,
+            enabled_check_families=tuple(f.family for f in pack.families
+                                       if f.family_class is pack_registry.FamilyClass.ATTEMPT),
+            attempt_limit=config.DEFAULT_ATTEMPT_LIMIT,
+            rotation_group_size=min(f.min_variants for f in pack.families),
+        )
+        repo.seed_engagement_assist_policy(
+            conn, pack.slug,
+            assist_level=pack.assist.level_label,
+            allowed_assist_roles=tuple(role.value for role in pack.assist.allowed_roles),
+            total_assist_budget_per_shift=pack.assist.total_calls_per_shift,
+        )
+
+
+def verified_assist_policy(conn: sqlite3.Connection, slug: str) -> pack_registry.AssistPolicy:
+    """Verify the current projection without reading historical assistance columns."""
+    policy = pack_registry.resolve_pack(slug).assist
+    row = repo.get_engagement_assist_policy(conn, slug)
+    try:
+        matches = (row is not None
+                   and row["assist_level"] == policy.level_label
+                   and json.loads(row["allowed_assist_roles_json"]) == [role.value for role in policy.allowed_roles]
+                   and row["total_assist_budget_per_shift"] == policy.total_calls_per_shift)
+    except (ValueError, TypeError):
+        matches = False
+    if not matches:
+        raise LifecycleError("conflict", "assist policy projection disagrees with the registered declaration")
+    return policy
+
+
+def verify_assist_policy_projections(conn: sqlite3.Connection) -> None:
+    """Fail startup closed on edited projections without rewriting their rows."""
+    for row in conn.execute("SELECT slug FROM engagements"):
+        verified_assist_policy(conn, row["slug"])
 
 
 BOOKSHOP_DRAFT_FILES: dict[str, str] = {
@@ -211,9 +363,8 @@ def append_selection(
         if (version is None or version.shift_id != shift.id
                 or version.content_hash != candidate.artifact_content_hash):
             raise LifecycleError("conflict", "selected version changed after the comparison")
-        if shift.engagement_slug != config.BOOKSHOP_SLUG:
-            raise LifecycleError("conflict", "current requirements are unavailable for this engagement")
-        if _hash_bytes(config.PIVOT_MISSION.read_bytes()) != context.requirement_set_hash:
+        pack = admit_pack(shift.engagement_slug)
+        if _hash_bytes((config.PACKAGE_DIR / pack.mission_path).read_bytes()) != context.requirement_set_hash:
             raise LifecycleError("conflict", "requirements changed after the comparison")
         alternative = next(
             (item for item in experiment.candidates if item.label != candidate.label), None
@@ -261,10 +412,8 @@ def _attempt_limit(conn: sqlite3.Connection, slug: str) -> int:
 
 
 def _enabled_families(conn: sqlite3.Connection, slug: str) -> tuple[str, ...]:
-    row = repo.get_engagement_config(conn, slug)
-    if row is None:
-        return config.BOOKSHOP_FAMILIES
-    return tuple(json.loads(row["enabled_check_families_json"]))
+    return tuple(f.family for f in pack_registry.resolve_pack(slug).families
+                 if f.family_class is pack_registry.FamilyClass.ATTEMPT)
 
 
 def _attempt_batch(ordinal: int) -> executor.BatchRef:
@@ -569,7 +718,8 @@ def start_run(
         drawn: dict[str, Any] = {}
         exposed = {draw.variant_ref for draw in repo.list_rotation_draws(conn, shift.engagement_slug)}
         for family in _enabled_families(conn, shift.engagement_slug):
-            drawn[family] = rotation.select_variant(family, sealed_store.load_family(family).cases, exposed)
+            drawn[family] = rotation.select_variant(
+                family, sealed_store.load_family(family, slug=shift.engagement_slug).cases, exposed)
         request_batch = _attempt_batch(rotation.shared_ordinal(drawn))
 
         ordinal = repo.count_runs_all(conn) + 1
@@ -603,7 +753,7 @@ def start_run(
                     family=family,
                     variant_ref=rotation.variant_ref(case),
                     run_id=run.id,
-                    cycle=sealed_store.family_cycle(family),
+                    cycle=sealed_store.family_cycle(family, slug=shift.engagement_slug),
                     drawn_at=_now(),
                 ),
             )
@@ -647,9 +797,8 @@ def _reserve_selected_operation(
         reservation = repo.get_exposure_reservation_for_experiment(conn, selection.comparison_id)
         if reservation is None or reservation.state != "ACTIVE":
             raise LifecycleError("conflict", "selected comparison exposure was invalidated")
-    if shift.engagement_slug != config.BOOKSHOP_SLUG:
-        raise LifecycleError("conflict", "operational mission is unavailable for this engagement")
-    mission_bytes = config.PIVOT_MISSION.read_bytes()
+    pack = admit_pack(shift.engagement_slug)
+    mission_bytes = (config.PACKAGE_DIR / pack.mission_path).read_bytes()
     if _hash_bytes(mission_bytes) != selection.requirement_set_hash:
         raise LifecycleError("conflict", "selected requirements changed before operation")
     prior_operations = [run for run in repo.list_runs_for_shift(conn, shift.id)
@@ -1248,7 +1397,7 @@ def _incident_case(conn: sqlite3.Connection, incident: Incident):
     )
     if failing is None:
         return None
-    return sealed_store.case_for_check_id(failing.check_id)
+    return sealed_store.case_for_check_id(failing.check_id, slug=incident.engagement_slug)
 
 
 def _resolution_drafts(
@@ -1914,6 +2063,10 @@ def request_assist(
             "conflict", "diagnostic help must reference an investigation owned by this shift"
         )
 
+    policy = verified_assist_policy(conn, shift.engagement_slug)
+    admit_pack(shift.engagement_slug)
+    if role not in policy.allowed_roles:
+        raise LifecycleError("conflict", "this engagement does not permit that assist role")
     if gateway is None:
         raise AssistGatewayUnavailable(
             f"assist gateway is not configured for this session; {role.value} is unavailable"
@@ -1958,16 +2111,14 @@ def request_assist(
             conn.rollback()
             return replay
         events = repo.list_assist_for_shift(conn, shift.id)
-        northline = shift.engagement_slug != config.BOOKSHOP_SLUG
-        limit = 1 if northline else config.BOOKSHOP_TOTAL_ASSIST_BUDGET
-        if northline and role is not AssistRole.HINT:
-            raise LifecycleError("conflict", "this engagement permits one hint only")
+        policy = verified_assist_policy(conn, shift.engagement_slug)
+        limit = policy.total_calls_per_shift
         if len(events) >= limit:
             raise LifecycleError("conflict", f"assist budget exhausted ({len(events)} of {limit} used)")
-        if role is AssistRole.PATCH_PROPOSAL and any(
+        if role is AssistRole.PATCH_PROPOSAL and sum(
             event.role is AssistRole.PATCH_PROPOSAL for event in events
-        ):
-            raise LifecycleError("conflict", "one patch proposal maximum per shift")
+        ) >= policy.max_patch_proposals:
+            raise LifecycleError("conflict", "patch proposal budget exhausted for this shift")
         model_id = getattr(gateway, "model_id", config.ASSIST_MODEL)
         event = AssistEvent(
             id=f"assist-{shift.id}-{len(events) + 1}", shift_id=shift.id,
@@ -2045,12 +2196,10 @@ def reserve_bootstrap_diagnostic(
         raise BootstrapBlocked("a null investigation is reserved only for a legacy first-choice shift")
     if adapter != TokenFactoryAdapter.name or not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID"):
         raise BootstrapBlocked("the verified isolated executor and its controller credentials are unavailable")
-    if shift.engagement_slug != config.BOOKSHOP_SLUG:
-        raise BootstrapBlocked("this engagement has no reviewed initial request and public state")
-    if not all(path.is_file() for path in (
-        config.PIVOT_MISSION, config.PIVOT_PUBLIC_STATE, config.PIVOT_INCIDENT_REQUESTS
-    )):
-        raise BootstrapBlocked("the reviewed initial request, mission or public state is missing")
+    try:
+        admit_pack(shift.engagement_slug)
+    except ShiftworkDomainError as exc:
+        raise BootstrapBlocked("the reviewed initial request, mission or public state is missing") from exc
     if repo.count_experiments_for_shift(conn, shift.id, ExperimentKind.DIAGNOSTIC):
         raise BootstrapBlocked("a bootstrap cannot be repeated after a diagnostic reservation")
     prior_runs = conn.execute(
@@ -2074,7 +2223,9 @@ def investigation_view(conn: sqlite3.Connection, shift_id: str, *, adapter: str 
     entries = repo.list_investigations_for_shift(conn, shift.id)
     latest = entries[-1] if entries else None
     assist_events = repo.list_assist_for_shift(conn, shift.id)
-    assist_limit = config.BOOKSHOP_TOTAL_ASSIST_BUDGET if shift.engagement_slug == config.BOOKSHOP_SLUG else 1
+    policy = verified_assist_policy(conn, shift.engagement_slug)
+    admit_pack(shift.engagement_slug)
+    assist_limit = policy.total_calls_per_shift
     assist_available = bool(latest and assist_gateway is not None and shift.state == "open"
                             and len(assist_events) < assist_limit)
     assist_reason = (
@@ -2114,6 +2265,7 @@ def investigation_view(conn: sqlite3.Connection, shift_id: str, *, adapter: str 
         "assist_reason": assist_reason,
         "assist_used": len(assist_events),
         "assist_limit": assist_limit,
+        "assist_allowed_roles": [role.value for role in policy.allowed_roles],
         "assist_events": [assist_event_view(event) for event in assist_events],
         "bootstrap_available": bootstrap_available,
         "bootstrap_reason": bootstrap_reason,
@@ -2153,20 +2305,13 @@ def _private_public_needles(conn: sqlite3.Connection | None = None) -> tuple[str
         value = os.environ.get(key)
         if value:
             needles.add(value)
-    for family in (*config.BOOKSHOP_FAMILIES, *config.BOOKSHOP_COMPARISON_FAMILIES):
-        for case in sealed_store.load_family(family).cases:
-            needles.update((case.id, case.check_id))
-            note = case.expected.get("note")
-            if isinstance(note, str) and len(note) >= 25:
-                needles.add(note)
-            if case.stimulus is not None:
-                stimulus = case.stimulus
-                needles.update((stimulus.request.request_id, stimulus.request.text,
-                                stimulus.task_spec.id, stimulus.task_spec.text,
-                                stimulus.state_delta.description))
-                aspect = case.expected.get("aspect")
-                if isinstance(aspect, str) and len(aspect) >= 8:
-                    needles.add(aspect)
+    for pack in pack_registry.registered_packs():
+        for declaration in pack.families:
+            try:
+                private_strings = sealed_store.load_privacy_needles(declaration.family, slug=pack.slug)
+            except FileNotFoundError:
+                continue
+            needles.update(private_strings)
     if conn is not None:
         needles.update(row["resolved_state_sha256"] for row in conn.execute(
             "SELECT resolved_state_sha256 FROM protected_case_snapshots"))
@@ -2262,19 +2407,20 @@ def freeze_diagnostic_context(
     protected reservation is created or referenced: a public diagnostic may only
     run material the learner can already read (Gate 3 S3.1, test 21).
     """
-    if shift.engagement_slug != config.BOOKSHOP_SLUG:
-        raise LifecycleError("conflict", "this engagement has no reviewed initial diagnostic workload")
-    mission_bytes = config.PIVOT_MISSION.read_bytes()
-    mission = task_contract.load_mission_bytes(mission_bytes, label=config.PIVOT_MISSION.name)
+    pack = admit_pack(shift.engagement_slug)
+    mission_path = config.PACKAGE_DIR / pack.mission_path
+    state_path = config.PACKAGE_DIR / pack.public_state_path
+    mission_bytes = mission_path.read_bytes()
+    mission = task_contract.load_mission_bytes(mission_bytes, label=mission_path.name)
     if mission.engagement_slug != shift.engagement_slug:
         raise LifecycleError("conflict", "reviewed mission belongs to another engagement")
-    snapshot_bytes = config.PIVOT_PUBLIC_STATE.read_bytes()
+    snapshot_bytes = state_path.read_bytes()
     snapshot = task_contract.load_public_state_bytes(
-        snapshot_bytes, label=config.PIVOT_PUBLIC_STATE.name
+        snapshot_bytes, label=state_path.name
     )
     if not snapshot.records:
         raise LifecycleError("conflict", "the reviewed public state carries no record")
-    batch_bytes = config.PIVOT_INCIDENT_REQUESTS.read_bytes()
+    batch_bytes = (config.PACKAGE_DIR / pack.incident_request_path).read_bytes()
     specs_bytes = json.dumps(
         [spec.model_dump(mode="json") for spec in mission.request_specs],
         sort_keys=True,
