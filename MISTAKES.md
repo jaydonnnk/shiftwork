@@ -1623,3 +1623,227 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **Prevention rule:** parse only Git diagnostic header lines, excluding plus-prefixed transcript content. Inspect every exit status and stop before any dependent commit or push when a verification command fails; verify already-created commits explicitly before continuing.
 
 - **Count-check follow-up:** the next helper asserted five receipt files although the five-file commit includes `.gitattributes` outside the four-file receipt package. Derive expected path sets explicitly instead of copying a total commit count into a scoped check.
+
+
+## 2026-10-03 S22a document verifier rejected a checkout-conversion warning
+
+- **What happened:** the read-only new-document whitespace helper stopped on the first LF document with Git exit 1, no whitespace output and an LF-to-CRLF checkout warning on stderr. It did not complete the remaining checks; no document or runtime code was rewritten by the helper.
+- **Root cause:** the helper required empty stderr although the repository's core.autocrlf setting emits a conversion warning for a clean new LF document.
+- **Prevention rule:** run read-only document whitespace checks with command-scoped core.autocrlf=false, keep actual whitespace diagnostics fatal, and distinguish the no-index difference exit from a whitespace failure. Inspect the whole helper result before claiming all checks passed.
+
+
+## 2026-10-03 S22a registry inspection: declared family locator allowed nested aliases
+
+- **What happened:** the first declaration validator admitted a nested sealed path while the loader used only its basename. Static inspection caught the alias before closeout; the validator now requires exactly sealed/cases/<file>.json, and four path-refusal tests pass. No production family was substituted.
+- **Root cause:** path containment was checked without verifying that the declared path and loader resolution named the same file.
+- **Prevention rule:** preserve one exact mapping from a reviewed locator to its reader; reject nested/path aliases when the loader intentionally uses a flat directory.
+
+
+## 2026-10-03 S22a registry metadata used an invented employer label
+
+- **What happened:** final metadata review found the GTM declaration named Shiftwork Revenue Team as its employer. The approved memo specifies Stonebridge Software with the revenue team as client. The declaration was corrected and its exact employer/client fields are now asserted. The earlier full-suite receipt precedes this correction.
+- **Root cause:** the declaration was authored from the schema and budget table without first checking the approved memo's role-fiction row.
+- **Prevention rule:** copy role/employer/client identity from the approved product source before choosing display strings; schema-valid metadata can still contradict product authority.
+
+
+## 2026-10-03 S22a closeout verifier applied new-file settings to tracked CRLF files
+
+- **What happened:** the final helper ran the tracked diff with core.autocrlf=false and returned exit 2, reporting existing CRLF line endings as trailing whitespace. Its assertion printed a large diagnostic and stopped at the first check; new-file, final scope and closeout-JSON checks did not run. Earlier normal tracked diff checks and the final 688-test suite passed. The premature final-whitespace PASS wording was withdrawn.
+- **Root cause:** a command-scoped setting intended for Git no-index checks of new LF files was also applied to the tracked checkout diff, disabling its normal checkout normalization. The document was updated before the dependent helper result was inspected.
+- **Prevention rule:** use the repository checkout settings for tracked diffs and the documented command-scoped setting only for new-file no-index checks; save diagnostics instead of interpolating a whole result into an assertion. Record PASS only after every dependent verification actually finishes. At an unexpected failure near the context limit, preserve the failure and hand off.
+
+
+## 2026-10-03 S22a resumed verifier treated CRLF receipt files as LF files
+
+- **What happened:** the resumed new-file helper stopped on the historical registry mutation JSON receipt after applying the LF-only Git setting. No receipt bytes were changed. The repaired helper completed and created closeout.json.
+- **Root cause:** untracked was used as a proxy for LF, although historical generated JSON receipts use CRLF.
+- **Prevention rule:** inspect line endings before selecting no-index settings; use repository checkout settings for CRLF receipts and the documented scoped setting for LF files. Preserve historical bytes and require all dependent checks to finish before recording completion.
+
+
+## 2026-10-03 S22a assistance projection omitted its strict HTTP schema field
+
+- **What happened:** the first post-change focused suite returned 10 failures because InvestigateStationView rejected the new assist_allowed_roles projection as an extra field. No live provider was used.
+- **Root cause:** the orchestration projection was changed without extending the strict response model consumed by the route.
+- **Prevention rule:** trace new public fields through projection, response schema and route assertions before running integration checks; retain extra-field rejection and fix the owning schema rather than weakening it.
+
+
+## 2026-10-03 S22a assistance mutation changed the event identifier as well as the budget
+
+- **What happened:** 15 targeted assistance faults reached intended assertions; the failed-call filter fault then raised a duplicate event ID constraint instead of the budget assertion, so the harness rejected it and left the final startup fault unrun. Exact source bytes were restored. Raw receipts remain in slice22a-assist-2026-10-03.
+- **Root cause:** filtering the shared event list also changed the event ID ordinal. The test could not distinguish the intended budget guard from that second effect.
+- **Prevention rule:** mutate only the budget predicate when testing failed-event accounting; keep the identifier ordinal intact. Express startup seeding failure as an explicit assertion outcome so wrong seeded projections are caught as the intended failure, not a fixture exception.
+
+
+## 2026-10-03 S22a assistance changes failed broader offline verification
+
+- **What happened:** final focused checks passed 97 tests and the 17 targeted faults reached intended failures, but the full offline suite returned 15 failed, 644 passed, 1 skipped, 2 warnings, 40 errors in 187.87s (0:03:07), exit 1. Raw output and receipt are preserved. No acceptance or later integration followed.
+- **Root cause:** not yet diagnosed. Focused assistance, registry and projection checks did not expose the failures exercised by the broader suite. The unexpected outcome arose at the half-context boundary, so diagnosis remains pending.
+- **Prevention rule:** retain the full-suite failure as the current source verdict; reconcile its actual failing paths before checking off assistance integration. Do not weaken historical preservation tests or infer approval to rewrite archived snapshots or sealed material.
+
+
+## 2026-10-03 S22a assistance final verifier stopped without saving new-file diagnostics
+
+- **What happened:** the final audit passed its source, scope, preservation, receipt and tracked-whitespace steps, then stopped on the new-file whitespace check of slice22a-registry-2026-10-03.md. Assistance closeout.json was not created. The helper only reported the path; underlying Git diagnostics were not retained. Final hold documentation follows this partial audit.
+- **Root cause:** the immediate checker condition failed; its underlying Git result is uninvestigated because the unexpected failure occurred at the half-context hold. The helper failed to save stdout/stderr before its assertion.
+- **Prevention rule:** persist every no-index command result before asserting it. Do not imply final whitespace or closeout completion after a partial audit. Preserve historical bytes and investigate the stored failing command in a fresh session before resuming source edits.
+
+
+## 2026-10-03 S22a verification resume rejected benign tracked conversion warnings
+
+- **What happened:** the new helper saved the actual held-command diagnostics, then stopped on a tracked diff with exit 0, no stdout and LF-to-CRLF warnings. No source or historical bytes changed; both raw streams and exit are retained.
+- **Root cause:** the tracked checker still required empty stderr despite the documented repository conversion warning behavior.
+- **Prevention rule:** require a clean tracked exit and no whitespace stdout, accept only exact known conversion-warning lines on stderr, and save all streams before asserting. Validate mixed line endings with clean and failing whitespace controls without rewriting bytes.
+
+
+## 2026-10-03 S22a verifier assumed one exact no-index whitespace exit
+
+- **What happened:** the LF trailing-space positive control emitted the intended whitespace diagnostic but returned exit 3, causing the verifier to stop. The exact argv, streams and exit are saved; no historical file changed.
+- **Root cause:** the control expected exit 2 and omitted the ordinary no-index difference bit that can produce exit 3.
+- **Prevention rule:** require real whitespace diagnostics and accept either whitespace-error exit 2 or 3 for failing controls. Clean checks still require exit 0 or 1 with no diagnostics.
+
+
+## 2026-10-03 S22a temporary verifier omitted repository import setup
+
+- **What happened:** whitespace checks and all six controls passed, then reusing the prior preservation audit stopped at importing shiftwork. No source or historical evidence was changed.
+- **Root cause:** the temporary script directory was Python's import root; the wrapper omitted the repository path expected by the reused audit.
+- **Prevention rule:** make the repository import path explicit before reusing repository imports from a temporary helper; keep saved completed checks and do not infer preservation completion from them.
+
+
+## 2026-10-03 S22a diagnosis helper omitted the test support import root
+
+- **What happened:** the diagnosis helper stopped while importing the existing sentinel test because its leakscan support module was unavailable on the temporary script path. No diagnosis receipt or product edit followed.
+- **Root cause:** repository imports were configured, but the test support path normally provided by pytest was omitted.
+- **Prevention rule:** when importing tests outside pytest, include their established support root as well as the repository root, or run the test through pytest directly.
+
+
+## 2026-10-03 S22a diagnosis helper left SQLite handles open on Windows
+
+- **What happened:** the diagnostic controls reached temporary-directory cleanup, which failed with WinError 32 on fresh.db. The complete diagnosis receipt was not written, so the controls require a recorded rerun.
+- **Root cause:** sqlite3's connection context commits or rolls back but does not close the handle; the temporary helper assumed it closed.
+- **Prevention rule:** explicitly close every temporary SQLite handle, and save diagnostic control results as they finish before cleanup or later assertions.
+
+
+## 2026-10-03 S22a repair check mixed conflicting pytest support roots
+
+- **What happened:** the combined assistance, migration and route check stopped at collection because tests/store/conftest.py shadowed the orchestration BookshopShift helper. No runtime assertion was evaluated; raw output is in policy-repair/focused.stdout.log.
+- **Root cause:** combining the store and orchestration test directories in this explicit order reused pytest's unqualified conftest module name.
+- **Prevention rule:** run the established assistance/orchestration group separately from the store migration group; retain collection errors and do not interpret them as runtime verification or weaken test imports to hide them.
+
+
+## 2026-10-03 S22a disposable sentinel package omitted legacy support files
+
+- **What happened:** focused checks returned 2 failed and 103 passed: the legacy API scan could not load catalog v1 and the local-executor scan could not read the artifact template. All current-policy and mocked assistance checks passed. Raw output is in policy-repair/focused-assist.stdout.log.
+- **Root cause:** copying only the declaration's admission pins omitted files used by other tests sharing the sentinel fixture when PACKAGE_DIR and CATALOG_DIR moved to the disposable root.
+- **Prevention rule:** trace all users of a shared fixture before redirecting a package root; copy required legacy catalogs and templates as well as reviewed pack material. Preserve admission, scoring and scanner assertions and log the failed check before rerunning.
+
+
+## 2026-10-03 S22a disposable seeding fixture omitted its changed state pin
+
+- **What happened:** the pre-change seeding check returned four setup errors at real admission, before reaching seeding assertions. Raw output remains in slice22a-seeding-2026-10-03/pre-change.stdout.log.
+- **Root cause:** the disposable clone reserialized public state but retained the manifest raw-state digest from the original bytes.
+- **Prevention rule:** recompute every dependent raw-byte binding after a disposable fixture changes serialization, then require real admission before claiming a failing regression. Preserve the invalid first run separately.
+
+
+## 2026-10-03 S22a new tests displaced a restart assertion block
+
+- **What happened:** immediate source inspection found a new test inserted before the preceding test had finished its restart assertions. The block was restored before the new behavior was verified. The saved reads-pre-change run stopped on its intended assertions before reaching the displaced block.
+- **Root cause:** a short finally/close patch anchor identified an interior function boundary instead of the complete test ending.
+- **Prevention rule:** anchor additions on the next complete function definition or module end; inspect complete neighboring functions after inserting tests so preservation assertions stay inside their original test.
+
+
+## 2026-10-03 S22a owning reads invalidated global-path fault setups
+
+- **What happened:** the first broader execution check returned 20 failed and 129 passed. Manifest fault copies and observed outage/retry states were still assigned through global Bellwether constants, which the owning declarations no longer read; an extra admission read also changed the mission-race trigger. Raw streams and argv remain in slice22a-seeding-2026-10-03/execution-focused.*.
+- **Root cause:** changing authority from globals to declarations without moving every existing fault stimulus to the new owning input left tests exercising obsolete controls.
+- **Prevention rule:** stage explicit disposable files behind declaration paths and pins with the real admission implementation; reseal only disposable manifests when reaching deeper workload guards. Keep the same refusal, preservation and serialized-scanner assertions, and inspect race read ordering before claiming equivalence.
+
+
+## 2026-10-03 S22a staging helper placed scratch inside its copy source
+
+- **What happened:** execution-final returned 1 failed and 202 passed. The failing unchanged-world control passed a production fixture path to a helper that created scratch beside the source, then recursively copied a directory containing its own destination. TemporaryDirectory cleanup ran. Production file digests are checked again at closeout.
+- **Root cause:** a request-world parent was used as a scratch directory without checking whether it belonged to the package being copied.
+- **Prevention rule:** use the system temporary root for recursive fixture copies; verify the resolved destination is outside the copy source before creating it. Never treat a cleanup attempt as byte-preservation proof.
+
+
+## 2026-10-03 S22a shape control expected a deeper guard after schema admission
+
+- **What happened:** after the scratch-directory repair, world-final still failed on its expected error text. Removing description now correctly fails whole-pack public-state schema admission before the later-world shape check. Raw output remains in world-final.*.
+- **Root cause:** the old integration assertion assigned the shape check responsibility for schema-invalid material, but new admission runs earlier.
+- **Prevention rule:** keep the exact shape-guard assertion on its direct pure-policy input and retain the integration schema refusal, conflict kind and no-write assertions separately. Never bypass actual admission to reach a deeper guard.
+
+## 2026-10-03 S22a exact legacy check initially rejected original omitted defaults
+
+- **What happened:** inspection before the first post-change test found that three original Bellwether payloads omit optional record fields that historical model snapshots include as defaults. A raw/model equality guard would reject those originals. No sealed bytes changed.
+- **Root cause:** exact source JSON and normalized model snapshots were assumed identical without comparing all six encodings first.
+- **Prevention rule:** pin each original encoding and its historical snapshot encoding explicitly; verify exact JSON value types by digest before parsing can coerce values. Never rewrite legacy payloads to make a compatibility guard pass.
+## 2026-10-03 S22a typed verification used wrong exception and nonexistent owning row
+
+- **What happened:** typed-new returned 2 failed/27 passed: a test expected ValueError instead of InvalidSealedCase, and another changed a reservation owner to a missing engagement, tripping the foreign key before the compatibility guard. typed-integration returned 1 failed/214 passed because a historical test expected an edited legacy family to remain readable. All raw failures remain saved.
+- **Root cause:** test setup did not follow the loader error taxonomy, relational ownership prerequisite or newly approved altered-payload refusal behavior.
+- **Prevention rule:** assert the actual domain exception, establish a historical owning row without production admission, and preserve archived-read assertions while requiring mutable altered legacy files to fail loading. Do not bypass foreign keys or weaken snapshot immutability.
+## 2026-10-03 S22a evidence ignore initially hid a test dependency
+
+- **What happened:** static inspection after the user requested local-only raw evidence found one test still loaded the now-ignored preflight JSON. That file would be absent in a fresh published checkout. The six independently verified variant refs now live as explicit test invariants; raw evidence stays preserved locally.
+- **Root cause:** the existing test treated a generated verification receipt as a required shipped fixture, and the first ignore edit did not audit consumers.
+- **Prevention rule:** search source and tests for reads of each newly ignored artifact directory; retain required invariants in source/tests and keep raw receipts optional. Save any earlier suite before rerunning against the final test source.
+
+## 2026-10-03 S22a Northline drafts failed broader offline verification
+
+- **What happened:** the 24 draft material files and exact-byte review packet
+  passed 55 focused checks with four disposable fault controls, but the full
+  offline suite returned 138 failed, 597 passed, 1 skipped, 2 warnings, 54 errors
+  in 172.44s (0:02:52), exit 1. Bellwether routes reported public evidence
+  contains private material. The raw command streams, argv, exit and source
+  pins are saved in evidence/slice22a-material-2026-10-03/. No draft service,
+  production seal, admission, seed or incident reproduction ran.
+- **Root cause:** not diagnosed. This unexpected regression arose at the
+  half-context boundary, so no investigation or speculative repair follows
+  in this session. Safety vocabulary/assessment limitations already known in
+  the packet do not explain the broader failures without a causal check.
+- **Prevention rule:** material authoring can affect global scanner inputs
+  before a new pack is admitted. Treat the saved full-suite failure as the
+  current verdict; establish the exact serialized collision and owning source
+  in a fresh session before repairing it. Never weaken the privacy scanner,
+  rewrite sealed Bellwether material or assume unreviewed means inert.
+
+## 2026-10-03 S22a privacy mutation verifier misread pytest failure text
+
+- **What happened:** the isolated case-id omission reached its named missing-refusal assertion, but the verifier rejected it and stopped after that control. Raw logs and JUnit remain in slice22a-privacy-2026-10-03/mutations/. Working source was never mutated.
+- **Root cause:** the verifier expected AssertionError for pytest.raises, which reports Failed: DID NOT RAISE LifecycleError.
+- **Prevention rule:** inspect actual JUnit failure text and require the exact named missing-refusal assertion with no setup or collection errors. Preserve the rejected receipt and rerun in a new output directory.
+
+## 2026-10-03 S22a material regression diagnosis
+
+- **What happened:** the saved material suite's privacy conflicts occurred before serialized scanning. Four disposable controls reproduce Bellwether 409, restore 200 by changing only the unsupported Northline task kind, and reproduce 409 after restoring exact draft bytes. No serialized needle matched and no scanner call occurred on the failing path.
+- **Root cause:** privacy inventory construction used executable SealedCase parsing for every registered pack, including unadmitted drafts. ROUTE_SAFETY_QUESTION raised a ValidationError, which the projection wrapper mislabeled as a leak.
+- **Prevention rule:** collect the same private string fields through a structural controller-only reader that protects drafts without executable task vocabulary. Keep complete semantic validation and real admission/seal guards on execution paths; prove each retained privacy field with serialized positive controls.
+
+## 2026-10-03 S22a sealing exposed obsolete Northline assistance setup
+
+- **What happened:** post-seal assistance compatibility returned 2 failed and 30 passed. Two tests inserted Northline manually and hit duplicate engagement keys because actual approved startup now seeds it. Raw logs and JUnit remain in evidence/slice22a-seal-2026-10-03/compatibility-assist.*.
+- **Root cause:** setup assumed Northline remained unadmitted after production review, despite moving the other unreviewed-material controls to disposable declarations.
+- **Prevention rule:** before changing admission state, inspect both absence assertions and manual engagement/policy inserts. Keep unreviewed refusal on explicit disposable unavailable declarations, reuse admitted rows, and preserve separate missing-unadmitted and mismatching-admitted startup checks.
+
+## 2026-10-04 S22a closeout comparator rejected historical checkout line endings
+
+- **What happened:** the new preservation verifier stopped on bookshop_v1.json when comparing raw checkout bytes with the HEAD blob. The saved diagnostic confirms 69 checkout CRLF sequences versus LF in HEAD, identical normalized content and identical Git-filtered blob hashes. No fixture bytes changed.
+- **Root cause:** I extended the exact-byte check for the 17 pinned files to every historical tracked fixture without accounting for existing checkout conversion.
+- **Prevention rule:** require exact entry-byte preservation for every historical file, exact HEAD-byte equality for pinned material, and repository-filtered Git blob equality for additional tracked material. Save a diagnostic before distinguishing checkout conversion from content drift.
+
+## 2026-10-04 S22a document updater guessed a CRLF checklist anchor
+
+- **What happened:** the closeout updater saved status, then stopped before writing the implementation plan because its checklist anchor assumed CRLF while the untracked plan uses LF. The remaining documents were untouched and no source changed.
+- **Root cause:** I used a guessed multiline byte anchor and validated files one at a time after the first document write.
+- **Prevention rule:** normalize proposed anchors to the measured target newline format and preflight every document replacement before writing any file. On resume, verify the already-applied document and preserve its current contents.
+
+## 2026-10-04 S22a document retry inferred one newline format from a mixed file
+
+- **What happened:** the updater retry again stopped at the same LF checklist anchor before any remaining document write. The plan contains both CRLF and LF; 68 CRLF sequences among 340 LF sequences are recorded.
+- **Root cause:** checking whether any CRLF exists still guessed the anchor format in a mixed historical file.
+- **Prevention rule:** measure the exact matching anchor bytes, permit precisely one existing LF or CRLF form, and derive replacement endings from that anchor. Never infer all line endings from one part of a mixed file.
+
+## 2026-10-04 S22a publication preflight found checkout-sensitive material pins
+
+- **What happened:** a disposable Git index and Windows autocrlf checkout preserved only 10 of the 24 approved Northline file hashes. Fourteen files changed checkout line endings before any publication. All working fixture bytes and the real index stayed unchanged. After explicit byte-preservation attributes, 24 of 24 checkout hashes match approval.
+- **Root cause:** raw-byte-reviewed catalogs, documents, state, mission and nested artifact worksheets lacked Git checkout attributes. Root-worktree tests could not prove a fresh Windows checkout preserved those pins.
+- **Prevention rule:** before publishing a new byte-pinned fixture pack, exercise a disposable autocrlf checkout of every reviewed file and require its exact approved hash. Protect new pinned paths explicitly without rewriting reviewed content.
