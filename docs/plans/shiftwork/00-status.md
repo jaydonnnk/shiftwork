@@ -1,5 +1,461 @@
 # Status: Shiftwork
 
+**Current S22a disposition, 2026-10-04: ACCEPTED FOR PUBLICATION.**
+The user requested committing S22a, merging and pushing to main, and cleaning
+the working tree after its verified technical closeout. This is acceptance
+and Git/cleanup authority for S22a; it does not authorize S22b or live work.
+The post-seal offline result is 854 passed, 1 skipped, 2 warnings; focused
+groups are 190/33/32 and all 21 final fault rows have verified raw receipts.
+A publication preflight additionally reproduced checkout drift: only 10/24
+approved Northline material hashes survived Windows autocrlf. Explicit
+attributes now preserve 24/24 without changing any reviewed file or seal.
+The stale registry comment is corrected; its literal pins stay unchanged.
+Raw evidence, archived preimages, deliberate blank worksheets, ADRs and
+future-slice material remain protected. Only regenerable caches are cleanup
+candidates. A pre-existing S21 mistake entry is retained separately.
+Publication and fresh-checkout receipts: evidence/slice22a-publication-2026-10-04/.
+Older checkpoints below retain their original evidence/authorization scope.
+
+
+**Historical S22a technical closeout, 2026-10-04: COMPLETE; user acceptance pending.**
+The authorized remaining work is finished on shiftwork/slice-22a at base/HEAD
+134b156280aa104b10f051bc17c34dcca00f74de. Operator approval "yes i pprove" and
+both scoped Gate 3 approvals remain in force. No repeat content/seal approval
+is due. Implementation remains uncommitted; this continuation changed no
+production or test source.
+
+Actual exits:
+
+- Current focused groups: 190 pack/schema checks, 33 assistance/sentinel checks
+  and 32 migration/route checks passed, each with two warnings and exit 0.
+- Post-seal full offline command: .venv313/Scripts/python.exe -m pytest tests
+  --ignore=tests/packaging -q. Result: 854 passed, 1 skipped, 2 warnings in
+  442.88s (0:07:22), exit 0. Collection contained 855 tests and no packaging.
+- The three unfinished privacy faults each pass a clean baseline, reach their
+  named missing-refusal assertion and restore exact disposable source bytes.
+  All 21 final fault rows, including the original 18, have verified raw log
+  hashes and actual JUnit failure text/counts, with no setup/collection errors.
+  They cover 49 intended failing parameter assertions. The interrupted run,
+  including its partial spec_text baseline, remains untouched. The original
+  18 receipts omit per-copy restoration digests; their finally restoration and
+  later passing baselines are retained, and working source pins are unchanged.
+- A fresh exact approved blank-handler loopback capture at
+  http://127.0.0.1:52942/ returned HTTP 200 with no task results. Assessment:
+  MISSING_OUTPUT / REQUIRED_TASK_MISSING, mandatory_pass=false. Its server is
+  closed. This is trusted-local HTTP-handler failure evidence, not isolation,
+  successful booking, selected operation or live deployment.
+- Real admission/idempotent seeding, restart and original v5 row preservation
+  with and without prior execution pass. Both seal changes exactly match the
+  approved proposal; the other 22 material files, 24 literal pins, six document
+  bindings, frozen dates, 17 Bellwether pins and six legacy refs re-verify.
+- Preservation covers 1501 continuation-entry files, 1307 seal-entry files
+  and 1198 historical evidence files. MISTAKES gains three verifier incidents
+  while its entire entry/prior prefixes survive. The index is unchanged.
+  Exact historical checkout bytes are retained; additional tracked material
+  uses Git-filtered HEAD equality because existing CRLF checkout conversion
+  is not raw LF-blob drift. Tracked/new-file whitespace checks pass.
+- Architect-reviewer cleanup reviewed the repository inventory, all 24 material
+  references, 37 new production definitions and affected ADRs. No deletion or
+  source refactor is needed. The earlier registry comment saying Northline has
+  no pins is a retained documentation nit; the approved literal pins are valid.
+  Historical evidence, deliberate blank worksheets and future-slice files stay.
+
+Fresh receipts: evidence/slice22a-closeout-2026-10-04/. Existing seal receipts:
+evidence/slice22a-seal-2026-10-03/. Older full-suite and mutation receipts keep
+their original source scope; older mutation harnesses were not all rerun.
+Safety assessment still refuses. Independent booking/retry/access/commitment/
+safety assessment, safety_route, consequences, selector and playable journey
+remain S22b. GTM remains unavailable. No installs, credentials, live calls,
+spend, staging, commits, pushes or S22b occurred. User S22a acceptance is the
+remaining decision; it is not inferred from passed technical exits.
+
+
+**Historical S22a sealed checkpoint, 2026-10-04:** the user answered "yes i pprove"
+to the exact Northline content and two-seal/24-pin/six-document proposal.
+Approval is obtained and those production changes are applied. Both scoped
+Gate 3 corrections remain approved; no repeat approval is due. The other 22
+material files and the original draft inventory retain their exact bytes.
+Northline now admits and seeds; GTM remains unavailable. No Northline shift,
+selection, operation or playable journey is claimed.
+
+Verification: focused 180 then 188 passed; assistance/sentinel 33 passed after
+repairing two obsolete manual-insert setups; store/routes 32 passed. Each group
+has two warnings. The blank approved HTTP handler reproduces MISSING_OUTPUT /
+REQUIRED_TASK_MISSING, with mandatory_pass=false, in a trusted-local loopback
+harness. Repeat startup/seeding preserves existing rows, including original v5
+bytes in source/no-source cases. This is not an isolated executor or successful
+deployment proof. Four independent seal status/digest baselines also pass.
+
+The interrupted disposable mutation harness retains 18 intended-failure
+receipts with no setup/collection errors. Privacy spec_text, delta_description
+and typed_kind remain unfinished; faults-summary.json is absent. No related
+process remains running. Resume in a fresh output directory without overwriting
+completed evidence. Raw receipts, authorization, source pins and entry snapshots:
+evidence/slice22a-seal-2026-10-03/.
+
+The full offline suite has NOT run after sealing. The older 814-pass suite
+predates these changes. Final preservation/diff audit, architect-reviewer cleanup
+and the S22a completion/acceptance decision remain pending. S22a stays unchecked
+and uncommitted. Safety assessment still refuses until S22b; no S22b, installs,
+credentials, live calls, spend, staging, commits or pushes occurred. MISTAKES
+only gained the assistance setup incident and its complete entry prefix survives.
+
+**Historical S22a operator-approval checkpoint, 2026-10-03:** exact packet
+preflight passes: 24 raw file hashes, two canonical payload digests, six document
+bindings, all three public pairs and six typed cases. Focused checks: 151 passed,
+two warnings. Current sources/logs match the saved 814-pass offline suite; no new
+full-suite run. All 17 Bellwether pins match HEAD and six legacy refs survive.
+Receipts: evidence/slice22a-review-preflight-2026-10-03/.
+
+The packet proposes only two Northline seals, 24 literal reviewed pins and six
+document bindings. Actual operator content approval is pending. No production
+seal/pin changed, no new pack was admitted/seeded and no starter ran. S22a stays
+unchecked. After approval, its blank starter can prove a missing-required-result
+incident offline through the existing check. Successful deployment assessment,
+safety_route, consequences and the playable journey remain S22b work; the safety
+assessment refusal is retained. Both Gate 3 corrections remain approved.
+
+**Historical S22a schema-only checkpoint, 2026-10-03:** approved slice ownership
+was checked before continuing: S22a owns material and per-family schema
+validation; S22b owns independent deployment assessment and the playable
+comparison/choice/operation journey. ROUTE_SAFETY_QUESTION now parses, so
+all three public pairs and all six draft cases validate without changing
+their exact bytes. Unknown future task kinds still refuse.
+
+The pure assessor explicitly refuses every safety-task assessment before
+grading, including missing output and every task status. This prevents
+schema recognition from falling through the generic completion branch;
+no safety, booking/retry/access or commitment assessor was implemented.
+The safety_route output claim and consequence rules remain S22b work.
+
+Baseline: 107 passed; final focused group: 114 passed. The schema check
+fails against pre-change parsing. Three separate disposable source faults
+reach their named failures with exact restoration and no collection/setup
+errors: omitted safety kind, omitted assessment refusal and semantic
+parsing reintroduced into the privacy reader. The future-draft privacy
+test now injects a genuinely unknown kind rather than relying on safety
+remaining unimplemented. Final offline suite: 814 passed, 1 skipped, 2 warnings in 413.59s (0:06:53), exit 0.
+Packaging is excluded; older mutation harnesses were not all rerun.
+
+Raw logs, JUnit, source pins and entry snapshots are in
+evidence/slice22a-schema-2026-10-03/. All 24 draft material hashes and
+Bellwether identities remain unchanged. Both Gate 3 corrections remain
+approved. Operator review/sealing, admission, Northline seeding and starter
+reproduction remain pending. Northline/GTM remain unavailable/unseeded.
+S22a is incomplete; no S22b assessor or journey was started. No installs,
+credentials, live calls, spend, staging, commits, pushes or sealing.
+
+**Historical S22a privacy repair checkpoint, 2026-10-03:** the saved broader
+regression is diagnosed and repaired. Northline's unimplemented
+ROUTE_SAFETY_QUESTION raised ValidationError during privacy-needle construction,
+before scanning; the wrapper mislabeled it as private material. Four disposable
+causal controls show 409, 200 with the draft absent, 200 with only that kind
+substituted, and 409 after exact restoration. No serialized collision occurred.
+
+A controller-only structural reader now retains the same private fields without
+requiring executable task vocabulary. Executable parsing, admission, seals and
+pins remain strict. Verification: 185 focused checks before the last two
+structural controls; final isolated baseline 18 passed; nine separate private-field
+omissions each reach the intended missing-refusal assertion. Final full offline
+suite: 807 passed, 1 skipped, 2 warnings in 389.84s (0:06:29), exit 0. Packaging is excluded; older mutation harnesses
+were not all rerun. Raw controls, source pins and preservation receipts:
+evidence/slice22a-privacy-2026-10-03/; raw command streams also remain in
+evidence/slice22a-material-2026-10-03/privacy-*.
+
+All 24 production drafts and their inventory hashes are unchanged. No runtime
+safety kind or independent deployment assessment was added. The packet is still
+not ready for sealing: compatible runtime validation and actual operator review
+precede admission, seeding and starter reproduction. Both scoped Gate 3
+corrections stay approved. S22a remains incomplete; S22b is untouched.
+Northline/GTM remain unavailable and unseeded. No installs, credentials, live
+calls, spend, staging, commits, pushes or sealing. Prior evidence and archived
+entry documents remain intact; MISTAKES only gained appended incidents.
+
+**Historical S22a verification HOLD, 2026-10-03:** the Northline drafts and exact
+operator packet are authored, but broader verification FAILED: 138 failed, 597 passed, 1 skipped, 2 warnings, 54 errors in 172.44s (0:02:52), exit 1.
+Bellwether routes reported public evidence contains private material. The cause
+is undiagnosed; no repair followed because the unexpected result arrived at the
+half-context boundary. Raw evidence/source pins: evidence/slice22a-material-2026-10-03/.
+The 55 passing focused checks and four disposable content faults are limited
+evidence, not the current full-suite verdict. Packet content is not ready for
+sealing or admission. Both scoped Gate 3 corrections stay approved; S22a is
+incomplete and S22b untouched. Production seals/pins remain unchanged and both
+new packs remain unavailable/unseeded. No installs, credentials, live calls,
+spend, staging, commits or pushes. The failure is appended to MISTAKES.md;
+all prior bytes, evidence and handoff/plan entry snapshots are preserved.
+
+
+Preservation/diff audit passed: 1069 entry files checked, all 223 suite source
+pins and 24 draft file hashes verified, original 134330-byte/145753-byte prefixes
+plus the complete 152052-byte entry MISTAKES prefix preserved. Six Bellwether
+refs and all earlier evidence are unchanged. No staging; whitespace checks pass.
+closeout.json records the FAILED suite, not acceptance. Final document recheck
+uses closeout-final.json in the same local evidence directory.
+
+**Historical S22a Northline draft checkpoint, 2026-10-03:** 24 draft material files
+and the exact-byte operator packet are authored. All remain unreviewed; manifest
+and protected family have review_status=DRAFT and null seal fields. Production
+declarations/pins are unchanged, and Northline/GTM remain unavailable/unseeded.
+Packet: slice22a-northline-operator-review-packet.md. Machine-readable checksums
+and proposed station documents: slice22a-northline-review-inventory.json.
+
+Focused checks: 55 passed, 2 warnings, exit 0. Four disposable content faults
+reach named assertions without mutating production draft bytes. The current
+runtime still rejects ROUTE_SAFETY_QUESTION in public pair 2 and protected case
+03, and generic booking completion does not independently enforce deployment
+commitments, retries or access. These limits are explicit in the packet; neither
+typed-aspect validation nor catalog parsing establishes deployment acceptance.
+No service was run. Full offline suite/final preservation verification is pending
+at this checkpoint. Local receipts: evidence/slice22a-material-2026-10-03/.
+
+Both scoped Gate 3 corrections remain approved. Actual content review/sealing,
+compatible runtime validation, admission, idempotent seeding and offline starter
+reproduction remain pending. S22a is incomplete; S22b is untouched. No installs,
+credentials, live calls, spend, staging, commits or pushes. Earlier evidence and
+archived handoff/plan bytes remain preserved.
+
+**Historical S22a typed acceptance checkpoint, 2026-10-03:** typed aspect validation
+and exact six-payload Bellwether compatibility are implemented and verified
+offline. Original files, snapshots, seals and variant refs are preserved.
+Altered or cross-pack legacy payloads refuse before exposure. Three source
+payloads omit optional record currency fields; immutable original and exact
+historical normalized snapshot encodings are pinned separately. Typed views
+never replace identity-bearing cases. Typed expectation kinds have serialized
+scanner positive controls; public outcome/reason vocabulary remains usable.
+Final full offline suite: 778 passed, 1 skipped, 2 warnings in 335.27s (0:05:35), exit 0. Twenty-two targeted mutations
+reach intended assertion failures, restore exact source bytes and retain each
+process log and JUnit result. Evidence: evidence/slice22a-typed-2026-10-03/.
+
+Bounded cleanup inventoried 131 untracked files, archived 42 generated mutation
+JSONs with SHA-256 manifest and exact readback/restoration, then removed only
+those loose copies. All 21 raw logs remain unchanged. Historical JSON path
+references resolve via policy-repair/mutation-jsons-manifest.json and its README.
+The user subsequently requested local-only artifacts/evidence. artifacts/ was
+already ignored; .gitignore now ignores docs/plans/shiftwork/evidence/ for
+future additions. Its 125 already tracked files remain tracked. The single
+test dependency on ignored preflight evidence was replaced with six explicit
+verified ref invariants. Source and fixtures remain visible to Git.
+
+Both scoped Gate 3 corrections remain approved. S22a remains incomplete.
+Northline authoring and its exact-byte operator packet are still unauthored;
+actual review/sealing precedes admission, seeding and reproduction. Both new
+production packs remain unavailable/unseeded. S22b is untouched. No install,
+credential, live call, spend, stage, stash, commit or push ran. Earlier failed
+evidence is retained, and older mutation harnesses were not all rerun.
+
+## Historical S22a owning-pack execution checkpoint verified offline: 2026-10-03
+
+Registered-pack startup seeding now requires whole-pack admission and uses
+INSERT OR IGNORE for engagement, configuration and current assistance policy.
+Existing rows remain unchanged. Diagnostic, comparison and operation material,
+family lookup and scanner inventory resolve declared owning-pack paths. Qualifying
+and later comparison reservations admit the owning pack before writes. Protected
+snapshot payloads and Bellwether exposure identities remain unchanged.
+
+The disposable distinct-pack tests preserve real admission. Existing fault and
+outage tests now stage declaration-bound copies with matching disposable pins;
+only disposable manifests/families are resealed for deeper guard tests. Serialized
+scanner controls, strict shape checks, conflicts and no-write assertions remain.
+Focused evidence includes 54 pack checks, 32 migration/route checks and 105
+assistance/registry/sentinel checks at their recorded checkpoints. Thirteen new
+integration faults reach intended assertion failures with exact source restoration.
+Latest full offline suite: 717 passed, 1 skipped, 2 warnings in 336.81s (0:05:36),
+exit 0. Evidence: evidence/slice22a-seeding-2026-10-03/.
+
+Earlier failed execution and fixture-repair runs remain in evidence and five
+incidents were appended to MISTAKES.md. The complete 145753-byte entry prefix,
+original 134330-byte prefix, all entry content files and six Bellwether refs are
+preserved. Entry handoff/plan snapshots are archived byte-identically. The final
+audit is recorded in preservation.json and closeout.json. Older mutation harness
+anchors were adjusted where necessary, but those harnesses were not all rerun
+after integration. No claim of independent review or S22a completion is made.
+
+Both scoped Gate 3 corrections remain approved. Typed aspect validation, immutable
+six-payload Bellwether decoding and Northline authoring/review material remain
+pending. Both new production packs remain unavailable and unseeded; actual
+Northline review/sealing precedes production use. Generated JSON cleanup is
+pending under the user's requested continuation scope. No installs, credentials,
+live calls, spend, commits, pushes or S22b. The handoff carries the current prompt.
+
+## Historical S22a assistance compatibility repair verified offline: 2026-10-03
+
+The separately approved current engagement_assist_policy table is implemented
+through idempotent v6 completion and INSERT OR IGNORE seeding. Startup and every
+assist/view use verify the declaration's current projection. Changed or missing
+rows refuse without historical fallback; startup retains existing mismatches.
+Original engagement_config values survive v5 source/no-source startup, first-choice
+opening and restart. New-pack engagements and policy rows remain absent.
+
+The disposable sentinel fixture copies declared material plus legacy catalogs
+and artifact templates, uses the declared family filename and updates only its
+disposable changed pin. Admission, real scoring, one mocked outbound request,
+serialized scanner controls and absence assertions remain intact.
+
+Pre-repair regression: 7 intended failures. Final focused groups: 105 and 32
+passed. All 21 named mutation faults fail at intended assertions and restore
+exact source bytes. Full offline verification: 707 passed, 1 skipped, 2 warnings
+in 289.58s (0:04:49), exit 0. The older 15 failed/40 errors verdict is historical.
+Evidence: evidence/slice22a-assist-2026-10-03/policy-repair/. Two intervening
+check failures remain recorded: a mixed-root collection error and missing
+support files in the disposable package. Both were corrected; earlier incidents
+and all prior evidence remain intact.
+
+Assistance verification is checked off; S22a is still unchecked. Remaining
+execution integration, typed legacy decoding and Northline material are pending.
+Both new packs remain unavailable and unseeded. Actual Northline review/sealing
+precedes production use. No installs, credentials, live calls, spend, commits,
+pushes or S22b. The handoff records the safe assistance checkpoint.
+
+## S22a verified Git hold and diagnosed failures: 2026-10-03
+
+The final verification hold is resolved. Assistance closeout.json exists and
+records the original failed-suite verdict, not acceptance. The exact held Git
+command returned exit 1, empty stdout and an LF-to-CRLF conversion warning.
+Raw argv, exits and separate streams are saved in verification-resume*/.
+Mixed-ending checks retain default whitespace rules with cr-at-eol; LF, CRLF
+and mixed clean controls pass, trailing spaces on LF/CRLF and blank EOF fail.
+All 62 content files, six Bellwether refs, original 134330-byte MISTAKES prefix,
+complete prior resume prefix, 17 raw mutations and durable harness rows verify.
+No historical bytes were normalized.
+
+The saved full suite remains 15 failed, 644 passed, 1 skipped, 2 warnings,
+40 errors. Diagnosis is complete: 54 failures/errors are startup rejection of
+the preserved v5 ["hint","diagnose"] config, and one sentinel test redirects
+the old family map to sentinel_family.json while pack admission requires the
+declared bookshop_stale_information.json. Three representative nodes reproduce
+3 failures, 2 warnings in 1.68s. Both v5 source/no-source controls fail startup
+while preserving original rows. Normalizing disposable copies restores startup
+and fails original-row preservation; it is rejected as a repair.
+
+Gate 3's scoped assistance projection storage correction is RE-APPROVED by
+the user on 2026-10-03: "Sure i approve?". Section 3.10 item 5 and section 4
+approve a separate current engagement_assist_policy table, keeping legacy
+columns unchanged and preserving strict current mismatch refusal. Runtime repair
+is authorized under the existing S22a go-ahead and remains unimplemented.
+The approved sealed-aspect correction stays approved. No product code was edited in this continuation. The sentinel fixture
+repair is also pending; no guard or scanner assertion was weakened.
+
+Evidence: evidence/slice22a-assist-2026-10-03/closeout.json and
+diagnosis-2/diagnosis.json. Five verifier/diagnostic helper incidents were
+appended; all earlier MISTAKES bytes stay intact. S22a, assistance verification,
+remaining execution integration, typed decoding and Northline material remain
+unchecked. Both new packs remain unavailable and unseeded. No install,
+credential, live call, spend, commit, push or S22b followed.
+
+## Historical pre-diagnosis S22a assistance hold: 2026-10-03
+
+Registry checkpoint verification completed before new source edits. Its
+closeout.json now exists in evidence/slice22a-registry-final-2026-10-03/;
+tracked diffs use repository settings and LF-only new-file checks use the scoped
+setting. Historical receipt bytes, all 62 existing content files and six
+Bellwether comparison refs were preserved.
+
+Assistance now resolves the owning pack's declaration for role, total-call and
+patch budgets. Stored level/roles/total projections are verified at startup and
+on use; mismatches refuse without rewriting the stored rows. The investigation
+view has a strict assist_allowed_roles response field. Existing Bellwether
+startup projects the declared policy and attempt family list; registration-wide
+admitted-pack seeding is still pending. Both new packs remain unavailable and
+unseeded. The three declared assistance levels were exercised only on disposable
+reviewed Bellwether material, not on admitted Northline/GTM content.
+
+Final focused evidence: 97 passed, 2 warnings in 11.33s, exit 0. Final raw mutation
+receipts reach 17/17 intended named failures and restore exact source bytes;
+the durable repository harness independently reproduces 17 FAIL_CAUGHT rows.
+The full offline suite FAILED: 15 failed, 644 passed, 1 skipped, 2 warnings, 40 errors in 187.87s (0:03:07), exit 1.
+The broader failures are undiagnosed because they surfaced at the repository
+half-context boundary. Assistance verification remains unchecked; this is not
+a completed S22a capability. Raw logs and receipts are retained in
+evidence/slice22a-assist-2026-10-03/final-checks/ and final-mutations/.
+
+Remaining execution mission/state/request/manifest/family/scanner readers,
+reservation admission and registered-pack seeding have not switched. Typed
+validation/immutable legacy decoding and Northline material/review packet are
+unimplemented. Actual material review/sealing still precedes production
+admission, seeding and reproduction. The Gate 3 correction is already approved.
+No live call, credential, install, spend, commit, push or S22b occurred.
+The 134330-byte MISTAKES prefix and the full resume-entry prefix are preserved.
+This resume appends five incidents: CRLF receipt verifier selection, the omitted
+strict response field, the coupled failed-call mutation, full-suite failure and final verifier hold.
+No active process remains. The final helper passed scope/source/preservation and tracked checks, then
+stopped on the new-file check of slice22a-registry-2026-10-03.md without saving
+underlying Git diagnostics. Assistance closeout.json does not exist. Its
+verification-hold.json records the partial checks and pending final whitespace.
+These hold edits and the fifth incident follow that audit and remain unchecked.
+
+
+## S22a registry implementation checkpoint: 2026-10-03
+
+The first registry checklist item is implemented on shiftwork/slice-22a.
+Three pure immutable declarations resolve by slug, while orchestration verifies
+required content pins, compatible catalog/mission binding, manifest seal,
+declared family seals, cycle, distinct inventory and cross-pack variant claims.
+The safe availability function reports Bellwether AVAILABLE and both new packs
+AWAITING_OPERATOR_REVIEW. No new pack has reviewed material pins or is seeded.
+All 17 declared Bellwether raw pins re-verify, all 62 existing fixture/case files
+retain entry bytes, and the six pinned comparison refs remain unchanged.
+
+The focused registry/store/import checks pass 55 tests. All 13 independent
+source mutations reach their intended failing assertions and restore original
+source bytes. The final full offline suite passes 688 passed, 1 skipped, 2 warnings in 312.05s (0:05:12), exit 0.
+Evidence: evidence/slice22a-registry-final-2026-10-03/ and
+evidence/slice22a-registry-2026-10-03.md. Both earlier raw receipts and the final
+receipts are retained. No active process remains.
+
+The existing execution reads, config family constants, global sealed map,
+seeding and assist enforcement have not switched to these declarations. Typed
+aspect validation/legacy decoding and Northline authoring remain pending; the
+new material admission function is not yet a reservation guard. S22a remains
+unchecked and incomplete. The next unchecked plan item is pack integration.
+The checkpoint follows the repository half-context rule; it is not slice
+acceptance or post-slice cleanup. The final helper failed at its first tracked
+whitespace check after applying core.autocrlf=false to tracked CRLF files. Its
+new-file, final scope/source/preservation and closeout-JSON checks did not run.
+The claimed final whitespace PASS was withdrawn; checkpoint closeout is pending.
+The test/mutation receipts remain valid and no further work follows before the
+safe handoff. No install, live call, credential, spend,
+seal, commit, push or S22b work occurred.
+
+## S22a start and scoped Gate 3 re-approval: 2026-10-03
+
+The user's "Start slice 22" starts S22a under the approved S22a/S22b split.
+Work is on `shiftwork/slice-22a`, created from main `134b156`; the main ancestor
+check passes. S21 is published. The pre-existing six-line S21 orchestration
+incident in MISTAKES.md retains its original bytes. One separate S22a
+verification-helper incident is appended at the end; preserve the older change.
+
+Gate 3 was backtracked for one compatibility correction. Section 3.11 required
+re-authoring the existing string aspects into typed objects and re-sealing them,
+but the Bellwether comparison family is already OPERATOR_SEALED. A read-only
+probe confirms all six current strings fail the proposed typed-only shape and
+all six converted expected blocks change rotation.variant_ref; the family seal
+digest changes too. Production file bytes remain unchanged. Simply treating the
+rewritten refs as fresh would undermine the existing exposure history.
+
+The proposed revision preserves the exact six legacy Bellwether payloads,
+seal, variant refs and historical snapshots, decoding only their pinned legacy
+aspects to typed views for assessment. New families require typed aspects;
+unknown/altered legacy payloads and cross-pack compatibility fail before exposure.
+The correction and preservation checks are in 03-program-design.md section 3.11.
+The user answered "Approve this scoped correction" to the explicit Gate 3
+request on 2026-10-03. Gate 3 is RE-APPROVED for that scope; Gates 1, 2 and the
+Gate 4 slice order remain approved. S22a implementation is authorized and has
+not started at the repository's safe half-context handoff boundary. No decoder
+or new-family admission enforcement has been implemented or tested.
+
+Existing-runtime baseline: `.venv313/Scripts/python.exe -m pytest tests
+--ignore=tests/packaging -q` passed 644 tests, with one existing skip and two
+FastAPI/Starlette warnings, in 352.60 seconds, exit 0. Packaging is excluded.
+No S22a implementation is validated by that baseline. Tracked whitespace checks
+pass; runtime/source/test/demo diffs are empty. The probe demonstrates a format
+and identity change, not an executed reservation bypass or observed reuse.
+
+Plan/checklist: `slice22a-implementation-plan.md`. Read-only evidence:
+`evidence/slice22a-aspect-compatibility-2026-10-03.json`. No implementation,
+production fixture or seal has changed. S22a is not complete or accepted.
+Actual Northline material review/sealing, S22b, installs, live execution,
+credentials, spend, commits, pushes and publication remain separately authorized.
+
 ## S21 review-fix publication and main integration: 2026-10-03
 
 The user authorized focused commits and push to main without co-author footers.
@@ -4689,7 +5145,7 @@ review affected ADRs and stale files, then ask whether to continue or re-steer.
 - [x] Slice 19: read-only semantic replay and legacy unknown handling; implemented, verified offline and published 2026-09-30 on `shiftwork/slice-19` (evidence at top), merged to main as `4cd4403..accd267` and pushed, no co-author footer; ACCEPTED by the user 2026-09-30
 - [ ] Slice 20: selected-version inheritance and the later retained-alternative experiment
 - [ ] Slice 21: complete the five-station Bellwether room journey
-- [ ] Slice 22a: FDE material, engagement-pack registration and the offline reproduction proof
+- [x] Slice 22a: FDE material, engagement-pack registration and the offline reproduction proof; ACCEPTED for publication 2026-10-04; technical exits pass
 - [ ] Slice 22b: the FDE board journey and the workplace board selector (Boards 2 and 3)
 - [ ] Slice 23: GTM material, contract, checks and the offline comparison (family authored for review and seal)
 - [ ] Slice 24: GTM selection, operation and inheritance offline with the pipeline consequence vocabulary
