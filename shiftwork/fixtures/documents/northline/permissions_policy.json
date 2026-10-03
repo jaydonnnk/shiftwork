@@ -1,0 +1,18 @@
+{
+  "review_status": "DRAFT",
+  "engagement_slug": "northline",
+  "description": "Public policy source. The learner's permissions.json is a separate blank work product, never assessment authority.",
+  "reads": [
+    "parts_availability",
+    "mechanic_schedule"
+  ],
+  "writes": [
+    "repair_slots"
+  ],
+  "forbidden": [
+    "payments",
+    "accounts",
+    "customer_history"
+  ],
+  "evidence_limit": "These names express scenario permissions. Real access requires controller evidence; self-reported access is not a security proof."
+}
