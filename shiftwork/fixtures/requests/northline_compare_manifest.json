@@ -1,0 +1,38 @@
+{
+  "engagement_slug": "northline",
+  "schema_version": 1,
+  "version": 1,
+  "review_status": "OPERATOR_SEALED",
+  "sealed_payload_sha256": "63e68eba6a68906bfdea1cbe5bc9a6bf4563616db92b7272a8eac6b27b1b19f0",
+  "description": "Unreviewed Northline pairs. No candidate solution supplied. Canonical specs include every model default explicitly. Pair 2 uses the approved, not-yet-implemented safety task kind.",
+  "workloads": [
+    {
+      "ordinal": 1,
+      "request_file": "northline_compare_pair_01.jsonl",
+      "request_bytes_sha256": "d928534c4827ba59c73afd04586311e73a062b8de3df75826ba3fa5a8a1618b9",
+      "request_bytes_length": 370,
+      "request_count": 2,
+      "task_spec_file": "northline_compare_pair_01_specs.json",
+      "task_specs_sha256": "015e3d2596ba1f8ae2744146e5688e207940b61fb261c47b63a2c9efd7da9b30"
+    },
+    {
+      "ordinal": 2,
+      "request_file": "northline_compare_pair_02.jsonl",
+      "request_bytes_sha256": "72a7b405c1e83064604fb58f058757c6e00927ad19dd0d38096c108eaa015a36",
+      "request_bytes_length": 402,
+      "request_count": 2,
+      "task_spec_file": "northline_compare_pair_02_specs.json",
+      "task_specs_sha256": "e7eeb5ad5b84457f7b3bd9317b75518d7ae70716650c7e42788b842014037e01"
+    },
+    {
+      "ordinal": 3,
+      "request_file": "northline_compare_pair_03.jsonl",
+      "request_bytes_sha256": "eaf45873d79f6407f4b166520fd2c80169e9e50bfa00cea126ea7f37a1241135",
+      "request_bytes_length": 373,
+      "request_count": 2,
+      "task_spec_file": "northline_compare_pair_03_specs.json",
+      "task_specs_sha256": "7c354ae54b129a0f5ef4ca8725b0d4f54651a29e114946179c899f9d3ab2e0b9"
+    }
+  ],
+  "comparison_state_sha256": "8cbe707cb710711b1610fa89ba527cc0c463d8e939aee22b8797ad18e2f9f36d"
+}
