@@ -28,8 +28,10 @@ using a local HTTP double. No provider call is made.
 
 import asyncio
 import base64
+import hashlib
 import json
 import logging
+import shutil
 import sys
 from pathlib import Path
 
@@ -45,6 +47,7 @@ from shiftwork.gateway.redaction import serialized_contains
 from shiftwork.evaluator.evaluator import expected_ref_for
 from shiftwork.executor.local_process import LocalProcessAdapter
 from shiftwork.sealed import store as sealed_store
+from shiftwork.packs import registry
 
 # Must exist nowhere else in the repository; asserted below before use.
 SENTINEL = "qZ7xSw6SeNtInElK4mP9wR2"
@@ -90,19 +93,28 @@ def sentinel_family(tmp_path, monkeypatch):
             if isinstance(claim.get("value"), str):
                 claim["value"] = f"{SENTINEL}-{claim['value']}"
 
-    directory = tmp_path / "sealed-cases"
-    directory.mkdir()
-    path = directory / "sentinel_family.json"
+    pack = registry.resolve_pack("bookshop")
+    root = tmp_path / "package"
+    for pin in pack.reviewed_pins:
+        copied = root / pin.path
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        copied.write_bytes((config.PACKAGE_DIR / pin.path).read_bytes())
+    # Shared legacy-lifecycle and local-executor checks also use older catalogs
+    # and the artifact template. Keep those support files in the disposable root.
+    shutil.copytree(config.CATALOG_DIR, root / "fixtures/catalogs", dirs_exist_ok=True)
+    shutil.copytree(config.PACKAGE_DIR / "templates", root / "templates")
+    directory = root / "sealed/cases"
+    path = directory / sealed_store._FAMILY_FILES[sealed_store.STALE_INFORMATION]
     path.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    files = dict(sealed_store._FAMILY_FILES)
-    files[sealed_store.STALE_INFORMATION] = path.name
-    # The other families stay real (a run draws one variant from each); they are
-    # copied so the patched directory remains a complete inventory.
-    for family, name in sealed_store._FAMILY_FILES.items():
-        if family != sealed_store.STALE_INFORMATION:
-            (directory / name).write_bytes((config.SEALED_CASES_DIR / name).read_bytes())
+    # Only the disposable declaration pins its changed expectation bytes.
+    # Admission still checks the complete package, locator, pins and seals.
+    pins = tuple(pin.model_copy(update={"sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+                 if pin.path == path.relative_to(root).as_posix() else pin for pin in pack.reviewed_pins)
+    monkeypatch.setattr(registry, "_PACKS", (pack.model_copy(update={"reviewed_pins": pins}),
+                                           *registry.registered_packs()[1:]))
+    monkeypatch.setattr(config, "PACKAGE_DIR", root)
+    monkeypatch.setattr(config, "CATALOG_DIR", root / "fixtures/catalogs")
     monkeypatch.setattr(config, "SEALED_CASES_DIR", directory)
-    monkeypatch.setattr(sealed_store, "_FAMILY_FILES", files)
 
     loaded = sealed_store.load_family(sealed_store.STALE_INFORMATION).cases
     assert loaded, "the sentinel family did not load; every scan below would be vacuous"

@@ -22,7 +22,8 @@ from shiftwork.assist.gateway import (
 import shiftwork.assist.gateway as assist_gateway_module
 from shiftwork.domain.models import AssistRole
 from shiftwork import orchestrator
-from shiftwork.store import db
+from shiftwork.packs import registry
+from shiftwork.store import db, repo
 
 
 class RecordedGateway:
@@ -84,9 +85,6 @@ def test_mixed_role_budget_patch_cap_and_idempotency(session):
     investigation_id = entry(client, shift_id, run_id).json()["id"]
     conn = db.connect(path)
     try:
-        conn.execute("UPDATE engagement_config SET total_assist_budget_per_shift = 6, "
-                     "allowed_assist_roles_json = '[\"hint\",\"diagnose\"]' WHERE slug = 'bookshop'")
-        conn.commit()
         before = tuple(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] for table in
                        ("artifact_versions", "experiments", "check_results", "operating_selections", "ledger_events"))
     finally:
@@ -120,10 +118,8 @@ def test_mixed_role_budget_patch_cap_and_idempotency(session):
         after = tuple(conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0] for table in
                       ("artifact_versions", "experiments", "check_results", "operating_selections", "ledger_events"))
         assert after == before, "help decisions must not edit, freeze, grade, select or write business history"
-        assert conn.execute("SELECT total_assist_budget_per_shift FROM engagement_config "
-                            "WHERE slug = 'bookshop'").fetchone()[0] == 6, (
-            "the approved three-call runtime cap must not rewrite a legacy configuration row"
-        )
+        assert conn.execute("SELECT total_assist_budget_per_shift FROM engagement_assist_policy "
+                            "WHERE slug = 'bookshop'").fetchone()[0] == 3
         with pytest.raises(sqlite3.IntegrityError, match="immutable"):
             conn.execute("UPDATE assist_events SET request_text = 'rewritten' WHERE id = ?", (patch["id"],))
         conn.rollback()
@@ -307,18 +303,201 @@ def test_system_plus_prompt_limit_refuses_before_reserving_budget(session):
     assert client.get(f"/api/shifts/{shift_id}/investigations").json()["assist_used"] == 0
 
 
-def test_northline_policy_allows_one_hint_only(session):
+def test_unreviewed_northline_refuses_help_before_gateway(session, monkeypatch):
+    packs = registry.registered_packs()
+    monkeypatch.setattr(registry, "_PACKS", (*packs[:2], packs[2].model_copy(update={"reviewed_pins": ()})))
     client, path, shift_id, run_id, gateway = session
     investigation_id = entry(client, shift_id, run_id).json()["id"]
     conn = db.connect(path)
     try:
-        conn.execute("INSERT INTO engagements (slug, business_kind, display_name) VALUES ('northline', 'northline', 'Northline')")
+        assert repo.get_engagement(conn, "northline") is not None
         conn.execute("UPDATE shifts SET engagement_slug = 'northline' WHERE id = ?", (shift_id,))
+        policy = registry.resolve_pack("northline").assist
+        repo.seed_engagement_config(conn, "northline", business_kind="northline",
+                                    assist_level=policy.level_label,
+                                    allowed_assist_roles=tuple(role.value for role in policy.allowed_roles),
+                                    total_assist_budget_per_shift=policy.total_calls_per_shift,
+                                    enabled_check_families=(), attempt_limit=2, rotation_group_size=6)
+        repo.seed_engagement_assist_policy(conn, "northline", assist_level=policy.level_label,
+                                          allowed_assist_roles=tuple(role.value for role in policy.allowed_roles),
+                                          total_assist_budget_per_shift=policy.total_calls_per_shift)
         conn.commit()
     finally:
         conn.close()
     assert assist(client, shift_id, investigation_id, "DIAGNOSIS").status_code == 409
     assert assist(client, shift_id, investigation_id, "PATCH_PROPOSAL").status_code == 409
-    assert assist(client, shift_id, investigation_id, "HINT").status_code == 200
+    assert assist(client, shift_id, investigation_id, "HINT").status_code == 409
     assert assist(client, shift_id, investigation_id, "HINT", "help-2").status_code == 409
+    assert gateway.calls == []
+
+
+def install_policy(monkeypatch, path, policy):
+    """Exercise declared levels on reviewed Bellwether test material only.
+
+    This does not admit Northline/GTM material or claim a board journey.
+    """
+    bookshop = registry.resolve_pack("bookshop").model_copy(update={"assist": policy})
+    monkeypatch.setattr(registry, "_PACKS", (bookshop, *registry.registered_packs()[1:]))
+    conn = db.connect(path)
+    try:
+        conn.execute("UPDATE engagement_assist_policy SET assist_level = ?, allowed_assist_roles_json = ?, "
+                     "total_assist_budget_per_shift = ? WHERE slug = 'bookshop'",
+                     (policy.level_label, json.dumps([role.value for role in policy.allowed_roles]),
+                      policy.total_calls_per_shift))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+@pytest.mark.parametrize("policy_slug", ("bookshop", "gtm", "northline"))
+def test_assist_policy_is_declared_per_pack(session, monkeypatch, policy_slug):
+    client, path, shift_id, run_id, gateway = session
+    investigation_id = entry(client, shift_id, run_id).json()["id"]
+    policy = registry.resolve_pack(policy_slug).assist
+    install_policy(monkeypatch, path, policy)
+    for role in set(AssistRole) - set(policy.allowed_roles):
+        refused = assist(client, shift_id, investigation_id, role.value, f"deny-{role.value}")
+        assert refused.status_code == 409, "an undeclared role reached the assist gateway"
+    assert gateway.calls == []
+    for ordinal in range(policy.total_calls_per_shift):
+        role = policy.allowed_roles[ordinal % len(policy.allowed_roles)]
+        response = assist(client, shift_id, investigation_id, role.value, f"allowed-{ordinal}")
+        assert response.status_code == 200, response.text
+    refused = assist(client, shift_id, investigation_id, "HINT", "over-budget")
+    assert refused.status_code == 409, "the pack's shared assistance budget was widened"
+    assert len(gateway.calls) == policy.total_calls_per_shift
+    view = client.get(f"/api/shifts/{shift_id}/investigations").json()
+    assert view["assist_limit"] == policy.total_calls_per_shift
+    assert view["assist_used"] == policy.total_calls_per_shift
+    assert view["assist_available"] is False
+    assert view["assist_allowed_roles"] == [role.value for role in policy.allowed_roles]
+
+
+@pytest.mark.parametrize("field,value", (
+    ("assist_level", "widened"),
+    ("allowed_assist_roles_json", '["HINT"]'),
+    ("total_assist_budget_per_shift", 9),
+    ("allowed_assist_roles_json", "malformed-json"),
+))
+def test_assist_projection_mismatch_refuses_route_view_and_startup(session, field, value):
+    client, path, shift_id, run_id, gateway = session
+    investigation_id = entry(client, shift_id, run_id).json()["id"]
+    conn = db.connect(path)
+    try:
+        conn.execute(f"UPDATE engagement_assist_policy SET {field} = ? WHERE slug = 'bookshop'", (value,))
+        conn.commit()
+        before = conn.execute("SELECT * FROM engagement_assist_policy WHERE slug = 'bookshop'").fetchone()
+        before = tuple(before)
+    finally:
+        conn.close()
+    assert assist(client, shift_id, investigation_id).status_code == 409, "mismatched projection allowed a call"
+    assert client.get(f"/api/shifts/{shift_id}/investigations").status_code == 409
+    assert gateway.calls == []
+    with pytest.raises(orchestrator.LifecycleError, match="assist policy projection"):
+        with TestClient(create_app(str(path), assist_gateway=gateway)):
+            pass
+    conn = db.connect(path)
+    try:
+        assert tuple(conn.execute("SELECT * FROM engagement_assist_policy WHERE slug = 'bookshop'").fetchone()) == before
+        assert conn.execute("SELECT COUNT(*) FROM assist_events").fetchone()[0] == 0
+    finally:
+        conn.close()
+
+
+def test_patch_limit_comes_from_declaration(session, monkeypatch):
+    client, path, shift_id, run_id, gateway = session
+    investigation_id = entry(client, shift_id, run_id).json()["id"]
+    policy = registry.resolve_pack("bookshop").assist.model_copy(update={"max_patch_proposals": 0})
+    install_policy(monkeypatch, path, policy)
+    response = assist(client, shift_id, investigation_id, "PATCH_PROPOSAL")
+    assert response.status_code == 409, "zero declared patch proposals allowed a model call"
+    assert gateway.calls == []
+
+
+def test_disallowed_diagnosis_is_refused_before_gateway(session, monkeypatch):
+    client, path, shift_id, run_id, gateway = session
+    investigation_id = entry(client, shift_id, run_id).json()["id"]
+    install_policy(monkeypatch, path, registry.resolve_pack("northline").assist)
+    response = assist(client, shift_id, investigation_id, "DIAGNOSIS")
+    assert response.status_code == 409, "undeclared diagnosis reached the gateway"
+    assert gateway.calls == []
+
+
+def test_failed_help_consumes_the_declared_reduced_budget(session, monkeypatch):
+    client, path, shift_id, run_id, gateway = session
+    investigation_id = entry(client, shift_id, run_id).json()["id"]
+    install_policy(monkeypatch, path, registry.resolve_pack("northline").assist)
+    gateway.replies = iter([AssistRejected("ASSIST_TRANSPORT_FAILED")])
+    first = assist(client, shift_id, investigation_id).json()
+    assert first["state"] == "FAILED"
+    assert assist(client, shift_id, investigation_id, request_id="after-failure").status_code == 409
     assert len(gateway.calls) == 1
+
+
+def test_startup_seeds_declared_policy_idempotently(tmp_path, monkeypatch):
+    policy = registry.resolve_pack("gtm").assist
+    bookshop = registry.resolve_pack("bookshop").model_copy(update={"assist": policy})
+    packs = registry.registered_packs()
+    monkeypatch.setattr(registry, "_PACKS", (bookshop, packs[1], packs[2].model_copy(update={"reviewed_pins": ()})))
+    path = tmp_path / "declared-policy.db"
+    for _ in range(2):
+        startup_failure = None
+        try:
+            with TestClient(create_app(str(path))):
+                pass
+        except orchestrator.LifecycleError as error:
+            startup_failure = error
+        assert startup_failure is None, "startup failed to seed the declared assistance projection"
+        conn = db.connect(path)
+        try:
+            row = repo.get_engagement_assist_policy(conn, "bookshop")
+            assert row["assist_level"] == policy.level_label
+            assert json.loads(row["allowed_assist_roles_json"]) == [role.value for role in policy.allowed_roles]
+            assert row["total_assist_budget_per_shift"] == policy.total_calls_per_shift
+            assert [row["slug"] for row in conn.execute("SELECT slug FROM engagements")] == ["bookshop"]
+            assert conn.execute("SELECT COUNT(*) FROM engagement_assist_policy").fetchone()[0] == 1
+        finally:
+            conn.close()
+
+
+def test_missing_current_projection_refuses_help_and_view_without_historical_fallback(session):
+    client, path, shift_id, run_id, gateway = session
+    investigation_id = entry(client, shift_id, run_id).json()["id"]
+    conn = db.connect(path)
+    try:
+        historical = tuple(repo.get_engagement_config(conn, "bookshop"))
+        conn.execute("DELETE FROM engagement_assist_policy WHERE slug = 'bookshop'")
+        conn.commit()
+    finally:
+        conn.close()
+    assert assist(client, shift_id, investigation_id).status_code == 409, "absent projection allowed a call"
+    assert client.get(f"/api/shifts/{shift_id}/investigations").status_code == 409, "absent projection allowed a view"
+    assert gateway.calls == []
+    conn = db.connect(path)
+    try:
+        assert repo.get_engagement_assist_policy(conn, "bookshop") is None, "per-use check seeded an absent row"
+        assert tuple(repo.get_engagement_config(conn, "bookshop")) == historical
+        assert conn.execute("SELECT COUNT(*) FROM assist_events").fetchone()[0] == 0
+    finally:
+        conn.close()
+
+
+@pytest.mark.parametrize("damage", ["missing_unadmitted", "mismatch_admitted"])
+def test_startup_verifies_every_seeded_engagement_projection(session, monkeypatch, damage):
+    _, path, _, _, gateway = session
+    conn = db.connect(path)
+    try:
+        assert repo.get_engagement(conn, "northline") is not None
+        if damage == "missing_unadmitted":
+            packs = registry.registered_packs()
+            monkeypatch.setattr(registry, "_PACKS", (*packs[:2], packs[2].model_copy(update={"reviewed_pins": ()})))
+            conn.execute("DELETE FROM engagement_assist_policy WHERE slug = 'northline'")
+        else:
+            conn.execute("UPDATE engagement_assist_policy SET total_assist_budget_per_shift = 2 WHERE slug = 'northline'")
+        conn.commit()
+    finally:
+        conn.close()
+    with pytest.raises(orchestrator.LifecycleError, match="assist policy projection"):
+        with TestClient(create_app(str(path), assist_gateway=gateway)):
+            pass
+    assert gateway.calls == []

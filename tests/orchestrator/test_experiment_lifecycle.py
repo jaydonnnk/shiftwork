@@ -20,6 +20,7 @@ from pathlib import Path
 
 import pytest
 from conftest import BookshopShift
+from tests.packs.material import apply_staged_material, protected_family_bytes
 
 from shiftwork import comparison_flow, config, experiments, orchestrator
 from shiftwork.domain import canonical, task_contract
@@ -34,16 +35,11 @@ from shiftwork.store import db, repo
 from shiftwork.sealed import store as sealed_store
 from shiftwork.sealed import rotation
 from shiftwork.domain.errors import RotationMisconfigured
+from shiftwork.packs import registry
 
 _REVIEW_GATE = comparison_flow._require_reviewed_comparison_material
 _REVIEWED_FAMILY = sealed_store.load_reviewed_comparison_family
 
-
-@pytest.fixture(autouse=True)
-def _synthetic_comparison_review(monkeypatch):
-    """Only this offline test module can exercise the draft comparison mechanics."""
-    monkeypatch.setattr(comparison_flow, "_require_reviewed_comparison_material", lambda *_: None)
-    monkeypatch.setattr(sealed_store, "load_reviewed_comparison_family", sealed_store.load_family)
 
 CAUSE = "the router answers only the optional price task and never reads collection records"
 FALSIFIER = "a request with no currency symbol still omits the collection task"
@@ -603,7 +599,11 @@ def test_draft_material_cannot_reserve_a_production_comparison(session, monkeypa
     draft.pop("sealed_payload_sha256", None)
     draft_path = tmp_path / "draft_compare_manifest.json"
     draft_path.write_bytes(json.dumps(draft, indent=2, ensure_ascii=False).encode("utf-8"))
-    monkeypatch.setattr(config, "PIVOT_COMPARE_MANIFEST", draft_path)
+    apply_staged_material(monkeypatch, tmp_path / "draft-package", {
+        "fixtures/requests/bookshop_compare_manifest.json": draft_path.read_bytes()})
+    with pytest.raises(registry.PackUnavailable) as admission:
+        orchestrator.admit_pack("bookshop")
+    assert "manifest awaits operator review and sealing" in str(admission.value.__cause__)
     monkeypatch.setattr(comparison_flow, "_require_reviewed_comparison_material", _REVIEW_GATE)
     monkeypatch.setattr(sealed_store, "load_reviewed_comparison_family", _REVIEWED_FAMILY)
     conn = db.connect(session.db_file)
@@ -613,7 +613,7 @@ def test_draft_material_cannot_reserve_a_production_comparison(session, monkeypa
         conn.close()
     response = _create_comparison(session, candidate_a, candidate_b, investigation)
     assert response.status_code == 409, response.text
-    assert "awaits operator review and sealing" in response.json()["detail"]
+    assert response.json()["kind"] == "conflict"
     conn = db.connect(session.db_file)
     try:
         assert _counts(conn) == before
@@ -821,7 +821,9 @@ def test_reserved_protected_cases_survive_later_edits_to_the_authored_file(
             json.dumps(proposed), encoding="utf-8"
         )
         monkeypatch.setattr(config, "SEALED_CASES_DIR", tmp_path)
-        assert sealed_store.load_family("task_completion").cases[0] != before[0][2]
+        from shiftwork.domain.errors import InvalidSealedCase
+        with pytest.raises(InvalidSealedCase, match="invalid protected acceptance"):
+            sealed_store.load_family("task_completion")
         assert sealed_store.load_reserved_comparison_cases(conn, reservation.id) == before
     finally:
         conn.close()
@@ -993,13 +995,15 @@ def test_a_manifest_mismatch_fails_closed_and_reserves_nothing(session, tmp_path
         ).hexdigest()
     if mutation != "remove_file":
         manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
-    monkeypatch.setattr(config, "PIVOT_COMPARE_REQUEST_DIR", directory)
-    monkeypatch.setattr(config, "PIVOT_COMPARE_MANIFEST", manifest_path)
+    apply_staged_material(monkeypatch, tmp_path / "fault-package", {
+        "fixtures/requests/" + name: (directory / name).read_bytes() if (directory / name).exists() else None
+        for name in ("bookshop_compare_manifest.json", *WORKLOAD_FILES)
+    }, reseal_manifest=True)
 
     conn = db.connect(session.db_file)
     try:
         before = _counts(conn)
-        with pytest.raises(orchestrator.LifecycleError) as excinfo:
+        with pytest.raises((orchestrator.LifecycleError, registry.PackUnavailable)) as excinfo:
             comparison_flow.create_qualifying_comparison(
                 conn,
                 session.shift_id,
@@ -1030,8 +1034,10 @@ def test_executor_incompatible_blank_line_fails_before_exposure(session, tmp_pat
     entry["request_bytes_sha256"] = hashlib.sha256(raw).hexdigest()
     entry["request_bytes_length"] = len(raw)
     manifest_path.write_bytes(json.dumps(manifest).encode("utf-8"))
-    monkeypatch.setattr(config, "PIVOT_COMPARE_REQUEST_DIR", directory)
-    monkeypatch.setattr(config, "PIVOT_COMPARE_MANIFEST", manifest_path)
+    apply_staged_material(monkeypatch, tmp_path / "blank-line-package", {
+        "fixtures/requests/" + name: (directory / name).read_bytes()
+        for name in ("bookshop_compare_manifest.json", *WORKLOAD_FILES)
+    }, reseal_manifest=True)
 
     conn = db.connect(session.db_file)
     try:
@@ -2626,7 +2632,7 @@ def test_protected_variant_is_bound_and_snapshotted_before_any_result(session):
 
 
 @pytest.mark.parametrize("collision", ["entity", "record"])
-def test_protected_delta_collision_is_rejected_before_exposure(session, monkeypatch, collision):
+def test_protected_delta_collision_is_rejected_before_exposure(session, monkeypatch, tmp_path, collision):
     candidate_a, candidate_b, investigation = _comparison_session(session)
     cases = list(sealed_store.load_family("task_completion").cases)
     stimulus = cases[0].stimulus
@@ -2644,9 +2650,13 @@ def test_protected_delta_collision_is_rejected_before_exposure(session, monkeypa
         public_data["records"].append(duplicate.model_dump(mode="json", exclude_none=True))
         assert task_contract.load_public_state_bytes(json.dumps(public_data).encode()), (
             "the public-state parser itself does not detect duplicate record ids")
-    cases[0] = cases[0].model_copy(update={"stimulus": stimulus.model_copy(update={"state_delta": delta})})
-    monkeypatch.setattr(sealed_store, "load_reviewed_comparison_family",
-                        lambda _family: evaluator.SealedCaseSet(cases=tuple(cases)))
+    from shiftwork.domain.comparison import acceptance_aspect
+    cases[0] = cases[0].model_copy(update={
+        "stimulus": stimulus.model_copy(update={"state_delta": delta}),
+        "expected": {**cases[0].expected, "aspect": acceptance_aspect(cases[0]).model_dump(mode="json")},
+    })
+    apply_staged_material(monkeypatch, tmp_path / "collision-package", {
+        "sealed/cases/bookshop_task_completion.json": protected_family_bytes(cases)})
     conn = db.connect(session.db_file)
     try:
         before = _counts(conn)
@@ -2779,15 +2789,12 @@ def test_protected_content_and_captures_never_reach_public_surfaces(tmp_path, mo
         stimulus = first.stimulus.model_copy(update={"state_delta": delta})
         cases[0] = first.model_copy(update={
             "stimulus": stimulus,
-            "expected": {"aspect": "x" if marker == 1 else "y", "rule_ids": [],
+            "expected": {"aspect": {"kind": "NAMED_TASK_OUTCOMES", "task_id": "collection",
+                                    "expected_outcomes": ["JUSTIFIED_REFERRAL"]}, "rule_ids": [],
                          "note": "x" if marker == 1 else "y"},
         })
-        case_set = evaluator.SealedCaseSet(cases=tuple(cases))
-        monkeypatch.setattr(sealed_store, "load_family",
-                            lambda family, current=case_set: current if family == "task_completion"
-                            else original_load(family))
-        monkeypatch.setattr(sealed_store, "load_reviewed_comparison_family",
-                            lambda _family, current=case_set: current)
+        apply_staged_material(monkeypatch, tmp_path / f"private-{marker}-package", {
+            "sealed/cases/bookshop_task_completion.json": protected_family_bytes(cases)})
         db_file = tmp_path / f"protected-{marker}.db"
         with TestClient(create_app(str(db_file))) as client:
             current = BookshopShift(client, db_file, monkeypatch)

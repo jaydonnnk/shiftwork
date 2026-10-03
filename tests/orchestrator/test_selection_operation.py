@@ -1,12 +1,16 @@
 """S17 exact selection and S18 selected-version operation proofs."""
 
 import base64
+import hashlib
 import importlib.util
+import inspect
 import json
 import shutil
 import sqlite3
+import tempfile
 import time
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -18,6 +22,7 @@ from shiftwork.domain.errors import InvalidSealedCase
 from shiftwork.sealed import store as sealed_store
 from shiftwork.store import db, repo
 from tests.orchestrator import pivot_flow
+from tests.packs.material import apply_staged_material, staged_material
 from shiftwork.domain.models import (ExecutorFailure, RunOutput, RunState,
                                      LedgerEventDraft, LedgerEventType,
                                       ExecutionObservation, ObservationKind,
@@ -478,10 +483,10 @@ def test_changed_mission_between_selection_check_and_freeze_blocks_run(
     def changed_second_read(path):
         nonlocal mission_reads
         payload = original_read(path)
-        if path == config.PIVOT_MISSION:
+        if (path == config.PIVOT_MISSION
+                and inspect.currentframe().f_back.f_code.co_name == "freeze_diagnostic_context"):
             mission_reads += 1
-            if mission_reads == 2:
-                return payload + b"\n"
+            return payload + b"\n"
         return payload
 
     try:
@@ -489,6 +494,7 @@ def test_changed_mission_between_selection_check_and_freeze_blocks_run(
         monkeypatch.setattr(type(config.PIVOT_MISSION), "read_bytes", changed_second_read)
         with pytest.raises(orchestrator.LifecycleError, match="selected requirements changed"):
             orchestrator.start_run(conn, shift_id, client_request_id="changed-mission")
+        assert mission_reads == 1, "the fault must reach the context capture after the selection check"
         assert repo.count_runs_all(conn) == before
     finally:
         conn.close()
@@ -636,7 +642,8 @@ def test_selected_operation_changed_context_blocks_zero_output_retry(
         conn.commit()
         changed = tmp_path / "changed-public-state.json"
         changed.write_bytes(config.PIVOT_PUBLIC_STATE.read_bytes() + b"\n")
-        monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", changed)
+        apply_staged_material(monkeypatch, tmp_path / "retry-package", {
+            "fixtures/shop/bookshop_pivot_public_state.json": changed.read_bytes()})
         with pytest.raises(orchestrator.LifecycleError, match="retry conditions changed"):
             orchestrator.start_run(conn, shift_id, client_request_id="context-second")
     finally:
@@ -791,7 +798,8 @@ def test_choice_rejects_incomplete_drifted_and_changed_requirements(session, tmp
         conn.close()
     new_mission = tmp_path / "changed-mission.json"
     new_mission.write_bytes(config.PIVOT_MISSION.read_bytes() + b"\n")
-    monkeypatch.setattr(config, "PIVOT_MISSION", new_mission)
+    apply_staged_material(monkeypatch, tmp_path / "new-mission-package", {
+        "fixtures/mission/bookshop_pivot_v1.json": new_mission.read_bytes()})
     assert session.client.post(path, json=body).status_code == 409
     assert len(session.client.get("/api/engagements/bookshop/selections").json()) == 1
 
@@ -1063,14 +1071,13 @@ def test_later_alternative_experiment_does_not_rewrite_original_history(tmp_path
         successor_id = successor["id"]
 
         outage = pivot_flow.staged_outage_state(tmp_path)
-        reviewed_state = config.PIVOT_PUBLIC_STATE
-        monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", outage)
-        started = client.post(
-            f"/api/shifts/{successor_id}/runs", json={"client_request_id": "s20-operation"}
-        )
-        assert started.status_code == 202, started.text
-        operation = pivot_flow.wait_run(client, started.json()["id"])
-        monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", reviewed_state)
+        with staged_material(monkeypatch, tmp_path / "observed-package", {
+            "fixtures/shop/bookshop_pivot_public_state.json": outage.read_bytes()}):
+            started = client.post(
+                f"/api/shifts/{successor_id}/runs", json={"client_request_id": "s20-operation"}
+            )
+            assert started.status_code == 202, started.text
+            operation = pivot_flow.wait_run(client, started.json()["id"])
 
         assert operation["state"] == "FINALIZED", operation
         assert operation["purpose"] == "OPERATION"
@@ -1248,16 +1255,14 @@ def test_later_alternative_experiment_does_not_rewrite_original_history(tmp_path
 
 def _operate_under(client, monkeypatch, shift_id, world):
     """Run one selected operation with the operation world pointed at ``world``."""
-    reviewed = config.PIVOT_PUBLIC_STATE
-    monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", world)
-    try:
-        started = client.post(
-            f"/api/shifts/{shift_id}/runs", json={"client_request_id": f"s20-world-{world.stem}"}
-        )
-        assert started.status_code == 202, started.text
-        run = pivot_flow.wait_run(client, started.json()["id"])
-    finally:
-        monkeypatch.setattr(config, "PIVOT_PUBLIC_STATE", reviewed)
+    with tempfile.TemporaryDirectory() as temporary:
+        with staged_material(monkeypatch, Path(temporary) / "package", {
+            "fixtures/shop/bookshop_pivot_public_state.json": world.read_bytes()}):
+            started = client.post(
+                f"/api/shifts/{shift_id}/runs", json={"client_request_id": f"s20-world-{world.stem}"}
+            )
+            assert started.status_code == 202, started.text
+            run = pivot_flow.wait_run(client, started.json()["id"])
     assert run["state"] == "FINALIZED", run
     return run
 
@@ -1327,7 +1332,15 @@ def test_later_condition_needs_an_observed_change_and_its_own_world(tmp_path, mo
         stored = json.loads(config.PIVOT_COMPARE_STATE.read_bytes().decode("utf-8"))
         del stored["description"]
         reshaped.write_bytes(json.dumps(stored, sort_keys=True).encode("utf-8"))
-        monkeypatch.setattr(config, "PIVOT_COMPARE_STATE", reshaped)
+        comparison_bytes = reshaped.read_bytes()
+        with pytest.raises(orchestrator.LifecycleError, match="is not the reviewed comparison world"):
+            comparison_flow._require_dependency_only_variation(
+                comparison_bytes, config.PIVOT_COMPARE_STATE.read_bytes())
+        manifest = json.loads(config.PIVOT_COMPARE_MANIFEST.read_bytes())
+        manifest["comparison_state_sha256"] = hashlib.sha256(comparison_bytes).hexdigest()
+        apply_staged_material(monkeypatch, tmp_path / "reshaped-package", {
+            "fixtures/shop/bookshop_compare_state_v1.json": comparison_bytes,
+            "fixtures/requests/bookshop_compare_manifest.json": json.dumps(manifest).encode()})
         mismatched = client.post(f"/api/shifts/{fourth['id']}/experiments", json={
             "kind": "LATER_CONDITION_COMPARISON",
             "observed_run_id": operation["id"],
@@ -1335,8 +1348,8 @@ def test_later_condition_needs_an_observed_change_and_its_own_world(tmp_path, mo
             "client_request_id": "s20-world-3",
         })
         assert mismatched.status_code == 409, mismatched.text
-        assert "is not the reviewed comparison world" in mismatched.json()["detail"], (
-            mismatched.text)
+        assert mismatched.json()["kind"] == "conflict"
+        assert mismatched.json()["detail"] == "engagement material is unavailable"
         conn = db.connect(db_file)
         try:
             assert not [

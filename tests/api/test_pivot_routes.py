@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from demos.final_pivot import create_v5_sample
 from shiftwork import orchestrator
 from shiftwork.app import create_app
+from shiftwork.packs import registry
 from shiftwork.store import db, repo
 
 
@@ -29,6 +30,44 @@ def _count(path, table):
         return conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
     finally:
         conn.close()
+
+
+@pytest.mark.parametrize("with_run", [True, False])
+def test_first_choice_and_restart_preserve_original_v5_column_values(tmp_path, monkeypatch, with_run):
+    packs = registry.registered_packs()
+    monkeypatch.setattr(registry, "_PACKS", (*packs[:2], packs[2].model_copy(update={"reviewed_pins": ()})))
+    client, path = _migrated_client(tmp_path, with_run=with_run)
+    conn = db.connect(path)
+    try:
+        original = {}
+        for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"):
+            table = row[0]
+            columns = ', '.join(info[1] for info in conn.execute(f"PRAGMA table_info({table})"))
+            original[table] = columns, tuple(tuple(row) for row in conn.execute(f"SELECT {columns} FROM {table} ORDER BY rowid"))
+    finally:
+        conn.close()
+    for restart in range(2):
+        failure = None
+        try:
+            with client:
+                if restart == 0:
+                    opened = client.post("/api/engagements/bookshop/shifts")
+                    assert opened.status_code == 201, opened.text
+                    assert opened.json()["opening_mode"] == "LEGACY_FIRST_CHOICE"
+                assert _count(path, "operating_selections") == 0
+                assert _count(path, "runs") == int(with_run)
+        except orchestrator.LifecycleError as error:
+            failure = error
+        assert failure is None, "preserved legacy roles blocked first-choice startup"
+        conn = db.connect(path)
+        try:
+            for table, (columns, rows) in original.items():
+                current = tuple(tuple(row) for row in conn.execute(
+                    f"SELECT {columns} FROM {table} ORDER BY rowid LIMIT ?", (len(rows),)))
+                assert current == rows, f"original {table} column values changed"
+            assert conn.execute("SELECT COUNT(*) FROM engagement_assist_policy").fetchone()[0] == 1
+        finally:
+            conn.close()
 
 
 def test_closed_v5_shift_opens_first_choice_without_invented_selection(tmp_path):
