@@ -9,6 +9,14 @@
 -- already hold accepted historical evidence. Column changes and row backfills
 -- belong in v6.sql, which only ever runs on the v5 and older paths.
 
+-- Current assistance projection, separate from preserved historical config.
+CREATE TABLE IF NOT EXISTS engagement_assist_policy (
+    slug TEXT PRIMARY KEY REFERENCES engagements(slug),
+    assist_level TEXT NOT NULL,
+    allowed_assist_roles_json TEXT NOT NULL,
+    total_assist_budget_per_shift INTEGER NOT NULL CHECK (total_assist_budget_per_shift >= 0)
+);
+
 -- Append-only: a revision never overwrites its parent, and the parent must
 -- belong to the same shift. SQLite CHECK constraints cannot hold a subquery, so
 -- the cross-row rule is a trigger rather than a constraint.

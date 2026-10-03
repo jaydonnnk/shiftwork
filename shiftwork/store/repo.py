@@ -105,6 +105,30 @@ def get_engagement_config(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | 
     return conn.execute("SELECT * FROM engagement_config WHERE slug = ?", (slug,)).fetchone()
 
 
+# --- current assistance policy ---------------------------------------------
+
+
+def seed_engagement_assist_policy(
+    conn: sqlite3.Connection,
+    slug: str,
+    *,
+    assist_level: str,
+    allowed_assist_roles: tuple[str, ...],
+    total_assist_budget_per_shift: int,
+) -> None:
+    """Seed a missing projection; retain existing mismatches for verification."""
+    conn.execute(
+        "INSERT OR IGNORE INTO engagement_assist_policy (slug, assist_level, "
+        "allowed_assist_roles_json, total_assist_budget_per_shift) VALUES (?, ?, ?, ?)",
+        (slug, assist_level, _dump(list(allowed_assist_roles)), total_assist_budget_per_shift),
+    )
+    conn.commit()
+
+
+def get_engagement_assist_policy(conn: sqlite3.Connection, slug: str) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM engagement_assist_policy WHERE slug = ?", (slug,)).fetchone()
+
+
 # --- shifts ----------------------------------------------------------------
 
 

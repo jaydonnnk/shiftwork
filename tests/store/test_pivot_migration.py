@@ -8,7 +8,10 @@ import pytest
 
 from demos.final_pivot import assert_v5_rows_preserved, create_v5_sample, snapshot_v5_rows
 from shiftwork import orchestrator
+from shiftwork.app import create_app
+from shiftwork.packs import registry
 from shiftwork.store import db
+from fastapi.testclient import TestClient
 
 
 def _copy_v5(tmp_path, *, with_run=True):
@@ -50,6 +53,45 @@ def test_v5_to_v6_preserves_every_legacy_blob_hash_and_row_count(tmp_path):
     finally:
         conn.close()
     assert hashlib.sha256(original.read_bytes()).hexdigest() == original_file_hash
+
+
+@pytest.mark.parametrize("with_run", [True, False])
+@pytest.mark.parametrize("already_v6", [False, True])
+def test_current_assist_projection_preserves_v5_rows_on_startup_and_restart(tmp_path, monkeypatch, with_run, already_v6):
+    packs = registry.registered_packs()
+    monkeypatch.setattr(registry, "_PACKS", (*packs[:2], packs[2].model_copy(update={"reviewed_pins": ()})))
+    original, copied, before = _copy_v5(tmp_path, with_run=with_run)
+    original_hash = hashlib.sha256(original.read_bytes()).hexdigest()
+    if already_v6:
+        conn = db.connect(copied)
+        try:
+            db.ensure_schema(conn)
+            conn.execute("DROP TABLE IF EXISTS engagement_assist_policy")
+            conn.commit()
+        finally:
+            conn.close()
+    policy = registry.resolve_pack("bookshop").assist
+    for _ in range(2):
+        failure = None
+        try:
+            with TestClient(create_app(str(copied))):
+                pass
+        except orchestrator.LifecycleError as error:
+            failure = error
+        assert failure is None, "preserved legacy roles blocked current-policy startup"
+        conn = db.connect(copied)
+        try:
+            assert_v5_rows_preserved(conn, before)
+            assert tuple(conn.execute("SELECT slug, assist_level, allowed_assist_roles_json, "
+                                      "total_assist_budget_per_shift FROM engagement_assist_policy").fetchone()) == (
+                "bookshop", policy.level_label, '["HINT","DIAGNOSIS","PATCH_PROPOSAL"]',
+                policy.total_calls_per_shift,
+            )
+            assert conn.execute("SELECT COUNT(*) FROM engagement_assist_policy").fetchone()[0] == 1
+            assert [row[0] for row in conn.execute("SELECT slug FROM engagements")] == ["bookshop"]
+        finally:
+            conn.close()
+    assert hashlib.sha256(original.read_bytes()).hexdigest() == original_hash
 
 
 @pytest.mark.parametrize("with_run", [True, False])

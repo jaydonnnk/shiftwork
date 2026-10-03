@@ -8,6 +8,8 @@
 -- by an earlier build gains the tables a later slice added. Keep the pivot tables
 -- there rather than duplicating them here: two copies of one constraint drift
 -- silently, and only the migration copy is exercised against real v5 evidence.
+-- S22a's engagement_assist_policy also lives there: current policy projections
+-- must never replace the historical engagement_config assistance columns.
 --
 -- The incidents table exists from the tracer and is read by the board, but
 -- Slice 2 opens no incidents (Slice 5/7). assist_events landed in Slice 14 and
