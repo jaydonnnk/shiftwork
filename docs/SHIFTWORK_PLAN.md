@@ -1,5 +1,19 @@
 # Shiftwork: working brief and adjudication register
 
+**Publication verification limit, 2026-10-04:** an autocrlf=true local
+clone under a long temporary directory returned 853 passed, 1 failed,
+1 skipped and 2 warnings. The failing historical manifest scanner expands
+sealed absolute file paths into 25-character windows; ten matching windows
+came only from the parent directory also used by the legitimate public
+snapshot reference. Full private paths and sealed identities were absent.
+Identical committed-tree controls reproduce that one assertion failure at
+the long path and pass all nine checks at the short path, including eight
+scanner self-tests. Scanner code and assertions are unchanged. This known
+test false positive for long shared checkout names remains a portability
+limit; it is not labelled flaky or a repaired product leak. Both control
+runs and the failed suite are preserved beside fresh-checkout receipts.
+
+
 **Current S22a disposition, 2026-10-04: ACCEPTED FOR PUBLICATION.**
 The user requested committing S22a, merging and pushing to main, and cleaning
 the working tree after its verified technical closeout. This is acceptance
