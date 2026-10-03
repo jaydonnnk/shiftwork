@@ -1,5 +1,195 @@
 # Program Design: Shiftwork final pivot
 
+**Current S22a disposition, 2026-10-04: ACCEPTED FOR PUBLICATION.**
+The user requested committing S22a, merging and pushing to main, and cleaning
+the working tree after its verified technical closeout. This is acceptance
+and Git/cleanup authority for S22a; it does not authorize S22b or live work.
+The post-seal offline result is 854 passed, 1 skipped, 2 warnings; focused
+groups are 190/33/32 and all 21 final fault rows have verified raw receipts.
+A publication preflight additionally reproduced checkout drift: only 10/24
+approved Northline material hashes survived Windows autocrlf. Explicit
+attributes now preserve 24/24 without changing any reviewed file or seal.
+The stale registry comment is corrected; its literal pins stay unchanged.
+Raw evidence, archived preimages, deliberate blank worksheets, ADRs and
+future-slice material remain protected. Only regenerable caches are cleanup
+candidates. A pre-existing S21 mistake entry is retained separately.
+Publication and fresh-checkout receipts: evidence/slice22a-publication-2026-10-04/.
+Older checkpoints below retain their original evidence/authorization scope.
+
+
+**Historical S22a technical closeout, 2026-10-04: COMPLETE; user acceptance pending.**
+The approved two seals, 24 pins and six document bindings remain exact. Current
+focused groups pass 190, 33 and 32 checks. Post-seal offline suite: 854 passed,
+1 skipped, 2 warnings in 442.88s (0:07:22), exit 0; packaging excluded.
+Three fresh privacy faults finish the interrupted run; all 21 fault rows and
+49 intended failing assertions have verified logs/JUnit. Original receipts,
+22 unchanged material files, Bellwether identities/history, frozen dates,
+MISTAKES prefixes and Git index are preserved. Final diff checks and the bounded
+architect-reviewer cleanup pass; one stale registry comment is retained as a nit.
+The exact blank HTTP handler proves MISSING_OUTPUT / REQUIRED_TASK_MISSING,
+mandatory_pass=false, on loopback only. Admission, idempotent startup and v5
+preservation pass. Safety assessment refusal and every S22b assessor/journey
+boundary remain. No source changed in this continuation; all implementation is
+uncommitted. No installs, credentials, live calls, spend, staging, commits,
+pushes or S22b. Fresh evidence: evidence/slice22a-closeout-2026-10-04/.
+Prior checkpoint prose and draft inventory below remain historical approval
+preimages; this closeout governs current state. No repeat gate/seal approval.
+
+
+**Historical S22a schema-only checkpoint, 2026-10-03:** approved slice ownership
+was checked before continuing: S22a owns material and per-family schema
+validation; S22b owns independent deployment assessment and the playable
+comparison/choice/operation journey. ROUTE_SAFETY_QUESTION now parses, so
+all three public pairs and all six draft cases validate without changing
+their exact bytes. Unknown future task kinds still refuse.
+
+The pure assessor explicitly refuses every safety-task assessment before
+grading, including missing output and every task status. This prevents
+schema recognition from falling through the generic completion branch;
+no safety, booking/retry/access or commitment assessor was implemented.
+The safety_route output claim and consequence rules remain S22b work.
+
+Baseline: 107 passed; final focused group: 114 passed. The schema check
+fails against pre-change parsing. Three separate disposable source faults
+reach their named failures with exact restoration and no collection/setup
+errors: omitted safety kind, omitted assessment refusal and semantic
+parsing reintroduced into the privacy reader. The future-draft privacy
+test now injects a genuinely unknown kind rather than relying on safety
+remaining unimplemented. Final offline suite: 814 passed, 1 skipped, 2 warnings in 413.59s (0:06:53), exit 0.
+Packaging is excluded; older mutation harnesses were not all rerun.
+
+Raw logs, JUnit, source pins and entry snapshots are in
+evidence/slice22a-schema-2026-10-03/. All 24 draft material hashes and
+Bellwether identities remain unchanged. Both Gate 3 corrections remain
+approved. Operator review/sealing, admission, Northline seeding and starter
+reproduction remain pending. Northline/GTM remain unavailable/unseeded.
+S22a is incomplete; no S22b assessor or journey was started. No installs,
+credentials, live calls, spend, staging, commits, pushes or sealing.
+
+**Historical S22a privacy repair checkpoint, 2026-10-03:** the saved broader
+regression is diagnosed and repaired. Northline's unimplemented
+ROUTE_SAFETY_QUESTION raised ValidationError during privacy-needle construction,
+before scanning; the wrapper mislabeled it as private material. Four disposable
+causal controls show 409, 200 with the draft absent, 200 with only that kind
+substituted, and 409 after exact restoration. No serialized collision occurred.
+
+A controller-only structural reader now retains the same private fields without
+requiring executable task vocabulary. Executable parsing, admission, seals and
+pins remain strict. Verification: 185 focused checks before the last two
+structural controls; final isolated baseline 18 passed; nine separate private-field
+omissions each reach the intended missing-refusal assertion. Final full offline
+suite: 807 passed, 1 skipped, 2 warnings in 389.84s (0:06:29), exit 0. Packaging is excluded; older mutation harnesses
+were not all rerun. Raw controls, source pins and preservation receipts:
+evidence/slice22a-privacy-2026-10-03/; raw command streams also remain in
+evidence/slice22a-material-2026-10-03/privacy-*.
+
+All 24 production drafts and their inventory hashes are unchanged. No runtime
+safety kind or independent deployment assessment was added. The packet is still
+not ready for sealing: compatible runtime validation and actual operator review
+precede admission, seeding and starter reproduction. Both scoped Gate 3
+corrections stay approved. S22a remains incomplete; S22b is untouched.
+Northline/GTM remain unavailable and unseeded. No installs, credentials, live
+calls, spend, staging, commits, pushes or sealing. Prior evidence and archived
+entry documents remain intact; MISTAKES only gained appended incidents.
+
+**Historical S22a verification HOLD, 2026-10-03:** the Northline drafts and exact
+operator packet are authored, but broader verification FAILED: 138 failed, 597 passed, 1 skipped, 2 warnings, 54 errors in 172.44s (0:02:52), exit 1.
+Bellwether routes reported public evidence contains private material. The cause
+is undiagnosed; no repair followed because the unexpected result arrived at the
+half-context boundary. Raw evidence/source pins: evidence/slice22a-material-2026-10-03/.
+The 55 passing focused checks and four disposable content faults are limited
+evidence, not the current full-suite verdict. Packet content is not ready for
+sealing or admission. Both scoped Gate 3 corrections stay approved; S22a is
+incomplete and S22b untouched. Production seals/pins remain unchanged and both
+new packs remain unavailable/unseeded. No installs, credentials, live calls,
+spend, staging, commits or pushes. The failure is appended to MISTAKES.md;
+all prior bytes, evidence and handoff/plan entry snapshots are preserved.
+
+
+**Historical S22a draft note, 2026-10-03:** 24 Northline material files and the exact
+operator packet are authored, unreviewed and unsealed. Production registration
+and pins are unchanged; both new packs remain unavailable/unseeded. Focused
+checks: 55 passed, 2 warnings. The packet records missing runtime safety vocabulary
+and independent deployment assessment; parsing does not establish acceptance.
+Both scoped corrections stay approved. No repeat gate approval is due. S22a is
+incomplete and S22b untouched. See slice22a-northline-operator-review-packet.md.
+
+**Historical S22a typed acceptance checkpoint, 2026-10-03:** typed aspect validation
+and exact six-payload Bellwether compatibility are implemented and verified
+offline. Original files, snapshots, seals and variant refs are preserved.
+Altered or cross-pack legacy payloads refuse before exposure. Three source
+payloads omit optional record currency fields; immutable original and exact
+historical normalized snapshot encodings are pinned separately. Typed views
+never replace identity-bearing cases. Typed expectation kinds have serialized
+scanner positive controls; public outcome/reason vocabulary remains usable.
+Final full offline suite: 778 passed, 1 skipped, 2 warnings in 335.27s (0:05:35), exit 0. Twenty-two targeted mutations
+reach intended assertion failures, restore exact source bytes and retain each
+process log and JUnit result. Evidence: evidence/slice22a-typed-2026-10-03/.
+
+Bounded cleanup inventoried 131 untracked files, archived 42 generated mutation
+JSONs with SHA-256 manifest and exact readback/restoration, then removed only
+those loose copies. All 21 raw logs remain unchanged. Historical JSON path
+references resolve via policy-repair/mutation-jsons-manifest.json and its README.
+The user subsequently requested local-only artifacts/evidence. artifacts/ was
+already ignored; .gitignore now ignores docs/plans/shiftwork/evidence/ for
+future additions. Its 125 already tracked files remain tracked. The single
+test dependency on ignored preflight evidence was replaced with six explicit
+verified ref invariants. Source and fixtures remain visible to Git.
+
+Both scoped Gate 3 corrections remain approved. S22a remains incomplete.
+Northline authoring and its exact-byte operator packet are still unauthored;
+actual review/sealing precedes admission, seeding and reproduction. Both new
+production packs remain unavailable/unseeded. S22b is untouched. No install,
+credential, live call, spend, stage, stash, commit or push ran. Earlier failed
+evidence is retained, and older mutation harnesses were not all rerun.
+
+**Historical S22a implementation checkpoint, 2026-10-03:** owning-pack execution
+reads, comparison reservation admission and admitted registered-pack seeding
+are implemented. The current policy projection and historical config retention
+remain strict. Latest full offline suite: 717 passed, 1 skipped, 2 warnings,
+exit 0; 13 targeted integration faults fail intended assertions and restore
+exact source bytes. Evidence: evidence/slice22a-seeding-2026-10-03/.
+Both scoped Gate 3 corrections remain approved. Typed legacy decoding and
+Northline material remain pending; both new packs stay unavailable/unseeded.
+S22a is incomplete. The earlier assistance proof below retains its original scope.
+
+Approved file/signature scope: `shiftwork/store/schema.sql` and
+`shiftwork/store/migrations/v6_tables.sql` add that table;
+`shiftwork/store/repo.py` gains
+`seed_engagement_assist_policy(conn, slug, *, assist_level, allowed_assist_roles,
+total_assist_budget_per_shift) -> None` and
+`get_engagement_assist_policy(conn, slug) -> sqlite3.Row | None`;
+`shiftwork/app.py` seeds its missing current row and `shiftwork/orchestrator.py`
+verifies it. Existing projection tests in `tests/assist/test_gateway.py` and
+mutation anchors in `tests/assist/mutation_proofs.py` follow the new owning row;
+`tests/store/test_pivot_migration.py` and `tests/api/test_pivot_routes.py` prove
+preserved v5 values and both source/no-source first-choice paths. The current
+policy table, signatures and these repair tests are now implemented and verified
+offline: 707 passed, 1 skipped, 2 warnings, exit 0; 21 targeted faults reach
+intended assertions with exact restoration. Evidence:
+evidence/slice22a-assist-2026-10-03/policy-repair/. S22a remains incomplete.
+
+**Current Gate 3 state: RE-APPROVED for the scoped assistance projection storage
+correction, 2026-10-03.** The user replied "Sure i approve?" to the explicit
+Gate 3 approval request. The scoped correction is now authorized under the
+existing S22a go-ahead. The already approved section 3.11
+sealed-aspect correction stays approved. Diagnosis proves section 3.10 item 5's
+current-column equality check blocks preserved v5 Bellwether history: the
+historical roles are ["hint","diagnose"], while the current declaration has
+HINT, DIAGNOSIS and PATCH_PROPOSAL. Rewriting the old row violates section 4.
+The approved narrow correction below uses a separate current assistance
+projection. Its assistance repair is implemented and verified offline; approval adds no live, content-seal,
+publication or S22b authority.
+Evidence: evidence/slice22a-assist-2026-10-03/diagnosis-2/diagnosis.json.
+
+**Historical Gate 3 approval: scoped S22a sealed-aspect compatibility correction,
+2026-10-03.** The user answered "Approve this scoped correction" to the explicit
+Gate 3 approval request. Section 3.11 preserves the six exact sealed legacy
+Bellwether payloads and exposure identities, evaluates their typed views and
+requires typed aspects for new families. S22a implementation is authorized by
+its own go-ahead; it has not started at this safe context handoff. The earlier
+approvals below remain historical; other approved decisions are unchanged.
+
 **GATE 3 SCOPED REVISION (THREE BOARDS): RE-APPROVED 2026-09-30.** The user
 reviewed the draft and approved it: "approve gate 3". Under the approved
 direction memo (`../../../shiftwork_three_boards.md`), the re-approved Gate 1
@@ -1375,12 +1565,27 @@ imports no sealed, store, gateway or network code.
    shift's pack: a draw in one board can never satisfy another board's comparison,
    and an invalidation in one board leaves the others untouched. Cross-pack
    identity collisions are registration errors.
-5. **Assist policy is declared, not branched.** `allowed_roles`,
-   `total_calls_per_shift` and `max_patch_proposals` are the enforcement source
-   for the assist route and the investigation view; the engagement-config columns
-   become a projection seeded from the declaration and verified at startup, and a
-   mismatch fails closed rather than diverging silently. A role outside the
-   declaration is refused before any model call.
+5. **Assist policy is declared, not branched. Scoped correction RE-APPROVED
+   2026-10-03.** `allowed_roles`, `total_calls_per_shift` and
+   `max_patch_proposals` remain the enforcement source for the assist route and
+   investigation view. The historical `engagement_config` assistance columns
+   remain unchanged and cease to represent current assistance policy. A separate
+   `engagement_assist_policy` row stores the current level, roles and total-call
+   projection. The controller seeds a missing row from the declaration with
+   INSERT OR IGNORE, for Bellwether now and other packs only after their actual
+   material admission. Startup and every assist/view use verify the stored row
+   against the declaration; an existing mismatch fails closed without rewriting
+   it. There is no fallback to historical columns or caller opt-in. A role outside
+   the declaration is refused before any model call. The patch cap remains
+   declaration-owned. Original v5 rows and all historical column values survive
+   startup, first-choice opening and restart unchanged.
+
+   This avoids a legacy-role alias decoder and avoids normalizing the demo to
+   hide the defect. Current-projection mutation tests move to the new owning
+   table and must still catch each altered field, absent rows at per-use checks,
+   and any overwrite of an existing mismatch. Separate v5-with-run and no-run
+   startup/first-choice proofs retain original-column byte comparisons. New-pack
+   rows and engagements remain absent until operator review and material admission.
 6. **No new authority.** A pack carries no evaluator logic, no ledger rule, no
    eligibility, promotion or credential authority, no sealed content read and no
    external call. `shiftwork/packs/registry.py` imports no sealed, evaluator,
@@ -1395,6 +1600,9 @@ imports no sealed, store, gateway or network code.
    sealed family file map (`sealed/store.py`), the content-bound identity name
    check (`sealed/rotation.py:33`), and the projection scanner needles whose
    sources become the registered declarations. No other behavior changes.
+   Privacy inventory reads private string fields structurally, including unadmitted
+   drafts with future task kinds; it does not grant execution admission.
+   Executable case parsing and seal/pin checks retain their full validation.
 
 ### 3.11 New-board pack contracts, consequence rules and acceptance aspects
 
@@ -1548,14 +1756,43 @@ exposure is recorded. `NAMED_TASK_OUTCOMES` requires a non-empty
 `NO_TASK_REASON_CODE` requires a `reason_code` and forbids the other parameters;
 `EVERY_REQUIRED_TASK_RETURNS_A_RESULT` forbids every parameter. An absent,
 unparseable, unknown-kind, unknown-task or out-of-vocabulary aspect is rejected
-with no exposure recorded. `protected_acceptance` reads the typed aspect; the
-existing named bookshop aspects become declared parameter values (the
-`collection` and `alternative` task ids with their outcome tuples) rather than
-code branches, and the mandatory-pass precondition and identity checks in
-section 3.9 stay exactly as stated. The present string-aspect draft does not
-parse and stays ineligible; it is replaced when the family is re-authored under
-this schema and sealed, and the needle collector is unaffected because it never
-parses aspects.
+with no exposure recorded. `protected_acceptance` evaluates a typed aspect
+view; the mandatory-pass precondition and identity checks in section 3.9 stay
+exactly as stated.
+
+**Compatibility correction, RE-APPROVED by the user 2026-10-03.** All new
+Northline and GTM cases and future authored cases require the typed schema.
+The six existing OPERATOR_SEALED Bellwether comparison payloads retain their
+exact bytes, canonical seal digest, variant refs, exposures and stored snapshots.
+A pure compatibility decoder maps only those exact pinned legacy payloads to a
+typed view. It never replaces the original `expected` block or stimulus in the
+identity-bearing case, never writes back the view, and never changes rotation
+or exposure accounting. Admission binds compatibility to the historical
+Bellwether pack/family and exact legacy payload pins under orchestration;
+caller input cannot enable it. Unknown strings, changed legacy payloads and
+legacy strings in another pack fail before exposure. Archived reserved payloads
+use the same exact-payload compatibility rule without depending on mutable
+current fixture bytes. The registry imports no sealed reader.
+
+The decoder preserves the existing meanings:
+
+| Legacy aspect | Typed view |
+| --- | --- |
+| `every_required_task_returns_a_result` | EVERY_REQUIRED_TASK_RETURNS_A_RESULT |
+| `fixed_task_claims_name_the_requested_entity_and_edition` | NAMED_TASK_OUTCOMES, collection, USEFUL_COMPLETION |
+| `supported_negative_collection_is_a_completed_answer` | NAMED_TASK_OUTCOMES, collection, USEFUL_COMPLETION |
+| `completed_alternative_meets_strict_budget` | NAMED_TASK_OUTCOMES, alternative, USEFUL_COMPLETION or JUSTIFIED_REFUSAL |
+| `conflicting_necessary_collection_records_require_referral` | NAMED_TASK_OUTCOMES, collection, JUSTIFIED_REFERRAL |
+| `collection_answer_creates_no_commitment` | NAMED_TASK_OUTCOMES, collection, USEFUL_COMPLETION |
+
+Compatibility metadata consists of immutable exact legacy payload pins; it is
+not a second sealed case inventory or an evaluator rule override. Independent
+mandatory assessment still enforces the named entity, budget, contradiction and
+commitment rules. The needle collector continues scanning the original expected
+blocks, including legacy strings, because a typed view does not remove their
+privacy boundary. Neither the existing family nor a stored snapshot is
+re-authored or re-sealed for this format change. The read-only six-case probe is
+in `evidence/slice22a-aspect-compatibility-2026-10-03.json`.
 
 ## 4. Storage and migration
 
@@ -1566,6 +1803,7 @@ version marker changes only in the same successful transaction.
 
 | Table | Required constraints |
 | --- | --- |
+| `engagement_assist_policy` | Scoped correction RE-APPROVED 2026-10-03: `slug TEXT PRIMARY KEY REFERENCES engagements(slug)`, `assist_level TEXT NOT NULL`, `allowed_assist_roles_json TEXT NOT NULL`, `total_assist_budget_per_shift INTEGER NOT NULL CHECK (total_assist_budget_per_shift >= 0)`. One current declaration projection per seeded engagement; startup and per-use equality checks; INSERT OR IGNORE preserves mismatches. Added through the existing idempotent v6 table bootstrap for fresh and already-v6 databases; no update to original engagement_config columns. |
 | `investigations` | Append-only; `revision_of_id` references the same shift; source run/request must exist. |
 | `execution_contexts` | Immutable `content_hash UNIQUE`; reviewed mission bytes/hash plus exact public and request-spec bytes retained for one or three ordered `FrozenWorkload` records; protected reservation remains an internal ref and protected bindings are hashed into the context, never projected. `protected_bindings` is RECONSTRUCTED, not stored: the table gains no bindings column, and the field is derived at load time from `exposure_items` joined to `protected_case_snapshots` through the existing `protected_reservation_id`. Storing a second copy would give the same digests two sources of truth and contradict Gate 2 S8.1 item 4, which requires execution to reconstruct reserved bytes from the restricted reservation. `content_hash` commits to the reconstructed values, and test 51 reads them back through the same reconstruction. |
 | `experiments` | `client_request_id UNIQUE`; exactly one or two candidates according to kind; immutable after reservation except terminal state. `investigation_id` may be null only for one public bootstrap diagnostic in a `LEGACY_FIRST_CHOICE` shift with no owned source run. |
@@ -2462,12 +2700,17 @@ not count as proof.
    with their own board's variants under the frozen mandatory-pass
    precondition.
 
-Obligations 55 to 60 are new with this draft. The three drawn aspect strings at
-`tests/orchestrator/test_experiment_lifecycle.py:633-647`, already named as
-invalidated by the 2026-09-28 revision, take their final shape from the typed
-aspect schema in 3.11 when that revision and this one land together. Obligation
-45's renamed test file and obligations 39, 55 and 56 extend the sealed-needle
-and per-board boundary rules to all three registered packs.
+Obligations 55 to 60 are new with the three-board revision. Under the proposed
+re-approved S22a compatibility correction, the existing drawn-aspect string assertions are
+retained as legacy-payload preservation checks. Add separate assertions for
+the decoded typed views, exact unchanged seal/payload/variant identities,
+unchanged historical exposure and archived snapshots, rejection of unknown or
+altered legacy payloads and refusal of cross-pack compatibility. Fault each
+compatibility boundary separately; new-family typed validation keeps all
+obligation 60 rejection arms. The older statement below that these strings
+must change is superseded only for this re-approved preservation scope.
+Obligation 45's renamed test file and obligations 39, 55 and 56 extend the
+sealed-needle and per-board boundary rules to all three registered packs.
 
 Obligations 50 to 54 are new. Four obligations that exist and pass today are
 invalidated by this revision and must be revised in the same change rather than
