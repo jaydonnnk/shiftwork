@@ -1,0 +1,76 @@
+{
+  "review_status": "DRAFT",
+  "description": "Fictional frozen Northline parts and mechanic availability. No existing booking or pilot outcome is recorded.",
+  "engagement_slug": "northline",
+  "display_name": "Northline Bike Cooperative",
+  "snapshot_version": 1,
+  "observed_at": "2026-10-03T01:00:00Z",
+  "timezone": "Asia/Singapore",
+  "currency": "GBP",
+  "dependencies": {
+    "inventory": "available",
+    "collection": "available"
+  },
+  "entities": {
+    "slot:2026-10-04:0900": {
+      "title": "09:00 mechanic slot",
+      "edition": "schedule-v1",
+      "genre": "mechanic_slot"
+    },
+    "slot:2026-10-04:1000": {
+      "title": "10:00 mechanic slot",
+      "edition": "schedule-v1",
+      "genre": "mechanic_slot"
+    },
+    "part:brake-pad:standard": {
+      "title": "Standard brake pad",
+      "edition": "parts-v1",
+      "genre": "repair_part"
+    },
+    "part:chain:standard": {
+      "title": "Standard chain",
+      "edition": "parts-v1",
+      "genre": "repair_part"
+    }
+  },
+  "records": [
+    {
+      "record_id": "northline:slot:0900:availability",
+      "entity_ref": "slot:2026-10-04:0900",
+      "kind": "availability",
+      "value": {
+        "collection_date": "2026-10-04",
+        "can_collect": true
+      },
+      "record_age_ms": 0,
+      "dependency": "collection"
+    },
+    {
+      "record_id": "northline:slot:1000:availability",
+      "entity_ref": "slot:2026-10-04:1000",
+      "kind": "availability",
+      "value": {
+        "collection_date": "2026-10-04",
+        "can_collect": true
+      },
+      "record_age_ms": 0,
+      "dependency": "collection"
+    },
+    {
+      "record_id": "northline:part:brake-pad:stock",
+      "entity_ref": "part:brake-pad:standard",
+      "kind": "stock",
+      "value": 2,
+      "record_age_ms": 0,
+      "dependency": "inventory"
+    },
+    {
+      "record_id": "northline:part:chain:stock",
+      "entity_ref": "part:chain:standard",
+      "kind": "stock",
+      "value": 0,
+      "record_age_ms": 0,
+      "dependency": "inventory"
+    }
+  ]
+}

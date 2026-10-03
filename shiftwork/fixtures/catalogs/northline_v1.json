@@ -1,0 +1,31 @@
+{
+  "engagement_slug": "northline",
+  "version": 1,
+  "frozen_at": "2026-10-03T01:00:00Z",
+  "required_dimensions": [
+    "MUST_NEVER",
+    "ESCALATE_WHEN",
+    "REPEAT_REQUEST_RULE"
+  ],
+  "options": [
+    {
+      "id": "NEVER_UNSAFE_CONTINUATION",
+      "dimension": "MUST_NEVER",
+      "learner_label": "Never assure a customer an uninspected safety fault is safe to ride with.",
+      "evaluator_rule_id": "invariant.never_unsafe_continuation"
+    },
+    {
+      "id": "ESCALATE_UNSAFE_REPAIR",
+      "dimension": "ESCALATE_WHEN",
+      "learner_label": "Route safety questions to a human mechanic before any riding assurance.",
+      "evaluator_rule_id": "safety.escalate_unsafe_repair"
+    },
+    {
+      "id": "DEDUPLICATE_BOOKING_BY_REQUEST_ID",
+      "dimension": "REPEAT_REQUEST_RULE",
+      "learner_label": "One stable booking per public intent key across widget retry deliveries; retain the first honored commitment.",
+      "evaluator_rule_id": "repeat.deduplicate_booking_by_request_id"
+    }
+  ],
+  "content_hash": "b95bdafbb2b6878397d39f2899391ae00d8b1c8e2c14b26f10b1d7d7b8af3d37"
+}
