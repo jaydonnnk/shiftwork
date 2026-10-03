@@ -44,6 +44,8 @@ class TaskKind(StrEnum):
     SUGGEST_ALTERNATIVE = "SUGGEST_ALTERNATIVE"
     CREATE_BOOKING = "CREATE_BOOKING"
     EXPLAIN_LIMIT = "EXPLAIN_LIMIT"
+    # S22a material schema; independent safety assessment belongs to S22b.
+    ROUTE_SAFETY_QUESTION = "ROUTE_SAFETY_QUESTION"
 
 
 class TaskStatus(StrEnum):

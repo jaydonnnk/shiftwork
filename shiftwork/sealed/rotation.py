@@ -30,7 +30,7 @@ def variant_ref(case: SealedCase) -> str:
     family binds its request ordinals and expected content, so an ID-only rename
     cannot turn an exposed comparison case into a fresh holdout.
     """
-    if case.family == "task_completion":
+    if case.family == "task_completion" or case.stimulus is not None:
         # This new comparison family has no legacy exposures to preserve. Its
         # identity binds content so a later refill cannot recycle a case by ID.
         identity = {"family": case.family, "request_ordinals": list(case.request_ordinals),

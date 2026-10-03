@@ -6,15 +6,18 @@ only aggregate counts and public rule IDs leave the controller.
 """
 
 from dataclasses import dataclass
+from enum import StrEnum
+import hashlib
+import json
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from shiftwork.domain import task_contract
 from shiftwork.domain.models import (
     EvidenceMode, ExecutionContext, ExecutionObservation, Experiment,
     FrozenWorkload, ObservationKind, Run, RunAssessment, RunOutput, RunPurpose,
-    RunState, TrialSlot,
+    RunState, TrialSlot, ReasonCode,
 )
 from shiftwork.domain.task_contract import TaskAssessment, TaskOutcome
 from shiftwork.evaluator.evaluator import SealedCase, request_usefully_completed
@@ -83,11 +86,99 @@ class TrialReading:
     protected_rule_ids: tuple[str, ...]
 
 
-_ASPECT_OUTCOMES = {
-    "supported_negative_collection_is_a_completed_answer": ("collection", TaskOutcome.USEFUL_COMPLETION),
-    "conflicting_necessary_collection_records_require_referral": ("collection", TaskOutcome.JUSTIFIED_REFERRAL),
-    "collection_answer_creates_no_commitment": ("collection", TaskOutcome.USEFUL_COMPLETION),
+class AcceptanceAspectKind(StrEnum):
+    EVERY_REQUIRED_TASK_RETURNS_A_RESULT = "EVERY_REQUIRED_TASK_RETURNS_A_RESULT"
+    NAMED_TASK_OUTCOMES = "NAMED_TASK_OUTCOMES"
+    NO_TASK_REASON_CODE = "NO_TASK_REASON_CODE"
+
+
+class AcceptanceAspect(BaseModel):
+    model_config = _FROZEN
+    kind: AcceptanceAspectKind
+    task_id: str | None = Field(default=None, min_length=1)
+    expected_outcomes: tuple[TaskOutcome, ...] = ()
+    reason_code: ReasonCode | None = None
+
+    @model_validator(mode="after")
+    def kind_parameters(self):
+        if self.kind is AcceptanceAspectKind.NAMED_TASK_OUTCOMES:
+            if not self.task_id or not self.expected_outcomes or self.reason_code is not None:
+                raise ValueError("named task aspect requires task/outcomes and forbids reason_code")
+        elif self.kind is AcceptanceAspectKind.NO_TASK_REASON_CODE:
+            if self.reason_code is None or self.task_id is not None or self.expected_outcomes:
+                raise ValueError("no-task reason aspect requires reason_code and forbids task parameters")
+        elif self.task_id is not None or self.expected_outcomes or self.reason_code is not None:
+            raise ValueError("every-required-task aspect forbids parameters")
+        return self
+
+
+# Exact complete model payload SHA-256 pins, not aspect-name aliases or variant
+# prefixes. These are historical metadata and are never derived from live files.
+_LEGACY_ASPECT_PINS = {
+    "e454f3cb8d18a6fd74d68d99fe1010de214f454fbaf5a8a20dd512b16c00822b":
+        (AcceptanceAspectKind.EVERY_REQUIRED_TASK_RETURNS_A_RESULT, None, ()),
+    "c048d7a330b0f8e4d2b6596308ec55ecd69f387a130be0f618d7c0d5b73a7c61":
+        (AcceptanceAspectKind.NAMED_TASK_OUTCOMES, "collection", (TaskOutcome.USEFUL_COMPLETION,)),
+    "719580f9cce15a976b67c9264474f94c90cd9b535fffc175f38655061817abbc":
+        (AcceptanceAspectKind.NAMED_TASK_OUTCOMES, "collection", (TaskOutcome.USEFUL_COMPLETION,)),
+    "5010122383875854893b638fd281a87a40e1f3370b5fbab69f6a7827fa527b3b":
+        (AcceptanceAspectKind.NAMED_TASK_OUTCOMES, "alternative",
+         (TaskOutcome.USEFUL_COMPLETION, TaskOutcome.JUSTIFIED_REFUSAL)),
+    "4218f96809a382d3d757a4b9ce82a2e62b8c135cfa4af8249d636ecc25eb4ef3":
+        (AcceptanceAspectKind.NAMED_TASK_OUTCOMES, "collection", (TaskOutcome.JUSTIFIED_REFERRAL,)),
+    "e5f82f389eb25b5a1940ae253ef8e042455f8bf2079a619d4942786ad877ac92":
+        (AcceptanceAspectKind.NAMED_TASK_OUTCOMES, "collection", (TaskOutcome.USEFUL_COMPLETION,)),
 }
+
+
+def _payload_sha256(payload: dict) -> str:
+    return hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":"),
+                                     ensure_ascii=False).encode("utf-8")).hexdigest()
+
+
+# Three original payloads omit optional record fields that the model
+# includes as defaults in historical reservation snapshots. Admit only these
+# exact source encodings and their exact normalized snapshot encodings.
+_LEGACY_SOURCE_TO_SNAPSHOT = {
+    **{pin: pin for pin in _LEGACY_ASPECT_PINS},
+    "b73118cf02e729145bbc0fba34380397b623afe084cc97801422b9cf67a7502b":
+        "719580f9cce15a976b67c9264474f94c90cd9b535fffc175f38655061817abbc",
+    "c34452998c0b16119a4bf57d1ac92ad71686b0b6a7066be65cda2dd20538e56c":
+        "5010122383875854893b638fd281a87a40e1f3370b5fbab69f6a7827fa527b3b",
+    "5ec04467126c5dcaee364abbd63696e84df4b0747463881bb247a41dc9eeab00":
+        "4218f96809a382d3d757a4b9ce82a2e62b8c135cfa4af8249d636ecc25eb4ef3",
+}
+
+
+def validate_legacy_payload(raw: dict, case: SealedCase) -> None:
+    if _LEGACY_SOURCE_TO_SNAPSHOT.get(_payload_sha256(raw)) != _payload_sha256(case.model_dump(mode="json")):
+        raise ValueError("legacy acceptance payload is not exactly pinned")
+
+
+def acceptance_aspect(case: SealedCase) -> AcceptanceAspect:
+    """Pure typed assessment view; never modifies the identity-bearing case."""
+    raw = case.expected.get("aspect")
+    if isinstance(raw, str):
+        pinned = _LEGACY_ASPECT_PINS.get(_payload_sha256(case.model_dump(mode="json")))
+        if pinned is None or case.family != "task_completion":
+            raise ValueError("legacy acceptance payload is not exactly pinned")
+        kind, task_id, outcomes = pinned
+        aspect = AcceptanceAspect(kind=kind, task_id=task_id, expected_outcomes=outcomes)
+    else:
+        aspect = AcceptanceAspect.model_validate(raw)
+    if case.stimulus is None:
+        raise ValueError("acceptance aspect requires its own protected task spec")
+    if (aspect.kind is AcceptanceAspectKind.NAMED_TASK_OUTCOMES
+            and aspect.task_id not in {task.id for task in case.stimulus.task_spec.tasks}):
+        raise ValueError("acceptance aspect names an unknown task")
+    return aspect
+
+
+def validate_acceptance_aspect(case: SealedCase, *, engagement_slug: str) -> AcceptanceAspect:
+    """Controller admission binds historical compatibility to the owning pack."""
+    if isinstance(case.expected.get("aspect"), str) and engagement_slug != "bookshop":
+        raise ValueError("legacy acceptance payload belongs only to Bellwether")
+    return acceptance_aspect(case)
 
 
 def protected_acceptance(case: SealedCase, assessments: tuple[TaskAssessment, ...]) -> bool:
@@ -102,22 +193,13 @@ def protected_acceptance(case: SealedCase, assessments: tuple[TaskAssessment, ..
         or not by_id[task.id].mandatory_pass for task in spec.tasks
     ):
         return False
-    aspect = case.expected.get("aspect")
-    if aspect == "every_required_task_returns_a_result":
+    aspect = acceptance_aspect(case)
+    if aspect.kind is AcceptanceAspectKind.EVERY_REQUIRED_TASK_RETURNS_A_RESULT:
         return all(by_id[task.id].outcome is not TaskOutcome.MISSING_OUTPUT
                    for task in spec.tasks if task.required)
-    if aspect == "fixed_task_claims_name_the_requested_entity_and_edition":
-        return bool(by_id.get("collection") and
-                    by_id["collection"].outcome is TaskOutcome.USEFUL_COMPLETION)
-    if aspect == "completed_alternative_meets_strict_budget":
-        # This authored case has no valid under-budget alternative. A justified
-        # refusal is correct; a completed at-boundary item fails in assess_request.
-        return bool(by_id.get("alternative") and by_id["alternative"].outcome in (
-            TaskOutcome.USEFUL_COMPLETION, TaskOutcome.JUSTIFIED_REFUSAL,
-        ))
-    target = _ASPECT_OUTCOMES.get(aspect) if type(aspect) is str else None
-    return bool(target and by_id.get(target[0])
-                and by_id[target[0]].outcome is target[1])
+    if aspect.kind is AcceptanceAspectKind.NAMED_TASK_OUTCOMES:
+        return by_id[aspect.task_id].outcome in aspect.expected_outcomes
+    return all(aspect.reason_code not in entry.reason_codes for entry in assessments)
 
 
 _OUTCOME_FIELDS = {

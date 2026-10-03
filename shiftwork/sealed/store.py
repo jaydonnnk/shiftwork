@@ -24,7 +24,9 @@ from shiftwork import config
 from shiftwork.domain.errors import InvalidSealedCase, UnsupportedSealedSchema
 from shiftwork.domain.models import IncidentState, RunPurpose
 from shiftwork.domain import task_contract
+from shiftwork.domain.comparison import validate_acceptance_aspect, validate_legacy_payload
 from shiftwork.evaluator.evaluator import SealedCase, SealedCaseSet
+from shiftwork.packs.registry import FamilyClass, FamilyDeclaration, resolve_pack
 from shiftwork.sealed import rotation
 from shiftwork.store import repo
 
@@ -51,9 +53,14 @@ def private_storage_locator() -> str:
     return str(config.SEALED_CASES_DIR)
 
 
-def _raw_family(family: str) -> dict:
-    path = config.SEALED_CASES_DIR / _FAMILY_FILES[family]
+def _raw_family(family: str, *, slug: str = "bookshop") -> dict:
+    declaration = next((item for item in resolve_pack(slug).families if item.family == family), None)
+    if declaration is None:
+        raise InvalidSealedCase("family is not declared by the owning pack")
+    path = config.SEALED_CASES_DIR / declaration.case_file.rsplit("/", 1)[-1]
     data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict):
+        raise InvalidSealedCase("invalid sealed family inventory")
     file_version = data.get("schema_version")
     if file_version not in SUPPORTED_SCHEMA_VERSIONS:
         raise UnsupportedSealedSchema(
@@ -62,8 +69,71 @@ def _raw_family(family: str) -> dict:
     return data
 
 
-def load_family(family: str) -> SealedCaseSet:
-    data = _raw_family(family)
+def load_privacy_needles(family: str, *, slug: str = "bookshop") -> tuple[str, ...]:
+    """Read private strings without requiring executable task vocabulary.
+
+    Drafts remain private before admission, including when their task kinds are
+    not executable yet. This reader grants no admission or execution authority;
+    those paths still use the complete case parser and seal/pin guards.
+    """
+    try:
+        data = _raw_family(family, slug=slug)
+    except json.JSONDecodeError as exc:
+        raise InvalidSealedCase("invalid private scanner inventory") from exc
+
+    def mapping(value):
+        if not isinstance(value, dict):
+            raise InvalidSealedCase("invalid private scanner inventory")
+        return value
+
+    def text(value):
+        if not isinstance(value, str) or not value:
+            raise InvalidSealedCase("invalid private scanner inventory")
+        return value
+
+    mapping(data)
+    cases = data.get("cases")
+    if not isinstance(cases, list) or not cases:
+        raise InvalidSealedCase("invalid private scanner inventory")
+    needles = set()
+    for raw in cases:
+        case = mapping(raw)
+        if case.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS:
+            raise UnsupportedSealedSchema("unsupported private scanner case schema")
+        needles.update((text(case.get("id")), text(case.get("check_id"))))
+        expected = mapping(case.get("expected"))
+        note = expected.get("note")
+        if isinstance(note, str) and len(note) >= 25:
+            needles.add(note)
+        if case.get("stimulus") is not None:
+            stimulus = mapping(case["stimulus"])
+            request = mapping(stimulus.get("request"))
+            spec = mapping(stimulus.get("task_spec"))
+            delta = mapping(stimulus.get("state_delta"))
+            needles.update((text(request.get("request_id")), text(request.get("text")),
+                            text(spec.get("id")), text(spec.get("text")),
+                            text(delta.get("description"))))
+            aspect = expected.get("aspect")
+            if isinstance(aspect, str):
+                needles.add(aspect)
+            elif isinstance(aspect, dict):
+                # Structural kind names remain private; task outcome/reason
+                # vocabulary is public, as in the previous model-based reader.
+                kind = text(aspect.get("kind"))
+                needles.add(kind)
+            else:
+                raise InvalidSealedCase("invalid private scanner inventory")
+    return tuple(needle for needle in needles if len(needle) >= 8)
+
+
+def load_family(family: str, *, slug: str = "bookshop") -> SealedCaseSet:
+    data = _raw_family(family, slug=slug)
+    declaration = next(item for item in resolve_pack(slug).families if item.family == family)
+    return _parse_family(family, data, comparison_family=declaration.family_class is FamilyClass.COMPARISON,
+                         slug=slug)
+
+
+def _parse_family(family: str, data: dict, *, comparison_family: bool, slug: str) -> SealedCaseSet:
     cases = []
     for raw in data["cases"]:
         version = raw.get("schema_version")
@@ -83,9 +153,55 @@ def load_family(family: str) -> SealedCaseSet:
                 f"positive request ordinals; got {ordinals!r}"
             )
         cases.append(SealedCase.model_validate(raw))
-    if family != TASK_COMPLETION and any(case.stimulus is not None for case in cases):
+    if any(case.family != family for case in cases):
+        raise InvalidSealedCase("case belongs to another declared family")
+    if not comparison_family and any(case.stimulus is not None for case in cases):
         raise InvalidSealedCase("attempt family cannot carry protected comparison stimulus")
+    if comparison_family:
+        for raw, case in zip(data["cases"], cases):
+            # Legacy pins cover the complete typed payload, including its exact
+            # JSON value types. Parsing must not silently coerce altered bytes.
+            try:
+                if isinstance(case.expected.get("aspect"), str):
+                    validate_legacy_payload(raw, case)
+                validate_acceptance_aspect(case, engagement_slug=slug)
+            except ValueError as exc:
+                raise InvalidSealedCase("invalid protected acceptance aspect") from exc
     return SealedCaseSet(cases=tuple(cases))
+
+
+def load_declared_family(declaration: FamilyDeclaration, *, slug: str) -> SealedCaseSet:
+    """Read only the operator declaration supplied by orchestration.
+
+    Historical attempt families have no seal envelope: their admission retains
+    their reviewed raw file pins. Comparison families require their payload seal.
+    """
+    path = config.PACKAGE_DIR / declaration.case_file
+    data = json.loads(path.read_bytes())
+    if data.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS:
+        raise UnsupportedSealedSchema("unsupported declared family schema")
+    if data.get("family") != declaration.family or data.get("cycle", 1) != declaration.cycle:
+        raise InvalidSealedCase("declared family name or cycle mismatch")
+    comparison_family = declaration.family_class is FamilyClass.COMPARISON
+    if comparison_family:
+        digest = hashlib.sha256(
+            json.dumps(data.get("cases"), sort_keys=True, separators=(",", ":"),
+                       ensure_ascii=False).encode("utf-8")
+        ).hexdigest()
+        if (data.get("review_status") != "OPERATOR_SEALED"
+                or data.get("sealed_payload_sha256") != digest):
+            raise InvalidSealedCase("declared comparison family awaits operator review and sealing")
+    loaded = _parse_family(declaration.family, data, comparison_family=comparison_family, slug=slug)
+    refs = {rotation.variant_ref(case) for case in loaded.cases}
+    if len(refs) != len(loaded.cases) or len(refs) < declaration.min_variants:
+        raise InvalidSealedCase("declared family has duplicate or insufficient distinct variants")
+    if comparison_family:
+        if any(case.stimulus is None for case in loaded.cases):
+            raise InvalidSealedCase("declared comparison case lacks protected stimulus")
+        ids = [case.stimulus.request.request_id for case in loaded.cases]
+        if len(set(ids)) != len(ids):
+            raise InvalidSealedCase("declared comparison variants reuse a protected request id")
+    return loaded
 
 
 def load_reviewed_comparison_family(family: str) -> SealedCaseSet:
@@ -106,9 +222,9 @@ def load_reviewed_comparison_family(family: str) -> SealedCaseSet:
     return loaded
 
 
-def family_cycle(family: str) -> int:
+def family_cycle(family: str, *, slug: str = "bookshop") -> int:
     """The family's inventory generation; a refill appends variants and bumps this."""
-    return int(_raw_family(family).get("cycle", 1))
+    return int(_raw_family(family, slug=slug).get("cycle", 1))
 
 
 class ReservedProtectedCase(NamedTuple):
@@ -126,6 +242,9 @@ def load_reserved_comparison_cases(
     rows = repo.list_protected_case_snapshots(conn, reservation_id)
     if not rows:
         raise InvalidSealedCase(f"comparison reservation {reservation_id!r} has no protected cases")
+    reservation = repo.get_exposure_reservation(conn, reservation_id)
+    if reservation is None:
+        raise InvalidSealedCase("comparison case snapshot has no owning reservation")
     result = []
     for row in rows:
         payload = row["payload_json"]
@@ -133,11 +252,18 @@ def load_reserved_comparison_cases(
             raise InvalidSealedCase("comparison reservation has a missing or mismatched case snapshot")
         if hashlib.sha256(payload.encode("utf-8")).hexdigest() != row["payload_sha256"]:
             raise InvalidSealedCase("comparison case snapshot digest mismatch")
-        case = SealedCase.model_validate(json.loads(payload))
+        raw = json.loads(payload)
+        case = SealedCase.model_validate(raw)
         if case.family != row["family"] or rotation.variant_ref(case) != row["variant_ref"]:
             raise InvalidSealedCase("comparison case snapshot identity mismatch")
         if case.stimulus is None or row["resolved_state_bytes"] is None:
             raise InvalidSealedCase("comparison case snapshot lacks protected stimulus")
+        try:
+            if isinstance(case.expected.get("aspect"), str):
+                validate_legacy_payload(raw, case)
+            validate_acceptance_aspect(case, engagement_slug=reservation.engagement_slug)
+        except ValueError as exc:
+            raise InvalidSealedCase("invalid reserved acceptance aspect") from exc
         if hashlib.sha256(row["resolved_state_bytes"]).hexdigest() != row["resolved_state_sha256"]:
             raise InvalidSealedCase("comparison resolved state digest mismatch")
         result.append(ReservedProtectedCase(
@@ -160,18 +286,18 @@ def load_reserved_protected_state(conn: sqlite3.Connection, reservation_id: str,
     return row["resolved_state_bytes"]
 
 
-def case_index() -> dict[str, SealedCase]:
+def case_index(*, slug: str = "bookshop") -> dict[str, SealedCase]:
     """Every case across the inventory, keyed by variant ref and by check id."""
     index: dict[str, SealedCase] = {}
-    for family in _FAMILY_FILES:
-        for case in load_family(family).cases:
+    for declaration in resolve_pack(slug).families:
+        for case in load_family(declaration.family, slug=slug).cases:
             index[rotation.variant_ref(case)] = case
             index[case.check_id] = case
     return index
 
 
-def case_for_check_id(check_id: str) -> SealedCase | None:
-    return case_index().get(check_id)
+def case_for_check_id(check_id: str, *, slug: str = "bookshop") -> SealedCase | None:
+    return case_index(slug=slug).get(check_id)
 
 
 def load_drawn_cases(conn: sqlite3.Connection, run_id: str) -> SealedCaseSet:
@@ -184,7 +310,11 @@ def load_drawn_cases(conn: sqlite3.Connection, run_id: str) -> SealedCaseSet:
     waits on that regression, and a resolved incident's stimulus is not part of
     a later run's evidence (program design S3.9, S5.7).
     """
-    index = case_index()
+    run = repo.get_run(conn, run_id)
+    shift = repo.get_shift(conn, run.shift_id) if run else None
+    if shift is None:
+        raise InvalidSealedCase(f"unknown owning shift for run: {run_id}")
+    index = case_index(slug=shift.engagement_slug)
     cases: list[SealedCase] = []
     seen: set[str] = set()
 
@@ -205,7 +335,7 @@ def load_drawn_cases(conn: sqlite3.Connection, run_id: str) -> SealedCaseSet:
     run = repo.get_run(conn, run_id)
     if run is None:
         raise InvalidSealedCase(f"unknown run: {run_id}")
-    engagement_slug = run.shift_id.rsplit("-shift-", 1)[0]
+    engagement_slug = shift.engagement_slug
     for incident in repo.list_incidents(conn, engagement_slug):
         if incident.state is IncidentState.RESOLVED:
             continue

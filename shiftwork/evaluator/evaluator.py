@@ -40,7 +40,7 @@ from shiftwork.domain.customer_answer import (
     ValidatedServiceResponse,
     validate_service_response,
 )
-from shiftwork.domain.errors import ServiceResponseInvalid
+from shiftwork.domain.errors import MissionSpecInvalid, ServiceResponseInvalid
 from shiftwork.domain.models import (
     CheckResult,
     ContractOptionId,
@@ -332,6 +332,11 @@ def assess_request(
     referral or a clarification: a timeout cannot become an answer the service
     did not give.
     """
+    # S22a recognizes the reviewed material vocabulary without inventing a
+    # safety assessor. Refuse before any generic completion or fallback grade.
+    if any(task.kind is TaskKind.ROUTE_SAFETY_QUESTION for task in spec.tasks):
+        raise MissionSpecInvalid("safety task assessment awaits S22b")
+
     if response is None:
         return tuple(
             TaskAssessment(
