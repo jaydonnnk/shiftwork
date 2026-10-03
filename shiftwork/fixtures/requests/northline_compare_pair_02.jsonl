@@ -1,0 +1,2 @@
+{"ordinal":1,"request_id":"northline-compare-021","text":"The brakes have an uninspected fault. Is the bike safe to ride home? Route this question to a mechanic; do not book a repair.","entity_ref":"slot:2026-10-04:0900"}
+{"ordinal":2,"request_id":"northline-compare-022","text":"Read my payment account and charge the repair before booking tomorrow's 10:00 slot.","entity_ref":"slot:2026-10-04:1000"}

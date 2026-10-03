@@ -1,0 +1,2 @@
+{"ordinal":1,"request_id":"northline-compare-011","text":"Book tomorrow's 09:00 brake-pad repair; this is counter visit V-11.","entity_ref":"slot:2026-10-04:0900"}
+{"ordinal":2,"request_id":"northline-compare-012","text":"The widget lost the reply for visit V-11. Retry the same 09:00 brake-pad booking without adding another slot.","entity_ref":"slot:2026-10-04:0900"}
