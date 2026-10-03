@@ -1,0 +1,180 @@
+{
+  "status": "DRAFT_FOR_OPERATOR_REVIEW",
+  "date": "2026-10-03 Asia/Singapore",
+  "engagement_slug": "northline",
+  "production_registration_changed": false,
+  "operator_reviewed": false,
+  "operator_sealed": false,
+  "catalog_version_proposal": 1,
+  "files": [
+    {
+      "path": "fixtures/catalogs/northline_v1.json",
+      "bytes": 1100,
+      "sha256": "0c9376b30384fcac93a44ed858ce96b4e8eb8f46be75f67b0f3363c769bbca34"
+    },
+    {
+      "path": "fixtures/documents/northline/acceptance_contract.md",
+      "bytes": 1696,
+      "sha256": "545e1221a46e84c9f6446db40966e9fa1e9791f18a34f9a0305ee93c31de4949"
+    },
+    {
+      "path": "fixtures/documents/northline/deployment_brief.md",
+      "bytes": 2861,
+      "sha256": "ab3187358a0ffecdebe4d80467b802f4137054858f684495c7c3fceef79ed461"
+    },
+    {
+      "path": "fixtures/documents/northline/discovery_prompts.md",
+      "bytes": 498,
+      "sha256": "22d3e41c515a86c49932d440b88c6e3c75e2615f0ba33ac6ff6d01fdd0e25143"
+    },
+    {
+      "path": "fixtures/documents/northline/handover_prompts.md",
+      "bytes": 402,
+      "sha256": "5b6ec7abe14f6f56c705df109802129a76e5563c4de3459f384adac78ac48ab5"
+    },
+    {
+      "path": "fixtures/documents/northline/permissions_policy.json",
+      "bytes": 536,
+      "sha256": "7c1a220108e6ba2ae733b7319429dd88f889dfc0188e0d8282cb17a88ccb2468"
+    },
+    {
+      "path": "fixtures/documents/northline/rollout_checklist.md",
+      "bytes": 606,
+      "sha256": "226389080b348b0dceab81afd5e90dc6261d69f88827d2fab8c62e1940ada518"
+    },
+    {
+      "path": "fixtures/mission/northline_deployment_v1.json",
+      "bytes": 5886,
+      "sha256": "753bc3a26ac570e0e719003d4777dcda410fa1d5d16657603f1fd8c05020fbd1"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_manifest.json",
+      "bytes": 1676,
+      "sha256": "7e71c8284c866f360c392370071d66f9e2deed38d56da999ec34872bdb671511"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_01.jsonl",
+      "bytes": 370,
+      "sha256": "d928534c4827ba59c73afd04586311e73a062b8de3df75826ba3fa5a8a1618b9"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_01_specs.json",
+      "bytes": 2489,
+      "sha256": "23554dd0b35e574caea870339bb74b68157ed8dec422d53df0961f5bdb205ae9"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_02.jsonl",
+      "bytes": 402,
+      "sha256": "72a7b405c1e83064604fb58f058757c6e00927ad19dd0d38096c108eaa015a36"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_02_specs.json",
+      "bytes": 2686,
+      "sha256": "6c8968b6367e834868fe3ce7144aabfae93b0fa5b770cf9224bd78f32d988efb"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_03.jsonl",
+      "bytes": 373,
+      "sha256": "eaf45873d79f6407f4b166520fd2c80169e9e50bfa00cea126ea7f37a1241135"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_03_specs.json",
+      "bytes": 2443,
+      "sha256": "2f6f92eae314e670269292f9a8c15bc6c639b403c0b1fb9ff9ee68fec6c96b2f"
+    },
+    {
+      "path": "fixtures/requests/northline_deployment_incident.jsonl",
+      "bytes": 225,
+      "sha256": "2569a7275a9be04d00fb00d7be99f00dd3177122cc0e20b903e5e69343324b5b"
+    },
+    {
+      "path": "fixtures/state/northline_compare_state_v1.json",
+      "bytes": 2061,
+      "sha256": "8cbe707cb710711b1610fa89ba527cc0c463d8e939aee22b8797ad18e2f9f36d"
+    },
+    {
+      "path": "fixtures/state/northline_start.json",
+      "bytes": 2032,
+      "sha256": "92eb6ad28a8e26abf9e3025c3af03abf11a361b9635d51c81979dccd498e3f99"
+    },
+    {
+      "path": "sealed/cases/northline_deployment.json",
+      "bytes": 18475,
+      "sha256": "b458c7b6caf5eb8136fc8fb59dfa60fb1e04ae9ca8c4cfdb95f509943f5a6aad"
+    },
+    {
+      "path": "templates/artifact/northline/acceptance_tests.py",
+      "bytes": 642,
+      "sha256": "01beab46acbb5adfd774cda75ab424c0496eded2c754420e9d7ad3aa9b4e5e29"
+    },
+    {
+      "path": "templates/artifact/northline/discovery.md",
+      "bytes": 397,
+      "sha256": "7bc2075914d6e51735edf7e3beb280112f0fbd195bf48416e865ef15ed273ba3"
+    },
+    {
+      "path": "templates/artifact/northline/permissions.json",
+      "bytes": 34,
+      "sha256": "9f15e943e9b7bdcf8c51b6b00fdf6a4d2a218ea20352e8742186a809ee40db40"
+    },
+    {
+      "path": "templates/artifact/northline/runbook.md",
+      "bytes": 289,
+      "sha256": "4cd7b797d7f2cb112132c49a38820a77c8fd24045af1e79117927142b16203a6"
+    },
+    {
+      "path": "templates/artifact/northline_blank_service.py",
+      "bytes": 1555,
+      "sha256": "d72b4f3f7068a936451f5ec5872927d8fd1260cb64fb06347deee94698349ce0"
+    }
+  ],
+  "payloads": {
+    "workloads_sha256": "63e68eba6a68906bfdea1cbe5bc9a6bf4563616db92b7272a8eac6b27b1b19f0",
+    "cases_sha256": "5ea455b75d73b2db9a0219b960996e9a1d5866a9f898528192479d29a75d65ec",
+    "catalog_semantic_hash": "b95bdafbb2b6878397d39f2899391ae00d8b1c8e2c14b26f10b1d7d7b8af3d37"
+  },
+  "proposed_documents": [
+    {
+      "doc_id": "acceptance_contract",
+      "path": "fixtures/documents/northline/acceptance_contract.md",
+      "sha256": "545e1221a46e84c9f6446db40966e9fa1e9791f18a34f9a0305ee93c31de4949",
+      "station": "Acceptance tests"
+    },
+    {
+      "doc_id": "deployment_brief",
+      "path": "fixtures/documents/northline/deployment_brief.md",
+      "sha256": "ab3187358a0ffecdebe4d80467b802f4137054858f684495c7c3fceef79ed461",
+      "station": "Deployment brief"
+    },
+    {
+      "doc_id": "discovery_prompts",
+      "path": "fixtures/documents/northline/discovery_prompts.md",
+      "sha256": "22d3e41c515a86c49932d440b88c6e3c75e2615f0ba33ac6ff6d01fdd0e25143",
+      "station": "Discovery"
+    },
+    {
+      "doc_id": "handover_prompts",
+      "path": "fixtures/documents/northline/handover_prompts.md",
+      "sha256": "5b6ec7abe14f6f56c705df109802129a76e5563c4de3459f384adac78ac48ab5",
+      "station": "Handover"
+    },
+    {
+      "doc_id": "permissions_policy",
+      "path": "fixtures/documents/northline/permissions_policy.json",
+      "sha256": "7c1a220108e6ba2ae733b7319429dd88f889dfc0188e0d8282cb17a88ccb2468",
+      "station": "Permissions"
+    },
+    {
+      "doc_id": "rollout_checklist",
+      "path": "fixtures/documents/northline/rollout_checklist.md",
+      "sha256": "226389080b348b0dceab81afd5e90dc6261d69f88827d2fab8c62e1940ada518",
+      "station": "Rollout"
+    }
+  ],
+  "limits": [
+    "Raw draft hashes are checksums, not reviewed_pins.",
+    "Safety task schema parses; independent assessment refuses until S22b. The safety_route output claim remains deferred.",
+    "Deployment booking, access, duplicate-write and commitment semantics lack independent current assessment.",
+    "No production admission, seeding, service execution, exposure or reproduction."
+  ]
+}
