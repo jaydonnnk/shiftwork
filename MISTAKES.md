@@ -1548,6 +1548,12 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **Root cause:** the first harness update replaced the primary navigation checks but missed a second visibility check using the retired links.
 - **Prevention rule:** search every navigation selector after changing the shell. Preserve the visibility assertion using the actual Compare and Next shift links.
 
+## 2026-10-02 S21 orchestrator split: staying code referenced a moved constant
+
+- **What happened:** the first focused run after the S21 split returned 38 failed and 31 errors, every one `NameError: name 'COMPARE_DEADLINE_S' is not defined` at `orchestrator.py:2377`; the staying `_comparison_run_request` reads the deadline constant that the move manifest sent to `comparison_flow.py`. The constant now stays in orchestrator next to that consumer and `comparison_flow` imports it.
+- **Root cause:** every move census and the corrected plan's edge check covered moved functions only; nothing scanned staying code for references to moved module-level constants, so the plan's "only one staying-to-moving edge" claim was never tested against constants.
+- **Prevention rule:** before running tests after a module move, run an unresolved-name scan over every touched module (Loads minus locals, module bindings and builtins) and require it clean; treat module constants as first-class movers in every reference census.
+
 ## 2026-10-02 S21 empty board entered candidate restoration
 
 - **What happened:** both fresh browser baselines failed the empty-board check with `Cannot read properties of null (reading 'candidates')`. Candidate restoration now requires an existing comparison.
