@@ -24,3 +24,29 @@ docs/plans/shiftwork/evidence/slice21-browser-*.json -text
 
 # Preserve the S21 review-fix publication receipt package byte-for-byte.
 docs/plans/shiftwork/evidence/slice21-review-fixes-2026-10-03/* -text
+
+# Preserve the exact operator-approved S22a Northline material bytes.
+shiftwork/fixtures/catalogs/northline_v1.json -text
+shiftwork/fixtures/documents/northline/acceptance_contract.md -text
+shiftwork/fixtures/documents/northline/deployment_brief.md -text
+shiftwork/fixtures/documents/northline/discovery_prompts.md -text
+shiftwork/fixtures/documents/northline/handover_prompts.md -text
+shiftwork/fixtures/documents/northline/permissions_policy.json -text
+shiftwork/fixtures/documents/northline/rollout_checklist.md -text
+shiftwork/fixtures/mission/northline_deployment_v1.json -text
+shiftwork/fixtures/requests/northline_compare_manifest.json -text
+shiftwork/fixtures/requests/northline_compare_pair_01.jsonl -text
+shiftwork/fixtures/requests/northline_compare_pair_01_specs.json -text
+shiftwork/fixtures/requests/northline_compare_pair_02.jsonl -text
+shiftwork/fixtures/requests/northline_compare_pair_02_specs.json -text
+shiftwork/fixtures/requests/northline_compare_pair_03.jsonl -text
+shiftwork/fixtures/requests/northline_compare_pair_03_specs.json -text
+shiftwork/fixtures/requests/northline_deployment_incident.jsonl -text
+shiftwork/fixtures/state/northline_compare_state_v1.json -text
+shiftwork/fixtures/state/northline_start.json -text
+shiftwork/sealed/cases/northline_deployment.json -text
+shiftwork/templates/artifact/northline/acceptance_tests.py -text
+shiftwork/templates/artifact/northline/discovery.md -text
+shiftwork/templates/artifact/northline/permissions.json -text
+shiftwork/templates/artifact/northline/runbook.md -text
+shiftwork/templates/artifact/northline_blank_service.py -text
