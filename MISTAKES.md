@@ -1853,3 +1853,9 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **What happened:** the fresh Windows-style clone returned 853 passed, 1 failed, 1 skipped and 2 warnings. Its long temporary parent name produced ten 25-character fragments common to sealed file paths and the legitimate public snapshot reference. Identical-commit controls fail that single manifest assertion at a long path and pass all nine checks, including eight scanner self-tests, at a short path. The failed suite and both controls remain preserved.
 - **Root cause:** the historical test collector applies note_windows to absolute sealed paths as well as authored notes. A long shared parent component can be mistaken for leaked private material; root-worktree evidence had not exercised that path shape.
 - **Prevention rule:** report this existing test-only portability limit and preserve its failing evidence. Use an ordinary short temporary checkout component for the full publication verification, keep all scanner code/assertions intact, and do not claim the long-name false positive is fixed or that any passing suite proves all filesystem locations.
+
+## 2026-10-04 S22a merge verifier omitted the preserved-byte index refresh
+
+- **What happened:** the fast-forward merge succeeded, but its verifier stopped before pushing when restored original checkout bytes appeared modified. All restored bytes matched the pre-merge snapshot and all Git clean-filter hashes matched HEAD. Explicitly refreshing those paths left every index entry unchanged and the tree clean.
+- **Root cause:** the verifier assumed restoring LF or mixed historical bytes after an autocrlf checkout would also refresh Git's stat metadata.
+- **Prevention rule:** preserve raw bytes, verify their clean-filter object IDs against HEAD, then refresh only those explicit paths and require unchanged index entries before asserting a clean tree.
