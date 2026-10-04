@@ -1,0 +1,105 @@
+{
+  "verdict": "ISSUES FOUND",
+  "gate3_approval_recorded": false,
+  "material_approval_recorded": false,
+  "slice22b_complete": false,
+  "publication_performed": false,
+  "head": "c7fd5c0e5e825f9fb7c036271cb2cef4f842115e",
+  "remote_main_sha": "c7fd5c0e5e825f9fb7c036271cb2cef4f842115e",
+  "focused_passed": 83,
+  "checkpoint_full_offline": {
+    "passed": 898,
+    "skipped": 1,
+    "warnings": 2,
+    "exit": 0,
+    "seconds": 405.21,
+    "packaging_excluded": true
+  },
+  "checkpoint_sources_match": true,
+  "reviewed_pins_verified": 41,
+  "proposal_applied": false,
+  "proposal_only_text_fields_changed": true,
+  "proposal_cycle": 1,
+  "unchanged_variant_refs_preserved": 5,
+  "expected_refs_preserved": 6,
+  "findings": [
+    {
+      "id": "R1",
+      "priority": 1,
+      "finding": "Unsafe trusted-driver startup imports",
+      "evidence": "driver-import-shadow.json",
+      "live_exploit_verified": false
+    },
+    {
+      "id": "R2",
+      "priority": 1,
+      "finding": "Undocumented public intent-key encoding",
+      "evidence": "input-flow.json"
+    },
+    {
+      "id": "R3",
+      "priority": 1,
+      "finding": "Final withdrawal accepted during retry",
+      "evidence": "cross-request-rollback.json"
+    },
+    {
+      "id": "R4",
+      "priority": 2,
+      "finding": "Unsupported booking claims accepted",
+      "evidence": "unsupported-booking-claim.json"
+    },
+    {
+      "id": "R5",
+      "priority": 2,
+      "finding": "Incomplete traces still produce IDENTICAL blank-operation replay",
+      "evidence": "replay-binding-controls.json"
+    },
+    {
+      "id": "R6",
+      "priority": 2,
+      "finding": "Protected-only reference omitted from serialized needle inventory",
+      "evidence": "private-reference-scan.json"
+    }
+  ],
+  "live_calls": 0,
+  "installs": 0,
+  "commits": 0,
+  "pushes": 0,
+  "raw_evidence_publication": "Raw linked evidence remains local; this JSON is the bounded reviewed summary.",
+  "review_report_sha256": "5a206ae5d98e66ba22deacc58c4c6aeb95c1132dbb98b29729ee28e44c5bd86a",
+  "local_control_receipt_sha256": {
+    "checkpoint-audit.json": "228910d3dbaf4be930db807fbca701bc746745aa257d22ebd66883c0425a105d",
+    "cross-request-rollback.json": "ea7522b1027de53f0d0d3b39a571f78b138ac4db42e62bde666345537eec4752",
+    "documentation-recording.json": "fb808811eccf0a4a52c8101de49dbf4cdfcdb2b25520804a9271231763e10d41",
+    "driver-import-shadow.json": "9ffe68dfb4d9221b07236780a45d393dbcd6801a625bc821e45350f05aef5783",
+    "entry-preservation.json": "8538ce4c0ce1cb91dfda1fe94a8469245e43ebbb25f23a1fe96ddbfe062240ad",
+    "focused-command.json": "4cb185a18f94765c2e6239306a3fca1f4fa0e607eedb583799bc677f380200ac",
+    "historical-privacy-preflight.json": "a1a0eb7097659480644e70ccf78c4ffe8e9ba9eb1bcf163029debf0f361561cb",
+    "input-flow.json": "0351d53a771075a0336449cb472054063827c59146d0bb14d9f10e5a93665da3",
+    "preservation.json": "f7d78996d69137407d9850fd2056207c3bcaa9d93a475df1a8e2746dcb08fb7c",
+    "private-reference-scan.json": "db3aa668573c730f19337d35cabcdf04ef2dc76524e616324a0cf4c31644437e",
+    "proposal-preservation.json": "029c64ce3acbc089e0337cec9c3c55eb1ebb799167ed7716462fe8ff00bda434",
+    "replay-binding-controls.json": "2e1cd40e1fe2ecd41e298c4f6e4c1bd52447892e2862742f82c01c21da3e9da6",
+    "review-helper-failed.json": "6c9bead22231d4a641bcf3978d0b77d2cd0f5a1bccd729a9d3e70c32db9b0585",
+    "unsupported-booking-claim.json": "798c161a862e66d1d7673221d7cf254c7cc88b1035c8a9a808c05e29b9b7ecb7",
+    "v2-input-controls.json": "89f50938d21a4651880b061ed660c0b51d2698d68b9c14e7f152bffdaaa71d51"
+  },
+  "runtime_source_sha256": {
+    "shiftwork/api/routes.py": "ad4178fd153a9ab5ef9285cdc5ebf7056999a8ce368e66f4f9edac514cf781de",
+    "shiftwork/api/schemas.py": "bec673264fb3e409fb6eac9279e9b3b53d9f27125efe441e60080b7701834c2d",
+    "shiftwork/comparison_flow.py": "102138515547a86c497976caca15cfdde6125e1630177a66ee582b2169ac8207",
+    "shiftwork/domain/task_contract.py": "0150e5a6cac1a7111df9418e7980ac9f1d784d1e7e689e6da3fef766b78d7cff",
+    "shiftwork/evaluator/evaluator.py": "90dd6eb7da223c6f2a2ccff86ececcf183ade72df74701ea5fdcad8d7fbb2e52",
+    "shiftwork/executor/base.py": "9576a137a0adae5bded8d7ee1cb4b140339c3c8e085be93ee20b5c9e7912de3c",
+    "shiftwork/executor/local_process.py": "475cf39887c1932b97bd42320d639b07b0c41d470f2c930d8adb15de95bf3f1f",
+    "shiftwork/executor/tokenfactory.py": "9e3abde7c6e01ba6974a03bf5c7ef52e6b0ca5cb9e86acd3eae6ea702592b2d1",
+    "shiftwork/experiments.py": "436b9d1e8b9acbd30ea7b9536f42886cba873e8f7acae98ad1e135227d17fb14",
+    "shiftwork/orchestrator.py": "75d308597cb33fe9514901f4184bc4d1d6ff2d1c372ec5abf61a550235008844",
+    "shiftwork/store/repo.py": "e171c534b1ca99623e17ff42cd4e8d5ca7424ca20bbbae085abc80b85256df11",
+    "tests/api/test_pivot_routes.py": "9227c99ca15e4081b1d694ff72797cd9921d59174616d99a01b484169101ecb4",
+    "tests/orchestrator/test_fde_deployment.py": "91fc48ad9bdb6727ee8ea50195f27f30ade98aee95206ed1dbaa726e52c53e4e",
+    "shiftwork/executor/deployment.py": "6edcf53fd11da1bd635fed2e7377486904378066ec255d29b1614886f28102a1",
+    "tests/api/test_workplace_boards.py": "29d40160d682a074466fb386a00ddb8e70e4d908e2f581908bdc845ccc14cdd9",
+    "tests/executor/test_deployment_evidence.py": "0b3db3336b2e10bd135c8c8b0e66aa8ea4d4e9a2cf25f2f4030eba9a836d844b"
+  }
+}

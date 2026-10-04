@@ -1,0 +1,50 @@
+{
+  "conformance_fixes_verified_offline": [
+    "R1",
+    "R3",
+    "R4",
+    "R5",
+    "R6"
+  ],
+  "R2": "public contract approved and validated; driver header and exact v2 application remain pending implementation",
+  "gate3_approval_recorded": true,
+  "operator_material_approval_recorded": true,
+  "material_applied": false,
+  "full_offline": {
+    "passed": 934,
+    "skipped": 1,
+    "seconds": 451.607,
+    "exit": 0,
+    "packaging_excluded": true,
+    "warnings": 2
+  },
+  "focused": {
+    "passed": 148,
+    "skipped": 0,
+    "seconds": 28.643,
+    "exit": 0
+  },
+  "privacy": {
+    "passed": 22,
+    "skipped": 0,
+    "seconds": 2.05,
+    "exit": 0
+  },
+  "named_source_omission_faults": 13,
+  "clean_fault_controls": 13,
+  "reviewed_pins_verified": 41,
+  "input_contract_matches": 13,
+  "previous_full_run": "2 failed, 932 passed, 1 skipped; slash-form base64 gap repaired; raw receipts retained",
+  "slice22b_complete": false,
+  "slice22b_accepted": false,
+  "publication_performed": false,
+  "live_calls": 0,
+  "installs": 0,
+  "raw_evidence_publication": "Raw linked receipts stay local. This bounded summary is included in the approved 15-file design packet.",
+  "gate3_approval_date": "2026-10-04 Asia/Singapore",
+  "gate3_approval_quote": "Yep gate 3 is approved. Commit it and merge and push it to main.",
+  "git_design_publication_authorized": true,
+  "runtime_fixes_in_design_publication": false,
+  "verification_scope": "Retained dirty S22b runtime tree; excludes live execution, material application and completed slice acceptance.",
+  "checkpoint": "Approved design packet before Git publication. Post-push receipt remains local in slice22b-gate3-publication-2026-10-04."
+}
