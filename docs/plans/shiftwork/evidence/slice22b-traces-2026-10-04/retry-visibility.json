@@ -1,0 +1,36 @@
+{
+  "mode": "OFFLINE_INFORMATION_FLOW_DIAGNOSTIC",
+  "service_executions": 0,
+  "state_sha256": "be1587aeb6034d6f98bfbbb245a28b4425738ed299882dc08ee7d752137393cb",
+  "request_sha256": "bb7da19a39e613410bc0daa7d462786bfbdd93de010149a0c6911ea7fd20814c",
+  "prior_reference_in_request": false,
+  "prior_reference_in_resolved_state": false,
+  "prior_writes_in_fresh_kernel": 0,
+  "unknown_reference": {
+    "request_id": "northline-protected-02",
+    "request_ordinal": 3,
+    "task_id": "booking",
+    "outcome": "INCORRECT_OUTPUT",
+    "mandatory_pass": false,
+    "reason_codes": [
+      "DUPLICATE_COMMITMENT"
+    ]
+  },
+  "private_literal_unit_control": {
+    "request_id": "northline-protected-02",
+    "request_ordinal": 3,
+    "task_id": "booking",
+    "outcome": "USEFUL_COMPLETION",
+    "mandatory_pass": true,
+    "reason_codes": []
+  },
+  "proposed_active_path": "sealed/cases/northline_deployment_v2.json",
+  "proposed_file_sha256": "c1f3c8d3369b6eeca61f8fba8a4ab4829a248a9887e14c4257d5b30a6ab56798",
+  "proposed_file_bytes": 18847,
+  "proposed_payload_sha256": "31cab9afaeed92d6421a045f49b33ae48079ef08ca2a682f7cc6b4a9647fbcfe",
+  "changed_case_ordinals": [
+    2
+  ],
+  "original_file_sha256": "d2f67e0655267698c3ac78458502d5e7e2aa582dfcf0755fcf9f348a4f6d04d6",
+  "production_changes_applied": false
+}
