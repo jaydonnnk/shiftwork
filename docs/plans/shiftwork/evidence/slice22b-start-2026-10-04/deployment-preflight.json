@@ -1,0 +1,162 @@
+{
+  "scope": "offline invented-envelope assessment and static protocol inspection; no execution",
+  "response": {
+    "request_id": "northline-incident-001",
+    "task_results": [
+      {
+        "task_id": "booking",
+        "status": "COMPLETED",
+        "entity_ref": "slot:2026-10-04:0900",
+        "claims": [],
+        "commitment_ref": "PREFLIGHT-NO-WRITE-WAS-EXECUTED",
+        "explanation_code": null
+      }
+    ],
+    "evidence_refs": [],
+    "uncertainty_codes": []
+  },
+  "assessments": [
+    {
+      "request_id": "northline-incident-001",
+      "request_ordinal": 1,
+      "task_id": "booking",
+      "outcome": "USEFUL_COMPLETION",
+      "mandatory_pass": true,
+      "reason_codes": []
+    }
+  ],
+  "useful_completion": true,
+  "booking_writes_executed": 0,
+  "assessor_parameters": [
+    "spec",
+    "request_ordinal",
+    "mission",
+    "snapshot",
+    "response"
+  ],
+  "gap": "prescribed inputs have no trusted action trace; completion claim does not prove a booking",
+  "additional_static_limit": "isolated driver waits for stdout readiness; reviewed blank starter supplies fixed-port HTTP only",
+  "northline_reviewed_pins": [
+    {
+      "path": "fixtures/catalogs/northline_v1.json",
+      "expected_sha256": "0c9376b30384fcac93a44ed858ce96b4e8eb8f46be75f67b0f3363c769bbca34",
+      "actual_sha256": "0c9376b30384fcac93a44ed858ce96b4e8eb8f46be75f67b0f3363c769bbca34"
+    },
+    {
+      "path": "fixtures/documents/northline/acceptance_contract.md",
+      "expected_sha256": "545e1221a46e84c9f6446db40966e9fa1e9791f18a34f9a0305ee93c31de4949",
+      "actual_sha256": "545e1221a46e84c9f6446db40966e9fa1e9791f18a34f9a0305ee93c31de4949"
+    },
+    {
+      "path": "fixtures/documents/northline/deployment_brief.md",
+      "expected_sha256": "ab3187358a0ffecdebe4d80467b802f4137054858f684495c7c3fceef79ed461",
+      "actual_sha256": "ab3187358a0ffecdebe4d80467b802f4137054858f684495c7c3fceef79ed461"
+    },
+    {
+      "path": "fixtures/documents/northline/discovery_prompts.md",
+      "expected_sha256": "22d3e41c515a86c49932d440b88c6e3c75e2615f0ba33ac6ff6d01fdd0e25143",
+      "actual_sha256": "22d3e41c515a86c49932d440b88c6e3c75e2615f0ba33ac6ff6d01fdd0e25143"
+    },
+    {
+      "path": "fixtures/documents/northline/handover_prompts.md",
+      "expected_sha256": "5b6ec7abe14f6f56c705df109802129a76e5563c4de3459f384adac78ac48ab5",
+      "actual_sha256": "5b6ec7abe14f6f56c705df109802129a76e5563c4de3459f384adac78ac48ab5"
+    },
+    {
+      "path": "fixtures/documents/northline/permissions_policy.json",
+      "expected_sha256": "7c1a220108e6ba2ae733b7319429dd88f889dfc0188e0d8282cb17a88ccb2468",
+      "actual_sha256": "7c1a220108e6ba2ae733b7319429dd88f889dfc0188e0d8282cb17a88ccb2468"
+    },
+    {
+      "path": "fixtures/documents/northline/rollout_checklist.md",
+      "expected_sha256": "226389080b348b0dceab81afd5e90dc6261d69f88827d2fab8c62e1940ada518",
+      "actual_sha256": "226389080b348b0dceab81afd5e90dc6261d69f88827d2fab8c62e1940ada518"
+    },
+    {
+      "path": "fixtures/mission/northline_deployment_v1.json",
+      "expected_sha256": "753bc3a26ac570e0e719003d4777dcda410fa1d5d16657603f1fd8c05020fbd1",
+      "actual_sha256": "753bc3a26ac570e0e719003d4777dcda410fa1d5d16657603f1fd8c05020fbd1"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_manifest.json",
+      "expected_sha256": "5d61c55311f99d30463b23230cdca53fd8b21479f7a0c57f308caa78fb8b122c",
+      "actual_sha256": "5d61c55311f99d30463b23230cdca53fd8b21479f7a0c57f308caa78fb8b122c"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_01.jsonl",
+      "expected_sha256": "d928534c4827ba59c73afd04586311e73a062b8de3df75826ba3fa5a8a1618b9",
+      "actual_sha256": "d928534c4827ba59c73afd04586311e73a062b8de3df75826ba3fa5a8a1618b9"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_01_specs.json",
+      "expected_sha256": "23554dd0b35e574caea870339bb74b68157ed8dec422d53df0961f5bdb205ae9",
+      "actual_sha256": "23554dd0b35e574caea870339bb74b68157ed8dec422d53df0961f5bdb205ae9"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_02.jsonl",
+      "expected_sha256": "72a7b405c1e83064604fb58f058757c6e00927ad19dd0d38096c108eaa015a36",
+      "actual_sha256": "72a7b405c1e83064604fb58f058757c6e00927ad19dd0d38096c108eaa015a36"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_02_specs.json",
+      "expected_sha256": "6c8968b6367e834868fe3ce7144aabfae93b0fa5b770cf9224bd78f32d988efb",
+      "actual_sha256": "6c8968b6367e834868fe3ce7144aabfae93b0fa5b770cf9224bd78f32d988efb"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_03.jsonl",
+      "expected_sha256": "eaf45873d79f6407f4b166520fd2c80169e9e50bfa00cea126ea7f37a1241135",
+      "actual_sha256": "eaf45873d79f6407f4b166520fd2c80169e9e50bfa00cea126ea7f37a1241135"
+    },
+    {
+      "path": "fixtures/requests/northline_compare_pair_03_specs.json",
+      "expected_sha256": "2f6f92eae314e670269292f9a8c15bc6c639b403c0b1fb9ff9ee68fec6c96b2f",
+      "actual_sha256": "2f6f92eae314e670269292f9a8c15bc6c639b403c0b1fb9ff9ee68fec6c96b2f"
+    },
+    {
+      "path": "fixtures/requests/northline_deployment_incident.jsonl",
+      "expected_sha256": "2569a7275a9be04d00fb00d7be99f00dd3177122cc0e20b903e5e69343324b5b",
+      "actual_sha256": "2569a7275a9be04d00fb00d7be99f00dd3177122cc0e20b903e5e69343324b5b"
+    },
+    {
+      "path": "fixtures/state/northline_compare_state_v1.json",
+      "expected_sha256": "8cbe707cb710711b1610fa89ba527cc0c463d8e939aee22b8797ad18e2f9f36d",
+      "actual_sha256": "8cbe707cb710711b1610fa89ba527cc0c463d8e939aee22b8797ad18e2f9f36d"
+    },
+    {
+      "path": "fixtures/state/northline_start.json",
+      "expected_sha256": "92eb6ad28a8e26abf9e3025c3af03abf11a361b9635d51c81979dccd498e3f99",
+      "actual_sha256": "92eb6ad28a8e26abf9e3025c3af03abf11a361b9635d51c81979dccd498e3f99"
+    },
+    {
+      "path": "sealed/cases/northline_deployment.json",
+      "expected_sha256": "d2f67e0655267698c3ac78458502d5e7e2aa582dfcf0755fcf9f348a4f6d04d6",
+      "actual_sha256": "d2f67e0655267698c3ac78458502d5e7e2aa582dfcf0755fcf9f348a4f6d04d6"
+    },
+    {
+      "path": "templates/artifact/northline/acceptance_tests.py",
+      "expected_sha256": "01beab46acbb5adfd774cda75ab424c0496eded2c754420e9d7ad3aa9b4e5e29",
+      "actual_sha256": "01beab46acbb5adfd774cda75ab424c0496eded2c754420e9d7ad3aa9b4e5e29"
+    },
+    {
+      "path": "templates/artifact/northline/discovery.md",
+      "expected_sha256": "7bc2075914d6e51735edf7e3beb280112f0fbd195bf48416e865ef15ed273ba3",
+      "actual_sha256": "7bc2075914d6e51735edf7e3beb280112f0fbd195bf48416e865ef15ed273ba3"
+    },
+    {
+      "path": "templates/artifact/northline/permissions.json",
+      "expected_sha256": "9f15e943e9b7bdcf8c51b6b00fdf6a4d2a218ea20352e8742186a809ee40db40",
+      "actual_sha256": "9f15e943e9b7bdcf8c51b6b00fdf6a4d2a218ea20352e8742186a809ee40db40"
+    },
+    {
+      "path": "templates/artifact/northline/runbook.md",
+      "expected_sha256": "4cd7b797d7f2cb112132c49a38820a77c8fd24045af1e79117927142b16203a6",
+      "actual_sha256": "4cd7b797d7f2cb112132c49a38820a77c8fd24045af1e79117927142b16203a6"
+    },
+    {
+      "path": "templates/artifact/northline_blank_service.py",
+      "expected_sha256": "d72b4f3f7068a936451f5ec5872927d8fd1260cb64fb06347deee94698349ce0",
+      "actual_sha256": "d72b4f3f7068a936451f5ec5872927d8fd1260cb64fb06347deee94698349ce0"
+    }
+  ],
+  "driver_sha256": "57dd997d0843de1455f43fe59f1b66840d1589fa03e429b9b97314f9d6f4d5c6"
+}

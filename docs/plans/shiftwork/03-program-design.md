@@ -1,5 +1,125 @@
 # Program Design: Shiftwork final pivot
 
+**S22b corrected Gate 3 RE-APPROVED, 2026-10-04.**
+The user explicitly approved the corrected design: "Yep gate 3 is approved.
+Commit it and merge and push it to main." This closes the scoped input
+backtrack and authorizes focused design commits, a clean main merge and push.
+Gates 1, 2 and 4 retain approval. S22b remains incomplete and unaccepted.
+
+The approved packet is slice22b-gate3-review-corrections.md plus
+docs/northline-deployment-protocol.md and the protected retry amendment.
+The prior operator approval covers only the exact existing 18847-byte v2
+proposal, its stated seal, new pin, declaration and -text attribute. No repeat
+Gate 3 or operator approval is needed for that exact next implementation step.
+The intent header and v2 application remain unimplemented/unapplied here.
+
+R1/R3/R4/R5/R6 conformance repairs are VERIFIED OFFLINE in the retained dirty
+S22b runtime tree. Their final checks: 148 focused passes, 22 privacy passes,
+934 full offline passes, 1 skip and 2 warnings; packaging excluded. Thirteen
+separate source omissions fail their named assertion after clean passes with
+zero setup errors and exact disposable restoration. Input diagnostics match
+13/13 public/pilot and proposed protected intent values. The earlier two
+encoding failures and failed clean control remain preserved. All 41 existing
+reviewed pins match. These results do not validate a completed S22b journey.
+
+Publication scope is the exact 15-file design packet, not the unfinished
+runtime/tests, private material, instructions or raw evidence. Raw proof and
+the earlier authorization receipt stay local in
+evidence/slice22b-review-repairs-2026-10-04/. Approval, publication and byte
+preservation receipts stay local in evidence/slice22b-gate3-publication-2026-10-04/.
+No material, pin or seal has changed. No live call, install or credential use
+ran. Implementation resumes on shiftwork/slice-22b after design publication.
+Older checkpoints below retain their historical authority and evidence scope.
+
+
+**S22b checkpoint; Gate 3 prior-reference input correction IN PROGRESS, 2026-10-04.**
+The approved trusted-trace correction remains authorized except its decision 6
+needs an input amendment: protected retry variant 02 expects a prior commitment
+literal that is absent from its request and resolved state in a fresh workspace.
+Offline no-write traces fail for a service-chosen reference and pass only when
+a unit control supplies the private literal. No candidate or live success is
+claimed. The exact unapplied versioned proposal is
+slice22b-protected-retry-amendment.md. It preserves the original sealed file
+and 24 pins, adds a v2 file/pin and explicit historical privacy coverage, and
+changes only variant 02's request/task-spec text. Gate 3 and separate operator
+material approval are pending. No proposed material, pin or seal is applied.
+Gates 1, 2 and Gate 4's slice order remain approved.
+
+Retained implementation: /api/boards; exact five-file Northline starter and
+STARTER_BASELINE operation route; bounded simulated action kernel; verified
+private traces; pure booking/retry/access/safety assessment; capture transaction
+and frozen trace replay plumbing. The actual blank local operation finalizes
+with an empty trace, failing task acceptance and one incident. Focused group:
+74 passed, 2 warnings; existing selection/operation group: 61 passed, 2 warnings;
+gateway group: 29 passed. Four disposable trace-source faults reach five named
+failures with exact restoration; their clean baseline passes 11 checks.
+These are offline/trusted-local checks, not Sandbox isolation or live proof.
+
+The first broader run exposed replay/wire regressions and was interrupted;
+its raw log is retained, with no full-suite verdict. The user interruption
+also left the next run unfinished. Repaired full offline suite: 898 passed, 1 skipped, 2 warnings in 405.21s,
+exit 0; packaging excluded. All 41 reviewed pins still match. Coding errors are logged in
+MISTAKES.md; the repeated call-contract rule is graduated to AGENTS.md while
+preserving the user's 200k handoff update.
+
+S22b is incomplete and unaccepted. The six-slot Northline journey, selected
+next-shift pilot/rollout reducer, handover, native six-station UI, browser faults,
+complete trace fault coverage, final architect cleanup and live packet remain.
+No installs, credentials, external calls/spend, commits, pushes, outreach or
+later slice ran. Current evidence: evidence/slice22b-traces-2026-10-04/.
+Older notices below retain their original authority and evidence scope.
+
+
+
+**S22b scoped Gate 3 correction RE-APPROVED, 2026-10-04.**
+The user answered "yes approve" to slice22b-gate3-deployment-evidence.md.
+The existing S22b go-ahead now covers its trusted action traces, existing
+private observation storage and exact blank-starter compatibility. Gates 1,
+2 and Gate 4 remain approved. No new material/pin/seal, live credential/call/
+spend, installation, publication, outreach or later-slice authority is inferred.
+Implementation resumes on shiftwork/slice-22b. The pause below is historical.
+S22b remains incomplete and unaccepted.
+
+
+**S22b started; Gate 3 scoped backtrack IN PROGRESS, 2026-10-04.**
+The user's "Please start slice 22b" authorizes implementation on
+shiftwork/slice-22b, created from clean main c7fd5c0; main ancestry passed.
+S22a is accepted/published. Gates 1, 2 and Gate 4's order remain approved.
+The workplace /api/boards route is implemented with declaration-order display
+and whole-pack availability, independent of learner progress. It uses the
+existing registered material guard and serialized private-payload scanner.
+This is the workplace API only; no playable Northline journey is claimed.
+
+Preflight finds a Gate 3 design omission: the prescribed assessor inputs carry
+no trusted booking/access/routing trace. A synthetic booking completion with
+an invented commitment and zero executed writes passes the current generic
+assessor. This is an intentionally unimplemented S22b surface, not an S22a
+regression. The existing isolated driver's stdout readiness protocol also
+does not match the exact blank starter's fixed-port HTTP startup (static
+inspection only; no live failure claimed). The reviewable correction is
+slice22b-gate3-deployment-evidence.md. It adds verified driver action traces
+through existing private observation storage and exact-starter compatibility;
+it changes no reviewed material, pin, seal, public inference tool allowlist or
+schema. Re-approval is pending before further deployment implementation.
+
+Existing pack baseline: 72 passed, 3 warnings (including existing Windows cache
+permission warning). Workplace pre-change: 12 intended route-absence failures.
+First post-change: 11 passed, 1 wrong expected-slug test failure; corrected
+without changing registration and logged in MISTAKES.md. Final workplace plus
+existing projection group: 16 passed, 2 warnings. Full offline suite: 866 passed, 1 skipped, 2 warnings
+in 389.04s, exit 0; packaging excluded. Three disposable workplace faults
+reach ten intended failures: scanner bypass (five), false availability (four)
+and reversed declaration order (one). Their clean baseline passes all 12 checks.
+Disposable copies restore exactly; working source bytes are unchanged.
+
+All 24 Northline reviewed hashes still match. No fixture, pin or seal changed.
+The externally updated AGENTS.md 200k context rule is retained. No install,
+credential use, live call, spend, commit, push, outreach or later slice ran.
+S22b is incomplete and unaccepted. Plan: slice22b-implementation-plan.md.
+Evidence: evidence/slice22b-start-2026-10-04/. Older notes retain their original
+authority and evidence scope; this notice governs the current scoped pause.
+
+
 **Current S22a disposition, 2026-10-04: ACCEPTED FOR PUBLICATION.**
 The user requested committing S22a, merging and pushing to main, and cleaning
 the working tree after its verified technical closeout. This is acceptance
