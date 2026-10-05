@@ -1,4 +1,132 @@
+**S22b ACCEPTED FOR PUBLICATION, 2026-10-06 Asia/Singapore.**
+
+The user requested committing S22b, publishing its branch, merging/pushing
+main, removing confirmed unneeded files and publishing any branch commits
+missing from main. This accepts the disclosed bounded S22b result for
+publication, including the actual hint-quality limitation. The hint itself
+is not accepted as verified diagnostic advice; its retained accepted field
+stays null. All consumed live allowances and evidence limits remain attached.
+
+The 2026-10-05 review retains six complete owning slots, exact B selection,
+inherited pilot, rollout/handover, separate v5 no-run bootstrap and one actual
+hint. Its full offline result was 1070 passed, 1 skipped, 2 warnings. Fresh
+checkout verification and Git publication are pending in this notice.
+Current closeout: [S22b publication](plans/shiftwork/slice22b-publication-2026-10-06.md). Older dated notices below retain
+their original bytes and historical scope. S23 needs its own go-ahead.
+
+**S22b bounded live execution VERIFIED; acceptance PENDING, 2026-10-05.**
+
+The exact approved packet ran once: 14 Sandbox operations, one actual HINT,
+zero in-service inference and 20 verified captures. Six slots completed with
+both candidates eligible; exact B choice, inherited pilot, rollout/handover
+and separate v5 no-run public bootstrap pass. Independent read-only capture,
+task, operation-identity, history and replay audits pass.
+
+The original audit confused three request meters with two Sandbox operations.
+Its source/failure are retained; the narrow offline correction and four distinct
+guard-omission proofs pass against the same live evidence, with no paid retry.
+Full offline: 1070 passed, 1 skipped, 2 warnings. Final focused: 16 passed.
+
+The actual hint wrongly treats a response artifact as proof of a resource
+action. Its original text is retained as a quality limitation; no replacement
+call ran. Sandbox charge and learner/model quality remain unverified.
+Technical evidence is ready for user acceptance. S22b remains unaccepted,
+uncommitted and unpublished; the live allowance is consumed.
+
+Details: [live completion and review](plans/shiftwork/slice22b-live-completion-checkpoint-2026-10-05.md). Older notices below retain
+their dated scope and original bytes.
+
+**S22b remaining execution PREPARED OFFLINE, 2026-10-05.**
+
+The user's continuation instruction covers remaining S22b work. Materially
+different provisional/conservative operator candidates, six owning slots,
+exact B choice, inherited pilot/handover and a separate v5 no-run bootstrap
+are now rehearsed. Independent read-only audit checks 20 captures and identical
+reassessment. Two candidate faults reach distinct intended assertions; provider,
+approval, HTTP-status and no-top-up controls pass. Full offline: 1064 passed,
+1 skipped, 2 warnings; packaging excluded. No new live call or credential read.
+
+The fresh live packet is prepared for at most 14 Sandbox operations and one
+actual public hint, with zero in-service inference and no retry. Its approval
+digest is e1736e421d0ca312849bb1d3dd3347df37b1f34bf75c8e4a317e8f144fa62716.
+The two historical live allowances remain consumed. Exact packet execution,
+live evidence review, hint-quality review and user acceptance remain pending.
+S22b remains incomplete, unaccepted, uncommitted and unpublished. Candidates,
+investigation and choice are operator/coding-assistant authored; no learner
+quality, real booking or Sandbox monetary-cost claim follows.
+
+Details: [completion checkpoint](plans/shiftwork/slice22b-completion-preflight-checkpoint-2026-10-05.md). Historical notices below retain their dated scope.
+
 # Shiftwork: working brief and adjudication register
+
+**S22b edited public diagnostic executed once, 2026-10-05.**
+
+The user's "i approve live runs, so just run the prompt" approved the prepared
+one-operation packet. It executed once: FINALIZED / EXPERIMENT / ISOLATED_LIVE,
+zero inference, one verified 2190-byte capture and independently accepted
+booking from two trusted reads and one final write. Business history and the
+original starter database stayed exact; all ten bindings, VALID chain and
+identical task reassessment pass. This allowance is consumed.
+
+The original runner printed PASS despite retaining a public experiment 409.
+That failure remains in the receipt and independent audit. Completed booking
+and safety tasks had fallen through Bellwether rendering. A narrow offline
+repair uses Northline's existing reviewed vocabulary; three new regression
+cases fail against the original renderer. Focused repair checks: 182 passed,
+2 warnings. Full offline: 1054 passed, 1 skipped, 2 warnings. Read-only
+experiment and Investigate endpoints now return 200 from
+the identical retained live database; no additional Sandbox or inference call
+ran. Full post-repair offline verification is recorded in the
+[diagnostic checkpoint](plans/shiftwork/slice22b-live-diagnostic-checkpoint-2026-10-05.md).
+
+S22b remains incomplete, unaccepted, uncommitted and unpublished. Defensible
+six-slot live comparison, exact eligible choice, selected pilot/handover, v5
+isolated bootstrap, any required real hint and whole-slice acceptance remain.
+Sandbox charge and real model/learner quality remain unverified. Older notices
+below describe their historical checkpoints.
+
+**2026-10-05 S22b native UI verified offline.** Workplace selection and the
+six-station 1280/390px journey pass with exact owning API values. Final source
+proof: 23 clean/fault pairs, no setup errors. Full offline: 1050 passed,
+1 skipped, 2 warnings; existing Bellwether baselines 3/3 PASS. All 42 pins and
+3232 prior evidence files remain exact. Current limits and retained failed
+attempts: plans/shiftwork/slice22b-ui-offline-checkpoint.md. The first live
+packet was separately authorized and executed once: one ISOLATED_LIVE
+Sandbox operation, zero inference, verified capture, expected task failure
+and one incident. Its separate read-only capture/binding/privacy audit passes;
+chain is VALID, replay IDENTICAL and database bytes are unchanged. The allowance
+is consumed; Sandbox charge remains unverified. Live comparison/pilot, edited
+isolated diagnostic, v5 bootstrap and acceptance remain pending. Checkpoint:
+plans/shiftwork/slice22b-live-starter-checkpoint-2026-10-05.md. S22b is incomplete,
+unaccepted, uncommitted and unpublished.
+The one-operation public diagnostic packet executed once under the latest
+user approval; its allowance is consumed. Current result and offline repair:
+plans/shiftwork/slice22b-live-diagnostic-checkpoint-2026-10-05.md.
+
+**2026-10-05 S22b pilot/handover proof verified offline.** Selected operation
+emits the declared booking and one rollout on full acceptance; close requires
+the selected runbook and records one handover. Final focused: 75 passed.
+Full offline: 1050 passed, 1 skipped, 2 warnings. Thirty-two source pairs fail
+their intended assertion after clean passes, with exact restoration. All
+42 reviewed pins and 2964 prior evidence files remain exact. The reviewed pilot
+has one booking request; safety/follow-up controls stay separately qualified.
+Checkpoint: `plans/shiftwork/slice22b-pilot-offline-checkpoint.md`.
+S22b remains incomplete and unaccepted; native UI, final review and live proof remain.
+
+**2026-10-04 S22b comparison/inheritance proof verified offline.** Six owning
+slots, exact prior-starter selection, experimental business preservation,
+the operation limit and all selected files' inheritance are proved. Final
+suite: 1017 passed, 1 skipped, 2 warnings. Runtime bytes and pins are retained.
+Checkpoint: `plans/shiftwork/slice22b-journey-offline-checkpoint.md`.
+S22b remains incomplete and unaccepted; pilot/handover and native UI remain.
+
+
+**2026-10-04 S22b intent/v2 offline step applied.** The trusted header is
+implemented from received inputs and the exact approved v2 material is applied.
+Original v1, pins and frozen history are preserved. Verification and remaining
+limits: `plans/shiftwork/slice22b-intent-v2-offline-checkpoint.md`. S22b remains
+incomplete and unaccepted; no runtime publication or live authority is inferred.
+
 
 **S22b corrected Gate 3 RE-APPROVED, 2026-10-04.**
 The user explicitly approved the corrected design: "Yep gate 3 is approved.

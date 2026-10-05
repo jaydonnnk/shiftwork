@@ -1,3 +1,19 @@
+**S22b ACCEPTED FOR PUBLICATION, 2026-10-06 Asia/Singapore.**
+
+The user requested committing S22b, publishing its branch, merging/pushing
+main, removing confirmed unneeded files and publishing any branch commits
+missing from main. This accepts the disclosed bounded S22b result for
+publication, including the actual hint-quality limitation. The hint itself
+is not accepted as verified diagnostic advice; its retained accepted field
+stays null. All consumed live allowances and evidence limits remain attached.
+
+The 2026-10-05 review retains six complete owning slots, exact B selection,
+inherited pilot, rollout/handover, separate v5 no-run bootstrap and one actual
+hint. Its full offline result was 1070 passed, 1 skipped, 2 warnings. Fresh
+checkout verification and Git publication are pending in this notice.
+Current closeout: [S22b publication](slice22b-publication-2026-10-06.md). Older dated notices below retain
+their original bytes and historical scope. S23 needs its own go-ahead.
+
 # Vertical Slice Plan: Shiftwork final pivot
 
 **Current S22a disposition, 2026-10-04: ACCEPTED FOR PUBLICATION.**

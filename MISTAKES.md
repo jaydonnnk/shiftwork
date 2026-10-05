@@ -1859,3 +1859,450 @@ When a failure pattern repeats 4+ times, graduate it into a permanent rule in `a
 - **What happened:** the fast-forward merge succeeded, but its verifier stopped before pushing when restored original checkout bytes appeared modified. All restored bytes matched the pre-merge snapshot and all Git clean-filter hashes matched HEAD. Explicitly refreshing those paths left every index entry unchanged and the tree clean.
 - **Root cause:** the verifier assumed restoring LF or mixed historical bytes after an autocrlf checkout would also refresh Git's stat metadata.
 - **Prevention rule:** preserve raw bytes, verify their clean-filter object IDs against HEAD, then refresh only those explicit paths and require unchanged index entries before asserting a clean tree.
+
+
+## 2026-10-04 S22b workplace test guessed the GTM slug
+
+- **What happened:** the first post-change workplace check returned 11 passed and 1 failed; the removal test expected stonebridge while the declaration uses gtm.
+- **Root cause:** I confused the fictional employer with the registered engagement slug instead of reading the declaration.
+- **Prevention rule:** copy identity values from current declarations and compare public display fields separately. Keep the failed log and fix the assertion without changing registration.
+
+
+## 2026-10-04 S22b digest domains and response serialization differed
+
+- **What happened:** initial kernel assessment checks compared returned-record transport SHA-256 with version-prefixed content_hash. Later receipt-fault controls failed their clean baseline because the trace used spaced JSON while the capture used compact JSON. Failed focused receipts remain in slice22b-traces-2026-10-04.
+- **Root cause:** I treated distinct digest domains and semantically identical JSON as byte-identical receipts.
+- **Prevention rule:** identify the digest domain and freeze exact response bytes. Compare plain SHA-256 with plain SHA-256 and verify each fault control's clean baseline before counting its failure.
+
+## 2026-10-04 S22b call contracts were inferred instead of inspected
+
+- **What happened:** the new tests used adapter instead of executor, read sqlite3.Row as a typed model, and omitted the selected-operation request key. Finalization referenced undefined batch_bytes. Replay passed keyword-only phase positionally and caused broad regressions. Failed receipts and the interrupted first full-run log remain; that interrupted run has no full-suite verdict.
+- **Root cause:** I did not inspect the signature, required request key, return model and frozen-byte ownership at every call site.
+- **Prevention rule:** inspect current call contracts, copy a compatible existing pattern, and exercise new and shared legacy paths before the full suite. Four distinct call-contract mistakes graduate this rule to AGENTS.md.
+
+## 2026-10-04 S22b baseline reservation retained the legacy family route
+
+- **What happened:** Northline STARTER_BASELINE fell through attempt-family selection even though this pack has only comparison families. The old atomic-open test also expected Northline to have no starter after S22b adds one.
+- **Root cause:** starter creation changed without checking reservation dispatch and old unavailable-starter stimuli.
+- **Prevention rule:** trace the new selection kind through reservation and finalization. Use explicit persistence faults to prove atomic opening independently of pack admission; retain old failed logs.
+
+## 2026-10-04 S22b expanded the unchanged Bellwether request wire
+
+- **What happened:** the exact-wire regression caught an extra logical_request_ordinal in Bellwether's current_request. The failing group retained 18 passes; its repaired group passes 29.
+- **Root cause:** deployment-only metadata was added to every executor request.
+- **Prevention rule:** add deployment metadata only with a controller deployment binding. Preserve exact-wire assertions for other packs.
+
+## 2026-10-04 S22b diagnostic runner and test paths were guessed
+
+- **What happened:** a nested evidence script could not import shiftwork when invoked directly; a reproduction command named nonexistent test_comparison_flow.py. Raw setup errors remain. Repository-cwd runpy and discovered test paths resolved setup.
+- **Root cause:** I inferred Python import-path behavior and a test filename from the source module.
+- **Prevention rule:** use a verified module or runpy entry point and discover paths with rg --files. Setup errors are not behavioral failures or mutation proof.
+
+
+## 2026-10-04 S22b independent review helper attempted an append-only update
+
+- **What happened:** the first disposable replay control stopped with
+  sqlite3.IntegrityError: execution observations are append-only. Its failed
+  source preimage and tool-output receipt are retained in
+  evidence/slice22b-gate3-review-2026-10-04/. No row or production file changed.
+- **Root cause:** I inspected observation read/write helpers but omitted
+  their schema triggers before choosing a direct corruption method.
+- **Prevention rule:** inspect schema-level immutability as well as helper
+  signatures before corruption tests. For downstream replay faults, inject
+  at the disposable read boundary and keep the actual append-only guard.
+
+## 2026-10-04 S22b historical privacy control retained a duplicate active needle
+
+- **What happened:** the first new review-regression run reached 31 intended
+  failures, but the historical privacy row passed against the broken reader.
+  Its raw log and JUnit remain in slice22b-review-repairs-2026-10-04.
+- **Root cause:** the disposable active version changed request text while its
+  matching task-spec text still contained the historical request verbatim.
+- **Prevention rule:** remove every duplicate source of the target needle from
+  the active fixture before testing historical coverage; require a failure
+  against the pre-change historical reader before claiming the guard is proved.
+
+## 2026-10-04 S22b expanded encoding controls lacked a final clean baseline
+
+- **What happened:** after adding slash-form base64 to the privacy controls, the
+  first disposable mutation run stopped at its clean private-intent control.
+  Raw logs and JUnit remain; it is not counted as an intended fault failure.
+- **Root cause:** the scanner encoded the original backslash needle but not
+  its slash form. I started broader checks before running the newly expanded
+  privacy controls on a clean source. Five other encoding shapes already matched.
+- **Prevention rule:** verify every new serialization shape independently on
+  clean source before mutation work. Keep any failed broader run and repeat the
+  relevant full suite against the final source after an encoding repair.
+
+
+## 2026-10-04 S22b historical replay test exceeded the reserved pair range
+
+- **What happened:** the first intent/v2 focused run returned 2 failed and 140 passed. The new history test tried to put six variants into one three-pair reservation; SQLite rejected pair 4 before the replay assertions. Raw log and JUnit are retained in slice22b-intent-v2-2026-10-04.
+- **Root cause:** I checked model/helper signatures but missed the pair_ordinal BETWEEN 1 AND 3 schema constraint.
+- **Prevention rule:** inspect schema constraints before constructing historical rows. Represent six spent variants with two legal three-pair reservations; isolate variant uniqueness faults in a separate reservation so slot uniqueness cannot mask them.
+
+
+## 2026-10-04 S22b checkout negative control overlooked inherited LF policy
+
+- **What happened:** a disposable Windows-checkout helper verified all 42 pins, then incorrectly required removing the new -text rule to change the already-LF v2 bytes. The assertion failed.
+- **Root cause:** the existing sealed-family wildcard also sets text eol=lf, so omission can preserve current LF bytes.
+- **Prevention rule:** inspect the effective attribute policy before choosing a conversion fault. Require exact checkout hashes and a separate literal/effective -text omission assertion; do not claim byte drift where none occurs.
+
+## 2026-10-04 S22b mutation anchor interpreted regex word boundaries as control characters
+
+- **What happened:** the mutation helper passed its first three clean/fault pairs, then stopped at the malformed-explicit source-anchor preflight. Its log, partial results and failed script are preserved.
+- **Root cause:** a Python string containing a regex word boundary used an ordinary literal, turning backslash-b into a backspace.
+- **Prevention rule:** use raw literals for regex source anchors and preflight every anchor before any mutation execution. Source setup failures do not count as behavioral fault catches.
+
+
+## 2026-10-04 S22b header omission test indexed a missing header
+
+- **What happened:** the new clean header check passed, but omission raised KeyError rather than the required named assertion. The mutation validator refused to count it. Raw clean/fault output remains in mutations-final.
+- **Root cause:** the assertion indexed a field that the mutation removes. A planned later node also omitted the generated row0 parameter identifier.
+- **Prevention rule:** test optional/missing fields with get and an explicit assertion message. Discover exact collected pytest node IDs before invoking them. Keep rejected mutation evidence and require assertion-level failures with zero setup errors.
+
+
+## 2026-10-04 S22b preview used an inferred database environment name
+
+- **What happened:** the first preview set SHIFTWORK_DB instead of configured SHIFTWORK_DB_PATH. Startup created a new default shiftwork.db. The process was stopped; creation time and read-only counts confirmed this turn created it with zero runs, shifts, exposures, protected snapshots or ledger events. It was retained as mistaken-preview.db in the new evidence directory. The corrected preview uses the explicit evidence DB path.
+- **Root cause:** I inferred the environment key without reading config.db_path.
+- **Prevention rule:** inspect actual configuration lookup before launching a preview and verify the resolved database path first. Keep preview state inside a new disposable/evidence location; never reuse an existing database by accident.
+
+
+## 2026-10-04 S22b version transition omitted historical inputs from shared test fixtures
+
+- **What happened:** full offline verification returned 4 failed, 993 passed, 1 skip and 2 warnings. One workplace fault still removed the old active pin; three privacy checks staged partial packages missing the now-historical Northline v1 file.
+- **Root cause:** I updated the focused active-family fixtures without auditing every shared disposable privacy inventory. The historical pin reader correctly refused missing input.
+- **Prevention rule:** when a declared family moves versions, distinguish active-admission faults from historical preservation checks and stage every explicitly pinned historical sealed file in shared privacy fixtures. Preserve the failed full receipt and rerun focused plus full checks without relaxing scanner behavior.
+
+
+## 2026-10-04 S22b journey fixture missed comparison-specific pins
+
+- **What happened:** the first new journey group returned 18 passed and 4 setup errors. The real comparison reservation refused the test services before any slot ran. Raw log and JUnit remain in slice22b-journey-2026-10-04/journey-first.
+- **Root cause:** I inspected the executor allowlist but missed the separate comparison admission check for compare_candidate_a/b.
+- **Prevention rule:** inspect admission as well as execution before constructing disposable services. Bind both explicit fixture pins only inside the test monkeypatch; retain production restrictions and do not count setup errors as fault catches.
+
+
+## 2026-10-04 S22b journey expected unknown offline usage
+
+- **What happened:** the second journey group returned 1 failed and 21 passed. The comparison executed and both candidates were eligible; the new test expected input_tokens=None but the offline metrics reported zero. Raw log and JUnit remain in journey-second.
+- **Root cause:** I applied the unknown-live-usage rule to a pure stdlib trusted-local service with known zero inference usage.
+- **Prevention rule:** inspect the metrics evidence-mode branch before asserting missingness. Keep unknown live usage separate from explicitly model-free offline zero usage.
+
+
+## 2026-10-04 S22b offline cost assertion inferred from token meter
+
+- **What happened:** journey-clean retained 1 failed and 21 passed because the repaired assertion correctly expected zero tokens but incorrectly expected zero monetary cost. The failure and JUnit remain retained.
+- **Root cause:** I inspected the inference-mode branch without reading CandidateMetrics cost_minor_units, which remains explicitly None. The earlier prevention entry overstated what offline zero usage established.
+- **Prevention rule:** read the exact metric construction for every asserted field. Zero inference tokens do not establish a monetary cost; unknown costs must remain unknown.
+
+
+## 2026-10-04 S22b migration comparator counted new schema columns
+
+- **What happened:** journey-final-focused returned 1 failed and 37 passed. The old shift had identical historical values plus the new opening_mode=None column, so SELECT * comparison reported a false rewrite. The diagnostic is retained.
+- **Root cause:** the test compared whole migrated rows with old-schema rows instead of retaining the original column inventory.
+- **Prevention rule:** capture old column names before migration and compare those exact values afterwards; assert new migration fields independently. Never normalize old values to satisfy the comparison.
+
+
+## 2026-10-04 S22b journey mutation preflight assumed inline next delimiter
+
+- **What happened:** the mutation harness stopped before any source mutation because its compared-member anchor expected next() to close on the same line as the None default. Raw preflight traceback and original script remain retained.
+- **Root cause:** I copied an abbreviated source excerpt rather than the complete measured multiline statement.
+- **Prevention rule:** preflight all exact current anchors before execution and preserve rejected helpers. A source-anchor failure is setup evidence, never a behavioral fault catch.
+
+
+## 2026-10-04 S22b mutation parser required an absent JUnit type attribute
+
+- **What happened:** the first disposable prior-starter omission correctly returned 201 and failed its named 409 assertion, but the verifier rejected it. Its clean/fault streams, JUnit and parser preimage remain in mutations-verified.
+- **Root cause:** pytest puts AssertionError in failure message/text and emits no type attribute in this JUnit format.
+- **Prevention rule:** inspect actual structured failure output; require the named AssertionError, one failure, zero setup errors and expected exit without assuming an optional JUnit attribute.
+
+
+## 2026-10-04 S22b completion omission was masked by an independent reader
+
+- **What happened:** mutations-final proved the prior-starter row, then rejected completed-comparison because the fault test still passed after the explicit state guard was omitted. Both streams, JUnit and helper preimage remain.
+- **Root cause:** the pure comparison reader independently rejects RUNNING experiments, so the original read-boundary substitution exercised two guards.
+- **Prevention rule:** for explicit boundary-policy controls, hold a genuinely validated slot outcome fixed and change only the boundary field. Keep the real end-to-end reader checks separately; a fault caught by a backup cannot prove the omitted guard. The operation-history fault tests history loss as a policy input, not every individual retry guard.
+
+## 2026-10-04 S22b safety reducer control assumed operation checks in a comparison
+
+- **What happened:** the first pilot focused group returned 1 failed and 59 passed.
+  Its safety reducer control had real route captures and passing public task
+  assessments, but supplied an empty check tuple. The diagnostic is retained.
+- **Root cause:** qualifying comparisons store public TaskAssessment rows and
+  protected CheckResult rows; they do not create operation-style public checks.
+- **Prevention rule:** inspect the actual persistence path before reusing captured
+  evidence in a pure reducer control. Bind explicitly constructed unit-check
+  provenance to the real public output; never claim it is a stored operation.
+
+## 2026-10-04 S22b pilot tests inferred public API fields and status
+
+- **What happened:** the expanded pilot group returned 2 failed and 66 passed.
+  One test indexed the private context_id on a public RunView. Another expected
+  diagnostic creation to return 201 rather than its declared 202 and also used
+  id rather than the trial's run_id. The failed stream and JUnit are retained.
+- **Root cause:** I reused internal model names and guessed the route contract
+  instead of copying the current schema and a working diagnostic call.
+- **Prevention rule:** check both public projections and route decorators before
+  using HTTP fields/statuses; private context identifiers come from repo.get_run.
+  The existing AGENTS.md call-contract rule applies to test fixtures as well.
+
+## 2026-10-05 S22b evidence demo launched without repository import context
+
+- **What happened:** invoking the new nested demo script directly failed at its
+  shiftwork import before creating a database. The startup traceback is retained.
+- **Root cause:** direct script execution places its evidence directory, not the
+  repository root, first on Python's import path. Pytest had supplied repository
+  context in the preceding checks.
+- **Prevention rule:** invoke repository evidence demos through runpy from the
+  repository root, or explicitly establish their import context. Verify no
+  destination database exists before retrying a failed startup.
+
+## 2026-10-05 S22b missing-check fault was masked by source provenance lookup
+
+- **What happened:** the first four pilot source pairs reached their named
+  assertion. The missing-check omission then raised KeyError at the later
+  required-check provenance lookup and was rejected as the wrong failure.
+  All raw results and the original harness remain retained.
+- **Root cause:** replacing a required source check exercised the policy guard
+  and the independent dictionary lookup. Omitting only the policy could not
+  publish partial state because the missing source still stopped reduction.
+- **Prevention rule:** isolate the inventory policy with a missing optional
+  check while retaining required source provenance. Keep separate real capture
+  completeness controls; a backup guard's crash cannot prove the omitted guard.
+
+## 2026-10-05 S22b reducer keyword extension broke an older fault wrapper
+
+- **What happened:** full offline verification returned 1 failed, 1049 passed,
+  1 skipped and 2 warnings. The Bellwether incident-write control raised TypeError
+  before injecting its intended transaction fault. The full receipt is retained.
+- **Root cause:** the reducer now accepts verified deployment trace and frozen
+  consequence keywords, while that test's forwarding shim accepted *args only.
+- **Prevention rule:** inspect forwarding wrappers as well as direct callers when
+  extending a signature. Forward **kwargs to the real implementation and keep
+  the original fault and all rollback assertions unchanged; rerun the focused
+  control and full suite against the final source.
+
+## 2026-10-05 S22b browser checks assumed uppercase public verdicts
+
+- **What happened:** the first browser journey reached the real blank-starter run and exact API/DOM evidence checks, then rejected its real lowercase fail verdict. Raw output and screenshot are retained in slice22b-ui-2026-10-05.
+- **Root cause:** acceptance assertions used uppercase tokens without copying public CheckResultView wire values.
+- **Prevention rule:** inspect a real serialized response for asserted tokens. Retain failed evidence and restart journey writes on a fresh database.
+
+## 2026-10-05 S22b workshop SVG remained hidden
+
+- **What happened:** the fresh functional UI reviewer found zero rendered artwork bounds while six station overlays appeared.
+- **Root cause:** assigning hidden on SVGElement sets an expando rather than removing its initial hidden attribute.
+- **Prevention rule:** use toggleAttribute for SVG visibility and assert nonzero rendered artwork bounds. An assigned JavaScript property is not proof that artwork renders.
+
+## 2026-10-05 S22b shared bench did not release comparison controls
+
+- **What happened:** the second browser journey recorded a valid investigation but the visible freeze controls stayed disabled. The failed browser receipt and real API entry are retained.
+- **Root cause:** recording an investigation redraws the investigative panel after pending clears, but the new Northline bench also contains comparison controls and those retained their pending render.
+- **Prevention rule:** when existing panels share one station, refresh every affected action state after pending clears. Prove the next UI action is available without an unrelated input change.
+
+## 2026-10-05 S22b browser runner used an inferred row key
+
+- **What happened:** an existing Bellwether regression invocation was rejected before launching a preview because baseline-selected is not a supported key. Its output directory and log remain.
+- **Root cause:** I copied a display label without inspecting the runner's generated row-key mapping.
+- **Prevention rule:** read the exact runner key construction before selecting rows. Setup rejection is not a regression or fault catch; rerun in a fresh output directory with supported keys.
+
+## 2026-10-05 S22b edit harness treated identical worksheet bytes as dirty
+
+- **What happened:** the third browser journey rejected an enabled board selector when an input dispatch retained an already-saved worksheet. Its raw failure and screenshot remain.
+- **Root cause:** the harness assumed every fixture assignment changes the draft. Some permission and shared A/B worksheet bytes already match.
+- **Prevention rule:** compare editor bytes before assignment. Assert dirty protection only for an actual change and verify the complete frozen file inventory independently.
+
+## 2026-10-05 S22b checkpoint route followed the static catch-all
+
+- **What happened:** the fourth browser journey completed a real six-slot comparison, then its test-only checkpoint POST returned an error. The browser failure and completed comparison DB remain.
+- **Root cause:** create_app mounts static content at / before the preview app adds its test-only route, so the catch-all consumed the POST.
+- **Prevention rule:** inspect route ordering when extending a mounted application. Place disposable test routes before the catch-all; keep production routing unchanged and retain rejected proof receipts.
+
+## 2026-10-05 S22b browser predicate captured a Node-only variable
+
+- **What happened:** the fifth browser journey chose A, inherited all its files and started the selected pilot, then its serialized wait predicate raised ReferenceError for chosen. The completed operation and traceback remain.
+- **Root cause:** CDP evaluates serialized function text in the page, without the Node lexical closure.
+- **Prevention rule:** pass needed values explicitly or derive a wait signal from page state, then verify its result independently against the API. A transport-side ReferenceError is not a product assertion failure.
+
+The combined-bench pending-state repair also applies to help, help decisions and diagnostics; the reviewer found the same omitted comparison redraw in those completions. All affected finally blocks now refresh comparison/editor controls.
+
+## 2026-10-05 existing inheritance demo staged the obsolete configuration pointer
+
+- **What happened:** the required Bellwether inheritance preview stopped before launching its browser. The later comparison correctly refused because its operation had observed no condition change. Raw preview output remains.
+- **Root cause:** S22a moved public-state ownership to the registered pack, but this older demo still changed PIVOT_PUBLIC_STATE. The operation therefore froze the unchanged registered world.
+- **Prevention rule:** stage operator-side test worlds through a disposable owning package and its explicit pin, following the real admission guard. Keep production material and pins exact; never weaken the no-observed-change refusal to rescue a demo.
+
+## 2026-10-05 S22b browser proof expected an unsupported edited offline diagnostic
+
+- **What happened:** the sixth browser journey recorded the one allowed hint and its decision, saved both candidates, then waited for a public diagnostic that the real API refused. Its receipt and database remain.
+- **Root cause:** I inspected the request shape but missed the retained local public-diagnostic admission rule, which permits only its reviewed starter and refuses an edited Northline candidate.
+- **Prevention rule:** inspect admission conditions before requiring a successful UI journey. Preserve the source guard, verify the real refusal and restored controls, and retain successful edited isolated diagnostic execution as separately authorized live work.
+
+## 2026-10-05 S22b event renderer inferred an absent public event id
+
+- **What happened:** the seventh browser journey completed choice, inherited selected operation and both closes, then exact handover comparison found a rendered undefined identity. Its API/event payloads and failure remain.
+- **Root cause:** LedgerEventView exposes seq within the owning ledger, not an id. The new renderer and assertion inferred the private model shape.
+- **Prevention rule:** copy public field definitions and use the owning ledger plus seq for public identity. Compare event inventories and payloads to actual serialized responses; retain wrong-output diagnostics.
+
+## 2026-10-05 S22b keyboard harness omitted the Enter character
+
+- **What happened:** the eighth journey reached selection, selected pilot and handover, then its mobile focus assertion failed. The focused brief button never activated; Handover remained selected. Raw output and screenshots remain.
+- **Root cause:** the new CDP keyDown omitted the carriage-return text supplied by the existing verified native keyboard harness. The desktop check also tested overflow without proving station activation.
+- **Prevention rule:** copy the existing native input pattern and verify the resulting station title before focus or scroll assertions. Use keyboard and touch independently on the mobile surface.
+
+The pending-state repair also covers opening/operating and close/next-shift completions. Their final redraw must release the shared draft and workplace controls without requiring an unrelated station change.
+
+## 2026-10-05 S22b board-switch control edited a closed shift
+
+- **What happened:** the first new snapshot reach check waited for Bellwether while an old Northline response was delayed. The switch was correctly refused and the test timed out. Raw streams and screenshot remain.
+- **Root cause:** the test injected an unsaved draft into a closed shift, then clicked its disabled discard button. The retained dirty text also made the unavailable-board check inconclusive.
+- **Prevention rule:** exercise edit/discard and dirty-switch guards on an open-shift snapshot. Keep mobile reach checks on the closed snapshot, and prove the draft is clean before testing an independent availability or refresh guard.
+
+## 2026-10-05 S22b fresh browser readiness raced document creation
+
+- **What happened:** the expanded source matrix stopped on stationNames/clean before any product assertion. Its first navigation predicate read dataset from a null document.body. Nine completed pairs and the rejected clean row remain retained.
+- **Root cause:** Page.navigate acknowledges navigation before the new document must have created its body. The first fifteen-pair run did not happen to encounter that window.
+- **Prevention rule:** initial browser readiness must tolerate the pre-document state while continuing to require the actual ready/empty signal. Retain setup errors separately from counted assertion catches; rerun in a fresh destination.
+
+## 2026-10-05 S22b live receipt inspection used shell-fragile SQL quoting
+
+- **What happened:** the first read-only inspection command raised SyntaxError before opening the retained database. The authorized live runner had already exited zero; no live retry followed.
+- **Root cause:** double quotes around a SQL literal were escaped as if PowerShell used backslash escaping inside the Python command string.
+- **Prevention rule:** put multi-statement receipt audits in a saved Python file and use ordinary SQL quoting there. Keep audit setup errors separate from the live execution verdict; never repeat a one-shot run to fix an inspection command.
+
+## 2026-10-05 S22b read-only audit inferred a repository helper
+
+- **What happened:** the saved receipt audit stopped with AttributeError on repo.list_events. The live runner had passed and no external retry followed. The failed helper and log remain retained.
+- **Root cause:** the audit inferred a repository symbol instead of inspecting its signature. Source review also found the deployment trace uses actions, not events, before that assertion ran.
+- **Prevention rule:** locate and read the current repository helper and domain field definitions before writing an audit. Repair inspection setup separately from live execution and preserve the original failure.
+
+
+## 2026-10-05 S22b retained audit inferred a raw observation field
+
+- **What happened:** the inherited read-only audit stopped on ExecutionObservation.raw_payload_json. The field does not exist. The consumed starter was never retried. Original source and logs remain.
+- **Root cause:** the audit used the executor-side raw payload shape instead of the persisted observation's raw_payload_ref data URI.
+- **Prevention rule:** inspect the stored model and repository decoder together. Validate the data-URI prefix, base64 wrapper and capture bytes, then use get_deployment_trace for the validated trace. Fix inspection separately from live execution.
+
+## 2026-10-05 S22b corrected audit treated a Literal string as an enum
+
+- **What happened:** the new read-only audit validated capture bytes and bindings, then stopped on CheckResult.verdict.value. The failed source and audit.log remain in the fresh audit folder. No database write or external request occurred.
+- **Root cause:** I extended the audit before checking CheckResult.verdict, which is Literal['pass', 'fail', 'error'], rather than an enum. Reading the definition in the same command as execution was too late.
+- **Prevention rule:** finish model inspection before running an extended audit. Compare a Literal directly; use .value only on an inspected enum. Retain the failure and run corrected inspection to a fresh log.
+
+## 2026-10-05 S22b inspection guessed the incident request filename
+
+- **What happened:** a read-only Get-Content requested northline_incident.jsonl, which does not exist. The actual reviewed file is northline_deployment_incident.jsonl; no execution used the guessed path.
+- **Root cause:** I read a presumed filename before using the available rg file inventory.
+- **Prevention rule:** discover the owning pack path or rg --files result before reading a fixture; never derive a shorter filename from a scenario label.
+
+## 2026-10-05 S22b final preservation helper launched without repository import context
+
+- **What happened:** the first final-preservation invocation compared entry bytes and Git state, then failed to import demos while loading the packet runner. Its log and exact helper source remain. No live call or original evidence overwrite followed.
+- **Root cause:** I launched a script from the separate projectless work directory directly, so its script directory replaced the repository root on the Python import path. The existing runpy-from-repository rule was not applied.
+- **Prevention rule:** launch repository-dependent helpers through python -c plus runpy from the repository root. Preserve failed inspection outputs and write the corrected result to a new log destination.
+
+
+## 2026-10-05 S22b reserved command confused runpy module and file execution
+
+- **What happened:** the final read-only command check rejected python -m runpy with a file path, before loading the packet runner. The original packet document, empty output and copied observed error remain in the packet evidence folder. No live call occurred.
+- **Root cause:** I inferred the runpy CLI accepted file paths instead of reusing the verified python -c plus runpy.run_path invocation.
+- **Prevention rule:** publish the exact invocation already exercised successfully. Verify its default read-only preflight from the declared working directory, then compare the manifest digest before presenting a live approval packet.
+
+
+## 2026-10-05 S22b diagnostic runner missed a broken public projection
+
+- **What happened:** the exact approved diagnostic executed once and the runner
+  printed PASS, while its receipt contained the experiment endpoint's 409 conflict.
+  Independent audit confirmed one valid isolated capture and useful booking, but
+  the completed booking could not render. Three new regression cases fail on the
+  original renderer with no setup errors; the consumed execution is never retried.
+- **Root cause:** completed deployment tasks fell through Bellwether's factual
+  renderer; the runner collected the experiment GET body without checking status.
+- **Prevention rule:** verify every required public endpoint status and owning
+  task vocabulary alongside execution and assessment. Preserve original runner,
+  receipts and failed projection evidence; repair presentation offline and audit
+  the retained capture before proposing any later live packet.
+
+## 2026-10-05 S22b audit source lookup repeated an inferred filename
+
+- **What happened:** a read-only Get-Content requested audit.py in the retained
+  starter audit folder. That file does not exist; rg located audit_live.py. No
+  database change or live retry followed the failed inspection.
+- **Root cause:** the read used a guessed filename before the required inventory.
+- **Prevention rule:** use the exact rg --files result before reading an evidence
+  helper, including helpers whose conceptual name resembles the new audit.
+
+
+## 2026-10-05 S22b read-only API audit blocked Windows asyncio socketpair
+
+- **What happened:** the first read-only API recheck stopped while TestClient
+  created its event loop, before any handler or database write. Original source
+  and log remain in the diagnostic continuation folder; no live retry followed.
+- **Root cause:** a blanket socket.connect trap also blocked the Windows stdlib
+  loopback handshake used by asyncio's internal wakeup pipe.
+- **Prevention rule:** distinguish the exact stdlib socketpair caller from product
+  connections. Retain the setup failure; require product loopback and external
+  connection controls to refuse while counting permitted internal handshakes.
+
+## 2026-10-05 S22b API audit confused experiment state with trial state
+
+- **What happened:** the corrected read-only recheck reached both HTTP 200
+  endpoints, then expected COMPLETE on an experiment whose actual terminal state
+  is FINALIZED. The stored trial is COMPLETE. Source and failed log remain.
+- **Root cause:** the helper inferred a shared terminal-state vocabulary instead
+  of reading Experiment.state and the trial projection separately.
+- **Prevention rule:** inspect both types before asserting state labels; retain
+  failures and rerun only the read-only audit to a fresh log destination.
+
+
+## 2026-10-05 S22b notice update normalized mixed historical newlines
+
+- **What happened:** a documentation helper normalized the existing status/brief
+  mixed LF/CRLF endings while prepending current notices. Byte inspection caught
+  this before completion. Failed copies remain in the continuation evidence.
+- **Root cause:** the helper chose one newline style for each whole file instead
+  of changing only the exact anchor bytes and new notice.
+- **Prevention rule:** preserve historical suffix bytes, use the original anchor's
+  own newline style, and verify backup hashes against the entry inventory before
+  reconstructing narrowly. The corrected documents retain the original suffix
+  except the explicit outdated pending-diagnostic paragraph.
+
+
+## 2026-10-05 S22b new verification candidate assumed a local intent header
+
+- **What happened:** the first completion rehearsal retained four failed booking
+  slots with SERVICE_UNREACHABLE. Their exact candidate/runner/receipt and decoded
+  logs remain; safety and refusal slots completed. No live call occurred.
+- **Root cause:** the new candidate indexed X-Shiftwork-Intent-Key, which the
+  isolated driver sends but the trusted-local adapter does not. HTTPMessage
+  returned None; constructing the booking reference then raised TypeError.
+- **Prevention rule:** inspect both delivery paths before relying on a header.
+  Derive the documented intent from received public inputs as a compatible
+  fallback, validate ambiguity, and rehearse booking and retry end to end.
+
+
+## 2026-10-05 S22b continuation repeated an unverified inspection path
+
+- **What happened:** a read-only Get-Content guessed audit_live.py in the
+  diagnostic continuation folder. Inventory located audit.py there. Later rg
+  also received a Windows wildcard as a literal path. No product execution or
+  live retry followed either inspection error.
+- **Root cause:** I reused conceptual filenames and shell glob assumptions
+  instead of taking exact inventory paths and passing rg -g patterns.
+- **Prevention rule:** finish rg --files discovery before a read. On Windows
+  pass rg directory roots and -g filters, never a guessed wildcard path.
+
+
+## 2026-10-05 S22b prepared live audit counted request meters as operations
+
+- **What happened:** the approved completion runner passed all 14 Sandbox operations and one hint, but the separate frozen audit stopped on its meter-count assertion. The approved audit source and failed log remain in the completion review evidence. No live operation or hint was repeated.
+- **Root cause:** a comparison slot has three request-level inference meters and two phase-level Sandbox operation bindings. The audit assumed both counts were two; its trusted-local rehearsal skipped this live-only branch.
+- **Prevention rule:** check meter count and exact ordinals against captured requests, and operation count against executed phases. Exercise live-only inventory checks with representative observations and omit each guard independently. Preserve consumed manifest/source bytes and repair audit logic offline against the identical retained databases.
+
+
+## 2026-10-05 S22b first meter-count omission control was masked
+
+- **What happened:** the first audit-guard matrix rejected its missing-meter omission row because the test still passed. Its source, clean/omitted logs and XML remain. That row is not counted as guard proof.
+- **Root cause:** removing a meter violated both cardinality and ordinal coverage, so the unchanged coverage guard caught the same fault and hid the omitted count guard.
+- **Prevention rule:** inject an extra duplicate meter to preserve complete ordinal coverage while violating only count. Check each independent omission reaches its own intended DID NOT RAISE failure, with zero setup errors, and retain rejected overlapping controls separately.

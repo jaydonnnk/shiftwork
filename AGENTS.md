@@ -346,6 +346,10 @@ Rules:
   otherwise. Never stash, discard, rewrite or stage unrelated changes.
 - Copy patch anchors from the current file, including complete inline statements.
   Verify every anchor before a multi-file edit; never append guessed context.
+- Before calling a repository helper, inspect its current signature, required
+  request keys and return type, then copy a compatible existing call pattern.
+  Discover source and test paths with `rg --files` before using an inferred name.
+  This graduates the repeated S22b call-contract errors logged 2026-10-04.
 - For a non-trivial task outside the gate workflow, write a short actionable plan
   before editing. Re-plan when evidence invalidates the approach. Skip process
   ceremony for a small, obvious, one-file change.
@@ -394,14 +398,13 @@ Rules:
 
 ### Context budget and handoff
 
-- Treat half of this session's context window as the working limit (for example
-  200k of a 400k-token window). Use the reported usage indicator when the runtime
-  shows one, and a conservative estimate otherwise. When usage reaches about that
-  point, stop starting new work even if the task is unfinished, except in the
-  near-completion case below.
+- Treat 200k tokens of session context usage as the working limit. Use the
+  reported usage indicator when the runtime shows one, and a conservative
+  estimate otherwise. When usage reaches about 200k tokens, stop starting new
+  work even if the task is unfinished, except in the near-completion case below.
 - Near-completion exception: when the task is almost done as usage approaches the
-  threshold (for example the last step of a five-step task at 45 to 50 percent of
-  the window), finish the task in this session instead of handing off. The
+  threshold (for example the last step of a five-step task at 180k to 200k
+  tokens used), finish the task in this session instead of handing off. The
   exception covers only a short, fully predictable remainder, never a new phase of
   work or an open question about what remains.
 - The exception lapses on an unexpected error or outcome: a failing check you did
