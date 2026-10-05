@@ -93,6 +93,12 @@ class LedgerEventType(StrEnum):
     INCIDENT_RESOLVED = "INCIDENT_RESOLVED"
     BACKLOG_RECORDED = "BACKLOG_RECORDED"
     LIMIT_DECLARED = "LIMIT_DECLARED"
+    OWNER_ASSIGNED = "OWNER_ASSIGNED"
+    SLA_CLOCK_STARTED = "SLA_CLOCK_STARTED"
+    HANDOFF_ESCALATED = "HANDOFF_ESCALATED"
+    ROLLOUT_APPROVED = "ROLLOUT_APPROVED"
+    HANDOVER_DECLARED = "HANDOVER_DECLARED"
+    COUNTER_FOLLOWUP_RECORDED = "COUNTER_FOLLOWUP_RECORDED"
 
 
 class IncidentState(StrEnum):
@@ -638,6 +644,7 @@ class CloseShiftFacts(BaseModel):
     declared_limits: tuple[str, ...]
     unresolved_incident_ids: tuple[Id, ...]
     committed_contract: ContractParams
+    handover_runbook_version_id: Id | None = None
 
 
 class LedgerEventDraft(BaseModel):

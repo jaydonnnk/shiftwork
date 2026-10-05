@@ -21,6 +21,7 @@ from shiftwork.domain.task_contract import (
     ShopEntity,
     ShopSnapshot,
     TaskResult,
+    TaskKind,
     TaskStatus,
 )
 from shiftwork.domain.task_contract import Claim as TaskClaim
@@ -144,8 +145,9 @@ def render_task_customer_text(
     contradict the scored result.
     """
     requested = spec.requested_entities[0] if spec.requested_entities else None
+    kinds = {task.id: task.kind for task in spec.tasks}
     sentences = [
-        _render_task_result(mission, snapshot, requested, result)
+        _render_task_result(mission, snapshot, requested, result, kinds[result.task_id])
         for result in response.task_results
     ]
     if not sentences:
@@ -158,12 +160,19 @@ def _render_task_result(
     snapshot: ShopSnapshot,
     requested_entity: str | None,
     result: TaskResult,
+    task_kind: TaskKind,
 ) -> str:
     if result.status is not TaskStatus.COMPLETED:
         return _render_fallback(mission, result)
 
     claims = {claim.kind: claim for claim in result.claims}
     entity = _entity(snapshot, result.entity_ref)
+    if task_kind in (TaskKind.CREATE_BOOKING, TaskKind.ROUTE_SAFETY_QUESTION):
+        vocabulary = "booking" if task_kind is TaskKind.CREATE_BOOKING else "safety_route"
+        return _fill(
+            mission.render_vocabulary[vocabulary],
+            mission=mission, snapshot=snapshot, entity=entity,
+        )
     availability = claims.get("availability")
 
     if availability is not None:

@@ -25,7 +25,7 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, ValidationError, Field, StrictInt, model_validator
 
 from shiftwork.domain.errors import (
     MissionSpecInvalid,
@@ -102,7 +102,7 @@ class Claim(BaseModel):
 
     model_config = _FROZEN
 
-    kind: Literal["price", "stock", "availability", "policy_answer", "booking", "none"]
+    kind: Literal["price", "stock", "availability", "policy_answer", "booking", "none", "safety_route"]
     entity_ref: str
     value: JsonValue
     evidence_refs: tuple[str, ...]
@@ -257,6 +257,87 @@ def resolve_protected_state(base_bytes: bytes, delta: ProtectedStateDelta) -> by
             or len(record_ids) != len(set(record_ids))):
         raise PublicStateInvalid("protected state is not an additive resolution")
     return resolved
+
+
+class DeploymentAction(BaseModel):
+    model_config = _FROZEN
+    sequence: StrictInt = Field(ge=1, le=64)
+    kind: Literal["READ", "WRITE_SLOT", "ROLLBACK", "ROUTE_HUMAN", "DENIED"]
+    resource: str
+    entity_ref: str
+    intent_key: str | None
+    commitment_ref: str | None
+    details: dict[str, JsonValue]
+
+    @model_validator(mode="after")
+    def exact_details(self):
+        fields = {
+            "READ": {"record_ids", "records_sha256"},
+            "WRITE_SLOT": {"slot_ref", "part_ref", "booking_date", "stage", "receipt", "before_sha256", "after_sha256"},
+            "ROLLBACK": {"target_receipt", "receipt", "before_sha256", "after_sha256"},
+            "ROUTE_HUMAN": {"route", "receipt"},
+            "DENIED": {"operation", "reason"},
+        }[self.kind]
+        if set(self.details) != fields or not self.resource:
+            raise ValueError("deployment action has an invalid detail shape")
+        for key, value in self.details.items():
+            if key == "record_ids":
+                if not isinstance(value, list) or any(not isinstance(item, str) or not item for item in value):
+                    raise ValueError("invalid returned record identities")
+            elif not isinstance(value, str) or not value:
+                raise ValueError("deployment detail must be nonempty text")
+            if key.endswith("sha256") and (not isinstance(value, str) or len(value) != 64
+                                            or any(c not in "0123456789abcdef" for c in value)):
+                raise ValueError("invalid deployment digest")
+        if self.kind == "WRITE_SLOT" and self.details["stage"] not in {"PROVISIONAL", "FINAL"}:
+            raise ValueError("invalid commitment stage")
+        if self.kind == "ROUTE_HUMAN" and self.details["route"] != "human_mechanic":
+            raise ValueError("invalid human route")
+        return self
+
+
+class DeploymentExecutionBinding(BaseModel):
+    model_config = _FROZEN
+    run_id: Id
+    context_hash: str
+    artifact_hash: str
+    state_hash: str
+    batch_hash: str
+    phase: Literal["PUBLIC", "PROTECTED"]
+    allowed_resources: tuple[str, ...]
+
+
+class DeploymentTrace(BaseModel):
+    model_config = _FROZEN
+    run_id: Id
+    context_hash: str
+    artifact_hash: str
+    state_hash: str
+    batch_hash: str
+    phase: Literal["PUBLIC", "PROTECTED"]
+    request_ordinal: StrictInt = Field(ge=1)
+    request_id: Id
+    request_sha256: str
+    response_sha256: str
+    actions: tuple[DeploymentAction, ...]
+    complete: Literal[True]
+
+    @model_validator(mode="before")
+    @classmethod
+    def strict_completion(cls, data):
+        if not isinstance(data, dict) or data.get("complete") is not True:
+            raise ValueError("deployment trace completion must be true")
+        return data
+
+    @model_validator(mode="after")
+    def ordered_actions(self):
+        if len(self.actions) > 64 or [a.sequence for a in self.actions] != list(range(1, len(self.actions) + 1)):
+            raise ValueError("deployment action order is incomplete")
+        for value in (self.context_hash, self.artifact_hash, self.state_hash, self.batch_hash,
+                      self.request_sha256, self.response_sha256):
+            if len(value) != 64 or any(c not in "0123456789abcdef" for c in value):
+                raise ValueError("invalid deployment trace binding digest")
+        return self
 
 
 class VisibleCheck(BaseModel):
