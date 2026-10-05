@@ -80,6 +80,26 @@ def load_privacy_needles(family: str, *, slug: str = "bookshop") -> tuple[str, .
         data = _raw_family(family, slug=slug)
     except json.JSONDecodeError as exc:
         raise InvalidSealedCase("invalid private scanner inventory") from exc
+    return _collect_privacy_needles(data)
+
+
+def load_pinned_privacy_needles(case_file: str, *, slug: str) -> tuple[str, ...]:
+    """Protect explicit historical reviewed files without admitting another family."""
+    pack = resolve_pack(slug)
+    pin = next((pin for pin in pack.reviewed_pins if pin.path == case_file), None)
+    if pin is None or not case_file.startswith("sealed/cases/"):
+        raise InvalidSealedCase("historical scanner file is not explicitly reviewed")
+    try:
+        raw = (config.SEALED_CASES_DIR / case_file.rsplit("/", 1)[-1]).read_bytes()
+        if hashlib.sha256(raw).hexdigest() != pin.sha256:
+            raise InvalidSealedCase("historical scanner file digest differs")
+        data = json.loads(raw)
+    except (OSError, ValueError) as exc:
+        raise InvalidSealedCase("invalid historical private scanner inventory") from exc
+    return _collect_privacy_needles(data)
+
+
+def _collect_privacy_needles(data: dict) -> tuple[str, ...]:
 
     def mapping(value):
         if not isinstance(value, dict):
@@ -92,6 +112,8 @@ def load_privacy_needles(family: str, *, slug: str = "bookshop") -> tuple[str, .
         return value
 
     mapping(data)
+    if data.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS:
+        raise UnsupportedSealedSchema("unsupported private scanner file schema")
     cases = data.get("cases")
     if not isinstance(cases, list) or not cases:
         raise InvalidSealedCase("invalid private scanner inventory")
@@ -113,6 +135,16 @@ def load_privacy_needles(family: str, *, slug: str = "bookshop") -> tuple[str, .
             needles.update((text(request.get("request_id")), text(request.get("text")),
                             text(spec.get("id")), text(spec.get("text")),
                             text(delta.get("description"))))
+            tasks = spec.get("tasks")
+            if not isinstance(tasks, list) or not tasks:
+                raise InvalidSealedCase("invalid private scanner task inventory")
+            for task in tasks:
+                condition = mapping(mapping(task).get("condition_json"))
+                # Distinctive protected intent/reference values are private;
+                # shared slot/part/date/route/outcome vocabulary remains usable.
+                for key in ("idempotency_key", "prior_commitment_ref"):
+                    if key in condition:
+                        needles.add(text(condition[key]))
             aspect = expected.get("aspect")
             if isinstance(aspect, str):
                 needles.add(aspect)

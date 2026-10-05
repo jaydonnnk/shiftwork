@@ -30,7 +30,7 @@ from packs.material import apply_staged_material
 
 def test_actual_northline_material_is_admitted_with_all_reviewed_bindings():
     pack = registry.resolve_pack("northline")
-    assert len(pack.reviewed_pins) == 24, "all reviewed Northline material must be bound"
+    assert len(pack.reviewed_pins) == 25, "original 24 pins and the approved v2 must be bound"
     assert len(pack.documents) == 6, "every Northline station needs its reviewed document"
     assert orchestrator.admit_pack("northline") == pack, "real Northline admission must pass"
     assert [b.availability for b in orchestrator.workplace_boards()] == [
@@ -68,8 +68,8 @@ def test_every_northline_reviewed_file_drift_refuses_before_seed(tmp_path, monke
 @pytest.mark.parametrize("path,field", [
     ("fixtures/requests/northline_compare_manifest.json", "review_status"),
     ("fixtures/requests/northline_compare_manifest.json", "sealed_payload_sha256"),
-    ("sealed/cases/northline_deployment.json", "review_status"),
-    ("sealed/cases/northline_deployment.json", "sealed_payload_sha256"),
+    ("sealed/cases/northline_deployment_v2.json", "review_status"),
+    ("sealed/cases/northline_deployment_v2.json", "sealed_payload_sha256"),
 ], ids=["manifest_status", "manifest_digest", "family_status", "family_digest"])
 def test_unsealed_northline_refuses_even_with_matching_disposable_pin(tmp_path, monkeypatch, path, field):
     raw = json.loads((config.PACKAGE_DIR / path).read_bytes())

@@ -45,6 +45,7 @@ shiftwork/fixtures/requests/northline_deployment_incident.jsonl -text
 shiftwork/fixtures/state/northline_compare_state_v1.json -text
 shiftwork/fixtures/state/northline_start.json -text
 shiftwork/sealed/cases/northline_deployment.json -text
+shiftwork/sealed/cases/northline_deployment_v2.json -text
 shiftwork/templates/artifact/northline/acceptance_tests.py -text
 shiftwork/templates/artifact/northline/discovery.md -text
 shiftwork/templates/artifact/northline/permissions.json -text

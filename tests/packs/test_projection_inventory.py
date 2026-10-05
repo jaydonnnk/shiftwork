@@ -19,7 +19,7 @@ def draft(tmp_path, monkeypatch):
     cases = tmp_path / "cases"
     shutil.copytree(config.SEALED_CASES_DIR, cases)
     monkeypatch.setattr(config, "SEALED_CASES_DIR", cases)
-    path = cases / "northline_deployment.json"
+    path = cases / registry.resolve_pack("northline").families[0].case_file.rsplit("/", 1)[-1]
     data = json.loads(path.read_bytes())
     data["review_status"] = "DRAFT"
     data["sealed_payload_sha256"] = None
@@ -120,3 +120,46 @@ def test_existing_bellwether_and_draft_needles_are_all_retained():
                         assert value in needles, "existing private field lost from inventory"
                         with pytest.raises(orchestrator.LifecycleError, match="private material"):
                             orchestrator.assert_public_projection(json.dumps({"probe": value}))
+
+
+@pytest.mark.parametrize("field", ["idempotency_key", "prior_commitment_ref"])
+def test_protected_condition_fragments_are_private_on_each_serialized_surface(draft, field):
+    path, data = draft
+    needle = "PRIVATE_CONDITION_" + field + r"_ONLY_C:\private\reference"
+    data["cases"][0]["stimulus"]["task_spec"]["tasks"][0]["condition_json"][field] = needle
+    path.write_text(json.dumps(data), encoding="utf-8")
+    orchestrator.assert_public_projection({"slot": "slot:2026-10-04:0900", "route": "human_mechanic",
+        "outcome": "USEFUL_COMPLETION", "reason": "INVALID_COMMITMENT"})
+    for surface in (needle, json.dumps({"probe": needle}), json.dumps(json.dumps({"probe": needle})),
+                    json.dumps({"base64": base64.b64encode(needle.encode()).decode()}),
+                    json.dumps({"probe": needle.replace("\\", "/")}),
+                    json.dumps({"base64": base64.b64encode(needle.replace("\\", "/").encode()).decode()})):
+        with pytest.raises(orchestrator.LifecycleError, match="private material"):
+            orchestrator.assert_public_projection(surface)
+
+
+@pytest.mark.parametrize("inventory", ["active", "historical"])
+def test_active_and_historical_reviewed_sealed_text_are_both_private(tmp_path, monkeypatch, inventory):
+    import hashlib
+    root = tmp_path / "sealed"
+    shutil.copytree(config.SEALED_CASES_DIR, root)
+    pack = registry.resolve_pack("northline")
+    active = root / "northline_deployment_review_control.json"
+    data = json.loads((root / "northline_deployment.json").read_bytes())
+    # This is a disposable structural inventory control, never production v2.
+    data["cases"][1]["stimulus"]["request"]["text"] = "PRIVATE_ACTIVE_VERSION_REQUEST_CONTROL"
+    data["cases"][1]["stimulus"]["task_spec"]["text"] = "PRIVATE_ACTIVE_VERSION_REQUEST_CONTROL"
+    active.write_text(json.dumps(data), encoding="utf-8")
+    updated = pack.model_copy(update={
+        "families": (pack.families[0].model_copy(update={"case_file": "sealed/cases/" + active.name}),),
+        "reviewed_pins": (*pack.reviewed_pins, registry.ReviewedPin(path="sealed/cases/" + active.name,
+                                     sha256=hashlib.sha256(active.read_bytes()).hexdigest()))})
+    monkeypatch.setattr(registry, "_PACKS", tuple(updated if item.slug == "northline" else item
+                       for item in registry.registered_packs()))
+    monkeypatch.setattr(config, "SEALED_CASES_DIR", root)
+    needle = (data["cases"][1]["stimulus"]["request"]["text"] if inventory == "active" else
+              json.loads((root / "northline_deployment.json").read_bytes())["cases"][1]["stimulus"]["request"]["text"])
+    for surface in (json.dumps({"history": needle}), json.dumps(json.dumps({"history": needle})),
+                    json.dumps({"history_base64": base64.b64encode(needle.encode()).decode()})):
+        with pytest.raises(orchestrator.LifecycleError, match="private material"):
+            orchestrator.assert_public_projection(surface)

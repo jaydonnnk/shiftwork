@@ -33,7 +33,8 @@ def serialized_contains(surface: object, needle: str) -> bool:
     serialized = json.dumps(surface, ensure_ascii=False, sort_keys=True, default=str)
     serialized += "\n" + "\n".join(_decoded_parts(surface))
     forms = {needle, needle.replace("\\", "/"),
-             base64.b64encode(needle.encode("utf-8")).decode("ascii")}
+             base64.b64encode(needle.encode("utf-8")).decode("ascii"),
+             base64.b64encode(needle.replace("\\", "/").encode("utf-8")).decode("ascii")}
     for ensure_ascii in (False, True):
         escaped = needle
         for _ in range(3):

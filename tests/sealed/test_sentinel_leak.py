@@ -104,6 +104,14 @@ def sentinel_family(tmp_path, monkeypatch):
     shutil.copytree(config.CATALOG_DIR, root / "fixtures/catalogs", dirs_exist_ok=True)
     shutil.copytree(config.PACKAGE_DIR / "templates", root / "templates")
     directory = root / "sealed/cases"
+    # Registered active and historical sealed inventories remain inputs to
+    # the global privacy guard. Copy them before injecting the local sentinel.
+    for registered in registry.registered_packs():
+        for pin in registered.reviewed_pins:
+            if pin.path.startswith("sealed/cases/"):
+                copied = root / pin.path
+                copied.parent.mkdir(parents=True, exist_ok=True)
+                copied.write_bytes((config.PACKAGE_DIR / pin.path).read_bytes())
     path = directory / sealed_store._FAMILY_FILES[sealed_store.STALE_INFORMATION]
     path.write_text(json.dumps(data, indent=2), encoding="utf-8")
     # Only the disposable declaration pins its changed expectation bytes.

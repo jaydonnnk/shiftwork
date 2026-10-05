@@ -30,6 +30,14 @@ def reviewed_disposable_pack(tmp_path, monkeypatch):
         target = root / pin.path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes((original / pin.path).read_bytes())
+    # Privacy scans also verify explicit historical sealed pins. Keep their
+    # actual bytes, even when this test admits only the disposable pack.
+    for registered in registry.registered_packs():
+        for pin in registered.reviewed_pins:
+            if pin.path.startswith("sealed/cases/"):
+                target = root / pin.path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes((original / pin.path).read_bytes())
 
     def renamed(path):
         return path.replace("bookshop", "disposable")
