@@ -2,6 +2,10 @@ import { bodyBytes, selectEvidence } from './evidence.js';
 
 const $ = id => document.getElementById(id);
 const state = { board: null, loadedShiftId: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
+state.slug = 'bookshop';
+state.workplaces = [];
+const northline = () => state.slug === 'northline';
+const engagementPath = suffix => `/engagements/${encodeURIComponent(state.slug)}/${suffix}`;
 let downloadUrl = null;
 let pollTimer = null;
 const terminal = run => !run || ['FINALIZED', 'FAILED'].includes(run.state);
@@ -23,6 +27,97 @@ async function api(path, options = {}) {
     throw new Error(payload?.detail ?? `Request failed (${response.status}). Refresh to load verified state.`);
   }
   return response.json();
+}
+function renderWorkplace() {
+  const select = $('workplace-board');
+  select.replaceChildren(...state.workplaces.map(board => {
+    const option = element('option', `${board.role_name} · ${board.client ?? board.employer}${board.availability === 'AVAILABLE' ? '' : ' · awaiting operator review'}`);
+    option.value = board.engagement_slug;
+    option.disabled = board.availability !== 'AVAILABLE';
+    return option;
+  }));
+  select.value = state.slug;
+  select.disabled = state.pending || hasUnsavedDraft() || !state.workplaces.length;
+}
+async function switchWorkplace() {
+  const slug = $('workplace-board').value;
+  if (state.pending || hasUnsavedDraft() || !state.workplaces.some(board => board.engagement_slug === slug && board.availability === 'AVAILABLE')) {
+    $('workplace-board').value = state.slug;
+    text('workplace-message', 'Save or discard the draft and finish the current action before changing boards.');
+    return;
+  }
+  state.generation += 1; state.intent += 1;
+  state.slug = slug; state.loadedShiftId = null; state.comparison = null;
+  state.candidates = { A: null, B: null }; state.selected = null;
+  for (const id of ['cause-input', 'falsifier-input', 'public-test-input', 'assist-message', 'treatment-input', 'selection-rationale']) $(id).value = '';
+  state.station = northline() ? 'brief' : 'service';
+  const url = new URL(location.href); url.searchParams.set('board', slug); url.hash = northline() ? 'brief' : 'board';
+  history.replaceState(null, '', url);
+  text('workplace-message', '');
+  await refresh();
+}
+function renderRoom() {
+  const display = state.workplaces.find(board => board.engagement_slug === state.slug);
+  if (!display) return;
+  document.body.dataset.board = display.engagement_slug;
+  document.title = `${display.client ?? display.employer} · Shiftwork`;
+  text('client-name', `YOUR CLIENT / ${display.client ?? display.employer}`);
+  text('role-description', `Your role: ${display.role_name}. Fictional client and simulated work.`);
+  text('room-title', northline() ? 'An integration the counter can trust.' : 'You keep this service running.');
+  text('artifact-name', northline() ? 'Northline integration' : 'Bellwether service');
+  document.querySelector('[data-file="checks"]').textContent = northline() ? 'Acceptance tests' : 'Visible checks';
+  document.querySelector('[data-file="history"]').textContent = northline() ? 'Discovery record' : 'Change log';
+  const room = document.querySelector('.room');
+  room.setAttribute('aria-label', northline() ? 'Northline deployment workshop' : 'Bellwether operational room');
+  for (const id of ['bookshop-stations', 'bookshop-journey']) $(id).hidden = northline();
+  for (const id of ['northline-stations', 'northline-journey', 'northline-art']) $(id).toggleAttribute('hidden', !northline());
+  document.querySelector('img.room-art').hidden = northline();
+  document.querySelector('.room-bookplate').hidden = northline();
+  $('deployment-protocol').hidden = !northline();
+  if (northline() && !$('northline-stations').children.length) {
+    const labels = ['Deployment brief', 'System map', 'Integration bench', 'Acceptance', 'Rollout', 'Handover'];
+    ['brief', 'map', 'bench', 'acceptance', 'rollout', 'handover'].forEach((name, index) => {
+      const button = element('button', undefined, `station northline-${name}`);
+      button.dataset.station = name;
+      button.append(element('span', String(index + 1).padStart(2, '0'), 'station-marker'), element('span', labels[index]));
+      button.addEventListener('click', () => activateStation(name));
+      $('northline-stations').append(button);
+      const link = element('a', labels[index]); link.href = `#${name}`; link.dataset.view = name;
+      link.addEventListener('click', event => { event.preventDefault(); navigate(name); });
+      $('northline-journey').append(link);
+    });
+  }
+}
+function deploymentFile(target, filename) {
+  const selected = state.operatingVersion;
+  const draft = state.draft;
+  for (const [owner, files, version] of [['Selected version', selected?.files, selected?.id], ['Current draft', draft?.files, state.board?.draft_base_version_id]]) {
+    const detail = element('details');
+    detail.dataset.deploymentFile = filename; detail.dataset.fileOwner = owner; detail.dataset.versionId = version ?? '';
+    detail.append(element('summary', `${owner} · ${filename} · ${version ?? 'not loaded'}`), element('pre', files?.[filename] ?? 'No verified file loaded.'));
+    target.append(detail);
+  }
+}
+function deploymentEvents(target, events) {
+  if (!events.length) return empty(target, 'No recorded events. No outcome is implied.');
+  target.replaceChildren(...events.map(event => {
+    const row = element('article', undefined, 'deployment-event'); row.dataset.deploymentEvent = String(event.seq);
+    row.append(element('strong', humanize(event.event_type)), element('p', `Event ${event.seq} · cause ${event.cause_refs.join(', ')}`, 'evidence-meta'));
+    row.append(element('pre', JSON.stringify(event.payload, null, 2)));
+    return row;
+  }));
+}
+function renderDeployment() {
+  for (const id of ['map-records', 'pilot-records', 'handover-records']) $(id).replaceChildren();
+  if (!northline() || !state.board) return;
+  for (const file of ['discovery.md', 'permissions.json']) deploymentFile($('map-records'), file);
+  deploymentEvents($('pilot-records'), state.events.filter(event => event.event_type !== 'HANDOVER_DECLARED'));
+  deploymentFile($('handover-records'), 'runbook.md');
+  const records = element('div');
+  deploymentEvents(records, state.events.filter(event => event.event_type === 'HANDOVER_DECLARED'));
+  $('handover-records').append(records);
+  $('operate-pilot').disabled = $('run-shift').disabled;
+  text('pilot-help', $('run-help').textContent);
 }
 function clearEvidence() {
   if (downloadUrl) URL.revokeObjectURL(downloadUrl);
@@ -81,6 +176,8 @@ function clearData(message) {
   for (const id of ['append-investigation', 'request-assist', 'run-diagnostic', 'freeze-candidate-a', 'freeze-candidate-b', 'run-comparison', 'select-candidate-a', 'select-candidate-b']) $(id).disabled = true;
   $('open-shift').disabled = true; $('run-shift').disabled = true;
   text('run-help', 'Refresh to load available actions.');
+  for (const id of ['map-records', 'pilot-records', 'handover-records']) empty($(id), 'No verified data loaded.');
+  $('operate-pilot').disabled = true;
   renderDraftEditor();
 }
 
@@ -93,12 +190,17 @@ async function refresh(runId = null) {
   document.body.dataset.loadState = 'loading';
   clearData('Loading your shift…');
   try {
-    const board = await api('/engagements/bookshop/board');
+    const workplaces = await api('/boards');
+    const available = workplaces.find(item => item.engagement_slug === state.slug && item.availability === 'AVAILABLE');
+    state.workplaces = workplaces;
+    renderWorkplace();
+    if (!available) throw new Error('This board is awaiting operator review. Choose an available role board.');
+    const board = await api(engagementPath('board'));
     const run = runId ? await api(`/runs/${encodeURIComponent(runId)}`) : board.latest_run;
     const [draft, stationView, ledger, outputs, checks, operatingVersion] = await Promise.all([
       board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/artifact`) : null,
       board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/investigations`) : null,
-      api('/engagements/bookshop/ledger'),
+      api(engagementPath('ledger')),
       run ? api(`/runs/${encodeURIComponent(run.id)}/outputs`) : [],
       run ? api(`/runs/${encodeURIComponent(run.id)}/checks`) : [],
       board.operating_selection ? api(`/artifact-versions/${encodeURIComponent(board.operating_selection.selected_version_id)}`) : null,
@@ -133,6 +235,7 @@ async function refresh(runId = null) {
 }
 
 function renderBoard() {
+  renderRoom();
   const board = state.board;
   const version = board.latest_version;
   const shift = board.latest_shift;
@@ -223,6 +326,7 @@ function renderBoard() {
     : board.attempts_remaining === 0 ? 'Attempt budget exhausted. The controller will not accept another run.'
     : 'Runs the selected version. A started attempt consumes one reservation, even if it fails.');
   renderArtifact();
+  renderDeployment();
 }
 
 function renderArtifact() {
@@ -256,8 +360,8 @@ function renderArtifact() {
       const detail = element('details'); detail.append(element('summary', name), element('pre', content)); target.append(detail);
     }
   } else {
-    const name = state.file === 'checks' ? 'checks.json' : 'change_log.md';
-    target.append(element('p', state.file === 'checks' ? 'Current draft checks. Visible-check scoring is not available in this build.' : 'Current draft change log. Decisions are not inferred from saves or runs.', 'empty'));
+    const name = northline() ? (state.file === 'checks' ? 'acceptance_tests.py' : 'discovery.md') : state.file === 'checks' ? 'checks.json' : 'change_log.md';
+    target.append(element('p', northline() ? 'Current draft worksheet. Independent acceptance comes from the captured service and controller checks.' : state.file === 'checks' ? 'Current draft checks. Visible-check scoring is not available in this build.' : 'Current draft change log. Decisions are not inferred from saves or runs.', 'empty'));
     target.append(files[name] ? element('pre', files[name]) : element('p', `No ${name} file in the draft.`, 'empty'));
   }
 }
@@ -393,7 +497,7 @@ function renderSource(station) {
 function renderAssist(station) {
   text('assist-standing', station?.assist_reason ?? '');
   text('assist-budget', station ? `${station.assist_used} of ${station.assist_limit} help calls used this shift. Failed calls also count.` : '');
-  for (const option of $('assist-role').options) option.disabled = station?.assist_limit === 1 && option.value !== 'HINT';
+  for (const option of $('assist-role').options) option.disabled = !station?.assist_allowed_roles?.includes(option.value);
   if ($('assist-role').selectedOptions[0]?.disabled) $('assist-role').value = 'HINT';
   const list = $('assist-events');
   if (!station?.assist_events?.length) empty(list, 'No assistance recorded.');
@@ -422,7 +526,7 @@ function renderAssist(station) {
     else row.append(element('p', 'Help request reserved. Refresh for its result.', 'help-text'));
     return row;
   }));
-  $('request-assist').disabled = state.pending || !station;
+  $('request-assist').disabled = state.pending || !station || (northline() && !station.assist_available);
 }
 function renderDiagnostic(station) {
   const experiment = state.diagnostic ?? station?.latest_diagnostic ?? null;
@@ -522,7 +626,7 @@ function renderCompare() {
   renderDraftEditor();
   const board = state.board;
   const shift = board?.latest_shift ?? null;
-  const compare = state.comparison;
+  const compare = state.board ? state.comparison : null;
   const evidence = $('compare-evidence');
   evidence.replaceChildren();
   if (compare) for (const [field, label, value] of [
@@ -657,7 +761,7 @@ function renderDraftEditor() {
   }
   const changedShift = source.dataset.shiftId !== shift.id;
   if (changedShift || !file.options.length) {
-    file.replaceChildren(...[...new Set([...Object.keys(files), 'checks.json', 'change_log.md'])].map(name => {
+    file.replaceChildren(...[...new Set([...Object.keys(files), ...(northline() ? [] : ['checks.json', 'change_log.md'])])].map(name => {
       const option = element('option', name); option.value = name; return option;
     }));
     if ('service.py' in files) file.value = 'service.py';
@@ -673,6 +777,7 @@ function renderDraftEditor() {
   source.disabled = !editable;
   $('save-draft').disabled = !editable || !hasUnsavedDraft();
   $('discard-draft-edit').disabled = !editable || !hasUnsavedDraft();
+  renderWorkplace();
   text('draft-note', hasUnsavedDraft() ? 'Unsaved edit. Save or discard it before switching files, freezing candidates or changing shifts.'
     : file.value in files ? 'Saved draft from this shift. Saving does not select a version or change operational history.'
     : `${file.value} is not in this draft yet. Add content and save to create it.`);
@@ -885,7 +990,7 @@ async function appendInvestigation() {
     text('investigate-error', error.message);
   } finally {
     state.pending = false;
-    if (state.board) { renderBoard(); renderInvestigate(); }
+    if (state.board) { renderBoard(); renderInvestigate(); renderCompare(); }
   }
 }
 async function requestAssist() {
@@ -900,7 +1005,7 @@ async function requestAssist() {
     text('assist-denial', error.message);
   } finally {
     state.pending = false;
-    if (state.board) { renderBoard(); renderInvestigate(); }
+    if (state.board) { renderBoard(); renderInvestigate(); renderCompare(); }
   }
 }
 async function decideAssist(eventId, accepted) {
@@ -913,7 +1018,7 @@ async function decideAssist(eventId, accepted) {
     text('assist-denial', error.message);
   } finally {
     state.pending = false;
-    if (state.board) renderInvestigate();
+    if (state.board) { renderInvestigate(); renderCompare(); }
   }
 }
 async function runDiagnostic() {
@@ -943,11 +1048,17 @@ async function runDiagnostic() {
     text('investigate-error', error.message);
   } finally {
     state.pending = false;
-    if (state.board) { renderBoard(); renderInvestigate(); }
+    if (state.board) { renderBoard(); renderInvestigate(); renderCompare(); }
   }
 }
 
 const stations = {
+  brief: ['Deployment brief', 'NORTHLINE / CUSTOMER REQUIREMENTS', 'The blank starter is labelled. Saving and comparing never select your operating version.'],
+  map: ['System map', 'DISCOVERY AND PERMISSIONS', 'Inspect your integration worksheets and the exact selected version. Availability reads and repair-slot writes are the permitted boundary.'],
+  bench: ['Integration bench', 'INVESTIGATE, REPAIR, COMPARE AND CHOOSE', 'State a cause and falsifier before help. One hint per shift. Compare two exact versions; no winner is chosen automatically.'],
+  acceptance: ['Acceptance', 'INDEPENDENT TASK RESULTS', 'Inspect the actual request, captured reply, independent checks and their recorded consequences.'],
+  rollout: ['Rollout', 'PILOT OPERATIONS', 'Synthetic pilot state. Only a fully accepted operation records rollout approval. Experiments write no pilot state.'],
+  handover: ['Handover', 'WHAT THE CO-OP INHERITS', 'Close records the selected runbook, declared limits and unresolved incidents. Newer saves cannot replace this handover.'],
   service: ['Service workbench', 'YOUR WORKING ARTIFACT', 'Your version, contract and files belong to you. Independent scoring stays separate.'],
   owner: ['Requirements', 'OWNER DESK', 'Inspect the operating version\'s committed requirements and frozen requirement hash. Saved candidates keep their own contracts.'],
   customers: ['Customer evidence', 'FOLLOW AN EXECUTED REQUEST', 'Select a customer. Every output, public record, check and event below belongs to that request.'],
@@ -976,16 +1087,21 @@ function activateStation(name, userIntent = true) {
     text('station-context', 'No unresolved incident is loaded. The repair bench becomes available for an actual incident.');
     return;
   }
+  if (northline()) name = ({ service: 'brief', owner: 'brief', customers: 'acceptance', pipeline: 'acceptance', ledger: 'rollout', repair: 'bench', investigate: 'bench', compare: 'bench', next: 'handover' })[name] ?? name;
   state.station = name;
   document.querySelectorAll('[data-station]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.station === name)));
-  const [title, kicker, context] = stations[name];
+  const [title, kicker, context] = stations[name] ?? stations.service;
   text('panel-title', title); text('panel-kicker', kicker); text('station-context', context);
   $('deferred-view').hidden = name !== 'evaluator';
-  $('customer-view').hidden = !['customers', 'pipeline'].includes(name);
-  $('investigate-view').hidden = name !== 'investigate';
-  $('compare-view').hidden = name !== 'compare';
-  $('next-view').hidden = name !== 'next';
-  $('board-view').hidden = !['service', 'owner', 'ledger', 'repair'].includes(name);
+  $('customer-view').hidden = !['customers', 'pipeline', 'acceptance'].includes(name);
+  $('investigate-view').hidden = !['investigate', 'bench'].includes(name);
+  $('compare-view').hidden = !['compare', 'bench'].includes(name);
+  $('next-view').hidden = !['next', 'handover'].includes(name);
+  $('board-view').hidden = !['service', 'owner', 'ledger', 'repair', 'brief'].includes(name);
+  $('northline-brief').hidden = name !== 'brief';
+  $('map-view').hidden = name !== 'map';
+  $('rollout-view').hidden = name !== 'rollout';
+  $('handover-record').hidden = !northline();
   if (name === 'evaluator') {
     text('deferred-title', 'Separate by design.');
     text('deferred-copy', 'The controller scores captured service outputs against independent checks. You can inspect recorded results at the customer queue, but this booth has no editing controls and never displays sealed expected values.');
@@ -998,7 +1114,7 @@ function activateStation(name, userIntent = true) {
   renderInvestigate();
   renderCompare();
   renderNext();
-  const view = { owner: 'contract', investigate: 'investigate', compare: 'compare', next: 'next' }[name] ?? 'board';
+  const view = northline() ? name : { owner: 'contract', investigate: 'investigate', compare: 'compare', next: 'next' }[name] ?? 'board';
   state.view = view;
   if (userIntent) history.replaceState(null, '', `#${view}`);
   document.querySelectorAll('[data-view]').forEach(link => {
@@ -1013,6 +1129,7 @@ function selectFile(name) {
 }
 function navigate(view, userIntent = true) {
   if (view === 'station-panel') return;
+  if (northline()) { activateStation({ board: 'brief', contract: 'brief', investigate: 'bench', compare: 'bench', next: 'handover' }[view] ?? (['brief', 'map', 'bench', 'acceptance', 'rollout', 'handover'].includes(view) ? view : 'brief'), userIntent); return; }
   activateStation({ board: 'service', contract: 'owner', investigate: 'investigate', compare: 'compare', next: 'next', return: 'next', customers: 'customers', repair: 'repair' }[view] ?? 'service', userIntent);
   if (userIntent && state.board) $('station-panel').focus({ preventScroll: true });
 }
@@ -1021,9 +1138,9 @@ async function act(action) {
   state.pending = true; renderBoard();
   try { await action(); await refresh(); }
   catch (error) { await refresh(); text('load-message', error.message); }
-  finally { state.pending = false; if (state.board) renderBoard(); }
+  finally { state.pending = false; if (state.board) { renderBoard(); renderCompare(); } }
 }
-$('open-shift').addEventListener('click', () => act(() => api('/engagements/bookshop/shifts', { method: 'POST' })));
+$('open-shift').addEventListener('click', () => act(() => api(engagementPath('shifts'), { method: 'POST' })));
 $('run-shift').addEventListener('click', () => {
   const shiftId = state.board?.latest_shift?.id;
   if (!shiftId) return;
@@ -1056,10 +1173,10 @@ async function shiftAction(path) {
   text('next-error', '');
   try { await api(path, { method: 'POST' }); await refresh(); }
   catch (error) { await refresh(); text('next-error', error.message); }
-  finally { state.pending = false; if (state.board) { renderBoard(); renderNext(); } }
+  finally { state.pending = false; if (state.board) { renderBoard(); renderNext(); renderCompare(); } }
 }
 $('close-shift').addEventListener('click', () => shiftAction(state.board?.latest_shift ? `/shifts/${encodeURIComponent(state.board.latest_shift.id)}/close` : null));
-$('open-next-shift').addEventListener('click', () => shiftAction('/engagements/bookshop/shifts'));
+$('open-next-shift').addEventListener('click', () => shiftAction(engagementPath('shifts')));
 $('select-candidate-a').addEventListener('click', () => chooseCandidate('A'));
 $('select-candidate-b').addEventListener('click', () => chooseCandidate('B'));
 $('selection-rationale').addEventListener('input', () => renderCompare());
@@ -1077,5 +1194,9 @@ window.addEventListener('beforeunload', event => {
   event.returnValue = '';
 });
 window.addEventListener('pagehide', () => { clearTimeout(pollTimer); if (downloadUrl) URL.revokeObjectURL(downloadUrl); });
+$('operate-pilot').addEventListener('click', () => $('run-shift').click());
+$('workplace-board').addEventListener('change', switchWorkplace);
+const requestedSlug = new URL(location.href).searchParams.get('board');
+if (requestedSlug) state.slug = requestedSlug;
 navigate(location.hash.slice(1) || 'board');
 refresh();

@@ -18,6 +18,34 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+.topbar { flex-wrap: wrap; }
+.board-picker { order: -1; flex: 0 0 100%; display: flex; align-items: center; gap: 12px; min-height: 45px; border-bottom: 1px solid #ffffff20; }
+.board-picker label { font-size: 11px; white-space: nowrap; color: #c3cdd3; }
+.board-picker select { min-width: 0; max-width: 100%; width: 470px; padding: 7px 10px; color: #f5f3ed; background: #202c40; border: 1px solid #87939c; border-radius: 3px; }
+#workplace-message { font-size: 11px; }
+body[data-board="northline"] { --room: #152f30; --navy: #1a3435; }
+body[data-board="northline"] .workplace { background: #183536; }
+body[data-board="northline"] .evidence-path { display: none; }
+body[data-board="northline"] .room-art { filter: drop-shadow(0 16px 12px #071d2080); }
+body[data-board="northline"] .station { background: #183c3cee; }
+body[data-board="northline"] .station[aria-pressed="true"] { background: #3d5c4e; }
+.northline-brief { left: 6%; top: 48%; }
+.northline-map { right: 7%; top: 28%; }
+.northline-bench { left: 35%; top: 56%; }
+.northline-acceptance { right: 0; top: 65%; }
+.northline-rollout { left: 12%; top: 76%; }
+.northline-handover { right: 13%; top: 86%; }
+.deployment-event { border-bottom: 1px solid var(--line); margin-top: 12px; padding-bottom: 12px; }
+.deployment-event pre, #map-records pre, #handover-records pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+@media (max-width: 760px) {
+  .board-picker { flex-wrap: wrap; gap: 5px; padding: 8px 0; }
+  .board-picker select { flex: 1; width: 250px; }
+  #workplace-message { flex-basis: 100%; }
+  #northline-journey { flex-wrap: wrap; }
+  #northline-journey a { flex: 1 1 30%; min-height: 38px; padding: 4px; }
+  #northline-stations .station { white-space: normal; font-size: 10px; padding: 5px; min-height: 49px; }
+  #northline-stations .station-marker { width: 18px; padding-right: 3px; flex-shrink: 0; }
+}
 button, input, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }

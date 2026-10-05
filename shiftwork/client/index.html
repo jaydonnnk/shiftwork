@@ -13,7 +13,9 @@
   <a class="skip-link" href="#station-panel">Skip to selected station</a>
   <header class="topbar">
     <a class="brand" href="#board" aria-label="Shiftwork shift board"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 3 12 7v13l-12 7-12-7V10Zm0 13L4 10m12 6 12-6M16 16v14"/></svg>Shiftwork<span class="brand-divider"></span><span class="workspace-label">THE WORKPLACE</span></a>
-    <nav class="journey" aria-label="Shift journey">
+    <div class="board-picker"><label for="workplace-board">Role board</label><select id="workplace-board" disabled><option>Loading workplace…</option></select><p id="workplace-message" role="status"></p></div>
+    <nav id="northline-journey" class="journey" aria-label="Deployment journey" hidden></nav>
+    <nav id="bookshop-journey" class="journey" aria-label="Shift journey">
       <a href="#board" data-view="board" aria-current="page"><span>01</span>Shift board</a>
       <a href="#contract" data-view="contract"><span>02</span>Requirements</a>
       <a href="#investigate" data-view="investigate"><span>03</span>Investigate</a>
@@ -26,14 +28,31 @@
   <main>
     <section class="workplace" aria-labelledby="room-title">
       <div class="room-heading">
-        <div><p class="eyebrow">YOUR CLIENT / BELLWETHER BOOKS</p><h1 id="room-title">You keep this service running.</h1><p class="room-subtitle">Your role: junior applied AI engineer. Your service. Your decisions.</p></div>
+        <div><p class="eyebrow" id="client-name">YOUR CLIENT / BELLWETHER BOOKS</p><h1 id="room-title">You keep this service running.</h1><p id="role-description" class="room-subtitle">Your role: junior applied AI engineer. Your service. Your decisions.</p></div>
         <div class="shift-stamp"><span>ON THE BOARD</span><strong id="shift-number">No shift loaded</strong><span>Fictional client · simulated role</span></div>
       </div>
       <div class="room" aria-label="Bellwether operational room">
         <div class="room-bookplate" aria-hidden="true">Bellwether <em>Books</em><span>THE SERVICE ROOM</span></div>
         <img class="room-art" src="room.svg" alt="" width="1000" height="720">
+        <svg id="northline-art" class="room-art" viewBox="0 0 1000 720" aria-hidden="true" hidden>
+          <path fill="#183d3c" stroke="#56817a" d="M80 400V170L490 30 920 190V420L490 675Z"/>
+          <path fill="#365853" d="M80 400 490 180 920 420 490 675Z"/>
+          <path fill="#c6b892" d="m135 424 355-193 350 193-350 200Z"/>
+          <path fill="#446c63" d="m570 115 240 85v125l-240-85Z"/>
+          <g fill="none" stroke="#b5c7b4" stroke-width="8"><path d="m600 158 16 6v40m40-27 32 12m-17-28v67m61-40v47"/></g>
+          <g fill="none" stroke="#dccea5" stroke-width="8" transform="translate(155 235)"><circle cx="50" cy="95" r="43"/><circle cx="215" cy="95" r="43"/><path d="m50 95 58-80 58 80H50l36-80h103l26 80m-49 0 23-80-12-25h30M88 3h34"/></g>
+          <path fill="#6b5943" d="m340 435 170-92 176 97v85l-176 91-170-93Z"/>
+          <path fill="#d2bc87" d="m340 435 170-92 176 97-176 93Z"/>
+          <path fill="#243c3d" stroke="#76968c" stroke-width="4" d="m472 335 80 43v66l-80-43Z"/>
+          <path fill="#bdcaac" d="m485 352 54 29v38l-54-29Z"/>
+          <path fill="#42635a" stroke="#7d9180" stroke-width="3" d="m743 466 87-46 58 35v93l-87 49-58-37Z"/>
+          <path fill="#d1c5a0" d="m226 527 89-48 63 38-89 48Z"/>
+          <path fill="#7e6650" d="m226 527 63 38v66l-63-39Z"/>
+          <path fill="#d1c5a0" d="m577 597 102-55 58 35-101 55Z"/>
+        </svg>
+        <div id="northline-stations" class="room-hotspots" hidden></div>
         <svg class="evidence-path" viewBox="0 0 1000 720" aria-hidden="true"><path d="M225 443 340 503 489 422 660 332 791 407"/><circle cx="225" cy="443" r="6"/><circle cx="489" cy="422" r="6"/><circle cx="660" cy="332" r="6"/><circle cx="791" cy="407" r="6"/></svg>
-        <div class="room-hotspots" aria-label="Room stations">
+        <div id="bookshop-stations" class="room-hotspots" aria-label="Room stations">
           <button class="station station-owner" data-station="owner"><span class="station-marker">02</span><span>Owner desk<small>Contract · read only</small></span></button>
           <button class="station station-service" data-station="service" aria-pressed="true"><span class="station-marker">01</span><span>Your service<small id="service-tag">Not loaded</small></span></button>
           <button class="station station-customers" data-station="customers"><span class="station-marker">03</span><span>Customer queue<small id="queue-tag">Not loaded</small></span></button>
@@ -62,8 +81,20 @@
     <aside class="detail-panel" id="station-panel" tabindex="-1" aria-labelledby="panel-title">
       <div class="panel-heading"><div><p class="eyebrow" id="panel-kicker">YOUR WORKING ARTIFACT</p><h2 id="panel-title">Service workbench</h2></div><span class="panel-symbol" aria-hidden="true">⌑</span></div>
       <div id="load-message" class="load-message" role="status">Loading your shift…</div>
+      <section id="northline-brief" class="panel-section" hidden>
+        <h3>The counter needs speed. A confirmation needs evidence.</h3>
+        <p>Check current parts and mechanic availability before a final booking. Repeated deliveries must retain one commitment. Uninspected safety questions go to a human mechanic. Read availability and schedules; write repair slots only.</p>
+        <p class="help-text">Start with the blank integration, inspect its failure, then record a cause and falsifier at the Integration bench. Compare two repairs and explicitly choose one. Close and open the next shift before running the selected pilot.</p>
+      </section>
+      <section id="map-view" hidden><p class="help-text">Your discovery and permission worksheets belong to this integration. Edit them at the Integration bench. The selected version and current draft are shown separately.</p><div id="map-records"></div></section>
+      <section id="rollout-view" data-synthetic-region="pilot" hidden>
+        <div class="section-heading"><h3>Pilot history</h3><span class="synthetic">Synthetic scenario</span></div>
+        <p class="help-text">Only a fully accepted operation writes pilot bookings and rollout approval. Experiments leave this history unchanged.</p>
+        <button id="operate-pilot" class="button primary" disabled>Operate the exact selection</button><p id="pilot-help" class="help-text"></p>
+        <div id="pilot-records"></div>
+      </section>
       <section id="board-view">
-        <div class="service-card"><div class="service-card-heading"><span class="service-icon" aria-hidden="true">⌘</span><div><strong>Bellwether service</strong><span id="version-state">Waiting for the board</span></div><span class="owner-label">Owned by you</span></div><p id="version-hash" class="mono hash"></p></div>
+        <div class="service-card"><div class="service-card-heading"><span class="service-icon" aria-hidden="true">⌘</span><div><strong id="artifact-name">Bellwether service</strong><span id="version-state">Waiting for the board</span></div><span class="owner-label">Owned by you</span></div><p id="version-hash" class="mono hash"></p></div>
         <div id="selection-summary" class="artifact-detail" aria-live="polite"></div>
         <div class="file-tabs" role="group" aria-label="Artifact details"><button data-file="contract" aria-pressed="true">Contract</button><button data-file="checks">Visible checks</button><button data-file="files">Files</button><button data-file="history">Change log</button></div>
         <div id="artifact-detail" class="artifact-detail"></div>
@@ -120,6 +151,11 @@
         <p id="compare-state" class="mono evidence-meta">No shift loaded</p>
         <section class="panel-section">
           <h3>Edit your draft</h3>
+          <details id="deployment-protocol">
+            <summary>Northline deployment action protocol</summary>
+            <p class="help-text">Use the received X-Shiftwork-Intent-Key header for booking retries. It comes only from the current request text and request ID. The original request body stays unchanged.</p>
+            <p><a href="/northline-deployment-protocol.html" target="_blank" rel="noopener">Read the intent, booking and receipt rules before writing a candidate</a></p>
+          </details>
           <p id="draft-note" class="help-text">Saving keeps your work. Freezing creates a candidate; choosing sets the operating version.</p>
           <div class="field"><label for="draft-file">Draft file</label><select id="draft-file" disabled></select></div>
           <div class="field"><label for="draft-source">Your code or visible checks</label><textarea id="draft-source" rows="12" spellcheck="false" disabled></textarea></div>
@@ -157,6 +193,9 @@
         </section>
       </section>
       <section id="next-view" hidden>
+        <section id="handover-record" class="panel-section" hidden>
+          <div class="section-heading"><h3>Selected runbook and recorded handovers</h3><span class="synthetic">Synthetic scenario</span></div><div id="handover-records"></div>
+        </section>
         <p id="next-state" class="mono evidence-meta">No shift loaded</p>
         <section class="panel-section">
           <h3>Inherited from the last shift</h3>

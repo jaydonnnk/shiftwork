@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Northline deployment action protocol</title>
+  <style>
+    body { max-width: 48rem; margin: 2rem auto; padding: 0 1rem; font: 1rem/1.6 system-ui, sans-serif; color: #182b2b; background: #f9f7f0; }
+    code { overflow-wrap: anywhere; } li { margin-bottom: .75rem; } pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+    a { color: #145f54; } h1 { font-size: 1.8rem; line-height: 1.2; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Northline deployment action protocol</h1>
+    <p>The service receives one customer request and frozen public state. Derive intent from received inputs. Task conditions and protected expectations belong to the controller.</p>
+    <h2>Stable intent</h2>
+    <p>The trusted driver sends <code>X-Shiftwork-Intent-Key</code> beside its transient <code>X-Shiftwork-Request-Token</code>. It derives the intent from the current request's <code>text</code> and <code>request_id</code>, for both public and protected requests. Capture hashes bind the exact original body.</p>
+    <ol>
+      <li>If text contains <code>counter intent TOKEN</code>, use that ASCII token literally. Tokens start with a letter or digit, contain only letters, digits, <code>_</code> and <code>-</code>, and have at most 256 characters. Sentence punctuation is excluded.</li>
+      <li>Otherwise, for <code>visit V-NUMBER</code>, remove the hyphen and prefix <code>northline-intent-</code>. Both <code>visit V-11</code> and its retry produce <code>northline-intent-V11</code>.</li>
+      <li>Otherwise use the received <code>request_id</code> literally. Different deliveries share intent only when their text supplies a shared identifier.</li>
+      <li>Malformed, overlong or conflicting identifiers fail. Repeated mentions must agree. If counter and visit identifiers both appear, they must identify the same intent. Never infer a key from controller conditions or a table of protected cases.</li>
+    </ol>
+    <p>Use the key in <code>WRITE_SLOT</code>. On a repeat, return the same stable commitment reference with no additional slot write. A customer-provided prior reference may be echoed without writing; it does not prove an earlier booking occurred.</p>
+    <h2>Booking claims and receipts</h2>
+    <p>The task result's top-level <code>commitment_ref</code> names the observed final commitment. An optional <code>booking</code> claim has exactly this shape:</p>
+    <pre><code>{"booking_date":"2026-10-04","commitment_ref":"example-service-reference"}</code></pre>
+    <p>The date equals the requested date. The reference equals the top-level reference and observed final write. The claim's <code>entity_ref</code> identifies that slot. Its <code>evidence_refs</code> lists exactly the write's trusted receipt, which also appears in the response envelope. A retry may cite the earlier final-write receipt.</p>
+    <p>A customer-declared prior reference without an executed receipt supports only the top-level reference. Return it without an unsupported booking claim.</p>
+    <p>Rolling back a final write fails, including on a later delivery. A provisional write may be rolled back within the same request and visit before final confirmation. Refusal, referral and retry labels cannot conceal withdrawal.</p>
+    <p>The loopback kernel simulates bookings. Its receipts prove simulated actions; they do not establish real customer bookings or live isolation.</p>
+  </main>
+</body>
+</html>
