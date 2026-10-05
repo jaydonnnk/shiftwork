@@ -1,3 +1,20 @@
+**S22b ACCEPTED AND PUBLISHED, 2026-10-06 Asia/Singapore.**
+
+S22b was committed in 13 focused batches, published on its branch and
+fast-forwarded/pushed to main at `4a574a2`. Both remote refs were
+independently checked. The fresh Windows checkout passed 1070 tests
+with 1 skip and 2 warnings; packaging was excluded because it installs
+dependencies. All 42 reviewed pins and 4786 prior evidence files remain
+exact. Cleanup removed 124 ignored Python cache files
+from 27 directories; no source or evidence was deleted.
+
+No other local or remote branch commits were missing from main. Three
+historical stashes remain preserved. The actual hint-quality limitation,
+consumed live allowances and unproved learner/model/cost claims remain
+attached. [Publication record](plans/shiftwork/slice22b-publication-2026-10-06.md) carries the checkout and merge
+receipts; its documentation follow-up is published under the same authority.
+Older notices below retain their original bytes. S23 is not authorized.
+
 **S22b ACCEPTED FOR PUBLICATION, 2026-10-06 Asia/Singapore.**
 
 The user requested committing S22b, publishing its branch, merging/pushing

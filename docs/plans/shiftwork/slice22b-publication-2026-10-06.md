@@ -44,7 +44,29 @@ and preserved. Original dated notice bytes remain exact beneath new prefixes.
 
 ## Publication verification
 
-Pending: focused commits, fresh Windows checkout with existing dependencies,
-full offline suite excluding packaging, final byte checks, branch publication,
-fast-forward main and remote verification. Raw receipts stay local in
-evidence/slice22b-publication-2026-10-06/.
+PASS. S22b was committed in 13 coherent batches covering 74 explicit files.
+The first branch/main publication was independently verified at `4a574a2b47295b42e1361f5e5b3a0e6a7ee19116`.
+Main was fast-forwarded from `157505ecd2f04ddc3fc86c0593771043af0d8325`.
+The following documentation commit records the observed publication result.
+
+The fresh Windows autocrlf checkout preserved all 42 reviewed pins and passed
+1070 tests, with 1 skipped and 2 warnings, exit 0. Its tested source commit
+is `4a574a2b47295b42e1361f5e5b3a0e6a7ee19116`. The skip is the separately authorized
+full real-provisioning conformance test. Packaging was excluded because it
+installs dependencies. No dotenv or local ignored raw evidence was copied;
+existing dependencies were used without installation. The two warnings are
+the existing Starlette TestClient/httpx and AnyIO BlockingPortal deprecations.
+
+Cleanup removed 124 regenerable ignored `.pyc` files from
+27 directories (5141341 bytes), confined to
+shiftwork/, tests/ and demos/. No source, evidence, database, credential,
+virtual environment or stash was deleted. All 4786 prior evidence files and
+42 reviewed pins remain byte-identical. Historical notice suffixes are exact.
+Git checkout conversion during the merge was restored without changing the
+committed tree; the final working tree is clean.
+
+Raw receipts remain local in evidence/slice22b-publication-2026-10-06/:
+fresh-verification.json, fresh-offline.log/xml, fresh-checkout-pins.json,
+cleanup.json, preservation.json, main-merge-1.json, first-publication.json
+and final-publication.json. The final receipt independently checks the refs
+after publishing this documentation follow-up. No raw receipt is newly tracked.
