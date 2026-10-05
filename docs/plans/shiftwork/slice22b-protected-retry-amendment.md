@@ -1,5 +1,17 @@
 # S22b protected retry input correction
 
+**S22b intent/v2 offline step APPLIED, 2026-10-04.**
+
+The approved received-input derivation and trusted intent header are implemented.
+The exact 18847-byte v2 packet, literal pin, seal, deployment declaration and
+`-text` attribute are applied. V1, original pins and existing raw evidence are
+preserved. Current verification and limits: [intent/v2 checkpoint](slice22b-intent-v2-offline-checkpoint.md).
+S22b remains incomplete, unaccepted and unpublished. Older unimplemented/unapplied
+notices below describe their original checkpoints. Final full offline verification:
+997 passed, 1 skipped, 2 warnings; packaging excluded. No live call, credential,
+install, later slice or Git publication follows.
+
+
 **S22b corrected Gate 3 RE-APPROVED, 2026-10-04.**
 The user explicitly approved the corrected design: "Yep gate 3 is approved.
 Commit it and merge and push it to main." This closes the scoped input

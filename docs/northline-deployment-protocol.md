@@ -1,10 +1,10 @@
 # Northline deployment action protocol
 
 Gate 3 amendment RE-APPROVED, 2026-10-04. The deterministic rule below has
-been checked against every reviewed public request and all six proposed
-protected requests. Its driver header is approved and awaits implementation.
-Existing reviewed material is unchanged; exact v2 application is separately
-operator-approved and remains unapplied at this design publication checkpoint.
+been checked against every reviewed public request and all six approved v2
+protected requests. Its driver header is implemented and verified offline.
+The exact separately approved v2 packet is applied; v1 and original pins remain
+unchanged. Evidence: `plans/shiftwork/slice22b-intent-v2-offline-checkpoint.md`.
 
 The service receives one customer request and frozen public state. It must not
 read controller task conditions or expected acceptance values.
@@ -24,7 +24,7 @@ Derive the key from the received request's `text` and `request_id`:
 4. Reject malformed, overlong or conflicting explicit tokens. Never guess an
    intent, consult a task spec, or maintain a table keyed by protected cases.
 
-The planned trusted driver will also send this value as
+The trusted driver also sends this value as
 `X-Shiftwork-Intent-Key` on the service request, alongside its existing transient
 request token. It derives the header from that received request alone, under
 the same rule for both phases. Capture digests continue to bind the exact
