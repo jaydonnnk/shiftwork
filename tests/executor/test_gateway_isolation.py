@@ -6,6 +6,9 @@ import dataclasses
 import hashlib
 import json
 import time
+import subprocess
+import sys
+from pathlib import Path
 
 import httpx
 import pytest
@@ -259,6 +262,38 @@ def test_adapter_requires_checkpoint_bytes_and_preserves_exact_capture(tmp_path)
     assert sandbox.spawn_args["networking"].enabled is False
     assert sandbox.spawn_args["disposable"] is False
     assert b"os.setuid(65534)" in DRIVER_SOURCE
+
+
+@pytest.mark.parametrize("sibling", ["secrets", "hmac", "unicodedata"])
+def test_trusted_driver_imports_never_execute_learner_siblings(tmp_path, sibling):
+    from shiftwork.executor import deployment
+    marker = tmp_path / "learner-startup-marker"
+    hostile = "from pathlib import Path\nPath(" + repr(str(marker)) + ").write_text('executed')\n"
+    (tmp_path / (sibling + ".py")).write_text(hostile, encoding="utf-8")
+    supplied = request(tmp_path)
+    supplied = supplied.model_copy(update={"artifact_snapshot": supplied.artifact_snapshot.model_copy(update={
+        "files": {**supplied.artifact_snapshot.files, sibling + ".py": hostile.encode()}})})
+    sandbox = FakeSandbox(capture())
+    adapter = TokenFactoryAdapter(run_id="run-1", allowed_tool_names=("public_record_lookup",),
+        token="TEST_PROVIDER_TOKEN", project="aiproject-test", client=sandbox)
+    run(adapter.execute(supplied))
+    assert "/work/" + sibling + ".py" in sandbox.spawn_args["files"], "control was not admitted"
+    # Execute the actual startup prefix and actual kernel on Windows, without the
+    # Linux privilege/drop/network section. Launcher flags come from the adapter.
+    prefix = DRIVER_SOURCE.decode().split("def send_line(value):", 1)[0]
+    prefix = prefix.replace("ROOT = Path('/work')", "ROOT = Path(" + repr(str(tmp_path)) + ")")
+    driver = tmp_path / "driver.py"
+    driver.write_text(prefix + "print(deployment.__class__.__name__)\n", encoding="utf-8")
+    (tmp_path / "deployment_kernel.py").write_bytes(Path(deployment.__file__).read_bytes())
+    state = (tmp_path / "shop.json").read_bytes()
+    binding = {"state_hash": hashlib.sha256(state).hexdigest()}
+    initial = json.dumps({"allowed_tool_names": [], "deployment_binding": binding}) + "\n"
+    flags = sandbox.spawn_args["args"][:-1]
+    result = subprocess.run([sys.executable, *flags, str(driver)], input=initial, text=True,
+                            capture_output=True, cwd=tmp_path, timeout=10)
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == "DeploymentKernel"
+    assert not marker.exists(), "trusted startup executed a learner sibling module"
 
 
 def test_adapter_executes_the_configured_image_and_rejects_a_stale_request(tmp_path, monkeypatch):

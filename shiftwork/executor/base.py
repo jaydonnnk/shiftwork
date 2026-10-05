@@ -1,14 +1,16 @@
 import base64
 import json
+import hashlib
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Protocol
+from typing import Protocol, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBytes
 
 from shiftwork import config
 from shiftwork.domain import canonical
 from shiftwork.domain.models import ExecutorFailure, RunOutput
+from shiftwork.domain.task_contract import DeploymentExecutionBinding, DeploymentTrace
 
 
 class ExecutorModel(BaseModel):
@@ -41,6 +43,8 @@ class RunRequest(ExecutorModel):
     inference_grant: InferenceGrant | None
     request_batch_bytes: StrictBytes | None = None
     single_request_ordinal: int | None = None
+    service_protocol: Literal["READY_JSON", "FIXED_HTTP_8080"] = "READY_JSON"
+    deployment_binding: DeploymentExecutionBinding | None = None
 
 
 class RawCapture(ExecutorModel):
@@ -64,6 +68,37 @@ class RunResult(ExecutorModel):
     failure: ExecutorFailure | None
     wall_ms: int = Field(ge=0)
     observations: tuple[RawObservation, ...] = ()
+
+
+def deployment_observation(request: RunRequest, stimulus, raw: bytes, *, byte_count: int,
+                           sha256: str) -> RawObservation:
+    """Verify the trusted driver's entire receipt before projecting a safe summary."""
+    if len(raw) != byte_count or hashlib.sha256(raw).hexdigest() != sha256 or len(raw) > 2 * 1024 * 1024:
+        raise ValueError("deployment checkpoint receipt differs")
+    capture = json.loads(raw)
+    trace_data = capture.get("deployment_trace")
+    if not isinstance(trace_data, dict) or type(trace_data.get("complete")) is not bool:
+        raise ValueError("deployment completion evidence invalid")
+    trace = DeploymentTrace.model_validate(trace_data)
+    binding = request.deployment_binding
+    if binding is None:
+        raise ValueError("deployment capture has no controller binding")
+    if any(getattr(trace, key) != value for key, value in binding.model_dump().items()
+           if key != "allowed_resources"):
+        raise ValueError("deployment capture binding differs")
+    body = base64.b64decode(capture["body_base64"], validate=True)
+    if (trace.request_ordinal != stimulus.ordinal
+            or trace.request_id != json.loads(stimulus.body)["request_id"]
+            or trace.request_sha256 != hashlib.sha256(stimulus.body).hexdigest()
+            or trace.response_sha256 != hashlib.sha256(body).hexdigest()):
+        raise ValueError("deployment capture request or response differs")
+    if len(json.dumps(trace_data).encode()) > 65536:
+        raise ValueError("deployment trace byte bound exceeded")
+    return RawObservation(kind="INTERPRETATION",
+        public_payload={"source": "controller_verified", "request_ordinal": stimulus.ordinal,
+                        "deployment_trace_verified": True},
+        raw_payload={"capture_base64": base64.b64encode(raw).decode(),
+                     "byte_count": byte_count, "sha256": sha256})
 
 
 class ExecutorAdapter(Protocol):

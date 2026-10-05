@@ -24,7 +24,7 @@ from contree_client.models import ClosableStreamRepr, FileSpec, InstanceNetworki
 
 from shiftwork import config
 from shiftwork.domain.models import ExecutorFailure
-from shiftwork.executor.base import RawCapture, RawObservation, RunRequest, RunResult, load_batch, load_single_request, provisioning_manifest
+from shiftwork.executor.base import RawCapture, RawObservation, RunRequest, RunResult, load_batch, load_single_request, provisioning_manifest, deployment_observation
 from shiftwork.gateway.protocol import InferencePolicy
 from shiftwork.gateway.service_inference import GatewayRejected, ServiceInferenceGateway
 from shiftwork.live_budget import LiveInferenceMeter
@@ -43,6 +43,7 @@ import base64
 import hashlib
 import http.client
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -50,6 +51,7 @@ import subprocess
 import sys
 import threading
 import time
+import secrets
 
 ROOT = Path('/work')
 MAX_BODY = 1024 * 1024
@@ -59,6 +61,17 @@ allowed = tuple(config['allowed_tool_names'])
 public_state = json.loads((ROOT / 'shop.json').read_bytes())
 events = []
 infer_lock = threading.Lock()
+deployment_lock = threading.Lock()
+deployment = None
+if config.get('deployment_binding'):
+    kernel_spec = importlib.util.spec_from_file_location(
+        'shiftwork_trusted_deployment_kernel', ROOT / 'deployment_kernel.py')
+    kernel_module = importlib.util.module_from_spec(kernel_spec)
+    sys.modules[kernel_spec.name] = kernel_module
+    kernel_spec.loader.exec_module(kernel_module)
+    DeploymentKernel = kernel_module.DeploymentKernel
+    derive_intent_key = kernel_module.derive_intent_key
+    deployment = DeploymentKernel((ROOT / 'shop.json').read_bytes(), config['deployment_binding'])
 
 def send_line(value):
     print(json.dumps(value, separators=(',', ':')), flush=True)
@@ -83,6 +96,17 @@ class GatewayHandler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length))
             if not isinstance(body, dict):
                 return self.reply(422, {'error': 'REQUEST_INVALID'})
+            if self.path == '/deployment':
+                if deployment is None:
+                    return self.reply(404, {'error': 'NO_SUCH_OPERATION'})
+                try:
+                    with deployment_lock:
+                        result = deployment.act(self.headers.get('X-Shiftwork-Request-Token'), body)
+                    return self.reply(200, result)
+                except PermissionError:
+                    return self.reply(403, {'error': 'DEPLOYMENT_NOT_PERMITTED'})
+                except ValueError:
+                    return self.reply(422, {'error': 'DEPLOYMENT_INVALID'})
             if self.path == '/infer':
                 if not infer_lock.acquire(blocking=False):
                     return self.reply(429, {'error': 'CALL_LIMIT'})
@@ -147,8 +171,25 @@ try:
         cwd='/work', env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, preexec_fn=drop_privileges)
     threading.Thread(target=drain, args=(child.stderr, stderr), daemon=True).start()
-    ready = json.loads(child.stdout.readline())
-    port = ready.get('port')
+    if config.get('service_protocol') == 'FIXED_HTTP_8080':
+        port = 8080
+        readiness_deadline = time.monotonic() + 20
+        while True:
+            if child.poll() is not None:
+                raise ValueError('SERVICE_NOT_READY')
+            try:
+                probe = http.client.HTTPConnection('127.0.0.1', port, timeout=0.2)
+                probe.request('GET', '/')
+                probe.getresponse().read()
+                probe.close()
+                break
+            except OSError:
+                if time.monotonic() > readiness_deadline:
+                    raise ValueError('SERVICE_NOT_READY')
+                time.sleep(0.02)
+    else:
+        ready = json.loads(child.stdout.readline())
+        port = ready.get('port')
     if type(port) is not int or not 0 < port < 65536:
         raise ValueError('SERVICE_NOT_READY')
     for ordinal in range(1, config['request_count'] + 1):
@@ -161,9 +202,16 @@ try:
         if not request_body or len(request_body) > 65536:
             raise ValueError('FROZEN_REQUEST_INVALID')
         request_started = time.monotonic()
+        request_token = secrets.token_hex(32)
+        request_headers = {'Content-Type': 'application/json', 'X-Shiftwork-Request-Token': request_token}
+        if deployment is not None:
+            received = json.loads(request_body)
+            request_headers['X-Shiftwork-Intent-Key'] = derive_intent_key(received['request_id'], received['text'])
+            with deployment_lock:
+                deployment.begin(config.get('logical_request_ordinal', ordinal), request_body, request_token)
         connection = http.client.HTTPConnection('127.0.0.1', port, timeout=35)
         try:
-            connection.request('POST', '/', body=request_body, headers={'Content-Type': 'application/json'})
+            connection.request('POST', '/', body=request_body, headers=request_headers)
             response = connection.getresponse()
             output = response.read(MAX_BODY + 1)
         finally:
@@ -177,6 +225,9 @@ try:
             'elapsed_ms': round((time.monotonic() - request_started) * 1000),
             'driver_events': events, 'service_stderr_base64': base64.b64encode(stderr).decode('ascii'),
         }
+        if deployment is not None:
+            with deployment_lock:
+                capture['deployment_trace'] = deployment.finish(output)
         raw = json.dumps(capture, sort_keys=True, separators=(',', ':')).encode()
         with open('/work/capture-%d.json' % ordinal, 'wb') as target:
             target.write(raw)
@@ -264,7 +315,7 @@ class TokenFactoryAdapter:
             manifest = provisioning_manifest(request)
             artifact_files = request.artifact_snapshot.files
             if ("service.py" not in artifact_files
-                    or {"driver.py", "shop.json", *(f"capture-{n}.json" for n in range(1, 5))} & set(artifact_files)
+                    or {"driver.py", "deployment_kernel.py", "shop.json", *(f"capture-{n}.json" for n in range(1, 5))} & set(artifact_files)
                     or sum(len(raw) for raw in artifact_files.values()) > MAX_BODY_BYTES):
                 return failure(ExecutorFailure.PROVISION_FAILED)
             batch = ((load_single_request(request.request_batch, request.request_batch_bytes,
@@ -279,6 +330,18 @@ class TokenFactoryAdapter:
             files = dict(artifact_files)
             files["shop.json"] = shop
             files["driver.py"] = DRIVER_SOURCE
+            if request.service_protocol == "FIXED_HTTP_8080":
+                starter = config.PACKAGE_DIR / "templates/artifact/northline_blank_service.py"
+                if artifact_files["service.py"] != starter.read_bytes():
+                    return failure(ExecutorFailure.PROVISION_FAILED)
+            if request.deployment_binding is not None:
+                from shiftwork.executor import deployment
+                if (request.deployment_binding.run_id != self.run_id
+                        or request.deployment_binding.artifact_hash != request.artifact_snapshot.manifest_hash
+                        or request.deployment_binding.state_hash != hashlib.sha256(shop).hexdigest()
+                        or request.deployment_binding.batch_hash != request.request_batch.content_hash):
+                    return failure(ExecutorFailure.PROVISION_FAILED)
+                files["deployment_kernel.py"] = Path(deployment.__file__).read_bytes()
             uploaded = {}
             for name, raw in files.items():
                 uploaded[name] = await client.upload_file(raw)
@@ -286,16 +349,23 @@ class TokenFactoryAdapter:
                     return failure(ExecutorFailure.PROVISION_FAILED)
             spawn_files = {"/work/" + name: FileSpec(uuid=uploaded[name].uuid, mode="0644") for name in files}
             def current_request(ordinal: int) -> dict[str, Any]:
-                return {"kind": "current_request", "request_ordinal": ordinal,
-                        "body_base64": base64.b64encode(batch[ordinal - 1].body).decode("ascii")}
+                value = {"kind": "current_request", "request_ordinal": ordinal,
+                         "body_base64": base64.b64encode(batch[ordinal - 1].body).decode("ascii")}
+                if request.deployment_binding is not None:
+                    value["logical_request_ordinal"] = batch[ordinal - 1].ordinal
+                return value
 
             initial = {**current_request(1), "request_count": len(batch),
                        "allowed_tool_names": list(self.allowed_tool_names)}
+            if request.service_protocol != "READY_JSON":
+                initial["service_protocol"] = request.service_protocol
+            if request.deployment_binding is not None:
+                initial["deployment_binding"] = request.deployment_binding.model_dump(mode="json")
             if self.live_budget is not None:
                 self.live_budget.before_operation()
             instance = await client.spawn_instance(
                 command="/usr/local/bin/python", image=config.TOKEN_FACTORY_IMAGE,
-                args=["-u", "/work/driver.py"],
+                args=["-I", "-B", "-u", "/work/driver.py"],
                 disposable=False, networking=InstanceNetworking(enabled=False),
                 resources_limits=InstanceResourcesLimits(max_layer_bytes=MAX_LAYER_BYTES),
                 stdin=ClosableStreamRepr(value=json.dumps(initial) + "\n", encoding="ascii", close=False),
@@ -436,6 +506,9 @@ class TokenFactoryAdapter:
                 if not body or len(body) > MAX_BODY_BYTES:
                     return failure(ExecutorFailure.CAPTURE_TRUNCATED)
                 body.decode("utf-8")
+                if request.deployment_binding is not None:
+                    observations.append(deployment_observation(request, batch[ordinal - 1], raw_capture,
+                        byte_count=summary["byte_count"], sha256=summary["sha256"]))
                 observations.append(RawObservation(kind="INTERPRETATION",
                     public_payload={"source": "controller_verified", "request_ordinal": ordinal,
                                     "capture_bytes": len(raw_capture),
