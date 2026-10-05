@@ -31,7 +31,8 @@ import shutil
 import sqlite3
 import tempfile
 import time
-from contextlib import nullcontext
+from contextlib import ExitStack, nullcontext
+from unittest.mock import patch
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -48,6 +49,7 @@ from shiftwork.ledger import chain
 from shiftwork.store import db
 from shiftwork.store import repo
 from shiftwork.sealed import store as sealed_store
+from shiftwork.packs import registry as pack_registry
 
 ROOT = Path(__file__).resolve().parents[1]
 V5_SCHEMA = ROOT / "tests" / "store" / "schema_v5.sql"
@@ -1083,9 +1085,25 @@ def inheritance_stage(*, preview_db: Path | None = None) -> int:
             staged["dependencies"] = {**staged["dependencies"], "collection": "unavailable"}
             staged_path = db_file.parent / "staged-outage-collection.json"
             staged_path.write_bytes(json.dumps(staged, indent=2, sort_keys=True).encode("utf-8"))
-            reviewed_public = config.PIVOT_PUBLIC_STATE
-            try:
-                config.PIVOT_PUBLIC_STATE = staged_path
+            # Registration owns the operation world since S22a. Changing the
+            # historical PIVOT_PUBLIC_STATE constant no longer changes that
+            # input. Bind a disposable package with its own exact reviewed pin;
+            # production material, declarations and seals remain untouched.
+            with tempfile.TemporaryDirectory(prefix="shiftwork-inherit-world-") as staged_directory, ExitStack() as bindings:
+                package = Path(staged_directory) / "package"
+                package.mkdir()
+                for folder in ("fixtures", "sealed/cases", "templates"):
+                    shutil.copytree(config.PACKAGE_DIR / folder, package / folder)
+                owning_pack = pack_registry.resolve_pack(config.BOOKSHOP_SLUG)
+                (package / owning_pack.public_state_path).write_bytes(staged_path.read_bytes())
+                digest = hashlib.sha256(staged_path.read_bytes()).hexdigest()
+                packs = tuple(pack.model_copy(update={"reviewed_pins": tuple(
+                    pin.model_copy(update={"sha256": digest})
+                    if pack.slug == config.BOOKSHOP_SLUG and pin.path == owning_pack.public_state_path else pin
+                    for pin in pack.reviewed_pins)}) for pack in pack_registry.registered_packs())
+                for name, value in (("PACKAGE_DIR", package), ("CATALOG_DIR", package / "fixtures/catalogs"), ("SEALED_CASES_DIR", package / "sealed/cases")):
+                    bindings.enter_context(patch.object(config, name, value))
+                bindings.enter_context(patch.object(pack_registry, "_PACKS", packs))
                 started = client.post(f"/api/shifts/{successor_id}/runs",
                                       json={"client_request_id": "s20-demo-operation"})
                 assert started.status_code == 202, started.text
@@ -1095,8 +1113,6 @@ def inheritance_stage(*, preview_db: Path | None = None) -> int:
                     if operation["state"] in ("FINALIZED", "FAILED") or time.monotonic() > run_deadline:
                         break
                     time.sleep(0.05)
-            finally:
-                config.PIVOT_PUBLIC_STATE = reviewed_public
             assert operation["state"] == "FINALIZED", operation
             outputs = client.get(f"/api/runs/{operation['id']}/outputs").json()
             checks = client.get(f"/api/runs/{operation['id']}/checks").json()
