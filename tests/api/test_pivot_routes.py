@@ -214,23 +214,28 @@ def test_first_choice_shift_open_is_atomic_and_caller_cannot_choose_mode(tmp_pat
         assert _count(path, "operating_selections") == 0
 
 
-def test_failed_first_shift_open_leaves_no_partial_state(tmp_path):
+@pytest.mark.parametrize("slug", ["bookshop", "northline"])
+def test_failed_first_shift_open_leaves_no_partial_state(tmp_path, monkeypatch, slug):
     """One atomic shift-open, faulted deterministically rather than by racing.
 
     The concurrency check above only detects a missing write transaction when the
     two requests happen to overlap, so it can pass by luck. This faults the same
-    transaction every time: an engagement with no reviewed starter raises after
-    its shift row is inserted, and nothing may survive that raise.
+    transaction every time: starter persistence raises after its shift row is
+    inserted, and nothing may survive that raise. Both admitted starters use
+    this path; Northline is no longer an unavailable-starter stimulus in S22b.
     """
     path = tmp_path / "atomic-open.db"
     with TestClient(create_app(str(path))):
         pass
     conn = db.connect(path)
     try:
-        repo.seed_engagement(conn, "northline", "bike_cooperative", "Northline Bike Cooperative")
         assert conn.execute("SELECT COUNT(*) FROM shifts").fetchone()[0] == 0
-        with pytest.raises(orchestrator.LifecycleError, match="reviewed initial starter"):
-            orchestrator.open_next_shift(conn, "northline")
+        def fail_starter_write(active_conn, _version):
+            assert active_conn.execute("SELECT COUNT(*) FROM shifts").fetchone()[0] == 1
+            raise RuntimeError("injected starter persistence failure")
+        monkeypatch.setattr(repo, "insert_version", fail_starter_write)
+        with pytest.raises(RuntimeError, match="injected starter persistence failure"):
+            orchestrator.open_next_shift(conn, slug)
         assert conn.execute("SELECT COUNT(*) FROM shifts").fetchone()[0] == 0
         assert conn.execute("SELECT COUNT(*) FROM operating_selections").fetchone()[0] == 0
         assert conn.execute("SELECT COUNT(*) FROM artifact_versions").fetchone()[0] == 0

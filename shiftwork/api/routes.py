@@ -35,6 +35,16 @@ def domain_error_handler(_request: Request, exc: ShiftworkDomainError) -> JSONRe
     return JSONResponse(status_code=status_code, content={"kind": exc.kind, "detail": exc.message})
 
 
+@router.get("/boards", response_model=list[schemas.WorkplaceBoardView])
+def get_workplace_boards(conn: sqlite3.Connection = Depends(get_conn)) -> list[schemas.WorkplaceBoardView]:
+    payload = [schemas.WorkplaceBoardView(
+        engagement_slug=board.engagement_slug, availability=board.availability,
+        **board.display.model_dump(),
+    ) for board in orchestrator.workplace_boards()]
+    orchestrator.assert_public_projection([board.model_dump(mode="json") for board in payload], conn)
+    return payload
+
+
 @router.get("/engagements/{slug}/board", response_model=schemas.BoardView)
 def get_board(slug: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.BoardView:
     payload = schemas.BoardView.of(orchestrator.board_snapshot(conn, slug))

@@ -23,6 +23,18 @@ from shiftwork.domain.models import (
 _FROZEN = ConfigDict(frozen=True, extra="forbid", from_attributes=True)
 
 
+class WorkplaceBoardView(BaseModel):
+    model_config = _FROZEN
+
+    engagement_slug: str
+    role_name: str
+    employer: str | None
+    client: str | None
+    room_id: str
+    station_labels: tuple[str, ...]
+    availability: Literal["AVAILABLE", "AWAITING_OPERATOR_REVIEW"]
+
+
 class DraftView(BaseModel):
     model_config = _FROZEN
 
