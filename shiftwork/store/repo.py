@@ -1065,6 +1065,32 @@ def list_observations(conn: sqlite3.Connection, run_id: str) -> list[ExecutionOb
 
 
 # --- task assessments (Slice 11) -------------------------------------------
+def get_deployment_trace(conn: sqlite3.Connection, run_id: str, ordinal: int):
+    """Read one private verified receipt. Absence is distinct from an empty trace."""
+    import base64
+    import hashlib
+    from shiftwork.domain.task_contract import DeploymentTrace
+
+    observations = [row for row in list_observations(conn, run_id)
+                    if row.request_ordinal == ordinal
+                    and row.public_payload_json.get("deployment_trace_verified") is True]
+    if not observations:
+        return None
+    if len(observations) != 1:
+        raise ValueError("duplicate deployment receipt")
+    row = observations[0]
+    if row.public_payload_json.get("source") != "controller_verified":
+        raise ValueError("deployment receipt source invalid")
+    prefix = "data:application/json;base64,"
+    if not row.raw_payload_ref.startswith(prefix):
+        raise ValueError("deployment receipt storage invalid")
+    wrapper = json.loads(base64.b64decode(row.raw_payload_ref[len(prefix):], validate=True))
+    raw = base64.b64decode(wrapper["capture_base64"], validate=True)
+    if len(raw) != wrapper["byte_count"] or hashlib.sha256(raw).hexdigest() != wrapper["sha256"]:
+        raise ValueError("stored deployment receipt digest differs")
+    return DeploymentTrace.model_validate(json.loads(raw)["deployment_trace"])
+
+
 
 
 def insert_task_assessment(

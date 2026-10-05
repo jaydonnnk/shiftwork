@@ -243,6 +243,7 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
             snapshot_path = Path(directory) / "public_state.json"
             snapshot_path.write_bytes(snapshot_bytes)
             request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})
+            request = orchestrator.bind_deployment_request(request, run, context, version, mission, snapshot_bytes)
             if run.adapter == orchestrator.TokenFactoryAdapter.name:
                 adapter = orchestrator.TokenFactoryAdapter(
                     run_id=run.id,
@@ -301,6 +302,8 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
                 mission=mission,
                 snapshot=snapshot,
                 response=response,
+                **orchestrator.deployment_assessment_inputs(conn, run, spec, index, snapshot_bytes,
+                    base64.b64decode(workload.request_batch_bytes_base64)),
             )
             for assessment in request_assessments:
                 repo.insert_task_assessment(

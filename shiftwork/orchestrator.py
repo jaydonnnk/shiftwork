@@ -493,7 +493,7 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
         repo.insert_shift(conn, shift)
 
         if is_first_shift:
-            if slug != config.BOOKSHOP_SLUG:
+            if slug not in (config.BOOKSHOP_SLUG, "northline"):
                 raise LifecycleError("conflict", "reviewed initial starter is unavailable")
             # Slice 11 supplies the reviewed, executable failing starter as the new
             # engagement's editable draft, so the first shift's public diagnostic can
@@ -502,8 +502,20 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
             files = {
                 name: path.read_text(encoding="utf-8")
                 for name, path in sorted(config.PIVOT_STARTER_ARTIFACT_PATHS.items())
-            }
+            } if slug == config.BOOKSHOP_SLUG else {}
             contract = ContractParams.model_validate(config.PIVOT_STARTER_CONTRACT_JSON)
+            if slug == "northline":
+                pack = admit_pack(slug)
+                files = {"service.py": (config.PACKAGE_DIR / "templates/artifact/northline_blank_service.py").read_text(encoding="utf-8"),
+                         **{name: (config.PACKAGE_DIR / "templates/artifact/northline" / name).read_text(encoding="utf-8")
+                            for name in ("discovery.md", "permissions.json", "acceptance_tests.py", "runbook.md")}}
+                contract = ContractParams.model_validate({
+                    "catalog_version": 1, "must_never": ["NEVER_UNSAFE_CONTINUATION"],
+                    "selections": {"ESCALATE_WHEN": "ESCALATE_UNSAFE_REPAIR",
+                                   "REPEAT_REQUEST_RULE": "DEDUPLICATE_BOOKING_BY_REQUEST_ID"},
+                    "response_time_limit_ms": 3000,
+                    "declared_limits": ["Fictional deployment; no real booking or customer access."],
+                })
             catalog = contract_catalog.load_catalog(slug, contract.catalog_version)
             contract_catalog.validate_contract(catalog, contract)
             content_hash = canonical.artifact_content_hash(
@@ -532,13 +544,15 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
                     kind="STARTER_BASELINE",
                     selected_version_id=starter.id,
                     selected_content_hash=starter.content_hash,
-                    rationale="Reviewed failing Bellwether starter; executable offline, not a qualified repair or live service.",
-                    requirement_set_hash=canonical.content_hash(
+                    rationale=("Reviewed blank Northline starter; required tasks are deliberately missing."
+                               if slug == "northline" else "Reviewed failing Bellwether starter; executable offline, not a qualified repair or live service."),
+                    requirement_set_hash=(_hash_bytes((config.PACKAGE_DIR / pack.mission_path).read_bytes())
+                        if slug == "northline" else canonical.content_hash(
                         {
                             "catalog_hash": catalog.content_hash,
                             "contract": canonical.contract_params_json(contract),
                         }
-                    ),
+                    )),
                     state="VALID",
                     client_request_id=f"starter:{slug}",
                     created_at=shift.opened_at,
@@ -605,6 +619,9 @@ def freeze_version(
         raise LifecycleError("conflict", f"no draft to freeze for shift: {shift_id}")
     files, _ = draft
 
+    if shift.engagement_slug == "northline":
+        _validate_deployment_records(files)
+
     catalog = contract_catalog.load_catalog(shift.engagement_slug, contract.catalog_version)
     contract_catalog.validate_contract(catalog, contract)
 
@@ -640,6 +657,21 @@ def freeze_version(
     repo.set_draft_base_version(conn, shift_id, version.id)
     conn.commit()
     return version
+
+
+def _validate_deployment_records(files):
+    for name in ("service.py", "discovery.md", "permissions.json", "acceptance_tests.py", "runbook.md"):
+        if not isinstance(files.get(name), str) or not files[name].strip():
+            raise LifecycleError("conflict", f"deployment artifact requires nonempty {name}")
+    try:
+        permissions = json.loads(files["permissions.json"])
+        if (not isinstance(permissions, dict) or set(permissions) != {"reads", "writes"}
+                or any(not isinstance(permissions[key], list)
+                       or any(not isinstance(item, str) for item in permissions[key])
+                       for key in ("reads", "writes"))):
+            raise ValueError("invalid permissions map")
+    except (ValueError, TypeError) as exc:
+        raise LifecycleError("conflict", "deployment permissions must contain reads and writes text lists") from exc
 
 
 def restore_version_to_draft(
@@ -702,7 +734,8 @@ def start_run(
         shift = _require_open_shift(conn, shift_id)
         selection, version = _selected_operating_version(conn, shift)
         adapter = executor or config.EXECUTOR_ADAPTER
-        if selection.kind == "LEARNER_CHOICE" and selection.comparison_id is not None:
+        if ((selection.kind == "LEARNER_CHOICE" and selection.comparison_id is not None)
+                or (shift.engagement_slug == "northline" and selection.kind == "STARTER_BASELINE")):
             run = _reserve_selected_operation(
                 conn, shift, selection, version, client_request_id,
                 adapter=(TokenFactoryAdapter.name if adapter == TokenFactoryAdapter.name
@@ -979,6 +1012,7 @@ def execute_selected_operation(conn: sqlite3.Connection, run_id: str,
             state_path = Path(directory) / "public_state.json"
             state_path.write_bytes(state_bytes)
             request = request.model_copy(update={"shop_snapshot_ref": str(state_path)})
+            request = bind_deployment_request(request, run, context, version, mission, state_bytes)
             if run.adapter == TokenFactoryAdapter.name:
                 adapter = TokenFactoryAdapter(
                     run_id=run.id,
@@ -1067,6 +1101,9 @@ def finalize_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
         snapshot = task_contract.load_public_state_bytes(state_bytes)
         outputs = repo.list_outputs(conn, run.id)
         workload = context.workloads[0]
+        batch_bytes = base64.b64decode(workload.request_batch_bytes_base64, validate=True)
+        if canonical.content_hash(_encode(batch_bytes)) != workload.request_batch_hash:
+            raise LifecycleError("conflict", "captured operational batch differs")
         if (len(outputs) != workload.request_count
                 or {item.request_ordinal for item in outputs}
                 != set(range(1, workload.request_count + 1))
@@ -1074,6 +1111,7 @@ def finalize_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
             raise LifecycleError("conflict", "operational capture is incomplete")
         captured = {item.request_ordinal: item for item in outputs}
         assessed = []
+        verified_traces = []
         completed = 0
         mandatory_pass = True
         for index, spec in enumerate(mission.request_specs, start=1):
@@ -1082,8 +1120,12 @@ def finalize_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
                 response = task_contract.validate_response_envelope(spec, output.body)
             except TaskEnvelopeInvalid:
                 response = None
+            inputs = deployment_assessment_inputs(conn, run, spec, index, state_bytes, batch_bytes,
+                                                  require_complete=True)
+            if inputs.get("deployment_trace") is not None:
+                verified_traces.append(inputs["deployment_trace"])
             rows = evaluator.assess_request(spec=spec, request_ordinal=index,
-                                            mission=mission, snapshot=snapshot, response=response)
+                                            mission=mission, snapshot=snapshot, response=response, **inputs)
             assessed.extend(rows)
             completed += int(evaluator.request_usefully_completed(spec, rows))
             mandatory_pass &= all(row.mandatory_pass for row in rows)
@@ -1108,7 +1150,8 @@ def finalize_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
                                         run_id=run.id, assessment=row, assessed_at=_now())
             checks[check_id] = check
         repo.insert_run_assessment(conn, assessment)
-        drafts = reducer.reduce_operation(run, assessment, mission, tuple(assessed), tuple(checks.values()))
+        drafts = reducer.reduce_operation(run, assessment, mission, tuple(assessed), tuple(checks.values()),
+            **operation_consequence_inputs(context), deployment_traces=tuple(verified_traces))
         resolving = []
         for incident in repo.list_incidents(conn, shift.engagement_slug):
             if incident.state is IncidentState.RESOLVED:
@@ -1169,7 +1212,30 @@ def execute_run_task(db_path: str, run_id: str,
         conn.close()
 
 
-_OPERATION_DRAFT_TYPES = (LedgerEventType.SALE_COMPLETED, LedgerEventType.INCIDENT_OPENED)
+_OPERATION_DRAFT_TYPES = (LedgerEventType.SALE_COMPLETED, LedgerEventType.INCIDENT_OPENED,
+                         LedgerEventType.BOOKING_COMMITTED, LedgerEventType.ESCALATION_TO_HUMAN,
+                         LedgerEventType.COUNTER_FOLLOWUP_RECORDED, LedgerEventType.ROLLOUT_APPROVED)
+
+
+def operation_consequence_inputs(context: ExecutionContext) -> dict[str, Any]:
+    """Resolve retained rules only; old v1 operations keep their original reduction."""
+    if context.reducer_version == "operation-ledger-v1":
+        return {}
+    if context.reducer_version != "operation-ledger-v2":
+        raise LifecycleError("conflict", "unknown operational reducer version")
+    if canonical.content_hash(context.starting_business_state_json) != context.starting_business_state_hash:
+        raise LifecycleError("conflict", "frozen operational consequence rules differ")
+    try:
+        rules = pack_registry.ConsequenceRules.model_validate(context.starting_business_state_json["consequence_rules"])
+        weights = json.loads(base64.b64decode(context.mission_bytes_base64, validate=True))["weights"]
+        for rule in (*rules.success_events, *((rules.rollout_event,) if rules.rollout_event else ())):
+            event, key = rule.split()
+            LedgerEventType(event)
+            if type(weights[key]) is not int:
+                raise ValueError("invalid consequence weight")
+    except (ValueError, TypeError, KeyError) as exc:
+        raise LifecycleError("conflict", "frozen operational consequence rules missing or invalid") from exc
+    return {"consequence_rules": rules.model_dump(mode="json"), "weights": weights}
 
 
 def replay_assessment(conn: sqlite3.Connection, run_id: str) -> ReplayReport:
@@ -1218,17 +1284,26 @@ def replay_assessment(conn: sqlite3.Connection, run_id: str) -> ReplayReport:
     stored_checks = repo.list_check_results(conn, run.id)
     stored_by_check_id = {check.check_id: check for check in stored_checks}
     assessed: list[task_contract.TaskAssessment] = []
+    verified_traces = []
     recomputed: dict[str, CheckResult] = {}
     completed = 0
     mandatory_pass = True
     for index, spec in enumerate(mission.request_specs, start=1):
         output = captured[index]
         try:
+            deployment_inputs = deployment_assessment_inputs(
+                conn, run, spec, index, state_bytes, batch_bytes, require_complete=True)
+        except LifecycleError:
+            return _unknown_inputs_report(run.id)
+        if deployment_inputs.get("deployment_trace") is not None:
+            verified_traces.append(deployment_inputs["deployment_trace"])
+        try:
             response = task_contract.validate_response_envelope(spec, output.body)
         except TaskEnvelopeInvalid:
             response = None
         rows = evaluator.assess_request(spec=spec, request_ordinal=index, mission=mission,
-                                        snapshot=snapshot, response=response)
+                                        snapshot=snapshot, response=response,
+                                        **deployment_inputs)
         assessed.extend(rows)
         completed += int(evaluator.request_usefully_completed(spec, rows))
         mandatory_pass &= all(row.mandatory_pass for row in rows)
@@ -1253,8 +1328,13 @@ def replay_assessment(conn: sqlite3.Connection, run_id: str) -> ReplayReport:
         mandatory_pass=mandatory_pass, rule_version=context.reducer_version,
         assessed_at=_now(), selection_id=run.selection_id,
     )
+    try:
+        consequence_inputs = operation_consequence_inputs(context)
+    except LifecycleError:
+        return _unknown_inputs_report(run.id)
     drafts = reducer.reduce_operation(run, assessment, mission, tuple(assessed),
-                                      tuple(recomputed.values()))
+                                      tuple(recomputed.values()), **consequence_inputs,
+                                      deployment_traces=tuple(verified_traces))
     check_differences = _check_differences(stored_checks, list(recomputed.values()))
     event_draft_differences = _event_draft_differences(
         _stored_operation_drafts(conn, run, context.engagement_slug), drafts)
@@ -1554,6 +1634,10 @@ def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
             raise LifecycleError("conflict", "run in flight; close refused: " + ", ".join(in_flight))
         drafts: list[LedgerEventDraft] = []
         if version is not None:
+            pack = admit_pack(shift.engagement_slug)
+            handover_required = pack.consequences.handover_record_required
+            if handover_required and not version.files.get("runbook.md", "").strip():
+                raise LifecycleError("conflict", "selected runbook document required before handover")
             facts = CloseShiftFacts(
                 shift_id=shift.id,
                 declared_limits=tuple(version.contract.declared_limits),
@@ -1561,10 +1645,14 @@ def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
                     incident.id
                     for incident in repo.list_incidents(conn, shift.engagement_slug)
                     if incident.state is IncidentState.OPEN
+                    or (handover_required and incident.state is IncidentState.CLOSED_UNRESOLVED)
                 ),
                 committed_contract=version.contract,
+                handover_runbook_version_id=version.id if handover_required else None,
             )
-            drafts = reducer.reduce_close(reducer.load_mission(config.BOOKSHOP_MISSION), facts)
+            close_mission = (task_contract.load_mission_bytes((config.PACKAGE_DIR / pack.mission_path).read_bytes())
+                             if handover_required else reducer.load_mission(config.BOOKSHOP_MISSION))
+            drafts = reducer.reduce_close(close_mission, facts, handover_record_required=handover_required)
         existing = repo.list_ledger_events(conn, shift.engagement_slug)
         events = chain.append(
             drafts,
@@ -2312,6 +2400,10 @@ def _private_public_needles(conn: sqlite3.Connection | None = None) -> tuple[str
             except FileNotFoundError:
                 continue
             needles.update(private_strings)
+        active_paths = {declaration.case_file for declaration in pack.families}
+        for pin in pack.reviewed_pins:
+            if pin.path.startswith("sealed/cases/") and pin.path not in active_paths:
+                needles.update(sealed_store.load_pinned_privacy_needles(pin.path, slug=pack.slug))
     if conn is not None:
         needles.update(row["resolved_state_sha256"] for row in conn.execute(
             "SELECT resolved_state_sha256 FROM protected_case_snapshots"))
@@ -2447,13 +2539,16 @@ def freeze_diagnostic_context(
             "unresolved_incident_ids": [incident.id for incident in repo.list_incidents(
                 conn, shift.engagement_slug) if incident.state is not IncidentState.RESOLVED],
         }
+        if shift.engagement_slug == "northline":
+            starting_state["consequence_rules"] = pack.consequences.model_dump(mode="json")
     condition = observed_condition(snapshot_bytes, snapshot.dependencies)
     fields = _diagnostic_context_fields(
         shift, mission, mission_bytes, snapshot_bytes, specs_bytes, workload, condition, starting_state
     )
     if operation:
         fields["evaluator_version"] = "operation-task-v1"
-        fields["reducer_version"] = "operation-ledger-v1"
+        fields["reducer_version"] = ("operation-ledger-v2" if shift.engagement_slug == "northline"
+                                     else "operation-ledger-v1")
     if isolated:
         fields.update({
             "executor_class": EvidenceMode.ISOLATED_LIVE.value,
@@ -2506,6 +2601,70 @@ def freeze_diagnostic_context(
 
 # The comparison deadline, shared with the comparison flow's frozen contexts.
 COMPARE_DEADLINE_S = 10
+
+
+def bind_deployment_request(request, run, context, version, mission, state_bytes, *, phase="PUBLIC"):
+    """Controller-owned deployment identity; no scoring material enters the driver."""
+    if not any(rule.startswith("deployment.") for rule in mission.public_rules):
+        return request
+    binding = task_contract.DeploymentExecutionBinding(
+        run_id=run.id, context_hash=context.content_hash, artifact_hash=version.content_hash,
+        state_hash=_hash_bytes(state_bytes), batch_hash=request.request_batch.content_hash,
+        phase=phase, allowed_resources=tuple(mission.allowed_tool_vocabulary),
+    )
+    protocol = "READY_JSON"
+    if version.created_by == "template":
+        starter = config.PACKAGE_DIR / f"templates/artifact/{mission.engagement_slug}_blank_service.py"
+        if starter.is_file() and version.files.get("service.py", "").encode() == starter.read_bytes():
+            protocol = "FIXED_HTTP_8080"
+    return request.model_copy(update={"deployment_binding": binding, "service_protocol": protocol})
+
+
+def deployment_assessment_inputs(conn, run, spec, ordinal, state_bytes, batch_bytes, *, phase="PUBLIC",
+                                 require_complete=False):
+    """Supply stored verified traces only after checking their frozen run/output bindings."""
+    if not any(task.kind in (task_contract.TaskKind.CREATE_BOOKING,
+                             task_contract.TaskKind.ROUTE_SAFETY_QUESTION) for task in spec.tasks):
+        return {}
+    context = repo.get_execution_context(conn, run.context_id) if run.context_id else None
+    version = repo.get_version(conn, run.artifact_version_id)
+    try:
+        trace = repo.get_deployment_trace(conn, run.id, ordinal)
+        if trace is None:
+            raise ValueError("deployment trace missing")
+        outputs = {row.request_ordinal: row for row in repo.list_outputs(conn, run.id)}
+        batch_hash = canonical.content_hash(_encode(batch_bytes))
+        stimuli = (executor.load_single_request(executor.BatchRef(path_ref="sealed:protected", content_hash=batch_hash),
+                                              batch_bytes, ordinal),) if phase == "PROTECTED" else executor.load_batch(
+            executor.BatchRef(path_ref="frozen:public", content_hash=batch_hash), batch_bytes)
+        stimulus = next(row for row in stimuli if row.ordinal == ordinal)
+        if (context is None or version is None or trace.run_id != run.id or trace.request_id != spec.id
+                or trace.context_hash != context.content_hash or trace.artifact_hash != version.content_hash
+                or trace.state_hash != _hash_bytes(state_bytes) or trace.batch_hash != batch_hash
+                or trace.phase != phase or trace.request_ordinal != ordinal
+                or trace.request_sha256 != _hash_bytes(stimulus.body)
+                or trace.response_sha256 != _hash_bytes(outputs[ordinal].body)):
+            raise ValueError("stored deployment trace binding differs")
+        prior = ()
+        if phase == "PUBLIC":
+            prior = tuple(repo.get_deployment_trace(conn, run.id, index) for index in range(1, ordinal))
+            if any(item is None for item in prior):
+                raise ValueError("prior deployment trace missing")
+            by_ordinal = {row.ordinal: row for row in stimuli}
+            for index, item in enumerate(prior, 1):
+                earlier = by_ordinal[index]
+                if (item.request_ordinal != index
+                        or item.request_id != json.loads(earlier.body)["request_id"]
+                        or item.request_sha256 != _hash_bytes(earlier.body)
+                        or item.response_sha256 != _hash_bytes(outputs[index].body)
+                        or any(getattr(item, field) != getattr(trace, field) for field in
+                               ("run_id", "context_hash", "artifact_hash", "state_hash", "batch_hash", "phase"))):
+                    raise ValueError("prior deployment trace binding differs")
+        return {"deployment_trace": trace, "prior_deployment_traces": prior}
+    except (ValueError, TypeError, KeyError, StopIteration) as exc:
+        if require_complete:
+            raise LifecycleError("conflict", "deployment execution evidence is missing or invalid") from exc
+        return {}
 
 
 def _comparison_run_request(

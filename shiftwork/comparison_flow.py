@@ -1119,6 +1119,7 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
             snapshot_path = Path(directory) / "public_state.json"
             snapshot_path.write_bytes(snapshot_bytes)
             request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})
+            request = orchestrator.bind_deployment_request(request, run, context, version, mission, snapshot_bytes)
             if run.adapter == orchestrator.TokenFactoryAdapter.name:
                 adapter = orchestrator.TokenFactoryAdapter(
                     run_id=run.id,
@@ -1151,6 +1152,8 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
                     "request_batch_bytes": protected_line,
                     "single_request_ordinal": slot.executed_request_count,
                 })
+                protected_request = orchestrator.bind_deployment_request(
+                    protected_request, run, context, version, mission, protected_state_bytes, phase="PROTECTED")
                 protected_result = asyncio.run(adapter.execute(protected_request))
         captures = list(public_result.captures)
         observations = list(public_result.observations)
@@ -1205,6 +1208,8 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
                     response = None
             request_assessments = evaluator.assess_request(
                 spec=spec, request_ordinal=index, mission=mission, snapshot=snapshot, response=response,
+                **orchestrator.deployment_assessment_inputs(conn, run, spec, index, snapshot_bytes,
+                    base64.b64decode(workload.request_batch_bytes_base64)),
             )
             for assessment in request_assessments:
                 repo.insert_task_assessment(
@@ -1236,6 +1241,8 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
             mission=mission,
             snapshot=task_contract.load_public_state_bytes(protected_state_bytes),
             response=protected_response,
+            **orchestrator.deployment_assessment_inputs(conn, run, protected_spec, slot.executed_request_count,
+                protected_state_bytes, protected_line, phase="PROTECTED"),
         )
         for assessment in protected_assessments:
             repo.insert_task_assessment(
@@ -1589,6 +1596,13 @@ def _comparison_outcome(
                 assessed = evaluator.assess_request(
                     spec=spec, request_ordinal=ordinal, mission=mission,
                     snapshot=public_snapshot, response=response,
+                    **orchestrator.deployment_assessment_inputs(
+                        conn, run, spec, ordinal, public_bytes,
+                        base64.b64decode(next(item.request_batch_bytes_base64
+                                             for item in context.workloads
+                                             if item.id == slot.workload_id), validate=True),
+                        phase="PUBLIC",
+                    ) if run is not None else {},
                 )
                 expected_public.extend(assessed)
                 expected_completed += evaluator.request_usefully_completed(spec, assessed)
@@ -1619,6 +1633,12 @@ def _comparison_outcome(
                     expected_protected = evaluator.assess_request(
                         spec=protected_spec, request_ordinal=slot.executed_request_count,
                         mission=mission, snapshot=protected_state, response=protected_response,
+                        **orchestrator.deployment_assessment_inputs(
+                            conn, run, protected_spec, slot.executed_request_count,
+                            reserved.resolved_state_bytes,
+                            task_contract.protected_request_bytes(reserved.case.stimulus.request),
+                            phase="PROTECTED",
+                        ),
                     )
                     if expected_protected != protected_assessments:
                         drift.add("protected_assessment")

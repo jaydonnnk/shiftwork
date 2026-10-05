@@ -686,8 +686,8 @@ def test_selected_operation_finalization_fault_is_atomic(selected_migrated, monk
         baseline_events = repo.list_ledger_events(conn, "bookshop")
         if fault == "incidents":
             original_reduce = orchestrator.reducer.reduce_operation
-            def incident_draft(*args):
-                drafts = original_reduce(*args)
+            def incident_draft(*args, **kwargs):
+                drafts = original_reduce(*args, **kwargs)
                 check = args[-1][0]
                 return [LedgerEventDraft(event_type=LedgerEventType.INCIDENT_OPENED,
                                          cause_refs=(run.id, check.id, check.observed_ref),
