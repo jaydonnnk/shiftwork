@@ -25,7 +25,7 @@ from enum import StrEnum
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError, Field, StrictInt, model_validator
+from pydantic import BaseModel, ConfigDict, ValidationError, Field, StrictBool, StrictInt, model_validator
 
 from shiftwork.domain.errors import (
     MissionSpecInvalid,
@@ -46,6 +46,10 @@ class TaskKind(StrEnum):
     EXPLAIN_LIMIT = "EXPLAIN_LIMIT"
     # S22a material schema; independent safety assessment belongs to S22b.
     ROUTE_SAFETY_QUESTION = "ROUTE_SAFETY_QUESTION"
+    QUALIFY_SIGNAL = "QUALIFY_SIGNAL"
+    ASSIGN_OWNER = "ASSIGN_OWNER"
+    WRITE_PIPELINE_RECORD = "WRITE_PIPELINE_RECORD"
+    HANDOFF_TO_REVIEW = "HANDOFF_TO_REVIEW"
 
 
 class TaskStatus(StrEnum):
@@ -102,7 +106,8 @@ class Claim(BaseModel):
 
     model_config = _FROZEN
 
-    kind: Literal["price", "stock", "availability", "policy_answer", "booking", "none", "safety_route"]
+    kind: Literal["price", "stock", "availability", "policy_answer", "booking", "none", "safety_route",
+                  "qualification", "owner_assignment", "pipeline_write", "handoff"]
     entity_ref: str
     value: JsonValue
     evidence_refs: tuple[str, ...]
@@ -151,6 +156,68 @@ class CustomerRequestSpec(BaseModel):
     tasks: tuple[RequiredTask, ...]
     mandatory_rule_ids: tuple[str, ...]
 
+    @model_validator(mode="after")
+    def complete_pipeline_spec(self):
+        kinds = {TaskKind.QUALIFY_SIGNAL, TaskKind.ASSIGN_OWNER,
+                 TaskKind.WRITE_PIPELINE_RECORD, TaskKind.HANDOFF_TO_REVIEW}
+        if not any(task.kind in kinds for task in self.tasks):
+            return self
+        if (len(self.tasks) != 4 or {task.kind for task in self.tasks} != kinds
+                or len({task.id for task in self.tasks}) != 4
+                or len(self.requested_entities) != 1
+                or any(task.requested_entity_ref != self.requested_entities[0] for task in self.tasks)):
+            raise ValueError("pipeline request needs four distinct tasks for one signal")
+        for task in self.tasks:
+            condition = task.condition_json
+            decisions = condition.get("expected_decisions")
+            if (set(condition) != {"expected_decisions", "qualified_owner", "review_owner", "repeat_of"}
+                    or not isinstance(decisions, list) or not decisions
+                    or any(not isinstance(value, str) or value not in {"QUALIFIED", "REVIEW", "DISQUALIFIED"}
+                           for value in decisions)
+                    or len(decisions) != len(set(decisions))
+                    or not isinstance(condition.get("qualified_owner"), str) or not condition["qualified_owner"]
+                    or condition.get("review_owner") != "revenue-review"
+                    or (condition["repeat_of"] is not None and
+                        (not isinstance(condition["repeat_of"], str) or not condition["repeat_of"]))
+                    or task.required != (task.kind is TaskKind.QUALIFY_SIGNAL)):
+                raise ValueError("invalid pinned pipeline decision conditions")
+        if any(task.condition_json != self.tasks[0].condition_json for task in self.tasks):
+            raise ValueError("pipeline task conditions disagree")
+        required_rules = {"task.required_results", "gtm.qualification", "gtm.pinned_routing",
+                          "gtm.exactly_once", "gtm.human_handoff", "response.structured_only"}
+        if not required_rules.issubset(self.mandatory_rule_ids):
+            raise ValueError("pipeline request cannot waive a mandatory rule")
+        return self
+
+
+class SignalEntity(BaseModel):
+    model_config = _FROZEN
+    company_name: str = Field(min_length=1)
+    domain: str = Field(min_length=1)
+
+
+class SignalFacts(BaseModel):
+    """Synthetic public inputs, never an expected answer or observed live prediction."""
+    model_config = _FROZEN
+    account_domain: str = Field(min_length=1)
+    region: Literal["APAC", "EMEA", "AMER", "UNKNOWN"]
+    product: Literal["platform", "analytics", "UNKNOWN"]
+    employee_count: StrictInt = Field(ge=0)
+    suppressed: StrictBool
+    intent_label: Literal["BUYING", "RESEARCH", "AMBIGUOUS"]
+    confidence: StrictInt = Field(ge=0, le=100)
+    note: str = Field(min_length=1)
+    existing_owner: str | None
+    existing_record_ref: str | None
+
+    @model_validator(mode="after")
+    def existing_record_is_complete(self):
+        if (self.existing_owner is None) != (self.existing_record_ref is None):
+            raise ValueError("existing synthetic record needs owner and reference together")
+        if self.existing_owner == "" or self.existing_record_ref == "":
+            raise ValueError("existing synthetic record fields cannot be empty")
+        return self
+
 
 class ProtectedRequestRow(BaseModel):
     model_config = _FROZEN
@@ -174,7 +241,7 @@ class ProtectedRecordDelta(BaseModel):
 
     record_id: str
     entity_ref: str
-    kind: Literal["price", "stock", "availability"]
+    kind: Literal["price", "stock", "availability", "signal"]
     value: JsonValue
     record_age_ms: int
     dependency: str
@@ -185,7 +252,7 @@ class ProtectedStateDelta(BaseModel):
     model_config = _FROZEN
 
     description: str
-    add_entities: dict[str, ProtectedEntityDelta]
+    add_entities: dict[str, ProtectedEntityDelta | SignalEntity]
     add_records: tuple[ProtectedRecordDelta, ...]
 
 
@@ -227,10 +294,17 @@ def resolve_protected_state(base_bytes: bytes, delta: ProtectedStateDelta) -> by
             raise PublicStateInvalid("protected record cites an unknown entity")
         if record.dependency not in base.dependencies:
             raise PublicStateInvalid("protected record cites an unknown dependency")
-        expected_dependency = {"price": "catalog", "stock": "inventory", "availability": "collection"}[record.kind]
+        expected_dependency = {"price": "catalog", "stock": "inventory", "availability": "collection", "signal": "enrichment"}[record.kind]
         if record.dependency != expected_dependency or record.record_age_ms < 0:
             raise PublicStateInvalid("protected record has an invalid public dependency or age")
-        if record.kind in ("price", "stock"):
+        if record.kind == "signal":
+            if base.engagement_slug != "gtm" or record.currency is not None:
+                raise PublicStateInvalid("signal delta requires the GTM public state")
+            try:
+                SignalFacts.model_validate(record.value)
+            except ValidationError as exc:
+                raise PublicStateInvalid("invalid protected signal facts") from exc
+        elif record.kind in ("price", "stock"):
             if type(record.value) is not int or record.value < 0:
                 raise PublicStateInvalid("protected price and stock must be nonnegative integers")
             if record.currency != (base.currency if record.kind == "price" else None):
@@ -439,6 +513,55 @@ class ShopSnapshot(BaseModel):
     records: tuple[PublicRecord, ...]
 
 
+class SignalRecord(BaseModel):
+    model_config = _FROZEN
+    record_id: str = Field(min_length=1)
+    entity_ref: str = Field(min_length=1)
+    kind: Literal["signal"]
+    value: dict[str, JsonValue]
+    record_age_ms: StrictInt = Field(ge=0)
+    dependency: Literal["enrichment"]
+
+    @model_validator(mode="after")
+    def usable_signal(self):
+        SignalFacts.model_validate(self.value)
+        return self
+
+
+class PipelineSnapshot(BaseModel):
+    model_config = _FROZEN
+    engagement_slug: Literal["gtm"]
+    display_name: str
+    snapshot_version: StrictInt = Field(ge=1)
+    review_status: str
+    description: str
+    observed_at: datetime
+    timezone: str
+    dependencies: dict[str, Literal["available", "unavailable"]]
+    routing_rules: dict[str, str]
+    entities: dict[str, SignalEntity]
+    records: tuple[SignalRecord, ...]
+
+    @model_validator(mode="after")
+    def signal_inventory(self):
+        routes = {region + "/" + product for region in ("APAC", "EMEA", "AMER")
+                  for product in ("platform", "analytics")}
+        if set(self.routing_rules) != routes or any(not owner or owner == "revenue-review" for owner in self.routing_rules.values()):
+            raise ValueError("pipeline needs six explicit qualified routes")
+        if set(self.dependencies) != {"enrichment"}:
+            raise ValueError("pipeline dependency vocabulary must be enrichment")
+        if len({r.record_id for r in self.records}) != len(self.records) or len({r.entity_ref for r in self.records}) != len(self.records):
+            raise ValueError("pipeline signal identities must be unique")
+        for record in self.records:
+            entity = self.entities.get(record.entity_ref)
+            facts = SignalFacts.model_validate(record.value)
+            if entity is None or entity.domain != facts.account_domain:
+                raise ValueError("signal evidence must bind its company domain")
+            if facts.existing_record_ref is not None and facts.existing_record_ref != "pipeline:" + record.entity_ref:
+                raise ValueError("existing pipeline reference must bind the signal")
+        return self
+
+
 RecordStatus = Literal["AGREED", "CONFLICT", "NO_CURRENT_RECORD"]
 
 
@@ -574,7 +697,7 @@ def _check_mission(label: str, mission: MissionSpec) -> None:
             raise MissionSpecInvalid(f"explanation code {code!r} allows no task kind")
 
 
-def load_public_state(path: Path) -> ShopSnapshot:
+def load_public_state(path: Path) -> ShopSnapshot | PipelineSnapshot:
     try:
         raw = path.read_bytes()
     except OSError as exc:
@@ -582,14 +705,15 @@ def load_public_state(path: Path) -> ShopSnapshot:
     return load_public_state_bytes(raw, label=path.name)
 
 
-def load_public_state_bytes(raw: bytes, *, label: str = "frozen public state bytes") -> ShopSnapshot:
+def load_public_state_bytes(raw: bytes, *, label: str = "frozen public state bytes") -> ShopSnapshot | PipelineSnapshot:
     """The same fail-closed parse over bytes, for a context's frozen public state."""
     try:
         data = json.loads(raw.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise PublicStateInvalid(f"public state {label} is not readable JSON: {exc}") from exc
     try:
-        snapshot = ShopSnapshot.model_validate(data)
+        model = PipelineSnapshot if isinstance(data, dict) and data.get("engagement_slug") == "gtm" else ShopSnapshot
+        snapshot = model.model_validate(data)
     except ValidationError as exc:
         raise PublicStateInvalid(
             f"public state {label} is not usable: {_validation_summary(exc)}"
