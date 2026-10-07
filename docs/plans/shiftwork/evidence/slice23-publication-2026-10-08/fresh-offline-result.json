@@ -1,0 +1,26 @@
+{
+  "command": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tests",
+    "--ignore=tests/packaging",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\fresh-offline.xml"
+  ],
+  "cwd": "C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\fresh-s23",
+  "tested_commit": "54f17f1924ec38686c0f9a23b6d9201fd435dfd5",
+  "exit_code": 1,
+  "tests": 1282,
+  "failures": 1,
+  "errors": 0,
+  "skipped": 1,
+  "log_sha256": "975d54ee61d4674d60e903888c2b2a22ff551078cf74b8c09ef1c1391cadbe37",
+  "xml_sha256": "a1175e4d2b0c159b253fc3366cf0f86c1690323fb7541a9751e3d4b9e20c9e3c",
+  "dependency_installation": false,
+  "environment": "existing .venv313 interpreter; fresh Git checkout with core.autocrlf=true"
+}

@@ -89,3 +89,6 @@ shiftwork/packs/registry.py -text
 
 # Preserve S23 acceptance, independent review and publication receipts.
 docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/** -text
+
+# Recognize preserved Windows receipt line endings without relaxing whitespace guards.
+docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,85 @@
+{
+  "tested_commit": "54f17f1924ec38686c0f9a23b6d9201fd435dfd5",
+  "files": {
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-offline.log": "975d54ee61d4674d60e903888c2b2a22ff551078cf74b8c09ef1c1391cadbe37",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-offline.xml": "a1175e4d2b0c159b253fc3366cf0f86c1690323fb7541a9751e3d4b9e20c9e3c",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-offline-result.json": "a7c45fa6b12970b371df16b2674864f1e729b5996afadac18f92692372dc6c00",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-checkout-preflight.json": "0f7bac7ec191f5232d9e3d89765b5fe97e2517f432b3009bdb357dc8dfba3033",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-short-focused.log": "10a19139478ebca768fd82a67aabd28b8758811f06528cebdceef8a8c49bb8e6",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-short-focused.xml": "63b2773c4f469a0d41dd32e752dd01208794a455919be296098d4fcb03d94142",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-short-focused-result.json": "03eb8fa19b3ddf0a73abb2218377d932de3b00f8df4c129955b2a5d8902d1241",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-short-offline.log": "bb8afe9a409aefa262cfe9afe86cb5da7fee5c4edc0709895657cfd997d84a77",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-short-offline.xml": "97b99d7499e1783454c977fcacc4653e6c8f53f44364f63e80884f91a44a5f29",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-short-offline-result.json": "4b3daa3812b10a25a0e1b540e9c01741be29cfdedd771802f32ca9126a3d79a6",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-short-checkout-preflight.json": "3288a9abc90cebb3ab7643c5b814268426b9a8bf38867e2ad0d29b3bf7801c56",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/fresh-path-diagnosis.json": "18819c9a830c859719ad4af616aa385fbab0683d31a4443685dd8b07ec35ba02",
+    "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/accepted-commit-batches.json": "016a06b0bf2e43f254738d9ec3d822b3e1739fb389315bb6aa7895fd5faff86c",
+    "MISTAKES.md": "414eccddd6ae0f2a9ad8140ecafaa1f7e5043c11d66c4893e980c9e836f52c60",
+    ".gitattributes": "7405fc754e2762b59817c3027481958e45bd80b0f85b15926b599105bd5fbc1e"
+  },
+  "mistakes_append": {
+    "previous_sha256": "74ec8813fd4aced84f21fd97a871d4080f802f8d40737d63b2fad9b69c4fc0ce",
+    "appended_sha256": "75ba08aa2067ded5690fae9ed2104b956e6951fb22c79d5d0d7167d7ae7134e0",
+    "final_sha256": "414eccddd6ae0f2a9ad8140ecafaa1f7e5043c11d66c4893e980c9e836f52c60",
+    "original_prefix_preserved": true
+  },
+  "publication_receipt_attribute_append": {
+    "previous_sha256": "740f6801ea0df31b456689c2ab099ccaac1b900ebdb3fabd764f7baae2db624c",
+    "final_sha256": "7405fc754e2762b59817c3027481958e45bd80b0f85b15926b599105bd5fbc1e",
+    "original_prefix_preserved": true
+  },
+  "retained_failed_long_path_run": {
+    "command": [
+      "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "tests",
+      "--ignore=tests/packaging",
+      "-q",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\fresh-offline.xml"
+    ],
+    "cwd": "C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\fresh-s23",
+    "tested_commit": "54f17f1924ec38686c0f9a23b6d9201fd435dfd5",
+    "exit_code": 1,
+    "tests": 1282,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 1,
+    "log_sha256": "975d54ee61d4674d60e903888c2b2a22ff551078cf74b8c09ef1c1391cadbe37",
+    "xml_sha256": "a1175e4d2b0c159b253fc3366cf0f86c1690323fb7541a9751e3d4b9e20c9e3c",
+    "dependency_installation": false,
+    "environment": "existing .venv313 interpreter; fresh Git checkout with core.autocrlf=true"
+  },
+  "successful_short_path_run": {
+    "command": [
+      "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "tests",
+      "--ignore=tests/packaging",
+      "-q",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\fresh-short-offline.xml"
+    ],
+    "cwd": "C:\\Users\\jayd0\\Documents\\Codex\\work\\sw23",
+    "tested_commit": "54f17f1924ec38686c0f9a23b6d9201fd435dfd5",
+    "exit_code": 0,
+    "tests": 1282,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "log_sha256": "bb8afe9a409aefa262cfe9afe86cb5da7fee5c4edc0709895657cfd997d84a77",
+    "xml_sha256": "97b99d7499e1783454c977fcacc4653e6c8f53f44364f63e80884f91a44a5f29",
+    "dependency_installation": false,
+    "environment": "existing .venv313 interpreter; fresh Git checkout with core.autocrlf=true"
+  },
+  "unresolved_limit": "The scanner portability limit remains; no general arbitrary-path pass is claimed.",
+  "source_or_test_edits": false
+}

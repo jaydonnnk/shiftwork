@@ -1,0 +1,48 @@
+{
+  "status": "CONFIRMED_PATH_CONDITIONED_HISTORICAL_SCANNER_LIMIT",
+  "probes": [
+    {
+      "cwd": "C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\fresh-s23",
+      "public_snapshot_ref": "C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\fresh-s23\\shiftwork\\fixtures\\shop\\bookshop_snapshot.json",
+      "matching_path_fragments": [
+        "-handover-for-shiftwork-s",
+        "\\background-handover-for-",
+        "ackground-handover-for-sh",
+        "andover-for-shiftwork-s23",
+        "background-handover-for-s",
+        "ckground-handover-for-shi",
+        "d-handover-for-shiftwork-",
+        "dover-for-shiftwork-s23-2",
+        "er-for-shiftwork-s23-2026",
+        "ground-handover-for-shift",
+        "handover-for-shiftwork-s2",
+        "kground-handover-for-shif",
+        "nd-handover-for-shiftwork",
+        "ndover-for-shiftwork-s23-",
+        "ound-handover-for-shiftwo",
+        "over-for-shiftwork-s23-20",
+        "r-for-shiftwork-s23-2026\\",
+        "round-handover-for-shiftw",
+        "und-handover-for-shiftwor",
+        "ver-for-shiftwork-s23-202"
+      ],
+      "manifest_matches": []
+    },
+    {
+      "cwd": "C:\\Users\\jayd0\\Documents\\Codex\\work\\sw23",
+      "public_snapshot_ref": "C:\\Users\\jayd0\\Documents\\Codex\\work\\sw23\\shiftwork\\fixtures\\shop\\bookshop_snapshot.json",
+      "matching_path_fragments": [],
+      "manifest_matches": []
+    }
+  ],
+  "unchanged_since_base": {
+    "tests/leakscan.py": "a65a5954221d534a7ceef9abd52ae0a086d25d81e8a919129ab753344b211f82",
+    "tests/sealed/test_payload_manifest.py": "b79794181466def14e3c632283742a306bbcbfd290294526df2ae9de14491ffb",
+    "tests/conftest.py": "279cb888735f3bcc7dc05ef93b8f388ba7e13a4848c961f57747bfb5965234e0"
+  },
+  "source_or_test_edits": false,
+  "diagnosis": "The scanner expands absolute sealed family paths into 25-character windows. The long checkout directory yields matching fragments in the serialized public snapshot reference. The unchanged request and scanner produce no matches under the short checkout path.",
+  "retained_failed_suite": "fresh-offline-result.json",
+  "short_path_positive_control": "fresh-short-focused-result.json",
+  "unresolved": "The scanner portability limit remains; no general arbitrary-path pass is claimed."
+}

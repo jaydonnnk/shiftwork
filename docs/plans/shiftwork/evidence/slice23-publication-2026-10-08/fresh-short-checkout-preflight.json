@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "cwd": "C:\\Users\\jayd0\\Documents\\Codex\\work\\sw23",
+  "fresh_commit": "54f17f1924ec38686c0f9a23b6d9201fd435dfd5",
+  "core_autocrlf": true,
+  "gtm_material_files": 19,
+  "prior_reviewed_pins": 42,
+  "exact_byte_bound_published_files": 601,
+  "excluded_changes_absent": true,
+  "checkout_clean": true
+}

@@ -2405,3 +2405,10 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - **What happened:** the final audit passed material, history, source, test, fault and publication checks, then Git diff --check rejected every preserved CRLF config line after -text was added. No final success receipt was written.
 - **Root cause:** preserving approved CRLF bytes as a blob requires Git to recognize carriage returns as line endings for that path.
 - **Prevention rule:** preserve exact approved bytes, declare cr-at-eol for that CRLF path while retaining all three default whitespace guards, and retain the failed audit diagnosis. Do not normalize signed source or suppress whitespace checks globally.
+
+
+## 2026-10-08 S23 fresh-checkout scan hit a known path portability limit
+
+- **What happened:** the first fresh Git checkout suite retained one failure, 1280 passes, one skip and two warnings. The payload scanner matched 25-character fragments of the long chat directory in a public snapshot path. The failed log, XML and result remain intact. The unchanged commit passed the focused guard and full suite from a short physical checkout path.
+- **Root cause:** publication verification used a long directory component despite the historical scanner portability limit. The collector expands sealed absolute paths into fragments, which can coincide with the public absolute path. Scanner, fixture and test blobs are unchanged from the incoming main commit.
+- **Prevention rule:** run fresh checkout verification from a short physical path, retain failed-path evidence and disclose the remaining portability limit. Do not weaken the scanner, rewrite reviewed source or claim arbitrary-path portability.
