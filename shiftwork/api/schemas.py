@@ -11,7 +11,6 @@ from shiftwork.domain.models import (
     ArtifactVersion,
     AssistRole,
     CheckResult,
-    Claim,
     Incident,
     JsonValue,
     OperatingSelection,
@@ -146,9 +145,17 @@ class CustomerAnswerView(BaseModel):
 
     action: Literal["answer", "ask", "decline", "escalate"]
     display_text: str
-    claims: tuple[Claim, ...]
+    claims: tuple["PublicAnswerClaim", ...]
     evidence_refs: tuple[str, ...]
     verified_record_age_ms: int | None
+
+
+class PublicAnswerClaim(BaseModel):
+    """Presentation vocabulary; the legacy sealed response grammar stays exact."""
+    model_config = _FROZEN
+    kind: Literal["price", "stock", "availability", "policy_answer", "booking", "none", "safety_route",
+                  "qualification", "owner_assignment", "pipeline_write", "handoff"]
+    value: JsonValue
 
 
 class PublicShopRecordView(BaseModel):

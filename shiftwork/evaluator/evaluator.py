@@ -57,6 +57,8 @@ from shiftwork.domain.task_contract import (
     CustomerRequestSpec,
     DeploymentTrace,
     MissionSpec,
+    PipelineSnapshot,
+    SignalFacts,
     ProtectedStimulus,
     RequiredTask,
     ShopSnapshot,
@@ -324,10 +326,11 @@ def assess_request(
     spec: CustomerRequestSpec,
     request_ordinal: int,
     mission: MissionSpec,
-    snapshot: ShopSnapshot,
+    snapshot: ShopSnapshot | PipelineSnapshot,
     response: TaskServiceResponse | None,
     deployment_trace: DeploymentTrace | None = None,
     prior_deployment_traces: tuple[DeploymentTrace, ...] = (),
+    prior_pipeline_results: tuple[tuple[CustomerRequestSpec, TaskServiceResponse], ...] = (),
 ) -> tuple[TaskAssessment, ...]:
     """Assess every task the frozen request declares, in declared order.
 
@@ -349,6 +352,9 @@ def assess_request(
             for task in spec.tasks
         )
 
+    if any(task.kind in PIPELINE_TASK_KINDS for task in spec.tasks):
+        return _assess_pipeline_request(spec, request_ordinal, mission, snapshot, response,
+                                        prior_pipeline_results)
     results = {result.task_id: result for result in response.task_results}
     assessments = []
     for task in spec.tasks:
@@ -371,6 +377,115 @@ def assess_request(
                     snapshot=snapshot,
                 )
             )
+    return tuple(assessments)
+
+
+PIPELINE_TASK_KINDS = frozenset((TaskKind.QUALIFY_SIGNAL, TaskKind.ASSIGN_OWNER,
+                               TaskKind.WRITE_PIPELINE_RECORD, TaskKind.HANDOFF_TO_REVIEW))
+
+
+def _pipeline_decisions(facts, record, snapshot, mission):
+    """Apply the public rubric without trusting a service's classification."""
+    if facts.suppressed or facts.employee_count < 50:
+        return {"DISQUALIFIED"}
+    current = (snapshot.dependencies[record.dependency] == "available"
+               and record.record_age_ms <= mission.max_record_age_ms)
+    if (not current or facts.region == "UNKNOWN" or facts.product == "UNKNOWN"
+            or facts.confidence < 80 or facts.intent_label == "AMBIGUOUS"):
+        return {"REVIEW"}
+    if facts.intent_label == "RESEARCH":
+        return {"DISQUALIFIED"}
+    explicit = any(phrase in facts.note.lower() for phrase in ("demo", "pricing", "security review"))
+    return {"QUALIFIED"} if explicit else {"QUALIFIED", "REVIEW"}
+
+
+def _assess_pipeline_request(spec, ordinal, mission, snapshot, response, prior):
+    """Validate synthetic output records, not a claimed external CRM action."""
+    if not isinstance(snapshot, PipelineSnapshot) or mission.engagement_slug != "gtm":
+        raise MissionSpecInvalid("pipeline assessment requires owning GTM state and mission")
+    entity_ref = spec.requested_entities[0]
+    records = [record for record in snapshot.records if record.entity_ref == entity_ref]
+    if len(records) != 1:
+        raise MissionSpecInvalid("pipeline spec names no unique frozen signal")
+    record = records[0]
+    facts = SignalFacts.model_validate(record.value)
+    results = {result.task_id: result for result in response.task_results}
+    qualification_task = next(task for task in spec.tasks if task.kind is TaskKind.QUALIFY_SIGNAL)
+    qualification = results.get(qualification_task.id)
+    condition = qualification_task.condition_json
+    allowed = _pipeline_decisions(facts, record, snapshot, mission) & set(condition["expected_decisions"])
+    decision = (qualification.claims[0].value if qualification is not None and len(qualification.claims) == 1
+                and qualification.claims[0].kind == "qualification" else None)
+    if not isinstance(decision, str) or decision not in allowed:
+        decision = None
+    owner = ("revenue-review" if decision == "REVIEW" else
+             snapshot.routing_rules.get(facts.region + "/" + facts.product))
+    pinned_owner_ok = decision != "QUALIFIED" or condition["qualified_owner"] == owner
+    existing = facts.existing_record_ref is not None
+    prior_decision = None
+    committed_prior_ids = set()
+    for index, (earlier_spec, earlier_response) in enumerate(prior):
+        if earlier_spec.requested_entities != spec.requested_entities:
+            continue
+        earlier = assess_request(spec=earlier_spec, request_ordinal=index + 1, mission=mission,
+                                 snapshot=snapshot, response=earlier_response,
+                                 prior_pipeline_results=prior[:index])
+        if not request_usefully_completed(earlier_spec, earlier):
+            continue
+        written = next((r for r in earlier_response.task_results
+                        if any(c.kind == "pipeline_write" for c in r.claims)), None)
+        if written is not None and written.status is TaskStatus.COMPLETED:
+            existing = True
+            committed_prior_ids.add(earlier_spec.id)
+            prior_decision = next(c.value for r in earlier_response.task_results for c in r.claims
+                                  if c.kind == "qualification")
+    repeat_of = condition["repeat_of"]
+    repeat_proved = repeat_of is None or repeat_of in committed_prior_ids
+    prior_consistent = (prior_decision is None or prior_decision == decision)
+    existing_consistent = (facts.existing_owner is None or facts.existing_owner == owner)
+    expected = {TaskKind.QUALIFY_SIGNAL: ("qualification", decision, True),
+                TaskKind.ASSIGN_OWNER: ("owner_assignment", owner, decision != "DISQUALIFIED" and not existing),
+                TaskKind.WRITE_PIPELINE_RECORD: ("pipeline_write", None, decision != "DISQUALIFIED" and not existing),
+                TaskKind.HANDOFF_TO_REVIEW: ("handoff", "revenue-review", decision == "REVIEW" and not existing)}
+    assessments = []
+    for task in spec.tasks:
+        result = results.get(task.id)
+        codes = []
+        kind, value, active = expected[task.kind]
+        if result is None:
+            codes.append(ReasonCode.REQUIRED_TASK_MISSING)
+        elif result.entity_ref != entity_ref or any(c.entity_ref != entity_ref for c in result.claims):
+            codes.append(ReasonCode.WRONG_ENTITY)
+        elif not repeat_proved or not prior_consistent or not existing_consistent or not pinned_owner_ok or decision is None:
+            codes.append(ReasonCode.WRONG_ACTION)
+        elif not active:
+            if result.status is not TaskStatus.NOT_APPLICABLE or result.claims or result.commitment_ref is not None:
+                codes.append(ReasonCode.DUPLICATE_COMMITMENT if existing else ReasonCode.WRONG_ACTION)
+        elif result.status is not TaskStatus.COMPLETED:
+            codes.append(ReasonCode.REQUIRED_TASK_MISSING)
+        elif len(result.claims) != 1:
+            codes.append(ReasonCode.DUPLICATE_COMMITMENT if len(result.claims) > 1 else ReasonCode.REQUIRED_TASK_MISSING)
+        else:
+            claim = result.claims[0]
+            if claim.kind != kind or result.commitment_ref is not None:
+                codes.append(ReasonCode.WRONG_ACTION)
+            if claim.evidence_refs != (record.record_id,):
+                codes.append(ReasonCode.UNSUPPORTED_CLAIM)
+            if kind == "pipeline_write":
+                row = claim.value
+                if (not isinstance(row, dict) or set(row) != {"owner", "record_ref", "decision_trace"}
+                        or row.get("owner") != owner or row.get("record_ref") != "pipeline:" + entity_ref
+                        or not isinstance(row.get("decision_trace"), list) or len(row["decision_trace"]) != 2
+                        or not isinstance(row["decision_trace"][0], str)
+                        or row["decision_trace"][0] not in {"RULES_FIRST", "RECORDED_CLASSIFICATION"}
+                        or row["decision_trace"][1] != decision):
+                    codes.append(ReasonCode.WRONG_ACTION)
+            elif claim.value != value:
+                codes.append(ReasonCode.WRONG_ACTION)
+        outcome = (TaskOutcome.MISSING_OUTPUT if result is None else TaskOutcome.INCORRECT_OUTPUT if codes
+                   else TaskOutcome.USEFUL_COMPLETION if active else TaskOutcome.JUSTIFIED_REFUSAL)
+        assessments.append(TaskAssessment(request_id=spec.id, request_ordinal=ordinal, task_id=task.id,
+                           outcome=outcome, mandatory_pass=not codes, reason_codes=tuple(dict.fromkeys(codes))))
     return tuple(assessments)
 
 

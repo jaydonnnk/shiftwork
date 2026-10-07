@@ -18,6 +18,7 @@ from shiftwork.domain.models import Claim, JsonValue, ServiceResponse
 from shiftwork.domain.task_contract import (
     CustomerRequestSpec,
     MissionSpec,
+    PipelineSnapshot,
     ShopEntity,
     ShopSnapshot,
     TaskResult,
@@ -134,7 +135,7 @@ def render_task_customer_text(
     *,
     spec: CustomerRequestSpec,
     mission: MissionSpec,
-    snapshot: ShopSnapshot,
+    snapshot: ShopSnapshot | PipelineSnapshot,
     response: TaskServiceResponse,
 ) -> str:
     """Render the customer-facing answer from a validated envelope alone.
@@ -157,11 +158,31 @@ def render_task_customer_text(
 
 def _render_task_result(
     mission: MissionSpec,
-    snapshot: ShopSnapshot,
+    snapshot: ShopSnapshot | PipelineSnapshot,
     requested_entity: str | None,
     result: TaskResult,
     task_kind: TaskKind,
 ) -> str:
+    if task_kind in (TaskKind.QUALIFY_SIGNAL, TaskKind.ASSIGN_OWNER,
+                     TaskKind.WRITE_PIPELINE_RECORD, TaskKind.HANDOFF_TO_REVIEW):
+        if result.status is TaskStatus.NOT_APPLICABLE:
+            return mission.render_vocabulary["not_applicable"]
+        if result.status is not TaskStatus.COMPLETED or len(result.claims) != 1:
+            return "The workflow returned no usable synthetic task output."
+        claim = result.claims[0]
+        template = mission.render_vocabulary.get(claim.kind)
+        if template is None:
+            raise ServiceResponseInvalid("unknown pipeline render vocabulary")
+        if claim.kind in ("qualification", "owner_assignment"):
+            if not isinstance(claim.value, str):
+                raise ServiceResponseInvalid("pipeline render value must be text")
+            permitted = ({"QUALIFIED", "REVIEW", "DISQUALIFIED"} if claim.kind == "qualification"
+                         else {*snapshot.routing_rules.values(), "revenue-review"})
+            if claim.value not in permitted:
+                return "The workflow returned an invalid synthetic decision or owner."
+            return template.format(value=claim.value)
+        # Never render service-authored row/prose fields, sent-message claims or revenue.
+        return template
     if result.status is not TaskStatus.COMPLETED:
         return _render_fallback(mission, result)
 
