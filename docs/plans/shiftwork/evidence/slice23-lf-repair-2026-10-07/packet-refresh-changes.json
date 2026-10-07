@@ -1,0 +1,49 @@
+{
+  "status": "PREPARED_REGRESSION_PENDING",
+  "changes": [
+    {
+      "path": "fixtures/requests/gtm_compare_manifest.json",
+      "field": "sha256",
+      "before": "3fae4e371612eacf9982dbf14e8198da4d0ba54ac429d63d46d6b0820d3a8193",
+      "after": "6b58826403dd11e37a4afefb0efc36a712a94c71e8207d80907a719eee1be4a9"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_manifest.json",
+      "field": "proposed_sha256",
+      "before": "c4352ed80c7a2117164a4e0ddd3dbb5b6866651df96b36ab18c9073f7dfe295a",
+      "after": "e517f09bb92be0680324484850cc2a95611ac0034c973ce36f06d0ca2ce762bf"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_01_specs.json",
+      "field": "sha256",
+      "before": "dce616be4556bcdfb2055b3c2b0ea39bdb950c46f9ff5f78b2fecc78f48ab910",
+      "after": "714433f66efb3308332df3fe130b19556fc7889365c88c809bd80f6abf87ef38"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_01_specs.json",
+      "field": "proposed_sha256",
+      "before": "dce616be4556bcdfb2055b3c2b0ea39bdb950c46f9ff5f78b2fecc78f48ab910",
+      "after": "714433f66efb3308332df3fe130b19556fc7889365c88c809bd80f6abf87ef38"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_02_specs.json",
+      "field": "sha256",
+      "before": "e179a2e37c1527f0187274cffd7cee1c70a8b8cf5839e8aceea3f69fb202aebd",
+      "after": "76019d7dea096438709d2a5f23bca202d86785e3907c59fd73a140677ae1e22c"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_02_specs.json",
+      "field": "proposed_sha256",
+      "before": "e179a2e37c1527f0187274cffd7cee1c70a8b8cf5839e8aceea3f69fb202aebd",
+      "after": "76019d7dea096438709d2a5f23bca202d86785e3907c59fd73a140677ae1e22c"
+    },
+    {
+      "path": "shiftwork/packs/registry.py",
+      "field": "proposed_sha256",
+      "before": "3e13c19fd9ee75cce2267cc1c9837a4dccdd86278616f8f319ff03c2d53b18d0",
+      "after": "e6cb4f3803479cf8aa35505a46463d83451b9a448c0fd96b162e2bae411c44d0"
+    }
+  ],
+  "canonical_seals_unchanged": true,
+  "production_application": false
+}

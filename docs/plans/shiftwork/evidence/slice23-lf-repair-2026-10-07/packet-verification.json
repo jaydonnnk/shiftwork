@@ -1,0 +1,46 @@
+{
+  "status": "PASS",
+  "approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa",
+  "material_preimages": 19,
+  "application_paths": [
+    "shiftwork/config.py",
+    "shiftwork/fixtures/requests/gtm_compare_manifest.json",
+    "shiftwork/packs/registry.py",
+    "shiftwork/sealed/cases/gtm_pipeline_ownership.json"
+  ],
+  "document_bindings": 3,
+  "offline_fixture_pins": 3,
+  "source_ast_scope": "only GTM pins/documents and three fixture entries",
+  "newline_preservation": [
+    {
+      "path": "shiftwork/packs/registry.py",
+      "unchanged_lines_byte_exact": 295
+    },
+    {
+      "path": "shiftwork/config.py",
+      "unchanged_lines_byte_exact": 281
+    }
+  ],
+  "git_text_attributes": [
+    "shiftwork/fixtures/catalogs/gtm_v1.json: text: unset",
+    "shiftwork/fixtures/mission/gtm_pipeline_v1.json: text: unset",
+    "shiftwork/fixtures/state/gtm_pipeline_public_state.json: text: unset",
+    "shiftwork/fixtures/state/gtm_compare_state_v1.json: text: unset",
+    "shiftwork/fixtures/requests/gtm_pipeline_incident.jsonl: text: unset",
+    "shiftwork/fixtures/requests/gtm_compare_manifest.json: text: unset",
+    "shiftwork/fixtures/requests/gtm_compare_pair_01.jsonl: text: unset",
+    "shiftwork/fixtures/requests/gtm_compare_pair_01_specs.json: text: unset",
+    "shiftwork/fixtures/requests/gtm_compare_pair_02.jsonl: text: unset",
+    "shiftwork/fixtures/requests/gtm_compare_pair_02_specs.json: text: unset",
+    "shiftwork/fixtures/requests/gtm_compare_pair_03.jsonl: text: unset",
+    "shiftwork/fixtures/requests/gtm_compare_pair_03_specs.json: text: unset",
+    "shiftwork/sealed/cases/gtm_pipeline_ownership.json: text: unset",
+    "shiftwork/fixtures/artifacts/gtm/pipeline_starter_failure.py: text: unset",
+    "shiftwork/fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py: text: unset",
+    "shiftwork/fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py: text: unset",
+    "shiftwork/fixtures/documents/gtm/revenue_team_brief.md: text: unset",
+    "shiftwork/fixtures/documents/gtm/qualification_routing_rules.md: text: unset",
+    "shiftwork/fixtures/documents/gtm/workflow_treatments.md: text: unset"
+  ],
+  "production_application": false
+}

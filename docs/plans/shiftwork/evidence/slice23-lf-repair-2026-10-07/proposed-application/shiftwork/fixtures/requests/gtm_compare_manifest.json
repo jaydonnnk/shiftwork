@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "engagement_slug": "gtm",
+  "review_status": "OPERATOR_SEALED",
+  "sealed_payload_sha256": "e0e3f5bddfa81e8a52dec188b79ca09dfd15b7d4c1ca819f08f2493ba0376454",
+  "comparison_state_sha256": "1a9d7cd051d691bcebed2917edc042ebc8f81dff6cf2b20b14f51c43bf9c834b",
+  "workloads": [
+    {
+      "ordinal": 1,
+      "request_file": "gtm_compare_pair_01.jsonl",
+      "task_spec_file": "gtm_compare_pair_01_specs.json",
+      "request_bytes_sha256": "7095b7a3ed2e0bd2bda8f8ab4594b7958adfdca420323d43235af101656d0497",
+      "request_bytes_length": 419,
+      "request_count": 3,
+      "task_specs_sha256": "8ffe0b1831cc9b48e38d6ce20d0c1000ab85c9a8fc320a074b67d6d6b3a76c04"
+    },
+    {
+      "ordinal": 2,
+      "request_file": "gtm_compare_pair_02.jsonl",
+      "task_spec_file": "gtm_compare_pair_02_specs.json",
+      "request_bytes_sha256": "47baa24e3446245f9fb861873e8953cc5f7058ef6914514a106d34054c282929",
+      "request_bytes_length": 461,
+      "request_count": 3,
+      "task_specs_sha256": "129e5fa77704a199bc4e65d14ed2a1f0da604f11e7ae60a1aaf865a8b9d26cd7"
+    },
+    {
+      "ordinal": 3,
+      "request_file": "gtm_compare_pair_03.jsonl",
+      "task_spec_file": "gtm_compare_pair_03_specs.json",
+      "request_bytes_sha256": "a7d01171a95cf888c52dd6136a223c6f6b0322805543a89e2cae598b89e9625d",
+      "request_bytes_length": 442,
+      "request_count": 3,
+      "task_specs_sha256": "c81b79570f7a21fb8745cdc95b5df609089091aa84f57045312555794af4d643"
+    }
+  ]
+}

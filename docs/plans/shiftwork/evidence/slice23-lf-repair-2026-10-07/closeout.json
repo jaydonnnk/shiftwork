@@ -1,0 +1,17 @@
+{
+  "status": "READY_FOR_OPERATOR_MATERIAL_REVIEW_WITH_INCOMING_EXCEPTION",
+  "full_suite_summary": "1278 passed, 1 skipped, 2 warnings in 967.15s (0:16:07)",
+  "full_suite_exit_code": 0,
+  "skipped": [
+    {
+      "classname": "tests.executor.test_conformance",
+      "name": "test_conformance_suite_tokenfactory",
+      "reason": "Test 29: full real-provisioning conformance still needs a separately authorized live Sandbox run; Slice 15 multi-request adapter behavior has offline fake-client coverage only"
+    }
+  ],
+  "approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa",
+  "production_application": false,
+  "s23_complete": false,
+  "s23_accepted": false,
+  "gitignore_ownership": "unverified"
+}

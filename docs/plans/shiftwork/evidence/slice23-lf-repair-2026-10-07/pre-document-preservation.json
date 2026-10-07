@@ -1,0 +1,588 @@
+{
+  "status": "PASS_WITH_PREEXISTING_EXCEPTION",
+  "continuation_changes": [
+    "docs/plans/shiftwork/slice23-gtm-operator-review-packet.md",
+    "docs/plans/shiftwork/slice23-gtm-review-inventory.json",
+    "shiftwork/fixtures/requests/gtm_compare_manifest.json",
+    "shiftwork/fixtures/requests/gtm_compare_pair_01_specs.json",
+    "shiftwork/fixtures/requests/gtm_compare_pair_02_specs.json"
+  ],
+  "pre_s23_evidence_byte_exact": 4803,
+  "incoming_evidence_byte_exact": 5065,
+  "existing_reviewed_material_byte_exact": 42,
+  "retained_guard_controls_verified": 106,
+  "guard_controls_rerun": false,
+  "rejected_controls_retained": [
+    {
+      "folder": "mutations-first",
+      "name": "snapshot_type"
+    },
+    {
+      "folder": "mutations-first",
+      "name": "trace_short"
+    },
+    {
+      "folder": "mutations-first",
+      "name": "spec_widen_review_owner"
+    },
+    {
+      "folder": "mutations-first",
+      "name": "prior_wrong_batch"
+    },
+    {
+      "folder": "mutations-repaired",
+      "name": "experiment_ledger_write"
+    }
+  ],
+  "exception": {
+    "path": ".gitignore",
+    "ownership": "unverified",
+    "preserved_sha256": "03ba60bd890227f4538781177ecf291eb07719043f52ddb6d870f3a9aa7b97a4",
+    "hidden_request_drafts_explicitly_inventoried": [
+      "shiftwork/fixtures/requests/gtm_pipeline_incident.jsonl",
+      "shiftwork/fixtures/requests/gtm_compare_manifest.json",
+      "shiftwork/fixtures/requests/gtm_compare_pair_01.jsonl",
+      "shiftwork/fixtures/requests/gtm_compare_pair_01_specs.json",
+      "shiftwork/fixtures/requests/gtm_compare_pair_02.jsonl",
+      "shiftwork/fixtures/requests/gtm_compare_pair_02_specs.json",
+      "shiftwork/fixtures/requests/gtm_compare_pair_03.jsonl",
+      "shiftwork/fixtures/requests/gtm_compare_pair_03_specs.json"
+    ],
+    "original_final_state_hold_resolved": false
+  },
+  "source_unchanged_since_handoff": true,
+  "head_and_index_unchanged": true,
+  "production_gtm_pins_or_seals_applied": false,
+  "controls": [
+    {
+      "name": "rubric_suppressed",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_small_company",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_unavailable",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_stale",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_unknown_region",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_unknown_product",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_low_confidence",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_ambiguous",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_research",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_freshness_boundary",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_confidence_boundary",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "rubric_size_boundary",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "result_entity",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "claim_entity",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "claim_kind",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "commitment",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "evidence",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "row_keys",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "row_revenue",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "row_owner",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "row_ref",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "trace_length",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "trace_decision",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "scalar_value",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "claim_cardinality",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "write_cardinality",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "active_status",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "retry_name",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "prior_decision",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "prior_validity",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "mission_owner",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "pinned_owner",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "pinned_decisions",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "existing_owner",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "snapshot_type",
+      "folder": "mutations-repaired",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "inactive_status",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "inactive_claim",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "inactive_commitment",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "trace_method",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "trace_short",
+      "folder": "mutations-repaired",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "row_type",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "trace_type",
+      "folder": "mutations-first",
+      "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+    },
+    {
+      "name": "spec_extra_duplicate_task",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_duplicate_kind",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_duplicate_id",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_two_entities",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_extra_condition",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_decisions_not_list",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_empty_decisions",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_duplicate_decisions",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_owner_not_text",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_empty_owner",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_repeat_not_text",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_empty_repeat",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_qualification_optional",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_conditional_required",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_wrong_signal",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_disagreeing_conditions",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_widen_review_owner",
+      "folder": "mutations-repaired",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_missing_rule",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "spec_decision_vocabulary",
+      "folder": "mutations-repaired",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "state_routes_missing",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "state_empty_route",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "state_review_route",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "state_extra_dependency",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "state_duplicate_record_id",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "state_duplicate_entity_ref",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "state_orphan_entity",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "empty_existing_owner",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "empty_existing_ref",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "state_domain",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "existing_pair",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "existing_ref",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "delta_currency",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "delta_foreign_state",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "delta_facts",
+      "folder": "mutations-first",
+      "source_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+    },
+    {
+      "name": "incident_count",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "incident_request_id",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "incident_text",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "incident_entity",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "family_tasks",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "prior_protected_phase",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "prior_foreign_context",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "prior_wrong_batch",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "prior_duplicate_batch",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "prior_zero_ordinal",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "prior_wrong_spec",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "prior_transport",
+      "folder": "mutations-first",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "private_record_id",
+      "folder": "mutations-first",
+      "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d"
+    },
+    {
+      "name": "private_entity_ref",
+      "folder": "mutations-first",
+      "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d"
+    },
+    {
+      "name": "private_account_domain",
+      "folder": "mutations-first",
+      "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d"
+    },
+    {
+      "name": "private_existing_record_ref",
+      "folder": "mutations-first",
+      "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d"
+    },
+    {
+      "name": "private_company_name",
+      "folder": "mutations-first",
+      "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d"
+    },
+    {
+      "name": "private_domain",
+      "folder": "mutations-first",
+      "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d"
+    },
+    {
+      "name": "state_owner_public_state_path",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "state_owner_comparison_state_path",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "chosen_operation_boundary",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "experiment_execution_boundary",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "assist_projection_allowed_assist_roles_json",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "assist_projection_total_assist_budget_per_shift",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "assist_projection_assist_level",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "assist_role",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "assist_total",
+      "folder": "mutations-repaired",
+      "source_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+    },
+    {
+      "name": "experiment_ledger_write",
+      "folder": "mutations-final",
+      "source_sha256": "fede7af5a3cddb46c64a45033481470a990bcf33f448b6ff91a1a6d89b876fb0"
+    },
+    {
+      "name": "gtm_aspect_NAMED_TASK_OUTCOMES",
+      "folder": "mutations-final",
+      "source_sha256": "a8321c001ef1c36d05d0258dd8b308147da5e523dc52dbc8a3740730cce21db8"
+    },
+    {
+      "name": "gtm_aspect_NO_TASK_REASON_CODE",
+      "folder": "mutations-final",
+      "source_sha256": "a8321c001ef1c36d05d0258dd8b308147da5e523dc52dbc8a3740730cce21db8"
+    }
+  ]
+}

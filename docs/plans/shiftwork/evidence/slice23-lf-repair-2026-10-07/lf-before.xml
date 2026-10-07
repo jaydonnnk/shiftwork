@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.487" timestamp="2026-10-07T20:47:57.070189+08:00" hostname="jaydonnks"><testcase classname="tests.executor.test_conformance" name="test_byte_addressed_fixtures_match_lf_checkout" time="0.060"><failure message="AssertionError: assert ['C:\\Users\\...2_specs.json'] == []&#10;  &#10;  Left contains 3 more items, first extra item: 'C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\fixtures\\requests\\gtm_compare_manifest.json'&#10;  Use -v to get more diff">tests\executor\test_conformance.py:294: in test_byte_addressed_fixtures_match_lf_checkout
+    assert [str(path) for path in files if b"\r\n" in path.read_bytes()] == []
+E   AssertionError: assert ['C:\\Users\\...2_specs.json'] == []
+E     
+E     Left contains 3 more items, first extra item: 'C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\fixtures\\requests\\gtm_compare_manifest.json'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,12 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______________ test_byte_addressed_fixtures_match_lf_checkout ________________
+tests\executor\test_conformance.py:294: in test_byte_addressed_fixtures_match_lf_checkout
+    assert [str(path) for path in files if b"\r\n" in path.read_bytes()] == []
+E   AssertionError: assert ['C:\\Users\\...2_specs.json'] == []
+E     
+E     Left contains 3 more items, first extra item: 'C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\fixtures\\requests\\gtm_compare_manifest.json'
+E     Use -v to get more diff
+=========================== short test summary info ===========================
+FAILED tests/executor/test_conformance.py::test_byte_addressed_fixtures_match_lf_checkout
+1 failed in 0.64s

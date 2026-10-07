@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "application_authorized_but_unapplied": true,
+  "prepared_packet_and_inventory_unchanged": true,
+  "production_material_and_source_preimages_unchanged": 21,
+  "document_suffix_preservation": {
+    "docs/plans/shiftwork/00-status.md": {
+      "preimage_sha256": "9c0d0ef2113e87a33aa942b373e707f1d9659cda382bf643b051503e1769695a",
+      "current_sha256": "7e0bd2698f82ae45da78e97be6a70fb438be46d2d3e285936711e0088dfd5892",
+      "historical_suffix_preserved": true
+    },
+    "docs/SHIFTWORK_PLAN.md": {
+      "preimage_sha256": "fb5b00b5a58b68afc6e54699be5cc09391aab4cdb3c3f84299315b6dea6a1f4d",
+      "current_sha256": "0407d9879b794a5ee0983552db51d6849f476a4edde709cb3a587102b392ddc7",
+      "historical_suffix_preserved": true
+    }
+  },
+  "head_and_index_unchanged": true,
+  "scope": "approval documentation only; no test rerun or production application"
+}

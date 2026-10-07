@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-07",
+  "timezone": "Asia/Singapore",
+  "authorization_source": "direct user message in this chat",
+  "user_statement": "I approve the application but put the approval in the copy paste handoff prompt",
+  "authorization_context": "reply to request to approve the refreshed S23 application packet",
+  "approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa",
+  "machine_inventory_sha256": "65a7bdf9cca9e54803b6d5978b9ad80979a65db48296f99e48525d3314ce1fa7",
+  "prepared_packet_sha256": "e5510402a78e260af8d5784c47d71d3fe4411f97444318df51522e9ac5a1b3ab",
+  "head": "3e02f1e5176cd34d6dc355bbc4529234fa51fe62",
+  "branch": "shiftwork/slice-23",
+  "approved_material_files": 19,
+  "approved_seals": 2,
+  "approved_material_pins": 19,
+  "approved_document_bindings": 3,
+  "approved_offline_fixture_pins": 3,
+  "approved_production_replacements": [
+    {
+      "path": "shiftwork/packs/registry.py",
+      "preimage_sha256": "32b641dc66785719feac7ed26d5eca4baf542e9f14b5418b22fa4171c02672ec",
+      "proposed_sha256": "e6cb4f3803479cf8aa35505a46463d83451b9a448c0fd96b162e2bae411c44d0",
+      "proposed_bytes": 21300
+    },
+    {
+      "path": "shiftwork/config.py",
+      "preimage_sha256": "1fb59fea9668ab6cd2b008ee202f66daebe6da7ec3f34b45db743aed56321f08",
+      "proposed_sha256": "ac8bb45fcbc186787da721b36aa6e30fc762f6d8cd899a07caf7c40c2ed009ff",
+      "proposed_bytes": 16918
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_manifest.json",
+      "preimage_sha256": "6b58826403dd11e37a4afefb0efc36a712a94c71e8207d80907a719eee1be4a9",
+      "proposed_sha256": "e517f09bb92be0680324484850cc2a95611ac0034c973ce36f06d0ca2ce762bf",
+      "proposed_bytes": 1490
+    },
+    {
+      "path": "shiftwork/sealed/cases/gtm_pipeline_ownership.json",
+      "preimage_sha256": "5c0b1aebe8e9c194084dc250148747c1e0df691d1881158e09694f3a3daba8d1",
+      "proposed_sha256": "f3323eba764cc116df1439abe21ad094369936cd39b05641060d9bc646a9dd5f",
+      "proposed_bytes": 28741
+    }
+  ],
+  "application_authorized": true,
+  "application_deferred_for_handoff": true,
+  "application_completed": false,
+  "s23_accepted": false,
+  "offline_verification": "existing S23 offline authority; described packet validation remains unrun",
+  "not_authorized": [
+    "live calls",
+    "credentials",
+    "installations",
+    "spending",
+    "Git staging/commits/pushes",
+    "S24",
+    "S25"
+  ],
+  "gitignore_ownership": "unverified; unchanged; not approved by this packet"
+}

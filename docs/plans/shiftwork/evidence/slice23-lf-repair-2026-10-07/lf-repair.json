@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "files": [
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_manifest.json",
+      "preimage_sha256": "3fae4e371612eacf9982dbf14e8198da4d0ba54ac429d63d46d6b0820d3a8193",
+      "repaired_sha256": "6b58826403dd11e37a4afefb0efc36a712a94c71e8207d80907a719eee1be4a9",
+      "crlf_replaced": 36,
+      "json_identical": true
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_pair_01_specs.json",
+      "preimage_sha256": "dce616be4556bcdfb2055b3c2b0ea39bdb950c46f9ff5f78b2fecc78f48ab910",
+      "repaired_sha256": "714433f66efb3308332df3fe130b19556fc7889365c88c809bd80f6abf87ef38",
+      "crlf_replaced": 225,
+      "json_identical": true
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_pair_02_specs.json",
+      "preimage_sha256": "e179a2e37c1527f0187274cffd7cee1c70a8b8cf5839e8aceea3f69fb202aebd",
+      "repaired_sha256": "76019d7dea096438709d2a5f23bca202d86785e3907c59fd73a140677ae1e22c",
+      "crlf_replaced": 221,
+      "json_identical": true
+    }
+  ],
+  "production_seal_applied": false
+}
