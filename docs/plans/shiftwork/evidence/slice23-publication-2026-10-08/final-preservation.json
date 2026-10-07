@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "reviewed_source_bindings_unchanged": 155,
+  "first_publication_head": "bda073714c5ecfad35a47fff6e2bba1e1c2b2771",
+  "raw_merge_preservation": {
+    "status": "PASS",
+    "head": "bda073714c5ecfad35a47fff6e2bba1e1c2b2771",
+    "merge": "fast-forward",
+    "files_preserved": 6205,
+    "byte_restored_paths": [
+      "shiftwork/comparison_flow.py",
+      "tests/packs/gtm_material.py",
+      "docs/plans/shiftwork/slice23-architecture-review-2026-10-07.md",
+      "docs/plans/shiftwork/slice23-application-checkpoint-2026-10-07.md",
+      "docs/plans/shiftwork/slice23-lf-repair-checkpoint-2026-10-07.md",
+      "docs/plans/shiftwork/slice23-offline-checkpoint-2026-10-07.md",
+      "docs/plans/shiftwork/slice23-application-handoff-2026-10-07.md",
+      "tests/packs/test_registry.py",
+      ".gitattributes",
+      "shiftwork/experiments.py",
+      "docs/plans/shiftwork/slice23-handoff-2026-10-07.md",
+      "tests/orchestrator/test_gtm_guards.py",
+      "tests/orchestrator/test_gtm_pipeline.py",
+      "demos/gtm_review.py",
+      "docs/plans/shiftwork/slice23-lf-repair-architecture-preflight-2026-10-07.md",
+      "tests/packs/test_northline_review.py",
+      "docs/SHIFTWORK_PLAN.md",
+      "tests/api/test_workplace_boards.py",
+      "tests/packs/gtm_mutation_proofs.py",
+      "MISTAKES.md",
+      "docs/plans/shiftwork/slice23-application-architecture-review-2026-10-07.md",
+      "docs/plans/shiftwork/slice23-implementation-plan.md",
+      "docs/plans/shiftwork/slice23-approved-application-handoff-2026-10-07.md",
+      "shiftwork/orchestrator.py",
+      "docs/plans/shiftwork/slice23-lf-repair-plan-2026-10-07.md",
+      "docs/plans/shiftwork/slice23-application-plan-2026-10-07.md",
+      "tests/orchestrator/test_fde_deployment.py",
+      "docs/plans/shiftwork/slice23-publication-inventory-2026-10-07.json",
+      "demos/gtm_reviewed.py",
+      "docs/plans/shiftwork/00-status.md"
+    ],
+    "index_tree_unchanged": true,
+    "excluded_changes_preserved": true
+  },
+  "excluded_hashes": {
+    "AGENTS.md": "af344830f82908ee3cc02363e172d9fb7fe7573c73cd2cfea8b94dfcf701e956",
+    ".gitignore": "03ba60bd890227f4538781177ecf291eb07719043f52ddb6d870f3a9aa7b97a4"
+  },
+  "unresolved_scanner_portability_limit": "The scanner portability limit remains; no general arbitrary-path pass is claimed.",
+  "acceptance": "ACCEPTED",
+  "publication": "VERIFIED",
+  "later_slices_authorized": false
+}

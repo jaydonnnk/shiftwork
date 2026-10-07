@@ -1,3 +1,25 @@
+**S23 ACCEPTED AND PUBLISHED, 2026-10-08 Asia/Singapore.**
+
+S23 was accepted by the user, committed in focused batches, fast-forwarded
+to main and atomically pushed with shiftwork/slice-23. Both remote refs
+were verified at `bda073714c5ecfad35a47fff6e2bba1e1c2b2771` before this documentation follow-up.
+A short-path fresh Windows Git checkout with core.autocrlf=true passed 1281 tests,
+with 1 live-conformance skip and 2 warnings; packaging was excluded.
+The first long-path clone failed one historical scanner assertion; its
+receipt remains intact. The path portability limit remains unresolved.
+All 19 GTM material files, 42 prior pins and signed receipts remained exact.
+The unowned .gitignore and AGENTS.md changes remain local and untouched.
+
+- [x] Slice 23: accepted and published on offline evidence.
+- [ ] Slice 24 and Slice 25: no go-ahead and no work started.
+
+Historical failures and signed labels remain unchanged. No model-quality,
+real CRM action, learner gain, cost or production-readiness proof follows.
+No live call, installation or product credential use occurred.
+Current publication checkpoint: [slice23-publication-checkpoint-2026-10-08.md](plans/shiftwork/slice23-publication-checkpoint-2026-10-08.md). Earlier notices below
+remain historical; acceptance and publication authorization now supersede
+their earlier pending-state labels.
+
 **S23 ACCEPTED FOR PUBLICATION, 2026-10-08 Asia/Singapore.**
 
 The user accepted the reviewed S23 offline result and authorized focused
