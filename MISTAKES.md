@@ -2306,3 +2306,102 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - **What happened:** the first audit-guard matrix rejected its missing-meter omission row because the test still passed. Its source, clean/omitted logs and XML remain. That row is not counted as guard proof.
 - **Root cause:** removing a meter violated both cardinality and ordinal coverage, so the unchanged coverage guard caught the same fault and hid the omitted count guard.
 - **Prevention rule:** inject an extra duplicate meter to preserve complete ordinal coverage while violating only count. Check each independent omission reaches its own intended DID NOT RAISE failure, with zero setup errors, and retain rejected overlapping controls separately.
+
+
+## 2026-10-07 S23 helper contracts and inspection paths
+
+- **What happened:** retained first-focused/second-journey failures assumed files in frozen-version JSON and used the wrong investigation URL. Direct nested authoring invocation failed imports; runpy worked. Several guessed read paths and PowerShell expressions failed, including this continuation's inferred executor/reducer/conftest paths.
+- **Root cause:** conceptual helper/file names were reused without copying the actual response, route, source path or launch context.
+- **Prevention rule:** discover exact paths with rg --files, inspect the current signature/model/route and copy a compatible call before invoking. Existing AGENTS.md already graduates this repeated pattern; preserve that rule rather than adding a duplicate.
+
+## 2026-10-07 S23 malformed membership inputs
+
+- **What happened:** malformed decision and decision-trace objects exposed unhashable membership checks during the prior draft session. Both guards were corrected; focused negative tests retain these shapes.
+- **Root cause:** vocabulary membership was attempted before confirming a hashable string shape.
+- **Prevention rule:** validate structural type before set membership and exercise malformed JSON objects, not only incorrect strings.
+
+## 2026-10-07 S23 isolated baseline checked a sanitized error
+
+- **What happened:** guards-first retained five failed assertions because admit_pack replaces internal error details with a public generic message. The implementation refused as intended. Isolated tests now exercise _verify_pack_material for the internal guard and keep the public refusal tests separately.
+- **Root cause:** an internal error regex was asserted through the sanitized public wrapper.
+- **Prevention rule:** isolate at the responsible layer; check public safe messages only at the public boundary. Preserve the failed baseline.
+
+## 2026-10-07 S23 omission controls crashed or overlapped
+
+- **What happened:** mutations-first rejected snapshot_type and trace_short crashes, a review-owner omission masked by condition agreement and a wrong-batch omission that indexed an empty list. All four original rows remain rejected; repaired controls produce named assertion failures with zero setup errors and exact restoration.
+- **Root cause:** removing a guard also violated another prerequisite or made a later access unsafe.
+- **Prevention rule:** supply all later fields and indices correctly while varying only the targeted predicate. Match review conditions across all tasks. Fault the batch equality predicate rather than the empty-workload cardinality predicate. Retain the rejected controls.
+
+## 2026-10-07 S23 no-reason aspect used the enum member name as its value
+
+- **What happened:** guards-complete retained one failed test using NO_TASK_HAS_REASON_CODE as serialized kind; the actual enum value is NO_TASK_REASON_CODE. Corrected guards-verified passes all 80 tests.
+- **Root cause:** a familiar member name was guessed as its wire value.
+- **Prevention rule:** read enum values and copy current serialization before authoring a fixture or asserting an API vocabulary.
+
+## 2026-10-07 S23 ledger fault inserted zero rows
+
+- **What happened:** mutations-repaired's experiment_ledger_write control passed because INSERT SELECT copied an empty GTM ledger. It is not counted as proof. A literal synthetic insertion in mutations-final reaches the intended unchanged-business-rows assertion.
+- **Root cause:** the fault assumed the failing S23 starter had already produced a ledger row; GTM consequence reduction is S24 scope.
+- **Prevention rule:** verify the initial row inventory and inject a guaranteed valid write that changes exactly the tested surface. Preserve empty/no-op fault controls as rejected evidence.
+
+## 2026-10-07 S23 regression found CRLF in unreviewed request drafts
+
+- **What happened:** the final full offline suite fails test_byte_addressed_fixtures_match_lf_checkout on the GTM manifest and pair 01/02 spec files. The focused suite did not cover this repository-wide LF guard. No repair or seal followed because the user requested a context handoff.
+- **Root cause:** draft request edits did not retain the existing LF-only byte-addressed fixture contract. The proposed -text attributes preserve the current bytes, including this defect.
+- **Prevention rule:** normalize only unreviewed affected drafts to LF, retain preimages and regenerate every changed inventory/seal/pin proposal before seeking approval. Reproduce the named guard and full suite without weakening them.
+
+
+## 2026-10-07 S23 final preservation audit stopped on unexpected ignore change
+
+- **What happened:** the post-document audit exited 1 because .gitignore contained a new /shiftwork/fixtures/requests/ rule outside the allowed tracked changes. It also hides new request drafts from ordinary git status.
+- **Root cause:** ownership and origin are unverified. The prior successful audit predates this observed change and closeout documentation.
+- **Prevention rule:** leave the unexpected change untouched, retain the blocked receipt and do not present the prior audit as final-state PASS. Resolve attribution and inventory completeness in a fresh authorized session.
+
+
+## 2026-10-07 S23 packet refresh missed a multiline LF anchor
+
+- **What happened:** readback found the inventory-history paragraph had not been replaced. The packet still correctly superseded the first draft, but did not explicitly name the pre-repair proposals. Corrected before operator review.
+- **Root cause:** the helper used a CRLF multiline anchor against an LF-authored packet and did not assert that replacement matched.
+- **Prevention rule:** inspect raw anchor endings and require exactly one match for every intended packet-text replacement before writing.
+
+## 2026-10-07 S23 application verification preflight assumptions
+
+- **What happened:** one inspection named a nonexistent executor conftest, and the new reviewed-inventory utility briefly assumed an undeclared pack catalog_path field. Both were corrected before test execution. The test-transition preflight then stopped three times before any test write: a non-unique damage-section marker, two equivalent one-line anchors with different inserted endings, and an LF-only assertion against the actual CRLF attributes tail. Raw rejected scripts, logs and zero-write receipts are retained in slice23-application-2026-10-07.
+- **Root cause:** path/type and newline contracts were inferred instead of measuring the exact current definition and anchor. The application itself remained exact and intact.
+- **Prevention rule:** use rg file inventory and model fields first; bind a complete unique section marker, measure the matching line ending, and validate all anchors before writing. The existing graduated AGENTS.md call-contract and anchor rules apply; no weaker fallback is permitted.
+
+## 2026-10-07 S23 admission transition missed one legacy cardinality premise
+
+- **What happened:** transition-focused retained 476 passes and two failures in the Northline admitted-v5 startup check. Its exact extra-one-row premise still relied on production GTM being unadmitted. A later read also named a nonexistent Northline mutation helper; no execution used that guessed path.
+- **Root cause:** the search covered literal slug and availability assertions but missed the len(current) == len(expected) + 1 admission premise; the path-inventory rule was not followed on the later read.
+- **Prevention rule:** inspect arithmetic cardinality and historical startup premises as well as slug lists before admitting another pack. Put the unrelated unavailable pack behind a disposable declaration, retain exact original-byte assertions, and add GTM's own admitted-v5 preservation proof. Discover every helper path before use. The original failing log and JUnit are retained; no production behavior was changed to satisfy the historical test.
+
+## 2026-10-07 S23 GTM preservation test omitted a reused import
+
+- **What happened:** admission-repair recorded two NameError failures because the newly copied GTM v5-preservation test used sqlite3 without importing it. These are rejected setup-level executions, not preservation proof. The Northline isolation repair already passed.
+- **Root cause:** the existing test body was reused without checking its complete import dependencies.
+- **Prevention rule:** audit every name imported by the source test before reusing its body, and run the new positive control before counting fault evidence. The failed log and JUnit remain intact.
+
+## 2026-10-07 S23 publication inventory preserves an unowned ignore change
+
+- **What happened:** exact request exceptions were temporarily added to .gitignore, then withdrawn before final publication preparation. Publishing that whole modified file could carry the incoming broad rule whose ownership is unverified. The superseded exception version remains in gitignore-exceptions-superseded.txt; incoming bytes are restored exactly.
+- **Root cause:** making ordinary status complete was mistaken for defining a safe publication scope. The inventory can list ignored required paths without including an unrelated dirty ignore file.
+- **Prevention rule:** preserve unknown incoming changes and exclude them from publication. Enumerate required ignored files explicitly with force-inclusion metadata, rather than treating whole-file staging as authorized. No user bytes, index entries or refs were discarded or changed.
+
+## 2026-10-07 S23 entry backup duplicated the unique test sentinel
+
+- **What happened:** the first post-application full suite recorded one failure, 1280 passes and one skip because the entry backup copied the sentinel-bearing test into the repository. The uniqueness guard correctly caught the duplicate.
+- **Root cause:** the broad preimage snapshot was stored as scannable source without checking the repository uniqueness contract.
+- **Prevention rule:** preserve unchanged sentinel-bearing test bytes in a verified lossless binary archive. Never weaken the uniqueness guard or include the literal token in notes. Retain the failed full log, verify the focused guard, then repeat the full suite. The original test bytes remain unchanged.
+
+## 2026-10-07 S23 diagnostic assumed a receipt list
+
+- **What happened:** a read-only inspection tried slicing prior_reviewed_pins as a list and stopped with KeyError before writing anything.
+- **Root cause:** the receipt field is a path-to-hash mapping.
+- **Prevention rule:** inspect JSON field types before indexing; use mapping items for pin inventories. The corrected inspection confirmed 42 preserved pin bindings.
+
+## 2026-10-07 S23 signed CRLF source requires explicit whitespace metadata
+
+- **What happened:** the final audit passed material, history, source, test, fault and publication checks, then Git diff --check rejected every preserved CRLF config line after -text was added. No final success receipt was written.
+- **Root cause:** preserving approved CRLF bytes as a blob requires Git to recognize carriage returns as line endings for that path.
+- **Prevention rule:** preserve exact approved bytes, declare cr-at-eol for that CRLF path while retaining all three default whitespace guards, and retain the failed audit diagnosis. Do not normalize signed source or suppress whitespace checks globally.
