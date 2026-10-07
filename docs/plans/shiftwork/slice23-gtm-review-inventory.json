@@ -1,0 +1,297 @@
+{
+  "schema_version": 1,
+  "engagement_slug": "gtm",
+  "files": [
+    {
+      "path": "fixtures/catalogs/gtm_v1.json",
+      "bytes": 1006,
+      "sha256": "a378f7ce2fd5b2506381eade910c4855424c9cf62676540c9ef932cca550f7b9",
+      "proposed_bytes": 1006,
+      "proposed_sha256": "a378f7ce2fd5b2506381eade910c4855424c9cf62676540c9ef932cca550f7b9"
+    },
+    {
+      "path": "fixtures/mission/gtm_pipeline_v1.json",
+      "bytes": 5608,
+      "sha256": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+      "proposed_bytes": 5608,
+      "proposed_sha256": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab"
+    },
+    {
+      "path": "fixtures/state/gtm_pipeline_public_state.json",
+      "bytes": 1415,
+      "sha256": "614ebac546b7b26b5175db1b6963ecc0d4d26c901ad56a000ee8c60fda37a15f",
+      "proposed_bytes": 1415,
+      "proposed_sha256": "614ebac546b7b26b5175db1b6963ecc0d4d26c901ad56a000ee8c60fda37a15f"
+    },
+    {
+      "path": "fixtures/state/gtm_compare_state_v1.json",
+      "bytes": 5685,
+      "sha256": "1a9d7cd051d691bcebed2917edc042ebc8f81dff6cf2b20b14f51c43bf9c834b",
+      "proposed_bytes": 5685,
+      "proposed_sha256": "1a9d7cd051d691bcebed2917edc042ebc8f81dff6cf2b20b14f51c43bf9c834b"
+    },
+    {
+      "path": "fixtures/requests/gtm_pipeline_incident.jsonl",
+      "bytes": 168,
+      "sha256": "77771e8a79224832208fd51d9cd513d38d5728edeab5a173c48408cda505badb",
+      "proposed_bytes": 168,
+      "proposed_sha256": "77771e8a79224832208fd51d9cd513d38d5728edeab5a173c48408cda505badb"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_manifest.json",
+      "bytes": 1418,
+      "sha256": "6b58826403dd11e37a4afefb0efc36a712a94c71e8207d80907a719eee1be4a9",
+      "proposed_bytes": 1490,
+      "proposed_sha256": "e517f09bb92be0680324484850cc2a95611ac0034c973ce36f06d0ca2ce762bf"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_01.jsonl",
+      "bytes": 419,
+      "sha256": "7095b7a3ed2e0bd2bda8f8ab4594b7958adfdca420323d43235af101656d0497",
+      "proposed_bytes": 419,
+      "proposed_sha256": "7095b7a3ed2e0bd2bda8f8ab4594b7958adfdca420323d43235af101656d0497"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_01_specs.json",
+      "bytes": 6003,
+      "sha256": "714433f66efb3308332df3fe130b19556fc7889365c88c809bd80f6abf87ef38",
+      "proposed_bytes": 6003,
+      "proposed_sha256": "714433f66efb3308332df3fe130b19556fc7889365c88c809bd80f6abf87ef38"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_02.jsonl",
+      "bytes": 461,
+      "sha256": "47baa24e3446245f9fb861873e8953cc5f7058ef6914514a106d34054c282929",
+      "proposed_bytes": 461,
+      "proposed_sha256": "47baa24e3446245f9fb861873e8953cc5f7058ef6914514a106d34054c282929"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_02_specs.json",
+      "bytes": 5973,
+      "sha256": "76019d7dea096438709d2a5f23bca202d86785e3907c59fd73a140677ae1e22c",
+      "proposed_bytes": 5973,
+      "proposed_sha256": "76019d7dea096438709d2a5f23bca202d86785e3907c59fd73a140677ae1e22c"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_03.jsonl",
+      "bytes": 442,
+      "sha256": "a7d01171a95cf888c52dd6136a223c6f6b0322805543a89e2cae598b89e9625d",
+      "proposed_bytes": 442,
+      "proposed_sha256": "a7d01171a95cf888c52dd6136a223c6f6b0322805543a89e2cae598b89e9625d"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_03_specs.json",
+      "bytes": 6078,
+      "sha256": "71b6ef3f82ae4f86d4836340e16596620a5c8f208e0aff739963900e93ea92f1",
+      "proposed_bytes": 6078,
+      "proposed_sha256": "71b6ef3f82ae4f86d4836340e16596620a5c8f208e0aff739963900e93ea92f1"
+    },
+    {
+      "path": "sealed/cases/gtm_pipeline_ownership.json",
+      "bytes": 28669,
+      "sha256": "5c0b1aebe8e9c194084dc250148747c1e0df691d1881158e09694f3a3daba8d1",
+      "proposed_bytes": 28741,
+      "proposed_sha256": "f3323eba764cc116df1439abe21ad094369936cd39b05641060d9bc646a9dd5f"
+    },
+    {
+      "path": "fixtures/artifacts/gtm/pipeline_starter_failure.py",
+      "bytes": 3302,
+      "sha256": "75be6938e5dbede87973a95f8ad56c3b099763475d4c98c72c8ccd929ae00a01",
+      "proposed_bytes": 3302,
+      "proposed_sha256": "75be6938e5dbede87973a95f8ad56c3b099763475d4c98c72c8ccd929ae00a01"
+    },
+    {
+      "path": "fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py",
+      "bytes": 3360,
+      "sha256": "36a31ae4aca44d6adff0a10b5baf5b449a2f7ef52706eef192721f75f4964f23",
+      "proposed_bytes": 3360,
+      "proposed_sha256": "36a31ae4aca44d6adff0a10b5baf5b449a2f7ef52706eef192721f75f4964f23"
+    },
+    {
+      "path": "fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py",
+      "bytes": 3294,
+      "sha256": "49cec35f5363a6bdcab60c66443fb193623063f9a404e3920aadbdc539d2ce9e",
+      "proposed_bytes": 3294,
+      "proposed_sha256": "49cec35f5363a6bdcab60c66443fb193623063f9a404e3920aadbdc539d2ce9e"
+    },
+    {
+      "path": "fixtures/documents/gtm/revenue_team_brief.md",
+      "bytes": 622,
+      "sha256": "71f72e619e08cb279339d70df19c583386e1e1ee3f310d4b19892ed15550ab66",
+      "proposed_bytes": 622,
+      "proposed_sha256": "71f72e619e08cb279339d70df19c583386e1e1ee3f310d4b19892ed15550ab66"
+    },
+    {
+      "path": "fixtures/documents/gtm/qualification_routing_rules.md",
+      "bytes": 2172,
+      "sha256": "d22940c6afa06aba4fdaafb9dc203bb42274c35d1b98381f7e88e1902af10046",
+      "proposed_bytes": 2172,
+      "proposed_sha256": "d22940c6afa06aba4fdaafb9dc203bb42274c35d1b98381f7e88e1902af10046"
+    },
+    {
+      "path": "fixtures/documents/gtm/workflow_treatments.md",
+      "bytes": 813,
+      "sha256": "6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29",
+      "proposed_bytes": 813,
+      "proposed_sha256": "6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29"
+    }
+  ],
+  "workloads_payload_sha256": "e0e3f5bddfa81e8a52dec188b79ca09dfd15b7d4c1ca819f08f2493ba0376454",
+  "cases_payload_sha256": "e2bc5e303f7e9883e90fdba3d94bd6a6cdb2e0e0eaebe1d84eff4ba8590f1853",
+  "catalog_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f",
+  "starter_contract": {
+    "catalog_version": 1,
+    "must_never": [
+      "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+    ],
+    "selections": {
+      "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+      "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+    },
+    "response_time_limit_ms": 3000,
+    "declared_limits": [
+      "Synthetic pipeline output; no CRM connection, message send or live model."
+    ]
+  },
+  "documents": [
+    {
+      "doc_id": "revenue-brief",
+      "path": "fixtures/documents/gtm/revenue_team_brief.md",
+      "station": "Signal inbox",
+      "sha256": "71f72e619e08cb279339d70df19c583386e1e1ee3f310d4b19892ed15550ab66"
+    },
+    {
+      "doc_id": "qualification-rules",
+      "path": "fixtures/documents/gtm/qualification_routing_rules.md",
+      "station": "Workflow",
+      "sha256": "d22940c6afa06aba4fdaafb9dc203bb42274c35d1b98381f7e88e1902af10046"
+    },
+    {
+      "doc_id": "workflow-treatments",
+      "path": "fixtures/documents/gtm/workflow_treatments.md",
+      "station": "Comparison bench",
+      "sha256": "6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29"
+    }
+  ],
+  "production_reviewed": false,
+  "production_sealed": false,
+  "evidence_limit": "Preparation and disposable policy tests do not authorize production use.",
+  "workload_request_counts": [
+    3,
+    3,
+    3
+  ],
+  "reviewed_pins": [
+    {
+      "path": "fixtures/catalogs/gtm_v1.json",
+      "sha256": "a378f7ce2fd5b2506381eade910c4855424c9cf62676540c9ef932cca550f7b9"
+    },
+    {
+      "path": "fixtures/mission/gtm_pipeline_v1.json",
+      "sha256": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab"
+    },
+    {
+      "path": "fixtures/state/gtm_pipeline_public_state.json",
+      "sha256": "614ebac546b7b26b5175db1b6963ecc0d4d26c901ad56a000ee8c60fda37a15f"
+    },
+    {
+      "path": "fixtures/state/gtm_compare_state_v1.json",
+      "sha256": "1a9d7cd051d691bcebed2917edc042ebc8f81dff6cf2b20b14f51c43bf9c834b"
+    },
+    {
+      "path": "fixtures/requests/gtm_pipeline_incident.jsonl",
+      "sha256": "77771e8a79224832208fd51d9cd513d38d5728edeab5a173c48408cda505badb"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_manifest.json",
+      "sha256": "e517f09bb92be0680324484850cc2a95611ac0034c973ce36f06d0ca2ce762bf"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_01.jsonl",
+      "sha256": "7095b7a3ed2e0bd2bda8f8ab4594b7958adfdca420323d43235af101656d0497"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_01_specs.json",
+      "sha256": "714433f66efb3308332df3fe130b19556fc7889365c88c809bd80f6abf87ef38"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_02.jsonl",
+      "sha256": "47baa24e3446245f9fb861873e8953cc5f7058ef6914514a106d34054c282929"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_02_specs.json",
+      "sha256": "76019d7dea096438709d2a5f23bca202d86785e3907c59fd73a140677ae1e22c"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_03.jsonl",
+      "sha256": "a7d01171a95cf888c52dd6136a223c6f6b0322805543a89e2cae598b89e9625d"
+    },
+    {
+      "path": "fixtures/requests/gtm_compare_pair_03_specs.json",
+      "sha256": "71b6ef3f82ae4f86d4836340e16596620a5c8f208e0aff739963900e93ea92f1"
+    },
+    {
+      "path": "sealed/cases/gtm_pipeline_ownership.json",
+      "sha256": "f3323eba764cc116df1439abe21ad094369936cd39b05641060d9bc646a9dd5f"
+    },
+    {
+      "path": "fixtures/artifacts/gtm/pipeline_starter_failure.py",
+      "sha256": "75be6938e5dbede87973a95f8ad56c3b099763475d4c98c72c8ccd929ae00a01"
+    },
+    {
+      "path": "fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py",
+      "sha256": "36a31ae4aca44d6adff0a10b5baf5b449a2f7ef52706eef192721f75f4964f23"
+    },
+    {
+      "path": "fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py",
+      "sha256": "49cec35f5363a6bdcab60c66443fb193623063f9a404e3920aadbdc539d2ce9e"
+    },
+    {
+      "path": "fixtures/documents/gtm/revenue_team_brief.md",
+      "sha256": "71f72e619e08cb279339d70df19c583386e1e1ee3f310d4b19892ed15550ab66"
+    },
+    {
+      "path": "fixtures/documents/gtm/qualification_routing_rules.md",
+      "sha256": "d22940c6afa06aba4fdaafb9dc203bb42274c35d1b98381f7e88e1902af10046"
+    },
+    {
+      "path": "fixtures/documents/gtm/workflow_treatments.md",
+      "sha256": "6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29"
+    }
+  ],
+  "offline_fixture_pins": [
+    {
+      "key": "gtm_starter",
+      "path": "fixtures/artifacts/gtm/pipeline_starter_failure.py",
+      "artifact_content_hash": "4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2",
+      "files_hash": "a24b2e15a4ac11e41806e7f7a74e4cc35c3806bc722d40af5d38675bc9cdfea8"
+    },
+    {
+      "key": "gtm_compare_candidate_a",
+      "path": "fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py",
+      "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+      "files_hash": "aa363640af12212a57f8b74f2f698c9773d2693154c4972eaa599d9c603c456d"
+    },
+    {
+      "key": "gtm_compare_candidate_b",
+      "path": "fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py",
+      "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+      "files_hash": "708ef678d36244d432455b0757feca0d4bd61a70eecc9493bf9a25419b91e7c2"
+    }
+  ],
+  "application_sources": [
+    {
+      "path": "shiftwork/packs/registry.py",
+      "preimage_sha256": "32b641dc66785719feac7ed26d5eca4baf542e9f14b5418b22fa4171c02672ec",
+      "proposed_sha256": "e6cb4f3803479cf8aa35505a46463d83451b9a448c0fd96b162e2bae411c44d0",
+      "proposed_bytes": 21300
+    },
+    {
+      "path": "shiftwork/config.py",
+      "preimage_sha256": "1fb59fea9668ab6cd2b008ee202f66daebe6da7ec3f34b45db743aed56321f08",
+      "proposed_sha256": "ac8bb45fcbc186787da721b36aa6e30fc762f6d8cd899a07caf7c40c2ed009ff",
+      "proposed_bytes": 16918
+    }
+  ],
+  "approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa"
+}
