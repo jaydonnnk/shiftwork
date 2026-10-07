@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.495" timestamp="2026-10-07T23:19:06.958896+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_gtm_chosen_operation_waits_for_s24" time="0.021"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_guards.py:278: in test_gtm_chosen_operation_waits_for_s24
+    with pytest.raises(orchestrator.LifecycleError, match="awaits S24"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

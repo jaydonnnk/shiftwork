@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.704" timestamp="2026-10-07T23:18:38.523519+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[existing_record_ref]" time="0.056"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_pipeline.py:315: in test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces
+    with pytest.raises(orchestrator.LifecycleError, match="private material"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

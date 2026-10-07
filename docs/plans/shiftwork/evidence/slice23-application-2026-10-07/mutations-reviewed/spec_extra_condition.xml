@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.929" timestamp="2026-10-07T23:12:55.408412+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_pipeline_spec_branches_refuse_independently[extra_condition]" time="0.007"><failure message="Failed: DID NOT RAISE ValidationError">tests\orchestrator\test_gtm_guards.py:47: in test_pipeline_spec_branches_refuse_independently
+    with pytest.raises(ValidationError, match="pipeline"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValidationError</failure></testcase></testsuite></testsuites>

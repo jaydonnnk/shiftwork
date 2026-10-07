@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.011" timestamp="2026-10-07T23:19:32.638285+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_assist_projection_cannot_widen_registered_policy[assist_level-unrestricted]" time="0.377"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_pipeline.py:412: in test_gtm_assist_projection_cannot_widen_registered_policy
+    with pytest.raises(orchestrator.LifecycleError, match="policy projection disagrees"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.894" timestamp="2026-10-07T23:17:04.365025+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_protected_signal_delta_refuses_invalid_inputs[facts]" time="0.009"><failure message="Failed: DID NOT RAISE PublicStateInvalid">tests\orchestrator\test_gtm_guards.py:241: in test_protected_signal_delta_refuses_invalid_inputs
+    with pytest.raises(PublicStateInvalid):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE PublicStateInvalid</failure></testcase></testsuite></testsuites>

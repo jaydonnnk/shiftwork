@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="2.419" timestamp="2026-10-07T23:14:55.876354+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_pinned_spec_cannot_weaken_pipeline_contract[missing_rule]" time="0.011"><failure message="Failed: DID NOT RAISE ValidationError">tests\orchestrator\test_gtm_pipeline.py:195: in test_pinned_spec_cannot_weaken_pipeline_contract
+    with pytest.raises(ValidationError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValidationError</failure></testcase></testsuite></testsuites>

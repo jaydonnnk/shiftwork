@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.673" timestamp="2026-10-07T23:11:48.489771+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_inactive_task_secondary_guards_are_independent[commitment]" time="0.009"><failure message="AssertionError: assert [] == ['owner']&#10;  &#10;  Right contains one more item: 'owner'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_guards.py:151: in test_inactive_task_secondary_guards_are_independent
+    assert [row.task_id for row in rows if not row.mandatory_pass] == ["owner"]
+E   AssertionError: assert [] == ['owner']
+E     
+E     Right contains one more item: 'owner'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

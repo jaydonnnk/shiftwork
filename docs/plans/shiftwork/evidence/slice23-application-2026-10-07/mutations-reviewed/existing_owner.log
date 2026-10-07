@@ -1,0 +1,21 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_________ test_existing_owner_cannot_change_even_without_second_write _________
+tests\orchestrator\test_gtm_guards.py:135: in test_existing_owner_cannot_change_even_without_second_write
+    assert not any(row.mandatory_pass for row in rows), "existing owner cannot be replaced"
+E   AssertionError: existing owner cannot be replaced
+E   assert not True
+E    +  where True = any(<generator object test_existing_owner_cannot_change_even_without_second_write.<locals>.<genexpr> at 0x000001C33D81ED40>)
+============================== warnings summary ===============================
+.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/orchestrator/test_gtm_guards.py::test_existing_owner_cannot_change_even_without_second_write
+1 failed, 2 warnings in 0.63s

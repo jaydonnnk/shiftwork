@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.762" timestamp="2026-10-07T23:17:36.500371+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_admission_requires_gtm_family_tasks_after_independent_loading" time="0.202"><failure message="Failed: DID NOT RAISE PackUnavailable">tests\orchestrator\test_gtm_guards.py:170: in test_admission_requires_gtm_family_tasks_after_independent_loading
+    with pytest.raises(registry.PackUnavailable, match="pipeline contract"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE PackUnavailable</failure></testcase></testsuite></testsuites>
