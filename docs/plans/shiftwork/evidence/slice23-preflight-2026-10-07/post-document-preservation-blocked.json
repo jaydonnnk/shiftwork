@@ -1,0 +1,15 @@
+{
+  "status": "BLOCKED",
+  "phase": "post-document preservation audit",
+  "audit_exit_code": 1,
+  "reason": "unexpected tracked .gitignore change outside the audit allowed set",
+  "observed_addition": "/shiftwork/fixtures/requests/",
+  "ownership": "unverified; left untouched",
+  "gitignore_entry_sha256": "1d7b1c305fc103cf2ef6a0d5869e16a275babb34a838b8d10461933a165744ca",
+  "gitignore_current_sha256": "03ba60bd890227f4538781177ecf291eb07719043f52ddb6d870f3a9aa7b97a4",
+  "last_completed_preservation_receipt": "final-preservation.json",
+  "last_completed_receipt_scope": "before closeout documentation changes",
+  "final_preservation_pass_claimed": false,
+  "pytest_processes_running": false,
+  "repair_applied": false
+}

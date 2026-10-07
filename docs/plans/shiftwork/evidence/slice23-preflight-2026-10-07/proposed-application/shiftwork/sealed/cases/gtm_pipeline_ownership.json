@@ -1,0 +1,844 @@
+{
+  "schema_version": 1,
+  "family": "pipeline_ownership",
+  "cycle": 1,
+  "review_status": "OPERATOR_SEALED",
+  "sealed_payload_sha256": "e2bc5e303f7e9883e90fdba3d94bd6a6cdb2e0e0eaebe1d84eff4ba8590f1853",
+  "description": "Six GTM variants for operator review, never admitted by draft authoring.",
+  "cases": [
+    {
+      "id": "gtm-private-case-01",
+      "schema_version": 1,
+      "family": "pipeline_ownership",
+      "check_id": "chk-gtm-private-01",
+      "request_ordinals": [
+        4
+      ],
+      "expected": {
+        "aspect": {
+          "kind": "NAMED_TASK_OUTCOMES",
+          "task_id": "qualification",
+          "expected_outcomes": [
+            "USEFUL_COMPLETION"
+          ],
+          "reason_code": null
+        },
+        "rule_ids": [
+          "task.required_results",
+          "gtm.qualification",
+          "gtm.pinned_routing",
+          "gtm.exactly_once",
+          "gtm.human_handoff",
+          "response.structured_only"
+        ],
+        "note": "Private GTM acceptance 01; expected qualification QUALIFIED and owner owner-apac-platform with full mandatory checks."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 4,
+          "request_id": "gtm-private-stimulus-01",
+          "text": "Evaluate the private synthetic signal for ownership control 01.",
+          "entity_ref": "signal:private-gtm-apac-owner"
+        },
+        "task_spec": {
+          "id": "gtm-private-stimulus-01",
+          "text": "Evaluate the private synthetic signal for ownership control 01.",
+          "requested_entities": [
+            "signal:private-gtm-apac-owner"
+          ],
+          "tasks": [
+            {
+              "id": "qualification",
+              "kind": "QUALIFY_SIGNAL",
+              "requested_entity_ref": "signal:private-gtm-apac-owner",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": true
+            },
+            {
+              "id": "owner",
+              "kind": "ASSIGN_OWNER",
+              "requested_entity_ref": "signal:private-gtm-apac-owner",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "write",
+              "kind": "WRITE_PIPELINE_RECORD",
+              "requested_entity_ref": "signal:private-gtm-apac-owner",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "handoff",
+              "kind": "HANDOFF_TO_REVIEW",
+              "requested_entity_ref": "signal:private-gtm-apac-owner",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "gtm.qualification",
+            "gtm.pinned_routing",
+            "gtm.exactly_once",
+            "gtm.human_handoff",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Private GTM additive state for control 01.",
+          "add_entities": {
+            "signal:private-gtm-apac-owner": {
+              "company_name": "Fictional Private Gtm Apac Owner",
+              "domain": "private-gtm-apac-owner.example"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "public:signal:private-gtm-apac-owner",
+              "entity_ref": "signal:private-gtm-apac-owner",
+              "kind": "signal",
+              "value": {
+                "account_domain": "private-gtm-apac-owner.example",
+                "region": "APAC",
+                "product": "platform",
+                "employee_count": 120,
+                "suppressed": false,
+                "intent_label": "BUYING",
+                "confidence": 95,
+                "note": "Request a demo for our platform evaluation.",
+                "existing_owner": null,
+                "existing_record_ref": null
+              },
+              "record_age_ms": 1000,
+              "dependency": "enrichment"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gtm-private-case-02",
+      "schema_version": 1,
+      "family": "pipeline_ownership",
+      "check_id": "chk-gtm-private-02",
+      "request_ordinals": [
+        4
+      ],
+      "expected": {
+        "aspect": {
+          "kind": "NAMED_TASK_OUTCOMES",
+          "task_id": "owner",
+          "expected_outcomes": [
+            "USEFUL_COMPLETION"
+          ],
+          "reason_code": null
+        },
+        "rule_ids": [
+          "task.required_results",
+          "gtm.qualification",
+          "gtm.pinned_routing",
+          "gtm.exactly_once",
+          "gtm.human_handoff",
+          "response.structured_only"
+        ],
+        "note": "Private GTM acceptance 02; expected qualification QUALIFIED and owner owner-emea-analytics with full mandatory checks."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 4,
+          "request_id": "gtm-private-stimulus-02",
+          "text": "Evaluate the private synthetic signal for ownership control 02.",
+          "entity_ref": "signal:private-gtm-emea-analytics"
+        },
+        "task_spec": {
+          "id": "gtm-private-stimulus-02",
+          "text": "Evaluate the private synthetic signal for ownership control 02.",
+          "requested_entities": [
+            "signal:private-gtm-emea-analytics"
+          ],
+          "tasks": [
+            {
+              "id": "qualification",
+              "kind": "QUALIFY_SIGNAL",
+              "requested_entity_ref": "signal:private-gtm-emea-analytics",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-emea-analytics",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": true
+            },
+            {
+              "id": "owner",
+              "kind": "ASSIGN_OWNER",
+              "requested_entity_ref": "signal:private-gtm-emea-analytics",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-emea-analytics",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "write",
+              "kind": "WRITE_PIPELINE_RECORD",
+              "requested_entity_ref": "signal:private-gtm-emea-analytics",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-emea-analytics",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "handoff",
+              "kind": "HANDOFF_TO_REVIEW",
+              "requested_entity_ref": "signal:private-gtm-emea-analytics",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-emea-analytics",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "gtm.qualification",
+            "gtm.pinned_routing",
+            "gtm.exactly_once",
+            "gtm.human_handoff",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Private GTM additive state for control 02.",
+          "add_entities": {
+            "signal:private-gtm-emea-analytics": {
+              "company_name": "Fictional Private Gtm Emea Analytics",
+              "domain": "private-gtm-emea-analytics.example"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "public:signal:private-gtm-emea-analytics",
+              "entity_ref": "signal:private-gtm-emea-analytics",
+              "kind": "signal",
+              "value": {
+                "account_domain": "private-gtm-emea-analytics.example",
+                "region": "EMEA",
+                "product": "analytics",
+                "employee_count": 120,
+                "suppressed": false,
+                "intent_label": "BUYING",
+                "confidence": 95,
+                "note": "Request a demo for our platform evaluation.",
+                "existing_owner": null,
+                "existing_record_ref": null
+              },
+              "record_age_ms": 1000,
+              "dependency": "enrichment"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gtm-private-case-03",
+      "schema_version": 1,
+      "family": "pipeline_ownership",
+      "check_id": "chk-gtm-private-03",
+      "request_ordinals": [
+        4
+      ],
+      "expected": {
+        "aspect": {
+          "kind": "NAMED_TASK_OUTCOMES",
+          "task_id": "handoff",
+          "expected_outcomes": [
+            "USEFUL_COMPLETION"
+          ],
+          "reason_code": null
+        },
+        "rule_ids": [
+          "task.required_results",
+          "gtm.qualification",
+          "gtm.pinned_routing",
+          "gtm.exactly_once",
+          "gtm.human_handoff",
+          "response.structured_only"
+        ],
+        "note": "Private GTM acceptance 03; expected qualification REVIEW and owner owner-apac-platform with full mandatory checks."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 4,
+          "request_id": "gtm-private-stimulus-03",
+          "text": "Evaluate the private synthetic signal for ownership control 03.",
+          "entity_ref": "signal:private-gtm-ambiguous-review"
+        },
+        "task_spec": {
+          "id": "gtm-private-stimulus-03",
+          "text": "Evaluate the private synthetic signal for ownership control 03.",
+          "requested_entities": [
+            "signal:private-gtm-ambiguous-review"
+          ],
+          "tasks": [
+            {
+              "id": "qualification",
+              "kind": "QUALIFY_SIGNAL",
+              "requested_entity_ref": "signal:private-gtm-ambiguous-review",
+              "condition_json": {
+                "expected_decisions": [
+                  "REVIEW"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": true
+            },
+            {
+              "id": "owner",
+              "kind": "ASSIGN_OWNER",
+              "requested_entity_ref": "signal:private-gtm-ambiguous-review",
+              "condition_json": {
+                "expected_decisions": [
+                  "REVIEW"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "write",
+              "kind": "WRITE_PIPELINE_RECORD",
+              "requested_entity_ref": "signal:private-gtm-ambiguous-review",
+              "condition_json": {
+                "expected_decisions": [
+                  "REVIEW"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "handoff",
+              "kind": "HANDOFF_TO_REVIEW",
+              "requested_entity_ref": "signal:private-gtm-ambiguous-review",
+              "condition_json": {
+                "expected_decisions": [
+                  "REVIEW"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "gtm.qualification",
+            "gtm.pinned_routing",
+            "gtm.exactly_once",
+            "gtm.human_handoff",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Private GTM additive state for control 03.",
+          "add_entities": {
+            "signal:private-gtm-ambiguous-review": {
+              "company_name": "Fictional Private Gtm Ambiguous Review",
+              "domain": "private-gtm-ambiguous-review.example"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "public:signal:private-gtm-ambiguous-review",
+              "entity_ref": "signal:private-gtm-ambiguous-review",
+              "kind": "signal",
+              "value": {
+                "account_domain": "private-gtm-ambiguous-review.example",
+                "region": "APAC",
+                "product": "platform",
+                "employee_count": 120,
+                "suppressed": false,
+                "intent_label": "AMBIGUOUS",
+                "confidence": 35,
+                "note": "Need and timing unclear.",
+                "existing_owner": null,
+                "existing_record_ref": null
+              },
+              "record_age_ms": 1000,
+              "dependency": "enrichment"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gtm-private-case-04",
+      "schema_version": 1,
+      "family": "pipeline_ownership",
+      "check_id": "chk-gtm-private-04",
+      "request_ordinals": [
+        4
+      ],
+      "expected": {
+        "aspect": {
+          "kind": "NAMED_TASK_OUTCOMES",
+          "task_id": "qualification",
+          "expected_outcomes": [
+            "USEFUL_COMPLETION"
+          ],
+          "reason_code": null
+        },
+        "rule_ids": [
+          "task.required_results",
+          "gtm.qualification",
+          "gtm.pinned_routing",
+          "gtm.exactly_once",
+          "gtm.human_handoff",
+          "response.structured_only"
+        ],
+        "note": "Private GTM acceptance 04; expected qualification DISQUALIFIED and owner owner-apac-platform with full mandatory checks."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 4,
+          "request_id": "gtm-private-stimulus-04",
+          "text": "Evaluate the private synthetic signal for ownership control 04.",
+          "entity_ref": "signal:private-gtm-suppressed"
+        },
+        "task_spec": {
+          "id": "gtm-private-stimulus-04",
+          "text": "Evaluate the private synthetic signal for ownership control 04.",
+          "requested_entities": [
+            "signal:private-gtm-suppressed"
+          ],
+          "tasks": [
+            {
+              "id": "qualification",
+              "kind": "QUALIFY_SIGNAL",
+              "requested_entity_ref": "signal:private-gtm-suppressed",
+              "condition_json": {
+                "expected_decisions": [
+                  "DISQUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": true
+            },
+            {
+              "id": "owner",
+              "kind": "ASSIGN_OWNER",
+              "requested_entity_ref": "signal:private-gtm-suppressed",
+              "condition_json": {
+                "expected_decisions": [
+                  "DISQUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "write",
+              "kind": "WRITE_PIPELINE_RECORD",
+              "requested_entity_ref": "signal:private-gtm-suppressed",
+              "condition_json": {
+                "expected_decisions": [
+                  "DISQUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "handoff",
+              "kind": "HANDOFF_TO_REVIEW",
+              "requested_entity_ref": "signal:private-gtm-suppressed",
+              "condition_json": {
+                "expected_decisions": [
+                  "DISQUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "gtm.qualification",
+            "gtm.pinned_routing",
+            "gtm.exactly_once",
+            "gtm.human_handoff",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Private GTM additive state for control 04.",
+          "add_entities": {
+            "signal:private-gtm-suppressed": {
+              "company_name": "Fictional Private Gtm Suppressed",
+              "domain": "private-gtm-suppressed.example"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "public:signal:private-gtm-suppressed",
+              "entity_ref": "signal:private-gtm-suppressed",
+              "kind": "signal",
+              "value": {
+                "account_domain": "private-gtm-suppressed.example",
+                "region": "APAC",
+                "product": "platform",
+                "employee_count": 120,
+                "suppressed": true,
+                "intent_label": "BUYING",
+                "confidence": 95,
+                "note": "Request a demo for our platform evaluation.",
+                "existing_owner": null,
+                "existing_record_ref": null
+              },
+              "record_age_ms": 1000,
+              "dependency": "enrichment"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gtm-private-case-05",
+      "schema_version": 1,
+      "family": "pipeline_ownership",
+      "check_id": "chk-gtm-private-05",
+      "request_ordinals": [
+        4
+      ],
+      "expected": {
+        "aspect": {
+          "kind": "NAMED_TASK_OUTCOMES",
+          "task_id": "handoff",
+          "expected_outcomes": [
+            "USEFUL_COMPLETION"
+          ],
+          "reason_code": null
+        },
+        "rule_ids": [
+          "task.required_results",
+          "gtm.qualification",
+          "gtm.pinned_routing",
+          "gtm.exactly_once",
+          "gtm.human_handoff",
+          "response.structured_only"
+        ],
+        "note": "Private GTM acceptance 05; expected qualification REVIEW and owner owner-apac-platform with full mandatory checks."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 4,
+          "request_id": "gtm-private-stimulus-05",
+          "text": "Evaluate the private synthetic signal for ownership control 05.",
+          "entity_ref": "signal:private-gtm-stale-review"
+        },
+        "task_spec": {
+          "id": "gtm-private-stimulus-05",
+          "text": "Evaluate the private synthetic signal for ownership control 05.",
+          "requested_entities": [
+            "signal:private-gtm-stale-review"
+          ],
+          "tasks": [
+            {
+              "id": "qualification",
+              "kind": "QUALIFY_SIGNAL",
+              "requested_entity_ref": "signal:private-gtm-stale-review",
+              "condition_json": {
+                "expected_decisions": [
+                  "REVIEW"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": true
+            },
+            {
+              "id": "owner",
+              "kind": "ASSIGN_OWNER",
+              "requested_entity_ref": "signal:private-gtm-stale-review",
+              "condition_json": {
+                "expected_decisions": [
+                  "REVIEW"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "write",
+              "kind": "WRITE_PIPELINE_RECORD",
+              "requested_entity_ref": "signal:private-gtm-stale-review",
+              "condition_json": {
+                "expected_decisions": [
+                  "REVIEW"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "handoff",
+              "kind": "HANDOFF_TO_REVIEW",
+              "requested_entity_ref": "signal:private-gtm-stale-review",
+              "condition_json": {
+                "expected_decisions": [
+                  "REVIEW"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "gtm.qualification",
+            "gtm.pinned_routing",
+            "gtm.exactly_once",
+            "gtm.human_handoff",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Private GTM additive state for control 05.",
+          "add_entities": {
+            "signal:private-gtm-stale-review": {
+              "company_name": "Fictional Private Gtm Stale Review",
+              "domain": "private-gtm-stale-review.example"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "public:signal:private-gtm-stale-review",
+              "entity_ref": "signal:private-gtm-stale-review",
+              "kind": "signal",
+              "value": {
+                "account_domain": "private-gtm-stale-review.example",
+                "region": "APAC",
+                "product": "platform",
+                "employee_count": 120,
+                "suppressed": false,
+                "intent_label": "BUYING",
+                "confidence": 95,
+                "note": "Request a demo for our platform evaluation.",
+                "existing_owner": null,
+                "existing_record_ref": null
+              },
+              "record_age_ms": 7200000,
+              "dependency": "enrichment"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "gtm-private-case-06",
+      "schema_version": 1,
+      "family": "pipeline_ownership",
+      "check_id": "chk-gtm-private-06",
+      "request_ordinals": [
+        4
+      ],
+      "expected": {
+        "aspect": {
+          "kind": "NAMED_TASK_OUTCOMES",
+          "task_id": "qualification",
+          "expected_outcomes": [
+            "USEFUL_COMPLETION"
+          ],
+          "reason_code": null
+        },
+        "rule_ids": [
+          "task.required_results",
+          "gtm.qualification",
+          "gtm.pinned_routing",
+          "gtm.exactly_once",
+          "gtm.human_handoff",
+          "response.structured_only"
+        ],
+        "note": "Private GTM acceptance 06; expected qualification QUALIFIED and owner owner-apac-platform with full mandatory checks."
+      },
+      "stimulus": {
+        "request": {
+          "ordinal": 4,
+          "request_id": "gtm-private-stimulus-06",
+          "text": "Evaluate the private synthetic signal for ownership control 06.",
+          "entity_ref": "signal:private-gtm-existing-retry"
+        },
+        "task_spec": {
+          "id": "gtm-private-stimulus-06",
+          "text": "Evaluate the private synthetic signal for ownership control 06.",
+          "requested_entities": [
+            "signal:private-gtm-existing-retry"
+          ],
+          "tasks": [
+            {
+              "id": "qualification",
+              "kind": "QUALIFY_SIGNAL",
+              "requested_entity_ref": "signal:private-gtm-existing-retry",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": true
+            },
+            {
+              "id": "owner",
+              "kind": "ASSIGN_OWNER",
+              "requested_entity_ref": "signal:private-gtm-existing-retry",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "write",
+              "kind": "WRITE_PIPELINE_RECORD",
+              "requested_entity_ref": "signal:private-gtm-existing-retry",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            },
+            {
+              "id": "handoff",
+              "kind": "HANDOFF_TO_REVIEW",
+              "requested_entity_ref": "signal:private-gtm-existing-retry",
+              "condition_json": {
+                "expected_decisions": [
+                  "QUALIFIED"
+                ],
+                "qualified_owner": "owner-apac-platform",
+                "review_owner": "revenue-review",
+                "repeat_of": null
+              },
+              "required": false
+            }
+          ],
+          "mandatory_rule_ids": [
+            "task.required_results",
+            "gtm.qualification",
+            "gtm.pinned_routing",
+            "gtm.exactly_once",
+            "gtm.human_handoff",
+            "response.structured_only"
+          ]
+        },
+        "state_delta": {
+          "description": "Private GTM additive state for control 06.",
+          "add_entities": {
+            "signal:private-gtm-existing-retry": {
+              "company_name": "Fictional Private Gtm Existing Retry",
+              "domain": "private-gtm-existing-retry.example"
+            }
+          },
+          "add_records": [
+            {
+              "record_id": "public:signal:private-gtm-existing-retry",
+              "entity_ref": "signal:private-gtm-existing-retry",
+              "kind": "signal",
+              "value": {
+                "account_domain": "private-gtm-existing-retry.example",
+                "region": "APAC",
+                "product": "platform",
+                "employee_count": 120,
+                "suppressed": false,
+                "intent_label": "BUYING",
+                "confidence": 95,
+                "note": "Request a demo for our platform evaluation.",
+                "existing_owner": "owner-apac-platform",
+                "existing_record_ref": "pipeline:signal:private-gtm-existing-retry"
+              },
+              "record_age_ms": 1000,
+              "dependency": "enrichment"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

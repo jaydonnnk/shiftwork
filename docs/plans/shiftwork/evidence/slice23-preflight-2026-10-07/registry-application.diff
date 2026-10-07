@@ -1,0 +1,55 @@
+--- shiftwork/packs/registry.py
++++ shiftwork/packs/registry.py (proposed)
+@@ -217,6 +217,38 @@
+ def _family(name, filename, family_class=FamilyClass.COMPARISON):
+     return FamilyDeclaration(family=name, family_class=family_class,
+                              case_file=f"sealed/cases/{filename}.json", cycle=1, min_variants=6)
++
++
++_GTM_PINS = (
++    ReviewedPin(path="fixtures/catalogs/gtm_v1.json", sha256="a378f7ce2fd5b2506381eade910c4855424c9cf62676540c9ef932cca550f7b9"),
++    ReviewedPin(path="fixtures/mission/gtm_pipeline_v1.json", sha256="de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab"),
++    ReviewedPin(path="fixtures/state/gtm_pipeline_public_state.json", sha256="614ebac546b7b26b5175db1b6963ecc0d4d26c901ad56a000ee8c60fda37a15f"),
++    ReviewedPin(path="fixtures/state/gtm_compare_state_v1.json", sha256="1a9d7cd051d691bcebed2917edc042ebc8f81dff6cf2b20b14f51c43bf9c834b"),
++    ReviewedPin(path="fixtures/requests/gtm_pipeline_incident.jsonl", sha256="77771e8a79224832208fd51d9cd513d38d5728edeab5a173c48408cda505badb"),
++    ReviewedPin(path="fixtures/requests/gtm_compare_manifest.json", sha256="c4352ed80c7a2117164a4e0ddd3dbb5b6866651df96b36ab18c9073f7dfe295a"),
++    ReviewedPin(path="fixtures/requests/gtm_compare_pair_01.jsonl", sha256="7095b7a3ed2e0bd2bda8f8ab4594b7958adfdca420323d43235af101656d0497"),
++    ReviewedPin(path="fixtures/requests/gtm_compare_pair_01_specs.json", sha256="dce616be4556bcdfb2055b3c2b0ea39bdb950c46f9ff5f78b2fecc78f48ab910"),
++    ReviewedPin(path="fixtures/requests/gtm_compare_pair_02.jsonl", sha256="47baa24e3446245f9fb861873e8953cc5f7058ef6914514a106d34054c282929"),
++    ReviewedPin(path="fixtures/requests/gtm_compare_pair_02_specs.json", sha256="e179a2e37c1527f0187274cffd7cee1c70a8b8cf5839e8aceea3f69fb202aebd"),
++    ReviewedPin(path="fixtures/requests/gtm_compare_pair_03.jsonl", sha256="a7d01171a95cf888c52dd6136a223c6f6b0322805543a89e2cae598b89e9625d"),
++    ReviewedPin(path="fixtures/requests/gtm_compare_pair_03_specs.json", sha256="71b6ef3f82ae4f86d4836340e16596620a5c8f208e0aff739963900e93ea92f1"),
++    ReviewedPin(path="sealed/cases/gtm_pipeline_ownership.json", sha256="f3323eba764cc116df1439abe21ad094369936cd39b05641060d9bc646a9dd5f"),
++    ReviewedPin(path="fixtures/artifacts/gtm/pipeline_starter_failure.py", sha256="75be6938e5dbede87973a95f8ad56c3b099763475d4c98c72c8ccd929ae00a01"),
++    ReviewedPin(path="fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py", sha256="36a31ae4aca44d6adff0a10b5baf5b449a2f7ef52706eef192721f75f4964f23"),
++    ReviewedPin(path="fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py", sha256="49cec35f5363a6bdcab60c66443fb193623063f9a404e3920aadbdc539d2ce9e"),
++    ReviewedPin(path="fixtures/documents/gtm/revenue_team_brief.md", sha256="71f72e619e08cb279339d70df19c583386e1e1ee3f310d4b19892ed15550ab66"),
++    ReviewedPin(path="fixtures/documents/gtm/qualification_routing_rules.md", sha256="d22940c6afa06aba4fdaafb9dc203bb42274c35d1b98381f7e88e1902af10046"),
++    ReviewedPin(path="fixtures/documents/gtm/workflow_treatments.md", sha256="6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29"),
++)
++
++_GTM_DOCUMENTS = (
++    PackDocument(doc_id="revenue-brief", path="fixtures/documents/gtm/revenue_team_brief.md",
++                 sha256="71f72e619e08cb279339d70df19c583386e1e1ee3f310d4b19892ed15550ab66", station="Signal inbox"),
++    PackDocument(doc_id="qualification-rules", path="fixtures/documents/gtm/qualification_routing_rules.md",
++                 sha256="d22940c6afa06aba4fdaafb9dc203bb42274c35d1b98381f7e88e1902af10046", station="Workflow"),
++    PackDocument(doc_id="workflow-treatments", path="fixtures/documents/gtm/workflow_treatments.md",
++                 sha256="6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29", station="Comparison bench"),
++)
+ 
+ 
+ _PACKS = (
+@@ -252,11 +284,11 @@
+         public_state_path="fixtures/state/gtm_pipeline_public_state.json",
+         comparison_state_path="fixtures/state/gtm_compare_state_v1.json",
+         incident_request_path="fixtures/requests/gtm_pipeline_incident.jsonl",
+-        manifest_path="fixtures/requests/gtm_compare_manifest.json", documents=(),
++        manifest_path="fixtures/requests/gtm_compare_manifest.json", documents=_GTM_DOCUMENTS,
+         families=(_family("pipeline_ownership", "gtm_pipeline_ownership"),),
+         consequences=ConsequenceRules(success_events=("OWNER_ASSIGNED owner", "SLA_CLOCK_STARTED sla"),
+                                       rollout_event=None, handover_record_required=False),
+-        reviewed_pins=(),
++        reviewed_pins=_GTM_PINS,
+     ),
+     EngagementPack(
+         slug="northline", schema_version=1,

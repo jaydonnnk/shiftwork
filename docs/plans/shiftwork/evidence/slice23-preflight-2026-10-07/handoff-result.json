@@ -1,0 +1,19 @@
+{
+  "summary": "1 failed, 1277 passed, 1 skipped, 2 warnings in 896.88s (0:14:56)",
+  "failed_test": "test_byte_addressed_fixtures_match_lf_checkout",
+  "guard_controls": 106,
+  "production_applied": false,
+  "slice_complete": false,
+  "packet_ready_for_approval": false,
+  "repair_applied": false,
+  "user_requested_handoff": true,
+  "affected_draft_files": [
+    "fixtures/requests/gtm_compare_manifest.json",
+    "fixtures/requests/gtm_compare_pair_01_specs.json",
+    "fixtures/requests/gtm_compare_pair_02_specs.json"
+  ],
+  "current_unapproved_digest": "1a7a469e1c8b1881adbb10ce1946a22025309744e14be06fcb93cd437bad2e11",
+  "post_document_preservation": "BLOCKED",
+  "unexpected_gitignore_change_ownership": "unverified",
+  "final_state_preservation_pass": false
+}
