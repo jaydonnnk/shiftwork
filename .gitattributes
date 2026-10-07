@@ -51,3 +51,41 @@ shiftwork/templates/artifact/northline/discovery.md -text
 shiftwork/templates/artifact/northline/permissions.json -text
 shiftwork/templates/artifact/northline/runbook.md -text
 shiftwork/templates/artifact/northline_blank_service.py -text
+
+# Preserve the exact proposed S23 GTM material bytes on Windows.
+shiftwork/fixtures/catalogs/gtm_v1.json -text
+shiftwork/fixtures/mission/gtm_pipeline_v1.json -text
+shiftwork/fixtures/state/gtm_pipeline_public_state.json -text
+shiftwork/fixtures/state/gtm_compare_state_v1.json -text
+shiftwork/fixtures/requests/gtm_pipeline_incident.jsonl -text
+shiftwork/fixtures/requests/gtm_compare_manifest.json -text
+shiftwork/fixtures/requests/gtm_compare_pair_01.jsonl -text
+shiftwork/fixtures/requests/gtm_compare_pair_01_specs.json -text
+shiftwork/fixtures/requests/gtm_compare_pair_02.jsonl -text
+shiftwork/fixtures/requests/gtm_compare_pair_02_specs.json -text
+shiftwork/fixtures/requests/gtm_compare_pair_03.jsonl -text
+shiftwork/fixtures/requests/gtm_compare_pair_03_specs.json -text
+shiftwork/sealed/cases/gtm_pipeline_ownership.json -text
+shiftwork/fixtures/artifacts/gtm/pipeline_starter_failure.py -text
+shiftwork/fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py -text
+shiftwork/fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py -text
+shiftwork/fixtures/documents/gtm/revenue_team_brief.md -text
+shiftwork/fixtures/documents/gtm/qualification_routing_rules.md -text
+shiftwork/fixtures/documents/gtm/workflow_treatments.md -text
+
+# Preserve the signed S23 packet and offline application receipts byte-for-byte.
+docs/plans/shiftwork/slice23-gtm-operator-review-packet.md -text
+docs/plans/shiftwork/slice23-gtm-review-inventory.json -text
+docs/plans/shiftwork/evidence/slice23-approval-handoff-2026-10-07/authorization.json -text
+docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/proposed-application/** -text
+docs/plans/shiftwork/evidence/slice23-application-2026-10-07/** -text
+docs/plans/shiftwork/evidence/slice23-preflight-2026-10-07/** -text
+docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/** -text
+docs/plans/shiftwork/evidence/slice23-approval-handoff-2026-10-07/** -text
+
+# Exact approved S23 production replacements also retain their signed bytes.
+shiftwork/config.py -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+shiftwork/packs/registry.py -text
+
+# Preserve S23 acceptance, independent review and publication receipts.
+docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/** -text
