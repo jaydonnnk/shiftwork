@@ -35,7 +35,7 @@ def _count(path, table):
 @pytest.mark.parametrize("with_run", [True, False])
 def test_first_choice_and_restart_preserve_original_v5_column_values(tmp_path, monkeypatch, with_run):
     packs = registry.registered_packs()
-    monkeypatch.setattr(registry, "_PACKS", (*packs[:2], packs[2].model_copy(update={"reviewed_pins": ()})))
+    monkeypatch.setattr(registry, "_PACKS", (packs[0], *(pack.model_copy(update={"reviewed_pins": ()}) for pack in packs[1:])))
     client, path = _migrated_client(tmp_path, with_run=with_run)
     conn = db.connect(path)
     try:

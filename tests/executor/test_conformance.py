@@ -299,13 +299,14 @@ def test_pinned_fixture_hashes_match_exact_bytes(executor):
     contract = ContractParams.model_validate_json((root / "contract.json").read_bytes())
     catalog = contract_catalog.load_catalog("bookshop", 1)
     compare_names = {f"compare_candidate_{label.lower()}" for label in config.PIVOT_COMPARE_CANDIDATE_SOURCES}
+    gtm_names = {"gtm_starter", "gtm_compare_candidate_a", "gtm_compare_candidate_b"}
     assert set(config.TRUSTED_LOCAL_FIXTURES) == {c.name for c in CASES} | {"env_probe", "pivot_starter"} | {
         f"repair_arc_{stage}" for stage in config.REPAIR_ARC_STAGES
-    } | compare_names, (
+    } | compare_names | gtm_names, (
         "a trusted fixture was added or removed without updating this guard"
     )
     for name, (manifest_hash, files_hash) in config.TRUSTED_LOCAL_FIXTURES.items():
-        if name.startswith("repair_arc_") or name == "pivot_starter" or name in compare_names:
+        if name.startswith("repair_arc_") or name == "pivot_starter" or name in compare_names or name in gtm_names:
             continue
         request = request_for(executor, name)
         files = request.artifact_snapshot.files
@@ -349,6 +350,12 @@ def test_pinned_fixture_hashes_match_exact_bytes(executor):
         assert canonical.content_hash(
             {name: base64.b64encode(text.encode("utf-8")).decode("ascii") for name, text in files.items()}
         ) == files_hash, f"compare_candidate_{label} files no longer match their pin"
+
+    # Each added GTM fixture is recomputed against the approved GTM contract/catalog.
+    from demos.gtm_review import offline_fixture_pins
+    gtm_catalog = contract_catalog.load_catalog("gtm", 1)
+    for row in offline_fixture_pins(gtm_catalog.content_hash):
+        assert config.TRUSTED_LOCAL_FIXTURES[row["key"]] == (row["artifact_content_hash"], row["files_hash"])
 
 
 def test_pivot_review_bytes_and_catalog_binding():

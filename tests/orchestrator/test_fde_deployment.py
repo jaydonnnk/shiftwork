@@ -946,7 +946,7 @@ def unreviewed_northline(tmp_path, monkeypatch):
     data["sealed_payload_sha256"] = None
     path.write_bytes(json.dumps(data).encode())
     packs = registry.registered_packs()
-    monkeypatch.setattr(registry, "_PACKS", (*packs[:2], packs[2].model_copy(update={"reviewed_pins": ()})))
+    monkeypatch.setattr(registry, "_PACKS", (packs[0], *(pack.model_copy(update={"reviewed_pins": ()}) for pack in packs[1:])))
     monkeypatch.setattr(config, "PACKAGE_DIR", root)
     monkeypatch.setattr(config, "CATALOG_DIR", root / "fixtures/catalogs")
     monkeypatch.setattr(config, "SEALED_CASES_DIR", root / "sealed/cases")

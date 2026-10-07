@@ -438,7 +438,7 @@ def test_startup_seeds_declared_policy_idempotently(tmp_path, monkeypatch):
     policy = registry.resolve_pack("gtm").assist
     bookshop = registry.resolve_pack("bookshop").model_copy(update={"assist": policy})
     packs = registry.registered_packs()
-    monkeypatch.setattr(registry, "_PACKS", (bookshop, packs[1], packs[2].model_copy(update={"reviewed_pins": ()})))
+    monkeypatch.setattr(registry, "_PACKS", (bookshop, *(pack.model_copy(update={"reviewed_pins": ()}) for pack in packs[1:])))
     path = tmp_path / "declared-policy.db"
     for _ in range(2):
         startup_failure = None

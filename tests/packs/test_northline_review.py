@@ -34,14 +34,14 @@ def test_actual_northline_material_is_admitted_with_all_reviewed_bindings():
     assert len(pack.documents) == 6, "every Northline station needs its reviewed document"
     assert orchestrator.admit_pack("northline") == pack, "real Northline admission must pass"
     assert [b.availability for b in orchestrator.workplace_boards()] == [
-        "AVAILABLE", "AWAITING_OPERATOR_REVIEW", "AVAILABLE"]
+        "AVAILABLE", "AVAILABLE", "AVAILABLE"]
     family = store.load_declared_family(pack.families[0], slug=pack.slug)
     assert len(family.cases) == 6
     assert {doc.station for doc in pack.documents} == set(pack.display.station_labels)
     pins = {p.path: p.sha256 for p in pack.reviewed_pins}
     for doc in pack.documents:
         assert pins[doc.path] == doc.sha256
-    assert registry.resolve_pack("gtm").reviewed_pins == ()
+    assert orchestrator.admit_pack("gtm") == registry.resolve_pack("gtm")
 
 
 @pytest.mark.parametrize("path", [pin.path for pin in registry.resolve_pack("northline").reviewed_pins])
@@ -58,7 +58,7 @@ def test_every_northline_reviewed_file_drift_refuses_before_seed(tmp_path, monke
     try:
         db.ensure_schema(conn)
         orchestrator.seed_registered_engagements(conn)
-        assert [row[0] for row in conn.execute("SELECT slug FROM engagements")] == ["bookshop"], "drifted material must not seed Northline"
+        assert [row[0] for row in conn.execute("SELECT slug FROM engagements")] == ["bookshop", "gtm"], "drifted material must not seed Northline"
         assert conn.execute("SELECT count(*) FROM shifts").fetchone()[0] == 0
     finally:
         conn.close()
@@ -109,7 +109,7 @@ def test_real_northline_seed_is_idempotent_and_preserves_existing_bellwether(tmp
         tables = ("engagements", "engagement_config", "engagement_assist_policy")
         history = {table: rows(conn, table) for table in tables}
         orchestrator.seed_registered_engagements(conn)
-        assert [row[0] for row in conn.execute("SELECT slug FROM engagements ORDER BY slug")] == ["bookshop", "northline"], "admitted Northline must seed once"
+        assert [row[0] for row in conn.execute("SELECT slug FROM engagements ORDER BY slug")] == ["bookshop", "gtm", "northline"], "admitted Northline must seed once"
         for table in tables:
             assert set(history[table]).issubset(set(rows(conn, table))), "seeding must preserve historical Bellwether values"
         current = conn.execute("SELECT * FROM engagement_assist_policy WHERE slug = 'northline'").fetchone()
@@ -134,7 +134,10 @@ def test_real_northline_seed_is_idempotent_and_preserves_existing_bellwether(tmp
 
 
 @pytest.mark.parametrize("with_run", [True, False])
-def test_admitted_northline_startup_preserves_all_original_v5_bytes(tmp_path, with_run):
+def test_admitted_northline_startup_preserves_all_original_v5_bytes(tmp_path, monkeypatch, with_run):
+    packs = registry.registered_packs()
+    monkeypatch.setattr(registry, "_PACKS", tuple(pack.model_copy(update={"reviewed_pins": ()})
+                      if pack.slug == "gtm" else pack for pack in packs))
     original = tmp_path / "original-v5.db"
     copied = tmp_path / "admitted-startup.db"
     create_v5_sample(original, with_run=with_run)

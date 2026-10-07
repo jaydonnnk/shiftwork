@@ -59,7 +59,7 @@ def test_v5_to_v6_preserves_every_legacy_blob_hash_and_row_count(tmp_path):
 @pytest.mark.parametrize("already_v6", [False, True])
 def test_current_assist_projection_preserves_v5_rows_on_startup_and_restart(tmp_path, monkeypatch, with_run, already_v6):
     packs = registry.registered_packs()
-    monkeypatch.setattr(registry, "_PACKS", (*packs[:2], packs[2].model_copy(update={"reviewed_pins": ()})))
+    monkeypatch.setattr(registry, "_PACKS", (packs[0], *(pack.model_copy(update={"reviewed_pins": ()}) for pack in packs[1:])))
     original, copied, before = _copy_v5(tmp_path, with_run=with_run)
     original_hash = hashlib.sha256(original.read_bytes()).hexdigest()
     if already_v6:

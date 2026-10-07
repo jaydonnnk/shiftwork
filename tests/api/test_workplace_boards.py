@@ -23,7 +23,7 @@ def test_workplace_projects_only_approved_fields_in_declaration_order(tmp_path):
                                   "room_id", "station_labels", "availability"}
             assert {key: board[key] for key in registry.BoardDisplay.model_fields} == pack.display.model_dump(mode="json")
         assert [board["availability"] for board in boards] == [
-            "AVAILABLE", "AWAITING_OPERATOR_REVIEW", "AVAILABLE"]
+            "AVAILABLE", "AVAILABLE", "AVAILABLE"]
         assert len(boards[2]["station_labels"]) == 6
         orchestrator.assert_public_projection(response.json())
 

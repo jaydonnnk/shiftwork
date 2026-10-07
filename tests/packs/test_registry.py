@@ -26,7 +26,7 @@ def test_declaration_order_and_unregistered_slug():
 
 def test_workplace_refuses_unreviewed_packs(monkeypatch):
     packs = registry.registered_packs()
-    monkeypatch.setattr(registry, "_PACKS", (*packs[:2], packs[2].model_copy(update={"reviewed_pins": ()})))
+    monkeypatch.setattr(registry, "_PACKS", (packs[0], *(pack.model_copy(update={"reviewed_pins": ()}) for pack in packs[1:])))
     boards = orchestrator.workplace_boards()
     assert tuple(board.availability for board in boards) == (
         "AVAILABLE", "AWAITING_OPERATOR_REVIEW", "AWAITING_OPERATOR_REVIEW",
