@@ -1,0 +1,225 @@
+[
+  {
+    "id": "gtm-pair03-001",
+    "text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+    "requested_entities": [
+      "signal:pair-recorded-intent"
+    ],
+    "tasks": [
+      {
+        "id": "qualification",
+        "kind": "QUALIFY_SIGNAL",
+        "requested_entity_ref": "signal:pair-recorded-intent",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED",
+            "REVIEW"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": true
+      },
+      {
+        "id": "owner",
+        "kind": "ASSIGN_OWNER",
+        "requested_entity_ref": "signal:pair-recorded-intent",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED",
+            "REVIEW"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "write",
+        "kind": "WRITE_PIPELINE_RECORD",
+        "requested_entity_ref": "signal:pair-recorded-intent",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED",
+            "REVIEW"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "handoff",
+        "kind": "HANDOFF_TO_REVIEW",
+        "requested_entity_ref": "signal:pair-recorded-intent",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED",
+            "REVIEW"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "gtm.qualification",
+      "gtm.pinned_routing",
+      "gtm.exactly_once",
+      "gtm.human_handoff",
+      "response.structured_only"
+    ]
+  },
+  {
+    "id": "gtm-pair03-002",
+    "text": "Process the APAC demo signal once.",
+    "requested_entities": [
+      "signal:pair-retry"
+    ],
+    "tasks": [
+      {
+        "id": "qualification",
+        "kind": "QUALIFY_SIGNAL",
+        "requested_entity_ref": "signal:pair-retry",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": true
+      },
+      {
+        "id": "owner",
+        "kind": "ASSIGN_OWNER",
+        "requested_entity_ref": "signal:pair-retry",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "write",
+        "kind": "WRITE_PIPELINE_RECORD",
+        "requested_entity_ref": "signal:pair-retry",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "handoff",
+        "kind": "HANDOFF_TO_REVIEW",
+        "requested_entity_ref": "signal:pair-retry",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "gtm.qualification",
+      "gtm.pinned_routing",
+      "gtm.exactly_once",
+      "gtm.human_handoff",
+      "response.structured_only"
+    ]
+  },
+  {
+    "id": "gtm-pair03-003",
+    "text": "Retry the same signal without a second owner, record or handoff.",
+    "requested_entities": [
+      "signal:pair-retry"
+    ],
+    "tasks": [
+      {
+        "id": "qualification",
+        "kind": "QUALIFY_SIGNAL",
+        "requested_entity_ref": "signal:pair-retry",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": "gtm-pair03-002"
+        },
+        "required": true
+      },
+      {
+        "id": "owner",
+        "kind": "ASSIGN_OWNER",
+        "requested_entity_ref": "signal:pair-retry",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": "gtm-pair03-002"
+        },
+        "required": false
+      },
+      {
+        "id": "write",
+        "kind": "WRITE_PIPELINE_RECORD",
+        "requested_entity_ref": "signal:pair-retry",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": "gtm-pair03-002"
+        },
+        "required": false
+      },
+      {
+        "id": "handoff",
+        "kind": "HANDOFF_TO_REVIEW",
+        "requested_entity_ref": "signal:pair-retry",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": "gtm-pair03-002"
+        },
+        "required": false
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "gtm.qualification",
+      "gtm.pinned_routing",
+      "gtm.exactly_once",
+      "gtm.human_handoff",
+      "response.structured_only"
+    ]
+  }
+]

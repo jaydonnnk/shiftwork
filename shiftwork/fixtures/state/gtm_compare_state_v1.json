@@ -1,0 +1,185 @@
+{
+  "engagement_slug": "gtm",
+  "display_name": "Stonebridge Software revenue team",
+  "snapshot_version": 1,
+  "review_status": "DRAFT",
+  "description": "Synthetic GTM signal evidence; no customer message or external CRM action.",
+  "observed_at": "2026-10-07T09:00:00+08:00",
+  "timezone": "Asia/Singapore",
+  "dependencies": {
+    "enrichment": "available"
+  },
+  "routing_rules": {
+    "APAC/platform": "owner-apac-platform",
+    "EMEA/platform": "owner-emea-platform",
+    "AMER/platform": "owner-amer-platform",
+    "APAC/analytics": "owner-apac-analytics",
+    "EMEA/analytics": "owner-emea-analytics",
+    "AMER/analytics": "owner-amer-analytics"
+  },
+  "entities": {
+    "signal:incident-apac": {
+      "company_name": "Fictional Incident Apac",
+      "domain": "incident-apac.example"
+    },
+    "signal:pair-apac": {
+      "company_name": "Fictional Pair Apac",
+      "domain": "pair-apac.example"
+    },
+    "signal:pair-emea": {
+      "company_name": "Fictional Pair Emea",
+      "domain": "pair-emea.example"
+    },
+    "signal:pair-low-confidence": {
+      "company_name": "Fictional Pair Low Confidence",
+      "domain": "pair-low-confidence.example"
+    },
+    "signal:pair-suppressed": {
+      "company_name": "Fictional Pair Suppressed",
+      "domain": "pair-suppressed.example"
+    },
+    "signal:pair-recorded-intent": {
+      "company_name": "Fictional Pair Recorded Intent",
+      "domain": "pair-recorded-intent.example"
+    },
+    "signal:pair-retry": {
+      "company_name": "Fictional Pair Retry",
+      "domain": "pair-retry.example"
+    }
+  },
+  "records": [
+    {
+      "record_id": "public:signal:incident-apac",
+      "entity_ref": "signal:incident-apac",
+      "kind": "signal",
+      "value": {
+        "account_domain": "incident-apac.example",
+        "region": "APAC",
+        "product": "platform",
+        "employee_count": 120,
+        "suppressed": false,
+        "intent_label": "BUYING",
+        "confidence": 95,
+        "note": "Request a demo for our platform evaluation.",
+        "existing_owner": null,
+        "existing_record_ref": null
+      },
+      "record_age_ms": 1000,
+      "dependency": "enrichment"
+    },
+    {
+      "record_id": "public:signal:pair-apac",
+      "entity_ref": "signal:pair-apac",
+      "kind": "signal",
+      "value": {
+        "account_domain": "pair-apac.example",
+        "region": "APAC",
+        "product": "platform",
+        "employee_count": 120,
+        "suppressed": false,
+        "intent_label": "BUYING",
+        "confidence": 95,
+        "note": "Request a demo for our platform evaluation.",
+        "existing_owner": null,
+        "existing_record_ref": null
+      },
+      "record_age_ms": 1000,
+      "dependency": "enrichment"
+    },
+    {
+      "record_id": "public:signal:pair-emea",
+      "entity_ref": "signal:pair-emea",
+      "kind": "signal",
+      "value": {
+        "account_domain": "pair-emea.example",
+        "region": "EMEA",
+        "product": "analytics",
+        "employee_count": 120,
+        "suppressed": false,
+        "intent_label": "BUYING",
+        "confidence": 95,
+        "note": "Request a demo for our platform evaluation.",
+        "existing_owner": null,
+        "existing_record_ref": null
+      },
+      "record_age_ms": 1000,
+      "dependency": "enrichment"
+    },
+    {
+      "record_id": "public:signal:pair-low-confidence",
+      "entity_ref": "signal:pair-low-confidence",
+      "kind": "signal",
+      "value": {
+        "account_domain": "pair-low-confidence.example",
+        "region": "APAC",
+        "product": "platform",
+        "employee_count": 120,
+        "suppressed": false,
+        "intent_label": "AMBIGUOUS",
+        "confidence": 45,
+        "note": "A colleague is exploring options; timing and need are unclear.",
+        "existing_owner": null,
+        "existing_record_ref": null
+      },
+      "record_age_ms": 1000,
+      "dependency": "enrichment"
+    },
+    {
+      "record_id": "public:signal:pair-suppressed",
+      "entity_ref": "signal:pair-suppressed",
+      "kind": "signal",
+      "value": {
+        "account_domain": "pair-suppressed.example",
+        "region": "APAC",
+        "product": "platform",
+        "employee_count": 120,
+        "suppressed": true,
+        "intent_label": "BUYING",
+        "confidence": 95,
+        "note": "Request a demo for our platform evaluation.",
+        "existing_owner": null,
+        "existing_record_ref": null
+      },
+      "record_age_ms": 1000,
+      "dependency": "enrichment"
+    },
+    {
+      "record_id": "public:signal:pair-recorded-intent",
+      "entity_ref": "signal:pair-recorded-intent",
+      "kind": "signal",
+      "value": {
+        "account_domain": "pair-recorded-intent.example",
+        "region": "APAC",
+        "product": "platform",
+        "employee_count": 120,
+        "suppressed": false,
+        "intent_label": "BUYING",
+        "confidence": 95,
+        "note": "Evaluating infrastructure suppliers for next quarter.",
+        "existing_owner": null,
+        "existing_record_ref": null
+      },
+      "record_age_ms": 1000,
+      "dependency": "enrichment"
+    },
+    {
+      "record_id": "public:signal:pair-retry",
+      "entity_ref": "signal:pair-retry",
+      "kind": "signal",
+      "value": {
+        "account_domain": "pair-retry.example",
+        "region": "APAC",
+        "product": "platform",
+        "employee_count": 120,
+        "suppressed": false,
+        "intent_label": "BUYING",
+        "confidence": 95,
+        "note": "Request a demo for our platform evaluation.",
+        "existing_owner": null,
+        "existing_record_ref": null
+      },
+      "record_age_ms": 1000,
+      "dependency": "enrichment"
+    }
+  ]
+}

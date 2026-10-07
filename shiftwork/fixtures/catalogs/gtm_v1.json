@@ -1,0 +1,31 @@
+{
+  "engagement_slug": "gtm",
+  "version": 1,
+  "frozen_at": "2026-10-07T00:00:00Z",
+  "required_dimensions": [
+    "MUST_NEVER",
+    "ESCALATE_WHEN",
+    "REPEAT_REQUEST_RULE"
+  ],
+  "options": [
+    {
+      "id": "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL",
+      "dimension": "MUST_NEVER",
+      "learner_label": "Every processed signal has its permitted owner and synthetic record exactly once.",
+      "evaluator_rule_id": "gtm.exactly_once"
+    },
+    {
+      "id": "REVIEW_AMBIGUOUS_SIGNAL",
+      "dimension": "ESCALATE_WHEN",
+      "learner_label": "Ambiguous or low-confidence signals require a human review queue.",
+      "evaluator_rule_id": "gtm.human_handoff"
+    },
+    {
+      "id": "DEDUPLICATE_PIPELINE_BY_SIGNAL",
+      "dimension": "REPEAT_REQUEST_RULE",
+      "learner_label": "Retries keep the first owner and record without a second commitment.",
+      "evaluator_rule_id": "gtm.exactly_once"
+    }
+  ],
+  "content_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f"
+}

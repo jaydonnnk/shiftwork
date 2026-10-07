@@ -1,0 +1,3 @@
+{"ordinal":1,"request_id":"gtm-pair03-001","text":"Process the high-confidence recorded intent with no explicit demo phrase.","entity_ref":"signal:pair-recorded-intent"}
+{"ordinal":2,"request_id":"gtm-pair03-002","text":"Process the APAC demo signal once.","entity_ref":"signal:pair-retry"}
+{"ordinal":3,"request_id":"gtm-pair03-003","text":"Retry the same signal without a second owner, record or handoff.","entity_ref":"signal:pair-retry"}

@@ -1,0 +1,47 @@
+{
+  "engagement_slug": "gtm",
+  "display_name": "Stonebridge Software revenue team",
+  "snapshot_version": 1,
+  "review_status": "DRAFT",
+  "description": "The frozen APAC platform demo signal exposes the starter's unconditional AMER route.",
+  "observed_at": "2026-10-07T09:00:00+08:00",
+  "timezone": "Asia/Singapore",
+  "dependencies": {
+    "enrichment": "available"
+  },
+  "routing_rules": {
+    "APAC/platform": "owner-apac-platform",
+    "EMEA/platform": "owner-emea-platform",
+    "AMER/platform": "owner-amer-platform",
+    "APAC/analytics": "owner-apac-analytics",
+    "EMEA/analytics": "owner-emea-analytics",
+    "AMER/analytics": "owner-amer-analytics"
+  },
+  "entities": {
+    "signal:incident-apac": {
+      "company_name": "Fictional Incident Apac",
+      "domain": "incident-apac.example"
+    }
+  },
+  "records": [
+    {
+      "record_id": "public:signal:incident-apac",
+      "entity_ref": "signal:incident-apac",
+      "kind": "signal",
+      "value": {
+        "account_domain": "incident-apac.example",
+        "region": "APAC",
+        "product": "platform",
+        "employee_count": 120,
+        "suppressed": false,
+        "intent_label": "BUYING",
+        "confidence": 95,
+        "note": "Request a demo for our platform evaluation.",
+        "existing_owner": null,
+        "existing_record_ref": null
+      },
+      "record_age_ms": 1000,
+      "dependency": "enrichment"
+    }
+  ]
+}

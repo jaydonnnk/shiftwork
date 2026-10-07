@@ -1,0 +1,221 @@
+[
+  {
+    "id": "gtm-pair02-001",
+    "text": "Process the uncertain low-confidence signal with a human decision owner.",
+    "requested_entities": [
+      "signal:pair-low-confidence"
+    ],
+    "tasks": [
+      {
+        "id": "qualification",
+        "kind": "QUALIFY_SIGNAL",
+        "requested_entity_ref": "signal:pair-low-confidence",
+        "condition_json": {
+          "expected_decisions": [
+            "REVIEW"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": true
+      },
+      {
+        "id": "owner",
+        "kind": "ASSIGN_OWNER",
+        "requested_entity_ref": "signal:pair-low-confidence",
+        "condition_json": {
+          "expected_decisions": [
+            "REVIEW"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "write",
+        "kind": "WRITE_PIPELINE_RECORD",
+        "requested_entity_ref": "signal:pair-low-confidence",
+        "condition_json": {
+          "expected_decisions": [
+            "REVIEW"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "handoff",
+        "kind": "HANDOFF_TO_REVIEW",
+        "requested_entity_ref": "signal:pair-low-confidence",
+        "condition_json": {
+          "expected_decisions": [
+            "REVIEW"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "gtm.qualification",
+      "gtm.pinned_routing",
+      "gtm.exactly_once",
+      "gtm.human_handoff",
+      "response.structured_only"
+    ]
+  },
+  {
+    "id": "gtm-pair02-002",
+    "text": "Evaluate the suppressed signal without assigning an owner or pipeline record.",
+    "requested_entities": [
+      "signal:pair-suppressed"
+    ],
+    "tasks": [
+      {
+        "id": "qualification",
+        "kind": "QUALIFY_SIGNAL",
+        "requested_entity_ref": "signal:pair-suppressed",
+        "condition_json": {
+          "expected_decisions": [
+            "DISQUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": true
+      },
+      {
+        "id": "owner",
+        "kind": "ASSIGN_OWNER",
+        "requested_entity_ref": "signal:pair-suppressed",
+        "condition_json": {
+          "expected_decisions": [
+            "DISQUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "write",
+        "kind": "WRITE_PIPELINE_RECORD",
+        "requested_entity_ref": "signal:pair-suppressed",
+        "condition_json": {
+          "expected_decisions": [
+            "DISQUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "handoff",
+        "kind": "HANDOFF_TO_REVIEW",
+        "requested_entity_ref": "signal:pair-suppressed",
+        "condition_json": {
+          "expected_decisions": [
+            "DISQUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "gtm.qualification",
+      "gtm.pinned_routing",
+      "gtm.exactly_once",
+      "gtm.human_handoff",
+      "response.structured_only"
+    ]
+  },
+  {
+    "id": "gtm-pair02-003",
+    "text": "Process the APAC platform demo signal.",
+    "requested_entities": [
+      "signal:pair-apac"
+    ],
+    "tasks": [
+      {
+        "id": "qualification",
+        "kind": "QUALIFY_SIGNAL",
+        "requested_entity_ref": "signal:pair-apac",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": true
+      },
+      {
+        "id": "owner",
+        "kind": "ASSIGN_OWNER",
+        "requested_entity_ref": "signal:pair-apac",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "write",
+        "kind": "WRITE_PIPELINE_RECORD",
+        "requested_entity_ref": "signal:pair-apac",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      },
+      {
+        "id": "handoff",
+        "kind": "HANDOFF_TO_REVIEW",
+        "requested_entity_ref": "signal:pair-apac",
+        "condition_json": {
+          "expected_decisions": [
+            "QUALIFIED"
+          ],
+          "qualified_owner": "owner-apac-platform",
+          "review_owner": "revenue-review",
+          "repeat_of": null
+        },
+        "required": false
+      }
+    ],
+    "mandatory_rule_ids": [
+      "task.required_results",
+      "gtm.qualification",
+      "gtm.pinned_routing",
+      "gtm.exactly_once",
+      "gtm.human_handoff",
+      "response.structured_only"
+    ]
+  }
+]

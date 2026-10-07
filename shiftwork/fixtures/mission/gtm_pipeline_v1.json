@@ -1,0 +1,120 @@
+{
+  "engagement_slug": "gtm",
+  "version": 1,
+  "review_status": "DRAFT",
+  "description": "Stonebridge signal qualification, routing and human-handoff contract.",
+  "contract_catalog_version": 1,
+  "contract_catalog_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f",
+  "request_specs": [
+    {
+      "id": "gtm-incident-001",
+      "text": "Process the APAC platform demo signal and hand it to its owner exactly once.",
+      "requested_entities": [
+        "signal:incident-apac"
+      ],
+      "tasks": [
+        {
+          "id": "qualification",
+          "kind": "QUALIFY_SIGNAL",
+          "requested_entity_ref": "signal:incident-apac",
+          "condition_json": {
+            "expected_decisions": [
+              "QUALIFIED"
+            ],
+            "qualified_owner": "owner-apac-platform",
+            "review_owner": "revenue-review",
+            "repeat_of": null
+          },
+          "required": true
+        },
+        {
+          "id": "owner",
+          "kind": "ASSIGN_OWNER",
+          "requested_entity_ref": "signal:incident-apac",
+          "condition_json": {
+            "expected_decisions": [
+              "QUALIFIED"
+            ],
+            "qualified_owner": "owner-apac-platform",
+            "review_owner": "revenue-review",
+            "repeat_of": null
+          },
+          "required": false
+        },
+        {
+          "id": "write",
+          "kind": "WRITE_PIPELINE_RECORD",
+          "requested_entity_ref": "signal:incident-apac",
+          "condition_json": {
+            "expected_decisions": [
+              "QUALIFIED"
+            ],
+            "qualified_owner": "owner-apac-platform",
+            "review_owner": "revenue-review",
+            "repeat_of": null
+          },
+          "required": false
+        },
+        {
+          "id": "handoff",
+          "kind": "HANDOFF_TO_REVIEW",
+          "requested_entity_ref": "signal:incident-apac",
+          "condition_json": {
+            "expected_decisions": [
+              "QUALIFIED"
+            ],
+            "qualified_owner": "owner-apac-platform",
+            "review_owner": "revenue-review",
+            "repeat_of": null
+          },
+          "required": false
+        }
+      ],
+      "mandatory_rule_ids": [
+        "task.required_results",
+        "gtm.qualification",
+        "gtm.pinned_routing",
+        "gtm.exactly_once",
+        "gtm.human_handoff",
+        "response.structured_only"
+      ]
+    }
+  ],
+  "public_rules": {
+    "task.required_results": "Qualification is required. Every active owner, pipeline-record or handoff task is mandatory even though the task is conditional. Return an explicit NOT_APPLICABLE result for each inactive task.",
+    "gtm.qualification": "Suppressed accounts and accounts below 50 employees are disqualified. A current confident RESEARCH interpretation is disqualified. Missing, stale or unavailable enrichment, unknown region/product, ambiguous intent or confidence below 80 requires human review. Current BUYING signals with explicit demo, pricing or security-review notes qualify. A current confident BUYING interpretation without those explicit phrases may qualify or enter human review. No fabricated fit fact is permitted.",
+    "gtm.pinned_routing": "Qualified signals use the frozen region/product owner map. REVIEW signals use revenue-review. DISQUALIFIED signals have no owner, record or handoff. The pinned task specification states the permitted qualification decisions and qualified owner independently of either workflow.",
+    "gtm.exactly_once": "One owner_assignment and one pipeline_write output per first processed signal. A retry must retain qualification and output NOT_APPLICABLE for owner, write and handoff, without another commitment. The assessor checks the earlier captured output or a frozen existing record. These are synthetic output records, not proof of a write to an external CRM.",
+    "gtm.human_handoff": "REVIEW requires one COMPLETED HANDOFF_TO_REVIEW to revenue-review. This is a record for a human queue, never a sent customer message. No send field or revenue quantity exists in the output grammar.",
+    "response.structured_only": "Only the task-aware envelope is accepted. No independent customer prose. Every active claim cites the exact frozen signal evidence. A pipeline row includes a bounded decision trace and a stable signal-bound record reference."
+  },
+  "constants": {
+    "max_record_age_ms": 3600000,
+    "minor_units_per_gbp": 100,
+    "tomorrow_basis": "No currency or relative booking-date rule applies to this GTM pack."
+  },
+  "explanation_codes": {},
+  "allowed_tool_vocabulary": {
+    "frozen_signal_lookup": "Read the frozen signal records only.",
+    "recorded_interpretation": "Synthetic recorded intent/confidence; no actual model inference in S23."
+  },
+  "render_vocabulary": {
+    "qualification": "Synthetic qualification: {value}.",
+    "owner_assignment": "Synthetic owner: {value}.",
+    "pipeline_write": "Synthetic pipeline record prepared for human handling.",
+    "handoff": "Human handoff to the revenue review queue; no message sent.",
+    "not_applicable": "No additional owner, record or handoff is required."
+  },
+  "weights": {
+    "owner": 1,
+    "sla": 1,
+    "handoff": 1
+  },
+  "transitions": [],
+  "evidence_limits": [
+    "Draft material awaits operator review and sealing.",
+    "All accounts, intent labels, confidence values, records and business effects are synthetic.",
+    "S23 runs no model, writes no external CRM and sends no customer message.",
+    "No learning, revenue, model-quality or isolation claim."
+  ]
+}
