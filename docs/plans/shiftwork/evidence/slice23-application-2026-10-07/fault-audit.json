@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "controls_rerun": 106,
+  "intended_assertion_first_lines_match_retained_receipts": 106,
+  "setup_errors": 0,
+  "all_source_restored_exactly": true,
+  "mutation_command_exit_code": 0,
+  "old_rejected_controls_excluded": 5
+}

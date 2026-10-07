@@ -1,0 +1,382 @@
+[
+  {
+    "path": ".gitattributes",
+    "application_session_changed_ranges": [
+      [
+        75,
+        88
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "3311da1adfb18a1b3eb22688f0d6ce959337e844474c53509042bad25a89c09e"
+  },
+  {
+    "path": "MISTAKES.md",
+    "application_session_changed_ranges": [
+      [
+        2366,
+        2407
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "74ec8813fd4aced84f21fd97a871d4080f802f8d40737d63b2fad9b69c4fc0ce"
+  },
+  {
+    "path": "demos/gtm_review.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "e7566411ed17460c49956b2f580dc5e01ac9b7fe710a1c3d3bd4ea29206b2bd1"
+  },
+  {
+    "path": "demos/gtm_reviewed.py",
+    "application_session_changed_ranges": [
+      [
+        1,
+        62
+      ]
+    ],
+    "entry_bound": false,
+    "current_sha256": "07c475933211f1dd5b532bea16d2f13bdc8bde226f80a95edebf24783c9d63fd"
+  },
+  {
+    "path": "docs/SHIFTWORK_PLAN.md",
+    "application_session_changed_ranges": [
+      [
+        1,
+        30
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "5ed0f78441ec992dd7cf79014f326742599d4ac8ba1e14045ef809a7b0c9b0e4"
+  },
+  {
+    "path": "docs/plans/shiftwork/00-status.md",
+    "application_session_changed_ranges": [
+      [
+        1,
+        30
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "1270afd5111696fb50236b3519d052f656e4d2814b0d7a1fde1776c20def51d3"
+  },
+  {
+    "path": "shiftwork/api/schemas.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "aa9a1c116e7943566858a67da4519c62552ada363b7df11bd38e2b49aee0ab65"
+  },
+  {
+    "path": "shiftwork/comparison_flow.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "fede7af5a3cddb46c64a45033481470a990bcf33f448b6ff91a1a6d89b876fb0"
+  },
+  {
+    "path": "shiftwork/config.py",
+    "application_session_changed_ranges": [
+      [
+        260,
+        262
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "ac8bb45fcbc186787da721b36aa6e30fc762f6d8cd899a07caf7c40c2ed009ff"
+  },
+  {
+    "path": "shiftwork/domain/customer_answer.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "c238a8e0728ff1142e01074bf8ae8cb124d15b980757108a214d562ac98af721"
+  },
+  {
+    "path": "shiftwork/domain/models.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "c792abf6add0f44959f6c8f6fcb7b17464009ac306a846311b303ff68e2e2bb8"
+  },
+  {
+    "path": "shiftwork/domain/task_contract.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5"
+  },
+  {
+    "path": "shiftwork/evaluator/evaluator.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c"
+  },
+  {
+    "path": "shiftwork/experiments.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "00f68e243f265fc956f733abe98bdd48730a145e4c438d82d4e1bb9ab70e4c6b"
+  },
+  {
+    "path": "shiftwork/orchestrator.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0"
+  },
+  {
+    "path": "shiftwork/packs/registry.py",
+    "application_session_changed_ranges": [
+      [
+        220,
+        251
+      ],
+      [
+        287,
+        287
+      ],
+      [
+        291,
+        291
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "e6cb4f3803479cf8aa35505a46463d83451b9a448c0fd96b162e2bae411c44d0"
+  },
+  {
+    "path": "shiftwork/sealed/store.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d"
+  },
+  {
+    "path": "tests/api/test_pivot_routes.py",
+    "application_session_changed_ranges": [
+      [
+        38,
+        38
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "0827d16eafd8957f241f251690e61659a388e7e8e90d83d224e6c185fc3b6b38"
+  },
+  {
+    "path": "tests/api/test_workplace_boards.py",
+    "application_session_changed_ranges": [
+      [
+        26,
+        26
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "6bc1beb1f0f85e30cf72f227ab597116e95c71966ee39dc69436180f5532f69d"
+  },
+  {
+    "path": "tests/assist/test_gateway.py",
+    "application_session_changed_ranges": [
+      [
+        441,
+        441
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "22abeeca307d656c842e4153451e503ce16ee74015d2f2695e17b1b292819278"
+  },
+  {
+    "path": "tests/executor/test_conformance.py",
+    "application_session_changed_ranges": [
+      [
+        302,
+        302
+      ],
+      [
+        305,
+        305
+      ],
+      [
+        309,
+        309
+      ],
+      [
+        353,
+        358
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "c3bb86b31f2c689688f64824fa7c4ca8b92e334782a26f65e931c2e5ecd9fe78"
+  },
+  {
+    "path": "tests/orchestrator/test_fde_deployment.py",
+    "application_session_changed_ranges": [
+      [
+        949,
+        949
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "b4c9f8dd39207fe7ccf5a9a6d915e852ef6afa3db96b4bb6d7f969da819f668f"
+  },
+  {
+    "path": "tests/orchestrator/test_gtm_guards.py",
+    "application_session_changed_ranges": [],
+    "entry_bound": true,
+    "current_sha256": "43dcde1ac49215465e8470436c30a82847721990cb16096154e0858dfee357f3"
+  },
+  {
+    "path": "tests/orchestrator/test_gtm_pipeline.py",
+    "application_session_changed_ranges": [
+      [
+        1,
+        1
+      ],
+      [
+        9,
+        9
+      ],
+      [
+        15,
+        18
+      ],
+      [
+        72,
+        102
+      ],
+      [
+        105,
+        106
+      ],
+      [
+        111,
+        111
+      ],
+      [
+        119,
+        158
+      ],
+      [
+        160,
+        160
+      ],
+      [
+        164,
+        164
+      ],
+      [
+        399,
+        399
+      ],
+      [
+        505,
+        505
+      ],
+      [
+        533,
+        533
+      ],
+      [
+        538,
+        539
+      ],
+      [
+        580,
+        590
+      ],
+      [
+        593,
+        593
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "684d0a8da9725e18e2853e0a341de82f28d10932d3a4d1d12d90b01f233b72a2"
+  },
+  {
+    "path": "tests/packs/gtm_material.py",
+    "application_session_changed_ranges": [
+      [
+        1,
+        1
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        12,
+        16
+      ],
+      [
+        20,
+        20
+      ],
+      [
+        23,
+        23
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "3fac5fbd42b6cf1316bd7548484d716c2b940d6fe44a28609469af2e947631d6"
+  },
+  {
+    "path": "tests/packs/gtm_mutation_proofs.py",
+    "application_session_changed_ranges": [
+      [
+        195,
+        195
+      ],
+      [
+        200,
+        200
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "92646d802cdb2627aa46634cb08f4a765a7ff26a312a8c8e83a16f7aa66b4971"
+  },
+  {
+    "path": "tests/packs/test_northline_review.py",
+    "application_session_changed_ranges": [
+      [
+        37,
+        37
+      ],
+      [
+        44,
+        44
+      ],
+      [
+        61,
+        61
+      ],
+      [
+        112,
+        112
+      ],
+      [
+        137,
+        140
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "8717420604774fdae6a5fcecdee1d91f13e8e5aa6b1fbe662c04bb36863d1c7c"
+  },
+  {
+    "path": "tests/packs/test_registry.py",
+    "application_session_changed_ranges": [
+      [
+        29,
+        29
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "3a9e90b86cf4b7c940a2bf2e2796c3c003e16fb2f279d70b866ae90d23d4741f"
+  },
+  {
+    "path": "tests/store/test_pivot_migration.py",
+    "application_session_changed_ranges": [
+      [
+        62,
+        62
+      ]
+    ],
+    "entry_bound": true,
+    "current_sha256": "bac9cf9d94d56fe0fc842f5b59fad55defade1c63848d50bd1321ada3485b340"
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "exit_code": 1,
+  "command": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tests/orchestrator/test_gtm_pipeline.py",
+    "tests/orchestrator/test_gtm_guards.py",
+    "tests/packs",
+    "tests/api/test_workplace_boards.py",
+    "tests/api/test_pivot_routes.py",
+    "tests/store/test_pivot_migration.py",
+    "tests/assist/test_gateway.py",
+    "tests/orchestrator/test_fde_deployment.py",
+    "tests/executor/test_conformance.py::test_pinned_fixture_hashes_match_exact_bytes",
+    "tests/executor/test_conformance.py::test_byte_addressed_fixtures_match_lf_checkout",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice23-application-2026-10-07\\transition-focused.xml"
+  ],
+  "tests": 478,
+  "failures": 2,
+  "errors": 0,
+  "skipped": 0,
+  "log_sha256": "65834bae54ef832aee2726f2d0213bc8b471aec5f7e68caa3a03197ab81db01a",
+  "xml_sha256": "a12f86690435209bbd499d9d16c9eb60e010eee89346070deb443fc4834fd8a0"
+}

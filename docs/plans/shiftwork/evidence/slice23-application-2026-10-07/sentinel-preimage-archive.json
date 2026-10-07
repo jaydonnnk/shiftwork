@@ -1,0 +1,8 @@
+{
+  "status": "LOSSLESS_ARCHIVE_VERIFIED",
+  "source": "preimages/tests/sealed/test_sentinel_leak.py",
+  "archive": "preimages/sentinel-test-preimage.zip",
+  "source_sha256": "f9d8aa76b4ba0d448f93bba37a5e068a61410bd020dc86727bb155cd1925f38d",
+  "archive_sha256": "31c27e59aca0d2454d85fc4467bde0901d427a63d44f953c429a2e36140bbc76",
+  "reason": "Own generated duplicate violated the repository uniqueness guard. Original test unchanged; backup bytes retained losslessly."
+}

@@ -1,0 +1,8 @@
+{
+  "path": "AGENTS.md",
+  "entry_sha256": "4c5489ef463a42407e802821d2f09f1f14c13e9d5d6561bc2ddeb90d61798b49",
+  "current_sha256": "af344830f82908ee3cc02363e172d9fb7fe7573c73cd2cfea8b94dfcf701e956",
+  "observed_difference": "Context threshold changed from 200k to 175k outside this agent edits. A later explicit diff confirms three changed lines versus HEAD. Initial status-based no-diff statement was stale and is superseded. Ownership unverified; bytes untouched and excluded from publication. Latest explicit user instructions state 200k.",
+  "agent_modified": false,
+  "git_diff_confirmed": "diff --git a/AGENTS.md b/AGENTS.md\nindex 177d9af..9fea6b1 100644\n--- a/AGENTS.md\n+++ b/AGENTS.md\n@@ -398,12 +398,12 @@ Rules:\n \n ### Context budget and handoff\n \n-- Treat 200k tokens of session context usage as the working limit. Use the\n+- Treat 175k tokens of session context usage as the working limit. Use the\n   reported usage indicator when the runtime shows one, and a conservative\n-  estimate otherwise. When usage reaches about 200k tokens, stop starting new\n+  estimate otherwise. When usage reaches about 175k tokens, stop starting new\n   work even if the task is unfinished, except in the near-completion case below.\n - Near-completion exception: when the task is almost done as usage approaches the\n-  threshold (for example the last step of a five-step task at 180k to 200k\n+  threshold (for example the last step of a five-step task at 155k to 175k\n   tokens used), finish the task in this session instead of handing off. The\n   exception covers only a short, fully predictable remainder, never a new phase of\n   work or an open question about what remains.\n"
+}

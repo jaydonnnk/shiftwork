@@ -1,0 +1,139 @@
+{
+  "status": "PASS",
+  "files": [
+    {
+      "path": "shiftwork/fixtures/catalogs/gtm_v1.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "47d22d39eccf238315907bd97e1cfdf21c0b3bb6",
+      "filtered_blob_hash": "47d22d39eccf238315907bd97e1cfdf21c0b3bb6"
+    },
+    {
+      "path": "shiftwork/fixtures/mission/gtm_pipeline_v1.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "d7d7193dbd9d9cc2f9ded7be73be4a42b35ad0d3",
+      "filtered_blob_hash": "d7d7193dbd9d9cc2f9ded7be73be4a42b35ad0d3"
+    },
+    {
+      "path": "shiftwork/fixtures/state/gtm_pipeline_public_state.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "935042c43d29c2150549c2fb2b047230ec0c4db8",
+      "filtered_blob_hash": "935042c43d29c2150549c2fb2b047230ec0c4db8"
+    },
+    {
+      "path": "shiftwork/fixtures/state/gtm_compare_state_v1.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "180fd980093d23564a980f2a827dae1208c7120a",
+      "filtered_blob_hash": "180fd980093d23564a980f2a827dae1208c7120a"
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_pipeline_incident.jsonl",
+      "text_attribute": "unset",
+      "raw_blob_hash": "6365424c95453a30a7363615ebbeee2fe4643a05",
+      "filtered_blob_hash": "6365424c95453a30a7363615ebbeee2fe4643a05"
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_manifest.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "c0a3b309d50e6c7c95dcd9a5e9bfebe060bb6ea3",
+      "filtered_blob_hash": "c0a3b309d50e6c7c95dcd9a5e9bfebe060bb6ea3"
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_pair_01.jsonl",
+      "text_attribute": "unset",
+      "raw_blob_hash": "9f18a77998816253a8760634afd4be979abf0807",
+      "filtered_blob_hash": "9f18a77998816253a8760634afd4be979abf0807"
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_pair_01_specs.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "9aa8c00873626766473d5d4daf9b20eb80c7d8b7",
+      "filtered_blob_hash": "9aa8c00873626766473d5d4daf9b20eb80c7d8b7"
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_pair_02.jsonl",
+      "text_attribute": "unset",
+      "raw_blob_hash": "58a23d32d09edc9176897e03f06bc80f2e524ca0",
+      "filtered_blob_hash": "58a23d32d09edc9176897e03f06bc80f2e524ca0"
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_pair_02_specs.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "f4f07234a1ab9d0a175f1b196eb4b1f9ba7e64cf",
+      "filtered_blob_hash": "f4f07234a1ab9d0a175f1b196eb4b1f9ba7e64cf"
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_pair_03.jsonl",
+      "text_attribute": "unset",
+      "raw_blob_hash": "1e6335be09e50b95e8599abbed2899d5b7b69520",
+      "filtered_blob_hash": "1e6335be09e50b95e8599abbed2899d5b7b69520"
+    },
+    {
+      "path": "shiftwork/fixtures/requests/gtm_compare_pair_03_specs.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "b3c04d637548657661ec67979d2e2cd77517d45d",
+      "filtered_blob_hash": "b3c04d637548657661ec67979d2e2cd77517d45d"
+    },
+    {
+      "path": "shiftwork/sealed/cases/gtm_pipeline_ownership.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "c337ea1b8f0964755851cb88fe1a72607704af1c",
+      "filtered_blob_hash": "c337ea1b8f0964755851cb88fe1a72607704af1c"
+    },
+    {
+      "path": "shiftwork/fixtures/artifacts/gtm/pipeline_starter_failure.py",
+      "text_attribute": "unset",
+      "raw_blob_hash": "5673d9bd9618dff98ecd1aae0dd8d2b0cb2cf429",
+      "filtered_blob_hash": "5673d9bd9618dff98ecd1aae0dd8d2b0cb2cf429"
+    },
+    {
+      "path": "shiftwork/fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py",
+      "text_attribute": "unset",
+      "raw_blob_hash": "027c6b73e772f9048c061fb86583aa3d02a2d7d1",
+      "filtered_blob_hash": "027c6b73e772f9048c061fb86583aa3d02a2d7d1"
+    },
+    {
+      "path": "shiftwork/fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py",
+      "text_attribute": "unset",
+      "raw_blob_hash": "16e6f14d7fd38974d7b0cfd401473f263ed6c27f",
+      "filtered_blob_hash": "16e6f14d7fd38974d7b0cfd401473f263ed6c27f"
+    },
+    {
+      "path": "shiftwork/fixtures/documents/gtm/revenue_team_brief.md",
+      "text_attribute": "unset",
+      "raw_blob_hash": "eebda57912f7c49916b8d933d0e3df673181449d",
+      "filtered_blob_hash": "eebda57912f7c49916b8d933d0e3df673181449d"
+    },
+    {
+      "path": "shiftwork/fixtures/documents/gtm/qualification_routing_rules.md",
+      "text_attribute": "unset",
+      "raw_blob_hash": "7993db1a27a782d58d3cc0bca2a9a932c6523778",
+      "filtered_blob_hash": "7993db1a27a782d58d3cc0bca2a9a932c6523778"
+    },
+    {
+      "path": "shiftwork/fixtures/documents/gtm/workflow_treatments.md",
+      "text_attribute": "unset",
+      "raw_blob_hash": "1c39cb1cde7c788074c34ad851f2fc8a30f8f58e",
+      "filtered_blob_hash": "1c39cb1cde7c788074c34ad851f2fc8a30f8f58e"
+    },
+    {
+      "path": "docs/plans/shiftwork/slice23-gtm-operator-review-packet.md",
+      "text_attribute": "unset",
+      "raw_blob_hash": "130fbd2e2ec5b8beb8667bac7bd182f3ef3ee9a3",
+      "filtered_blob_hash": "130fbd2e2ec5b8beb8667bac7bd182f3ef3ee9a3"
+    },
+    {
+      "path": "docs/plans/shiftwork/slice23-gtm-review-inventory.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "b368da7cfa675b3d8ed51f2aabbacaac3b73d199",
+      "filtered_blob_hash": "b368da7cfa675b3d8ed51f2aabbacaac3b73d199"
+    },
+    {
+      "path": "docs/plans/shiftwork/evidence/slice23-approval-handoff-2026-10-07/authorization.json",
+      "text_attribute": "unset",
+      "raw_blob_hash": "fd19417d172b24e18e2eabac6506ae8df7a0900b",
+      "filtered_blob_hash": "fd19417d172b24e18e2eabac6506ae8df7a0900b"
+    }
+  ],
+  "method": "read-only effective attributes and Git clean-filter identity under core.autocrlf=true",
+  "fresh_checkout_run": false
+}

@@ -1,0 +1,23 @@
+{
+  "exit_code": 1,
+  "command": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tests/packs/test_northline_review.py::test_admitted_northline_startup_preserves_all_original_v5_bytes",
+    "tests/orchestrator/test_gtm_pipeline.py::test_admitted_gtm_startup_preserves_all_original_v5_bytes",
+    "tests/orchestrator/test_gtm_pipeline.py::test_actual_gtm_reviewed_material_is_admitted_and_seeded_idempotently",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice23-application-2026-10-07\\admission-repair.xml"
+  ],
+  "tests": 5,
+  "failures": 2,
+  "errors": 0,
+  "skipped": 0,
+  "log_sha256": "54756aa1e87405d5367dbd195295178ea856a24471a022c86679c3303a992c8a",
+  "xml_sha256": "90f19bce4344eabccaecfaf46e3d9e2f9e4c2fa8a69a3af3a4a1a02c18b74b11"
+}

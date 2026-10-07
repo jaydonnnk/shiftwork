@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\docs\plans\shiftwork\evidence\slice23-application-2026-10-07\transition_tests.py", line 179, in <module>
+    assert raw.endswith(b"shiftwork/fixtures/documents/gtm/workflow_treatments.md -text\n")
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

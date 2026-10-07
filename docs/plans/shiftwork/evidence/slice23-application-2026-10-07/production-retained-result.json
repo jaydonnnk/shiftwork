@@ -1,0 +1,21 @@
+{
+  "exit_code": 0,
+  "command": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tests/orchestrator/test_gtm_pipeline.py::test_reviewed_production_runs_six_fair_slots_without_business_writes",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice23-application-2026-10-07\\production-retained.xml"
+  ],
+  "tests": 1,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "log_sha256": "b351892f455fc509cbf649374fd2e63064adaa7101265d120f2406b113834adf",
+  "xml_sha256": "c98bcd61c3dca4641f3093f03189e9ebe9c4fc7eb3511b9780007e7da0ff4bfc"
+}

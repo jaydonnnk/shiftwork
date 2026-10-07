@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\docs\plans\shiftwork\evidence\slice23-application-2026-10-07\transition_tests.py", line 121, in <module>
+    replace(path, 'def test_hypothetical_reviewed_copy_runs_six_fair_slots_without_business_writes(tmp_path, monkeypatch, reviewed_copy):',
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            'def test_reviewed_production_runs_six_fair_slots_without_business_writes(tmp_path, monkeypatch):\n    reviewed_inventory()')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\docs\plans\shiftwork\evidence\slice23-application-2026-10-07\transition_tests.py", line 15, in replace
+    assert len(matches) == 1, (path, old, [(raw.count(a), len(a)) for a, _ in candidates])
+           ^^^^^^^^^^^^^^^^^
+AssertionError: ('tests/orchestrator/test_gtm_pipeline.py', 'def test_hypothetical_reviewed_copy_runs_six_fair_slots_without_business_writes(tmp_path, monkeypatch, reviewed_copy):', [(1, 118), (1, 118)])

@@ -1,0 +1,7 @@
+{
+  "exit_code": 1,
+  "production_writes": 0,
+  "test_writes": 0,
+  "status": "REJECTED_PREFLIGHT",
+  "log_sha256": "20ed9a40771c92a695187afcda91099bc91bb941121d4b63fd72d2a3b2c731c4"
+}

@@ -1,0 +1,22 @@
+{
+  "exit_code": 0,
+  "command": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tests",
+    "--ignore=tests/packaging",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice23-application-2026-10-07\\full-offline-verified.xml"
+  ],
+  "tests": 1282,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 1,
+  "log_sha256": "8a87537a7ac1d8ec2085017de5ff15d59e34c09cae5c633e39d0b6194bb10e48",
+  "xml_sha256": "30e47a341ccd26b345a3b02ed6ae908e5da85cecfcf988ea2e24c58705b2dba9"
+}

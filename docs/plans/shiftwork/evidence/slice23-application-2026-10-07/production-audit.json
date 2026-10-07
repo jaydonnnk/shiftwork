@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "database_sha256": "f8f64acce9ee5a7c29b84b92ceda4f2076cb723dd4e80b653640a7673ab59194",
+  "database_unchanged": true,
+  "fair_paired_slots": 6,
+  "public_requests_per_candidate": 9,
+  "shared_protected_variants": 3,
+  "verified_captures": 25,
+  "both_candidates_eligible": true,
+  "business_rows_unchanged": true,
+  "starter_failure_tasks": [
+    "owner",
+    "write"
+  ],
+  "assist_roles": [
+    "HINT",
+    "DIAGNOSIS"
+  ],
+  "live_model_calls": 0,
+  "external_crm_actions": 0
+}

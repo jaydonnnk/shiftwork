@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\docs\plans\shiftwork\evidence\slice23-application-2026-10-07\transition_tests.py", line 56, in <module>
+    assert raw.count(start) == raw.count(end) == 1
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

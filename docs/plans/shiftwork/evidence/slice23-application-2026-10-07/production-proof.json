@@ -1,0 +1,1082 @@
+{
+  "mode": "PRODUCTION_REVIEWED_TRUSTED_LOCAL",
+  "production_sealed": true,
+  "production_admitted": true,
+  "assist_gateway": "FAKE_NO_MODEL_CALL",
+  "starter": {
+    "id": "run-0001",
+    "shift_id": "gtm-shift-01",
+    "artifact_version_id": "ver-0001",
+    "attempt_number": 1,
+    "state": "FINALIZED",
+    "adapter": "local_process",
+    "failure_kind": null,
+    "started_at": "2026-10-07T15:05:43.788560Z",
+    "ended_at": "2026-10-07T15:05:44.147146Z",
+    "purpose": "OPERATION",
+    "evidence_mode": "TRUSTED_LOCAL",
+    "selection_id": "sel-0001"
+  },
+  "comparison": {
+    "id": "experiment-gtm-shift-01-c1",
+    "shift_id": "gtm-shift-01",
+    "kind": "QUALIFYING_COMPARISON",
+    "investigation_id": "inv-0001",
+    "declared_treatment": "Rules-first human review versus recorded-confidence direct routing.",
+    "context_hash": "88af9cecac173c6d71a8eea247c541003a5a8fba2ac9f9857674dde96cd4dced",
+    "context_evidence_class": "TRUSTED_LOCAL",
+    "condition": {
+      "id": "condition-normal",
+      "kind": "normal",
+      "public_label": "Normal public conditions",
+      "content_hash": "1a9d7cd051d691bcebed2917edc042ebc8f81dff6cf2b20b14f51c43bf9c834b"
+    },
+    "observed_run_id": null,
+    "workloads": [
+      {
+        "id": "workload-01",
+        "ordinal": 1,
+        "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+        "request_count": 3
+      },
+      {
+        "id": "workload-02",
+        "ordinal": 2,
+        "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+        "request_count": 3
+      },
+      {
+        "id": "workload-03",
+        "ordinal": 3,
+        "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+        "request_count": 3
+      }
+    ],
+    "candidates": [
+      {
+        "label": "A",
+        "artifact_version_id": "ver-0002",
+        "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33"
+      },
+      {
+        "label": "B",
+        "artifact_version_id": "ver-0003",
+        "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f"
+      }
+    ],
+    "trials": [
+      {
+        "pair_ordinal": 1,
+        "execution_ordinal": 1,
+        "candidate_label": "A",
+        "artifact_version_id": "ver-0002",
+        "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+        "workload_id": "workload-01",
+        "workload_ordinal": 1,
+        "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+        "request_count": 3,
+        "protected_request_count": 1,
+        "run_id": "run-0002",
+        "state": "COMPLETE",
+        "evidence_mode": "TRUSTED_LOCAL",
+        "task_assessments": [
+          {
+            "request_id": "gtm-pair01-001",
+            "request_ordinal": 1,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-001",
+            "request_ordinal": 1,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-001",
+            "request_ordinal": 1,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-001",
+            "request_ordinal": 1,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-002",
+            "request_ordinal": 2,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-002",
+            "request_ordinal": 2,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-002",
+            "request_ordinal": 2,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-002",
+            "request_ordinal": 2,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-003",
+            "request_ordinal": 3,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-003",
+            "request_ordinal": 3,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-003",
+            "request_ordinal": 3,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-003",
+            "request_ordinal": 3,
+            "task_id": "handoff",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          }
+        ],
+        "observations": [],
+        "outputs": [
+          {
+            "request_ordinal": 1,
+            "request_text": "Process the APAC platform demo signal.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsInZhbHVlIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6eyJvd25lciI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItYXBhYyIsImRlY2lzaW9uX3RyYWNlIjpbIlJVTEVTX0ZJUlNUIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1hcGFjIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItYXBhYyJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 2,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 2,
+            "request_text": "Process the EMEA analytics demo signal.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWVtZWEiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItZW1lYSIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItZW1lYSIsInZhbHVlIjoib3duZXItZW1lYS1hbmFseXRpY3MiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1lbWVhIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOlt7ImtpbmQiOiJwaXBlbGluZV93cml0ZSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1lbWVhIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1lbWVhLWFuYWx5dGljcyIsInJlY29yZF9yZWYiOiJwaXBlbGluZTpzaWduYWw6cGFpci1lbWVhIiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWVtZWEiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiaGFuZG9mZiIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOltdLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1lbWVhIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+            "elapsed_ms": 1,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 3,
+            "request_text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InF1YWxpZmljYXRpb24iLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJSRVZJRVciLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoib3duZXJfYXNzaWdubWVudCIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiLCJ2YWx1ZSI6InJldmVudWUtcmV2aWV3IiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50Il19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsInZhbHVlIjp7Im93bmVyIjoicmV2ZW51ZS1yZXZpZXciLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJSRVZJRVciXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6ImhhbmRvZmYiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 1,
+            "transport_error": null
+          }
+        ],
+        "customer_text": null,
+        "missing_evidence": [],
+        "metrics": null
+      },
+      {
+        "pair_ordinal": 1,
+        "execution_ordinal": 2,
+        "candidate_label": "B",
+        "artifact_version_id": "ver-0003",
+        "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+        "workload_id": "workload-01",
+        "workload_ordinal": 1,
+        "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+        "request_count": 3,
+        "protected_request_count": 1,
+        "run_id": "run-0003",
+        "state": "COMPLETE",
+        "evidence_mode": "TRUSTED_LOCAL",
+        "task_assessments": [
+          {
+            "request_id": "gtm-pair01-001",
+            "request_ordinal": 1,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-001",
+            "request_ordinal": 1,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-001",
+            "request_ordinal": 1,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-001",
+            "request_ordinal": 1,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-002",
+            "request_ordinal": 2,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-002",
+            "request_ordinal": 2,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-002",
+            "request_ordinal": 2,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-002",
+            "request_ordinal": 2,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-003",
+            "request_ordinal": 3,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-003",
+            "request_ordinal": 3,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-003",
+            "request_ordinal": 3,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair01-003",
+            "request_ordinal": 3,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          }
+        ],
+        "observations": [],
+        "outputs": [
+          {
+            "request_ordinal": 1,
+            "request_text": "Process the APAC platform demo signal.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsInZhbHVlIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6eyJvd25lciI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItYXBhYyIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1hcGFjIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItYXBhYyJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 2,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 2,
+            "request_text": "Process the EMEA analytics demo signal.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWVtZWEiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItZW1lYSIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItZW1lYSIsInZhbHVlIjoib3duZXItZW1lYS1hbmFseXRpY3MiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1lbWVhIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOlt7ImtpbmQiOiJwaXBlbGluZV93cml0ZSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1lbWVhIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1lbWVhLWFuYWx5dGljcyIsInJlY29yZF9yZWYiOiJwaXBlbGluZTpzaWduYWw6cGFpci1lbWVhIiwiZGVjaXNpb25fdHJhY2UiOlsiUkVDT1JERURfQ0xBU1NJRklDQVRJT04iLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWVtZWEiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiaGFuZG9mZiIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOltdLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1lbWVhIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+            "elapsed_ms": 1,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 3,
+            "request_text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InF1YWxpZmljYXRpb24iLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoib3duZXJfYXNzaWdubWVudCIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiLCJ2YWx1ZSI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoicGlwZWxpbmVfd3JpdGUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiaGFuZG9mZiIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 1,
+            "transport_error": null
+          }
+        ],
+        "customer_text": null,
+        "missing_evidence": [],
+        "metrics": null
+      },
+      {
+        "pair_ordinal": 2,
+        "execution_ordinal": 3,
+        "candidate_label": "B",
+        "artifact_version_id": "ver-0003",
+        "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+        "workload_id": "workload-02",
+        "workload_ordinal": 2,
+        "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+        "request_count": 3,
+        "protected_request_count": 1,
+        "run_id": "run-0004",
+        "state": "COMPLETE",
+        "evidence_mode": "TRUSTED_LOCAL",
+        "task_assessments": [
+          {
+            "request_id": "gtm-pair02-001",
+            "request_ordinal": 1,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-001",
+            "request_ordinal": 1,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-001",
+            "request_ordinal": 1,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-001",
+            "request_ordinal": 1,
+            "task_id": "handoff",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-002",
+            "request_ordinal": 2,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-002",
+            "request_ordinal": 2,
+            "task_id": "owner",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-002",
+            "request_ordinal": 2,
+            "task_id": "write",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-002",
+            "request_ordinal": 2,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-003",
+            "request_ordinal": 3,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-003",
+            "request_ordinal": 3,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-003",
+            "request_ordinal": 3,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-003",
+            "request_ordinal": 3,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          }
+        ],
+        "observations": [],
+        "outputs": [
+          {
+            "request_ordinal": 1,
+            "request_text": "Process the uncertain low-confidence signal with a human decision owner.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1sb3ctY29uZmlkZW5jZSIsInZhbHVlIjoiUkVWSUVXIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJjbGFpbXMiOlt7ImtpbmQiOiJvd25lcl9hc3NpZ25tZW50IiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiY2xhaW1zIjpbeyJraW5kIjoicGlwZWxpbmVfd3JpdGUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJ2YWx1ZSI6eyJvd25lciI6InJldmVudWUtcmV2aWV3IiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiZGVjaXNpb25fdHJhY2UiOlsiUkVDT1JERURfQ0xBU1NJRklDQVRJT04iLCJSRVZJRVciXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJjbGFpbXMiOlt7ImtpbmQiOiJoYW5kb2ZmIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+            "elapsed_ms": 2,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 2,
+            "request_text": "Evaluate the suppressed signal without assigning an owner or pipeline record.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXN1cHByZXNzZWQiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXN1cHByZXNzZWQiLCJ2YWx1ZSI6IkRJU1FVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXN1cHByZXNzZWQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1zdXBwcmVzc2VkIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItc3VwcHJlc3NlZCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItc3VwcHJlc3NlZCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXN1cHByZXNzZWQiXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+            "elapsed_ms": 1,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 3,
+            "request_text": "Process the APAC platform demo signal.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsInZhbHVlIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6eyJvd25lciI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItYXBhYyIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1hcGFjIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItYXBhYyJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 1,
+            "transport_error": null
+          }
+        ],
+        "customer_text": null,
+        "missing_evidence": [],
+        "metrics": null
+      },
+      {
+        "pair_ordinal": 2,
+        "execution_ordinal": 4,
+        "candidate_label": "A",
+        "artifact_version_id": "ver-0002",
+        "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+        "workload_id": "workload-02",
+        "workload_ordinal": 2,
+        "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+        "request_count": 3,
+        "protected_request_count": 1,
+        "run_id": "run-0005",
+        "state": "COMPLETE",
+        "evidence_mode": "TRUSTED_LOCAL",
+        "task_assessments": [
+          {
+            "request_id": "gtm-pair02-001",
+            "request_ordinal": 1,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-001",
+            "request_ordinal": 1,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-001",
+            "request_ordinal": 1,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-001",
+            "request_ordinal": 1,
+            "task_id": "handoff",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-002",
+            "request_ordinal": 2,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-002",
+            "request_ordinal": 2,
+            "task_id": "owner",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-002",
+            "request_ordinal": 2,
+            "task_id": "write",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-002",
+            "request_ordinal": 2,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-003",
+            "request_ordinal": 3,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-003",
+            "request_ordinal": 3,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-003",
+            "request_ordinal": 3,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair02-003",
+            "request_ordinal": 3,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          }
+        ],
+        "observations": [],
+        "outputs": [
+          {
+            "request_ordinal": 1,
+            "request_text": "Process the uncertain low-confidence signal with a human decision owner.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1sb3ctY29uZmlkZW5jZSIsInZhbHVlIjoiUkVWSUVXIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJjbGFpbXMiOlt7ImtpbmQiOiJvd25lcl9hc3NpZ25tZW50IiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiY2xhaW1zIjpbeyJraW5kIjoicGlwZWxpbmVfd3JpdGUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJ2YWx1ZSI6eyJvd25lciI6InJldmVudWUtcmV2aWV3IiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJSRVZJRVciXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJjbGFpbXMiOlt7ImtpbmQiOiJoYW5kb2ZmIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+            "elapsed_ms": 1,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 2,
+            "request_text": "Evaluate the suppressed signal without assigning an owner or pipeline record.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXN1cHByZXNzZWQiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXN1cHByZXNzZWQiLCJ2YWx1ZSI6IkRJU1FVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXN1cHByZXNzZWQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1zdXBwcmVzc2VkIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItc3VwcHJlc3NlZCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItc3VwcHJlc3NlZCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXN1cHByZXNzZWQiXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+            "elapsed_ms": 1,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 3,
+            "request_text": "Process the APAC platform demo signal.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsInZhbHVlIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6eyJvd25lciI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItYXBhYyIsImRlY2lzaW9uX3RyYWNlIjpbIlJVTEVTX0ZJUlNUIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1hcGFjIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItYXBhYyJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 1,
+            "transport_error": null
+          }
+        ],
+        "customer_text": null,
+        "missing_evidence": [],
+        "metrics": null
+      },
+      {
+        "pair_ordinal": 3,
+        "execution_ordinal": 5,
+        "candidate_label": "A",
+        "artifact_version_id": "ver-0002",
+        "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+        "workload_id": "workload-03",
+        "workload_ordinal": 3,
+        "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+        "request_count": 3,
+        "protected_request_count": 1,
+        "run_id": "run-0006",
+        "state": "COMPLETE",
+        "evidence_mode": "TRUSTED_LOCAL",
+        "task_assessments": [
+          {
+            "request_id": "gtm-pair03-001",
+            "request_ordinal": 1,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-001",
+            "request_ordinal": 1,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-001",
+            "request_ordinal": 1,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-001",
+            "request_ordinal": 1,
+            "task_id": "handoff",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-002",
+            "request_ordinal": 2,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-002",
+            "request_ordinal": 2,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-002",
+            "request_ordinal": 2,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-002",
+            "request_ordinal": 2,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-003",
+            "request_ordinal": 3,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-003",
+            "request_ordinal": 3,
+            "task_id": "owner",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-003",
+            "request_ordinal": 3,
+            "task_id": "write",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-003",
+            "request_ordinal": 3,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          }
+        ],
+        "observations": [],
+        "outputs": [
+          {
+            "request_ordinal": 1,
+            "request_text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InF1YWxpZmljYXRpb24iLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJSRVZJRVciLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoib3duZXJfYXNzaWdubWVudCIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiLCJ2YWx1ZSI6InJldmVudWUtcmV2aWV3IiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50Il19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsInZhbHVlIjp7Im93bmVyIjoicmV2ZW51ZS1yZXZpZXciLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJSRVZJRVciXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6ImhhbmRvZmYiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 1,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 2,
+            "request_text": "Process the APAC demo signal once.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjoiUVVBTElGSUVEIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOlt7ImtpbmQiOiJvd25lcl9hc3NpZ25tZW50IiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwidmFsdWUiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOlt7ImtpbmQiOiJwaXBlbGluZV93cml0ZSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjp7Im93bmVyIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsInJlY29yZF9yZWYiOiJwaXBlbGluZTpzaWduYWw6cGFpci1yZXRyeSIsImRlY2lzaW9uX3RyYWNlIjpbIlJVTEVTX0ZJUlNUIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZXRyeSJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOltdLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZXRyeSJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 1,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 3,
+            "request_text": "Retry the same signal without a second owner, record or handoff.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjoiUVVBTElGSUVEIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJldHJ5Il0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+            "elapsed_ms": 1,
+            "transport_error": null
+          }
+        ],
+        "customer_text": null,
+        "missing_evidence": [],
+        "metrics": null
+      },
+      {
+        "pair_ordinal": 3,
+        "execution_ordinal": 6,
+        "candidate_label": "B",
+        "artifact_version_id": "ver-0003",
+        "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+        "workload_id": "workload-03",
+        "workload_ordinal": 3,
+        "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+        "request_count": 3,
+        "protected_request_count": 1,
+        "run_id": "run-0007",
+        "state": "COMPLETE",
+        "evidence_mode": "TRUSTED_LOCAL",
+        "task_assessments": [
+          {
+            "request_id": "gtm-pair03-001",
+            "request_ordinal": 1,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-001",
+            "request_ordinal": 1,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-001",
+            "request_ordinal": 1,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-001",
+            "request_ordinal": 1,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-002",
+            "request_ordinal": 2,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-002",
+            "request_ordinal": 2,
+            "task_id": "owner",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-002",
+            "request_ordinal": 2,
+            "task_id": "write",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-002",
+            "request_ordinal": 2,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-003",
+            "request_ordinal": 3,
+            "task_id": "qualification",
+            "outcome": "USEFUL_COMPLETION",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-003",
+            "request_ordinal": 3,
+            "task_id": "owner",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-003",
+            "request_ordinal": 3,
+            "task_id": "write",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          },
+          {
+            "request_id": "gtm-pair03-003",
+            "request_ordinal": 3,
+            "task_id": "handoff",
+            "outcome": "JUSTIFIED_REFUSAL",
+            "mandatory_pass": true,
+            "reason_codes": []
+          }
+        ],
+        "observations": [],
+        "outputs": [
+          {
+            "request_ordinal": 1,
+            "request_text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InF1YWxpZmljYXRpb24iLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoib3duZXJfYXNzaWdubWVudCIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiLCJ2YWx1ZSI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoicGlwZWxpbmVfd3JpdGUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiaGFuZG9mZiIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 2,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 2,
+            "request_text": "Process the APAC demo signal once.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjoiUVVBTElGSUVEIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOlt7ImtpbmQiOiJvd25lcl9hc3NpZ25tZW50IiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwidmFsdWUiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOlt7ImtpbmQiOiJwaXBlbGluZV93cml0ZSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjp7Im93bmVyIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsInJlY29yZF9yZWYiOiJwaXBlbGluZTpzaWduYWw6cGFpci1yZXRyeSIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZXRyeSJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOltdLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZXRyeSJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+            "elapsed_ms": 1,
+            "transport_error": null
+          },
+          {
+            "request_ordinal": 3,
+            "request_text": "Retry the same signal without a second owner, record or handoff.",
+            "http_status": 200,
+            "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjoiUVVBTElGSUVEIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJldHJ5Il0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+            "elapsed_ms": 1,
+            "transport_error": null
+          }
+        ],
+        "customer_text": null,
+        "missing_evidence": [],
+        "metrics": null
+      }
+    ],
+    "shared_public_denominator_requests": 9,
+    "protected_denominator_requests_per_candidate": 3,
+    "protected_counts": {
+      "A": {
+        "reserved": 3,
+        "captured": 3,
+        "missing": 0
+      },
+      "B": {
+        "reserved": 3,
+        "captured": 3,
+        "missing": 0
+      }
+    },
+    "outcome": {
+      "experiment_id": "experiment-gtm-shift-01-c1",
+      "status": "COMPLETE",
+      "shared_public_denominator_requests": 9,
+      "candidate_metrics": [
+        {
+          "candidate_label": "A",
+          "candidate_version_id": "ver-0002",
+          "public_denominator_requests": 9,
+          "useful_completions": 9,
+          "incorrect_outputs": 0,
+          "justified_refusals": 6,
+          "justified_referrals": 0,
+          "justified_clarifications": 0,
+          "unjustified_refusals": 0,
+          "unjustified_referrals": 0,
+          "unjustified_clarifications": 0,
+          "missing_outputs": 0,
+          "protected_denominator": 3,
+          "protected_passed": 3,
+          "protected_failed": 0,
+          "protected_missing": 0,
+          "service_calls": 0,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "service_latency_ms": 0,
+          "provisioning_latency_ms": null,
+          "cost_minor_units": null
+        },
+        {
+          "candidate_label": "B",
+          "candidate_version_id": "ver-0003",
+          "public_denominator_requests": 9,
+          "useful_completions": 9,
+          "incorrect_outputs": 0,
+          "justified_refusals": 8,
+          "justified_referrals": 0,
+          "justified_clarifications": 0,
+          "unjustified_refusals": 0,
+          "unjustified_referrals": 0,
+          "unjustified_clarifications": 0,
+          "missing_outputs": 0,
+          "protected_denominator": 3,
+          "protected_passed": 3,
+          "protected_failed": 0,
+          "protected_missing": 0,
+          "service_calls": 0,
+          "input_tokens": 0,
+          "output_tokens": 0,
+          "service_latency_ms": 0,
+          "provisioning_latency_ms": null,
+          "cost_minor_units": null
+        }
+      ],
+      "eligibility": [
+        {
+          "candidate_label": "A",
+          "candidate_version_id": "ver-0002",
+          "eligible": true,
+          "blocking_reason_codes": []
+        },
+        {
+          "candidate_label": "B",
+          "candidate_version_id": "ver-0003",
+          "eligible": true,
+          "blocking_reason_codes": []
+        }
+      ],
+      "drift_fields": [],
+      "noncompletion_incidence_non_additive": true
+    },
+    "eligible": true,
+    "eligibility_reason": "No winner is derived here. Candidate eligibility requires a complete comparable outcome, and selection is a separate learner action.",
+    "state": "FINALIZED"
+  },
+  "competing_recorded_intent_decisions": {
+    "A": "REVIEW",
+    "B": "QUALIFIED"
+  },
+  "business_rows_before": {
+    "ledger_events": [],
+    "incidents": [],
+    "operating_selections": [
+      [
+        "sel-0001",
+        "gtm",
+        "gtm-shift-01",
+        "STARTER_BASELINE",
+        "ver-0001",
+        "4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2",
+        null,
+        null,
+        "Reviewed failing Stonebridge starter; wrong owner, not an eligible repair.",
+        "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+        null,
+        "VALID",
+        "starter:gtm",
+        "2026-10-07T15:05:43.648232+00:00"
+      ]
+    ]
+  },
+  "business_rows_after": {
+    "ledger_events": [],
+    "incidents": [],
+    "operating_selections": [
+      [
+        "sel-0001",
+        "gtm",
+        "gtm-shift-01",
+        "STARTER_BASELINE",
+        "ver-0001",
+        "4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2",
+        null,
+        null,
+        "Reviewed failing Stonebridge starter; wrong owner, not an eligible repair.",
+        "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+        null,
+        "VALID",
+        "starter:gtm",
+        "2026-10-07T15:05:43.648232+00:00"
+      ]
+    ]
+  },
+  "assist_roles": [
+    "HINT",
+    "DIAGNOSIS"
+  ],
+  "production_fixture_pins": {
+    "gtm_starter": [
+      "4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2",
+      "a24b2e15a4ac11e41806e7f7a74e4cc35c3806bc722d40af5d38675bc9cdfea8"
+    ],
+    "gtm_compare_candidate_a": [
+      "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+      "aa363640af12212a57f8b74f2f698c9773d2693154c4972eaa599d9c603c456d"
+    ],
+    "gtm_compare_candidate_b": [
+      "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+      "708ef678d36244d432455b0757feca0d4bd61a70eecc9493bf9a25419b91e7c2"
+    ]
+  }
+}

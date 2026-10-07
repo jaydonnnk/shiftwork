@@ -1,0 +1,7 @@
+{
+  "path": "AGENTS.md",
+  "entry_sha256": "4c5489ef463a42407e802821d2f09f1f14c13e9d5d6561bc2ddeb90d61798b49",
+  "current_sha256": "af344830f82908ee3cc02363e172d9fb7fe7573c73cd2cfea8b94dfcf701e956",
+  "observed_difference": "Context threshold changed from 200k to 175k outside this agent edits. Current file has no Git diff against HEAD. Ownership unverified; current bytes untouched and excluded from publication. Latest explicit user instructions still state 200k.",
+  "agent_modified": false
+}

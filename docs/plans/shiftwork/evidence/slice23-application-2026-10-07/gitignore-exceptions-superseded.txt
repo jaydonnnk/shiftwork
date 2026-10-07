@@ -1,0 +1,68 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.pfx
+
+# Captured data and logs may contain private desktop text
+*.log
+harness/textpattern-results.txt
+**/harness-log.txt
+
+# .NET and packaging output
+**/bin/
+**/obj/
+**/stage/
+**/probe*-work/
+*.msix
+*.appx
+*.appxbundle
+TestResults/
+artifacts/
+!shiftwork/fixtures/artifacts/
+.vs/
+
+# Local IDE and OS files
+*.user
+*.suo
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+.venv313/
+venv/
+.mypy_cache/
+.ruff_cache/
+
+# Local runtime databases (scenario state, never committed)
+*.db
+*.sqlite
+*.sqlite3
+
+# Operational memory (AGENTS.md S7): local run state, never committed
+PROGRESS.md
+
+# Local raw verification evidence and receipts; tracked history stays tracked.
+/docs/plans/shiftwork/evidence/
+/shiftwork/fixtures/requests/
+# S23 publication: preserve the incoming broad rule, expose only these approved files.
+!/shiftwork/fixtures/requests/
+/shiftwork/fixtures/requests/*
+!/shiftwork/fixtures/requests/gtm_pipeline_incident.jsonl
+!/shiftwork/fixtures/requests/gtm_compare_manifest.json
+!/shiftwork/fixtures/requests/gtm_compare_pair_01.jsonl
+!/shiftwork/fixtures/requests/gtm_compare_pair_01_specs.json
+!/shiftwork/fixtures/requests/gtm_compare_pair_02.jsonl
+!/shiftwork/fixtures/requests/gtm_compare_pair_02_specs.json
+!/shiftwork/fixtures/requests/gtm_compare_pair_03.jsonl
+!/shiftwork/fixtures/requests/gtm_compare_pair_03_specs.json
+
+# Workbuddy local memory
+/.workbuddy-ai/memory/

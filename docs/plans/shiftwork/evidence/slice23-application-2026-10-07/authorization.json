@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-07",
+  "timezone": "Asia/Singapore",
+  "user_statement": "OKay then apply it complete the offline proofs and the publication inventory and then once ure done let me know and ill see to it whether to accept or not",
+  "approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa",
+  "previous_authorization": "docs/plans/shiftwork/evidence/slice23-approval-handoff-2026-10-07/authorization.json",
+  "authorized": [
+    "unchanged approved application",
+    "offline verification and test transition",
+    "publication inventory"
+  ],
+  "s23_acceptance": "PENDING_USER_DECISION",
+  "not_authorized": [
+    "staging",
+    "commits",
+    "pushes",
+    "live calls",
+    "credentials",
+    "installations",
+    "spending",
+    "S24",
+    "S25"
+  ]
+}

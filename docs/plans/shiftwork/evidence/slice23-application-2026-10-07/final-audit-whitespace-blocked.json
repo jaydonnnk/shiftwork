@@ -1,0 +1,6 @@
+{
+  "status": "BLOCKED_AT_GIT_DIFF_CHECK",
+  "preceding_checks": "approved bytes, 5148 incoming evidence, 4803 pre-S23 evidence, 42 reviewed files, 155 source hashes, test receipts, 106 fault receipts, production DB and 632 publication rows passed",
+  "diagnosis": "Git treated preserved CRLF as trailing whitespace after config -text. Exact config bytes unchanged; path metadata now recognizes CR at EOL and retains default whitespace guards.",
+  "final_success_receipt_written": false
+}

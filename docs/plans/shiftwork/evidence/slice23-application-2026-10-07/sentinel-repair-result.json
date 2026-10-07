@@ -1,0 +1,21 @@
+{
+  "exit_code": 0,
+  "command": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-B",
+    "-m",
+    "pytest",
+    "tests/sealed/test_sentinel_leak.py",
+    "-q",
+    "--tb=short",
+    "-p",
+    "no:cacheprovider",
+    "--junitxml=C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice23-application-2026-10-07\\sentinel-repair.xml"
+  ],
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "log_sha256": "971944cd5f0badcecdbf84273a1360fd4ad15c1fbe76729ae6eb6a50561dcd52",
+  "xml_sha256": "7f65ae23729afe79eeb936f262aa1562bec61fd8b36080819b1aca02b8a275b3"
+}
