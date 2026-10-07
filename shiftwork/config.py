@@ -182,6 +182,23 @@ def repair_arc_artifact_files(stage: str) -> dict[str, str]:
     }
 
 
+GTM_STARTER_CONTRACT_JSON = {
+    "catalog_version": 1,
+    "must_never": ["NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"],
+    "selections": {"ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+                   "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"},
+    "response_time_limit_ms": 3000,
+    "declared_limits": ["Synthetic pipeline output; no CRM connection, message send or live model."],
+}
+
+
+def offline_fixture_keys(slug: str) -> tuple[str, str, str]:
+    """Separate GTM fixture authority from the historical Bellwether pins."""
+    if slug == "gtm":
+        return ("gtm_starter", "gtm_compare_candidate_a", "gtm_compare_candidate_b")
+    return ("pivot_starter", "compare_candidate_a", "compare_candidate_b")
+
+
 PIVOT_STARTER_ARTIFACT_PATHS = {
     "service.py": FIXTURE_DIR / "artifacts" / "bookshop" / "pivot_starter_failure_service.py",
 }
@@ -240,6 +257,9 @@ PIVOT_INCIDENT_REQUESTS = FIXTURE_DIR / "requests" / "bookshop_pivot_incident.js
 # covers the base64 files alone. A guard test recomputes every pin from the
 # fixture files, so the pre-proof cannot run against unpinned bytes.
 TRUSTED_LOCAL_FIXTURES = {
+    "gtm_starter": ("4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2", "a24b2e15a4ac11e41806e7f7a74e4cc35c3806bc722d40af5d38675bc9cdfea8"),
+    "gtm_compare_candidate_a": ("80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33", "aa363640af12212a57f8b74f2f698c9773d2693154c4972eaa599d9c603c456d"),
+    "gtm_compare_candidate_b": ("ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f", "708ef678d36244d432455b0757feca0d4bd61a70eecc9493bf9a25419b91e7c2"),
     "happy_path": ("6e36ed1b3c602fa1585bc499f6cf9adcb232756ed5726bd50ea756eb8311433d", "10826190b7318ec0c27a5d41cf241d5453e04c20c4b33ad336815ecca1293924"),
     "port_dead": ("3fca29de3e0bb2cb9f1b87e4a6bc6e44ec0b2f0613d84dd9bebccd30d912e3fe", "9e4ae1f16d75a5d9fdc9d0897255664b0706abef9dcb7bc92a10ed11723afad9"),
     "timeout": ("85949f7e6ad38f8dfee55716a5ccd1198853088e603024ed24a9781da6286f1d", "71b1a13c8d67705933e4a25cc96f3dbc24d778c66efff195cd5b59b954217449"),
