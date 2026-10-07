@@ -135,6 +135,18 @@ def _collect_privacy_needles(data: dict) -> tuple[str, ...]:
             needles.update((text(request.get("request_id")), text(request.get("text")),
                             text(spec.get("id")), text(spec.get("text")),
                             text(delta.get("description"))))
+            # GTM private company/signal identities stay private before admission.
+            # Owner/rule/outcome vocabulary is shared public material.
+            for record in delta.get("add_records", []):
+                if isinstance(record, dict) and record.get("kind") == "signal":
+                    needles.update((text(record.get("record_id")), text(record.get("entity_ref"))))
+                    value = mapping(record.get("value"))
+                    needles.add(text(value.get("account_domain")))
+                    if value.get("existing_record_ref") is not None:
+                        needles.add(text(value["existing_record_ref"]))
+            for entity in mapping(delta.get("add_entities", {})).values():
+                if isinstance(entity, dict) and "company_name" in entity:
+                    needles.update((text(entity.get("company_name")), text(entity.get("domain"))))
             tasks = spec.get("tasks")
             if not isinstance(tasks, list) or not tasks:
                 raise InvalidSealedCase("invalid private scanner task inventory")
