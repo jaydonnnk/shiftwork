@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.996" timestamp="2026-10-07T20:08:39.809634+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_pipeline_assessor_requires_pipeline_snapshot" time="0.009"><failure message="AttributeError: 'types.SimpleNamespace' object has no attribute 'records'">tests\orchestrator\test_gtm_guards.py:153: in test_pipeline_assessor_requires_pipeline_snapshot
+    evaluator.assess_request(spec=spec, request_ordinal=1, mission=mission, snapshot=SimpleNamespace(), response=response)
+shiftwork\evaluator\evaluator.py:356: in assess_request
+    return _assess_pipeline_request(spec, request_ordinal, mission, snapshot, response,
+shiftwork\evaluator\evaluator.py:407: in _assess_pipeline_request
+    records = [record for record in snapshot.records if record.entity_ref == entity_ref]
+                                    ^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'records'</failure></testcase></testsuite></testsuites>

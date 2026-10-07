@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.969" timestamp="2026-10-07T20:08:32.846198+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_existing_owner_cannot_change_even_without_second_write" time="0.015"><failure message="AssertionError: existing owner cannot be replaced&#10;assert not True&#10; +  where True = any(&lt;generator object test_existing_owner_cannot_change_even_without_second_write.&lt;locals&gt;.&lt;genexpr&gt; at 0x0000025A1788ED40&gt;)">tests\orchestrator\test_gtm_guards.py:129: in test_existing_owner_cannot_change_even_without_second_write
+    assert not any(row.mandatory_pass for row in rows), "existing owner cannot be replaced"
+E   AssertionError: existing owner cannot be replaced
+E   assert not True
+E    +  where True = any(&lt;generator object test_existing_owner_cannot_change_even_without_second_write.&lt;locals&gt;.&lt;genexpr&gt; at 0x0000025A1788ED40&gt;)</failure></testcase></testsuite></testsuites>

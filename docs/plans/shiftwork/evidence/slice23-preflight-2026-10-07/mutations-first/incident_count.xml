@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.293" timestamp="2026-10-07T20:13:24.659332+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_incident_binding_guards_are_independent[count]" time="0.381"><failure message="Failed: DID NOT RAISE PackUnavailable">tests\orchestrator\test_gtm_guards.py:193: in test_incident_binding_guards_are_independent
+    with pytest.raises(registry.PackUnavailable, match="incident request"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE PackUnavailable</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.977" timestamp="2026-10-07T20:09:07.777992+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_pipeline_row_shape_branches_fail_only_write[trace_short]" time="0.007"><failure message="IndexError: list index out of range">tests\orchestrator\test_gtm_guards.py:85: in test_pipeline_row_shape_branches_fail_only_write
+    rows = assessed(spec, raw)
+           ^^^^^^^^^^^^^^^^^^^
+tests\orchestrator\test_gtm_pipeline.py:65: in assessed
+    return evaluator.assess_request(spec=spec, request_ordinal=1, mission=mission, snapshot=state,
+shiftwork\evaluator\evaluator.py:356: in assess_request
+    return _assess_pipeline_request(spec, request_ordinal, mission, snapshot, response,
+shiftwork\evaluator\evaluator.py:481: in _assess_pipeline_request
+    or row["decision_trace"][1] != decision):
+       ^^^^^^^^^^^^^^^^^^^^^^^^
+E   IndexError: list index out of range</failure></testcase></testsuite></testsuites>

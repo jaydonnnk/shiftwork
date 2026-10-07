@@ -1,0 +1,22 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______ test_inactive_task_secondary_guards_are_independent[commitment] _______
+tests\orchestrator\test_gtm_guards.py:145: in test_inactive_task_secondary_guards_are_independent
+    assert [row.task_id for row in rows if not row.mandatory_pass] == ["owner"]
+E   AssertionError: assert [] == ['owner']
+E     
+E     Right contains one more item: 'owner'
+E     Use -v to get more diff
+============================== warnings summary ===============================
+.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/orchestrator/test_gtm_guards.py::test_inactive_task_secondary_guards_are_independent[commitment]
+1 failed, 2 warnings in 0.97s

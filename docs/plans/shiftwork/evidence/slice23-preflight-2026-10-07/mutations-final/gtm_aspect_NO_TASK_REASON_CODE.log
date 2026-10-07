@@ -1,0 +1,21 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+___ test_gtm_typed_aspects_pass_and_fail_independently[NO_TASK_REASON_CODE] ___
+tests\orchestrator\test_gtm_guards.py:357: in test_gtm_typed_aspects_pass_and_fail_independently
+    assert not comparison.protected_acceptance(case, (altered, *rows[1:]))
+E   AssertionError: assert not True
+E    +  where True = <function protected_acceptance at 0x000002E57E8D1580>(SealedCase(id='gtm-private-case-01', schema_version=1, family='pipeline_ownership', check_id='chk-gtm-private-01', req... 'existing_owner': None, 'existing_record_ref': None}, record_age_ms=1000, dependency='enrichment', currency=None),)))), (TaskAssessment(request_id='gtm-private-stimulus-01', request_ordinal=4, task_id='qualification', outcome=<TaskOutcome...task_id='handoff', outcome=<TaskOutcome.USEFUL_COMPLETION: 'USEFUL_COMPLETION'>, mandatory_pass=True, reason_codes=())))
+E    +    where <function protected_acceptance at 0x000002E57E8D1580> = <module 'shiftwork.domain.comparison' from 'C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\shiftwork\\domain\\comparison.py'>.protected_acceptance
+============================== warnings summary ===============================
+.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/orchestrator/test_gtm_guards.py::test_gtm_typed_aspects_pass_and_fail_independently[NO_TASK_REASON_CODE]
+1 failed, 2 warnings in 3.55s

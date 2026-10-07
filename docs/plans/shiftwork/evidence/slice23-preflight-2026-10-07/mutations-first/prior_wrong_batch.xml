@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.948" timestamp="2026-10-07T20:14:17.637140+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_prior_pipeline_input_guards_refuse_unbound_evidence[wrong_batch]" time="0.006"><failure message="IndexError: list index out of range">tests\orchestrator\test_gtm_guards.py:219: in test_prior_pipeline_input_guards_refuse_unbound_evidence
+    values = orchestrator.deployment_assessment_inputs(None, SimpleNamespace(context_id="context", id="run"), current, ordinal, b"state", batch, phase=phase)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+shiftwork\orchestrator.py:2659: in deployment_assessment_inputs
+    base64.b64decode(workloads[0].request_specs_bytes_base64, validate=True)))
+                     ^^^^^^^^^^^^
+E   IndexError: list index out of range</failure></testcase></testsuite></testsuites>

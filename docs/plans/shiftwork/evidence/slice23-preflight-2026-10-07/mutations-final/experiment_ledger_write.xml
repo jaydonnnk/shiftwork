@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="8.232" timestamp="2026-10-07T20:21:56.531306+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_hypothetical_reviewed_copy_runs_six_fair_slots_without_business_writes" time="7.109"><failure message="AssertionError: public/protected experiments must preserve every business row and selection&#10;assert {'ledger_even...cea2', ...),)} == {'ledger_even...cea2', ...),)}&#10;  &#10;  Omitting 2 identical items, use -vv to show&#10;  Differing items:&#10;  {'ledger_events': (('gtm', 1, 'INCIDENT_OPENED', '[]', '{}', 1, ...),)} != {'ledger_events': ()}&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:501: in test_hypothetical_reviewed_copy_runs_six_fair_slots_without_business_writes
+    assert business_rows(conn) == before, "public/protected experiments must preserve every business row and selection"
+E   AssertionError: public/protected experiments must preserve every business row and selection
+E   assert {'ledger_even...cea2', ...),)} == {'ledger_even...cea2', ...),)}
+E     
+E     Omitting 2 identical items, use -vv to show
+E     Differing items:
+E     {'ledger_events': (('gtm', 1, 'INCIDENT_OPENED', '[]', '{}', 1, ...),)} != {'ledger_events': ()}
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

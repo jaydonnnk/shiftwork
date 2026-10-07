@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.101" timestamp="2026-10-07T20:12:55.732382+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_signal_state_refuses_unusable_facts[wrong_existing_ref]" time="0.004"><failure message="Failed: DID NOT RAISE PublicStateInvalid">tests\orchestrator\test_gtm_pipeline.py:129: in test_signal_state_refuses_unusable_facts
+    with pytest.raises(PublicStateInvalid):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE PublicStateInvalid</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="9.082" timestamp="2026-10-07T20:19:24.310349+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_hypothetical_reviewed_copy_runs_six_fair_slots_without_business_writes" time="8.062"><failure message="assert (200 == 409)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">tests\orchestrator\test_gtm_pipeline.py:527: in test_hypothetical_reviewed_copy_runs_six_fair_slots_without_business_writes
+    assert exhausted.status_code == 409 and gateway.roles == ["HINT", "DIAGNOSIS"]
+E   assert (200 == 409)
+E    +  where 200 = &lt;Response [200 OK]&gt;.status_code</failure></testcase></testsuite></testsuites>

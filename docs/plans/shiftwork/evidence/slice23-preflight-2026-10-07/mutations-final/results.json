@@ -1,0 +1,38 @@
+[
+  {
+    "name": "experiment_ledger_write",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_hypothetical_reviewed_copy_runs_six_fair_slots_without_business_writes",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: public/protected experiments must preserve every business row and selection\nassert {'ledger_even...cea2', ...),)} == {'ledger_even...cea2', ...),)}\n  \n  Omitting 2 identical items, use -vv to show\n  Differing items:\n  {'ledger_events': (('gtm', 1, 'INCIDENT_OPENED', '[]', '{}', 1, ...),)} != {'ledger_events': ()}\n  Use -v to get more diff",
+    "source_sha256": "fede7af5a3cddb46c64a45033481470a990bcf33f448b6ff91a1a6d89b876fb0",
+    "log_sha256": "ecc6e1f1fdc2ebbc1a7672fce65564cdfa9bdaad36e71ad5c09819d05ac70792",
+    "xml_sha256": "824dc32dd52c4cb2e5fc8551a6ed10cd6ebb566f1b049a1c807352ef3263aa7f",
+    "restored": true
+  },
+  {
+    "name": "gtm_aspect_NAMED_TASK_OUTCOMES",
+    "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_typed_aspects_pass_and_fail_independently[NAMED_TASK_OUTCOMES]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert not True\n +  where True = <function protected_acceptance at 0x0000014375E914E0>(SealedCase(id='gtm-private-case-01', schema_version=1, family='pipeline_ownership', check_id='chk-gtm-private-01', req... 'existing_owner': None, 'existing_record_ref': None}, record_age_ms=1000, dependency='enrichment', currency=None),)))), (TaskAssessment(request_id='gtm-private-stimulus-01', request_ordinal=4, task_id='qualification', outcome=<TaskOutcome...task_id='handoff', outcome=<TaskOutcome.USEFUL_COMPLETION: 'USEFUL_COMPLETION'>, mandatory_pass=True, reason_codes=())))\n +    where <function protected_acceptance at 0x0000014375E914E0> = <module 'shiftwork.domain.comparison' from 'C:\\\\Users\\\\jayd0\\\\OneDrive\\\\Desktop\\\\nebius_nvidia\\\\shiftwork\\\\domain\\\\comparison.py'>.protected_acceptance",
+    "source_sha256": "a8321c001ef1c36d05d0258dd8b308147da5e523dc52dbc8a3740730cce21db8",
+    "log_sha256": "f60d63ccbab560d94e65f2bb6f5cdbecf65546ee6568180d1d6b4e89fbb2189e",
+    "xml_sha256": "b895027894e6633cd08d9b9380a313d34f40b0fefe710ca53251192e24e8c111",
+    "restored": true
+  },
+  {
+    "name": "gtm_aspect_NO_TASK_REASON_CODE",
+    "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_typed_aspects_pass_and_fail_independently[NO_TASK_REASON_CODE]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert not True\n +  where True = <function protected_acceptance at 0x000002E57E8D1580>(SealedCase(id='gtm-private-case-01', schema_version=1, family='pipeline_ownership', check_id='chk-gtm-private-01', req... 'existing_owner': None, 'existing_record_ref': None}, record_age_ms=1000, dependency='enrichment', currency=None),)))), (TaskAssessment(request_id='gtm-private-stimulus-01', request_ordinal=4, task_id='qualification', outcome=<TaskOutcome...task_id='handoff', outcome=<TaskOutcome.USEFUL_COMPLETION: 'USEFUL_COMPLETION'>, mandatory_pass=True, reason_codes=())))\n +    where <function protected_acceptance at 0x000002E57E8D1580> = <module 'shiftwork.domain.comparison' from 'C:\\\\Users\\\\jayd0\\\\OneDrive\\\\Desktop\\\\nebius_nvidia\\\\shiftwork\\\\domain\\\\comparison.py'>.protected_acceptance",
+    "source_sha256": "a8321c001ef1c36d05d0258dd8b308147da5e523dc52dbc8a3740730cce21db8",
+    "log_sha256": "827d4c1c62cc8ac49af5185f8d9c1816055df3331401eedf7f79e16b83440e1f",
+    "xml_sha256": "86014cfaf4ed3fc16b6052e5c5668c9fa140a91d3de819a0e6a90ddab27fa5a9",
+    "restored": true
+  }
+]

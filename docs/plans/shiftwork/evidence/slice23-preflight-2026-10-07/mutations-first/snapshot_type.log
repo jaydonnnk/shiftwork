@@ -1,0 +1,24 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+______________ test_pipeline_assessor_requires_pipeline_snapshot ______________
+tests\orchestrator\test_gtm_guards.py:153: in test_pipeline_assessor_requires_pipeline_snapshot
+    evaluator.assess_request(spec=spec, request_ordinal=1, mission=mission, snapshot=SimpleNamespace(), response=response)
+shiftwork\evaluator\evaluator.py:356: in assess_request
+    return _assess_pipeline_request(spec, request_ordinal, mission, snapshot, response,
+shiftwork\evaluator\evaluator.py:407: in _assess_pipeline_request
+    records = [record for record in snapshot.records if record.entity_ref == entity_ref]
+                                    ^^^^^^^^^^^^^^^^
+E   AttributeError: 'types.SimpleNamespace' object has no attribute 'records'
+============================== warnings summary ===============================
+.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/orchestrator/test_gtm_guards.py::test_pipeline_assessor_requires_pipeline_snapshot
+1 failed, 2 warnings in 1.01s

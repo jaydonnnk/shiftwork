@@ -1,0 +1,3 @@
+experiment_ledger_write FAIL_CAUGHT
+gtm_aspect_NAMED_TASK_OUTCOMES FAIL_CAUGHT
+gtm_aspect_NO_TASK_REASON_CODE FAIL_CAUGHT

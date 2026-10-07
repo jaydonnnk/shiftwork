@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.930" timestamp="2026-10-07T20:09:21.152545+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_assessor_secondary_shape_guards_are_independent[row_type]" time="0.008"><failure message="AssertionError: assert [] == ['write']&#10;  &#10;  Right contains one more item: 'write'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_guards.py:108: in test_assessor_secondary_shape_guards_are_independent
+    assert [row.task_id for row in rows if not row.mandatory_pass] == [result.task_id]
+E   AssertionError: assert [] == ['write']
+E     
+E     Right contains one more item: 'write'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>
