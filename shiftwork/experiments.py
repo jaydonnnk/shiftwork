@@ -107,7 +107,9 @@ def create_diagnostic_experiment(
             raise LifecycleError(
                 "conflict", "client_request_id was already used for a different experiment"
             )
-        if not isolated and version.content_hash != config.TRUSTED_LOCAL_FIXTURES["pivot_starter"][0]:
+        starter_key = config.offline_fixture_keys(shift.engagement_slug)[0]
+        starter_pin = config.TRUSTED_LOCAL_FIXTURES.get(starter_key)
+        if not isolated and (starter_pin is None or version.content_hash != starter_pin[0]):
             raise LifecycleError(
                 "conflict",
                 "only the pinned reviewed starter is executable as a public diagnostic candidate",

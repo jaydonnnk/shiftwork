@@ -134,8 +134,18 @@ def _verify_pack_material(pack: pack_registry.EngagementPack) -> frozenset[str]:
     catalog = contract_catalog.load_catalog(pack.slug, mission.contract_catalog_version)
     if catalog.content_hash != mission.contract_catalog_hash:
         raise pack_registry.PackUnavailable("mission catalog binding mismatch")
-    task_contract.load_public_state(config.PACKAGE_DIR / pack.public_state_path)
-    task_contract.load_public_state(config.PACKAGE_DIR / pack.comparison_state_path)
+    for state_path in (pack.public_state_path, pack.comparison_state_path):
+        state = task_contract.load_public_state(config.PACKAGE_DIR / state_path)
+        if state.engagement_slug != pack.slug:
+            raise pack_registry.PackUnavailable("public state belongs to another engagement")
+    incident_bytes = (config.PACKAGE_DIR / pack.incident_request_path).read_bytes()
+    incident_rows = executor.load_batch(executor.BatchRef(path_ref=pack.incident_request_path,
+        content_hash=canonical.content_hash(_encode(incident_bytes))), incident_bytes)
+    if len(incident_rows) != len(mission.request_specs) or any(
+            json.loads(row.body).get("request_id") != spec.id or row.text != spec.text
+            or json.loads(row.body).get("entity_ref") not in spec.requested_entities
+            for row, spec in zip(incident_rows, mission.request_specs, strict=True)):
+        raise pack_registry.PackUnavailable("incident request disagrees with its owning mission")
     manifest = json.loads((config.PACKAGE_DIR / pack.manifest_path).read_bytes())
     payload = manifest.get("workloads")
     sealed_digest = hashlib.sha256(json.dumps(
@@ -160,6 +170,10 @@ def _verify_pack_material(pack: pack_registry.EngagementPack) -> frozenset[str]:
     refs: set[str] = set()
     for declaration in pack.families:
         loaded = sealed_store.load_declared_family(declaration, slug=pack.slug)
+        if pack.slug == "gtm" and any(case.stimulus is None or
+                {task.kind for task in case.stimulus.task_spec.tasks} != evaluator.PIPELINE_TASK_KINDS
+                for case in loaded.cases):
+            raise pack_registry.PackUnavailable("GTM family must assess the pipeline contract")
         family_refs = {rotation.variant_ref(case) for case in loaded.cases}
         if refs & family_refs:
             raise pack_registry.PackUnavailable("declared families share variant refs")
@@ -493,7 +507,7 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
         repo.insert_shift(conn, shift)
 
         if is_first_shift:
-            if slug not in (config.BOOKSHOP_SLUG, "northline"):
+            if slug not in (config.BOOKSHOP_SLUG, "northline", "gtm"):
                 raise LifecycleError("conflict", "reviewed initial starter is unavailable")
             # Slice 11 supplies the reviewed, executable failing starter as the new
             # engagement's editable draft, so the first shift's public diagnostic can
@@ -504,6 +518,10 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
                 for name, path in sorted(config.PIVOT_STARTER_ARTIFACT_PATHS.items())
             } if slug == config.BOOKSHOP_SLUG else {}
             contract = ContractParams.model_validate(config.PIVOT_STARTER_CONTRACT_JSON)
+            if slug == "gtm":
+                pack = admit_pack(slug)
+                files = {"service.py": (config.PACKAGE_DIR / "fixtures/artifacts/gtm/pipeline_starter_failure.py").read_text(encoding="utf-8")}
+                contract = ContractParams.model_validate(config.GTM_STARTER_CONTRACT_JSON)
             if slug == "northline":
                 pack = admit_pack(slug)
                 files = {"service.py": (config.PACKAGE_DIR / "templates/artifact/northline_blank_service.py").read_text(encoding="utf-8"),
@@ -545,9 +563,10 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
                     selected_version_id=starter.id,
                     selected_content_hash=starter.content_hash,
                     rationale=("Reviewed blank Northline starter; required tasks are deliberately missing."
-                               if slug == "northline" else "Reviewed failing Bellwether starter; executable offline, not a qualified repair or live service."),
+                               if slug == "northline" else "Reviewed failing Stonebridge starter; wrong owner, not an eligible repair."
+                               if slug == "gtm" else "Reviewed failing Bellwether starter; executable offline, not a qualified repair or live service."),
                     requirement_set_hash=(_hash_bytes((config.PACKAGE_DIR / pack.mission_path).read_bytes())
-                        if slug == "northline" else canonical.content_hash(
+                        if slug in ("northline", "gtm") else canonical.content_hash(
                         {
                             "catalog_hash": catalog.content_hash,
                             "contract": canonical.contract_params_json(contract),
@@ -734,8 +753,10 @@ def start_run(
         shift = _require_open_shift(conn, shift_id)
         selection, version = _selected_operating_version(conn, shift)
         adapter = executor or config.EXECUTOR_ADAPTER
+        if shift.engagement_slug == "gtm" and selection.kind != "STARTER_BASELINE":
+            raise LifecycleError("conflict", "GTM chosen operation awaits S24")
         if ((selection.kind == "LEARNER_CHOICE" and selection.comparison_id is not None)
-                or (shift.engagement_slug == "northline" and selection.kind == "STARTER_BASELINE")):
+                or (shift.engagement_slug in ("northline", "gtm") and selection.kind == "STARTER_BASELINE")):
             run = _reserve_selected_operation(
                 conn, shift, selection, version, client_request_id,
                 adapter=(TokenFactoryAdapter.name if adapter == TokenFactoryAdapter.name
@@ -2623,6 +2644,30 @@ def bind_deployment_request(request, run, context, version, mission, state_bytes
 def deployment_assessment_inputs(conn, run, spec, ordinal, state_bytes, batch_bytes, *, phase="PUBLIC",
                                  require_complete=False):
     """Supply stored verified traces only after checking their frozen run/output bindings."""
+    if any(task.kind in evaluator.PIPELINE_TASK_KINDS for task in spec.tasks):
+        if phase != "PUBLIC":
+            return {}
+        context = repo.get_execution_context(conn, run.context_id) if run.context_id else None
+        if context is None or context.engagement_slug != "gtm":
+            return {}
+        batch_hash = canonical.content_hash(_encode(batch_bytes))
+        workloads = [workload for workload in context.workloads if workload.request_batch_hash == batch_hash]
+        if len(workloads) != 1:
+            return {}
+        specs = tuple(task_contract.CustomerRequestSpec.model_validate(raw) for raw in json.loads(
+            base64.b64decode(workloads[0].request_specs_bytes_base64, validate=True)))
+        if not 1 <= ordinal <= len(specs) or specs[ordinal - 1] != spec:
+            return {}
+        outputs = {output.request_ordinal: output for output in repo.list_outputs(conn, run.id)}
+        prior = []
+        for index, earlier_spec in enumerate(specs[:ordinal - 1], 1):
+            output = outputs.get(index)
+            if output is not None and output.transport_error is None:
+                try:
+                    prior.append((earlier_spec, task_contract.validate_response_envelope(earlier_spec, output.body)))
+                except TaskEnvelopeInvalid:
+                    pass
+        return {"prior_pipeline_results": tuple(prior)}
     if not any(task.kind in (task_contract.TaskKind.CREATE_BOOKING,
                              task_contract.TaskKind.ROUTE_SAFETY_QUESTION) for task in spec.tasks):
         return {}

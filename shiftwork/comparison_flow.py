@@ -396,9 +396,10 @@ def create_qualifying_comparison(
                 "conflict", "a qualifying comparison needs two distinct candidate versions"
             )
         if not isolated:
+            _, candidate_a_key, candidate_b_key = config.offline_fixture_keys(shift.engagement_slug)
             pinned = {
-                config.TRUSTED_LOCAL_FIXTURES["compare_candidate_a"][0],
-                config.TRUSTED_LOCAL_FIXTURES["compare_candidate_b"][0],
+                config.TRUSTED_LOCAL_FIXTURES.get(candidate_a_key, (None,))[0],
+                config.TRUSTED_LOCAL_FIXTURES.get(candidate_b_key, (None,))[0],
             }
             if {candidate_a.content_hash, candidate_b.content_hash} != pinned:
                 raise LifecycleError(
