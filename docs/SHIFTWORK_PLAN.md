@@ -1,3 +1,120 @@
+**S23 ACCEPTED FOR PUBLICATION, 2026-10-08 Asia/Singapore.**
+
+The user accepted the reviewed S23 offline result and authorized focused
+commits, merge to main and push. Fresh adversarial review passed: 1281 passed,
+1 skipped, 2 warnings; all 106 intended fault controls reproduced with zero
+setup errors and exact restoration; 15 additional tampering probes refused
+eligibility. The exact approved packet and historical evidence remain intact.
+
+- [x] Slice 23: GTM material, contract, checks and offline comparison; accepted
+  2026-10-08 with trusted-local limits. Git publication is in progress.
+- [ ] Slice 24 and Slice 25: no go-ahead; remain outside this authorization.
+
+No model-quality, real CRM, learning, cost or production-readiness proof follows.
+Packaging remains excluded; live conformance remains skipped. The unowned
+.gitignore and AGENTS.md changes remain untouched and excluded. Earlier notices
+below are retained historical states. Current record: [slice23-acceptance-publication-2026-10-08.md](plans/shiftwork/slice23-acceptance-publication-2026-10-08.md).
+
+**S23 APPROVED APPLICATION AND OFFLINE PROOFS COMPLETE; ACCEPTANCE PENDING, 2026-10-07 Asia/Singapore.**
+
+The approved digest `8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa`
+was applied as four exact replacements: 19 material files, two seals, 19 pins,
+three document bindings and three literal offline fixture pins now verify.
+Post-application regression: 1281 passed, 1 skipped, 2 warnings, exit 0;
+packaging excluded and live conformance skipped. All 106 retained fault controls
+were rerun, each caught by its intended assertion with zero setup errors and
+exact source restoration. The five rejected historical controls remain excluded.
+Production-reviewed offline proof: actual admission, idempotent seeding, GTM v5
+preservation, starter owner/write failures, six fair slots and 25 verified
+captures; both candidates eligible, business rows unchanged. Assistance uses
+two fake HINT/DIAGNOSIS calls, with excess and patch requests refused.
+
+The publication inventory explicitly includes all eight ignored GTM requests.
+The incoming unowned `.gitignore` change remains exact and excluded. An external
+AGENTS.md context-threshold change was observed, retained and excluded; ownership
+is unverified. The old failed whole-tree audit remains unresolved history.
+The prepared packet and inventory still retain historical NOT APPROVED labels;
+separate authorization and application receipts establish the later decision.
+The first new full run caught a copied sentinel test in entry preimages. Its
+bytes were retained in a verified lossless archive, the original guard stayed
+unchanged, and six focused sentinel checks plus the final full suite passed.
+
+Current [application checkpoint](plans/shiftwork/slice23-application-checkpoint-2026-10-07.md). `plans/shiftwork/evidence/slice23-application-2026-10-07/` contains raw logs, JUnit, the retained
+comparison database, fault receipts and final preservation receipt. Earlier
+notices below remain byte-exact historical states. S23 is unaccepted, unstaged
+and uncommitted. No Git publication, live call, credentials, installations,
+spending, S24 or S25 were authorized or performed.
+
+**S23 EXACT PACKET APPLICATION APPROVED, NOT YET APPLIED, 2026-10-07 Asia/Singapore.**
+
+The user said: `I approve the application but put the approval in the copy paste handoff prompt`.
+This approves the refreshed inventory digest `8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa`
+and its four exact proposed production replacements, while all preimage/proposal
+bindings match. Application is deferred to the next chat at the user's request.
+The prepared packet and inventory retain their original bytes and historical
+NOT APPROVED labels; the separate authorization receipt records this later decision.
+Seals/pins remain unapplied, production review verification is unrun, and S23
+remains incomplete and unaccepted. No live, credential, install, spend, Git
+publication or S24/S25 authority is added. The ignore-rule exception is unchanged.
+
+Current [approved application handoff](plans/shiftwork/slice23-approved-application-handoff-2026-10-07.md).
+Authorization: `plans/shiftwork/evidence/slice23-approval-handoff-2026-10-07/authorization.json`.
+
+**S23 LF REPAIR VERIFIED; AWAITING OPERATOR MATERIAL REVIEW, 2026-10-07 Asia/Singapore.**
+
+The continuation repaired only three unreviewed CRLF drafts. Full offline
+regression: 1278 passed, 1 skipped, 2 warnings in 967.15s (0:16:07), exit 0; packaging excluded.
+Production GTM pins remain absent and both seals remain DRAFT/null. The
+fresh exact packet is ready for material review with the incoming `.gitignore`
+exception disclosed. Its ownership remains unverified and its bytes preserved;
+all eight hidden request drafts are explicitly inventoried. S23 is incomplete
+and unaccepted. No application, live work, Git publication or later slice.
+
+The notices below describe the earlier handoff state and are superseded only
+for this LF repair and packet refresh. Their bytes and failed receipts remain.
+Current [repair checkpoint](plans/shiftwork/slice23-lf-repair-checkpoint-2026-10-07.md)
+and [operator packet](plans/shiftwork/slice23-gtm-operator-review-packet.md).
+
+**FINAL CLOSEOUT HOLD, 2026-10-07.**
+
+The post-document preservation audit exited 1 on an unexpected `.gitignore`
+addition: `/shiftwork/fixtures/requests/`. Its ownership is unverified; it was
+left untouched. This rule hides new request drafts from ordinary git status.
+`final-preservation.json` is the last successful pre-document audit, not a
+final-state PASS. `post-document-preservation-blocked.json` supersedes any
+final-state preservation claim below. No repair or further phase followed.
+
+**S23 OFFLINE IMPLEMENTATION DRAFTED; REGRESSION BLOCKED, 2026-10-07 Asia/Singapore.**
+
+The user authorized S23 offline implementation, draft material and concrete
+operator-review preparation, then requested a handoff near the 200k context
+boundary. S23 remains incomplete, unaccepted, unstaged and uncommitted on
+`shiftwork/slice-23` at `3e02f1e`. This notice supersedes older S23 authorization
+notices; their historical bytes and scope remain intact below.
+
+Resumed focused baseline: 128 passed. Final focused group: 232 passed; the
+expanded isolated guard/typed-family group passes 80 tests. The retained matrix
+verifies 106 distinct source faults, each reaching its named assertion with
+zero setup errors and exact restoration. Five rejected controls stay separate.
+The disposable API/local-process rehearsal completes six fair slots with A and
+B eligible, preserves business/selection rows and enforces two HINT/DIAGNOSIS
+calls with no patch. This is hypothetical policy proof, not production approval.
+
+Full offline regression: **1 failed, 1277 passed, 1 skipped, 2 warnings in 896.88s (0:14:56)**. The one LF-only fixture guard rejects
+the unreviewed GTM manifest and pair 01/02 spec files containing CRLF. The repair
+has not been applied. Repairing those drafts invalidates the current proposal
+digest and requires fresh inventory, seal/source proposals and verification.
+The concrete packet exists but is BLOCKED, NOT READY FOR APPROVAL.
+
+All 4803 historical evidence files and 42 existing reviewed pins remain byte
+exact; unchanged source lines retain their entry line endings. GTM pins are
+empty and both seals remain null/DRAFT. No production GTM admission, real
+reviewed comparison, live call, credential, install, spend, Git publication,
+S24 or S25. The architecture scan records later retry/live-shape limits.
+
+Current records: [offline checkpoint](plans/shiftwork/slice23-offline-checkpoint-2026-10-07.md),
+[operator packet](plans/shiftwork/slice23-gtm-operator-review-packet.md), [handoff](plans/shiftwork/slice23-handoff-2026-10-07.md).
+
 **S22b ACCEPTED AND PUBLISHED, 2026-10-06 Asia/Singapore.**
 
 S22b was committed in 13 focused batches, published on its branch and

@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-08",
+  "timezone": "Asia/Singapore",
+  "user_statement": "Okay i accept and u can merge and push to main",
+  "slice": "S23",
+  "acceptance": "ACCEPTED_WITH_OFFLINE_LIMITS",
+  "authorized": [
+    "focused S23 staging and commits",
+    "merge S23 to main",
+    "push main and shiftwork/slice-23"
+  ],
+  "not_authorized": [
+    "live calls",
+    "credential use for product execution",
+    "installations",
+    "spending",
+    "S24",
+    "S25"
+  ],
+  "approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa",
+  "reviewed_head": "3e02f1e5176cd34d6dc355bbc4529234fa51fe62",
+  "review_evidence_zip_sha256": "03476d6856123dcc33a1c2a560e594d6607f65020612fd221f1c55c724e733d6"
+}

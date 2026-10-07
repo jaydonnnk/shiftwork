@@ -1,0 +1,249 @@
+{
+  "verdict": "PASS_WITHIN_APPROVED_OFFLINE_SCOPE",
+  "acceptance": "PENDING_USER_DECISION",
+  "publication_authorized": false,
+  "full_offline": {
+    "command": [
+      "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+      "-B",
+      "-m",
+      "pytest",
+      "tests",
+      "--ignore=tests/packaging",
+      "-q",
+      "--tb=short",
+      "-p",
+      "no:cacheprovider",
+      "--junitxml=C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\full-offline.xml"
+    ],
+    "exit_code": 0,
+    "tests": 1282,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "log_sha256": "548a08da7c22abb60e72daeceac1ea5907a7c1a856d21b578427dc92bc33987a",
+    "xml_sha256": "918591125170c8b6c1df6fc68aaf56cd5c51709441ed185c7425bedf7ef2425a"
+  },
+  "bindings": {
+    "status": "PASS",
+    "production_replacements": 4,
+    "material_pins": 19,
+    "seals": 2,
+    "document_bindings": 3,
+    "fixture_pins": 3,
+    "incoming_evidence": 5148,
+    "pre_s23_evidence": 4803,
+    "prior_reviewed": 42,
+    "source_bindings": 155,
+    "retained_faults_with_matching_assertions": 106,
+    "publication_files": 634,
+    "hidden_requests": 8
+  },
+  "database": {
+    "status": "PASS",
+    "digest": "f8f64acce9ee5a7c29b84b92ceda4f2076cb723dd4e80b653640a7673ab59194",
+    "captures": 25,
+    "paired_slots": 6,
+    "source": "read-only immutable SQLite"
+  },
+  "publication": {
+    "status": "PASS",
+    "inventory_rows": 634,
+    "additional_manifest_and_preservation_files": 2,
+    "ignored_paths": 580,
+    "explicit_hidden_requests": 8,
+    "byte_preserving_filters": 595,
+    "visible_dirty_scope_complete": true,
+    "excluded_unowned_paths": [
+      ".gitignore",
+      "AGENTS.md"
+    ],
+    "fresh_git_checkout": "NOT_RUN"
+  },
+  "faults": {
+    "status": "PASS",
+    "controls": 106,
+    "intended_assertions_match": 106,
+    "setup_errors": 0,
+    "isolated_source_files_restored_exactly": 271,
+    "product_checkout_faulted": false,
+    "command": [
+      "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+      "-B",
+      "tests/packs/gtm_mutation_proofs.py",
+      "--out",
+      "C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\faults-rerun"
+    ],
+    "cwd": "C:\\Users\\jayd0\\Documents\\Codex\\2026-10-07\\background-handover-for-shiftwork-s23-2026\\work\\isolated-s23"
+  },
+  "readback_probes": [
+    {
+      "name": "mission_hash",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "frozen_context",
+        "mission_bytes_hash"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "public_state_hash",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "condition",
+        "frozen_context",
+        "public_data_bytes_hash"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "context_hash",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "assessment_context",
+        "experiment_schedule",
+        "frozen_context"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "workload_count",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "frozen_context",
+        "slot_binding",
+        "workload_1"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "workload_spec",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "frozen_context",
+        "public_assessment",
+        "workload_1"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "recorded_adapter",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "run_evidence_class"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "recorded_mode",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "run_evidence_class"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "wrong_run_purpose",
+      "status": "STORAGE_REFUSED",
+      "error": "UNIQUE constraint failed: runs.shift_id",
+      "eligibility_refused": true
+    },
+    {
+      "name": "run_binding",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "run_binding"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "candidate_hash",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "candidate_A"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "missing_public_capture",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "public_assessment"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "missing_protected_capture",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "protected_assessment"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "public_assessment",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "public_assessment"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "protected_assessment",
+      "status": "NOT_COMPARABLE",
+      "eligibility_refused": true,
+      "drift_fields": [
+        "protected_assessment"
+      ],
+      "altered_rows": 1
+    },
+    {
+      "name": "failed_slot",
+      "status": "INCOMPLETE",
+      "eligibility_refused": true,
+      "drift_fields": [],
+      "altered_rows": 1
+    }
+  ],
+  "preservation": {
+    "status": "PASS",
+    "files_unchanged": 6184,
+    "index_head_branch_unchanged": true
+  },
+  "helper_rejections": [
+    {
+      "status": "REVIEW_HELPER_FORMAT_ASSUMPTION_REJECTED",
+      "control": "prior_validity",
+      "cause": "The new review checker required the word AssertionError in pytest's message. Pytest reports this ordinary assertion as assert False.",
+      "verification": "Raw log reaches test_retry_requires_valid_captured_first_record_and_never_writes_twice line 275; JUnit has one failure and zero errors. Corrected checker accepts pytest's assert prefix.",
+      "product_source_changed": false
+    },
+    {
+      "status": "REVIEW_HELPER_UNHANDLED_STORAGE_REFUSAL",
+      "control": "wrong_run_purpose",
+      "exception": "sqlite3.IntegrityError: UNIQUE constraint failed: runs.shift_id",
+      "cause": "The retained S23 database already has its starter operation. Its storage constraint rejects changing a comparison run to a second operation before the readback probe can run.",
+      "correction": "Count this specific constraint as storage-level refusal, while retaining all other exceptions as failures. Use a new disposable database copy.",
+      "retained_database_changed": false
+    }
+  ],
+  "limitations": [
+    "packaging excluded",
+    "live conformance skipped",
+    "fresh Git checkout not run",
+    "no model-quality, CRM, learning, spending, or production-readiness proof",
+    "ignore/AGENTS ownership and historical whole-tree audit remain unresolved"
+  ]
+}
