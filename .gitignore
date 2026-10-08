@@ -51,6 +51,7 @@ PROGRESS.md
 
 # Local raw verification evidence and receipts; tracked history stays tracked.
 /docs/plans/shiftwork/evidence/
+/shiftwork/fixtures/requests/
 
 # Workbuddy local memory
 /.workbuddy-ai/memory/

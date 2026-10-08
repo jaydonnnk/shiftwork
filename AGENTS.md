@@ -398,12 +398,12 @@ Rules:
 
 ### Context budget and handoff
 
-- Treat 200k tokens of session context usage as the working limit. Use the
+- Treat 175k tokens of session context usage as the working limit. Use the
   reported usage indicator when the runtime shows one, and a conservative
-  estimate otherwise. When usage reaches about 200k tokens, stop starting new
+  estimate otherwise. When usage reaches about 175k tokens, stop starting new
   work even if the task is unfinished, except in the near-completion case below.
 - Near-completion exception: when the task is almost done as usage approaches the
-  threshold (for example the last step of a five-step task at 180k to 200k
+  threshold (for example the last step of a five-step task at 155k to 175k
   tokens used), finish the task in this session instead of handing off. The
   exception covers only a short, fully predictable remainder, never a new phase of
   work or an open question about what remains.
