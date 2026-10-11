@@ -4,12 +4,13 @@ Slice 2 replaces this tracer repository with the approved schema and repo groups
 """
 
 import base64
+import functools
 import json
 import sqlite3
 from datetime import datetime
 
 from shiftwork.domain import canonical
-from shiftwork.domain.errors import VersionTampered
+from shiftwork.domain.errors import RetainedRecordUnreadable, VersionTampered
 from shiftwork.domain.models import (
     ArtifactVersion,
     AssistEvent,
@@ -51,6 +52,24 @@ def _dump(value) -> str:
 
 def _load(raw: str):
     return json.loads(raw)
+
+
+def _retained(label: str):
+    """Deserialize one retained evidence row at the storage boundary.
+
+    A stored value its model rejects (an unknown enum, a missing JSON field, TEXT
+    in a BLOB column) is a typed conflict, never an untyped server error. Only
+    deserialization is converted; each caller keeps its own policy for it.
+    """
+    def wrap(build):
+        @functools.wraps(build)
+        def load(row: sqlite3.Row):
+            try:
+                return build(row)
+            except (ValueError, TypeError) as exc:
+                raise RetainedRecordUnreadable(f"retained {label} is unreadable") from exc
+        return load
+    return wrap
 
 
 # --- engagements -----------------------------------------------------------
@@ -559,6 +578,7 @@ def list_nonterminal_runs(conn: sqlite3.Connection) -> list[Run]:
 # --- run_outputs -----------------------------------------------------------
 
 
+@_retained("run output")
 def _output(row: sqlite3.Row) -> RunOutput:
     return RunOutput(
         id=row["id"],
@@ -601,6 +621,7 @@ def list_outputs(conn: sqlite3.Connection, run_id: str) -> list[RunOutput]:
 # --- check_results ---------------------------------------------------------
 
 
+@_retained("check result")
 def _check_result(row: sqlite3.Row) -> CheckResult:
     return CheckResult(
         id=row["id"],
@@ -807,6 +828,7 @@ def invalidated_run_ids(conn: sqlite3.Connection, slug: str) -> list[str]:
 # --- ledger_events ---------------------------------------------------------
 
 
+@_retained("ledger event")
 def _ledger_event(row: sqlite3.Row) -> LedgerEvent:
     return LedgerEvent(
         event_type=LedgerEventType(row["event_type"]),
@@ -1135,21 +1157,23 @@ def count_task_assessments(conn: sqlite3.Connection) -> int:
     return int(conn.execute("SELECT COUNT(*) AS n FROM task_assessments").fetchone()["n"])
 
 
+@_retained("task assessment")
+def _task_assessment(row: sqlite3.Row) -> TaskAssessment:
+    return TaskAssessment(
+        request_id=row["request_id"],
+        request_ordinal=row["request_ordinal"],
+        task_id=row["task_id"],
+        outcome=TaskOutcome(row["outcome"]),
+        mandatory_pass=bool(row["mandatory_pass"]),
+        reason_codes=tuple(ReasonCode(code) for code in _load(row["reason_codes_json"])),
+    )
+
+
 def list_task_assessment_models(
     conn: sqlite3.Connection, run_id: str
 ) -> list[TaskAssessment]:
     """The stored assessments of one run, as the public model a projection reads."""
-    return [
-        TaskAssessment(
-            request_id=row["request_id"],
-            request_ordinal=row["request_ordinal"],
-            task_id=row["task_id"],
-            outcome=TaskOutcome(row["outcome"]),
-            mandatory_pass=bool(row["mandatory_pass"]),
-            reason_codes=tuple(ReasonCode(code) for code in _load(row["reason_codes_json"])),
-        )
-        for row in list_task_assessments(conn, run_id)
-    ]
+    return [_task_assessment(row) for row in list_task_assessments(conn, run_id)]
 
 
 # --- run assessments (Slice 11) --------------------------------------------
@@ -1235,6 +1259,7 @@ def insert_execution_context(conn: sqlite3.Connection, context: ExecutionContext
     )
 
 
+@_retained("execution context")
 def _execution_context(row: sqlite3.Row) -> ExecutionContext:
     return ExecutionContext(
         id=row["id"],

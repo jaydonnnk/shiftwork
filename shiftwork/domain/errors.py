@@ -157,3 +157,16 @@ class BootstrapBlocked(ShiftworkDomainError):
     """
 
     kind = "conflict"
+
+
+class RetainedRecordUnreadable(ShiftworkDomainError, ValueError):
+    """A persisted evidence row no longer deserializes into its model.
+
+    No CHECK constraint guards most stored values, so a row edited out of band
+    can hold SQL values its model rejects. Raised only at the storage boundary,
+    so a programming error elsewhere is never mistaken for unreadable evidence.
+    It stays a ValueError so every degrade path that already caught the
+    underlying validation failure behaves as before.
+    """
+
+    kind = "conflict"
