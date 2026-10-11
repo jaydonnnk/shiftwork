@@ -1,0 +1,23 @@
+{
+  "date": "2026-10-11",
+  "commit": "c9e4f887b0ebdcd02ab5e09a74793b1336fa35e4",
+  "first_clone": "C:\\s24f",
+  "first_clone_path_characters": 7,
+  "first_clone_result": "2 failed, 1397 passed, 1 skipped, 2 warnings (exit 1)",
+  "failed": [
+    "tests/api/test_workplace_boards.py::test_workplace_scanner_detects_private_values_in_the_serialized_payload[host_path]",
+    "tests/api/test_workplace_boards.py::test_workplace_scanner_detects_private_values_in_the_serialized_payload[slash_path]"
+  ],
+  "failure": "AssertionError: serialized workplace leaked injected private material; assert 200 == 409",
+  "cause": "The test injects str(Path.cwd()) (and its slash form) as the private needle. The scanner adds str(Path.cwd()) to its needles but keeps only needles of at least 8 characters (shiftwork/orchestrator.py _private_public_needles: lines 2464 and 2483 at c9e4f88). C:\\s24f has 7 characters, so the injected value is not scanned and the response is 200.",
+  "predates_s24": {
+    "scanner_rule_introduced_by": "e1366d5 Run the isolated diagnostic end to end and scan its public projection",
+    "scanner_rule_present_at_entry_main_66f9b8d": true,
+    "test_file_diff_66f9b8d_to_c9e4f88_lines": 0
+  },
+  "second_clone": "C:\\s24fresh",
+  "second_clone_path_characters": 11,
+  "second_clone_focused_result": "5 passed, 2 warnings (all five needle kinds)",
+  "source_changed_to_obtain_pass": false,
+  "portability_limit": "A checkout whose working directory path is shorter than 8 characters fails the host_path and slash_path scanner self-tests; the scanner then does not treat that path as private."
+}

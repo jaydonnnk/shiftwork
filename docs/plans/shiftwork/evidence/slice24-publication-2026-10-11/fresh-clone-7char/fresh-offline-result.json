@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-11",
+  "clone": "C:\\s24f",
+  "source": "local repository, git clone --no-local --single-branch",
+  "commit": "c9e4f887b0ebdcd02ab5e09a74793b1336fa35e4",
+  "branch": "shiftwork/slice-24",
+  "core_autocrlf": "true",
+  "status_lines_after": 0,
+  "interpreter": "uv CPython 3.13.14 base interpreter, -B, PYTHONPATH=<workspace>/.venv313/Lib/site-packages, PYTHONNOUSERSITE=1, PYTHONDONTWRITEBYTECODE=1; no installation",
+  "preflight": "C:\\s24f\\shiftwork\\__init__.py 9.1.1 2.13.5 3.13.14",
+  "command": "python -B -m pytest tests -q --ignore=tests/packaging -p no:cacheprovider --junitxml=<proof>/fresh-offline.xml",
+  "exit": "exit=1 seconds=365",
+  "summary_line": "2 failed, 1397 passed, 1 skipped, 2 warnings in 364.15s (0:06:04)",
+  "junit": {
+    "tests": 1400,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 1
+  },
+  "skipped": [
+    "tests.executor.test_conformance::test_conformance_suite_tokenfactory"
+  ],
+  "passed": 1397,
+  "demo": {
+    "status": "PASS",
+    "replay": "IDENTICAL",
+    "operation_run_id": "run-0008",
+    "selected_version_id": "ver-0002",
+    "retained_version_id": "ver-0003"
+  },
+  "reviewed_material": {
+    "status": "PASS",
+    "approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa",
+    "reviewed_material_files": 19,
+    "document_bindings": 3,
+    "offline_fixture_pins": 3
+  },
+  "receipts_sha256": {
+    "fresh-offline.log": "caa306f8fbe012ed467ffe8efd3ba71f73ad9dd89c7ae3397e380e7f9fc539b7",
+    "fresh-offline.xml": "5a1429181847ebc7089eb830840070f2802ec24aea452c942bd8cc6927665c88",
+    "reviewed.log": "f6230d28383413c8c187efe7d244a7a81d636d561c525fb80807fce87e6f047e",
+    "preflight.txt": "e2db84ddb3cdd9122c724673832bad02090fb64af0220bbf64b8a42cfc10aa75",
+    "demo-console.json": "3c7eb8a108eaa8006c3cdaa2d659f938e05a3b23681fe5e34e79fea26a622ce3",
+    "demo/journey.json": "9068dbcbb49e0586bce59d1ab3c145ac44d337af3ae5eb48c93a0b0441082c21",
+    "demo/journey.log": "7748126f65e0c4707f08fadb3f995dec8611b46eb6f3974d85bf72c6328b362f",
+    "demo/journey.xml": "182da811ebb4d021819dbccb0b64a2545ab2d0c2c72d307cc4551e66bed6620e"
+  }
+}

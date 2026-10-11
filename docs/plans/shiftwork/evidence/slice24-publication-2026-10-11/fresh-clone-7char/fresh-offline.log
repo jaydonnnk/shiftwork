@@ -1,0 +1,125 @@
+.............................................................FF......... [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 15%]
+..................................pivot-starter: adapter=local_process; local verification only; no task-assessor result
+{"request_id":"bellwether-collection-001","task_results":[{"task_id":"price","status":"COMPLETED","entity_ref":"book:salt-roads:paperback","claims":[{"kind":"price","entity_ref":"book:salt-roads:paperback","value":1800,"evidence_refs":["public:salt-roads:paperback:price"]}],"commitment_ref":null,"explanation_code":null}],"evidence_refs":["public:salt-roads:paperback:price"],"uncertainty_codes":[]}
+{"source":"service_reported","kind":"interpretation","request_id":"bellwether-collection-001","intent":"price","method":"keyword_router"}
+{"source":"service_reported","kind":"tool_call","tool":"public_record_lookup","entity_ref":"book:salt-roads:paperback","record_kind":"price"}
+{"source":"service_reported","kind":"tool_result","tool":"public_record_lookup","record_ids":["public:salt-roads:paperback:price"]}
+
+.....happy_path: captures=2 bytes/status/ordinal/time/logs=identical failure=NONE (injected capture clock; real sockets/deadline)
+.port_dead: captures=1 bytes/status/ordinal/time/logs=identical failure=SERVICE_UNREACHABLE (injected capture clock; real sockets/deadline)
+.timeout: captures=1 bytes/status/ordinal/time/logs=identical failure=REQUEST_TIMEOUT (injected capture clock; real sockets/deadline)
+.truncated_body: captures=1 bytes/status/ordinal/time/logs=identical failure=CAPTURE_TRUNCATED (injected capture clock; real sockets/deadline)
+.non_utf8_body: captures=1 bytes/status/ordinal/time/logs=identical failure=CAPTURE_NON_UTF8 (injected capture clock; real sockets/deadline)
+.connection_refused: captures=2 bytes/status/ordinal/time/logs=identical failure=SERVICE_UNREACHABLE (injected capture clock; real sockets/deadline)
+.kill_mid_batch: captures=1 bytes/status/ordinal/time/logs=identical failure=SANDBOX_TERMINATED (injected capture clock; real sockets/deadline)
+.s............trusted-guard unknown_hash: PROVISION_FAILED; subprocess starts=0
+.trusted-guard modified_bytes: PROVISION_FAILED; subprocess starts=0
+.trusted-guard extra_file: PROVISION_FAILED; subprocess starts=0
+.trusted-guard path_escape: PROVISION_FAILED; subprocess starts=0
+.provisioning-fault: PROVISION_FAILED; captures=0
+....credential-guard recorded: captures=2; injected markers absent from bodies/logs; no process or environment access
+.credential-guard local_process: captures=2; injected markers absent from bodies/logs; spawn env and child-reported env match SYSTEMROOT/WINDIR allowlist
+.... [ 20%]
+........................................................................ [ 25%]
+........................................................................ [ 30%]
+........................................................................ [ 36%]
+........................................................................ [ 41%]
+........................................................................ [ 46%]
+........................................................................ [ 51%]
+........................................................................ [ 56%]
+........................................................................ [ 61%]
+........................................................................ [ 66%]
+........................................................................ [ 72%]
+........................................................................ [ 77%]
+........................................................................ [ 82%]
+........................................................................ [ 87%]
+........................................................................ [ 92%]
+........................................................................ [ 97%]
+................................                                         [100%]
+================================== FAILURES ===================================
+_ test_workplace_scanner_detects_private_values_in_the_serialized_payload[host_path] _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-7241/test_workplace_scanner_detects2')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002668B640AD0>
+needle_kind = 'host_path'
+
+    @pytest.mark.parametrize("needle_kind", ("bookshop", "northline", "host_path", "slash_path", "secret"))
+    def test_workplace_scanner_detects_private_values_in_the_serialized_payload(
+        tmp_path, monkeypatch, needle_kind,
+    ):
+        with TestClient(create_app(str(tmp_path / "scanner.db"))) as client:
+            assert client.get("/api/boards").status_code == 200
+            if needle_kind in {"bookshop", "northline"}:
+                pack = registry.resolve_pack(needle_kind)
+                family = pack.families[0].family
+                needle = next(value for value in store.load_privacy_needles(family, slug=pack.slug)
+                              if len(value) >= 8 and "\\" not in value)
+            elif needle_kind == "secret":
+                needle = "workplace-scanner-test-secret"
+                monkeypatch.setenv("NEBIUS_API_KEY", needle)
+            else:
+                needle = str(Path.cwd())
+                if needle_kind == "slash_path":
+                    needle = needle.replace("\\", "/")
+            boards = orchestrator.workplace_boards()
+            injected = boards[0].model_copy(update={
+                "display": boards[0].display.model_copy(update={"role_name": needle})})
+            monkeypatch.setattr(orchestrator, "workplace_boards", lambda: (injected, *boards[1:]))
+            response = client.get("/api/boards")
+>           assert response.status_code == 409, "serialized workplace leaked injected private material"
+E           AssertionError: serialized workplace leaked injected private material
+E           assert 200 == 409
+E            +  where 200 = <Response [200 OK]>.status_code
+
+tests\api\test_workplace_boards.py:90: AssertionError
+_ test_workplace_scanner_detects_private_values_in_the_serialized_payload[slash_path] _
+
+tmp_path = WindowsPath('C:/Users/jayd0/AppData/Local/Temp/pytest-of-jayd0/pytest-7241/test_workplace_scanner_detects3')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000002668C387000>
+needle_kind = 'slash_path'
+
+    @pytest.mark.parametrize("needle_kind", ("bookshop", "northline", "host_path", "slash_path", "secret"))
+    def test_workplace_scanner_detects_private_values_in_the_serialized_payload(
+        tmp_path, monkeypatch, needle_kind,
+    ):
+        with TestClient(create_app(str(tmp_path / "scanner.db"))) as client:
+            assert client.get("/api/boards").status_code == 200
+            if needle_kind in {"bookshop", "northline"}:
+                pack = registry.resolve_pack(needle_kind)
+                family = pack.families[0].family
+                needle = next(value for value in store.load_privacy_needles(family, slug=pack.slug)
+                              if len(value) >= 8 and "\\" not in value)
+            elif needle_kind == "secret":
+                needle = "workplace-scanner-test-secret"
+                monkeypatch.setenv("NEBIUS_API_KEY", needle)
+            else:
+                needle = str(Path.cwd())
+                if needle_kind == "slash_path":
+                    needle = needle.replace("\\", "/")
+            boards = orchestrator.workplace_boards()
+            injected = boards[0].model_copy(update={
+                "display": boards[0].display.model_copy(update={"role_name": needle})})
+            monkeypatch.setattr(orchestrator, "workplace_boards", lambda: (injected, *boards[1:]))
+            response = client.get("/api/boards")
+>           assert response.status_code == 409, "serialized workplace leaked injected private material"
+E           AssertionError: serialized workplace leaked injected private material
+E           assert 200 == 409
+E            +  where 200 = <Response [200 OK]>.status_code
+
+tests\api\test_workplace_boards.py:90: AssertionError
+============================== warnings summary ===============================
+..\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/api/test_workplace_boards.py::test_workplace_scanner_detects_private_values_in_the_serialized_payload[host_path]
+FAILED tests/api/test_workplace_boards.py::test_workplace_scanner_detects_private_values_in_the_serialized_payload[slash_path]
+2 failed, 1397 passed, 1 skipped, 2 warnings in 364.15s (0:06:04)

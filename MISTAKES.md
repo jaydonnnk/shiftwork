@@ -2671,3 +2671,24 @@ The pending-state repair also covers opening/operating and close/next-shift comp
   `PYTHONPATH=".;tests;.venv313/Lib/site-packages"`; count `\r\n` and `\n` bytes
   in Python, comparing with HEAD or a pre-session copy, before reporting line
   endings.
+
+## 2026-10-11 (third session): S24 fresh clone made below the scanner's needle minimum
+
+- What happened: the S24 publication's fresh Windows clone was made at `C:\s24f`.
+  Its full non-packaging run gave 2 failed, 1,397 passed, 1 skipped: the
+  `host_path` and `slash_path` cases of
+  `test_workplace_scanner_detects_private_values_in_the_serialized_payload`
+  returned 200 instead of 409. Nothing had been pushed. The same commit passed in
+  a clone at `C:\s24fresh` (1,399 passed, 1 live-only skip). Separately, a
+  secret-pattern scan of the evidence first used ripgrep, which skips binary
+  files, and a bundle scan then flagged `sk-` inside `operation-task-v1` in a
+  SQLite file; both scans were redone with a decompressed, boundary-anchored check.
+- Root cause: the public-projection scanner adds the working directory as a needle
+  but keeps only needles of at least 8 characters (`_private_public_needles`,
+  since `e1366d5`); `C:\s24f` has 7. The path followed the S23 short-path lesson
+  without checking a lower bound. No S24 source was involved. The scan errors came
+  from trusting a text-only search for binary and compressed receipts.
+- Prevention: make fresh-checkout clones at a short path of at least 8
+  characters, such as `C:\swNNfresh`, and read a fresh-clone failure's needle
+  setup before treating it as a source defect. Scan databases and decompressed
+  archive members for secrets with a word-boundary pattern, not ripgrep defaults.
