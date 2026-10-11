@@ -2,11 +2,13 @@
 
 Run only while no other tests or product processes use this worktree.
 Each row runs one test parameter; crashes, setup errors and unrelated catches fail proof.
+Each control must also fail with its named assertion text.
 """
 import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -21,8 +23,8 @@ OR = "shiftwork/orchestrator.py"
 CASES = []
 
 
-def fault(name, old, new, node, file=EV, test=TEST):
-    CASES.append(dict(name=name, file=file, old=old, new=new, node=f"{test}::{node}"))
+def fault(name, old, new, node, file=EV, test=TEST, scope=None):
+    CASES.append(dict(name=name, file=file, old=old, new=new, scope=scope, node=f"{test}::{node}"))
 
 
 for label, old, new in (
@@ -162,7 +164,8 @@ for label, old, new in (
     ("wrong_spec", "specs[ordinal - 1] != spec", "False"),
     ("transport", "output.transport_error is None", "True"),
 ):
-    fault("prior_" + label, old, new, f"test_prior_pipeline_input_guards_refuse_unbound_evidence[{label}]", file=OR, test=GUARDS)
+    fault("prior_" + label, old, new, f"test_prior_pipeline_input_guards_refuse_unbound_evidence[{label}]", file=OR, test=GUARDS,
+          scope="deployment_assessment_inputs")
 for field, old, new in (
     ("record_id", 'text(record.get("record_id")), text(record.get("entity_ref"))', '"", text(record.get("entity_ref"))'),
     ("entity_ref", 'text(record.get("record_id")), text(record.get("entity_ref"))', 'text(record.get("record_id")), ""'),
@@ -176,8 +179,8 @@ for field, old, new in (
 for label in ("public_state_path", "comparison_state_path"):
     fault("state_owner_" + label, "if state.engagement_slug != pack.slug:", "if False:",
           f"test_admission_checks_each_state_owner_independently[{label}]", file=OR, test=GUARDS)
-fault("chosen_operation_boundary", 'if shift.engagement_slug == "gtm" and selection.kind != "STARTER_BASELINE":',
-      "if False:", "test_gtm_chosen_operation_waits_for_s24", file=OR, test=GUARDS)
+fault("gtm_operation_rules_frozen", 'if shift.engagement_slug in ("northline", "gtm"):',
+      'if shift.engagement_slug == "northline":', "test_gtm_operation_freezes_declared_rules_before_execution", file=OR, test=GUARDS)
 fault("experiment_execution_boundary", "if run.purpose is not RunPurpose.OPERATION or run.context_id is None:\n        raise LifecycleError(\"conflict\", \"selected operation required\")",
       "if run.context_id is None:\n        raise LifecycleError(\"conflict\", \"selected operation required\")",
       "test_experimental_run_cannot_enter_selected_execution", file=OR, test=GUARDS)
@@ -206,7 +209,78 @@ for label, old in (
           file="shiftwork/domain/comparison.py", test=GUARDS)
 
 
+# Needles copied from the observed failure messages of the r13 run, not written from memory.
+EXPECTED_ASSERTIONS = {
+    **dict.fromkeys(("rubric_suppressed", "rubric_small_company", "rubric_research"),
+        ["qualification rule must return exactly its published decisions", "assert {'QUALIFIED'} == {'DISQUALIFIED'}"]),
+    **dict.fromkeys(("rubric_unavailable", "rubric_stale", "rubric_unknown_region", "rubric_unknown_product",
+        "rubric_low_confidence", "rubric_ambiguous"),
+        ["qualification rule must return exactly its published decisions", "assert {'QUALIFIED'} == {'REVIEW'}"]),
+    **dict.fromkeys(("rubric_freshness_boundary", "rubric_confidence_boundary"),
+        ["qualification rule must return exactly its published decisions", "assert {'REVIEW'} == {'QUALIFIED'}"]),
+    "rubric_size_boundary": ["qualification rule must return exactly its published decisions", "assert {'DISQUALIFIED'} == {'QUALIFIED'}"],
+    **dict.fromkeys(("result_entity", "claim_entity", "claim_kind", "commitment", "evidence", "scalar_value",
+        "claim_cardinality"),
+        ["fault must reach exactly its own task guard", "assert [] == ['owner']"]),
+    **dict.fromkeys(("row_keys", "row_revenue", "row_owner", "row_ref", "trace_length", "trace_decision",
+        "write_cardinality"),
+        ["fault must reach exactly its own task guard", "assert [] == ['write']"]),
+    **dict.fromkeys(("active_status", "inactive_status", "inactive_claim", "inactive_commitment"),
+        ["assert [] == ['owner']"]),
+    "retry_name": ["retry must name its captured prior", "where False = any(<generator object test_retry_names_the_actual_valid_prior_request.<locals>.<genexpr>"],
+    "prior_decision": ["retry cannot replace the first decision", "where False = any(<generator object test_retry_cannot_replace_a_previous_human_review_decision.<locals>.<genexpr>"],
+    "prior_validity": ["where False = any(<generator object test_retry_requires_valid_captured_first_record_and_never_writes_twice.<locals>.<genexpr>"],
+    **dict.fromkeys(("mission_owner", "snapshot_type"),
+        ["Failed: DID NOT RAISE MissionSpecInvalid"]),
+    "pinned_owner": ["pinned expected owner disagrees with frozen routing", "where False = any(<generator object test_frozen_expected_owner_cannot_disagree_with_routing_even_when_output_is_correct.<locals>.<genexpr>"],
+    "pinned_decisions": ["where True = any(<generator object test_pinned_decision_cannot_be_widened_by_correct_route.<locals>.<genexpr>"],
+    "existing_owner": ["existing owner cannot be replaced", "where True = any(<generator object test_existing_owner_cannot_change_even_without_second_write.<locals>.<genexpr>"],
+    **dict.fromkeys(("trace_method", "trace_short", "row_type", "trace_type"),
+        ["assert [] == ['write']"]),
+    **dict.fromkeys(("spec_extra_duplicate_task", "spec_duplicate_kind", "spec_duplicate_id", "spec_two_entities",
+        "spec_extra_condition", "spec_decisions_not_list", "spec_empty_decisions", "spec_duplicate_decisions",
+        "spec_owner_not_text", "spec_empty_owner", "spec_repeat_not_text", "spec_empty_repeat",
+        "spec_qualification_optional", "spec_conditional_required", "spec_wrong_signal",
+        "spec_disagreeing_conditions", "spec_widen_review_owner", "spec_missing_rule", "spec_decision_vocabulary",
+        "state_routes_missing", "state_empty_route", "state_review_route", "state_extra_dependency",
+        "state_duplicate_record_id", "state_duplicate_entity_ref", "state_orphan_entity", "empty_existing_owner",
+        "empty_existing_ref"),
+        ["Failed: DID NOT RAISE ValidationError"]),
+    **dict.fromkeys(("state_domain", "existing_pair", "existing_ref", "delta_currency", "delta_foreign_state",
+        "delta_facts"),
+        ["Failed: DID NOT RAISE PublicStateInvalid"]),
+    **dict.fromkeys(("incident_count", "incident_request_id", "incident_text", "incident_entity", "family_tasks",
+        "state_owner_public_state_path", "state_owner_comparison_state_path"),
+        ["Failed: DID NOT RAISE PackUnavailable"]),
+    **dict.fromkeys(("prior_protected_phase", "prior_foreign_context", "prior_wrong_batch", "prior_duplicate_batch",
+        "prior_zero_ordinal", "prior_wrong_spec", "prior_transport"),
+        ["unbound evidence must not count as a committed prior record"]),
+    **dict.fromkeys(("private_record_id", "private_entity_ref", "private_account_domain",
+        "private_existing_record_ref", "private_company_name", "private_domain", "experiment_execution_boundary",
+        "assist_projection_allowed_assist_roles_json", "assist_projection_total_assist_budget_per_shift",
+        "assist_projection_assist_level"),
+        ["Failed: DID NOT RAISE LifecycleError"]),
+    "gtm_operation_rules_frozen": ["GTM frozen consequence rules omitted", "assert None == {'success_events'"],
+    "assist_role": ["GTM role refusal must hold before any provider call", "assert (200 == 409)", "where 200 = <Response [200 OK]>.status_code"],
+    "assist_total": ["assert (200 == 409)", "where 200 = <Response [200 OK]>.status_code"],
+    "experiment_ledger_write": ["public/protected experiments must preserve every business row and selection", "'ledger_events': (('gtm', 1, 'INCIDENT_OPENED'"],
+    **dict.fromkeys(("gtm_aspect_NAMED_TASK_OUTCOMES", "gtm_aspect_NO_TASK_REASON_CODE"),
+        ["where True = <function protected_acceptance"]),
+}
+assert set(EXPECTED_ASSERTIONS) == {case["name"] for case in CASES}, "every control needs named assertion text"
+
+
 def anchor(raw, case):
+    if case.get("scope"):
+        starts = list(re.finditer(rb"(?m)^def " + case["scope"].encode() + rb"\(", raw))
+        if len(starts) != 1:
+            raise ValueError("function scope must match exactly once: " + case["name"])
+        start = starts[0].start()
+        following = re.search(rb"(?m)^def ", raw[starts[0].end():])
+        end = starts[0].end() + following.start() if following else len(raw)
+        before = raw[start:end]
+        old, new = anchor(before, {key: value for key, value in case.items() if key != "scope"})
+        return before, before.replace(old, new, 1)
     old, new = case["old"].encode(), case["new"].encode()
     old_lf, new_lf = old.replace(b"\r\n", b"\n"), new.replace(b"\r\n", b"\n")
     for before, after in ((old, new), (old_lf, new_lf), (old_lf.replace(b"\n", b"\r\n"), new_lf.replace(b"\n", b"\r\n"))):
@@ -239,7 +313,16 @@ def run(case, out):
         assert path.read_bytes() == raw, "source restoration failed"
 
 
-def main():
+def named_run(case, out):
+    row = run(case, out)
+    row["expected_assertions"] = EXPECTED_ASSERTIONS[case["name"]]
+    row["assertion_matches"] = all(needle in row["message"] for needle in row["expected_assertions"])
+    if not row["assertion_matches"]:
+        row["status"] = "NOT_PROVED"
+    return row
+
+
+def main(runner=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--check-anchors", action="store_true")
@@ -252,7 +335,7 @@ def main():
     args.out.mkdir(parents=True, exist_ok=False)
     rows = []
     for case in selected:
-        row = run(case, args.out)
+        row = (runner or run)(case, args.out)
         rows.append(row)
         print(case["name"], row["status"], flush=True)
         (args.out / "results.json").write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
@@ -260,4 +343,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(main(named_run))
