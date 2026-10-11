@@ -2412,3 +2412,262 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - **What happened:** the first fresh Git checkout suite retained one failure, 1280 passes, one skip and two warnings. The payload scanner matched 25-character fragments of the long chat directory in a public snapshot path. The failed log, XML and result remain intact. The unchanged commit passed the focused guard and full suite from a short physical checkout path.
 - **Root cause:** publication verification used a long directory component despite the historical scanner portability limit. The collector expands sealed absolute paths into fragments, which can coincide with the public absolute path. Scanner, fixture and test blobs are unchanged from the incoming main commit.
 - **Prevention rule:** run fresh checkout verification from a short physical path, retain failed-path evidence and disclose the remaining portability limit. Do not weaken the scanner, rewrite reviewed source or claim arbitrary-path portability.
+
+## 2026-10-08 S24 proof guessed an API field and helper
+
+- **What happened:** the first lifecycle proof stopped on an absent inherited_selection_id field. Static inspection also found a nonexistent assertion helper. The subsequent multi-file repair was rejected on a guessed Mistakes Log header, with no writes. All failing output remains retained.
+- **Root cause:** new proof code inferred contracts instead of copying current ShiftView and pivot_flow definitions; the repair guessed a document anchor.
+- **Prevention rule:** inspect exact public response keys, helper names and signatures, and every patch anchor before editing. Prove inheritance through the real board selection and draft; use assert_prefix_unchanged plus exact business-row equality.
+
+## 2026-10-08 S24 proof repeated the public/internal field error
+
+- **What happened:** the second lifecycle proof reached inherited exactly-once operation and then stopped on absent public RunView.context_id. The first repair had inspected ShiftView only. No product state was lost.
+- **Root cause:** an internal Run field was assumed to be a public API field.
+- **Prevention rule:** inspect every response model used by a new flow at once. Resolve internal context_id through repo.get_run; retain public run/version/selection binding assertions separately.
+
+## 2026-10-08 S24 projection fixture used the parsed mission encoding
+
+- **What happened:** two projection tests returned no customer answer because a parsed MissionSpec model_dump was passed to the raw mission loader. The loader correctly refused its missing constants object. The product loader was unchanged.
+- **Root cause:** the parsed model and original mission JSON have different schemas.
+- **Prevention rule:** construct captured mission bytes from the actual reviewed source JSON, replacing only the explicit disposable request_specs field. Do not use a model dump as a substitute for its source encoding.
+
+## 2026-10-08 S24 projection omitted its TaskOutcome reference
+
+- **What happened:** final focused verification returned 2 failed, 315 passed and 2 warnings. The new GTM claim projection references TaskOutcome without importing or qualifying it. The earlier lifecycle proof passed before this projection addition. The defect is unrepaired at the user-requested handoff.
+- **Root cause:** a bare enum name was added without checking the import list.
+- **Prevention rule:** use the already-imported task_contract.TaskOutcome or verify an explicit import before adding the reference; run the affected projection tests and then regression. Never promote the earlier lifecycle PASS to a final-tree PASS.
+
+## 2026-10-08 S24 handoff whitespace checker misread no-index status
+
+- **What happened:** the closeout checker stopped on an LF new file with no whitespace output, no stderr and Git exit 1. No final receipt was written. The exact diagnostics are retained.
+- **Root cause:** the helper treated the no-index difference status as a whitespace failure.
+- **Prevention rule:** retain argv and both streams; for no-index --check accept a difference exit with empty whitespace diagnostics. Keep tracked diff checks strict and never infer that a missing receipt passed.
+
+
+## 2026-10-08 S24 continuation mutation preflight needed function scopes
+
+- **What happened:** the first anchor preflight refused four repeated statements; after scoping reducer/orchestrator rows, a second preflight still refused the comparison pin row. No mutation or product write ran. The rejected first diagnostics are retained in continuation/anchors-first-failure.json.
+- **Root cause:** the new fault inventory used statement anchors shared by earlier reducers and comparison paths, and omitted the comparison scope on its first repair.
+- **Prevention rule:** preflight every row at once against its owning function, rather than relying on global uniqueness. Replace and restore the full exact function bytes so only the selected statement changes.
+
+
+## 2026-10-08 S24 mutation receipts exposed intercepted controls
+
+- **What happened:** the first 49-control execution completed with one NOT_PROVED storage IntegrityError. Manual inspection rejected two further catches: the owning-pack fault failed an earlier history-refusal regex, and the incident check-id fault changed the reason before its provenance assertion. Those three controls are not counted. Raw first-round receipts remain unchanged.
+- **Root cause:** one journey mixed a positive pin path with a prior negative-history test, one injected check substituted several fields, and the accounting omission reached the independent storage constraint before a named assertion.
+- **Prevention rule:** separate refusal and positive journeys; alter only the intended check-id field; isolate the controller operation guard by neutralizing later retry reads in a disposable direct-reservation test. Require the expected named assertion text in new fault receipts, not merely any assertion in the test node.
+
+
+## 2026-10-08 S24 restoration open failed in the OneDrive worktree
+
+- **What happened:** a mutation's finally restoration raised OSError errno 22 while opening orchestrator.py. The remaining handoff-weight omission was reversed only after reconstructing bytes whose SHA256 exactly matched the prior preimage receipt. A binary preimage archive and restoration-recovery.json retain both states. No tests or further mutations ran before exact restoration.
+- **Root cause:** unconfirmed Windows/filesystem write failure. The in-place runner had no persistent preimage to recover after its process exited; this fault's single exact inverse and earlier source hash made recovery possible.
+- **Prevention rule:** execute source faults in a verified disposable physical copy outside OneDrive, retaining a binary archive of all target preimages before execution. Audit both restoration in the copy and unchanged bytes in the shared worktree. Do not count an interrupted receipt as completed proof.
+
+
+## 2026-10-08 S24 completion review-probe setup contracts
+
+- **What happened:** the extra retained human-review probe first failed collection
+  because its evidence-folder launch did not load the tests directory import path.
+  The next run failed with AttributeError because the stored operation draft helper
+  returns serialized dictionaries, not LedgerEventDraft models. Both rejected logs,
+  JUnit and lossless source preimages remain in completion/. Neither is behavioral proof.
+- **Root cause:** the external proof reused a test module without its collection
+  context and guessed an internal helper return shape instead of inspecting it.
+- **Prevention rule:** inspect the imported module's prerequisites and the helper's
+  current return contract before launching a nested proof. Use serialized keys when
+  the stored-event helper returns dictionaries. The existing graduated call-contract
+  rule applies; no additional duplicate AGENTS.md rule is needed.
+
+## 2026-10-08 S24 completion review-probe changed only state
+
+- **What happened:** after setup repair, lowering a public signal's confidence to
+  50 produced one traced incident rather than the three expected success events.
+  The shipped operation spec allows QUALIFIED only, so the independent assessor
+  correctly rejected REVIEW. queue-corrected.log/xml and its source preimage remain.
+- **Root cause:** the probe changed the observation without binding a matching
+  operator workload before comparison and selection. This was a false positive
+  test premise, not an observed product defect.
+- **Prevention rule:** for a positive synthetic operator scenario, bind its complete
+  mission before selecting, then retain the same observation across reprocessing.
+  Keep production reviewed material and pins exact. Report this path as disposable
+  operator mission/state proof, separately from the shipped-material API demo.
+
+
+## 2026-10-08 S24 evidence audit launch syntax
+
+- **What happened:** python -m runpy was given a filesystem path, so it rejected
+  module resolution before the read-only demo audit ran. The corrected
+  runpy.run_path invocation audited both retained databases successfully.
+- **Root cause:** runpy's module CLI was confused with its filesystem-path API.
+- **Prevention rule:** execute a saved script directly when it has no root imports;
+  for repository imports use python -c with runpy.run_path and run_name=__main__.
+  Do not pass a filesystem path to python -m runpy.
+
+
+## 2026-10-08 S24 repair observer counted an aliased inventory twice
+
+- **What happened:** the first disposable source-fault preflight stopped before
+  pytest because the observer found the same freeze_duplicate_owner row twice.
+  The runner had assigned the S24 inventory to the shared S23 module. The failed
+  receipt is retained in C:/sw24-repair-20261008/preflight-control/. All 6215
+  copied files restored exactly; this attempt is excluded from fault counts.
+- **Root cause:** instrumentation concatenated two module inventory references
+  without accounting for the CLI's deliberate alias assignment.
+- **Prevention rule:** deduplicate observation candidates by exact fault identity
+  before requiring unique source landing. Retain and exclude instrumentation
+  failures; verify restoration before rerunning into a fresh destination.
+
+
+## 2026-10-08 S24 repair test insertion crossed a function boundary
+
+- **What happened:** readback found the new archived-history test inserted before
+  the preceding test's final chain assertions. A broad follow-up anchor matched
+  another replay assertion. Both were corrected before test execution.
+- **Root cause:** a repeated assertion was used without its owning function as
+  the exact patch scope.
+- **Prevention rule:** scope multi-line test edits to the complete current function
+  and inspect both adjacent boundaries immediately after writing.
+
+
+## 2026-10-08 S24 repair archived-history test assumed comparison-state absence
+
+- **What happened:** strengthened-final retained 1 failure and 33 passes. The
+  archived-history setup assumed the reviewed comparison state omitted the
+  operational APAC signal; it actually includes it. The failure preceded the
+  inheritance assertion and is not product or guard proof.
+- **Root cause:** the raw observation inventory was inferred instead of checked.
+- **Prevention rule:** explicitly construct and assert the disposable archived
+  observation by removing the target record from a copy. Preserve the reviewed
+  source bytes and keep the rejected setup receipt separate from verification.
+
+
+## 2026-10-08 S24 repair overlapped dependent copy refresh and proof
+
+- **What happened:** the physical-copy refresh and pre-repair source proof were
+  launched before the refresh completed. Both final binding checks failed on
+  three intentionally newer test/log files. The disposable orchestrator source
+  restored exactly; shared source was never faulted. Original manifests,
+  preimages and failed outputs remain retained and excluded from completed proof.
+- **Root cause:** dependent copy-refresh and proof operations were scheduled
+  concurrently against a manifest describing the older copy state.
+- **Prevention rule:** await refresh and its complete exact-binding audit before
+  launching a dependent proof. When a binding fails, preserve the attempt and
+  create a fresh short physical copy and fresh manifest/output names; never
+  overwrite the old receipt or count an unissued restoration receipt.
+
+
+## 2026-10-08 S24 final copy helper renamed its historical input
+
+- **What happened:** the fresh copy helper stopped before creating a copy because
+  it looked for continuation/physical-copy-final.json, which does not exist.
+  The original continuation manifest and all source bytes remained unchanged.
+- **Root cause:** a global filename replacement changed both the fresh output
+  name and the historical input path.
+- **Prevention rule:** distinguish immutable input bindings from new output
+  destinations when adapting an evidence helper. Verify each path before launch.
+
+
+## 2026-10-08 S24 human-review fixture leaked temporary material bindings
+
+- **What happened:** the first repair full suite retained 2 failures, 1371 passes
+  and 1 live-only skip. An ordered three-case proof reproduced both downstream
+  failures after the human-review case. Temporary PACKAGE_DIR bindings survived
+  fixture return, affecting mission-fault detection and the historical pin check.
+- **Root cause:** mission staging used an internal binding, while state staging
+  reused an outer binding. Outer cleanup reinstated the temporary mission root
+  after the internal mission cleanup had restored the real package root.
+- **Prevention rule:** nest a separate state-binding context inside the mission
+  context so cleanup occurs in reverse acquisition order. Verify downstream
+  configuration-sensitive cases together in one process, then run regression.
+
+## 2026-10-08 S24 repair introduced an ambiguous retained S23 fault anchor
+
+- **What happened:** the retained S23 CLI preflight refused prior_foreign_context
+  before any fault ran. The new history verifier has the same context guard text.
+  The rejected output and archived target preimages remain excluded.
+- **Root cause:** the retained inventory relied on global statement uniqueness,
+  which the new controller verifier invalidated.
+- **Prevention rule:** bind the prior-input controls to their owning
+  deployment_assessment_inputs function, preflight all anchors and observe the
+  exact changed function/import. Keep all existing cases and assertions.
+
+## 2026-10-08 S24 repair missed absent-result and out-of-try deceptions
+
+- **What happened:** the second independent review demonstrated two residual
+  defects. A required task omitted from the captured response left no task row
+  for the projection to compare, so the derived text kept the generic no-action
+  sentence while the assessment had marked REQUIRED_TASK_MISSING. Separately, a
+  corrupted retained context row raised pydantic ValidationError while replay
+  loaded the context, before the block that converts expected input failures into
+  the UNKNOWN_MISSING_INPUTS verdict.
+- **Root cause:** the rejection verdict was computed only from the tasks the
+  response happened to carry, and the evidence-verdict conversion wrapped only
+  the byte-decoding block that already had a try, not the retained-row loading
+  calls that run before it.
+- **Prevention rule:** derive partial-failure verdicts from the complete stored
+  assessment for the request, including absent required results. Convert expected
+  retained-input deserialization failures at every loading call that feeds
+  replay, and keep assessment and reduction outside that conversion so
+  programming errors still propagate.
+
+## 2026-10-09: S24 R2 repair placed at one call site, not the loading boundary
+
+- What happened: the R2 repair caught unreadable retained contexts only inside
+  `replay_assessment`. GTM inheritance loads the same contexts and still leaked
+  pydantic `ValidationError`. A later mutation needle also assumed pydantic's repr
+  includes the class name; it does not, so two correct catches read NOT_PROVED.
+- Root cause: the fix followed the reported trigger, not the reviewer's named
+  boundary, and no other consumer of the same rows was searched. The needle was
+  written from memory instead of from an observed failure message.
+- Prevention: when a review names a boundary, grep every caller of that loader and
+  add a falsifier per verification consumer. Copy mutation needles from a real
+  observed failure message.
+
+## 2026-10-10: `.venv313` interpreter blocked by Application Control
+
+- What happened: `.venv313/Scripts/python.exe` failed with "An Application Control
+  policy has blocked this file" from both Git Bash and PowerShell, before the S24
+  fault rerun. AGENTS.md names this interpreter as the one to use.
+- Root cause: the machine policy now covers the `.venv313` launcher as it earlier
+  covered `.venv` (2026-09-17, 2026-09-26). Not caused by repository changes.
+- Prevention: do not retry the blocked launcher. Run the venv's base interpreter
+  from `pyvenv.cfg` (`home`) with `PYTHONPATH=.venv313/Lib/site-packages` and
+  `PYTHONNOUSERSITE=1`, after confirming the venv has no `.pth` files and that
+  `shiftwork` imports from the intended tree. Record the substitution with the
+  evidence.
+
+## 2026-10-11: S24 review-repair shell commands misfired before any source edit
+
+- What happened: a preimage-archive command still carried an exploratory
+  `cp <test file> "$TMPDIR/../"` fragment, which wrote a stray copy of
+  `test_gtm_review_repairs.py` to `C:/Users/jayd0/AppData/Local/`. `cmp` proved it
+  identical to the workspace file and it was deleted. A later command holding two
+  heredocs failed to parse; it wrote nothing, which a hash check confirmed.
+- Root cause: an unreviewed fragment left in a compound command, and multi-heredoc
+  shell input instead of the file-writing tool.
+- Prevention: write scratch files with the Write tool, keep one purpose per shell
+  command, and confirm every destination in an archive command is inside the
+  scratchpad before running it.
+
+## 2026-10-11 (second session): S24 F2 repair commands misfired before any edit
+
+- What happened: the session's first command used the `rtk` prefix from the
+  user-level CLAUDE.md and failed with exit 127 (not installed). A later `&&`
+  chain stopped at a failing `grep`, so its `pyvenv.cfg` and `.pth` checks did not
+  run and had to be repeated. A scratch observation script that imported
+  `tests.orchestrator.test_gtm_pipeline` failed on `from packs...` because only
+  the repository root was on `PYTHONPATH`. None of the three wrote anything.
+  Separately, a line-ending check with Git Bash `grep -c $'\r$'` reported every
+  line as CRLF in LF files, and the session briefly told the user the edited
+  files were "uniformly CRLF". Python byte counts showed the real state: each file
+  kept its pre-session endings.
+- Root cause: the global prefix rule was followed over AGENTS.md section 6, which
+  says not to assume `rtk` exists; independent checks were chained with `&&`; the
+  script lacked the `tests/` path entry that pytest's rootdir conftest adds; and a
+  shell idiom was trusted for byte-level evidence without a known-LF control.
+- Prevention: run `command -v rtk` once before using the prefix; separate
+  independent checks with `;`; a scratch script importing test modules needs
+  `PYTHONPATH=".;tests;.venv313/Lib/site-packages"`; count `\r\n` and `\n` bytes
+  in Python, comparing with HEAD or a pre-session copy, before reporting line
+  endings.

@@ -378,7 +378,13 @@ Rules:
 - Run repository checks with `.venv313/Scripts/python.exe`. The `.venv` trampoline
   is blocked by Windows Application Control on this machine, and installs into a
   fresh venv need `uv pip install --link-mode=copy` because the tree is OneDrive-synced
-  (see `MISTAKES.md`, 2026-09-26).
+  (see `MISTAKES.md`, 2026-09-26). If Application Control also blocks
+  `.venv313/Scripts/python.exe`, do not retry it: run the base interpreter named by
+  `home` in `.venv313/pyvenv.cfg` with `-B`, `PYTHONPATH=.venv313/Lib/site-packages`
+  and `PYTHONNOUSERSITE=1`, only after confirming the venv has no `.pth` files and
+  that `shiftwork` imports from the intended tree. Record the substitution with the
+  evidence. This graduates the fourth Application Control incident (`MISTAKES.md`,
+  2026-10-10).
 - Do not create branches, commits, tags or pushes unless the user has authorized
   that Git operation. Never stage everything implicitly.
 - Before starting work on each slice, check the current branch with
