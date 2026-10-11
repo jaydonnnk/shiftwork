@@ -783,9 +783,10 @@ def create_later_condition_comparison(
                 f"{LATER_COMPARISONS_PER_SHIFT})",
             )
         if not isolated:
+            _, candidate_a_key, candidate_b_key = config.offline_fixture_keys(shift.engagement_slug)
             pinned = {
-                config.TRUSTED_LOCAL_FIXTURES["compare_candidate_a"][0],
-                config.TRUSTED_LOCAL_FIXTURES["compare_candidate_b"][0],
+                config.TRUSTED_LOCAL_FIXTURES.get(candidate_a_key, (None,))[0],
+                config.TRUSTED_LOCAL_FIXTURES.get(candidate_b_key, (None,))[0],
             }
             if {selected_version.content_hash, retained_version.content_hash} != pinned:
                 raise LifecycleError(
@@ -811,7 +812,13 @@ def create_later_condition_comparison(
         # observed differently, so the reviewed requests stay valid for it and
         # the experiment runs under the exact bytes the operation observed.
         reviewed_comparison_bytes = (config.PACKAGE_DIR / pack.comparison_state_path).read_bytes()
-        _require_dependency_only_variation(reviewed_comparison_bytes, snapshot_bytes)
+        reviewed_observed_world = reviewed_comparison_bytes
+        if shift.engagement_slug == "gtm" and observed_context.reducer_version == "operation-ledger-v3":
+            if canonical.content_hash(observed_context.starting_business_state_json) != observed_context.starting_business_state_hash:
+                raise LifecycleError("conflict", "observed pipeline history differs")
+            reviewed_observed_world = task_contract.apply_pipeline_history(
+                reviewed_comparison_bytes, observed_context.starting_business_state_json["pipeline_records"])
+        _require_dependency_only_variation(reviewed_observed_world, snapshot_bytes)
         workloads = _read_comparison_workloads(
             shift.engagement_slug, mission, reviewed_comparison_bytes
         )

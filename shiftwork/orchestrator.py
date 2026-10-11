@@ -40,6 +40,7 @@ from shiftwork.domain.errors import (
     AssistGatewayUnavailable,
     BootstrapBlocked,
     InvestigationIncomplete,
+    RetainedRecordUnreadable,
     ServiceResponseInvalid,
     ShiftworkDomainError,
     TaskEnvelopeInvalid,
@@ -753,8 +754,6 @@ def start_run(
         shift = _require_open_shift(conn, shift_id)
         selection, version = _selected_operating_version(conn, shift)
         adapter = executor or config.EXECUTOR_ADAPTER
-        if shift.engagement_slug == "gtm" and selection.kind != "STARTER_BASELINE":
-            raise LifecycleError("conflict", "GTM chosen operation awaits S24")
         if ((selection.kind == "LEARNER_CHOICE" and selection.comparison_id is not None)
                 or (shift.engagement_slug in ("northline", "gtm") and selection.kind == "STARTER_BASELINE")):
             run = _reserve_selected_operation(
@@ -1172,7 +1171,8 @@ def finalize_selected_operation(conn: sqlite3.Connection, run_id: str) -> Run:
             checks[check_id] = check
         repo.insert_run_assessment(conn, assessment)
         drafts = reducer.reduce_operation(run, assessment, mission, tuple(assessed), tuple(checks.values()),
-            **operation_consequence_inputs(context), deployment_traces=tuple(verified_traces))
+            **operation_consequence_inputs(context), deployment_traces=tuple(verified_traces),
+            pipeline_outputs=tuple(outputs))
         resolving = []
         for incident in repo.list_incidents(conn, shift.engagement_slug):
             if incident.state is IncidentState.RESOLVED:
@@ -1235,20 +1235,28 @@ def execute_run_task(db_path: str, run_id: str,
 
 _OPERATION_DRAFT_TYPES = (LedgerEventType.SALE_COMPLETED, LedgerEventType.INCIDENT_OPENED,
                          LedgerEventType.BOOKING_COMMITTED, LedgerEventType.ESCALATION_TO_HUMAN,
-                         LedgerEventType.COUNTER_FOLLOWUP_RECORDED, LedgerEventType.ROLLOUT_APPROVED)
+                         LedgerEventType.COUNTER_FOLLOWUP_RECORDED, LedgerEventType.ROLLOUT_APPROVED,
+                         LedgerEventType.OWNER_ASSIGNED, LedgerEventType.SLA_CLOCK_STARTED,
+                         LedgerEventType.HANDOFF_ESCALATED)
 
 
 def operation_consequence_inputs(context: ExecutionContext) -> dict[str, Any]:
     """Resolve retained rules only; old v1 operations keep their original reduction."""
     if context.reducer_version == "operation-ledger-v1":
         return {}
-    if context.reducer_version != "operation-ledger-v2":
+    if context.reducer_version not in ("operation-ledger-v2", "operation-ledger-v3"):
         raise LifecycleError("conflict", "unknown operational reducer version")
     if canonical.content_hash(context.starting_business_state_json) != context.starting_business_state_hash:
         raise LifecycleError("conflict", "frozen operational consequence rules differ")
     try:
         rules = pack_registry.ConsequenceRules.model_validate(context.starting_business_state_json["consequence_rules"])
         weights = json.loads(base64.b64decode(context.mission_bytes_base64, validate=True))["weights"]
+        if context.reducer_version == "operation-ledger-v3":
+            if (context.engagement_slug != "gtm" or rules.success_events != (
+                    "OWNER_ASSIGNED owner", "SLA_CLOCK_STARTED sla")
+                    or rules.rollout_event is not None or rules.handover_record_required
+                    or type(weights["handoff"]) is not int):
+                raise ValueError("invalid pipeline consequence rules")
         for rule in (*rules.success_events, *((rules.rollout_event,) if rules.rollout_event else ())):
             event, key = rule.split()
             LedgerEventType(event)
@@ -1278,9 +1286,18 @@ def replay_assessment(conn: sqlite3.Connection, run_id: str) -> ReplayReport:
         raise LifecycleError("conflict", "semantic replay is defined for operational runs")
     if run.state is not RunState.FINALIZED:
         raise LifecycleError("conflict", "replay needs a finalized assessment")
-    context = repo.get_execution_context(conn, run.context_id)
-    snapshot_bytes = repo.get_run_snapshot_bytes(conn, run.id)
-    outputs = repo.list_outputs(conn, run.id)
+    try:
+        context = repo.get_execution_context(conn, run.context_id)
+        snapshot_bytes = repo.get_run_snapshot_bytes(conn, run.id)
+        outputs = repo.list_outputs(conn, run.id)
+        stored_checks = repo.list_check_results(conn, run.id)
+        stored_drafts = (_stored_operation_drafts(conn, run, context.engagement_slug)
+                         if context is not None else [])
+    except RetainedRecordUnreadable:
+        # A retained row that no longer deserializes is unreadable evidence:
+        # report the missing-input verdict instead of a typed conflict. Only the
+        # storage boundary raises it; assessment and reduction stay outside.
+        return _unknown_inputs_report(run.id)
     workload = (context.workloads[0]
                 if context is not None and len(context.workloads) == 1 else None)
     if (context is None or workload is None or snapshot_bytes is None
@@ -1290,19 +1307,39 @@ def replay_assessment(conn: sqlite3.Connection, run_id: str) -> ReplayReport:
         mission_bytes = base64.b64decode(context.mission_bytes_base64, validate=True)
         state_bytes = base64.b64decode(context.public_data_bytes_base64, validate=True)
         batch_bytes = base64.b64decode(workload.request_batch_bytes_base64, validate=True)
-        if (_hash_bytes(mission_bytes) != context.mission_hash
+        specs_bytes = base64.b64decode(workload.request_specs_bytes_base64, validate=True)
+        # Match the operational producer's identity domain, not a hash of the
+        # whole retained model (which also carries DB IDs, bytes and timestamps).
+        identity = context.model_dump(mode="json", exclude={
+            "id", "schema_version", "mission_bytes_base64", "public_data_bytes_base64",
+            "starting_business_state_json", "protected_reservation_id", "created_at", "content_hash"})
+        if (canonical.content_hash(identity) != context.content_hash
+                or _hash_bytes(specs_bytes) != workload.request_specs_hash
+                or workload.request_specs_hash != context.visible_check_set_hash
+                or context.requirement_set_hash != context.mission_hash
+                or context.condition.content_hash != context.public_data_hash
+                or base64.b64decode(context.condition.exact_bytes_base64, validate=True) != state_bytes
+                or _hash_bytes(mission_bytes) != context.mission_hash
                 or _hash_bytes(state_bytes) != context.public_data_hash
                 or snapshot_bytes != state_bytes
                 or canonical.content_hash(_encode(batch_bytes)) != workload.request_batch_hash):
             return _unknown_inputs_report(run.id)
         mission = task_contract.load_mission_bytes(mission_bytes)
         snapshot = task_contract.load_public_state_bytes(state_bytes)
-    except (ValueError, ShiftworkDomainError):
+        specs = tuple(task_contract.CustomerRequestSpec.model_validate(raw) for raw in json.loads(specs_bytes))
+        if (specs != mission.request_specs or workload.request_count != len(specs)
+                or workload.request_count != len([line for line in batch_bytes.splitlines() if line.strip()])
+                or context.engagement_slug != mission.engagement_slug):
+            return _unknown_inputs_report(run.id)
+    except (ValueError, TypeError, ShiftworkDomainError):
         return _unknown_inputs_report(run.id)
     captured = {item.request_ordinal: item for item in outputs}
-    if set(captured) != set(range(1, workload.request_count + 1)):
+    # Expected evidence failures are handled before reduction. Reducer errors
+    # remain programming errors; do not broadly catch ValueError around it.
+    if (len(captured) != len(outputs)
+            or set(captured) != set(range(1, workload.request_count + 1))
+            or any(item.run_id != run.id or item.transport_error is not None for item in outputs)):
         return _unknown_inputs_report(run.id)
-    stored_checks = repo.list_check_results(conn, run.id)
     stored_by_check_id = {check.check_id: check for check in stored_checks}
     assessed: list[task_contract.TaskAssessment] = []
     verified_traces = []
@@ -1355,10 +1392,9 @@ def replay_assessment(conn: sqlite3.Connection, run_id: str) -> ReplayReport:
         return _unknown_inputs_report(run.id)
     drafts = reducer.reduce_operation(run, assessment, mission, tuple(assessed),
                                       tuple(recomputed.values()), **consequence_inputs,
-                                      deployment_traces=tuple(verified_traces))
+                                      deployment_traces=tuple(verified_traces), pipeline_outputs=tuple(outputs))
     check_differences = _check_differences(stored_checks, list(recomputed.values()))
-    event_draft_differences = _event_draft_differences(
-        _stored_operation_drafts(conn, run, context.engagement_slug), drafts)
+    event_draft_differences = _event_draft_differences(stored_drafts, drafts)
     status = "DIFFERENT" if check_differences or event_draft_differences else "IDENTICAL"
     return ReplayReport(run_id=run.id, status=status,
                         check_differences=tuple(check_differences),
@@ -1851,6 +1887,22 @@ def output_evidence_for(conn: sqlite3.Connection, output: RunOutput, run: Run) -
                        for task in response.task_results for claim in task.claims],
             "evidence_refs": list(response.evidence_refs), "verified_record_age_ms": None,
         }
+        if mission.engagement_slug == "gtm":
+            assessed = customer_answer.render_assessed_task_customer_text(
+                spec=spec, mission=mission, snapshot=snapshot, response=response,
+                request_ordinal=output.request_ordinal,
+                assessments=repo.list_task_assessment_models(conn, run.id))
+            if assessed is None:
+                # The request has no independent assessment yet, or its finalization
+                # failed: nothing is accepted or rejected, so no derived answer is
+                # presented. The raw captured bytes stay retrievable.
+                evidence["customer_answer"] = None
+                return evidence
+            display, accepted_tasks = assessed
+            evidence["customer_answer"]["claims"] = [
+                {"kind": claim.kind, "value": claim.value}
+                for task in response.task_results if task.task_id in accepted_tasks for claim in task.claims]
+            evidence["customer_answer"]["display_text"] = display
         return evidence
     records: dict[str, JsonValue] = {}
     try:
@@ -2509,6 +2561,33 @@ def _diagnostic_context_fields(
     }
 
 
+def _verify_pipeline_history(conn: sqlite3.Connection, events) -> None:
+    """Validate complete GTM consequence sets against their frozen operations.
+
+    Chain links alone do not bind an owner, clock or handoff to a checked capture.
+    Replay compares the entire per-run draft set, including omitted events and
+    cause refs, using historical inputs rather than today's mission or routing.
+    A retained row that no longer deserializes raises the storage boundary's
+    typed conflict, so unreadable history is refused rather than a server error.
+    """
+    runs = {run.id: run for run in repo.list_runs(conn, "gtm")
+            if run.purpose is RunPurpose.OPERATION and run.state is RunState.FINALIZED}
+    relevant = (LedgerEventType.OWNER_ASSIGNED, LedgerEventType.SLA_CLOCK_STARTED,
+                LedgerEventType.HANDOFF_ESCALATED)
+    for event in events:
+        if event.event_type in relevant:
+            if len(event.cause_refs) != 3 or event.cause_refs[0] not in runs:
+                raise LifecycleError("conflict", "pipeline history has unbound operational provenance")
+            context = repo.get_execution_context(conn, runs[event.cause_refs[0]].context_id)
+            if context is None or context.engagement_slug != "gtm" or context.reducer_version != "operation-ledger-v3":
+                raise LifecycleError("conflict", "pipeline history lacks its frozen GTM operation")
+    for run in runs.values():
+        context = repo.get_execution_context(conn, run.context_id) if run.context_id else None
+        if context is not None and context.reducer_version == "operation-ledger-v3":
+            if replay_assessment(conn, run.id).status != "IDENTICAL":
+                raise LifecycleError("conflict", "pipeline history consequences or captured provenance differ")
+
+
 def freeze_diagnostic_context(
     conn: sqlite3.Connection, shift: Shift, *, isolated: bool = False,
     operation: bool = False,
@@ -2560,15 +2639,31 @@ def freeze_diagnostic_context(
             "unresolved_incident_ids": [incident.id for incident in repo.list_incidents(
                 conn, shift.engagement_slug) if incident.state is not IncidentState.RESOLVED],
         }
-        if shift.engagement_slug == "northline":
+        if shift.engagement_slug in ("northline", "gtm"):
             starting_state["consequence_rules"] = pack.consequences.model_dump(mode="json")
+        if shift.engagement_slug == "gtm":
+            events = repo.list_ledger_events(conn, shift.engagement_slug)
+            if chain.verify_chain(events) is chain.ChainStatus.BROKEN:
+                raise LifecycleError("conflict", "ledger chain is BROKEN; refusing pipeline inheritance")
+            owned = {}
+            for event in events:
+                if event.event_type is LedgerEventType.OWNER_ASSIGNED:
+                    signal = event.payload["signal_ref"]
+                    if signal in owned:
+                        raise LifecycleError("conflict", "pipeline history contains a duplicate owner")
+                    owned[signal] = {"owner": event.payload["owner"], "record_ref": event.payload["record_ref"]}
+            _verify_pipeline_history(conn, events)
+            starting_state["pipeline_records"] = owned
+            snapshot_bytes = task_contract.apply_pipeline_history(snapshot_bytes, owned)
+            snapshot = task_contract.load_public_state_bytes(snapshot_bytes)
     condition = observed_condition(snapshot_bytes, snapshot.dependencies)
     fields = _diagnostic_context_fields(
         shift, mission, mission_bytes, snapshot_bytes, specs_bytes, workload, condition, starting_state
     )
     if operation:
         fields["evaluator_version"] = "operation-task-v1"
-        fields["reducer_version"] = ("operation-ledger-v2" if shift.engagement_slug == "northline"
+        fields["reducer_version"] = ("operation-ledger-v3" if shift.engagement_slug == "gtm" else
+                                     "operation-ledger-v2" if shift.engagement_slug == "northline"
                                      else "operation-ledger-v1")
     if isolated:
         fields.update({
