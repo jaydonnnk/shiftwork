@@ -377,7 +377,9 @@ def _diagnostic_customer_text(
 
     Rendered from the validated envelope plus the frozen mission and public state
     alone, so no prose the service tried to carry can reach a customer surface
-    (Gate 3 S3.3).
+    (Gate 3 S3.3). A GTM diagnostic also consults the run's stored assessments, as
+    the operational projection does, so a rejected or missing workflow task never
+    reads as the customer answer (S24 review, finding F2).
     """
     outputs = repo.list_outputs(conn, run_id)
     if not outputs:
@@ -396,6 +398,12 @@ def _diagnostic_customer_text(
         response = task_contract.validate_response_envelope(spec, output.body)
     except (ShiftworkDomainError, ValueError):
         return None
+    if mission.engagement_slug == "gtm":
+        assessed = customer_answer.render_assessed_task_customer_text(
+            spec=spec, mission=mission, snapshot=snapshot, response=response,
+            request_ordinal=output.request_ordinal,
+            assessments=repo.list_task_assessment_models(conn, run_id))
+        return assessed[0] if assessed is not None else None
     return customer_answer.render_task_customer_text(
         spec=spec, mission=mission, snapshot=snapshot, response=response
     )

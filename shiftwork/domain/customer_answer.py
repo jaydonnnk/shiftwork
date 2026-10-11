@@ -21,6 +21,8 @@ from shiftwork.domain.task_contract import (
     PipelineSnapshot,
     ShopEntity,
     ShopSnapshot,
+    TaskAssessment,
+    TaskOutcome,
     TaskResult,
     TaskKind,
     TaskStatus,
@@ -154,6 +156,48 @@ def render_task_customer_text(
     if not sentences:
         return "The service returned no answer for this request."
     return " ".join(sentences)
+
+
+def render_assessed_task_customer_text(
+    *,
+    spec: CustomerRequestSpec,
+    mission: MissionSpec,
+    snapshot: ShopSnapshot | PipelineSnapshot,
+    response: TaskServiceResponse,
+    request_ordinal: int,
+    assessments: list[TaskAssessment],
+) -> tuple[str, frozenset[str]] | None:
+    """The customer text the independent assessment supports, and its accepted tasks.
+
+    ``assessments`` are the run's stored rows; only this request's rows count. None
+    when the request has none: an unassessed request is neither accepted nor
+    rejected, so no derived answer exists. A partial failure renders only the
+    usefully completed tasks plus a rejection sentence, so neither a rejected
+    owner nor the generic NOT_APPLICABLE sentence reads as the answer. The
+    accepted tasks are the only ones whose claims a projection may present.
+    Shared by the operational and diagnostic projections (S24 review, finding F2).
+    """
+    rows = [row for row in assessments
+            if row.request_ordinal == request_ordinal and row.request_id == spec.id]
+    if not rows:
+        return None
+    passed = {row.task_id for row in rows if row.mandatory_pass}
+    accepted = frozenset(row.task_id for row in rows
+                         if row.mandatory_pass and row.outcome is TaskOutcome.USEFUL_COMPLETION)
+    # A required task missing from the response has no task result to compare, so
+    # partial failure comes from the complete assessment for the request, not only
+    # the tasks the response happens to carry.
+    rejected = (any(not row.mandatory_pass for row in rows)
+                or any(task.task_id not in passed for task in response.task_results))
+    shown = accepted if rejected else passed
+    text = render_task_customer_text(
+        spec=spec, mission=mission, snapshot=snapshot,
+        response=response.model_copy(update={"task_results": tuple(
+            task for task in response.task_results if task.task_id in shown)}),
+    )
+    if rejected:
+        text += " Some workflow task outputs were rejected by the independent assessment."
+    return text, accepted
 
 
 def _render_task_result(
