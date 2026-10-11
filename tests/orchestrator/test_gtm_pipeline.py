@@ -27,6 +27,10 @@ from shiftwork.packs import registry
 from shiftwork.sealed import store
 from shiftwork.store import db, repo
 from tests.orchestrator import pivot_flow
+from datetime import datetime, timezone
+from types import SimpleNamespace
+from shiftwork.domain.models import CheckResult, OperationalAssessment, RunOutput, RunPurpose
+from shiftwork.ledger import reducer
 
 
 def material_json(path):
@@ -533,6 +537,350 @@ def prepare_flow(client, monkeypatch):
         assert_version_pin(source.json(), "gtm_compare_candidate_" + label.lower())
     return {"shift_id": shift_id, "starter": starter, "source_run": run,
             "investigation_id": investigation.json()["id"], "candidates": candidates}
+
+
+def pipeline_reduction_inputs(pair=2, decisions=("REVIEW", "DISQUALIFIED", "QUALIFIED"), fault=None):
+    """Real reviewed specs/envelopes and independent assessment, with stable provenance."""
+    mission, state = mission_and_state()
+    specs = pair_specs(pair)
+    mission = mission.model_copy(update={"request_specs": specs})
+    outputs, rows, checks, prior = [], [], [], []
+    for ordinal, (spec, decision) in enumerate(zip(specs, decisions), 1):
+        raw = response_for(spec, decision, repeat=spec.tasks[0].condition_json["repeat_of"] is not None)
+        if fault and ordinal == 1:
+            fault(raw)
+        response = task_contract.validate_response_envelope(spec, json.dumps(raw).encode())
+        assessed_rows = evaluator.assess_request(spec=spec, request_ordinal=ordinal,
+            mission=mission, snapshot=state, response=response, prior_pipeline_results=tuple(prior))
+        prior.append((spec, response))
+        rows.extend(assessed_rows)
+        output = RunOutput(id=f"pipeline-output-{ordinal}", run_id="pipeline-run", request_ordinal=ordinal,
+            request_text=spec.text, http_status=200, body=json.dumps(raw).encode(), elapsed_ms=1)
+        outputs.append(output)
+        for row in assessed_rows:
+            checks.append(CheckResult(id=f"pipeline-check-{ordinal}-{row.task_id}", run_id="pipeline-run",
+                check_id=f"task:{spec.id}:{row.task_id}", verdict="pass" if row.mandatory_pass else "fail",
+                observed_ref=output.id, reason_code=row.reason_codes[0] if row.reason_codes else None))
+    summary = OperationalAssessment(run_id="pipeline-run", context_hash="captured-pipeline-context",
+        expected_request_count=3, complete_request_count=sum(evaluator.request_usefully_completed(
+            spec, [r for r in rows if r.request_ordinal == i]) for i, spec in enumerate(specs, 1)),
+        mandatory_pass=all(r.mandatory_pass for r in rows), selection_id="pipeline-choice",
+        rule_version="operation-ledger-v3", assessed_at=datetime.now(timezone.utc))
+    run = SimpleNamespace(id="pipeline-run", purpose=RunPurpose.OPERATION, selection_id="pipeline-choice")
+    return run, summary, mission, tuple(rows), tuple(checks), {
+        "consequence_rules": registry.resolve_pack("gtm").consequences.model_dump(mode="json"),
+        "weights": material_json("fixtures/mission/gtm_pipeline_v1.json")["weights"],
+        "pipeline_outputs": tuple(outputs)}
+
+
+def test_gtm_consequence_classes_reduce_from_operational_captures_only():
+    args = pipeline_reduction_inputs()
+    drafts = reducer.reduce_operation(*args[:5], **args[5])
+    assert [d.event_type.value for d in drafts] == [
+        "OWNER_ASSIGNED", "SLA_CLOCK_STARTED", "HANDOFF_ESCALATED", "OWNER_ASSIGNED", "SLA_CLOCK_STARTED"]
+    assert [d.payload["signal_ref"] for d in drafts] == ["signal:pair-low-confidence"] * 3 + ["signal:pair-apac"] * 2
+    assert drafts[0].payload["owner"] == "revenue-review"
+    assert drafts[3].payload["owner"] == "owner-apac-platform"
+    assert drafts[2].payload["terminal_action"] == "HUMAN_HANDOFF"
+    assert all(d.synthetic and d.payload["catalog_version"] == 1 and d.payload["rule_version"] == "operation-ledger-v3" for d in drafts)
+    expected_causes = [("pipeline-run", "pipeline-check-1-owner", "pipeline-output-1"),
+        ("pipeline-run", "pipeline-check-1-write", "pipeline-output-1"),
+        ("pipeline-run", "pipeline-check-1-handoff", "pipeline-output-1"),
+        ("pipeline-run", "pipeline-check-3-owner", "pipeline-output-3"),
+        ("pipeline-run", "pipeline-check-3-write", "pipeline-output-3")]
+    assert [d.cause_refs for d in drafts] == expected_causes
+    assert all(d.payload["mission_version"] == args[2].version for d in drafts)
+    assert all(d.payload["weight"] == args[5]["weights"][d.payload["consequence"]] for d in drafts)
+    assert reducer.reduce_operation(*args[:5], **args[5]) == drafts
+    assert_pipeline_surface_safe([d.model_dump(mode="json") for d in drafts])
+
+
+def test_gtm_retry_has_no_second_owner_write_clock_or_handoff():
+    args = pipeline_reduction_inputs(3, ("REVIEW", "QUALIFIED", "QUALIFIED"))
+    assert args[1].mandatory_pass
+    drafts = reducer.reduce_operation(*args[:5], **args[5])
+    assert [d.event_type.value for d in drafts].count("OWNER_ASSIGNED") == 2
+    assert [d.event_type.value for d in drafts].count("SLA_CLOCK_STARTED") == 2
+    assert [d.event_type.value for d in drafts].count("HANDOFF_ESCALATED") == 1
+    assert all(d.payload["request_id"] != "gtm-pair03-003" for d in drafts)
+
+
+@pytest.mark.parametrize("fault,expected", [("duplicate_owner", "DUPLICATE_COMMITMENT"),
+    ("duplicate_write", "DUPLICATE_COMMITMENT"), ("missing_owner", "REQUIRED_TASK_MISSING"),
+    ("missing_handoff", "REQUIRED_TASK_MISSING"), ("sent_message", "WRONG_ACTION"),
+    ("revenue", "WRONG_ACTION"), ("wrong_owner", "WRONG_ACTION")])
+def test_gtm_one_traced_incident_per_failing_record(fault, expected):
+    def damage(raw):
+        results = {row["task_id"]: row for row in raw["task_results"]}
+        if fault in ("duplicate_owner", "duplicate_write"):
+            target = results["owner" if fault == "duplicate_owner" else "write"]
+            target["claims"].append(copy.deepcopy(target["claims"][0]))
+        elif fault in ("missing_owner", "missing_handoff"):
+            raw["task_results"].remove(results["owner" if fault == "missing_owner" else "handoff"])
+        elif fault == "wrong_owner":
+            results["owner"]["claims"][0]["value"] = "owner-amer-platform"
+            results["write"]["claims"][0]["value"]["owner"] = "owner-amer-platform"
+        else:
+            results["write"]["claims"][0]["value"][fault] = 50000 if fault == "revenue" else True
+    args = pipeline_reduction_inputs(fault=damage)
+    drafts = reducer.reduce_operation(*args[:5], **args[5])
+    failing = [d for d in drafts if d.payload["signal_ref"] == "signal:pair-low-confidence"]
+    assert [d.event_type.value for d in failing] == ["INCIDENT_OPENED"]
+    assert failing[0].payload["reason_code"] == expected
+    trace = failing[0].payload["decision_trace"]
+    assert [r["task_id"] for r in trace] == ["qualification", "owner", "write", "handoff"]
+    assert any(expected in row["reason_codes"] for row in trace)
+    assert trace == [r.model_dump(mode="json") for r in args[3] if r.request_ordinal == 1]
+    first_failure = next(r for r in args[3] if r.request_ordinal == 1 and not r.mandatory_pass)
+    assert failing[0].cause_refs == ("pipeline-run", "pipeline-check-1-" + first_failure.task_id, "pipeline-output-1")
+    assert failing[0].payload["failed_task_ids"] == [r.task_id for r in args[3] if r.request_ordinal == 1 and not r.mandatory_pass]
+    assert_pipeline_surface_safe([d.model_dump(mode="json") for d in drafts])
+
+
+@pytest.mark.parametrize("damage", ["experiment", "unselected", "wrong_selection", "missing_output", "duplicate_output", "foreign_run", "foreign_check", "foreign_output", "duplicate_task"])
+def test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs(damage):
+    run, summary, mission, rows, checks, kwargs = pipeline_reduction_inputs()
+    if damage == "experiment": run.purpose = RunPurpose.EXPERIMENT
+    elif damage == "unselected": run.selection_id = None
+    elif damage == "wrong_selection": run.selection_id = "other-choice"
+    elif damage == "missing_output": kwargs["pipeline_outputs"] = kwargs["pipeline_outputs"][:-1]
+    elif damage == "duplicate_output": kwargs["pipeline_outputs"] += (kwargs["pipeline_outputs"][0],)
+    elif damage == "foreign_run": kwargs["pipeline_outputs"] = (kwargs["pipeline_outputs"][0].model_copy(update={"run_id": "experiment-run"}), *kwargs["pipeline_outputs"][1:])
+    elif damage == "foreign_check": checks = (checks[0].model_copy(update={"run_id": "experiment-run"}), *checks[1:])
+    elif damage == "foreign_output": checks = (checks[0].model_copy(update={"observed_ref": "experiment-output"}), *checks[1:])
+    elif damage == "duplicate_task": rows += (rows[0],)
+    with pytest.raises(ValueError):
+        reducer.reduce_operation(run, summary, mission, rows, checks, **kwargs)
+
+
+def assert_pipeline_surface_safe(payload):
+    serialized = json.dumps(payload, sort_keys=True)
+    for needle in ('"revenue":', '"sent_message":', '"synthetic_orders":'):
+        assert needle not in serialized, "unsafe pipeline surface: " + needle
+
+
+@pytest.mark.parametrize("key", ["revenue", "sent_message", "synthetic_orders"])
+def test_pipeline_surface_scanner_detects_each_serialized_key(key):
+    surface = [{"synthetic": True, "payload": {key: 50000}}]
+    with pytest.raises(AssertionError, match="unsafe pipeline surface"):
+        assert_pipeline_surface_safe(surface)
+
+
+@pytest.mark.parametrize("key", ["revenue", "sent_message"])
+def test_gtm_customer_projection_does_not_present_rejected_output_claims(monkeypatch, key):
+    def damage(raw):
+        raw["task_results"][2]["claims"][0]["value"][key] = 50000 if key == "revenue" else True
+    run, summary, mission, rows, checks, kwargs = pipeline_reduction_inputs(fault=damage)
+    run.context_id = "pipeline-context"
+    _, state = mission_and_state()
+    mission_data = material_json("fixtures/mission/gtm_pipeline_v1.json")
+    mission_data["request_specs"] = [spec.model_dump(mode="json") for spec in mission.request_specs]
+    context = SimpleNamespace(mission_bytes_base64=base64.b64encode(json.dumps(mission_data).encode()),
+                              public_data_bytes_base64=base64.b64encode(json.dumps(state.model_dump(mode="json")).encode()))
+    monkeypatch.setattr(repo, "get_execution_context", lambda *args: context)
+    monkeypatch.setattr(repo, "list_task_assessment_models", lambda *args: rows)
+    projection = orchestrator.output_evidence_for(None, kwargs["pipeline_outputs"][0], run)
+    assert projection["customer_answer"] is not None
+    assert_pipeline_surface_safe(projection["customer_answer"])
+    assert "prepared for human handling" not in projection["customer_answer"]["display_text"]
+    assert "rejected by the independent assessment" in projection["customer_answer"]["display_text"]
+    assert all(claim["kind"] != "pipeline_write" for claim in projection["customer_answer"]["claims"])
+
+
+@pytest.mark.parametrize("damage", ["wrong_ref", "empty_owner", "extra_field", "conflicting_observation"])
+def test_pipeline_inheritance_refuses_corrupt_or_conflicting_record(damage):
+    raw = (config.PACKAGE_DIR / "fixtures/state/gtm_pipeline_public_state.json").read_bytes()
+    prior = {"signal:incident-apac": {"owner": "owner-apac-platform", "record_ref": "pipeline:signal:incident-apac"}}
+    if damage == "wrong_ref": prior["signal:incident-apac"]["record_ref"] = "pipeline:other"
+    elif damage == "empty_owner": prior["signal:incident-apac"]["owner"] = ""
+    elif damage == "extra_field": prior["signal:incident-apac"]["sent_message"] = True
+    else:
+        data = json.loads(raw)
+        data["records"][0]["value"].update(existing_owner="owner-amer-platform", existing_record_ref="pipeline:signal:incident-apac")
+        raw = json.dumps(data).encode()
+    with pytest.raises(PublicStateInvalid):
+        task_contract.apply_pipeline_history(raw, prior)
+
+
+def test_pipeline_inheritance_uses_history_without_rewriting_reviewed_state():
+    raw = (config.PACKAGE_DIR / "fixtures/state/gtm_pipeline_public_state.json").read_bytes()
+    assert task_contract.apply_pipeline_history(raw, {}) == raw
+    derived = task_contract.apply_pipeline_history(raw, {"signal:incident-apac": {
+        "owner": "owner-apac-platform", "record_ref": "pipeline:signal:incident-apac"}})
+    assert json.loads(raw)["records"][0]["value"]["existing_owner"] is None
+    assert json.loads(derived)["records"][0]["value"]["existing_owner"] == "owner-apac-platform"
+    assert json.loads(derived)["records"][0]["value"]["existing_record_ref"] == "pipeline:signal:incident-apac"
+
+
+@pytest.mark.parametrize("damage", ["missing_rules", "wrong_events", "rollout", "handover", "missing_handoff_weight", "boolean_weight"])
+def test_gtm_frozen_consequence_rules_refuse_drift(damage):
+    from shiftwork.domain import canonical
+    starting = {"consequence_rules": registry.resolve_pack("gtm").consequences.model_dump(mode="json")}
+    mission = material_json("fixtures/mission/gtm_pipeline_v1.json")
+    if damage == "missing_rules": starting.clear()
+    elif damage == "wrong_events": starting["consequence_rules"]["success_events"] = ["SALE_COMPLETED owner"]
+    elif damage == "rollout": starting["consequence_rules"]["rollout_event"] = "ROLLOUT_APPROVED owner"
+    elif damage == "handover": starting["consequence_rules"]["handover_record_required"] = True
+    elif damage == "missing_handoff_weight": del mission["weights"]["handoff"]
+    else: mission["weights"]["owner"] = True
+    context = SimpleNamespace(reducer_version="operation-ledger-v3", engagement_slug="gtm",
+        starting_business_state_json=starting, starting_business_state_hash=canonical.content_hash(starting),
+        mission_bytes_base64=base64.b64encode(json.dumps(mission).encode()))
+    with pytest.raises(orchestrator.LifecycleError, match="rules missing or invalid"):
+        orchestrator.operation_consequence_inputs(context)
+
+
+def qualify_gtm(client):
+    flow = prepare_flow(client, None)
+    conn = db.connect(client.app.state.db_path)
+    try:
+        before = business_rows(conn)
+        experiment = comparison_flow.create_qualifying_comparison(conn, flow["shift_id"],
+            candidate_a_version_id=flow["candidates"]["A"]["id"], candidate_b_version_id=flow["candidates"]["B"]["id"],
+            investigation_id=flow["investigation_id"], declared_treatment="Rules-first review versus recorded-confidence routing.",
+            client_request_id="s24-qualifying", adapter="local_process")
+        comparison_flow.execute_comparison(conn, experiment.id)
+        result = client.get(f"/api/experiments/{experiment.id}").json()
+        assert result["outcome"]["status"] == "COMPLETE", result
+        assert all(row["eligible"] for row in result["outcome"]["eligibility"])
+        assert business_rows(conn) == before, "GTM experiment changed pipeline history"
+        bad = client.post(f"/api/shifts/{flow['shift_id']}/selections", json={"comparison_id": experiment.id,
+            "selected_version_id": flow["candidates"]["A"]["id"], "expected_prior_selection_id": "stale-selection",
+            "rationale": "Choose the independently eligible rules-first repair.", "client_request_id": "s24-stale"})
+        assert bad.status_code == 409, bad.text
+        assert business_rows(conn) == before, "stale choice changed history"
+        chosen = client.post(f"/api/shifts/{flow['shift_id']}/selections", json={"comparison_id": experiment.id,
+            "selected_version_id": flow["candidates"]["A"]["id"], "expected_prior_selection_id": flow["starter"]["id"],
+            "rationale": "Choose the independently eligible rules-first repair.", "client_request_id": "s24-choice"})
+        assert chosen.status_code == 201, chosen.text
+        after = business_rows(conn)
+        assert after["ledger_events"] == before["ledger_events"] and after["incidents"] == before["incidents"], "selection wrote pipeline state"
+        flow.update(choice=chosen.json(), comparison=result)
+        return flow
+    finally:
+        conn.close()
+
+
+def gtm_next_shift(client, current):
+    closed = client.post(f"/api/shifts/{current}/close")
+    assert closed.status_code == 200, closed.text
+    opened = client.post("/api/engagements/gtm/shifts")
+    assert opened.status_code == 201, opened.text
+    return opened.json()
+
+
+def test_gtm_exact_selection_operation_restart_inheritance_and_later_condition(tmp_path, monkeypatch):
+    from tests.packs.material import staged_material
+    from shiftwork.ledger import chain
+    reviewed_inventory()
+    path = tmp_path / "gtm-lifecycle.db"
+    with TestClient(create_app(str(path), executor="local_process")) as client:
+        flow = qualify_gtm(client)
+        # The public failing starter already spent this shift's operation.
+        blocked = client.post(f"/api/shifts/{flow['shift_id']}/runs", json={"client_request_id": "s24-second-first-shift"})
+        assert blocked.status_code == 409, blocked.text
+        second = gtm_next_shift(client, flow["shift_id"])
+        assert client.get("/api/engagements/gtm/board").json()["operating_selection"]["id"] == flow["choice"]["id"]
+        # Saving the retained alternative cannot change the operational pointer.
+        files = {"service.py": (config.PACKAGE_DIR / "fixtures/artifacts/gtm/gtm_compare_repair_b_workflow.py").read_text(encoding="utf-8")}
+        assert client.put(f"/api/shifts/{second['id']}/artifact", json={"files": files}).status_code == 200
+        frozen = client.post(f"/api/shifts/{second['id']}/artifact/versions", json={"contract": config.GTM_STARTER_CONTRACT_JSON})
+        assert frozen.status_code == 201, frozen.text
+        op = client.post(f"/api/shifts/{second['id']}/runs", json={"client_request_id": "s24-selected-operation"})
+        assert op.status_code == 202, op.text
+        run = pivot_flow.wait_run(client, op.json()["id"])
+        assert run["state"] == "FINALIZED", run
+        assert run["artifact_version_id"] == flow["candidates"]["A"]["id"] and run["selection_id"] == flow["choice"]["id"]
+        conn = db.connect(path)
+        try:
+            events = repo.list_ledger_events(conn, "gtm")
+            generated = [e for e in events if e.cause_refs[0] == run["id"]]
+            assert [e.event_type.value for e in generated if e.event_type.value != "INCIDENT_RESOLVED"] == ["OWNER_ASSIGNED", "SLA_CLOCK_STARTED"]
+            assert all(e.payload["signal_ref"] == "signal:incident-apac" and e.payload["owner"] == "owner-apac-platform" for e in generated if e.event_type.value != "INCIDENT_RESOLVED")
+            assert chain.verify_chain(events) is chain.ChainStatus.VALID
+            before = business_rows(conn)
+            assert orchestrator.finalize_selected_operation(conn, run["id"]).id == run["id"]
+            assert business_rows(conn) == before, "finalization retry wrote duplicate state"
+            assert orchestrator.replay_assessment(conn, run["id"]).status == "IDENTICAL"
+            original_reduction = orchestrator._stored_operation_drafts(conn, repo.get_run(conn, run["id"]), "gtm")
+            current_mission = material_json("fixtures/mission/gtm_pipeline_v1.json")
+            current_mission["weights"]["owner"] += 100
+            with staged_material(monkeypatch, tmp_path / "changed-current-mission", {
+                    "fixtures/mission/gtm_pipeline_v1.json": json.dumps(current_mission).encode()}):
+                assert orchestrator.replay_assessment(conn, run["id"]).status == "IDENTICAL", "current mission rewrote GTM replay"
+        finally:
+            conn.close()
+        repeat_key = client.post(f"/api/shifts/{second['id']}/runs", json={"client_request_id": "s24-selected-operation"})
+        assert repeat_key.status_code == 202 and repeat_key.json()["id"] == run["id"]
+        blocked = client.post(f"/api/shifts/{second['id']}/runs", json={"client_request_id": "s24-second-success"})
+        assert blocked.status_code == 409, blocked.text
+        third = gtm_next_shift(client, second["id"])
+        assert client.get("/api/engagements/gtm/board").json()["operating_selection"]["id"] == flow["choice"]["id"]
+    # A fresh app and connection must retain the chosen bytes and owned record.
+    with TestClient(create_app(str(path), executor="local_process")) as client:
+        draft = client.get(f"/api/shifts/{third['id']}/artifact").json()
+        assert draft["files"] == {"service.py": (config.PACKAGE_DIR / "fixtures/artifacts/gtm/gtm_compare_repair_a_workflow.py").read_text(encoding="utf-8")}
+        retry = client.post(f"/api/shifts/{third['id']}/runs", json={"client_request_id": "s24-inherited-reprocessing"})
+        assert retry.status_code == 202, retry.text
+        repeat = pivot_flow.wait_run(client, retry.json()["id"])
+        assert repeat["state"] == "FINALIZED", repeat
+        conn = db.connect(path)
+        try:
+            summary = repo.get_run_assessment(conn, repeat["id"])
+            assert summary.mandatory_pass, "inherited reprocessing did not honor exactly-once ownership"
+            assert orchestrator._stored_operation_drafts(conn, repo.get_run(conn, repeat["id"]), "gtm") == [], "reprocessing wrote another owner, record or clock"
+            assert orchestrator.replay_assessment(conn, repeat["id"]).status == "IDENTICAL"
+            context = repo.get_execution_context(conn, repo.get_run(conn, repeat["id"]).context_id)
+            assert context.starting_business_state_json["pipeline_records"] == {"signal:incident-apac": {"owner": "owner-apac-platform", "record_ref": "pipeline:signal:incident-apac"}}
+        finally:
+            conn.close()
+        fourth = gtm_next_shift(client, third["id"])
+        world = json.loads((config.PACKAGE_DIR / "fixtures/state/gtm_compare_state_v1.json").read_bytes())
+        world["dependencies"]["enrichment"] = "unavailable"
+        # Disposable operator-observed state, never a production fixture or seal.
+        with staged_material(monkeypatch, tmp_path / "observed-package", {
+                "fixtures/state/gtm_pipeline_public_state.json": json.dumps(world).encode()}):
+            started = client.post(f"/api/shifts/{fourth['id']}/runs", json={"client_request_id": "s24-observed-outage"})
+            assert started.status_code == 202, started.text
+            outage = pivot_flow.wait_run(client, started.json()["id"])
+            assert outage["state"] == "FINALIZED", outage
+        conn = db.connect(path)
+        try:
+            history = pivot_flow.snapshot_rows(conn)
+            pipeline_before = business_rows(conn)
+        finally:
+            conn.close()
+        later = client.post(f"/api/shifts/{fourth['id']}/experiments", json={"kind": "LATER_CONDITION_COMPARISON",
+            "observed_run_id": outage["id"], "declared_treatment": "Re-test selected and retained workflows under the observed enrichment outage.",
+            "client_request_id": "s24-later-outage"})
+        assert later.status_code == 202, later.text
+        result = pivot_flow.wait_experiment(client, later.json()["id"])
+        assert result["state"] == "FINALIZED" and result["outcome"]["status"] == "COMPLETE", result
+        assert {row["artifact_version_id"] for row in result["candidates"]} == {flow["candidates"]["A"]["id"], flow["candidates"]["B"]["id"]}
+        assert len(result["trials"]) == 6 and all(row["state"] == "COMPLETE" for row in result["trials"])
+        conn = db.connect(path)
+        try:
+            pivot_flow.assert_prefix_unchanged(conn, history)
+            assert business_rows(conn) == pipeline_before, "later experiment changed pipeline history or selection"
+            assert orchestrator._stored_operation_drafts(conn, repo.get_run(conn, run["id"]), "gtm") == original_reduction
+            assert orchestrator.replay_assessment(conn, run["id"]).status == "IDENTICAL"
+            output = os.environ.get("SHIFTWORK_S24_PROOF_OUT")
+            if output:
+                dest = Path(output)
+                database = dest.with_suffix(".db")
+                assert not dest.exists() and not database.exists()
+                backup = sqlite3.connect(database)
+                try: conn.backup(backup)
+                finally: backup.close()
+                proof = {"mode": "PRODUCTION_REVIEWED_TRUSTED_LOCAL", "observed_outage": "DISPOSABLE_SYNTHETIC_OPERATOR_STATE",
+                    "selected_version_id": flow["candidates"]["A"]["id"], "retained_version_id": flow["candidates"]["B"]["id"],
+                    "selection": flow["choice"], "operation": run, "inherited_reprocessing": repeat,
+                    "operational_events": [e.model_dump(mode="json") for e in repo.list_ledger_events(conn, "gtm")],
+                    "later_comparison": result, "database_sha256": hashlib.sha256(database.read_bytes()).hexdigest(),
+                    "replay": orchestrator.replay_assessment(conn, run["id"]).model_dump(mode="json")}
+                dest.write_text(json.dumps(proof, indent=2) + "\n", encoding="utf-8")
+        finally:
+            conn.close()
 
 
 def test_reviewed_production_runs_six_fair_slots_without_business_writes(tmp_path, monkeypatch):

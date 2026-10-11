@@ -262,21 +262,21 @@ def test_experimental_run_cannot_enter_selected_execution(monkeypatch):
         orchestrator.execute_selected_operation(None, "gtm-experiment")
 
 
-def test_gtm_chosen_operation_waits_for_s24(monkeypatch):
-    # Isolate the S23 refusal before reservations, credentials or business writes.
-    from shiftwork import config
+def test_gtm_operation_freezes_declared_rules_before_execution(tmp_path):
     from shiftwork.store import db
-    from pathlib import Path
-    import tempfile
-    with tempfile.TemporaryDirectory() as folder:
-        conn = db.connect(Path(folder) / "boundary.db")
+    from fastapi.testclient import TestClient
+    from shiftwork.app import create_app
+    from shiftwork.store import repo
+    path = tmp_path / "gtm-freeze.db"
+    with TestClient(create_app(str(path))) as client:
+        opened = client.post("/api/engagements/gtm/shifts")
+        assert opened.status_code == 201, opened.text
+        conn = db.connect(path)
         try:
-            db.ensure_schema(conn)
-            monkeypatch.setattr(orchestrator, "_require_open_shift", lambda *args: SimpleNamespace(engagement_slug="gtm"))
-            monkeypatch.setattr(orchestrator, "_selected_operating_version", lambda *args: (SimpleNamespace(kind="LEARNER_CHOICE", comparison_id="comparison"), None))
-            monkeypatch.setattr(orchestrator, "_reserve_selected_operation", lambda *args, **kwargs: SimpleNamespace(id="should-not-reserve"))
-            with pytest.raises(orchestrator.LifecycleError, match="awaits S24"):
-                orchestrator.start_run(conn, "gtm-shift", client_request_id="no-operation", executor=config.EXECUTOR_ADAPTER)
+            context = orchestrator.freeze_diagnostic_context(conn, repo.get_shift(conn, opened.json()["id"]), operation=True)
+            assert context.reducer_version == "operation-ledger-v3"
+            assert context.starting_business_state_json.get("consequence_rules") == registry.resolve_pack("gtm").consequences.model_dump(mode="json"), "GTM frozen consequence rules omitted"
+            assert context.starting_business_state_json["pipeline_records"] == {}
         finally:
             conn.close()
 
