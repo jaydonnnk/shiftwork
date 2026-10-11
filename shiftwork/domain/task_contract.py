@@ -562,6 +562,36 @@ class PipelineSnapshot(BaseModel):
         return self
 
 
+def apply_pipeline_history(snapshot_bytes: bytes, owned: dict[str, JsonValue]) -> bytes:
+    """Overlay verified synthetic ownership without changing reviewed source files."""
+    snapshot = load_public_state_bytes(snapshot_bytes)
+    if not isinstance(snapshot, PipelineSnapshot):
+        raise PublicStateInvalid("pipeline history requires GTM state")
+    for signal, record in owned.items():
+        if (not isinstance(signal, str) or not signal.startswith("signal:")
+                or not isinstance(record, dict) or set(record) != {"owner", "record_ref"}
+                or not isinstance(record["owner"], str) or not record["owner"]
+                or record["record_ref"] != "pipeline:" + signal):
+            raise PublicStateInvalid("invalid inherited pipeline record")
+    data = json.loads(snapshot_bytes)
+    changed = False
+    for record in data["records"]:
+        prior = owned.get(record["entity_ref"])
+        if prior is None:
+            continue
+        facts = record["value"]
+        if facts["existing_owner"] is not None and (facts["existing_owner"] != prior["owner"]
+                or facts["existing_record_ref"] != prior["record_ref"]):
+            raise PublicStateInvalid("observed pipeline ownership contradicts history")
+        facts.update(existing_owner=prior["owner"], existing_record_ref=prior["record_ref"])
+        changed = True
+    if not changed:
+        return snapshot_bytes
+    encoded = json.dumps(data, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    load_public_state_bytes(encoded)
+    return encoded
+
+
 RecordStatus = Literal["AGREED", "CONFLICT", "NO_CURRENT_RECORD"]
 
 

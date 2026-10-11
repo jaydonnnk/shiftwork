@@ -31,6 +31,8 @@ from shiftwork.domain.models import (
     RunOutput,
 )
 from shiftwork.domain.task_contract import DeploymentTrace, MissionSpec, TaskAssessment, TaskKind
+from shiftwork.domain import task_contract
+from shiftwork.domain.errors import TaskEnvelopeInvalid
 from shiftwork.evaluator import evaluator
 
 _FROZEN = ConfigDict(frozen=True, extra="forbid")
@@ -147,6 +149,7 @@ def reduce_operation(
     *, consequence_rules: dict[str, JsonValue] | None = None,
     weights: dict[str, int] | None = None,
     deployment_traces: tuple[DeploymentTrace, ...] = (),
+    pipeline_outputs: tuple[RunOutput, ...] = (),
 ) -> list[LedgerEventDraft]:
     """Derive labelled synthetic order and incident drafts from one selected run."""
     if (run.purpose is not RunPurpose.OPERATION or run.selection_id is None
@@ -154,6 +157,9 @@ def reduce_operation(
             or assessment.selection_id != run.selection_id
             or assessment.run_id != run.id):
         raise ValueError("business reduction requires the selected operational run")
+    if assessment.rule_version == "operation-ledger-v3":
+        return _reduce_pipeline_operation(run, assessment, mission, task_assessments, checks,
+                                          consequence_rules, weights or {}, pipeline_outputs)
     if consequence_rules is not None:
         return _reduce_pack_operation(run, assessment, mission, task_assessments, checks,
                                       consequence_rules, weights or {}, deployment_traces)
@@ -182,6 +188,78 @@ def reduce_operation(
                                  "mission_version": mission.version,
                                  "rule_version": assessment.rule_version},
                     ))
+    return drafts
+
+
+def _reduce_pipeline_operation(run, assessment, mission, rows, checks, rules, weights, outputs):
+    """One synthetic consequence set per independently assessed signal capture."""
+    if mission.engagement_slug != "gtm" or rules is None:
+        raise ValueError("pipeline reduction requires frozen GTM rules")
+    expected = {f"task:{spec.id}:{task.id}" for spec in mission.request_specs for task in spec.tasks}
+    by_check = {check.check_id: check for check in checks}
+    captured = {output.request_ordinal: output for output in outputs}
+    if (len(checks) != len(by_check) or set(by_check) != expected
+            or len(rows) != len(expected) or len(outputs) != len(captured)
+            or set(captured) != set(range(1, len(mission.request_specs) + 1))
+            or any(output.run_id != run.id or output.transport_error is not None for output in outputs)):
+        raise ValueError("pipeline capture or assessment inventory differs")
+    base = {"mission_version": mission.version, "rule_version": assessment.rule_version,
+            "catalog_version": mission.contract_catalog_version}
+    drafts = []
+    for ordinal, spec in enumerate(mission.request_specs, 1):
+        output = captured[ordinal]
+        assessed = [row for row in rows if row.request_ordinal == ordinal]
+        by_task = {row.task_id: row for row in assessed}
+        if (len(assessed) != len(by_task) or set(by_task) != {task.id for task in spec.tasks}
+                or any(row.request_id != spec.id for row in assessed)):
+            raise ValueError("pipeline task identity differs")
+        for row in assessed:
+            check = by_check[f"task:{spec.id}:{row.task_id}"]
+            if (check.run_id != run.id or check.observed_ref != output.id
+                    or check.verdict != ("pass" if row.mandatory_pass else "fail")):
+                raise ValueError("pipeline check provenance differs")
+        payload = {**base, "request_id": spec.id, "signal_ref": spec.requested_entities[0]}
+        failed = [row for row in assessed if not row.mandatory_pass]
+        if failed:
+            source = by_check[f"task:{spec.id}:{failed[0].task_id}"]
+            drafts.append(LedgerEventDraft(event_type=LedgerEventType.INCIDENT_OPENED,
+                cause_refs=(run.id, source.id, output.id), payload={**payload,
+                    "reason_code": (source.reason_code or ReasonCode.REQUIRED_TASK_MISSING).value,
+                    "failed_task_ids": [row.task_id for row in failed],
+                    "decision_trace": [row.model_dump(mode="json") for row in assessed]}))
+            continue
+        if not evaluator.request_usefully_completed(spec, assessed):
+            continue
+        try:
+            response = task_contract.validate_response_envelope(spec, output.body)
+        except TaskEnvelopeInvalid as exc:
+            raise ValueError("accepted pipeline capture is not a valid envelope") from exc
+        results = {result.task_id: result for result in response.task_results}
+        tasks = {task.kind: task for task in spec.tasks}
+        owner_task = tasks[TaskKind.ASSIGN_OWNER]
+        write_task = tasks[TaskKind.WRITE_PIPELINE_RECORD]
+        # Inactive, disqualified and already processed signals create no state.
+        if (by_task[owner_task.id].outcome is not task_contract.TaskOutcome.USEFUL_COMPLETION
+                or by_task[write_task.id].outcome is not task_contract.TaskOutcome.USEFUL_COMPLETION):
+            continue
+        owner = results[owner_task.id].claims[0].value
+        record = results[write_task.id].claims[0].value
+        record_payload = {**payload, "owner": owner, "record_ref": record["record_ref"],
+                          "decision_trace": record["decision_trace"]}
+        for rule in rules["success_events"]:
+            event, key = rule.split()
+            source_task = owner_task if event == "OWNER_ASSIGNED" else write_task
+            source = by_check[f"task:{spec.id}:{source_task.id}"]
+            drafts.append(LedgerEventDraft(event_type=LedgerEventType(event),
+                cause_refs=(run.id, source.id, output.id),
+                payload={**record_payload, "consequence": key, "weight": weights[key]}))
+        handoff_task = tasks[TaskKind.HANDOFF_TO_REVIEW]
+        if by_task[handoff_task.id].outcome is task_contract.TaskOutcome.USEFUL_COMPLETION:
+            source = by_check[f"task:{spec.id}:{handoff_task.id}"]
+            drafts.append(LedgerEventDraft(event_type=LedgerEventType.HANDOFF_ESCALATED,
+                cause_refs=(run.id, source.id, output.id),
+                payload={**record_payload, "consequence": "handoff", "weight": weights["handoff"],
+                         "terminal_action": "HUMAN_HANDOFF"}))
     return drafts
 
 
