@@ -1,0 +1,60 @@
+{
+  "date": "2026-10-11",
+  "timezone": "Asia/Singapore",
+  "command": "git push --atomic origin shiftwork/slice-24:refs/heads/main shiftwork/slice-24:refs/heads/shiftwork/slice-24",
+  "remote": "https://github.com/jaydonnnk/shiftwork.git",
+  "remote_main_before": "66f9b8d5d286f67bb2e7dd75acf24c0ed1e029c0",
+  "push_result": [
+    "66f9b8d..d95c62d  shiftwork/slice-24 -> main",
+    "* [new branch]      shiftwork/slice-24 -> shiftwork/slice-24"
+  ],
+  "pushed_commit": "d95c62dfdb69213a65b59c3333d445a33992cc6c",
+  "ls_remote_after_push": {
+    "refs/heads/main": "d95c62dfdb69213a65b59c3333d445a33992cc6c",
+    "refs/heads/shiftwork/slice-24": "d95c62dfdb69213a65b59c3333d445a33992cc6c"
+  },
+  "remote_refs_verified": true,
+  "local_main_after_fetch": "d95c62dfdb69213a65b59c3333d445a33992cc6c",
+  "main_checked_out_in_workspace": false,
+  "fast_forward_from_entry_main": true,
+  "commits": [
+    "7a0b5819a61c67eef5412aa7cd40033fd8740c6a feat(shiftwork): derive GTM pipeline history and reduce chosen operations",
+    "352acd75c772fb18d1c0c51a1dd1d4aa01b1a8fa feat(shiftwork): refuse unreadable retained evidence at the storage boundary",
+    "c21dd49510f24e6efe6219db9a23bf77aff24694 feat(shiftwork): render GTM customer text from one assessed-text helper",
+    "48ada2399e89c3886006f1f5042bb199d9a79995 feat(shiftwork): operate chosen GTM workflows with inheritance and replay",
+    "5d029dc335983cf9227c486f383ba550c117dc8e test(shiftwork): prove GTM selection, operation, restart and later comparison",
+    "63e09825e57a1204cc28897ee5195ac2cf918d0d test(shiftwork): retain S24 review-repair regressions",
+    "be6749aaf7fee69a84995b88369aeeee004b5f76 test(shiftwork): add S24 fault inventory and named S23 assertions",
+    "2631548bdbf2e22ff5c0b2facc25d7a6c6a0c886 feat(demos): retain the offline S24 GTM operation journey",
+    "a7030eda56c99156190051ce2c7b52e136f845a0 docs(shiftwork): retain S24 plan, checkpoints, handoffs and architecture review",
+    "c87222b7faf2477cb5aff0817c489fdae0122f05 docs: record S24 incidents and graduate the base-interpreter fallback",
+    "78f6de5a35d60852f454f6074363ce3949ffdd75 docs(shiftwork): retain S24 offline evidence byte-exact",
+    "c9e4f887b0ebdcd02ab5e09a74793b1336fa35e4 docs(shiftwork): accept S24 offline evidence and authorize publication",
+    "d95c62dfdb69213a65b59c3333d445a33992cc6c docs(shiftwork): retain fresh Windows checkout regression proof"
+  ],
+  "fresh_tested_commit": "c9e4f887b0ebdcd02ab5e09a74793b1336fa35e4",
+  "changed_after_fresh_test": [
+    "MISTAKES.md",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/demo-console.json",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/demo/journey.json",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/demo/journey.log",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/demo/journey.xml",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/fresh-offline-exit.txt",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/fresh-offline-result.json",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/fresh-offline.log",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/fresh-offline.xml",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/preflight.txt",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-11char/reviewed.log",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/demo-console.json",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/demo/journey.json",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/demo/journey.log",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/demo/journey.xml",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/fresh-offline-exit.txt",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/fresh-offline-result.json",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/fresh-offline.log",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/fresh-offline.xml",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/fresh-path-diagnosis.json",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/preflight.txt",
+    "docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/fresh-clone-7char/reviewed.log"
+  ]
+}

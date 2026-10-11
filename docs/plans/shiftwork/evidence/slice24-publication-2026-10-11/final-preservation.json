@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-11",
+  "baseline": "workspace manifest after the 2026-10-11 demo rerun, before the refresh documents (C:/swr24-acc-20261011/workspace-after.json)",
+  "exclusions": [
+    ".git",
+    ".venv",
+    ".venv313",
+    ".claude",
+    ".env",
+    "__pycache__",
+    ".pytest_cache"
+  ],
+  "files_now": 9248,
+  "changed": [
+    ".gitattributes",
+    "MISTAKES.md",
+    "docs/SHIFTWORK_PLAN.md",
+    "docs/plans/shiftwork/00-status.md",
+    "docs/plans/shiftwork/slice24-architecture-review-2026-10-08.md",
+    "docs/plans/shiftwork/slice24-residual-repair-checkpoint-2026-10-08.md"
+  ],
+  "removed": [],
+  "added_count": 26,
+  "added_outside_publication_evidence": [
+    "docs/plans/shiftwork/slice24-acceptance-publication-2026-10-11.md"
+  ],
+  "source_test_demo_changed_or_removed": [],
+  "working_tree_status_lines": 0,
+  "head": "d95c62dfdb69213a65b59c3333d445a33992cc6c"
+}

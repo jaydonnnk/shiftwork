@@ -1,3 +1,24 @@
+**S24 ACCEPTED AND PUBLISHED, 2026-10-11 Asia/Singapore.**
+
+S24 was accepted by the user, committed in focused batches, fast-forwarded to
+main and atomically pushed with shiftwork/slice-24. Both remote refs were
+verified at `d95c62dfdb69213a65b59c3333d445a33992cc6c` before this documentation
+follow-up. A fresh Windows Git clone at `C:\s24fresh` with core.autocrlf=true
+passed 1,399 tests, with 1 live-conformance skip and 2 warnings; packaging was
+excluded. A first clone at the 7-character `C:\s24f` failed the two host-path
+scanner self-tests, because the scanner ignores needles under 8 characters; its
+receipts remain intact. Reviewed GTM material and signed receipts remained exact.
+
+- [x] Slice 24: accepted and published on offline evidence.
+- [ ] Slice 25: no go-ahead and no work started.
+
+Accepted without another independent review of the F1-F6 repairs. No
+model-quality, real CRM action, learner gain, cost or production-readiness proof
+follows. No live call, installation or product credential use occurred.
+Current publication checkpoint: [slice24-publication-checkpoint-2026-10-11.md](slice24-publication-checkpoint-2026-10-11.md).
+Earlier notices below remain historical; publication supersedes their
+pending-state labels.
+
 **S24 ACCEPTED FOR PUBLICATION, 2026-10-11 Asia/Singapore.**
 
 The user accepted the S24 offline result and authorized focused commits, merge
