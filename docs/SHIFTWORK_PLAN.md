@@ -1,3 +1,172 @@
+**S24 ACCEPTED FOR PUBLICATION, 2026-10-11 Asia/Singapore.**
+
+The user accepted the S24 offline result and authorized focused commits, merge
+to main and push of main and shiftwork/slice-24. Accepted evidence: 1,399
+non-packaging tests passed with one live-only skip and two warnings; all 73 S24
+and 106 S23 fault controls were caught on named assertions with exact
+restoration; healthy demos match the 2026-10-08 record apart from timing; the
+reviewed material digest verifies. Accepted without another independent review
+of the F1-F6 repairs.
+
+- [x] Slice 24: offline GTM operation, exact selection, inheritance and later
+  comparison; accepted 2026-10-11 with trusted-local limits. Git publication is
+  in progress.
+- [ ] Slice 25: no go-ahead; outside this authorization.
+
+Carried, not fixed: untyped readers outside the five converted retained row
+types, and the repeated no-action sentence on inherited reprocessing. No live,
+model-quality, real CRM action, learner gain, cost or production-readiness
+claim follows. Acceptance record:
+[slice24-acceptance-publication-2026-10-11.md](plans/shiftwork/slice24-acceptance-publication-2026-10-11.md).
+Earlier notices below remain historical; acceptance supersedes their
+acceptance-pending labels.
+
+**S24 F1-F6 REPAIRED AND PRE-ACCEPTANCE CHECKS COMPLETE; ACCEPTANCE PENDING, 2026-10-11 Asia/Singapore.**
+
+An independent review of the R1/R2 repairs reported six findings, F1 to F6; all
+are repaired. A retained evidence row that no longer deserializes now raises one
+typed storage-boundary conflict (`RetainedRecordUnreadable`): replay reports
+UNKNOWN_MISSING_INPUTS, inheritance and controller reads refuse with 409, and
+nothing is written. One shared helper decides GTM customer text from the stored
+assessment for both the operational and the diagnostic projection, so a rejected
+or missing workflow task never reads as the answer.
+
+The repair module passes 59 tests. Full non-packaging regression passes 1,399
+with one live-only skip and two existing warnings. In a fresh disposable copy,
+all 73 S24 controls (69 distinct faults) and 106 S23 controls (102 distinct) were
+FAIL_CAUGHT on their named assertions, and the workspace stayed byte-identical.
+Both demos were rerun on the current tree. The GTM operation journey matches the
+2026-10-08 record apart from timing: replay IDENTICAL and unchanged projection
+text. The reviewed material passes with approval digest `8d87c2dc...62d1fa`.
+The refreshed architecture review passes within the offline scope and proposes
+no deletion.
+
+Open for the user: another independent review of the F1-F6 repairs, local
+commits, S24 acceptance and publication, and three non-blocking review items.
+These are untyped readers outside the five converted row types, a repeated
+no-action sentence on inherited reprocessing, and the stale S24 notice in
+`docs/SHIFTWORK_PLAN.md`.
+
+The [residual repair checkpoint](plans/shiftwork/slice24-residual-repair-checkpoint-2026-10-08.md)
+records each round, and the [architecture review](plans/shiftwork/slice24-architecture-review-2026-10-08.md)
+holds the 2026-10-11 refresh. S24 remains unaccepted, unstaged and uncommitted.
+No gates, reviewed material, seals, pins, installs, credentials, live calls,
+spending, publication or S25 authority changed. No process remains running.
+Earlier notices below retain their exact historical bytes and are superseded
+only for current state.
+
+**S24 R1/R2 RESIDUAL REPAIRS COMPLETE; ACCEPTANCE PENDING, 2026-10-08 Asia/Singapore.**
+
+The second independent review's two residual defects are repaired in
+`shiftwork/orchestrator.py`: the GTM projection rejection verdict now derives
+from the complete stored assessment for the request, so a required result
+missing from the captured response cannot leave the generic no-action
+assurance; and replay now converts expected retained-input deserialization
+failures at the loading boundary into the UNKNOWN_MISSING_INPUTS evidence
+verdict while reducer and programming errors still propagate.
+
+Six shipped regression cases fail against the pre-repair orchestrator on the
+intended sites and pass after the repair (module: 39 passed). The reviewer's R1
+and R2 probes pass from a disposable copy with fresh zero-write observations.
+Fresh full non-packaging regression passes 1,379 with one live-only skip and two
+existing warnings. All 55 S24 and 106 S23 mutation controls re-ran on a
+9,221-file disposable physical copy: every control FAIL_CAUGHT, every faulted
+file restored, and the copy verifies byte-exact against the workspace. Healthy
+demos remain unchanged.
+
+The [residual repair checkpoint](plans/shiftwork/slice24-residual-repair-checkpoint-2026-10-08.md)
+records the changes, proof and remaining limits. S24 remains unaccepted,
+unstaged and uncommitted. No gates, reviewed material, seals, pins, installs,
+credentials, live calls, spending, publication or S25 authority changed. No
+process remains running. Earlier notices below retain their exact historical
+bytes and are superseded only for current repair state.
+
+**S24 F1-F4 OFFLINE REPAIRS VERIFIED; ACCEPTANCE PENDING, 2026-10-08 Asia/Singapore.**
+
+The four demonstrated independent-review defects are repaired. Copied reviewer
+cases pass 36; final regression passes 1,373 with one live-only skip and two
+existing warnings. All 55 S24 and 106 refreshed S23 controls reach their intended
+assertions with zero setup errors and exact 6,215-file restoration. The first
+repair full-suite fixture leak and all excluded attempts remain retained.
+
+The [new repair checkpoint](plans/shiftwork/slice24-review-repair-checkpoint-2026-10-08.md) records the changes, before/after evidence,
+preservation, cleanup and remaining GTM specificity/disposable-material limits.
+S24 remains unaccepted, unstaged and uncommitted. No gates, reviewed material,
+seals, pins, installs, credentials, live calls, spending, publication or S25
+authority changed. No process remains running. Earlier notices below retain
+their exact historical bytes and are superseded only for current repair state.
+
+**S24 OFFLINE IMPLEMENTATION AND PROOFS COMPLETE; ACCEPTANCE PENDING, 2026-10-08 Asia/Singapore.**
+
+The remaining offline evidence is complete: final implementation-tree regression
+passed 1,340 tests, with one live-only skip and two existing warnings. All 55 S24
+and 106 refreshed S23 controls reached their intended named assertions, with zero
+setup errors. All 6,214 files in the disposable physical copy remain exact after
+both runs. No source fault ran in the shared OneDrive tree this continuation.
+
+The retained shipped-material API journey demonstrates exact selection, operation,
+restart, idempotent reprocessing, six later-condition slots and IDENTICAL replay.
+A separate human-review controller proof uses a consistent disposable operator
+mission/state; it is not additional production material approval. Reviewed GTM
+material, seals and pins still verify. Architecture cleanup proposes no deletion.
+
+S24 remains unaccepted, unstaged and uncommitted. Packaging remains excluded.
+No installs, credentials, live calls, spending, publication or S25 were authorized
+or performed. Nothing from this continuation remains running. Earlier notices
+below retain historical bytes and are superseded only for current completion state.
+
+Current checkpoint: [S24 offline result](plans/shiftwork/slice24-offline-checkpoint-2026-10-08.md).
+
+**S24 CONTINUATION HANDOFF; INCOMPLETE, 2026-10-08 Asia/Singapore.**
+
+The user requested this checkpoint before further work. The customer-projection
+TaskOutcome reference is repaired. Full offline regression passed 1,338 tests,
+with one live-only skip and two warnings, before the latest two separated guard
+tests. Latest guards plus the API lifecycle passed 25 tests with two warnings.
+Final-tree full regression remains unrun.
+
+Source-fault proof remains incomplete: 46 usable first-round controls after
+three excluded catches; 34 completed intended assertion catches in the second
+round. A restoration OSError stopped control 35. Source was restored byte-exactly.
+The current 55-control S24 runner includes six latest unpreflighted cases.
+A 6,214-file exact disposable copy at `C:\sw24-y6rzzs69` is prepared but unexecuted.
+Retained demo, refreshed S23 controls and architecture cleanup remain unrun.
+
+S24 is incomplete, unaccepted, unstaged and uncommitted. No tests, mutations or
+servers remain running. No installs, credentials, live calls, spending,
+publication or S25 are authorized. Reviewed GTM material and pins still verify.
+Current checkpoint: [slice24-continuation-handoff-2026-10-08.md](slice24-continuation-handoff-2026-10-08.md).
+Evidence: `evidence/slice24-offline-2026-10-08/continuation/`.
+Earlier notices below retain their historical bytes and prior evidence status.
+
+**S24 STARTED; INCOMPLETE HANDOFF, 2026-10-08 Asia/Singapore.**
+
+The user authorized `Start s24`, then requested a handoff checkpoint.
+Work is on `shiftwork/slice-24` from main `66f9b8d`; entry worktree clean.
+Offline GTM reduction, selected operation, captured-rule replay and ownership
+inheritance are drafted. The real API lifecycle proof passed once, including
+six qualifying slots, exact selection, operation, restart, reprocessing and
+six later-condition slots without changing prior business rows.
+
+Latest focused run: **2 failed, 315 passed, 2 warnings in 79.69s**, packaging
+not included. Both failures are a missing `TaskOutcome` reference in the new
+GTM customer-claim projection. This known defect is retained and unrepaired
+at the user's handoff boundary. The earlier lifecycle PASS predates that final
+projection addition and does not make the current tree green.
+
+S24 remains incomplete, unaccepted, unstaged and uncommitted. Full offline
+regression, S24 source-fault execution, retained demo and post-slice architecture
+review are unrun. The S23 fault runner has 106 unique anchors after replacing
+its superseded S24 refusal row; no faults were executed this turn.
+No installation, credential use, live call, spending, publication or S25 work.
+Tracked entry preservation passes outside the eight intended source/log files;
+all 19 reviewed GTM material files and their existing bindings still verify.
+Ignored historical local evidence and unchanged source-line bytes have not had
+an exhaustive final preservation audit.
+
+Current checkpoint: [slice24-handoff-2026-10-08.md](plans/shiftwork/slice24-handoff-2026-10-08.md).
+Evidence: `plans/shiftwork/evidence/slice24-offline-2026-10-08/`. Earlier notices are history.
+
 **S23 ACCEPTED AND PUBLISHED, 2026-10-08 Asia/Singapore.**
 
 S23 was accepted by the user, committed in focused batches, fast-forwarded

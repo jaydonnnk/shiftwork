@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-11",
+  "timezone": "Asia/Singapore",
+  "user_statement": "i accept s24 and authroize publication, publish and merge/push to main",
+  "slice": "S24",
+  "acceptance": "ACCEPTED_WITH_OFFLINE_LIMITS",
+  "authorized": [
+    "focused S24 staging and commits",
+    "merge S24 to main",
+    "push main and shiftwork/slice-24"
+  ],
+  "not_authorized": [
+    "live calls",
+    "credential use for product execution",
+    "installations",
+    "spending",
+    "S25"
+  ],
+  "accepted_without": [
+    "another independent review of the F1 to F6 repairs"
+  ],
+  "carried_open_items": [
+    "untyped errors from deserializers outside the five converted retained row types; background executors read before their failure-marking try",
+    "inherited reprocessing renders the no-action sentence once per NOT_APPLICABLE task"
+  ],
+  "approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa",
+  "entry_main": "66f9b8d5d286f67bb2e7dd75acf24c0ed1e029c0",
+  "final_receipts_zip_sha256": "d569caa3a1ca9bd63efd30db743376ce389014b53247d983859970dfbe17f28d"
+}

@@ -1,0 +1,2544 @@
+{
+  "date": "2026-10-11",
+  "zip": "s24-final-receipts.zip",
+  "zip_sha256": "d569caa3a1ca9bd63efd30db743376ce389014b53247d983859970dfbe17f28d",
+  "excluded": [
+    "C:/swr24-f2-receipts/preimage-shiftwork/ (source preimage copy; its manifest is included)",
+    "whole-tree disposable copies (C:/swr24-f2, C:/swrev24 and earlier) beyond the probe file",
+    "earlier-round receipt directories (r13, r14, f1, 2026-10-08 repairs); they remain local"
+  ],
+  "members": [
+    {
+      "member": "acceptance-checks-2026-10-11/architecture-inventory.json",
+      "source": "C:\\swr24-acc-20261011\\architecture-inventory.json",
+      "bytes": 1547,
+      "sha256": "6980c2cf41c558df278917544f1e438d2d04377aaf5c84aa3d350fa43663e7a1"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/demo-compare-r13code.json",
+      "source": "C:\\swr24-acc-20261011\\demo-compare-r13code.json",
+      "bytes": 8015,
+      "sha256": "b4d172085c4580322b815bcaa4fd4e2f50dbaf7db9de35515c7ee48c21d7432d"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/demo-compare.json",
+      "source": "C:\\swr24-acc-20261011\\demo-compare.json",
+      "bytes": 8015,
+      "sha256": "b4d172085c4580322b815bcaa4fd4e2f50dbaf7db9de35515c7ee48c21d7432d"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/demo/journey.db",
+      "source": "C:\\swr24-acc-20261011\\demo\\journey.db",
+      "bytes": 741376,
+      "sha256": "306e50b2f4c476b4723faa0ac158cb5b4e8b4c0c6583da86eac5b456c89d11d0"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/demo/journey.json",
+      "source": "C:\\swr24-acc-20261011\\demo\\journey.json",
+      "bytes": 73496,
+      "sha256": "c55bc03732e5f8198ede8b10948782b714483d8f567c48cb421e141fb9b8d20c"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/demo/journey.log",
+      "source": "C:\\swr24-acc-20261011\\demo\\journey.log",
+      "bytes": 970,
+      "sha256": "bba085981827d0ec6f4b29104d0ee1cdabb104655a3e2c8d1e484658a262792f"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/demo/journey.xml",
+      "source": "C:\\swr24-acc-20261011\\demo\\journey.xml",
+      "bytes": 401,
+      "sha256": "df9344fbfbf940ed8297e9d13730b092fb7d28c10bf9f8df3a4654de21220392"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/f2-copy-manifest.json",
+      "source": "C:\\swr24-acc-20261011\\f2-copy-manifest.json",
+      "bytes": 1503433,
+      "sha256": "6153686b6f490a092ced0bfb3124fe7eb01fff5762d9687c5e8a8ab536240b28"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/reviewed.log",
+      "source": "C:\\swr24-acc-20261011\\reviewed.log",
+      "bytes": 189,
+      "sha256": "f6230d28383413c8c187efe7d244a7a81d636d561c525fb80807fce87e6f047e"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/workspace-after.json",
+      "source": "C:\\swr24-acc-20261011\\workspace-after.json",
+      "bytes": 1503317,
+      "sha256": "0c362ea209da927f2cb935a5eec21397d3231dd2fb050dda9a722b1d4bc76bb0"
+    },
+    {
+      "member": "acceptance-checks-2026-10-11/workspace-before.json",
+      "source": "C:\\swr24-acc-20261011\\workspace-before.json",
+      "bytes": 1503317,
+      "sha256": "0c362ea209da927f2cb935a5eec21397d3231dd2fb050dda9a722b1d4bc76bb0"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/audit.json",
+      "source": "C:\\swr24-f2-receipts\\audit.json",
+      "bytes": 1326,
+      "sha256": "cf7f7ba8938426ecc2cec0e8fd219cf469aed93785d937caf2d1c88ede106c3c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/copy-after.json",
+      "source": "C:\\swr24-f2-receipts\\copy-after.json",
+      "bytes": 1503818,
+      "sha256": "1c5cfbaec1f27157d97c12fcf2a47917cc573f3add0ea8ccc149a9a4a3c373cd"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/copy-before.json",
+      "source": "C:\\swr24-f2-receipts\\copy-before.json",
+      "bytes": 1503818,
+      "sha256": "609d1d44883057c4c5f8b840a5ab0a3babb400651b34f12f4434d3ba172d191d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/copy-shiftwork-after.json",
+      "source": "C:\\swr24-f2-receipts\\copy-shiftwork-after.json",
+      "bytes": 17444,
+      "sha256": "c59fceacd638299c119191f5616f00505effdf7338456ef98b3ac3d0a6e6a410"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/preimage-shiftwork.json",
+      "source": "C:\\swr24-f2-receipts\\preimage-shiftwork.json",
+      "bytes": 17444,
+      "sha256": "c59fceacd638299c119191f5616f00505effdf7338456ef98b3ac3d0a6e6a410"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/probes-f2.log",
+      "source": "C:\\swr24-f2-receipts\\probes-f2.log",
+      "bytes": 465,
+      "sha256": "b33559e3d4e8f76dc8f9a1039ed433b2c07d585eb5c4b38116ce760a811b88a5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/probes-f2.xml",
+      "source": "C:\\swr24-f2-receipts\\probes-f2.xml",
+      "bytes": 544,
+      "sha256": "12f1f41ef97d4d25d51fdf626a28b7204fdb045e1f018720739135d2704601f9"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/runners.txt",
+      "source": "C:\\swr24-f2-receipts\\runners.txt",
+      "bytes": 32,
+      "sha256": "85dc6cc98ae4eda45d01670575ac19773d9e2ee473e9da80aedd32d5e14f2a9f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23.log",
+      "source": "C:\\swr24-f2-receipts\\s23.log",
+      "bytes": 3411,
+      "sha256": "17e018b0a6903f1b3a4cc3dae7e134ffb15d686c43286302961595b6387d0a8a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/active_status.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\active_status.log",
+      "bytes": 1736,
+      "sha256": "5e0134419bb8756c8854322ce4a4d390105b151ed24fbb679dae778c9c9859e8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/active_status.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\active_status.xml",
+      "bytes": 864,
+      "sha256": "eafd9a61c5a24dfc66cc8eafa0409913d4ea3b404e04d9a0c6eb920b2909db45"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_projection_allowed_assist_roles_json.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_projection_allowed_assist_roles_json.log",
+      "bytes": 1854,
+      "sha256": "a8b7cf2c6d0f14cbf7f7b6680fef62229df99035deb3ab79383187681ece23f5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_projection_allowed_assist_roles_json.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_projection_allowed_assist_roles_json.xml",
+      "bytes": 882,
+      "sha256": "4222079024dede1fa403adaf68074f16575e106f86f95f6edc50706727dd9f20"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_projection_assist_level.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_projection_assist_level.log",
+      "bytes": 1778,
+      "sha256": "6463136303a9f77e5bd82b21710cc4dcbdbd776963c5ade0430646506098764e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_projection_assist_level.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_projection_assist_level.xml",
+      "bytes": 814,
+      "sha256": "9faa242ab8c37fdae9ebf895b5ba5ce858b5946b82899a95778ed2908474d4c3"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_projection_total_assist_budget_per_shift.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_projection_total_assist_budget_per_shift.log",
+      "bytes": 1790,
+      "sha256": "5f1cec73f4e4cf273b6e6b5c244f827d18e6a73b78978d8773c2a13cb486720f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_projection_total_assist_budget_per_shift.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_projection_total_assist_budget_per_shift.xml",
+      "bytes": 820,
+      "sha256": "ae58372d8d5943897eb89e39a80544312ae5c51ad217b5cf2be809c98d76bd9f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_role.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_role.log",
+      "bytes": 1771,
+      "sha256": "2e90abe183830f8fff5027fcae974094e9a0b3d3bc92ff50ded003715195c49e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_role.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_role.xml",
+      "bytes": 935,
+      "sha256": "462bea7c90d473c783c5a5374d2635c9a7072bb120fc17b5058b13e658dc6687"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_total.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_total.log",
+      "bytes": 1703,
+      "sha256": "e2ff7febc9fb4257b65430303b8021b0639e2ba28fe499fb49814de1e19eb209"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/assist_total.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\assist_total.xml",
+      "bytes": 795,
+      "sha256": "1c54e96f313ebb2fe018e26cc7fbdf5a194e8ad0d7ed1a145415b40cc3fe4037"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/claim_cardinality.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\claim_cardinality.log",
+      "bytes": 1807,
+      "sha256": "868255698f31b706d18d06be0edce55a694cc6d5d138fbb645bf9c9b4b4c7712"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/claim_cardinality.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\claim_cardinality.xml",
+      "bytes": 983,
+      "sha256": "a8e7d3b584951dd266913886c3e95dec10ad1aa596fd8ac0bdb63038f8cf69f4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/claim_entity.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\claim_entity.log",
+      "bytes": 1810,
+      "sha256": "5b29a54d539c20029e7c426f31993bf83ec5d1d8b99e8f4fc77f304460028d49"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/claim_entity.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\claim_entity.xml",
+      "bytes": 986,
+      "sha256": "2f2d88a0223b44e1cfb21270dac17ba09a0c95e24afb7606eeea06f5e8cf27ac"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/claim_kind.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\claim_kind.log",
+      "bytes": 1808,
+      "sha256": "56de9223782da2e59e382479701c72904b785b812c873600d692a1dead589bca"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/claim_kind.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\claim_kind.xml",
+      "bytes": 984,
+      "sha256": "4fc90bb1bcbd481b3c43922da6e32394ee0211f22958266f1b3c2a3d7bb474a6"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/commitment.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\commitment.log",
+      "bytes": 1811,
+      "sha256": "edb0a491cc137dc9ca75ab9f94ccb2736d006a32ff949c13774a8d82bfeb94e0"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/commitment.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\commitment.xml",
+      "bytes": 987,
+      "sha256": "7b588b083f44f3e6a29674974e4aa993d57da770c1ab73e1360d35e1fdc710ce"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/delta_currency.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\delta_currency.log",
+      "bytes": 1646,
+      "sha256": "4d1b5aeba931fb79fc2accceacd80c709f774c9bf3c7a272a8e8d3f91bb2dae3"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/delta_currency.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\delta_currency.xml",
+      "bytes": 695,
+      "sha256": "94522e60a9017d181794b84a11a085c1bd37d7bf9098a38d3bde2de40718e14d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/delta_facts.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\delta_facts.log",
+      "bytes": 1643,
+      "sha256": "934f33860678753c25d7446a37450b4537eb03f2d45144435f7757c971f8b923"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/delta_facts.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\delta_facts.xml",
+      "bytes": 692,
+      "sha256": "5bb4b17df173ea1f3b03f2be7d7865ceaa7a7f9a654878af35e2db70e51ead9e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/delta_foreign_state.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\delta_foreign_state.log",
+      "bytes": 1651,
+      "sha256": "c344ab044a61a99f4637f9cd9db6cfec437eb9b17234af2a8b35eccd90d45e75"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/delta_foreign_state.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\delta_foreign_state.xml",
+      "bytes": 700,
+      "sha256": "ad5bb8822d5b5caab378f00b90bd6e7e93a4980e534a1f3adb08291634ff6217"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/empty_existing_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\empty_existing_owner.log",
+      "bytes": 1700,
+      "sha256": "84d6be016eda56baf54375551e4c89c9a00595c18ebf1cdccb1255991d01d6da"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/empty_existing_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\empty_existing_owner.xml",
+      "bytes": 746,
+      "sha256": "53c5a387a14475e42d58e937fbb7c0365d9c8e9570c0f95097900bcae64561f9"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/empty_existing_ref.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\empty_existing_ref.log",
+      "bytes": 1698,
+      "sha256": "13474ec9a85bf09a0c209c71d570fb94d446976c6cdcdb617666fe75326f02c5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/empty_existing_ref.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\empty_existing_ref.xml",
+      "bytes": 744,
+      "sha256": "0b011939bfcd1f57911fb1fc30515fd4225a7dbba32f1389e57741ce8401c35b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/evidence.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\evidence.log",
+      "bytes": 1806,
+      "sha256": "7203be9c454d2e2179a3ebcd82c03ff36e657f5e25aa831407f66185b711d5a5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/evidence.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\evidence.xml",
+      "bytes": 982,
+      "sha256": "2bf3d3a5e2284e17978ba7aa8cee552391ed959ca0ca1f21a27aa11cb7aa4b3b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/existing_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\existing_owner.log",
+      "bytes": 1835,
+      "sha256": "ee4d8ebda3d0404cebdd68f6feaab82162302764949ac6f4b5a083e9567638b8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/existing_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\existing_owner.xml",
+      "bytes": 1095,
+      "sha256": "46790eab9e9fdc2a782200a70a41453b2d0eb768c1fe6109532c4a835fcdf725"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/existing_pair.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\existing_pair.log",
+      "bytes": 1641,
+      "sha256": "5d51c5d6220ed93db8b1e0f2876a6c4546282d5ac80da48b20d64127ef7b4f75"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/existing_pair.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\existing_pair.xml",
+      "bytes": 690,
+      "sha256": "a9915a1d0e59ceef4eb46cb7aa0e0fc211dcf5dff4fc02fcc2d092d241a991c4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/existing_ref.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\existing_ref.log",
+      "bytes": 1640,
+      "sha256": "5e7d182562dc73041fa2a4aa5271afecc28b844a71bb2be884ef11f65b8d01bd"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/existing_ref.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\existing_ref.xml",
+      "bytes": 689,
+      "sha256": "d334bc5a93e90c8d1513be1e792ca7ac912fa99165da33dea7d4895e196eeee6"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/experiment_execution_boundary.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\experiment_execution_boundary.log",
+      "bytes": 1730,
+      "sha256": "ea7cd66220d63aa3220fced47c7e28e03d16e9d178a713371a7291f0de80b0fd"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/experiment_execution_boundary.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\experiment_execution_boundary.xml",
+      "bytes": 775,
+      "sha256": "9121d07cc7f26321b145ab4ad2025ce9f07996323fee2f5ef66dfffa80c56311"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/experiment_ledger_write.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\experiment_ledger_write.log",
+      "bytes": 2442,
+      "sha256": "a48bc7ce6ff56c530045a4691e2de8a82baa9b486c7eba21d9faa5ce90f5bbc3"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/experiment_ledger_write.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\experiment_ledger_write.xml",
+      "bytes": 2394,
+      "sha256": "efa67d58cbb0f5b75f1c67a30d34e1e74180a7b21d43b96c80886733f208e6d5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/family_tasks.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\family_tasks.log",
+      "bytes": 1731,
+      "sha256": "e682a632135cc9ac1c8d4ecc28fa9308246a2d2289ab0ca9fb9030d7f39546ee"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/family_tasks.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\family_tasks.xml",
+      "bytes": 777,
+      "sha256": "a6ebc8a78818f629f1e4257388b07565ddedaf2329fe50bfb71c526a62450b4a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/gtm_aspect_NAMED_TASK_OUTCOMES.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\gtm_aspect_NAMED_TASK_OUTCOMES.log",
+      "bytes": 2382,
+      "sha256": "3a676c52240ee5e4974bf9bae6a93a1c5933559599f1bbaa1b2846e081a99dd6"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/gtm_aspect_NAMED_TASK_OUTCOMES.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\gtm_aspect_NAMED_TASK_OUTCOMES.xml",
+      "bytes": 2221,
+      "sha256": "d0181838d18675853afe6dad0adaa1aafb732e6db4a0a6efcfd50be455dea364"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/gtm_aspect_NO_TASK_REASON_CODE.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\gtm_aspect_NO_TASK_REASON_CODE.log",
+      "bytes": 2382,
+      "sha256": "4b1e180110b951c4a0b8108e8a1b6f036b8b7d73dbb16842b9e7cc939ea7186d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/gtm_aspect_NO_TASK_REASON_CODE.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\gtm_aspect_NO_TASK_REASON_CODE.xml",
+      "bytes": 2221,
+      "sha256": "8a0828ed8fe85e203f9616bf3d08f79acb7dd3a849a207dbc10196d8a3011c65"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/gtm_operation_rules_frozen.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\gtm_operation_rules_frozen.log",
+      "bytes": 3824,
+      "sha256": "dac959beee5d24ecaa0e743d2ef6414df279c48d7f4ef226eba9e626c0ca7c28"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/gtm_operation_rules_frozen.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\gtm_operation_rules_frozen.xml",
+      "bytes": 4990,
+      "sha256": "a3334af5999823894b33f6711f6569161041ab8247618a137dce2d6763e2f3f0"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/inactive_claim.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\inactive_claim.log",
+      "bytes": 1719,
+      "sha256": "2f30d2c4ed5b2839e23725eca717c4aef23f5aeaecf268e31190d29e3fc37cab"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/inactive_claim.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\inactive_claim.xml",
+      "bytes": 847,
+      "sha256": "ba0e3906a4613fdaaa2bba7b18ec2e36207c29721871012b8d035c0b01ea49a7"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/inactive_commitment.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\inactive_commitment.log",
+      "bytes": 1724,
+      "sha256": "267d9ba08037dcedf5e0aff32e89a6e85f5bad8343f557c338dcf3b81df588ae"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/inactive_commitment.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\inactive_commitment.xml",
+      "bytes": 852,
+      "sha256": "447d04e073245280e626976cefcbb898db04ad4ce5cc5b66a571c04b8412bb7c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/inactive_status.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\inactive_status.log",
+      "bytes": 1720,
+      "sha256": "9d2d6c046bff48fae93d14c9e84e1bbff60aad97a78bd6c6832540c7e5c207f6"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/inactive_status.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\inactive_status.xml",
+      "bytes": 848,
+      "sha256": "414d290b97a6b493b3246658fd1f530a138e75957b328d027bdd833ce7c62483"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/incident_count.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\incident_count.log",
+      "bytes": 1692,
+      "sha256": "9506c0e1853d29e2ca10ea5b68273587e2f8d74ff7b808f069469b92c5808959"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/incident_count.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\incident_count.xml",
+      "bytes": 738,
+      "sha256": "77ebe77f6e83f242527abd3ae59ca7ac614c140f3c3108b92af2287f1fedd407"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/incident_entity.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\incident_entity.log",
+      "bytes": 1693,
+      "sha256": "7b455082fbdc27559b91965f6104fc90ced0e2200a0c1fee850acff0faabe939"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/incident_entity.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\incident_entity.xml",
+      "bytes": 739,
+      "sha256": "f1764e6619133416b37e12bd0542795ceedbbc330298aa930cebebd86d98c42e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/incident_request_id.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\incident_request_id.log",
+      "bytes": 1697,
+      "sha256": "e8fd1ac02abf24e79872caffa4a20b371968217774606d9fe38b1ad005688298"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/incident_request_id.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\incident_request_id.xml",
+      "bytes": 743,
+      "sha256": "0df7ff3908e044feacbf67519f175e94dd2e122926edaf2610d444d7f6580b7d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/incident_text.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\incident_text.log",
+      "bytes": 1691,
+      "sha256": "c86abbcfef545f45310d166abc21f0f2bf95641d2d83be49e873006a3167661c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/incident_text.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\incident_text.xml",
+      "bytes": 737,
+      "sha256": "38a9840ce492134cb2e5e581749e2de4ef58ab903f6debe4d0013786660199ad"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/mission_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\mission_owner.log",
+      "bytes": 1724,
+      "sha256": "a8c45daf374d53aec055e798d0a97670dbb5adeccf8375349109741c07f1e896"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/mission_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\mission_owner.xml",
+      "bytes": 773,
+      "sha256": "53337966a0701851300d2f84259c29a26f2651bbed5a9f3bd82521cb2a102caa"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/pinned_decisions.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\pinned_decisions.log",
+      "bytes": 1778,
+      "sha256": "4eef1a3c3e31fa41cb27b14c94bda6f1e81f0983721df712a19c257a4e709da9"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/pinned_decisions.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\pinned_decisions.xml",
+      "bytes": 980,
+      "sha256": "594409e52169125bbb9691b6765dde0ad79277c0f989730f4b6b93f8ee78078d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/pinned_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\pinned_owner.log",
+      "bytes": 1973,
+      "sha256": "1c357da468531ef1040c838a0590c69ace8c44731b4a7fd65d7de5f37844b366"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/pinned_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\pinned_owner.xml",
+      "bytes": 1265,
+      "sha256": "f6be34a9f5ce7c21858663b45c42da462544f3130994ea479f39f096a29def22"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_decision.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_decision.log",
+      "bytes": 1911,
+      "sha256": "9a1f0d855b88517716bccd29b7a35001c683c705b7a86261785e3d5896de4e75"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_decision.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_decision.xml",
+      "bytes": 1174,
+      "sha256": "c475f0ca35c55665b9bb043ac6e4d38d3825180720f6c1d888299890a798b9ea"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_duplicate_batch.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_duplicate_batch.log",
+      "bytes": 2650,
+      "sha256": "ae23b82a8967eca541580cb4983d66556ecd4f94cbeaa361a6796279783245a6"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_duplicate_batch.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_duplicate_batch.xml",
+      "bytes": 2678,
+      "sha256": "c566c559cb800735322316343585d39b7457f4be71fdf5741b7eaf84a126414b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_foreign_context.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_foreign_context.log",
+      "bytes": 2650,
+      "sha256": "106ca63f74108573b127fba53c4d9cc0418ef7e38d44922040d64ca84ee4c3d3"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_foreign_context.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_foreign_context.xml",
+      "bytes": 2678,
+      "sha256": "4c351d1044fbc1b464766d58268cb01a56088bb34ff29f43222cf93fedd26f36"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_protected_phase.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_protected_phase.log",
+      "bytes": 2650,
+      "sha256": "55bbc377ec2dc8cc4ea77aad87d2b22a63e0f795e9591617dcd40d17a1575cac"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_protected_phase.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_protected_phase.xml",
+      "bytes": 2678,
+      "sha256": "9fb400dc1951be678ce6e07f481915fbc624ccfe4b914b986b90861512409abc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_transport.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_transport.log",
+      "bytes": 2644,
+      "sha256": "963753e0cb166336516debcf0de5a29e74ff27b73d8dd2e2cd918ea4470612dc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_transport.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_transport.xml",
+      "bytes": 2672,
+      "sha256": "d8c1a46ca523a298c4767308a824a7cef20a4b9f9f3ccafc3544a6f6a045721a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_validity.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_validity.log",
+      "bytes": 1810,
+      "sha256": "7735731dfc000d7f54f72d9959e906b3124c0db7e876c2c0b7af2dbe4d891362"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_validity.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_validity.xml",
+      "bytes": 1025,
+      "sha256": "5cd60a09a6d492ad766fbcf68265d1fe29e27c4e435e67fde65e1d95d6266c38"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_wrong_batch.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_wrong_batch.log",
+      "bytes": 2646,
+      "sha256": "7e9d38eb59eb7bb2ae71c1b8cd5f6d6ab5d96da2425737f168f1dc7370a2a9a1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_wrong_batch.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_wrong_batch.xml",
+      "bytes": 2674,
+      "sha256": "ab2551b378e8fd2815b4a6665e0e32feb1b9f58322928daf46e26311bd95d43f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_wrong_spec.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_wrong_spec.log",
+      "bytes": 2645,
+      "sha256": "906674f7f3428a6973db12d1c4e1df7bf5dbde28d77ea59a83ec0c55fc878c86"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_wrong_spec.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_wrong_spec.xml",
+      "bytes": 2673,
+      "sha256": "6ca561dd91b275cfa2959af51818249a42507c4773649f3ede98ab59f061fd62"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_zero_ordinal.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_zero_ordinal.log",
+      "bytes": 2647,
+      "sha256": "1a3ee8cba2e4cb11e035f9aff1462ac33ce28471cad10289b7d711267d6a1ec5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/prior_zero_ordinal.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\prior_zero_ordinal.xml",
+      "bytes": 2675,
+      "sha256": "c7ef30c9b509fefa2d6f131ddce97c6e7321dce2ba9b08e61abe5ec7c606a801"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_account_domain.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_account_domain.log",
+      "bytes": 1767,
+      "sha256": "6264b2184b77a9a0f65da7c090d17f9b2bfc0d5e5004128b088763f0904a9577"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_account_domain.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_account_domain.xml",
+      "bytes": 803,
+      "sha256": "8917ad81afa54d0c2d2f92ed98e142023b1127fb975f6fd69c918c6f860a6c6f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_company_name.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_company_name.log",
+      "bytes": 1763,
+      "sha256": "62ac31ec763186a77bac8417f637e82e5aa93ef5694bb3a03e0b035c53c0d93e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_company_name.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_company_name.xml",
+      "bytes": 801,
+      "sha256": "9b6aba3859a9aa4ed3a783497a4122a7deb8c0962c314cd8ed55a072638d9f28"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_domain.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_domain.log",
+      "bytes": 1751,
+      "sha256": "4a99f0f76f487bb19aaadfbf0488651cd681f9f029a7c258624b1e41ce2beb60"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_domain.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_domain.xml",
+      "bytes": 795,
+      "sha256": "1e3d8847c42e96ca01e430eb72d8c1d1adb8c00c08153585e6268ae57c87740b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_entity_ref.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_entity_ref.log",
+      "bytes": 1759,
+      "sha256": "8cf86032e8b729fe159982e46ec65fc512db262d4caea4bd67826f056aef04df"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_entity_ref.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_entity_ref.xml",
+      "bytes": 799,
+      "sha256": "de7e72aeb13b82c8204b8ecb4514def422221b83623e23678b128cd31a6ca785"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_existing_record_ref.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_existing_record_ref.log",
+      "bytes": 1777,
+      "sha256": "d43572a2b88a37bca3e45bee03775ad8012f9e8108d5ad40644f14c09002b746"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_existing_record_ref.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_existing_record_ref.xml",
+      "bytes": 808,
+      "sha256": "1fcc81374b31bee97f11b08202c588cce4c6819a714bd15bb3ce099a92f8848d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_record_id.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_record_id.log",
+      "bytes": 1757,
+      "sha256": "d1572f0f5d07ca874a7aeb3405586ac7cafb714d8fb32d34ecfb0d6d97808118"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/private_record_id.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\private_record_id.xml",
+      "bytes": 798,
+      "sha256": "3a18e0923d9ff5c3e44369742997a45ff5ad51723215e4dcc60d2a0ffa1b1d4d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/result_entity.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\result_entity.log",
+      "bytes": 1804,
+      "sha256": "27fbab74f672f830014b286202aad4299d75bfcd2208a1328f1106ce5e4e209c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/result_entity.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\result_entity.xml",
+      "bytes": 980,
+      "sha256": "edd6705681658ededff7b425e7045ce8d5f8e490d745667ba98df3abb1c36a2d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/results.json",
+      "source": "C:\\swr24-f2-receipts\\s23\\results.json",
+      "bytes": 93460,
+      "sha256": "b2cc50b27ad0046422e391b05e3e71a22be1b0c55c8b101b371c9e8dc79b499c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/retry_name.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\retry_name.log",
+      "bytes": 1868,
+      "sha256": "58fcbc3a826b0aedcbae7edd8dd6326f73df7106c489223d73164266972e8add"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/retry_name.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\retry_name.xml",
+      "bytes": 1115,
+      "sha256": "ea64fd78524af16ff7f60f046b3d7e8812187ac1d4d8cf96a608b4967b193749"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_keys.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_keys.log",
+      "bytes": 1802,
+      "sha256": "d575f6eb13920affa95c949bee7fe84dbc0f7b4d7e324638e0574976fec0d412"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_keys.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_keys.xml",
+      "bytes": 978,
+      "sha256": "fd0ecc4450bd574463172af7c824916fbe66328cb75573993633d30137d1739b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_owner.log",
+      "bytes": 1809,
+      "sha256": "9ed510be28b018b69afb9ba7cac0692e3a29fe0821f93330e0d8780210834837"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_owner.xml",
+      "bytes": 985,
+      "sha256": "1ab915730fc4ed283aa5c797b230508e29e71cbea43dc6d5909d45b5b397a37a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_ref.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_ref.log",
+      "bytes": 1808,
+      "sha256": "62e10c53ede65982e2e75c77b141f52a16f43f83223b12e8cf226d5eef2a7ba9"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_ref.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_ref.xml",
+      "bytes": 984,
+      "sha256": "d1b6e14fe14541a6eba5e2973a3abe8224c63ce5343bb37371d2165bbb942cb8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_revenue.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_revenue.log",
+      "bytes": 1805,
+      "sha256": "f5b2f93f2584f1d534c185bf793c6406ba3ed5abc008ad7ae68e52326164f318"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_revenue.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_revenue.xml",
+      "bytes": 981,
+      "sha256": "23c7f0fd2805d1e79687b6fbe33f23fa657ea78266dcbcdc644700161bbb4833"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_type.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_type.log",
+      "bytes": 1731,
+      "sha256": "5a428b821078ab1a5680fa4366445100612595556262b7c840c0bedfadb9d161"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/row_type.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\row_type.xml",
+      "bytes": 859,
+      "sha256": "dc7b6469b0625a085419b8c2de6d96e49a63756b3219c3a947488ed446949dc5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_ambiguous.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_ambiguous.log",
+      "bytes": 1957,
+      "sha256": "eea5c6f1818b3af06a6e41fcb65c22581383b7d0df30eebb4a50696972f9bd38"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_ambiguous.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_ambiguous.xml",
+      "bytes": 1213,
+      "sha256": "befb1002d00cbd6798421d7c0275263d6110b7f0da24de89a524281a39040129"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_confidence_boundary.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_confidence_boundary.log",
+      "bytes": 1983,
+      "sha256": "38009f975d8e6cc0508a985bd5bce57a84cffdd6955da10d5618e3de220ee01b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_confidence_boundary.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_confidence_boundary.xml",
+      "bytes": 1226,
+      "sha256": "75f708af22d8f8d425b5915d6ca404834a3d0cbfd6ec0fd0532b4da1f2f28f5a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_freshness_boundary.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_freshness_boundary.log",
+      "bytes": 1981,
+      "sha256": "a982f740f4460db5fcbdadff82153c79d5af7a56eed2a9e8a363b3865857183f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_freshness_boundary.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_freshness_boundary.xml",
+      "bytes": 1225,
+      "sha256": "0bb441735c6fb4bfa931e138a31030f67ce702e700fea132b3512c4bd69ce756"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_low_confidence.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_low_confidence.log",
+      "bytes": 1967,
+      "sha256": "62d91b8b6e144a142704e803a2403eb7d762eea2496e6bff5b8fe306f51480d8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_low_confidence.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_low_confidence.xml",
+      "bytes": 1218,
+      "sha256": "5370036afc682755dd635bf7e29d86070a5ef89a3d581e7112bba482d88cfe81"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_research.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_research.log",
+      "bytes": 1979,
+      "sha256": "cbc11716f463fb13940b7d97d81e4371fdc52c777067dfabc22f920555b84b44"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_research.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_research.xml",
+      "bytes": 1242,
+      "sha256": "fa5e7f5d72db183bb14d8ca5eea6936df75cc6bab68a5a4375f3eced4c32c8bc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_size_boundary.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_size_boundary.log",
+      "bytes": 1983,
+      "sha256": "49f0b7356f47c8583cfdb38a512a4b0d234f0e01e2c2056ae8f084c23dac1781"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_size_boundary.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_size_boundary.xml",
+      "bytes": 1244,
+      "sha256": "9ce9079703ef0e1dd417da25cf33dc86aed4327d1e8d3fed0778c6e2b884c512"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_small_company.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_small_company.log",
+      "bytes": 1989,
+      "sha256": "1ae140693a081eaaa5b9b33997f2160023cc827d201852d95e96f8d0589cc292"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_small_company.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_small_company.xml",
+      "bytes": 1247,
+      "sha256": "6588b16c0ded689b78709a69a7424bc5efcdcb379f1064fba81f86940b85b8d0"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_stale.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_stale.log",
+      "bytes": 1949,
+      "sha256": "5ad967199a8e94ae5cf3094ad9dc604520fb4b0131dc616fd1cafb43751a6f2f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_stale.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_stale.xml",
+      "bytes": 1209,
+      "sha256": "2204f079aba0b45fd8826d8ce6ff97fed3e96b7d3930ab2c4f9ac94a9ce9c0d8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_suppressed.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_suppressed.log",
+      "bytes": 1983,
+      "sha256": "b5981439f8b1260de17097db3dc14a6f70005ae9d65b7958b02edfdd718ccf3e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_suppressed.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_suppressed.xml",
+      "bytes": 1244,
+      "sha256": "aaf480c6f194e50e5c7655713b65f98e87f4462e02be8e03c673c6cf5b330cec"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_unavailable.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_unavailable.log",
+      "bytes": 1961,
+      "sha256": "8c3bfb94bc262094d68a62a52ce8a1bb6c1684605c91cd679284fe539b35eaed"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_unavailable.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_unavailable.xml",
+      "bytes": 1215,
+      "sha256": "a4c675e128f80651720d578acf2b1203a94946cec3594d39573789973c06e535"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_unknown_product.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_unknown_product.log",
+      "bytes": 1969,
+      "sha256": "bb2d6606f95c8248e4a6a8af6108f76af4c60fb8cb841fb77047724ad3b86efc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_unknown_product.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_unknown_product.xml",
+      "bytes": 1219,
+      "sha256": "f420f2bbaa5cdad6160eee59951b0d1771630044ae7cd9e98a28dd349b873460"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_unknown_region.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_unknown_region.log",
+      "bytes": 1967,
+      "sha256": "2fd289a08fd835cac2952cb16029f515366f91726050d53f02cdf1c306d47f81"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/rubric_unknown_region.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\rubric_unknown_region.xml",
+      "bytes": 1218,
+      "sha256": "8d9a0aef0d93024d5a44e9e2cf61e853b8936463b8ddb2cd26c7d05fe547f9f1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/scalar_value.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\scalar_value.log",
+      "bytes": 1803,
+      "sha256": "ca77b4d86773f53010278b8d6f3391fcb81006749578e29f08cc32a760b34357"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/scalar_value.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\scalar_value.xml",
+      "bytes": 979,
+      "sha256": "dcbf48a8773f5e4529ab2be8e7437ac114ed40ef0dc3b4f1ccee5d379b677750"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/snapshot_type.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\snapshot_type.log",
+      "bytes": 1674,
+      "sha256": "7a842937d27a3994a7fc9a1399bedf9b8a9fd7b3602e1e9951399764c1e28a9c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/snapshot_type.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\snapshot_type.xml",
+      "bytes": 723,
+      "sha256": "3b83639bc8122c84e2127fc01973a2ca4a05a0936863fa88c00af642b77b5ffc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_conditional_required.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_conditional_required.log",
+      "bytes": 1680,
+      "sha256": "e1ebac689f2046ccf1b349b395457ee6e73f2a1791a8057e25820347626c2d5d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_conditional_required.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_conditional_required.xml",
+      "bytes": 726,
+      "sha256": "01a0a75793bc7fd3d4415ee5204fc0a586576d5357398b0acf4d1a664be4ca8a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_decision_vocabulary.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_decision_vocabulary.log",
+      "bytes": 1645,
+      "sha256": "7abaf6c2c26fdfe781f7016770ddafaea44a774604c8e483f15d9ba4dc419ef8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_decision_vocabulary.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_decision_vocabulary.xml",
+      "bytes": 691,
+      "sha256": "f1960431f96f850c28aae491afd128eabc967e7bb184f9510070797e7b3c1a24"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_decisions_not_list.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_decisions_not_list.log",
+      "bytes": 1678,
+      "sha256": "15583d2bf7829f6ce9f6b96c8f013a738d0f24573d6725981e066cccd1f92ed1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_decisions_not_list.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_decisions_not_list.xml",
+      "bytes": 724,
+      "sha256": "1e4b30124d71d49321e47b15ab63d0c8de35c65a554295f0f00551dd4c73ab6b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_disagreeing_conditions.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_disagreeing_conditions.log",
+      "bytes": 1651,
+      "sha256": "f46e0587119dd51533cc76146509ca9f3cd70d1898abc11014e6bb5a7c57cf4c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_disagreeing_conditions.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_disagreeing_conditions.xml",
+      "bytes": 697,
+      "sha256": "4b4ecd094804e0ef656bb6497e5303575239690dd2d77e3ff782d1748826f0cb"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_duplicate_decisions.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_duplicate_decisions.log",
+      "bytes": 1679,
+      "sha256": "89c09b1884e7e699fed64c46895aef49c4fb02cc0e2d8de066e662b1d596e043"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_duplicate_decisions.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_duplicate_decisions.xml",
+      "bytes": 725,
+      "sha256": "67ae1cd6cee0fcefb9bb8cd24119fbb4db27ef92d81bb5b3fe3a61dad91020ba"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_duplicate_id.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_duplicate_id.log",
+      "bytes": 1672,
+      "sha256": "2e6f07866afdc18aba1230eedf0ab27c4b541bf3f7cba779c39c1182e3b1e93a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_duplicate_id.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_duplicate_id.xml",
+      "bytes": 718,
+      "sha256": "57d54056d44c300ebc7477befec8828cdf307fbae8891344114ecb95e9f6ed5e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_duplicate_kind.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_duplicate_kind.log",
+      "bytes": 1674,
+      "sha256": "98c4f2ef44be1a8e03c4031fa3288129621d045d100145beefad8947911e94ff"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_duplicate_kind.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_duplicate_kind.xml",
+      "bytes": 720,
+      "sha256": "081f9f37aa66acaf170f2ad02c49be8be1d316be689345c03160c7e3de3ec1d7"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_empty_decisions.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_empty_decisions.log",
+      "bytes": 1675,
+      "sha256": "b989e5e9497a9005207a7eda867a7fa8b5bd8fc9615ed8d60e541c902ffe2486"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_empty_decisions.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_empty_decisions.xml",
+      "bytes": 721,
+      "sha256": "d093144c9580946decd28891498982510666c6b70caa90b0bd8c13de31d57062"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_empty_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_empty_owner.log",
+      "bytes": 1671,
+      "sha256": "3691f42c11087c4b5997c2b83d8072423108ee0770555446c523677061a8832c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_empty_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_empty_owner.xml",
+      "bytes": 717,
+      "sha256": "14c38f8943466182a28f191ccb69bdf8512240e240ed746be71289512a8f9713"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_empty_repeat.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_empty_repeat.log",
+      "bytes": 1672,
+      "sha256": "45eb9340a28274b5d24ad9bd42d10265f6e0935001f889c8f6dd3e850298d25d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_empty_repeat.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_empty_repeat.xml",
+      "bytes": 718,
+      "sha256": "1c0a359b84b27910719612ff0b19f666b470d5242e231e73a5c2bed8f29f6249"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_extra_condition.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_extra_condition.log",
+      "bytes": 1675,
+      "sha256": "3dcdbfd06c82f000ef7fb4e7ead8f12e8b702db10a6f6210eac39e5a6b944f53"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_extra_condition.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_extra_condition.xml",
+      "bytes": 721,
+      "sha256": "2bfa63a2b2a7a230418023c1c8c14528099a97374d721a2e42de9937961e2d29"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_extra_duplicate_task.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_extra_duplicate_task.log",
+      "bytes": 1680,
+      "sha256": "291f26e47e40ebe1532a6d424c3285122d73e4643ad779326951887e1c553722"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_extra_duplicate_task.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_extra_duplicate_task.xml",
+      "bytes": 726,
+      "sha256": "b39e8c56ab180533464cca7d009288a43316eb82e08c75d6cbd9ab09be9330d2"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_missing_rule.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_missing_rule.log",
+      "bytes": 1641,
+      "sha256": "94bc4429e5083535c9367dc6bee96b4761f36f9617d6a148a4e3cfe46adb77c7"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_missing_rule.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_missing_rule.xml",
+      "bytes": 687,
+      "sha256": "d76a7bf20a40b34b505c934863079b725b614715fa7e84d08238d76b95a4164c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_owner_not_text.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_owner_not_text.log",
+      "bytes": 1674,
+      "sha256": "2940854d476f78ffac924e356defa7af504c4d40dca55fa861c19eb0f33aa786"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_owner_not_text.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_owner_not_text.xml",
+      "bytes": 720,
+      "sha256": "0ebf6765b83dd5bc6284416ab53eacc3cf23de51d7fe756af519d952028c6eb7"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_qualification_optional.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_qualification_optional.log",
+      "bytes": 1682,
+      "sha256": "b79630e790f042ced5d0f6ff1d65f7df30999818de377660658d12353bce6ccd"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_qualification_optional.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_qualification_optional.xml",
+      "bytes": 728,
+      "sha256": "af3620cc31f5a8f4936a06c87308687f8eae61665b1d083ca3665d5795a852e4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_repeat_not_text.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_repeat_not_text.log",
+      "bytes": 1675,
+      "sha256": "4ef8f7468daeb12ac541a18b0f05f47e945103dfc2a5e9af9524c8bbfe5c7e1c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_repeat_not_text.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_repeat_not_text.xml",
+      "bytes": 721,
+      "sha256": "2c71338c05a08e09eaa2d125647398de9bbf5f1d3cd1475150c8a500c976fb19"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_two_entities.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_two_entities.log",
+      "bytes": 1672,
+      "sha256": "762b304f4dc4e1d5124f8c3f5bc887d267947507480d9724a476d91e96d74193"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_two_entities.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_two_entities.xml",
+      "bytes": 718,
+      "sha256": "881729f16aa8dcab8e1f86db23bcb1740af2b53cdd4491a0a129bc11621cef24"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_widen_review_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_widen_review_owner.log",
+      "bytes": 1647,
+      "sha256": "9b88b0b79851978712556acf5eb88e1691f17531f8d78ccdee4027fcfda7a4ea"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_widen_review_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_widen_review_owner.xml",
+      "bytes": 693,
+      "sha256": "c3c18e51b144509095c5e1f7dbab7b39e18753a40036a264e361d7e9b9749045"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_wrong_signal.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_wrong_signal.log",
+      "bytes": 1641,
+      "sha256": "0c36ffb5d5ccb0a5ec6667f4620cd95e2b65e98a058e59746c8c3f9fc2a62f3d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/spec_wrong_signal.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\spec_wrong_signal.xml",
+      "bytes": 687,
+      "sha256": "69eb65f66435fd3e6ba079b77f13bfcd8b3555a68f7c7c25d1b77443a75e99a3"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_domain.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_domain.log",
+      "bytes": 1634,
+      "sha256": "52930d4116851a1cdfd7a98edd0f249cdb38a98d4d1be8b2de372410e2765752"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_domain.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_domain.xml",
+      "bytes": 683,
+      "sha256": "3d00f1e9f05e55f1169e00728071743ebb38a60475b72159d46af53d25e7f886"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_duplicate_entity_ref.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_duplicate_entity_ref.log",
+      "bytes": 1650,
+      "sha256": "8e2f38265c7df9a378ca34a3e09b5f84af54bed4f9fc2457e91cc503e85e8c59"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_duplicate_entity_ref.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_duplicate_entity_ref.xml",
+      "bytes": 696,
+      "sha256": "23d9f1e4ce54809bfa0c447796e25580e1a50d09c9fad4a2ad439b2cb195d38a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_duplicate_record_id.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_duplicate_record_id.log",
+      "bytes": 1649,
+      "sha256": "20d6f9bd052403568cf9e7d9acdd221b86db1971c8f7e05f5b79af49c939f374"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_duplicate_record_id.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_duplicate_record_id.xml",
+      "bytes": 695,
+      "sha256": "698976f9f456e717dd2700e1016ece606497091921d30d0b51000876c862a843"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_empty_route.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_empty_route.log",
+      "bytes": 1641,
+      "sha256": "739bd56b5fda2973094675c696b9225d243064de3d8cddf208fb18fc9557bf16"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_empty_route.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_empty_route.xml",
+      "bytes": 687,
+      "sha256": "97feebb8211a978ade135597260f351077f2d5288aec40c25777fcdea7aa16aa"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_extra_dependency.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_extra_dependency.log",
+      "bytes": 1646,
+      "sha256": "6e368c23d501855743f88c7900fc08150ed5324aa65c6d9b1e1fc45a3d556ad1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_extra_dependency.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_extra_dependency.xml",
+      "bytes": 692,
+      "sha256": "395a308a3a75a2ffefe478ec8979fb377c340ecabc8e24c876848fa2be6f243e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_orphan_entity.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_orphan_entity.log",
+      "bytes": 1643,
+      "sha256": "59bc43ca7987e4802d91be3c789163ce8fb5d64d929e52339a68d63ed2351f54"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_orphan_entity.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_orphan_entity.xml",
+      "bytes": 689,
+      "sha256": "808a0e44bee02aab94a37b15dc943e611015f5571e4c963f49f375593e219c97"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_owner_comparison_state_path.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_owner_comparison_state_path.log",
+      "bytes": 1732,
+      "sha256": "ddd4c16568f39576806ab6db6f1c1b29c27127024914e9057ddf334b2d793bd1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_owner_comparison_state_path.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_owner_comparison_state_path.xml",
+      "bytes": 778,
+      "sha256": "2a3df819ee7f4746d38bcf3f9b94d52bb557c7ad267cebf2ed3808ef4cd154eb"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_owner_public_state_path.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_owner_public_state_path.log",
+      "bytes": 1728,
+      "sha256": "04374f474675fd454c40f810d0b5d9b222a394e24fd16448a985e04b0cd92449"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_owner_public_state_path.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_owner_public_state_path.xml",
+      "bytes": 774,
+      "sha256": "3c8c5b36453c47c42a33cd3f9e932a243ce8cec8d6b7a875ec247534096c4f67"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_review_route.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_review_route.log",
+      "bytes": 1642,
+      "sha256": "96417d2a28e52750de067012b66b7d7067ffc46d98b384455f259b1e7bd00433"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_review_route.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_review_route.xml",
+      "bytes": 688,
+      "sha256": "952a19455ac573e4b833da6d614a6d7c0c4ac6382b8cd8923b5d8307510482b4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_routes_missing.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_routes_missing.log",
+      "bytes": 1644,
+      "sha256": "d52276edcc77859af7e13fed268d13a84b4b0da8ac33c4580a6f039c480516db"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/state_routes_missing.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\state_routes_missing.xml",
+      "bytes": 690,
+      "sha256": "03ee7e0dffd13eb7515567aed792d20b8484c52247eaba2ecd6e20402594e2e7"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_decision.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_decision.log",
+      "bytes": 1803,
+      "sha256": "fa4bc28f0d601c76b18d7cd799c9b45560b2e080d0274b528482dca1146d2e2b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_decision.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_decision.xml",
+      "bytes": 979,
+      "sha256": "0ddcce161a192f605cdbd4ab76477807edbf473c42c1f723fc8972c7581a5669"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_length.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_length.log",
+      "bytes": 1808,
+      "sha256": "12dee765706d7c652c7fbb0e491fde307b922071c0a6385640e0ec4f3f2f7be8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_length.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_length.xml",
+      "bytes": 984,
+      "sha256": "ed61d92c5140a1da7c6aee3c2b6bfbadca94fc5f61eb6cd63c77b25ceb6a3c12"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_method.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_method.log",
+      "bytes": 1719,
+      "sha256": "6836b87a99eda8cdc64d26c7359b068f6096cb9ac4127a11579f58597d72127b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_method.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_method.xml",
+      "bytes": 847,
+      "sha256": "ded29004b41af89291f247c90e1028c34ff8cb23e530ee89ccb9947d5cf8867e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_short.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_short.log",
+      "bytes": 1734,
+      "sha256": "4f16f8c2d21e9eb5e93cc1b4f71d7ca7dc57ac6a93f8e54cc8fa90e6531a2a8d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_short.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_short.xml",
+      "bytes": 862,
+      "sha256": "ef107be0009b159d4e55f88822662ee806760294006a5bff12b584f004f4a2cb"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_type.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_type.log",
+      "bytes": 1733,
+      "sha256": "1ea8c779066cdcd94dc9918630c4ad3dcbca8f9952cc289e4e7207032aa545dc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/trace_type.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\trace_type.xml",
+      "bytes": 861,
+      "sha256": "ff33da67865a236fdc931fbef2cb67baf44130b566c0db8a0e147c723894b83c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/write_cardinality.log",
+      "source": "C:\\swr24-f2-receipts\\s23\\write_cardinality.log",
+      "bytes": 1807,
+      "sha256": "632564b45c18681822befbb64c0b4341f5f47e609df8fb1970c8161e94ce345f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s23/write_cardinality.xml",
+      "source": "C:\\swr24-f2-receipts\\s23\\write_cardinality.xml",
+      "bytes": 983,
+      "sha256": "59b3236baea66f3b396a727d683f5bdc34788e09e33428ce7975f0741af058de"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24.log",
+      "source": "C:\\swr24-f2-receipts\\s24.log",
+      "bytes": 2387,
+      "sha256": "5a8e5a6ef0c430f7d41145669e9252a8617963ff3c6e6f9cda1de9e8c416290c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/assessment_purpose.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\assessment_purpose.log",
+      "bytes": 1688,
+      "sha256": "e82a3a1732bb85978b91018f8dfb317f9cf4687a90070a942d691a3fa5a333eb"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/assessment_purpose.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\assessment_purpose.xml",
+      "bytes": 720,
+      "sha256": "a07637ca2241852d42bd62a15df88e04cf5c05d7db6877396e48d226d4d1f151"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/assessment_run.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\assessment_run.log",
+      "bytes": 1680,
+      "sha256": "adf3530d08027a983289307046e9bc331cf212ee6fe062412e28f12a7d48153a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/assessment_run.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\assessment_run.xml",
+      "bytes": 716,
+      "sha256": "bc897d38726475d619e38ef622fbdc9c0472278464a6c8f9f08cdab7ddbff0c1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_cardinality.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_cardinality.log",
+      "bytes": 1682,
+      "sha256": "8f9eb366a35d604324e1c2062e7002493392d01e468ec08be8e76226aeecb29a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_cardinality.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_cardinality.xml",
+      "bytes": 717,
+      "sha256": "6a5da9ea150f57a9adbacc3bc0d8a43c84e28c57f92e4040016b579d9201b1d9"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_inventory.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_inventory.log",
+      "bytes": 1674,
+      "sha256": "4e553d3e2339f355234f044eb7da6e079f37fbd10c66b3fec2f941a4b8933af9"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_inventory.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_inventory.xml",
+      "bytes": 713,
+      "sha256": "f14210c2c60e4accebbfa101bf777e75da4d4553d711f5d59115f4b776f2cfcc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_output.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_output.log",
+      "bytes": 1665,
+      "sha256": "f1a9f2ecad7caaaec8e8f8d787171da4564b47bbd23c70d29be68028841f391e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_output.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_output.xml",
+      "bytes": 701,
+      "sha256": "0299c4d2bb0533bcc1c227a7b3d7c6a4c7bf09c664440c9bd879037fa42c7cd7"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_run.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_run.log",
+      "bytes": 1663,
+      "sha256": "2ae8fe950edaf1f59e1a2249de2377d00f47aa1147472f04df005483915cacb5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_run.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_run.xml",
+      "bytes": 700,
+      "sha256": "c53499621f92bd1be57e481b42c26c974a920645a196be0730999633c6d26816"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_verdict.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_verdict.log",
+      "bytes": 1678,
+      "sha256": "c9f996458cefc7b9e3e826e5a3b571011bf7c2fc41ece844b408ac75b6b6dbb5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/check_verdict.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\check_verdict.xml",
+      "bytes": 715,
+      "sha256": "54444147ec9ac6880eab84d19f59f8817bc6d65a9cfad8b82fd29d401154a965"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/clock_event.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\clock_event.log",
+      "bytes": 1861,
+      "sha256": "1140caf04e3a6d060232fbafe2b5354c85a80656e650b6b8a6e4eaa977996afa"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/clock_event.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\clock_event.xml",
+      "bytes": 1130,
+      "sha256": "72062d0fa766a2d18f5f3f284e4c38f16e79f4a964b8a2128745db246c04b874"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/diagnostic_unfiltered.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\diagnostic_unfiltered.log",
+      "bytes": 1982,
+      "sha256": "8b70861e0705dc3a67634597f87cce6139e554ecd997b90f4840d9483268e75a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/diagnostic_unfiltered.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\diagnostic_unfiltered.xml",
+      "bytes": 1355,
+      "sha256": "f89da2f73a30c58ae89692cf1c3857ec042a2d184678aa3ecd518950d11afa1c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/freeze_broken_chain.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\freeze_broken_chain.log",
+      "bytes": 1765,
+      "sha256": "3813dd1bdec26e2d82150bdbdb1b73568c63376e3347d159ce744917adfc95ff"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/freeze_broken_chain.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\freeze_broken_chain.xml",
+      "bytes": 810,
+      "sha256": "fab60721c8a5d72353a1de0780abe64dedf2ab55872a232fc827f2b1c6ee1cc4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/freeze_duplicate_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\freeze_duplicate_owner.log",
+      "bytes": 1740,
+      "sha256": "a5469d201d18038651e44d505a88dae618e018d5623188078da40f1ce6a8a254"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/freeze_duplicate_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\freeze_duplicate_owner.xml",
+      "bytes": 785,
+      "sha256": "da196df078d78d7c743a5f885d7a11041221065243c637416d6dea8b838aefe8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/freeze_history_overlay.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\freeze_history_overlay.log",
+      "bytes": 2162,
+      "sha256": "8c79dc9941a68c176cd0bf576b40021c9a863d27e199d6cc027d974ab6182211"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/freeze_history_overlay.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\freeze_history_overlay.xml",
+      "bytes": 1614,
+      "sha256": "045f169f6913e1ec25ccfe5aab526c1f5e788707e0e0e2def0b94036a62546e4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/handoff_event.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\handoff_event.log",
+      "bytes": 1844,
+      "sha256": "1f4315f075ecaaddb2b7c8ca10d26c9a060b47b9260243e4803f5b97abbe40f1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/handoff_event.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\handoff_event.xml",
+      "bytes": 1096,
+      "sha256": "80de597f27aba9fa41496a6df788fc60b63546ef32d3906762ebadf742fa19d8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_conflict.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_conflict.log",
+      "bytes": 1704,
+      "sha256": "96253a3f89f3676748d3f1dc51e9e9eaf10b0ba5f26c6cbb623b64a9b9c9b250"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_conflict.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_conflict.xml",
+      "bytes": 740,
+      "sha256": "965dde2cd8f890eea00e915606f10caa086b949089b2944e70f1670f03cb395a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_overlay.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_overlay.log",
+      "bytes": 1703,
+      "sha256": "ed9acdd946dbbc7309b653edaefd41946463be8b8d864cb4eacf5fc08e4a9f7d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_overlay.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_overlay.xml",
+      "bytes": 764,
+      "sha256": "43fa1750839ce4f17d10464656ba7358956921e73212e60a7c9cbcb98a1676ef"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_owner_empty.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_owner_empty.log",
+      "bytes": 1793,
+      "sha256": "c0a26c3f5cab4c67884db7c174d6a005132144e7900beb5dd8d6f16e2882e525"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_owner_empty.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_owner_empty.xml",
+      "bytes": 837,
+      "sha256": "3efd12adade429dbd250daf38b2d6657a8c7630b76937ad73c0d754161e74c84"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_owner_type.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_owner_type.log",
+      "bytes": 1799,
+      "sha256": "e7e7269c5cd1b3eee6d1816970347df8689f8e53f17c97b9ad273ec5930f74e1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_owner_type.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_owner_type.xml",
+      "bytes": 840,
+      "sha256": "5a8283dcf72cd08459be3815cbb4e6909e862cf6443d311278a46e6e5a5757f4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_record_fields.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_record_fields.log",
+      "bytes": 1793,
+      "sha256": "aed5d9aee4277ab54075c758cc19f94bb8850b204622ee14108f4a060b2d3f32"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_record_fields.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_record_fields.xml",
+      "bytes": 837,
+      "sha256": "df2ad5ee026966dd3674130166828d847080f52b222a05ccf12e4675b6027287"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_record_ref.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_record_ref.log",
+      "bytes": 1789,
+      "sha256": "4e2f012ea1c5be0b4b3c6b77ced4927c7695557150746aedfc0ba082e94b3450"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_record_ref.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_record_ref.xml",
+      "bytes": 835,
+      "sha256": "0d30a6ff215811c5408e3dbe063370a39c3d30916c6a1235f23aee5011f7eea9"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_signal_prefix.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_signal_prefix.log",
+      "bytes": 1797,
+      "sha256": "08b90e41de1c5b8687d6852bf2afe4c6d0711816ba6ff7058b3767be1a1e7b5c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/history_signal_prefix.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\history_signal_prefix.xml",
+      "bytes": 839,
+      "sha256": "fc8e7669f9ee38b85ee2d1cf9c1c91d553da6dadff33d2ef01defa675852adc0"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/human_terminal.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\human_terminal.log",
+      "bytes": 1720,
+      "sha256": "d9cfd113053d16818fa0ca6115fe7ee6aa640cc375b02f8c9b1751085854eed2"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/human_terminal.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\human_terminal.xml",
+      "bytes": 835,
+      "sha256": "7d6ad40d1e6d177eeaa669a3cb2695643cc87776ac6d2e09b02c27e1569970dc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/incident_provenance.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\incident_provenance.log",
+      "bytes": 1850,
+      "sha256": "7ec42bdc404a386b0e770cead1624d94ce90ac2f0e18b007388fe2ecee920aae"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/incident_provenance.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\incident_provenance.xml",
+      "bytes": 1055,
+      "sha256": "091d674ea6f513a50785d97aa22e582ca0dc2d2f5d5f3e3431cd3794354b7019"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/incident_tasks.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\incident_tasks.log",
+      "bytes": 1806,
+      "sha256": "5f4cd32a505354d684b10bdd2239626ead2d0973603edfc4b60bcb3aca4a9d7f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/incident_tasks.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\incident_tasks.xml",
+      "bytes": 925,
+      "sha256": "fc10f978428dd2ae667d3178ed53a07424ae33d98c159bcb9d189c4321aa3b0f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/incident_trace.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\incident_trace.log",
+      "bytes": 1815,
+      "sha256": "4d065667bd7170dd387f9cbfc22d6c70a58a3870ea35f4b99ad2578753f9dcb8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/incident_trace.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\incident_trace.xml",
+      "bytes": 978,
+      "sha256": "1ba20f9b4301643c0c0dba895203bf407d13dc9c87711e34648433726b824cdf"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/later_history_hash.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\later_history_hash.log",
+      "bytes": 1774,
+      "sha256": "e06b6958f78472a3f54ae735a5713126126010f17aa5fc59cd107070f0f0a639"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/later_history_hash.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\later_history_hash.xml",
+      "bytes": 819,
+      "sha256": "e3d63e274dbab5896f2ad0491c662415d32c6dae5032046835c40dd84c2b51c2"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/later_history_overlay.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\later_history_overlay.log",
+      "bytes": 1854,
+      "sha256": "3dbe6bb223b4b6a11671454e68fe40fbb1ce2318d8e1c291623493f9628df94f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/later_history_overlay.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\later_history_overlay.xml",
+      "bytes": 1159,
+      "sha256": "b1d8117365a757cb71a553ebf5c2ff6d2b76c74558ed521f3da0b810f03665bf"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/later_pack_pins.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\later_pack_pins.log",
+      "bytes": 1816,
+      "sha256": "4fd40f47ff53a66913d1f32f9aad71e22bfe9d2b07aeb613f27fa21482501e0f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/later_pack_pins.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\later_pack_pins.xml",
+      "bytes": 1083,
+      "sha256": "c6b683cc65b58738706931c8cef1c23bb1ce3bbf9218131578737ce00b96fc81"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/malformed_accepted_capture.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\malformed_accepted_capture.log",
+      "bytes": 1791,
+      "sha256": "8a55371fcdef0685466c656958b9041f520b4baff478e17c593de4f88df9221c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/malformed_accepted_capture.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\malformed_accepted_capture.xml",
+      "bytes": 832,
+      "sha256": "25736de34ad4e31d8562e7fa3b0a85de61cc3630626488674e8f0df44935c17f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/missing_task_assurance.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\missing_task_assurance.log",
+      "bytes": 1988,
+      "sha256": "83f87a407b2b5e1529e271aeeb799e65cd91a19caccbb67832d3babd421d4a5b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/missing_task_assurance.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\missing_task_assurance.xml",
+      "bytes": 1321,
+      "sha256": "fc1a97b7c7c70bf5a076485edffc3d81ba912becb476b44c1ae70f06468acdee"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/mission_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\mission_owner.log",
+      "bytes": 1682,
+      "sha256": "0a267dcb81d53e7f7e2bacb1b6eec7f04e376f62c44853dacdac6b702c4ae89d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/mission_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\mission_owner.xml",
+      "bytes": 717,
+      "sha256": "4d52a798435475b458c9904561af173a9b0bece3872fd949176985d6807f62be"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operation_accounting.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\operation_accounting.log",
+      "bytes": 1760,
+      "sha256": "a28b67cbbd98f38ac1f1e74374b384cdf92a239df33cbfae1b02eef583944d69"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operation_accounting.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\operation_accounting.xml",
+      "bytes": 805,
+      "sha256": "ea212d5a0cb15bd9bc44862fd2511bb3af39c55af38e8c8a79b548003575838b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operation_purpose.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\operation_purpose.log",
+      "bytes": 1657,
+      "sha256": "4011207c5dedb08b0843eb214441cff0f9f4f99165d0be4151aff730bdb92cd2"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operation_purpose.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\operation_purpose.xml",
+      "bytes": 697,
+      "sha256": "1327e844fed1c8d62c38df9c9281dd0961f8cfd2875581b3fc31a310aca69324"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_duplicate_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_duplicate_owner.log",
+      "bytes": 1876,
+      "sha256": "16fc7b6f142da81b6cab4d21e28a7f680c67d5f65474a648f99495a35b04d093"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_duplicate_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_duplicate_owner.xml",
+      "bytes": 1121,
+      "sha256": "d0998445e8a83619d860f06af89cbbf26e65ce55f8f9f86f4bf58882486105c7"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_duplicate_write.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_duplicate_write.log",
+      "bytes": 1876,
+      "sha256": "a20c6547c760c07b842b1312eb014b90ed84eec42c79026baa6247c9e71fb3ef"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_duplicate_write.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_duplicate_write.xml",
+      "bytes": 1121,
+      "sha256": "b7abe655eb34c3d030b22ec2b3dab08adb38b925c9bd55a657c7670474095507"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_missing_handoff.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_missing_handoff.log",
+      "bytes": 1861,
+      "sha256": "4e5ab184bcee5fe3c619d033ddbfaa2e309199acc1223e7ccf52b1bcbeefd8cd"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_missing_handoff.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_missing_handoff.xml",
+      "bytes": 1088,
+      "sha256": "d0746915a420d77be46d0f498c77a85b337713b9c5f151bcb4b4cfe7d79a2865"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_missing_owner.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_missing_owner.log",
+      "bytes": 1766,
+      "sha256": "9790a579d7cdb0f845ce086773feddd2dba63d1703a0407da941974156fabb6c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_missing_owner.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_missing_owner.xml",
+      "bytes": 905,
+      "sha256": "6ac66f220040634d20b32c4f79721ad95f899b941aef99ac3167deb5957e8914"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_revenue.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_revenue.log",
+      "bytes": 1850,
+      "sha256": "8599c7766d62e4de831bb7b3d28d902b3dc2dc940362833c19e3d005ce818667"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_revenue.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_revenue.xml",
+      "bytes": 1105,
+      "sha256": "a44f1490f9dd24e2d175349f3128ec826695075946ce5d87a354e1b082e86828"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_sent_message.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_sent_message.log",
+      "bytes": 1855,
+      "sha256": "f3a140ef6fbcfacbc0cab7a99858c64e847e1359c272388c373358099d087847"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/operational_sent_message.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\operational_sent_message.xml",
+      "bytes": 1110,
+      "sha256": "f6ba95ae76a4a61aae8ca7ec3483e4e7ef3922e579ac787e1cf4b5e428ac046e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/output_cardinality.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\output_cardinality.log",
+      "bytes": 1669,
+      "sha256": "a225fc6013808f9f91b33500b6c8a656bb9436455b2911698bf1a19bd688fb8d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/output_cardinality.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\output_cardinality.xml",
+      "bytes": 703,
+      "sha256": "bb3c4a7a763ce5438857fa53d606a2e07f56ac47a03ec11e7a9474c00a231c32"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/output_ordinals.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\output_ordinals.log",
+      "bytes": 1676,
+      "sha256": "64ab5a01e9f67018826712c84d410cffaf474a77616eefade46227783c3e47e0"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/output_ordinals.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\output_ordinals.xml",
+      "bytes": 714,
+      "sha256": "b2b687a1604be2d7fcf54f80503f0f10a4ce6589f54ec006731d2e97ad25711c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/output_run.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\output_run.log",
+      "bytes": 1659,
+      "sha256": "1c91eb6e438876fc9189ad73b9deb6e6d5542591071fae24bdd0a4e61f50ddfe"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/output_run.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\output_run.xml",
+      "bytes": 698,
+      "sha256": "8766e88fcef2bfdd90571c2fcd028831775ae08f1b114b2c29119da839b005c1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/output_transport.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\output_transport.log",
+      "bytes": 1670,
+      "sha256": "7a69a2a854e16adaa202602ae7a61d723c56ccf299321b812b254bac1020ba48"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/output_transport.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\output_transport.xml",
+      "bytes": 711,
+      "sha256": "211c335379ff1bdb9db7c31fe3f4745c51092c1076f41bff4200cbebe0b57bbf"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/owner_event.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\owner_event.log",
+      "bytes": 1858,
+      "sha256": "bea930eb50e83403fb4c465773ae535819ef6f2d243d67261cb63bd999992465"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/owner_event.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\owner_event.xml",
+      "bytes": 1124,
+      "sha256": "66da5e74de118bdaecf47a7bf111fa5de2e25cebb800198b66ad0e1f79a2d91a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/projection_revenue.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\projection_revenue.log",
+      "bytes": 2358,
+      "sha256": "f2891d202051fc4a10a7bef4102229083bc9d6c7d52382a2292116e84a7a94ef"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/projection_revenue.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\projection_revenue.xml",
+      "bytes": 2092,
+      "sha256": "8c62a1981e01247884aa7add3ab1622cdda4e0f1a80cc7f0f63f2f686f0773b8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/projection_sent_message.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\projection_sent_message.log",
+      "bytes": 2392,
+      "sha256": "cbf7a3cba3f7421a788c823363a08234072b37fb16f631a765fb3fe610c7f0e6"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/projection_sent_message.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\projection_sent_message.xml",
+      "bytes": 2145,
+      "sha256": "6a77ebbc1cb3130704d5551cb7d9dd585906fb0feb9d9c3eab6ca518f670002f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rejected_fallback_shown.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\rejected_fallback_shown.log",
+      "bytes": 2127,
+      "sha256": "6843a3de96e4ec98a26da9b096b5fbc73062d407831ddabfeda99e182715481c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rejected_fallback_shown.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\rejected_fallback_shown.xml",
+      "bytes": 1632,
+      "sha256": "b7fc314364af20e21d16e3be7e0e859b990b0b5cd0df2fd55727e49b36905bd6"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rejection_sentence.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\rejection_sentence.log",
+      "bytes": 1796,
+      "sha256": "f9bc45e9b18158cdf00f94a6bc00465e2e7b8f59f134648b83ad81740a282297"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rejection_sentence.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\rejection_sentence.xml",
+      "bytes": 995,
+      "sha256": "9daba2c9685ef4d8b0cba55a3630c09741ab3b6015d939a147a2204c0f5480e2"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/replay_checks_outside_conversion.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\replay_checks_outside_conversion.log",
+      "bytes": 3151,
+      "sha256": "c42270e2d5cac8030433c5e8d96e80f4167994c4f00c608b928911b8b58d8fc5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/replay_checks_outside_conversion.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\replay_checks_outside_conversion.xml",
+      "bytes": 2275,
+      "sha256": "16a87d41ce29b3261f1d00b8cd305a648385c8fe9157ae96b96970aac5273b3e"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/replay_context_outside_conversion.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\replay_context_outside_conversion.log",
+      "bytes": 3300,
+      "sha256": "bcacb5a909d39572ed351d8063619a41fe93d72742290941e00e2991bf41e641"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/replay_context_outside_conversion.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\replay_context_outside_conversion.xml",
+      "bytes": 2419,
+      "sha256": "c9d65176a94e73a6dcdc498fca9c64b18ea55513e7a30a2ccef14f72ffabb936"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/replay_drafts_outside_conversion.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\replay_drafts_outside_conversion.log",
+      "bytes": 3526,
+      "sha256": "2de13c98f17d9dc3663e4695ca7aa1ed57c1a0d3de8b1ffc51176bbdc3782cd1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/replay_drafts_outside_conversion.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\replay_drafts_outside_conversion.xml",
+      "bytes": 2646,
+      "sha256": "cc29a81b930f57415748a811becfb2a3c7b8832befb27dd53d79cc0c856e179b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/replay_outputs_outside_conversion.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\replay_outputs_outside_conversion.log",
+      "bytes": 3205,
+      "sha256": "16f89c77e5218e8cc36088f0f1b43c8ecce083249e26501f1ea2210a278739a4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/replay_outputs_outside_conversion.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\replay_outputs_outside_conversion.xml",
+      "bytes": 2324,
+      "sha256": "a526dca0f32f3b19bb0f2ff537b7452f195b31af1b37f6a8d59ad3dc9fb98144"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/results.json",
+      "source": "C:\\swr24-f2-receipts\\s24\\results.json",
+      "bytes": 60160,
+      "sha256": "758492c0e7a9f17b764c66eb833d906ea1bf4c816acbd9f2affcdce9ace9c0ac"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_assessment_rows.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_assessment_rows.log",
+      "bytes": 1782,
+      "sha256": "3b4edc6749867db6ef612e8c1e3346054359c403f4f283c4ae93532c4ad8c806"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_assessment_rows.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_assessment_rows.xml",
+      "bytes": 951,
+      "sha256": "1a6e378278e4aeaa62d3499e8b115ea43a3c94faffbab13bf01c4516e415769b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_check_rows.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_check_rows.log",
+      "bytes": 2945,
+      "sha256": "d20d31b858d3b405f18746bfac807c507676a10d489635c33707be3ac3595d2a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_check_rows.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_check_rows.xml",
+      "bytes": 2069,
+      "sha256": "f1793fc2a5613dfbcbc5cb719a180ce4722954215dcf43b5a4685677117d4dc4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_context_rows.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_context_rows.log",
+      "bytes": 1813,
+      "sha256": "061b9480ef71845a8a0fe2fd1bb3b39afe5378e07073fb17fb9c3bac3fae8a27"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_context_rows.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_context_rows.xml",
+      "bytes": 995,
+      "sha256": "85acdeb0d0f9360185e26f6e530d5455e9b26a6cd044f457c61ac2dfc07e2ab1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_ledger_rows.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_ledger_rows.log",
+      "bytes": 3157,
+      "sha256": "669bda7c4a969eddac1f00ad6b71eea37b4df68a9d758e7d1733e5ef7629f724"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_ledger_rows.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_ledger_rows.xml",
+      "bytes": 2281,
+      "sha256": "6f2809f091ce95aa5855abda21ee629c3e93ba12f743e6aa05b51327ddd95ef5"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_output_rows.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_output_rows.log",
+      "bytes": 3133,
+      "sha256": "a3b1997a0c99d648d03c58711df0e2d6a39c5142f110faa29d0be299d17de0e4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_output_rows.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_output_rows.xml",
+      "bytes": 2538,
+      "sha256": "1cb7ad77c99778b15a28b372a84383c96e3e325e38149ee3f0c34621f3aec10f"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_type_arm.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_type_arm.log",
+      "bytes": 3371,
+      "sha256": "fb3354b70c0a38e38b2e6f7e0b65d61f03350f98308c1792866c1def6a536a04"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_type_arm.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_type_arm.xml",
+      "bytes": 2517,
+      "sha256": "bb6d15343330dd75e69f508374aa8b6ce9d9e656c26793801510d58289870bac"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_value_arm.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_value_arm.log",
+      "bytes": 3632,
+      "sha256": "ccdaf3b5f113334df657d61ff6fca125d2dfe46e1d5e3039a9e8539260531384"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/retained_value_arm.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\retained_value_arm.xml",
+      "bytes": 2963,
+      "sha256": "f2499875a11e8d993045ddff176e64636583faca0f0454bfab207384802e7661"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/row_inventory.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\row_inventory.log",
+      "bytes": 1670,
+      "sha256": "7b665e9b72697acaae343bfe79dd9bacb9a1c43e39e81bb2d1d9687d8e5799b0"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/row_inventory.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\row_inventory.xml",
+      "bytes": 711,
+      "sha256": "fb02d178021461e0210f64933f76b073d23ada6d552e33e34c82c574a1f5b276"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_handoff_weight.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_handoff_weight.log",
+      "bytes": 1824,
+      "sha256": "a89f959370ef4eb014e8c6f20c1522da39738ae08a0712cddcfd249f762b2e1b"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_handoff_weight.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_handoff_weight.xml",
+      "bytes": 859,
+      "sha256": "c87356f10ae3537927d3a0582e01829af11a0b7f2826616813fb42ef4fdbbd99"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_handover.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_handover.log",
+      "bytes": 1724,
+      "sha256": "ffeac197cdcc93965a8be1d55a7100213330d4dcbc7c2c4fc8d08826b875b69a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_handover.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_handover.xml",
+      "bytes": 769,
+      "sha256": "2e7d71138b718bc0046b6b4f07edb161a3bb22ea1668d581686a0e5d35e91f0a"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_history_hash.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_history_hash.log",
+      "bytes": 1818,
+      "sha256": "f1395837b42c746315a607715651af3772cbdb274007b0d9788523e20b5368e4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_history_hash.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_history_hash.xml",
+      "bytes": 856,
+      "sha256": "3b86fd0652de2adbf41a94ba7a8bb735f85680a290f543d29be15b6cfa444fa2"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_pack.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_pack.log",
+      "bytes": 1818,
+      "sha256": "2456d7237f265d5d07e9bb64fcff293f65936e231e550c5820732576409a20e8"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_pack.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_pack.xml",
+      "bytes": 856,
+      "sha256": "976864c9b211bc379545a113bb798bd7bacf1ba056af21003b6447fe7ab91fea"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_rollout.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_rollout.log",
+      "bytes": 1723,
+      "sha256": "f3e8c67ba5e5a6499a17c865f18f3495a40b3018f4e3d12fe7a50255a730b27c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_rollout.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_rollout.xml",
+      "bytes": 768,
+      "sha256": "25fb248c4c83d43c7b098c71b5310dc1a0dbd09f7c22b656dc6c72277b633b56"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_success_events.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_success_events.log",
+      "bytes": 1728,
+      "sha256": "2ebf5700cbd7822c0651fa024e018a1d2bad5cb305591961dac46b3e0da45c68"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/rule_success_events.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\rule_success_events.xml",
+      "bytes": 773,
+      "sha256": "cb9ce979e490cc58064b6f8eb141bc452b26e46be488fd7bbf0ceac4574a8431"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/selection_binding.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\selection_binding.log",
+      "bytes": 1667,
+      "sha256": "4a9159a4feee5b4d154407afb68a8fe1e957e04fc69039ed2185a3323af8bd99"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/selection_binding.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\selection_binding.xml",
+      "bytes": 702,
+      "sha256": "ce43eddd51b35054b87492f6211544b4775a71c487cba0232756502a3983d4be"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/stale_selection.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\stale_selection.log",
+      "bytes": 2330,
+      "sha256": "b077c93a8ac95a6c5259ad906b2abad0f5dff8ac5c0ec2b7c336ae8ae751dc69"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/stale_selection.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\stale_selection.xml",
+      "bytes": 2170,
+      "sha256": "364b70abcd7767081f80287ebe0e71d97f682057c96f917fd2fd9ed61536f533"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/success_provenance.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\success_provenance.log",
+      "bytes": 1886,
+      "sha256": "71f22579157f1b7384de4a7af2184006ce2abb402f192ca33a98ff43d4d0350c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/success_provenance.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\success_provenance.xml",
+      "bytes": 1173,
+      "sha256": "d0b89fb3fd27b2d127e248aa554bfbeb650f47c5c167a4baae4fc2e7dccc6aa0"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/success_weight.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\success_weight.log",
+      "bytes": 1811,
+      "sha256": "0f9ff0134c0c57a4c9f2a179d73ed234886de542f09e78aee195a253cc8e9996"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/success_weight.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\success_weight.xml",
+      "bytes": 1022,
+      "sha256": "f510fe08196a917039c3107552e2a79af6422f62d99ea2920d520399a47a3d0c"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/task_request.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\task_request.log",
+      "bytes": 1678,
+      "sha256": "d8519cc0d73f08d26bf508a8bbbb618d8a02481ff4a438cce76eb0f2693b20cd"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/task_request.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\task_request.xml",
+      "bytes": 715,
+      "sha256": "4a0e8173024c02eed2b6d9f91db8869ee6600e07a1ef4203765d99ee611e63e1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/unassessed_projection.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\unassessed_projection.log",
+      "bytes": 1925,
+      "sha256": "8835b3d2bd2c5e1daca3a73d96d12fbfd25ba7bd487e678ae9c20574a8da3b28"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/unassessed_projection.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\unassessed_projection.xml",
+      "bytes": 1206,
+      "sha256": "b58fa866da51eea98a9cbcb38a057dcdd214dccba1c0f71497b4aebcd9a2e813"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/unassessed_response_task.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\unassessed_response_task.log",
+      "bytes": 1929,
+      "sha256": "c6f25139299f710501a2e5cafe27a1ebce1312eff0ff320982fb6619c791c3bc"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/unassessed_response_task.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\unassessed_response_task.xml",
+      "bytes": 1232,
+      "sha256": "dc5164f25f24955c0805c4eafd654596bdba3c7db450e01a2ecfa49c05179fa4"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/unreadable_replay_binding.log",
+      "source": "C:\\swr24-f2-receipts\\s24\\unreadable_replay_binding.log",
+      "bytes": 3328,
+      "sha256": "904f16280e45f05f7cd465a0b40e1a0068eeeee9257c652647abd0a2a416be3d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/s24/unreadable_replay_binding.xml",
+      "source": "C:\\swr24-f2-receipts\\s24\\unreadable_replay_binding.xml",
+      "bytes": 2458,
+      "sha256": "3209282bed879910d1c3bdf33776c736c81b3c0679b642956fc12f47e0c745c1"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/workspace-after.json",
+      "source": "C:\\swr24-f2-receipts\\workspace-after.json",
+      "bytes": 1503818,
+      "sha256": "609d1d44883057c4c5f8b840a5ab0a3babb400651b34f12f4434d3ba172d191d"
+    },
+    {
+      "member": "f2-fault-round-2026-10-11/workspace-before.json",
+      "source": "C:\\swr24-f2-receipts\\workspace-before.json",
+      "bytes": 1503818,
+      "sha256": "609d1d44883057c4c5f8b840a5ab0a3babb400651b34f12f4434d3ba172d191d"
+    },
+    {
+      "member": "independent-review-probes/test_zz_review_probes.py",
+      "source": "C:\\swr24-f2\\tests\\orchestrator\\test_zz_review_probes.py",
+      "bytes": 11056,
+      "sha256": "9a1e2d65c90583e4b163b7d7f1fd2a82397c7c20dacb9d55d95b521942ec1f45"
+    },
+    {
+      "member": "independent-review-tools/mutate.py",
+      "source": "C:\\swrev24-tools\\mutate.py",
+      "bytes": 3517,
+      "sha256": "6450ff980b111eae0dd673fe9e50d1fb935068aabab731088e60b6f6db1494c2"
+    },
+    {
+      "member": "independent-review-tools/out/baseline.xml",
+      "source": "C:\\swrev24-tools\\out\\baseline.xml",
+      "bytes": 37619,
+      "sha256": "1d3be7f39a16ba5ef6b026793a36bff371d376810bf9eb48267cb433236fe63f"
+    },
+    {
+      "member": "independent-review-tools/out/history_drop_typeerror.xml",
+      "source": "C:\\swrev24-tools\\out\\history_drop_typeerror.xml",
+      "bytes": 39228,
+      "sha256": "f92d419e2d904592bf1faced58af316f9c625171d0debc03a484831aab88cf96"
+    },
+    {
+      "member": "independent-review-tools/out/history_loop2_unconverted.xml",
+      "source": "C:\\swrev24-tools\\out\\history_loop2_unconverted.xml",
+      "bytes": 37619,
+      "sha256": "f3b86fe678cac28b8b7e5171cc6448417afbc90dd6bcd61c4ca93e9bdcdbd1c3"
+    },
+    {
+      "member": "independent-review-tools/out/missing_task_assurance.xml",
+      "source": "C:\\swrev24-tools\\out\\missing_task_assurance.xml",
+      "bytes": 49697,
+      "sha256": "f5228d3f6dca4471cb2356c238cfd2d1d90c6933c20813477142c2926a98c78f"
+    },
+    {
+      "member": "independent-review-tools/out/mutate.log",
+      "source": "C:\\swrev24-tools\\out\\mutate.log",
+      "bytes": 31856,
+      "sha256": "de18aa24ad86b924d7a2e7791d47e1d6a140d2a102755ff69403ebde4b6d9c21"
+    },
+    {
+      "member": "independent-review-tools/out/replay_drop_typeerror.xml",
+      "source": "C:\\swrev24-tools\\out\\replay_drop_typeerror.xml",
+      "bytes": 39117,
+      "sha256": "93a2a2b299ea50b0337ab18054a09436bf0e59737c69a8dc42e7193f50f1a2f3"
+    },
+    {
+      "member": "independent-review-tools/out/replay_outputs_outside_try.xml",
+      "source": "C:\\swrev24-tools\\out\\replay_outputs_outside_try.xml",
+      "bytes": 39442,
+      "sha256": "6ad31db57067ee7436d848ae20ed1cd8fe2c2c50fff7504cb161757b5c168278"
+    },
+    {
+      "member": "independent-review-tools/out/s23/assist_role.log",
+      "source": "C:\\swrev24-tools\\out\\s23\\assist_role.log",
+      "bytes": 1771,
+      "sha256": "2e90abe183830f8fff5027fcae974094e9a0b3d3bc92ff50ded003715195c49e"
+    },
+    {
+      "member": "independent-review-tools/out/s23/assist_role.xml",
+      "source": "C:\\swrev24-tools\\out\\s23\\assist_role.xml",
+      "bytes": 935,
+      "sha256": "7c320b78c184c3cdc02969df6bd2e99cc200e1580de2086c5240565a69c4a292"
+    },
+    {
+      "member": "independent-review-tools/out/s23/experiment_ledger_write.log",
+      "source": "C:\\swrev24-tools\\out\\s23\\experiment_ledger_write.log",
+      "bytes": 2442,
+      "sha256": "3f74a10aa1324ea6e3366a91d4c37c02e5a82dff10f45ba4f858216de3cbc65e"
+    },
+    {
+      "member": "independent-review-tools/out/s23/experiment_ledger_write.xml",
+      "source": "C:\\swrev24-tools\\out\\s23\\experiment_ledger_write.xml",
+      "bytes": 2394,
+      "sha256": "4e4d5dbb97062999f5092feca24312c1704b45e2f4318cc4112faa23e4739aae"
+    },
+    {
+      "member": "independent-review-tools/out/s23/gtm_operation_rules_frozen.log",
+      "source": "C:\\swrev24-tools\\out\\s23\\gtm_operation_rules_frozen.log",
+      "bytes": 3824,
+      "sha256": "d233d4562b0fe535d1ef50b919ac3ce7dc5875498da9de4857a256dd1ce186d2"
+    },
+    {
+      "member": "independent-review-tools/out/s23/gtm_operation_rules_frozen.xml",
+      "source": "C:\\swrev24-tools\\out\\s23\\gtm_operation_rules_frozen.xml",
+      "bytes": 4990,
+      "sha256": "f71d082643129dac4eca93acd49d969ae6f1a560e4411eb50f68402094886276"
+    },
+    {
+      "member": "independent-review-tools/out/s23/prior_wrong_batch.log",
+      "source": "C:\\swrev24-tools\\out\\s23\\prior_wrong_batch.log",
+      "bytes": 2646,
+      "sha256": "f72639e83623a7b158b0a7f4d32844c3a2bda216ab755b39498da51a07aa7777"
+    },
+    {
+      "member": "independent-review-tools/out/s23/prior_wrong_batch.xml",
+      "source": "C:\\swrev24-tools\\out\\s23\\prior_wrong_batch.xml",
+      "bytes": 2674,
+      "sha256": "40f1fea2383a576b2cbbfbb90bc710239a0737bfe2081496a9554d517d4d7554"
+    },
+    {
+      "member": "independent-review-tools/out/s23/results.json",
+      "source": "C:\\swrev24-tools\\out\\s23\\results.json",
+      "bytes": 10275,
+      "sha256": "be7490cb6c901141701e9e8ddfe85671d7d387fb6517d25baec85b49f9c7f2ad"
+    },
+    {
+      "member": "independent-review-tools/out/s23/row_ref.log",
+      "source": "C:\\swrev24-tools\\out\\s23\\row_ref.log",
+      "bytes": 1808,
+      "sha256": "62e10c53ede65982e2e75c77b141f52a16f43f83223b12e8cf226d5eef2a7ba9"
+    },
+    {
+      "member": "independent-review-tools/out/s23/row_ref.xml",
+      "source": "C:\\swrev24-tools\\out\\s23\\row_ref.xml",
+      "bytes": 984,
+      "sha256": "e1342de50866174e8428ec960b2ca9fd2cbd5d6c9e4e96fe2688236fa21d27e0"
+    },
+    {
+      "member": "independent-review-tools/out/s23/rubric_confidence_boundary.log",
+      "source": "C:\\swrev24-tools\\out\\s23\\rubric_confidence_boundary.log",
+      "bytes": 1983,
+      "sha256": "bba40e41804d997156229c9536373702e24932483cada8ce581ab0f27a046124"
+    },
+    {
+      "member": "independent-review-tools/out/s23/rubric_confidence_boundary.xml",
+      "source": "C:\\swrev24-tools\\out\\s23\\rubric_confidence_boundary.xml",
+      "bytes": 1226,
+      "sha256": "ea14c9d7a9ab3d776bd6e9b2a45515155f3f900143bd17c9c0d86900ada9a90e"
+    },
+    {
+      "member": "independent-review-tools/out/s23/scalar_value.log",
+      "source": "C:\\swrev24-tools\\out\\s23\\scalar_value.log",
+      "bytes": 1803,
+      "sha256": "b4a009620dd352db17da4d1a61a526dda243cacacd5c2186df0a7f87516fcf5b"
+    },
+    {
+      "member": "independent-review-tools/out/s23/scalar_value.xml",
+      "source": "C:\\swrev24-tools\\out\\s23\\scalar_value.xml",
+      "bytes": 979,
+      "sha256": "367435daa55d10ac4f3ddf711dd9a4cf790baaa297bfca4fb467b4d99e8f5487"
+    },
+    {
+      "member": "independent-review-tools/out/s23/spec_missing_rule.log",
+      "source": "C:\\swrev24-tools\\out\\s23\\spec_missing_rule.log",
+      "bytes": 1641,
+      "sha256": "94bc4429e5083535c9367dc6bee96b4761f36f9617d6a148a4e3cfe46adb77c7"
+    },
+    {
+      "member": "independent-review-tools/out/s23/spec_missing_rule.xml",
+      "source": "C:\\swrev24-tools\\out\\s23\\spec_missing_rule.xml",
+      "bytes": 687,
+      "sha256": "e9142fd0bce910fe64da12100d1ed66cba2b8ade9c88d598ab6903fc9b17b31b"
+    },
+    {
+      "member": "independent-review-tools/out/s24/missing_task_assurance.log",
+      "source": "C:\\swrev24-tools\\out\\s24\\missing_task_assurance.log",
+      "bytes": 1988,
+      "sha256": "c035485247c2ee6c4e32ac5734150cd76f0f087d85002c3c407aac7dd8ecd3c0"
+    },
+    {
+      "member": "independent-review-tools/out/s24/missing_task_assurance.xml",
+      "source": "C:\\swrev24-tools\\out\\s24\\missing_task_assurance.xml",
+      "bytes": 1321,
+      "sha256": "b241d1c1165f0f444dddcf614bad449fefab281b25809fc53d69c42a92b59870"
+    },
+    {
+      "member": "independent-review-tools/out/s24/results.json",
+      "source": "C:\\swrev24-tools\\out\\s24\\results.json",
+      "bytes": 3104,
+      "sha256": "6faba5c4b78c54e19a0e332742f4c003d556fc6e0b8bb8170d79908090b28133"
+    },
+    {
+      "member": "independent-review-tools/out/s24/unreadable_history_binding.log",
+      "source": "C:\\swrev24-tools\\out\\s24\\unreadable_history_binding.log",
+      "bytes": 3399,
+      "sha256": "08e1f7274748aa0177f7c78b8ac0da85aeaf23459741f74476643c4b1c2bf6b5"
+    },
+    {
+      "member": "independent-review-tools/out/s24/unreadable_history_binding.xml",
+      "source": "C:\\swrev24-tools\\out\\s24\\unreadable_history_binding.xml",
+      "bytes": 2716,
+      "sha256": "e9a13a929730256133e9179ac7a311596a7b5b87935c4535cec15ea409c1e407"
+    },
+    {
+      "member": "independent-review-tools/out/s24/unreadable_replay_binding.log",
+      "source": "C:\\swrev24-tools\\out\\s24\\unreadable_replay_binding.log",
+      "bytes": 3155,
+      "sha256": "dbb75e61739d5718433b59032fc4cff076243581fc6465037ae638d689855b53"
+    },
+    {
+      "member": "independent-review-tools/out/s24/unreadable_replay_binding.xml",
+      "source": "C:\\swrev24-tools\\out\\s24\\unreadable_replay_binding.xml",
+      "bytes": 2477,
+      "sha256": "e44bded718292bd2587b80737028fc7f819722ff8b37f43aa8965407f295a3a6"
+    },
+    {
+      "member": "independent-review-tools/out/unreadable_history_binding.xml",
+      "source": "C:\\swrev24-tools\\out\\unreadable_history_binding.xml",
+      "bytes": 56679,
+      "sha256": "71185dd96c1063b114fbdd4715999ece866ea849edc6fdddd447c4a2bd2eba53"
+    },
+    {
+      "member": "independent-review-tools/out/unreadable_replay_binding.xml",
+      "source": "C:\\swrev24-tools\\out\\unreadable_replay_binding.xml",
+      "bytes": 56930,
+      "sha256": "1a2d2e50c7b1aaa2d8d4b14eb344842d4fe52b89b0befc1d9b613f8c10c31f63"
+    },
+    {
+      "member": "independent-review-tools/pre-shiftwork.sha",
+      "source": "C:\\swrev24-tools\\pre-shiftwork.sha",
+      "bytes": 18083,
+      "sha256": "c6c396f4cf6d58f4dbecc756feaaf6611a77462ca49166dd8d2f5bbfde0cc871"
+    },
+    {
+      "member": "independent-review-tools/probe_d.py",
+      "source": "C:\\swrev24-tools\\probe_d.py",
+      "bytes": 1506,
+      "sha256": "8bab28ce2f6016bf5ce28734e3cc602f1e8e88f509baa0804c4bb19dc2df5ec4"
+    },
+    {
+      "member": "independent-review-tools/py.sh",
+      "source": "C:\\swrev24-tools\\py.sh",
+      "bytes": 282,
+      "sha256": "5e91e250218a32d3bc49f5c20440ed84b66bdd2be34eee616f756805ff0a68ec"
+    },
+    {
+      "member": "independent-review-tools/summarize.py",
+      "source": "C:\\swrev24-tools\\summarize.py",
+      "bytes": 734,
+      "sha256": "2ad2513cf1b0ac3fc027fdfa03890619f914397fb1676d9ced0833e671e69e8c"
+    }
+  ]
+}
