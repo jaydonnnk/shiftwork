@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.382" timestamp="2026-10-08T09:20:26.601125+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_pipeline_assessor_requires_pipeline_snapshot" time="0.003"><failure message="Failed: DID NOT RAISE MissionSpecInvalid">tests\orchestrator\test_gtm_guards.py:158: in test_pipeline_assessor_requires_pipeline_snapshot
+    with pytest.raises(MissionSpecInvalid, match="owning GTM"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE MissionSpecInvalid</failure></testcase></testsuite></testsuites>

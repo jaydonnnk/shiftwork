@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.452" timestamp="2026-10-08T09:00:42.869747+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_pipeline_inheritance_uses_history_without_rewriting_reviewed_state" time="0.002"><failure message="AssertionError: assert None == 'owner-apac-platform'">tests\orchestrator\test_gtm_pipeline.py:710: in test_pipeline_inheritance_uses_history_without_rewriting_reviewed_state
+    assert json.loads(derived)["records"][0]["value"]["existing_owner"] == "owner-apac-platform"
+E   AssertionError: assert None == 'owner-apac-platform'</failure></testcase></testsuite></testsuites>

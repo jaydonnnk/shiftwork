@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.576" timestamp="2026-10-08T09:16:59.992226+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_customer_projection_does_not_present_rejected_output_claims[revenue]" time="0.011"><failure message="AssertionError: unsafe pipeline surface: &quot;revenue&quot;:&#10;assert '&quot;revenue&quot;:' not in '{&quot;action&quot;: ...e_ms&quot;: null}'&#10;  &#10;  '&quot;revenue&quot;:' is contained here:&#10;    fidence&quot;, &quot;revenue&quot;: 50000}}, {&quot;kind&quot;: &quot;handoff&quot;, &quot;value&quot;: &quot;revenue-review&quot;}], &quot;display_text&quot;: &quot;Synthetic qualification: REVIEW. Synthetic owner: revenue-review. Synthetic pipeline record prepared for human handling. Human handoff to the revenue review queue; no message sent.&quot;, &quot;evidence_refs&quot;: [&quot;public:signal:pair-low-confidence&quot;], &quot;verified_record_age_ms&quot;: null}&#10;  ?           ++++++++++">tests\orchestrator\test_gtm_pipeline.py:684: in test_gtm_customer_projection_does_not_present_rejected_output_claims
+    assert_pipeline_surface_safe(projection["customer_answer"])
+tests\orchestrator\test_gtm_pipeline.py:659: in assert_pipeline_surface_safe
+    assert needle not in serialized, "unsafe pipeline surface: " + needle
+E   AssertionError: unsafe pipeline surface: "revenue":
+E   assert '"revenue":' not in '{"action": ...e_ms": null}'
+E     
+E     '"revenue":' is contained here:
+E       fidence", "revenue": 50000}}, {"kind": "handoff", "value": "revenue-review"}], "display_text": "Synthetic qualification: REVIEW. Synthetic owner: revenue-review. Synthetic pipeline record prepared for human handling. Human handoff to the revenue review queue; no message sent.", "evidence_refs": ["public:signal:pair-low-confidence"], "verified_record_age_ms": null}
+E     ?           ++++++++++</failure></testcase></testsuite></testsuites>

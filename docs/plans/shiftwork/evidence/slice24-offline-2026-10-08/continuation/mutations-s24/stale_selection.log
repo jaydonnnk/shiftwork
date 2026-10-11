@@ -1,0 +1,24 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_gtm_exact_selection_operation_restart_inheritance_and_later_condition __
+tests\orchestrator\test_gtm_pipeline.py:777: in test_gtm_exact_selection_operation_restart_inheritance_and_later_condition
+    flow = qualify_gtm(client)
+           ^^^^^^^^^^^^^^^^^^^
+tests\orchestrator\test_gtm_pipeline.py:749: in qualify_gtm
+    assert bad.status_code == 409, bad.text
+E   AssertionError: {"id":"sel-0002","kind":"LEARNER_CHOICE","selected_version_id":"ver-0002","selected_content_hash":"80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33","comparison_id":"experiment-gtm-shift-01-c1","retained_alternative_version_id":"ver-0003","rationale":"Choose the independently eligible rules-first repair.","requirement_set_hash":"de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab","prior_selection_id":"sel-0001","state":"VALID","created_at":"2026-10-08T00:54:08.541946Z"}
+E   assert 201 == 409
+E    +  where 201 = <Response [201 Created]>.status_code
+============================== warnings summary ===============================
+.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition
+1 failed, 2 warnings in 4.29s

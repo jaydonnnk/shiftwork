@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="6.981" timestamp="2026-10-08T09:18:27.200087+08:00" hostname="jaydonnks"><testcase classname="docs.plans.shiftwork.evidence.slice24-offline-2026-10-08.completion.review_queue_probe" name="test_review_queue_operation_and_inheritance" time="5.045"><failure message="AssertionError: assert ['INCIDENT_OPENED'] == ['OWNER_ASSIG...FF_ESCALATED']&#10;  &#10;  At index 0 diff: 'INCIDENT_OPENED' != 'OWNER_ASSIGNED'&#10;  Right contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'&#10;  Use -v to get more diff">docs\plans\shiftwork\evidence\slice24-offline-2026-10-08\completion\review_queue_probe.py:40: in test_review_queue_operation_and_inheritance
+    assert [row["event_type"] for row in drafts] == ["OWNER_ASSIGNED", "SLA_CLOCK_STARTED", "HANDOFF_ESCALATED"]
+E   AssertionError: assert ['INCIDENT_OPENED'] == ['OWNER_ASSIG...FF_ESCALATED']
+E     
+E     At index 0 diff: 'INCIDENT_OPENED' != 'OWNER_ASSIGNED'
+E     Right contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

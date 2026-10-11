@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.471" timestamp="2026-10-08T09:20:19.614815+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_pinned_decision_cannot_be_widened_by_correct_route" time="0.006"><failure message="assert not True&#10; +  where True = any(&lt;generator object test_pinned_decision_cannot_be_widened_by_correct_route.&lt;locals&gt;.&lt;genexpr&gt; at 0x0000028FBB6DB340&gt;)">tests\orchestrator\test_gtm_guards.py:123: in test_pinned_decision_cannot_be_widened_by_correct_route
+    assert not any(row.mandatory_pass for row in assessed(narrowed, response_for(spec, "QUALIFIED")))
+E   assert not True
+E    +  where True = any(&lt;generator object test_pinned_decision_cannot_be_widened_by_correct_route.&lt;locals&gt;.&lt;genexpr&gt; at 0x0000028FBB6DB340&gt;)</failure></testcase></testsuite></testsuites>

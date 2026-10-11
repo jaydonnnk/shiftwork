@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.370" timestamp="2026-10-08T09:19:23.458627+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_each_pipeline_output_fault_fails_its_named_task[wrong_evidence]" time="0.003"><failure message="AssertionError: fault must reach exactly its own task guard&#10;assert [] == ['owner']&#10;  &#10;  Right contains one more item: 'owner'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:248: in test_each_pipeline_output_fault_fails_its_named_task
+    assert [row.task_id for row in failing] == [target], "fault must reach exactly its own task guard"
+E   AssertionError: fault must reach exactly its own task guard
+E   assert [] == ['owner']
+E     
+E     Right contains one more item: 'owner'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

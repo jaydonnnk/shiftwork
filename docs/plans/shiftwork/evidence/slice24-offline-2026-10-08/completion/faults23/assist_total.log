@@ -1,0 +1,20 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+____ test_reviewed_production_runs_six_fair_slots_without_business_writes _____
+tests\orchestrator\test_gtm_pipeline.py:924: in test_reviewed_production_runs_six_fair_slots_without_business_writes
+    assert exhausted.status_code == 409 and gateway.roles == ["HINT", "DIAGNOSIS"]
+E   assert (200 == 409)
+E    +  where 200 = <Response [200 OK]>.status_code
+============================== warnings summary ===============================
+..\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/orchestrator/test_gtm_pipeline.py::test_reviewed_production_runs_six_fair_slots_without_business_writes
+1 failed, 2 warnings in 4.20s

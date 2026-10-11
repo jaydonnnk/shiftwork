@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.540" timestamp="2026-10-08T09:00:10.964243+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_one_traced_incident_per_failing_record[wrong_owner-WRONG_ACTION]" time="0.010"><failure message="AssertionError: assert ('pipeline-ru...ine-output-1') == ('pipeline-ru...ine-output-1')&#10;  &#10;  At index 1 diff: 'wrong-source-check' != 'pipeline-check-1-owner'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:635: in test_gtm_one_traced_incident_per_failing_record
+    assert failing[0].cause_refs == ("pipeline-run", "pipeline-check-1-" + first_failure.task_id, "pipeline-output-1")
+E   AssertionError: assert ('pipeline-ru...ine-output-1') == ('pipeline-ru...ine-output-1')
+E     
+E     At index 1 diff: 'wrong-source-check' != 'pipeline-check-1-owner'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,17 @@
+{
+  "docs/plans/shiftwork/00-status.md": {
+    "historical_bytes": 631143,
+    "historical_sha256": "052480a513cca03aaaee1d1665ca4bb0858d8a41f5c1dc5bf034b2ed72942b9c",
+    "prefix_bytes": 1320
+  },
+  "docs/SHIFTWORK_PLAN.md": {
+    "historical_bytes": 72319,
+    "historical_sha256": "2d4790908337e4041521517f882693a8c94a3b05344e75d303131add996f0744",
+    "prefix_bytes": 1336
+  },
+  "MISTAKES.md": {
+    "historical_bytes": 220028,
+    "historical_sha256": "79e2c569114f90a4d6409ae8246ec254d77c7eb2a9797471d374ff017d81efb2",
+    "append_bytes": 574
+  }
+}

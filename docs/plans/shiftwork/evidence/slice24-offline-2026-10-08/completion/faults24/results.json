@@ -1,0 +1,884 @@
+[
+  {
+    "name": "operation_purpose",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[experiment]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "9889f4ea2bdfaff9cc2cafeb50f2bbd888ab1a1a95661f230c840ea8aad15462",
+    "xml_sha256": "72b53ca3b46da240f020b027a270d5ae01fdeff8bf58e5bd8151631c8d5538a0",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "selection_binding",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[wrong_selection]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "da69546c36256b91a1af56a1e8b9539fec7a2a4344632d70bc704d967812399a",
+    "xml_sha256": "a2ffce74a110f722af7b788bc6f6cf4cf2ece7da39b7bc9ab4fcae10020e345f",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "assessment_purpose",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[assessment_purpose]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "ccf8c5ff67a174ac626ca23a1224615df7d62eea7ebdc5027cce6bcca7e17239",
+    "xml_sha256": "ea26d44eddbd723be465c7396fba31a2d170df46f87b695eb021f655888d1bef",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "assessment_run",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[assessment_run]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "8a45e9acde1ca68ebaae02690088043473fd8dd856f2b8545fa1ee5b21a5a7e5",
+    "xml_sha256": "ffa35bd44caaf391725a3b2f0f27ca967977932283f18246d4ed363f7894768b",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "check_cardinality",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[duplicate_check]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "0346fadb7e4d12f4e1c399848ff5073c27a17af47df5c36357cbed43a3a73979",
+    "xml_sha256": "82f5b8556f91689eaa854724f711030aa78f376c5d7d82b3d40a2a033ec6e7e0",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "check_inventory",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[extra_check]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "f54bc82df2b82965c83c32e64a7d234eddfab969fdd4df3a2518e7c302935264",
+    "xml_sha256": "9b365d0295bcd7d50ee9903f7724e5fc863e535197ef0939c918f1bc6abeec7d",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "row_inventory",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[extra_row]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "a5629c30d29a52bf6a810c00ce947df53928f019ee25ae4c8a4d4756568ca5a9",
+    "xml_sha256": "a90557248995e122412414d370e36d28b4d17d922dfd8e6a4a23dbd93dd0c2b2",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "output_cardinality",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[duplicate_output]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "6b4cef26b578052df2855deb9a1704208a4c8af9934120b818d98806ea1595e5",
+    "xml_sha256": "d3ac1dd19e4f38822d5a93cfb4ff86541c518876c6a18c1c7bf6ac9326566baa",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "output_ordinals",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[extra_output]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "e1e6f6be687cc9a6004e8fea7cce0afd38e01da0714825ab057a286b40f0402a",
+    "xml_sha256": "c5e6f17d8528ade7d2bed7c4b6cf50c97d8d7af7bb46423f045c2e4d7bc82bd2",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "output_run",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[foreign_run]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "7b371fd03471edbc65154a17bf85c42eb83bd185476d0124123167bba32efa79",
+    "xml_sha256": "89941d5cf594bdbb803be15ed80a94362c27b7384715a60487d357cf5329b6f5",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "output_transport",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[transport]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "5237a0c7d139705b93c0a514f504b46344da91e008bd043da93f10e19156f85e",
+    "xml_sha256": "b6467f42944e6249202ca9b3986f041e87b0dd68f17dae9ac0fe0eaf25bdf447",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "task_request",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[wrong_request]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "95ddf3de7aec50859119d1a23d29ed64037ecf1b482b5d4ce764ca2c62595aae",
+    "xml_sha256": "c85154c179c69e54b7a7cde6eeba567b3a95cb0e48b786fab6a687c28ab5856d",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "check_run",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[foreign_check]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "7a1e3d1a2eae072644c0678dbe08374cf03f1f946dc961d3a9f52044a636aa3c",
+    "xml_sha256": "58c5e6103d59841c8c9b818de1df6a06c83045fe4c15ed9c55968ede72024c97",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "check_output",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[foreign_output]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "159599807d81ac04123fe52082c3fbb10a1f6c87816e63663cf1bfb223a42978",
+    "xml_sha256": "998f034864cc381eb54933dabfd1b22747ee2611b41458167bf9294754b576fb",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "check_verdict",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[wrong_verdict]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "f703737a0ab79118288c3371ccb41b5c3c5334b25cf3004fcdfdaabd38b65301",
+    "xml_sha256": "d79420cb14d5a44d71b190f77715edd6e42eabe030aa2d3ebb32a8ab11384428",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "mission_owner",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[foreign_mission]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "342822dbcc024a234344f589ca1d72d098e743f3cf788623964688c783c9709e",
+    "xml_sha256": "818888745da4f76cd7c9a507bdb962d071baeb3e6ca75eba65411dc3a57be57a",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "owner_event",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ['SLA_CLOCK_S...LOCK_STARTED'] == ['OWNER_ASSIG...LOCK_STARTED']\n  \n  At index 0 diff: 'SLA_CLOCK_STARTED' != 'OWNER_ASSIGNED'\n  Right contains 2 more items, first extra item: 'OWNER_ASSIGNED'\n  Use -v to get more diff",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "69201e413fe62b30c3fb6e6f4af9f3fd831e4e24da47d22e2f6964680919437e",
+    "xml_sha256": "fc958d9c69387e2b52bac79715029eeca591d74f9c2b1490202d383ebd14a858",
+    "restored": true,
+    "expected_assertions": [
+      "assert ['SLA_CLOCK_S"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "clock_event",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ['OWNER_ASSIG...NER_ASSIGNED'] == ['OWNER_ASSIG...LOCK_STARTED']\n  \n  At index 1 diff: 'HANDOFF_ESCALATED' != 'SLA_CLOCK_STARTED'\n  Right contains 2 more items, first extra item: 'OWNER_ASSIGNED'\n  Use -v to get more diff",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "cca3c6aebe9beb7c898fdeff176fa5383b1722f6e55737466c2c96492e8eb668",
+    "xml_sha256": "66531bb7dd0f6cf4271f77fa3da87f619b1b7e2916b43be04de42289dc3455ab",
+    "restored": true,
+    "expected_assertions": [
+      "assert ['OWNER_ASSIG"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "handoff_event",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ['OWNER_ASSIG...LOCK_STARTED'] == ['OWNER_ASSIG...LOCK_STARTED']\n  \n  At index 2 diff: 'OWNER_ASSIGNED' != 'HANDOFF_ESCALATED'\n  Right contains one more item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "3d6832bace2cedd0d81e769efb3a931ea962ce3e43a1ea77c641aac98645890d",
+    "xml_sha256": "74f15b167c2b39bd8cbb48872d18c7e910efe0bf00d7a9b9ebff5afa2e0c7715",
+    "restored": true,
+    "expected_assertions": [
+      "assert ['OWNER_ASSIG"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "human_terminal",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert 'SENT_MESSAGE' == 'HUMAN_HANDOFF'\n  \n  - HUMAN_HANDOFF\n  + SENT_MESSAGE",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "9ca3af8c137d6d9cd6af071f3b1eb1289e761c6b9a9a77e6884563e828e2be09",
+    "xml_sha256": "58ecdba77f2da1ef7543675a7db34bebbb2e3dd2d000c4a6b6d5fa8710b00d1b",
+    "restored": true,
+    "expected_assertions": [
+      "'SENT_MESSAGE' == 'HUMAN_HANDOFF'"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "success_provenance",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert [('pipeline-r...ne-output-3')] == [('pipeline-r...ne-output-3')]\n  \n  At index 1 diff: ('pipeline-run', 'pipeline-check-1-owner', 'pipeline-output-1') != ('pipeline-run', 'pipeline-check-1-write', 'pipeline-output-1')\n  Use -v to get more diff",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "719ffa4542497074b1422e0249f42f8d4c5ba90f56597bcc304b6bea08ced3a2",
+    "xml_sha256": "adf3e378cb9ef7288bd7932b2c897794b1f420f3074e695124c57d648efc4113",
+    "restored": true,
+    "expected_assertions": [
+      "assert [('pipeline-r"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "success_weight",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "assert False\n +  where False = all(<generator object test_gtm_consequence_classes_reduce_from_operational_captures_only.<locals>.<genexpr> at 0x000001EBC41D5700>)",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "816d3ef07027d04d0014c01106d9c511e325b4d956488df32c4e52c3932c9c9c",
+    "xml_sha256": "eb6e92bc0bcde9824a75ef920b1589f4f218f8ecdc5d2bc439dfee4d72cce57b",
+    "restored": true,
+    "expected_assertions": [
+      "assert False"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "incident_trace",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[missing_handoff-REQUIRED_TASK_MISSING]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert [] == ['qualificati...e', 'handoff']\n  \n  Right contains 4 more items, first extra item: 'qualification'\n  Use -v to get more diff",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "20f3ab8656dba8f92e659785713db39ec7d9bfde823539a2b8aec998bf1d57ab",
+    "xml_sha256": "eac5495402f1ea19337ff575d88d27572cd3521630d9128340b38c71d0f79267",
+    "restored": true,
+    "expected_assertions": [
+      "assert [] == ['qualificati"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "incident_tasks",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[missing_owner-REQUIRED_TASK_MISSING]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "cf8a5bf26e45eb3cd0fd0f24400f40eb4e9ecd09985651c57c591795fa11bcb9",
+    "xml_sha256": "749d4260ef49782d769ec846497abc9ca267f14280cbb0b597a47608ec5dfd0a",
+    "restored": true,
+    "expected_assertions": [
+      "assert [] == ['owner']"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "incident_provenance",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[wrong_owner-WRONG_ACTION]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ('pipeline-ru...ine-output-1') == ('pipeline-ru...ine-output-1')\n  \n  At index 1 diff: 'wrong-source-check' != 'pipeline-check-1-owner'\n  Use -v to get more diff",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "ee952d67b25833b7819d872136741dc1d7b0f32d737d465380f5e28fb648aabe",
+    "xml_sha256": "3551865813a4e19f13100841614851c1e38bb3757db53fffecf8ea515bb15398",
+    "restored": true,
+    "expected_assertions": [
+      "wrong-source-check"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "malformed_accepted_capture",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_accepted_pipeline_capture_must_still_parse_as_its_request_envelope",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE ValueError",
+    "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "log_sha256": "7a52de635a252e876b7e6fde91316ff142536656d048712768d719eba100279d",
+    "xml_sha256": "88ed843cfe998e9b02c8b67ea7479acfa04ac893af1ae79f4043d208ad35667f",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "history_record_ref",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[wrong_ref]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE PublicStateInvalid",
+    "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "log_sha256": "9f407844d7d8b161924c8a771f211abde0337df37b846bc078837268f14ff5d1",
+    "xml_sha256": "cc14d532c7307322482ed17fa793f756ce42eeeb856d20d738f0caf16d3b52fe",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "history_owner_empty",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[empty_owner]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE PublicStateInvalid",
+    "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "log_sha256": "f08d6947d0af9828e7e52bf40922e28cd68661aab100cc31340ccdd4177a74bd",
+    "xml_sha256": "555c8262c6584f2a8d90dd758dfaffcb5034481ca399d6ded8fc2a5d42e45b89",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "history_record_fields",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[extra_field]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE PublicStateInvalid",
+    "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "log_sha256": "a5bafca2ab6ace352a5ad9cd471eb270303007d12ef67ba93c891530f7e22702",
+    "xml_sha256": "156bfe8ed3803dede54124a0f6a6e5c90c720155de6aa1d01531bf179cb21790",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "history_owner_type",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[owner_not_text]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE PublicStateInvalid",
+    "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "log_sha256": "5cb8abdf50f91c1c2fcf36a57f0ce812bfa29d267ad271941687fb932bfed566",
+    "xml_sha256": "55e83b69ebe0bcf9c6e0de748cb599a374269d150216d315a9bda72a28095ddc",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "history_signal_prefix",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[signal_prefix]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE PublicStateInvalid",
+    "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "log_sha256": "31d008341612dba2c79c1b826a6548fa02751b7bf506f3989a8a2347db60484d",
+    "xml_sha256": "52e4505bbfd96bedb8f39fd6cc1ca08b86ef3bc6ed69ebe7ebcd3acd868beb49",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "history_conflict",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_pipeline_inheritance_refuses_corrupt_or_conflicting_record[conflicting_observation]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE PublicStateInvalid",
+    "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "log_sha256": "d323289bf4ac1e717a2643bc3233c610d147005f31166d085e6abe1f4f027ca0",
+    "xml_sha256": "b1f9a5192060f3c98e802e7f4fc948b1567fa8a7267a89a82b72d13c78876d99",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "history_overlay",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_pipeline_inheritance_uses_history_without_rewriting_reviewed_state",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert None == 'owner-apac-platform'",
+    "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "log_sha256": "f70c0ba7de8a06add97d22639e3864061ffb3f9f0d6e4b2dd56427723df65844",
+    "xml_sha256": "783a96817c5dca6b0693fe91cb07e4ce3163f0ce910724d4f369f61bd6b5b35f",
+    "restored": true,
+    "expected_assertions": [
+      "assert None == 'owner-apac-platform'"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "rule_pack",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_rule_resolution_refuses_wrong_owner_or_unbound_history[foreign_pack]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "4c97306ddcec8be7285051b1355830d809c740a01cfbd68e8cd3d2df99740782",
+    "xml_sha256": "b42f3fd11bc88cc79b507cbb53dce4627c82840bb82a60f682ad03467b448684",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "rule_handoff_weight",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_rule_resolution_refuses_wrong_owner_or_unbound_history[boolean_handoff]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "64ce89e85d91ca82cc19a70023f92e3c66964afa1dc61a30560eefa454be719f",
+    "xml_sha256": "d64d32ef5be4b929e2fedee828780a759cd3207cefe0dad8bfa6323eb47f83a1",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "rule_history_hash",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_rule_resolution_refuses_wrong_owner_or_unbound_history[history_hash]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "dfec0fc2ad76fd0703a218f0f41651530eca7d317cfafafba889bfc84d46049d",
+    "xml_sha256": "3e4bfd43c1e7eff3259a80eb4b62e2417ed7f1799f08258315abbd6285b96d3c",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "rule_success_events",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_frozen_consequence_rules_refuse_drift[wrong_events]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "5eb5d5ac98ef07cdf1d75c820ef5ae6ac0ecf627e5eef2c03c277f30fcbbdef8",
+    "xml_sha256": "53f0c18c1442e859e8359475362f90aa9ac0b4ebab1b9e622b4eeab9ed469ee4",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "rule_rollout",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_frozen_consequence_rules_refuse_drift[rollout]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "115f0eb735d2059a12a62d200460adcab698c51204b873fdb5748f398dde69ad",
+    "xml_sha256": "6779c32607acd84be0bb635c439605ec9738900ecc769c7a4dcd132690141bd1",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "rule_handover",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_frozen_consequence_rules_refuse_drift[handover]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "0a86f6bc3cf79f5182bd4278736109da630184448c8fbe68174e2dabd1f16b1d",
+    "xml_sha256": "383705a9433cbcc708a76553fa0bad59f2a9c73ba4e407bfe38ef24343869e8e",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "freeze_broken_chain",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_freeze_refuses_broken_chain_before_inheriting",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "47ec38a0a0d929b2e9a6da5275ee2a2d64f094d5ec4900ce12a4ea3fd66efe2e",
+    "xml_sha256": "2c023a88d5a221750349aa9546118f95f4482352b1d515d774b1a8ed50a1b127",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "freeze_duplicate_owner",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_freeze_refuses_duplicate_owners_in_valid_chain",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "e94e71e6ea9dfdf224439e2b815d57b5b7d329b51462424e782850daf504d94b",
+    "xml_sha256": "7c320abb183e6c7ea1965adca76d0b832113084ab8e76564e47288b7a8155619",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "freeze_history_overlay",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: reprocessing wrote another owner, record or clock\nassert [{'event_type...hetic': True}] == []\n  \n  Left contains 2 more items, first extra item: {'event_type': 'OWNER_ASSIGNED', 'cause_refs': ['run-0009', 'cr-0010', 'run-0009-out-1'], 'payload': {'catalog_version... 'consequence': 'owner', 'decision_trace': ['RULES_FIRST', 'QUALIFIED'], 'mission_version': 1, ...}, 'synthetic': True}\n  Use -v to get more diff",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "bc1da498fc6a8888e7a209b05ab6a9841afcb5271ab2c3528c75db60b47fd52d",
+    "xml_sha256": "4e98b5393e63dd8896f1b0728c4b9ac470a513b21058d7a42b1c17c234036071",
+    "restored": true,
+    "expected_assertions": [
+      "reprocessing wrote another owner, record or clock"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "later_history_hash",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_later_gtm_comparison_refuses_unbound_ownership_history",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+    "log_sha256": "ae3e31290e09aa45d7af6ed1d8508c8a56db14c52de328906aa540a58574a00e",
+    "xml_sha256": "ab20e820adae7c7f6f20217e7d6c58dfde78652b2c4373ae122033e9df5d2b37",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "later_history_overlay",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: {\"kind\":\"conflict\",\"detail\":\"the observed world changes more than dependency availability: records; the reviewed comparison workloads do not apply\"}\nassert 409 == 202\n +  where 409 = <Response [409 Conflict]>.status_code",
+    "source_sha256": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+    "log_sha256": "0cee197e74514e846702ae11d40748918f4eba862b571e3e9c4a866b56ad2ea6",
+    "xml_sha256": "9a6202809d52c9090ec9aba9bb94daf65cffe1932a56167fa41e80fbd6a49493",
+    "restored": true,
+    "expected_assertions": [
+      "the observed world changes more than dependency availability",
+      "assert 409 == 202"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "later_pack_pins",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: {\"kind\":\"conflict\",\"detail\":\"only the two pinned reviewed candidates are executable as an offline comparison\"}\nassert 409 == 202\n +  where 409 = <Response [409 Conflict]>.status_code",
+    "source_sha256": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+    "log_sha256": "93399afd66b097fb0898ab95b2de00c8cd3fcfe40e6059491542559e74a075d9",
+    "xml_sha256": "85481152d37d0df8cfb641c84ccf41690bad4173bf8410b778f38288a00b7e7b",
+    "restored": true,
+    "expected_assertions": [
+      "only the two pinned reviewed candidates",
+      "assert 409 == 202"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "stale_selection",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: {\"id\":\"sel-0002\",\"kind\":\"LEARNER_CHOICE\",\"selected_version_id\":\"ver-0002\",\"selected_content_hash\":\"80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33\",\"comparison_id\":\"experiment-gtm-shift-01-c1\",\"retained_alternative_version_id\":\"ver-0003\",\"rationale\":\"Choose the independently eligible rules-first repair.\",\"requirement_set_hash\":\"de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab\",\"prior_selection_id\":\"sel-0001\",\"state\":\"VALID\",\"created_at\":\"2026-10-08T01:16:50.498741Z\"}\nassert 201 == 409\n +  where 201 = <Response [201 Created]>.status_code",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "74898e19d915f7911bd55e824de8f1989e2de97a6917a74f9c09cb328029444e",
+    "xml_sha256": "c5f7070a4b3bfbc8409484bd5b5356fe024eaa8e35d9fbff0c64856f67db91fd",
+    "restored": true,
+    "expected_assertions": [
+      "assert 201 == 409"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "operation_accounting",
+    "node": "tests/orchestrator/test_gtm_operation_guards.py::test_gtm_finalized_operation_guard_precedes_retry_and_storage",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "Failed: DID NOT RAISE LifecycleError",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "a7548e76180455795033b368f58114f2c309eb6e8a38adb3a5dfeae33ec45d4d",
+    "xml_sha256": "4298bd4fdc269f6c71d81f55e8d8327c927be39788e1b9833042bf1a6a099ccc",
+    "restored": true,
+    "expected_assertions": [
+      "Failed: DID NOT RAISE"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "projection_revenue",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_customer_projection_does_not_present_rejected_output_claims[revenue]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: unsafe pipeline surface: \"revenue\":\nassert '\"revenue\":' not in '{\"action\": ...e_ms\": null}'\n  \n  '\"revenue\":' is contained here:\n    fidence\", \"revenue\": 50000}}, {\"kind\": \"handoff\", \"value\": \"revenue-review\"}], \"display_text\": \"Synthetic qualification: REVIEW. Synthetic owner: revenue-review. Synthetic pipeline record prepared for human handling. Human handoff to the revenue review queue; no message sent.\", \"evidence_refs\": [\"public:signal:pair-low-confidence\"], \"verified_record_age_ms\": null}\n  ?           ++++++++++",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "3bef593ca7076647f7437fc042703586c6c9203ced30bb6e6dd1a853f280e6bc",
+    "xml_sha256": "4f4b491cd20d93e71702d71eeaa051956988d97423933c9ba8601435eb482455",
+    "restored": true,
+    "expected_assertions": [
+      "unsafe pipeline surface: \"revenue\":"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "projection_sent_message",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_customer_projection_does_not_present_rejected_output_claims[sent_message]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: unsafe pipeline surface: \"sent_message\":\nassert '\"sent_message\":' not in '{\"action\": ...e_ms\": null}'\n  \n  '\"sent_message\":' is contained here:\n    fidence\", \"sent_message\": true}}, {\"kind\": \"handoff\", \"value\": \"revenue-review\"}], \"display_text\": \"Synthetic qualification: REVIEW. Synthetic owner: revenue-review. Synthetic pipeline record prepared for human handling. Human handoff to the revenue review queue; no message sent.\", \"evidence_refs\": [\"public:signal:pair-low-confidence\"], \"verified_record_age_ms\": null}\n  ?           +++++++++++++++",
+    "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "log_sha256": "728211af24e19c3b68628100c458da5a38dc6b42a3b057be3c7cd290cc5308b5",
+    "xml_sha256": "5edb5088ab5656cf8f07096bb8e7324df93f014160849b02e02687e6c43befef",
+    "restored": true,
+    "expected_assertions": [
+      "unsafe pipeline surface: \"sent_message\":"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "operational_duplicate_owner",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[duplicate_owner-DUPLICATE_COMMITMENT]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+    "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+    "log_sha256": "4500d755189eb390b9199934bc446fdbcf19ed4eb0bdbafab78c1d71cfad58aa",
+    "xml_sha256": "bdc11092fd36196db553caed8aafa6981bcfca65ff530eae13515c53bdf99613",
+    "restored": true,
+    "expected_assertions": [
+      "INCIDENT_OPENED"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "operational_duplicate_write",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[duplicate_write-DUPLICATE_COMMITMENT]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+    "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+    "log_sha256": "cf1bb2909240b2274f26618c1c3ee0b040be211a8c35ebc271e43f85007a0ebf",
+    "xml_sha256": "d7abf79a7062f373f474aaaf5327b2f25881eb77c01a941e20e26db144354695",
+    "restored": true,
+    "expected_assertions": [
+      "INCIDENT_OPENED"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "operational_sent_message",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[sent_message-WRONG_ACTION]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+    "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+    "log_sha256": "0c520118396c72b45f7fbd85c323e1c6f50780328e00fb5a66c7321bec980008",
+    "xml_sha256": "a44d4d643f9d0f21b6bcaedc039c3c1ecf7cfb26a4525c56e2865afc11bb98bc",
+    "restored": true,
+    "expected_assertions": [
+      "INCIDENT_OPENED"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "operational_revenue",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[revenue-WRONG_ACTION]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+    "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+    "log_sha256": "6966e579c7c18baf103bcdac666bd3b7dc5eced350409e87a4e89ae28aa42084",
+    "xml_sha256": "b839964ffbf0bc759b98ea1d1c814541cfefb7cf74cbd85311be41a8d8885178",
+    "restored": true,
+    "expected_assertions": [
+      "INCIDENT_OPENED"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "operational_missing_owner",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[missing_owner-REQUIRED_TASK_MISSING]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert [] == ['INCIDENT_OPENED']\n  \n  Right contains one more item: 'INCIDENT_OPENED'\n  Use -v to get more diff",
+    "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+    "log_sha256": "a4e494b46a9daaafbd98134e90e17901bafabfe87c8238c8185dcc10573a5b2f",
+    "xml_sha256": "89c9b0a453224f01d6733122f0d247cea6e0e4fc0e7741edd1e3b4abc701f7c3",
+    "restored": true,
+    "expected_assertions": [
+      "INCIDENT_OPENED"
+    ],
+    "assertion_matches": true
+  },
+  {
+    "name": "operational_missing_handoff",
+    "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[missing_handoff-REQUIRED_TASK_MISSING]",
+    "status": "FAIL_CAUGHT",
+    "failures": 1,
+    "errors": 0,
+    "message": "AssertionError: assert ['OWNER_ASSIG...LOCK_STARTED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains one more item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+    "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+    "log_sha256": "be826a32a63df8aad5240462a35da85ebf60cb6429f7eaafb0c6c4d7c468bee2",
+    "xml_sha256": "aa56c48f691b59a39d77bee08c7c56c019f7508fe519513392822c1d5761eeb1",
+    "restored": true,
+    "expected_assertions": [
+      "INCIDENT_OPENED"
+    ],
+    "assertion_matches": true
+  }
+]

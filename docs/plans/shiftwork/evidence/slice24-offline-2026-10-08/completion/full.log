@@ -1,0 +1,50 @@
+........................................................................ [  5%]
+........................................................................ [ 10%]
+........................................................................ [ 16%]
+..................................pivot-starter: adapter=local_process; local verification only; no task-assessor result
+{"request_id":"bellwether-collection-001","task_results":[{"task_id":"price","status":"COMPLETED","entity_ref":"book:salt-roads:paperback","claims":[{"kind":"price","entity_ref":"book:salt-roads:paperback","value":1800,"evidence_refs":["public:salt-roads:paperback:price"]}],"commitment_ref":null,"explanation_code":null}],"evidence_refs":["public:salt-roads:paperback:price"],"uncertainty_codes":[]}
+{"source":"service_reported","kind":"interpretation","request_id":"bellwether-collection-001","intent":"price","method":"keyword_router"}
+{"source":"service_reported","kind":"tool_call","tool":"public_record_lookup","entity_ref":"book:salt-roads:paperback","record_kind":"price"}
+{"source":"service_reported","kind":"tool_result","tool":"public_record_lookup","record_ids":["public:salt-roads:paperback:price"]}
+
+.....happy_path: captures=2 bytes/status/ordinal/time/logs=identical failure=NONE (injected capture clock; real sockets/deadline)
+.port_dead: captures=1 bytes/status/ordinal/time/logs=identical failure=SERVICE_UNREACHABLE (injected capture clock; real sockets/deadline)
+.timeout: captures=1 bytes/status/ordinal/time/logs=identical failure=REQUEST_TIMEOUT (injected capture clock; real sockets/deadline)
+.truncated_body: captures=1 bytes/status/ordinal/time/logs=identical failure=CAPTURE_TRUNCATED (injected capture clock; real sockets/deadline)
+.non_utf8_body: captures=1 bytes/status/ordinal/time/logs=identical failure=CAPTURE_NON_UTF8 (injected capture clock; real sockets/deadline)
+.connection_refused: captures=2 bytes/status/ordinal/time/logs=identical failure=SERVICE_UNREACHABLE (injected capture clock; real sockets/deadline)
+.kill_mid_batch: captures=1 bytes/status/ordinal/time/logs=identical failure=SANDBOX_TERMINATED (injected capture clock; real sockets/deadline)
+.s............trusted-guard unknown_hash: PROVISION_FAILED; subprocess starts=0
+.trusted-guard modified_bytes: PROVISION_FAILED; subprocess starts=0
+.trusted-guard extra_file: PROVISION_FAILED; subprocess starts=0
+.trusted-guard path_escape: PROVISION_FAILED; subprocess starts=0
+.provisioning-fault: PROVISION_FAILED; captures=0
+....credential-guard recorded: captures=2; injected markers absent from bodies/logs; no process or environment access
+.credential-guard local_process: captures=2; injected markers absent from bodies/logs; spawn env and child-reported env match SYSTEMROOT/WINDIR allowlist
+.... [ 21%]
+........................................................................ [ 26%]
+........................................................................ [ 32%]
+........................................................................ [ 37%]
+........................................................................ [ 42%]
+........................................................................ [ 48%]
+........................................................................ [ 53%]
+........................................................................ [ 59%]
+........................................................................ [ 64%]
+........................................................................ [ 69%]
+........................................................................ [ 75%]
+........................................................................ [ 80%]
+........................................................................ [ 85%]
+........................................................................ [ 91%]
+........................................................................ [ 96%]
+.............................................                            [100%]
+============================== warnings summary ===============================
+.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1340 passed, 1 skipped, 2 warnings in 613.48s (0:10:13)

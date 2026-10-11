@@ -1,0 +1,14 @@
+{
+  "mode": "demo",
+  "argv": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-m",
+    "demos.gtm_operation",
+    "--out",
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice24-offline-2026-10-08\\completion\\demo"
+  ],
+  "cwd": "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia",
+  "returncode": 0,
+  "elapsed_seconds": 11.92,
+  "log_sha256": "b2492161b31b11b4ce8463d1d05789025df5b900c94464ad7be5a0f504ffa3e2"
+}

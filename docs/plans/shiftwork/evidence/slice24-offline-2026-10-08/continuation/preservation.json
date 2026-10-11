@@ -1,0 +1,183 @@
+{
+  "tracked_entry_files": 1112,
+  "tracked_unchanged_exact": 1102,
+  "allowed_tracked_changes": [
+    "MISTAKES.md",
+    "docs/SHIFTWORK_PLAN.md",
+    "docs/plans/shiftwork/00-status.md",
+    "shiftwork/comparison_flow.py",
+    "shiftwork/domain/task_contract.py",
+    "shiftwork/ledger/reducer.py",
+    "shiftwork/orchestrator.py",
+    "tests/orchestrator/test_gtm_guards.py",
+    "tests/orchestrator/test_gtm_pipeline.py",
+    "tests/packs/gtm_mutation_proofs.py"
+  ],
+  "unexpected_tracked_drift": [],
+  "continuation_entry_files": 6211,
+  "unexpected_incoming_drift": [],
+  "historical_protected_files": 5921,
+  "historical_protected_drift": [],
+  "history_boundaries": {
+    "MISTAKES.md": {
+      "retained_bytes": 212130,
+      "boundary": 212130,
+      "sha256": "414eccddd6ae0f2a9ad8140ecafaa1f7e5043c11d66c4893e980c9e836f52c60"
+    },
+    "docs/SHIFTWORK_PLAN.md": {
+      "retained_bytes": 69168,
+      "boundary": 3151,
+      "sha256": "10f69f0a474c24f135eafe904f8b43bcd8e644dfe3e3e7cbda0a696d294f4f1f"
+    },
+    "docs/plans/shiftwork/00-status.md": {
+      "retained_bytes": 628024,
+      "boundary": 3119,
+      "sha256": "f1e8e27170e381b9304bea65519ec9f6c08587c539e1e35479ca7245a18f4c99"
+    }
+  },
+  "source_lines": [
+    {
+      "path": "shiftwork/comparison_flow.py",
+      "entry_sha256": "fede7af5a3cddb46c64a45033481470a990bcf33f448b6ff91a1a6d89b876fb0",
+      "unchanged_lines_exact": 1752
+    },
+    {
+      "path": "shiftwork/domain/task_contract.py",
+      "entry_sha256": "51611b7494ae31968d0eab1f7c5dc97c1cd1ee890de966068243dd7a6b60c7b5",
+      "unchanged_lines_exact": 920
+    },
+    {
+      "path": "shiftwork/ledger/reducer.py",
+      "entry_sha256": "256852d70532c6c3f2fb91756dbf95d7b938a4bc853bae799237af0069ee3df8",
+      "unchanged_lines_exact": 290
+    },
+    {
+      "path": "shiftwork/orchestrator.py",
+      "entry_sha256": "dcb796a5f1d0273b4f68d936f7c7844934bfab1dd0246c5991955ac5e07626e0",
+      "unchanged_lines_exact": 2733
+    },
+    {
+      "path": "tests/orchestrator/test_gtm_guards.py",
+      "entry_sha256": "43dcde1ac49215465e8470436c30a82847721990cb16096154e0858dfee357f3",
+      "unchanged_lines_exact": 344
+    },
+    {
+      "path": "tests/orchestrator/test_gtm_pipeline.py",
+      "entry_sha256": "684d0a8da9725e18e2853e0a341de82f28d10932d3a4d1d12d90b01f233b72a2",
+      "unchanged_lines_exact": 598
+    },
+    {
+      "path": "tests/packs/gtm_mutation_proofs.py",
+      "entry_sha256": "92646d802cdb2627aa46634cb08f4a765a7ff26a312a8c8e83a16f7aa66b4971",
+      "unchanged_lines_exact": 261
+    }
+  ],
+  "branch": {
+    "argv": [
+      "git",
+      "branch",
+      "--show-current"
+    ],
+    "returncode": 0,
+    "stdout": "shiftwork/slice-24\n",
+    "stderr": ""
+  },
+  "head": {
+    "argv": [
+      "git",
+      "rev-parse",
+      "HEAD"
+    ],
+    "returncode": 0,
+    "stdout": "66f9b8d5d286f67bb2e7dd75acf24c0ed1e029c0\n",
+    "stderr": ""
+  },
+  "staged": {
+    "argv": [
+      "git",
+      "diff",
+      "--cached",
+      "--name-only"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  "whitespace": {
+    "argv": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "returncode": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of 'MISTAKES.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/SHIFTWORK_PLAN.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/plans/shiftwork/00-status.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'shiftwork/comparison_flow.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'shiftwork/orchestrator.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tests/orchestrator/test_gtm_guards.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tests/orchestrator/test_gtm_pipeline.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tests/packs/gtm_mutation_proofs.py', LF will be replaced by CRLF the next time Git touches it\n"
+  },
+  "new_whitespace": [
+    {
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "demos\\gtm_operation.py"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "tests\\orchestrator\\test_gtm_operation_guards.py"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "tests\\packs\\gtm_operation_mutation_proofs.py"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "docs\\plans\\shiftwork\\slice24-continuation-handoff-2026-10-08.md"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "status": "PASS"
+}

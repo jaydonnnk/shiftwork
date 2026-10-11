@@ -1,0 +1,10 @@
+{
+  "first_round_controls": 49,
+  "controls_excluded_from_proof": {
+    "incident_provenance": "The altered check changed reason_code before the intended check-id assertion.",
+    "later_pack_pins": "The positive pin fault was intercepted by the earlier negative history-refusal regex.",
+    "operation_accounting": "An IntegrityError reached the test before its assertion; the storage constraint remained an independent safeguard."
+  },
+  "raw_receipts_unchanged": true,
+  "current_repairs": "New dedicated refusal/controller-guard tests, check-id-only fault, and expected-assertion matching. Final controls are in mutations-s24-final."
+}

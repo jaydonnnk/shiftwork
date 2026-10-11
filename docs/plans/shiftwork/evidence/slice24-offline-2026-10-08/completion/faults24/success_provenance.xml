@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.558" timestamp="2026-10-08T09:14:55.090365+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_consequence_classes_reduce_from_operational_captures_only" time="0.008"><failure message="AssertionError: assert [('pipeline-r...ne-output-3')] == [('pipeline-r...ne-output-3')]&#10;  &#10;  At index 1 diff: ('pipeline-run', 'pipeline-check-1-owner', 'pipeline-output-1') != ('pipeline-run', 'pipeline-check-1-write', 'pipeline-output-1')&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:591: in test_gtm_consequence_classes_reduce_from_operational_captures_only
+    assert [d.cause_refs for d in drafts] == expected_causes
+E   AssertionError: assert [('pipeline-r...ne-output-3')] == [('pipeline-r...ne-output-3')]
+E     
+E     At index 1 diff: ('pipeline-run', 'pipeline-check-1-owner', 'pipeline-output-1') != ('pipeline-run', 'pipeline-check-1-write', 'pipeline-output-1')
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

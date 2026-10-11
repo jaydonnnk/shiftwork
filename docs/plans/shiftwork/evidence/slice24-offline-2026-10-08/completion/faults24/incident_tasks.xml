@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.359" timestamp="2026-10-08T09:15:05.212150+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_one_traced_incident_per_failing_record[missing_owner-REQUIRED_TASK_MISSING]" time="0.006"><failure message="AssertionError: assert [] == ['owner']&#10;  &#10;  Right contains one more item: 'owner'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:636: in test_gtm_one_traced_incident_per_failing_record
+    assert failing[0].payload["failed_task_ids"] == [r.task_id for r in args[3] if r.request_ordinal == 1 and not r.mandatory_pass]
+E   AssertionError: assert [] == ['owner']
+E     
+E     Right contains one more item: 'owner'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

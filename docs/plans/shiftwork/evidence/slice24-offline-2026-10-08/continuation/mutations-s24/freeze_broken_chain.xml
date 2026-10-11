@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.760" timestamp="2026-10-08T08:53:08.083807+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_operation_guards" name="test_pipeline_freeze_refuses_broken_chain_before_inheriting" time="0.259"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_operation_guards.py:99: in test_pipeline_freeze_refuses_broken_chain_before_inheriting
+    with pytest.raises(orchestrator.LifecycleError, match="refusing pipeline inheritance"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

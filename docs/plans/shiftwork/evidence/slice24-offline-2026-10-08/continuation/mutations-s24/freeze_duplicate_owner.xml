@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.578" timestamp="2026-10-08T08:53:12.077348+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_operation_guards" name="test_pipeline_freeze_refuses_duplicate_owners_in_valid_chain" time="0.188"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_operation_guards.py:125: in test_pipeline_freeze_refuses_duplicate_owners_in_valid_chain
+    with pytest.raises(orchestrator.LifecycleError, match="duplicate owner"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

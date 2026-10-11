@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="5.800" timestamp="2026-10-08T08:53:36.505449+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_exact_selection_operation_restart_inheritance_and_later_condition" time="5.327"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_pipeline.py:856: in test_gtm_exact_selection_operation_restart_inheritance_and_later_condition
+    with pytest.raises(orchestrator.LifecycleError, match="observed pipeline history differs"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

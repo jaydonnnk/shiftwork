@@ -1,0 +1,4405 @@
+[
+  {
+    "path": "docs/plans/shiftwork/00-status.md",
+    "sha256": "9449d6b797564fa2b9da12b168a3620d88eb2904fee25abbf7b8c3a87775319f",
+    "headings": [
+      "# Status: Shiftwork",
+      "## Historical S22a owning-pack execution checkpoint verified offline: 2026-10-03",
+      "## Historical S22a assistance compatibility repair verified offline: 2026-10-03",
+      "## S22a verified Git hold and diagnosed failures: 2026-10-03",
+      "## Historical pre-diagnosis S22a assistance hold: 2026-10-03",
+      "## S22a registry implementation checkpoint: 2026-10-03",
+      "## S22a start and scoped Gate 3 re-approval: 2026-10-03",
+      "## S21 review-fix publication and main integration: 2026-10-03",
+      "## S21 independent-review repair round: 2026-10-02",
+      "## S21 publication and main integration: 2026-10-02",
+      "## S21 implementation and offline verification: 2026-10-02",
+      "## Slice 20 offline implementation and verification: 2026-09-30",
+      "### What landed",
+      "### Working result and demo",
+      "### Verification, all under `.venv313/Scripts/python.exe`",
+      "### Two proof defects this round found, and their repairs",
+      "### Independent review round and repairs: 2026-10-01",
+      "### Second independent review round and Limits repair: 2026-10-01",
+      "### Mirror and ADR corrections in this record",
+      "### Limits",
+      "### Stretch chain achieved: 2026-10-01 UTC, verified 2026-10-02",
+      "### Stretch chain pre-change anchor round and offline baseline: 2026-10-01",
+      "### Stretch chain post-change round, rehearsal and live attempt: 2026-10-01",
+      "### Stretch chain delegated decision and SSE repair: 2026-10-01",
+      "### Stretch chain stored-record verification: 2026-10-02",
+      "### S20 stretch housekeeping, publication authority and completion: 2026-10-02",
+      "## Slice 19 branch and main publication and user acceptance: 2026-09-30",
+      "## Slice 19 offline implementation and verification: 2026-09-30",
+      "### S19 anchor-repair round: 2026-09-30",
+      "## Three-board scope direction, revision memo and approval: 2026-09-30"
+    ],
+    "s24_lines": [
+      {
+        "line": 1,
+        "text": "**S24 STARTED; INCOMPLETE HANDOFF, 2026-10-08 Asia/Singapore.**"
+      },
+      {
+        "line": 3,
+        "text": "The user authorized `Start s24`, then requested a handoff checkpoint."
+      },
+      {
+        "line": 16,
+        "text": "S24 remains incomplete, unaccepted, unstaged and uncommitted. Full offline"
+      },
+      {
+        "line": 5618,
+        "text": "- [ ] Slice 24: GTM selection, operation and inheritance offline with the pipeline consequence vocabulary"
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/01-product.md",
+    "sha256": "4df6b71dfe54205e684771c182f9b2eb2d23e00e5b200f20607c3ff08cb79e80",
+    "headings": [
+      "# Product: Shiftwork",
+      "## Problem",
+      "## Success metric",
+      "## Approved product decisions",
+      "### S1. A continuing service, not a sequence of coding quizzes",
+      "### S2. Explain and test before accepting a diagnosis",
+      "### S3. Separate experiment, choose and operate",
+      "### S4. Make a comparison fair and useful",
+      "### S5. Make later consequences causal without hindsight grading",
+      "### S6. Keep the scope narrow",
+      "## Concrete Bellwether example",
+      "## Visual direction and screen journey",
+      "## Announcement: the blog post before the feature",
+      "## Open product hypotheses and evidence questions"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/02-architecture.md",
+    "sha256": "c6fab1be7213d9ba1732ea3f5e0cda171b4ed3a7407f9240901528ac99f431c3",
+    "headings": [
+      "# Architecture: Shiftwork final pivot",
+      "## 1. Fit",
+      "## 2. Runtime and module boundaries",
+      "## 3. Endpoints",
+      "## 4. Data",
+      "## 5. Flow",
+      "### Legacy first-choice bootstrap",
+      "### Investigate and experiment",
+      "### Choose and operate",
+      "## 6. Versioning, selection, restart and restoration",
+      "## 7. Evaluator, credential and sealed-case isolation",
+      "## 8. Fair comparison and repeated-probing controls",
+      "### 8.1 Protected task stimuli: distinct phases, frozen together, never public",
+      "## 9. Deterministic ledger ownership and replay",
+      "## 10. Nemotron responsibilities and learner authorship",
+      "## 11. Tavily mission-curation boundary",
+      "## 12. External services and configuration",
+      "## 13. Observability and execution evidence",
+      "## 14. Local development and delivery boundary",
+      "## 15. Track fit and evidence limits",
+      "## 16. Verified foundation and unverified integration",
+      "## 17. Failure containment",
+      "## 18. Decisions to challenge before approval",
+      "## 19. ADR reconciliation",
+      "## 20. Handoff to the next gates",
+      "## 21. Three-board engagement packs, consequence vocabulary and per-board comparison registration",
+      "### 21.1 The engagement pack as a declared concept",
+      "### 21.2 What the registration replaces",
+      "### 21.3 Go-To-Market pipeline consequence vocabulary",
+      "### 21.4 Forward Deployed Engineer discovery and rollout records"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/03-program-design.md",
+    "sha256": "b0f7e04ee0b2d3740740204fd59130c5b9ffa022b68c4fc249c5d1b159de1072",
+    "headings": [
+      "# Program Design: Shiftwork final pivot",
+      "## 1. Decisions fixed at this gate",
+      "## 2. Exact file map",
+      "### Existing production files to change",
+      "### New production files",
+      "### Tests to add or change",
+      "## 3. Types and signatures",
+      "### 3.1 Identity, purpose and captured context",
+      "### 3.2 Investigation and assistance",
+      "### 3.3 Public task contract and service response",
+      "### 3.4 Evaluator and comparison policy",
+      "### 3.5 Experiments, runs, observations and gateway",
+      "### 3.6 Selection, ancestry and orchestration",
+      "### 3.7 Public API projections",
+      "### 3.8 Curation, offline only",
+      "### 3.9 Protected comparison stimuli (approved Gate 2 section 8.1)",
+      "### 3.10 Engagement pack declaration and registration",
+      "### 3.11 New-board pack contracts, consequence rules and acceptance aspects",
+      "## 4. Storage and migration",
+      "### New tables",
+      "### Existing-table changes",
+      "### v5 migration rules",
+      "## 5. Final API surface",
+      "## 6. Call stacks and transactions",
+      "### 6.0 Open a legacy first-choice shift",
+      "### 6.1 Investigate",
+      "### 6.2 Freeze candidates",
+      "### 6.3 Create a qualifying comparison",
+      "### 6.4 Execute and finalize an experimental trial",
+      "### 6.5 Select"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/04-slices.md",
+    "sha256": "6601681fbdf883eabe6acd707fcd9622fd1fc3f7a2647d63aad85c7fe3c0d11a",
+    "headings": [
+      "# Vertical Slice Plan: Shiftwork final pivot",
+      "## 1. Authority, baseline and exit rule",
+      "## 2. Proposed dependency order",
+      "## 3. Slice exit contracts",
+      "### Slice 10: v5 history to v6 without invented choice",
+      "### Slice 11: investigate a task-relevant failure",
+      "### Slice 12: capability spike and hard stop",
+      "### Slice 13: one fresh, isolated service request",
+      "### Slice 14: optional assistance after learner commitment",
+      "### Slice 15: paired candidate execution",
+      "### Slice 16: fair outcome, invalidation and recovery",
+      "### Slice 17: choose an eligible exact version",
+      "### Slice 18: operate only the selected service",
+      "### Slice 19: semantic replay of captured consequences",
+      "### Slice 20: inherit and test the retained alternative later",
+      "### Slice 21: complete the Bellwether room journey",
+      "### Slice 22a: FDE material, registration and offline reproduction",
+      "### Slice 22b: execute the FDE board journey",
+      "### Slice 23: the GTM pack and its offline comparison",
+      "### Slice 24: GTM consequences, operation and inheritance offline",
+      "### Slice 25: complete the GTM revenue floor",
+      "### Slice 26: optional Tavily curation",
+      "### Slice 27: full-pivot package and honest judge evidence",
+      "### Slice 28: conditional hosted demo",
+      "## 4. Gate 3 assertion-clause trace",
+      "## 5. No-go conditions and evidence boundaries",
+      "## 6. Approval boundary"
+    ],
+    "s24_lines": [
+      {
+        "line": 850,
+        "text": "### Slice 24: GTM consequences, operation and inheritance offline"
+      },
+      {
+        "line": 868,
+        "text": "  obligation 58, the GTM arms of 25, 28, 29, 30 to 34 and 45's operation"
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/client-visual-direction.md",
+    "sha256": "0489754397aad3efc5a0ebb13c456c36f8ae76563d8420f03447260e08f945f3",
+    "headings": [
+      "# Client visual direction: operational diorama",
+      "## Reference",
+      "## Product intent",
+      "## Station map",
+      "### Board 1 \u00b7 Bellwether service room",
+      "### Board 2 \u00b7 revenue floor",
+      "### Board 3 \u00b7 Northline deployment workshop",
+      "## Interaction rules",
+      "## State changes across the journey",
+      "## Responsive and accessibility acceptance",
+      "## Product comprehension acceptance"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice12-capability-2026-09-26.md",
+    "sha256": "03387629ec512ab5ef547fc4e1edf8450fa3d6e6d135223f992398603a36ad2c",
+    "headings": [
+      "# Slice 12 live capability matrix: final verdict 2026-09-27",
+      "## One-run small-file follow-up: 2026-09-26",
+      "## Fixed setup and spend",
+      "## Actual observations",
+      "## Independent review findings: 2026-09-26",
+      "### F2, F3 and F4 repair status: 2026-09-26 (offline only, no live run)",
+      "### Controlled pair live run: 2026-09-26 (one authorized live step)",
+      "### Controls phase live run: 2026-09-26 (one authorized live step)",
+      "### Remaining probes authored offline: 2026-09-26 (no live calls)",
+      "### Outage phase live run: 2026-09-26 (one authorized live step)",
+      "### Escape phase live run: 2026-09-26 (one authorized live step)",
+      "### Reuse phase live run: 2026-09-26 (one authorized live step)",
+      "### Trials phase live run: 2026-09-27 (one authorized live step)",
+      "### Judge route archived offline: 2026-09-27 (no live call)",
+      "### Inference payload archiving repaired, one authorized confirming call: 2026-09-27",
+      "### Reset phase live run: 2026-09-27 (one authorized live step)",
+      "### Final matrix, hostile probes and stop verdict: 2026-09-27",
+      "## Stopped or unmeasured"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice12-preflight-2026-09-26.md",
+    "sha256": "53905c10aaf8ad46dede58abfea170d5501450058acdca257d94b54cc8fce8b9",
+    "headings": [
+      "# Slice 12 Sandbox entitlement preflight: 2026-09-26",
+      "## Corrected project header: entitlement available",
+      "## Reproduction",
+      "## Evidence boundaries and next action"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice14-assist-live-2026-09-27.md",
+    "sha256": "db57debf70fdf8d951a6a5a2eed64b4032390ab489e869e25650ab26667a7d08",
+    "headings": [
+      "# Slice 14 live assist check: 2026-09-27",
+      "## Authority and setup",
+      "## Observed call records",
+      "## Adjudication and repair boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice15-live-cost-estimate-2026-09-28.md",
+    "sha256": "3e1735c4e7a4ea3a043d45f77eb3f5fc1b1235d5e0ca0e58fef3446e8f0f5528",
+    "headings": [
+      "# Live comparison cost and latency estimate, revised for twelve executor operations",
+      "## What a live comparison actually executes",
+      "## The measured basis, and the rate card derived from it",
+      "## Latency projection",
+      "## Cost projection",
+      "## Assumptions that could break this, and their falsifiers",
+      "## Verdict"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice16-live-comparison-2026-09-29.md",
+    "sha256": "62453bec2baaf28f2eaf5c4ac16e9952074ad5e61cc667b6e375df70baa31e3f",
+    "headings": [
+      "# Slice 16 single live comparison, 2026-09-29",
+      "## Before the call",
+      "## One execution and independent readback",
+      "## Repair and offline proof boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice20-sse-recovery-2026-10-01.md",
+    "sha256": "77a09634f1fadd6d11b51cd36fa66669ceed26f518946d8f1fa6e4227832cb0c",
+    "headings": [
+      "# S20 stretch decision and SSE recovery: 2026-10-01",
+      "## Boundaries",
+      "## Mechanism and repair",
+      "## Current preflight sources",
+      "## Offline proof and live result",
+      "## Live result and stored-record verification",
+      "## Scoped architect-reviewer check and Git state",
+      "## Subsequent housekeeping and publication authority: 2026-10-02"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice21-review-fixes-2026-10-02.md",
+    "sha256": "c397e7d233625070b4791e40571a8a416ac54be513b74c53bde434646e8aeb85",
+    "headings": [
+      "# S21 independent-review repairs: 2026-10-02",
+      "## Authority and checkout",
+      "## Repairs and falsification",
+      "## Receipts and verification",
+      "## Current claim corrections and limits",
+      "## Repository receipt package: 2026-10-03",
+      "## Publication and main integration: 2026-10-03"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice21-room-2026-10-02.md",
+    "sha256": "ac2a78393c3be72b377e54fe7030a016fad03b046c9b5800d84a5a1476a0fdb3",
+    "headings": [
+      "# S21 Bellwether room: verified offline",
+      "## Working result",
+      "## Verification",
+      "## Failures preserved and repaired",
+      "## Architecture and cleanup",
+      "## Completion boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-assist-2026-10-03/approval-2026-10-03/entry-handoff.md",
+    "sha256": "3efde0d960a8bcc077962d48882eace9f3495fbc6b3f0120c1a56d84259c9174",
+    "headings": [
+      "# S22a handoff, 2026-10-03: diagnosed assistance compatibility defect",
+      "## Completed and evidence",
+      "## Gate state and proposed correction",
+      "## Changed here, traps and remaining work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-assist-2026-10-03/diagnosis-2/entry-handoff.md",
+    "sha256": "3aa5a9a16ded6a7424bcea82b35b6db32bf80c393927fdb0b2afdf7ad10452c2",
+    "headings": [
+      "# S22a handoff, 2026-10-03: assistance full-suite hold",
+      "## Completed",
+      "## Current implementation and evidence",
+      "## Files changed in this resume",
+      "## Open work and agreements",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-assist-2026-10-03/policy-repair/entry-slice22a-handoff-2026-10-03.md",
+    "sha256": "961055b4e45907b7497835583a1e46b98c9a5e93ce7f6511080254fb8ff6961a",
+    "headings": [
+      "# S22a handoff, 2026-10-03: diagnosed assistance compatibility defect",
+      "## Completed and evidence",
+      "## Gate state and approved correction",
+      "## Changed here, traps and remaining work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-assist-2026-10-03/policy-repair/entry-slice22a-implementation-plan.md",
+    "sha256": "34b23575fdd55b483ac41e62deb4bada0b2f9b0fd5b7cf490fc878b2d6c1870a",
+    "headings": [
+      "# S22a implementation plan",
+      "## Authority and entry state",
+      "## Checklist",
+      "## Design defect and re-approved correction",
+      "## Resume boundary",
+      "## Entry baseline and document verification",
+      "## Historical registry verifier hold, resolved on resume"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-assist-2026-10-03/policy-repair/mutation-jsons-README.md",
+    "sha256": "c02597ab79d4c95e3c47d439c1df9ca4d2e453939ad83c58833a9371bd7ddf71",
+    "headings": [
+      "# Archived generated mutation JSONs"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-registry-2026-10-03.md",
+    "sha256": "038f950c16c395f88e28604bfee8dbfab864bbe48c2922c44b619108cbb0dae8",
+    "headings": [
+      "# S22a registry checkpoint, 2026-10-03",
+      "## Final closeout",
+      "## Registry verification resumed, 2026-10-03"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-seeding-2026-10-03/entry-slice22a-handoff-2026-10-03.md",
+    "sha256": "d7771ce1c929053ba85cbe85be41f72547637e22cde9629f22b5e5b50ea731da",
+    "headings": [
+      "# S22a handoff, 2026-10-03: assistance repair verified offline",
+      "## Completed and evidence",
+      "## Changed files and traps",
+      "## Open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-seeding-2026-10-03/entry-slice22a-implementation-plan.md",
+    "sha256": "9992c037c2da0b7bd0181af6faf6b78c2853efdbcc999e1779158bcf811162d4",
+    "headings": [
+      "# S22a implementation plan",
+      "## Authority and entry state",
+      "## Checklist",
+      "## Design defect and re-approved correction",
+      "## Historical pre-diagnosis resume boundary",
+      "## Entry baseline and document verification",
+      "## Historical registry verifier hold, resolved on resume"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-typed-2026-10-03/entry-slice22a-handoff-2026-10-03.md",
+    "sha256": "1297558ff41a8faffc3b742920960fb816bae7321cd5f4e6c6fe80d87f8fd7f5",
+    "headings": [
+      "# S22a handoff, 2026-10-03: owning-pack execution verified offline",
+      "## Completed and decisions",
+      "## Verification and limits",
+      "## Changed files",
+      "## Traps and retained failures",
+      "## Open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22a-typed-2026-10-03/entry-slice22a-implementation-plan.md",
+    "sha256": "70276f790333bf544f45b54c0c98bc1ca2cd668f1f13a75b5024220dc9b2f74f",
+    "headings": [
+      "# S22a implementation plan",
+      "## Authority and entry state",
+      "## Checklist",
+      "## Design defect and re-approved correction",
+      "## Historical pre-diagnosis resume boundary",
+      "## Entry baseline and document verification",
+      "## Historical registry verifier hold, resolved on resume"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/cleanup-review.md",
+    "sha256": "0d3d243ed00ebfce2902463ca69d093a6235f67925fe44fd856d945e9eec6626",
+    "headings": [
+      "# Bounded completion architecture and cleanup review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/fault-provisional-policy/candidate-A/discovery.md",
+    "sha256": "d9bffa01b054ec3fafa0509aef0e8ebc3dd8488c50aff483a9ec6bbedf25e9cb",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/fault-provisional-policy/candidate-A/runbook.md",
+    "sha256": "57e16576e68086c6822215e35c5d5045d62c25456e3fd4426515ab99c5d14662",
+    "headings": [
+      "# Operator verification runbook A"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/fault-provisional-policy/candidate-B/discovery.md",
+    "sha256": "945ab1638e439dbb1342c4b629049e113ee17279f47ae6111c479dcea4a78974",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/fault-provisional-policy/candidate-B/runbook.md",
+    "sha256": "63c697db6942206ac11cd6944fa818a4f6719dcc84f090e271683db5ba5e88ce",
+    "headings": [
+      "# Operator verification runbook B"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/fault-stable-retry/candidate-A/discovery.md",
+    "sha256": "d9bffa01b054ec3fafa0509aef0e8ebc3dd8488c50aff483a9ec6bbedf25e9cb",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/fault-stable-retry/candidate-A/runbook.md",
+    "sha256": "57e16576e68086c6822215e35c5d5045d62c25456e3fd4426515ab99c5d14662",
+    "headings": [
+      "# Operator verification runbook A"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/fault-stable-retry/candidate-B/discovery.md",
+    "sha256": "945ab1638e439dbb1342c4b629049e113ee17279f47ae6111c479dcea4a78974",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/fault-stable-retry/candidate-B/runbook.md",
+    "sha256": "63c697db6942206ac11cd6944fa818a4f6719dcc84f090e271683db5ba5e88ce",
+    "headings": [
+      "# Operator verification runbook B"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/pytest-full-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-01/candidate-A/discovery.md",
+    "sha256": "d9bffa01b054ec3fafa0509aef0e8ebc3dd8488c50aff483a9ec6bbedf25e9cb",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-01/candidate-A/runbook.md",
+    "sha256": "57e16576e68086c6822215e35c5d5045d62c25456e3fd4426515ab99c5d14662",
+    "headings": [
+      "# Operator verification runbook A"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-01/candidate-B/discovery.md",
+    "sha256": "945ab1638e439dbb1342c4b629049e113ee17279f47ae6111c479dcea4a78974",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-01/candidate-B/runbook.md",
+    "sha256": "63c697db6942206ac11cd6944fa818a4f6719dcc84f090e271683db5ba5e88ce",
+    "headings": [
+      "# Operator verification runbook B"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-02/candidate-A/discovery.md",
+    "sha256": "d9bffa01b054ec3fafa0509aef0e8ebc3dd8488c50aff483a9ec6bbedf25e9cb",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-02/candidate-A/runbook.md",
+    "sha256": "57e16576e68086c6822215e35c5d5045d62c25456e3fd4426515ab99c5d14662",
+    "headings": [
+      "# Operator verification runbook A"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-02/candidate-B/discovery.md",
+    "sha256": "945ab1638e439dbb1342c4b629049e113ee17279f47ae6111c479dcea4a78974",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-02/candidate-B/runbook.md",
+    "sha256": "63c697db6942206ac11cd6944fa818a4f6719dcc84f090e271683db5ba5e88ce",
+    "headings": [
+      "# Operator verification runbook B"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-final/candidate-A/discovery.md",
+    "sha256": "d9bffa01b054ec3fafa0509aef0e8ebc3dd8488c50aff483a9ec6bbedf25e9cb",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-final/candidate-A/runbook.md",
+    "sha256": "57e16576e68086c6822215e35c5d5045d62c25456e3fd4426515ab99c5d14662",
+    "headings": [
+      "# Operator verification runbook A"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-final/candidate-B/discovery.md",
+    "sha256": "945ab1638e439dbb1342c4b629049e113ee17279f47ae6111c479dcea4a78974",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-completion-preflight-2026-10-05/rehearsal-final/candidate-B/runbook.md",
+    "sha256": "63c697db6942206ac11cd6944fa818a4f6719dcc84f090e271683db5ba5e88ce",
+    "headings": [
+      "# Operator verification runbook B"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/northline-deployment-protocol.md",
+    "sha256": "556c0f585bf9fd972337b070ef61dee38ef4a24f2428c10540365b777ecba344",
+    "headings": [
+      "# Northline deployment action protocol",
+      "## Stable intent from received inputs",
+      "## Booking assertions and receipts"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/plans/shiftwork/00-status.md",
+    "sha256": "c290a159cc7b9027cacdb99ffae33ec7145e75174394661cf72a8cef58580af3",
+    "headings": [
+      "# Status: Shiftwork",
+      "## Historical S22a owning-pack execution checkpoint verified offline: 2026-10-03",
+      "## Historical S22a assistance compatibility repair verified offline: 2026-10-03",
+      "## S22a verified Git hold and diagnosed failures: 2026-10-03",
+      "## Historical pre-diagnosis S22a assistance hold: 2026-10-03",
+      "## S22a registry implementation checkpoint: 2026-10-03",
+      "## S22a start and scoped Gate 3 re-approval: 2026-10-03",
+      "## S21 review-fix publication and main integration: 2026-10-03",
+      "## S21 independent-review repair round: 2026-10-02",
+      "## S21 publication and main integration: 2026-10-02",
+      "## S21 implementation and offline verification: 2026-10-02",
+      "## Slice 20 offline implementation and verification: 2026-09-30",
+      "### What landed",
+      "### Working result and demo",
+      "### Verification, all under `.venv313/Scripts/python.exe`",
+      "### Two proof defects this round found, and their repairs",
+      "### Independent review round and repairs: 2026-10-01",
+      "### Second independent review round and Limits repair: 2026-10-01",
+      "### Mirror and ADR corrections in this record",
+      "### Limits",
+      "### Stretch chain achieved: 2026-10-01 UTC, verified 2026-10-02",
+      "### Stretch chain pre-change anchor round and offline baseline: 2026-10-01",
+      "### Stretch chain post-change round, rehearsal and live attempt: 2026-10-01",
+      "### Stretch chain delegated decision and SSE repair: 2026-10-01",
+      "### Stretch chain stored-record verification: 2026-10-02",
+      "### S20 stretch housekeeping, publication authority and completion: 2026-10-02",
+      "## Slice 19 branch and main publication and user acceptance: 2026-09-30",
+      "## Slice 19 offline implementation and verification: 2026-09-30",
+      "### S19 anchor-repair round: 2026-09-30",
+      "## Three-board scope direction, revision memo and approval: 2026-09-30"
+    ],
+    "s24_lines": [
+      {
+        "line": 5277,
+        "text": "- [ ] Slice 24: GTM selection, operation and inheritance offline with the pipeline consequence vocabulary"
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/plans/shiftwork/03-program-design.md",
+    "sha256": "3565957c51a5aba8a32574446e23d40f1504b3f2c60e8ba4fafa7bca12690969",
+    "headings": [
+      "# Program Design: Shiftwork final pivot",
+      "## 1. Decisions fixed at this gate",
+      "## 2. Exact file map",
+      "### Existing production files to change",
+      "### New production files",
+      "### Tests to add or change",
+      "## 3. Types and signatures",
+      "### 3.1 Identity, purpose and captured context",
+      "### 3.2 Investigation and assistance",
+      "### 3.3 Public task contract and service response",
+      "### 3.4 Evaluator and comparison policy",
+      "### 3.5 Experiments, runs, observations and gateway",
+      "### 3.6 Selection, ancestry and orchestration",
+      "### 3.7 Public API projections",
+      "### 3.8 Curation, offline only",
+      "### 3.9 Protected comparison stimuli (approved Gate 2 section 8.1)",
+      "### 3.10 Engagement pack declaration and registration",
+      "### 3.11 New-board pack contracts, consequence rules and acceptance aspects",
+      "## 4. Storage and migration",
+      "### New tables",
+      "### Existing-table changes",
+      "### v5 migration rules",
+      "## 5. Final API surface",
+      "## 6. Call stacks and transactions",
+      "### 6.0 Open a legacy first-choice shift",
+      "### 6.1 Investigate",
+      "### 6.2 Freeze candidates",
+      "### 6.3 Create a qualifying comparison",
+      "### 6.4 Execute and finalize an experimental trial",
+      "### 6.5 Select"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/plans/shiftwork/slice22b-gate3-deployment-evidence.md",
+    "sha256": "7546d81196c2b148b1a2b5259b472e481e8d836a59efd80792f85691db0874ff",
+    "headings": [
+      "# Gate 3 scoped correction: independent Northline deployment evidence",
+      "## Concrete problem",
+      "## Proposed decisions",
+      "## Types and signatures to add",
+      "## File ownership and call stacks",
+      "## Required falsification",
+      "## Approval boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/plans/shiftwork/slice22b-gate3-independent-review.md",
+    "sha256": "5a206ae5d98e66ba22deacc58c4c6aeb95c1132dbb98b29729ee28e44c5bd86a",
+    "headings": [
+      "# S22b Gate 3 independent review, 2026-10-04",
+      "## Findings",
+      "## Independent checks",
+      "## Required disposition before approval",
+      "## Exact candidate publication scope"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/plans/shiftwork/slice22b-gate3-review-corrections.md",
+    "sha256": "3323265bcece9fcb6eb7b64943228eddbeb1c93851cdfb56c1d35761294986a4",
+    "headings": [
+      "# S22b Gate 3 corrections for R1 to R6",
+      "## Decisions",
+      "## Signatures and ownership",
+      "# Planned R2 addition, after explicit Gate 3 approval:",
+      "# Existing conformance repairs:",
+      "## Exact operator packet already approved",
+      "## Publication and acceptance boundaries",
+      "## Verification at this checkpoint"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/plans/shiftwork/slice22b-implementation-plan.md",
+    "sha256": "e3c9112f91aacfafe820b144ca9a5e151ac1a8a0e19ade196ada3a9ebb7f5ef6",
+    "headings": [
+      "# S22b implementation plan"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/plans/shiftwork/slice22b-protected-retry-amendment.md",
+    "sha256": "2325f300b1669ed2b52f6c7991eeac316b89cd15b68aa33f8eafbe17ebfe044a",
+    "headings": [
+      "# S22b protected retry input correction",
+      "## Reproduced blocker",
+      "## Exact proposed input",
+      "## Concrete unapplied operator packet",
+      "## Required proof after approval",
+      "## Boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/plans/shiftwork/slice22b-review-repair-plan.md",
+    "sha256": "758ee3b152426840d7dc0f324e1b896096009501f36ad0a0050be356675664d4",
+    "headings": [
+      "# S22b review repair plan, 2026-10-04"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/before-approval/docs/SHIFTWORK_PLAN.md",
+    "sha256": "f35404bf782784b4aa2fc77d1ed7c2a42ec3abae6d26380eb540428d5ab6ea2b",
+    "headings": [
+      "# Shiftwork: working brief and adjudication register",
+      "## 1. Product thesis",
+      "## 2. Decisions and authority",
+      "## 3. Revised learning loop",
+      "## 4. Bellwether: a less predetermined incident",
+      "## 5. Comparison and evidence requirements",
+      "## 6. Authority boundary for subsequent gate revision",
+      "## 7. Organiser technology and track hypothesis",
+      "## 8. Tavily is optional",
+      "## 9. Evidence plan to revise at later gates",
+      "### Central mechanism",
+      "### Reduced-assistance transfer",
+      "### Tavily ablation",
+      "## 10. Scope and prior evidence retained",
+      "## 11. Forecast and adjudication history",
+      "## 12. Immediate next action"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-publication-2026-10-04/handoff.md",
+    "sha256": "f2ec8ca0e1ddc20f02ce9968f0201fcc57127b8ec50a70995dfd53969335330a",
+    "headings": [
+      "# Prompt for New Chat"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-gate3-review-2026-10-04/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/cache-fix/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/cache-full/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/cache-full-final/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations/clean-explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations/clean-fallback/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations/clean-visit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations/fault-explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations/fault-fallback/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations/fault-visit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/clean-conflicting_visits/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/clean-cross_conflict/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/clean-explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/clean-fallback/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/clean-header/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/clean-malformed_explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-conflicting_explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-conflicting_visits/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-cross_conflict/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-fallback/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-header/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-key_validation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-malformed_explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-malformed_visit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final/fault-visit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-active_declaration/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-active_privacy/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-attribute/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-conflicting_explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-conflicting_visits/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-cross_conflict/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-fallback/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-header/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-historical_privacy/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-key_validation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-malformed_explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-malformed_visit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-never_reuse/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/clean-original_body/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-active_declaration/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-active_privacy/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-attribute/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-conflicting_explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-conflicting_visits/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-cross_conflict/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-fallback/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-header/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-historical_privacy/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-key_validation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-malformed_explicit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-malformed_visit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-never_reuse/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-original_body/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-intent-v2-2026-10-04/mutations-final-2/fault-visit/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-journey-2026-10-04/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-completion-2026-10-05/candidate-A/discovery.md",
+    "sha256": "d9bffa01b054ec3fafa0509aef0e8ebc3dd8488c50aff483a9ec6bbedf25e9cb",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-completion-2026-10-05/candidate-A/runbook.md",
+    "sha256": "57e16576e68086c6822215e35c5d5045d62c25456e3fd4426515ab99c5d14662",
+    "headings": [
+      "# Operator verification runbook A"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-completion-2026-10-05/candidate-B/discovery.md",
+    "sha256": "945ab1638e439dbb1342c4b629049e113ee17279f47ae6111c479dcea4a78974",
+    "headings": [
+      "# Operator verification discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-completion-2026-10-05/candidate-B/runbook.md",
+    "sha256": "63c697db6942206ac11cd6944fa818a4f6719dcc84f090e271683db5ba5e88ce",
+    "headings": [
+      "# Operator verification runbook B"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-completion-review-2026-10-05/authorization.md",
+    "sha256": "31a3d26dace66d9a37edcab7f9f8018256f60713059fe99ec909c746dceb2122",
+    "headings": [
+      "# S22b completion live authorization"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-completion-review-2026-10-05/cleanup-review.md",
+    "sha256": "d3bc0bd2617bbed0f275cafe4dc3815975c99b24d3fb0c78b635295534fa3261",
+    "headings": [
+      "# S22b final bounded architecture and cleanup review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-diagnostic-continuation-2026-10-05/diagnostic-packet.before.md",
+    "sha256": "2ff00374b7dc7ce7b544fca78d2a6efcd2434b55acb8ee6951d055dd49074300",
+    "headings": [
+      "# S22b next live packet: one edited public diagnostic",
+      "## Exact candidate bytes",
+      "## Reserved execution and decisive result",
+      "## Completed offline checks and limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-diagnostic-continuation-2026-10-05/plan.md",
+    "sha256": "a58058495685798d28953be5ecfc311ac8bcd6be475fc4cd33f2874fa1ad6c32",
+    "headings": [
+      "# S22b approved live diagnostic continuation"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-diagnostic-packet-2026-10-05/candidate/discovery.md",
+    "sha256": "cef7501e69731ccc22c905cc0848f1151bfe22497d0ef5c99423bb3568de693e",
+    "headings": [
+      "# Public diagnostic discovery"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-diagnostic-packet-2026-10-05/candidate/runbook.md",
+    "sha256": "3bba46d56fddcbde078e4e1dd97f1b838027de8c3a8698fa29799a83f772a70a",
+    "headings": [
+      "# Public diagnostic runbook"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-diagnostic-packet-2026-10-05/packet-document-command-failed.md",
+    "sha256": "c27397e267180c020fb99e375b7af59c56fe0543075e908042377bc07cf04c5d",
+    "headings": [
+      "# S22b next live packet: one edited public diagnostic",
+      "## Exact candidate bytes",
+      "## Reserved execution and decisive result",
+      "## Completed offline checks and limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-diagnostic-packet-2026-10-05/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-live-starter-audit-2026-10-05/mistakes-before.md",
+    "sha256": "1dc71625544e452bc59e4b8cb41ebe60ae466c68d3cc4bc4f564f4a17dd4d53e",
+    "headings": [
+      "# Mistakes Log",
+      "## 2026-10-02 S20 publication: checkout converted byte-hashed evidence endings",
+      "## 2026-10-02 S20 publication: unstaged diff checks omitted new evidence files",
+      "## 2026-10-01 S20 demo proof: comparison included the evidence note wrapper",
+      "## 2026-10-01 S20 SSE proof runner: multiline anchors did not match CRLF source",
+      "## 2026-10-01 S20 live chain: the comparison died on an SSE server-error frame the adapter cannot resume",
+      "## 2026-10-01 S20 chain runner: the local executor produced backlog events where the recipe said incidents",
+      "## 2026-10-01 S20 stretch: test slips and a wrong-type meter crashed a guard",
+      "## 2026-10-01 S20 review: a demo boolean that could never be false",
+      "## 2026-10-01 S20 review: the record stated a mechanism and an attribution its captured evidence contradicts",
+      "## 2026-09-30 S18 mutation classifier missed bare pytest assertions",
+      "## 2026-09-29 S17 stale station label and ambiguous test patch",
+      "## 2026-09-29 S17 Compare panel crashed before the first board load",
+      "## 2026-09-28 Slice 15 render-fault run could not tell its preview from a foreign server",
+      "## 2026-09-28 Slice 15 compare-demo harness kept the pre-protected copy assertion",
+      "## 2026-09-28 Slice 15 protected-phase guards masked four older proof rows",
+      "## 2026-09-28 Slice 15 two proof shapes measured unprovable",
+      "## 2026-09-28 Slice 15 mutation run crashed at row 95 and left a stranded mutation",
+      "## 2026-09-28 Slice 15 reservation fault test assumed the wrong SQLite error class",
+      "## 2026-09-28 Slice 15 execution claim: stale fault and mutation targets",
+      "## 2026-09-27 Slice 15 browser proof: a wait condition true on the initial render hides a swallowed click",
+      "## 2026-09-27 Slice 15 browser proof: a transport timer shorter than the page deadline replaced the real error",
+      "## 2026-09-27 Slice 15 browser proof: rendered rows matched on an identity that duplicates",
+      "## 2026-09-27 Slice 14: live assist probe used a mismatched investigation",
+      "## 2026-09-27 Slice 14: assist test expected the wrong run status",
+      "## 2026-09-27 Slice 14: gateway unit test kept an invalid role argument",
+      "## 2026-09-27 Slice 14: old absence guards failed after the assist package landed",
+      "## 2026-09-27 Slice 14: reply metadata changed positional argument meaning",
+      "## 2026-09-16 \u2014 Gate 4 slice plan mapped tests by number, not by clause",
+      "## 2026-09-17 \u2014 Clause-level coverage repair verified only the clauses a reviewer named"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-pilot-2026-10-04/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-publication-2026-10-06/authorization.md",
+    "sha256": "2cffbe3cd8fb94825d6a91352079d8b2f5a15d01169613da5f7b1cc2b9f6e450",
+    "headings": [
+      "# User authorization, 2026-10-06 Asia/Singapore"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-claim_date/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-claim_receipt/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-claim_reference/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-driver_isolation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-finalization_completeness/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-kernel_dependency_isolation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-private_intent/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-replay_completeness/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/clean-rollback_history/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/fault-claim_date/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/fault-claim_receipt/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/fault-claim_reference/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/fault-driver_isolation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/fault-finalization_completeness/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/fault-kernel_dependency_isolation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/fault-replay_completeness/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/fault-rollback_history/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-active_inventory/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-claim_date/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-claim_receipt/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-claim_reference/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-driver_isolation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-finalization_completeness/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-historical_inventory/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-kernel_dependency_isolation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-private_intent/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-private_reference/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-replay_completeness/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-rollback_history/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/clean-slash_base64/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-active_inventory/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-claim_date/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-claim_receipt/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-claim_reference/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-driver_isolation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-finalization_completeness/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-historical_inventory/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-kernel_dependency_isolation/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-private_intent/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-private_reference/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-replay_completeness/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-rollback_history/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-review-repairs-2026-10-04/mutations-final/fault-slash_base64/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-start-2026-10-04/fault-availability_overridden/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-start-2026-10-04/fault-baseline/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-start-2026-10-04/fault-declaration_order_reversed/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-start-2026-10-04/fault-scanner_bypassed/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-start-2026-10-04/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/cache2/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/cache3/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/cache4/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/trace-fault-action_order/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/trace-fault-baseline/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/trace-fault-receipt_count/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/trace-fault-receipt_digest/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-traces-2026-10-04/trace-fault-trace_byte_bound/cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-ui-2026-10-05/cleanup-review.md",
+    "sha256": "cb7a054c2a1d25f9aaef52be537fbdddacbd7d0d67a90d67c891f87d986c96b6",
+    "headings": [
+      "# S22b native UI cleanup review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-ui-2026-10-05/pytest-cache/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice22b-ui-2026-10-05/pytest-cache-final/README.md",
+    "sha256": "73fd6fccdd802c419a6b2d983d6c3173b7da97558ac4b589edec2dfe443db9ad",
+    "headings": [
+      "# pytest cache directory #"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.agents/references/architecture-contract.md",
+    "sha256": "34c9dcf594fec62172c79777970dfc4a3b04f7c0d434997a838f85eebe6361d9",
+    "headings": [
+      "# Architecture Contract",
+      "## Core principles",
+      "## View levels",
+      "## Standard artifact shape",
+      "## Evidence and confidence",
+      "## Diagram grounding",
+      "## Visual conventions"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.agents/references/architecture-evidence-model.md",
+    "sha256": "d26f3cd90f7c11c36565e39a6bf05eefbad0717c5f45c73173250ca7c3543531",
+    "headings": [
+      "# Architecture Evidence Model",
+      "## Node fields",
+      "## Edge fields",
+      "## Evidence types",
+      "## Model metadata",
+      "## Validation rules"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/bp-extract.md",
+    "sha256": "2a0eac276edae51ee68e61ba44c15da973772ff673af92540dbf85dc715c233f",
+    "headings": [
+      "# Best Practices for Extract",
+      "## Extract Parameters",
+      "### Query",
+      "### Chunks Per Source",
+      "## Extraction Approaches",
+      "### Search with include\\_raw\\_content",
+      "### Direct Extract API",
+      "## Extract Depth",
+      "### Using `extract_depth=advanced`",
+      "## Advanced Filtering Strategies",
+      "### Example: Score-based filtering",
+      "## Integration with Search",
+      "### Optimal workflow",
+      "### Example end-to-end pipeline",
+      "## Use Session Tracking for Multi-Step Workflows",
+      "## Summary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/bp-search.md",
+    "sha256": "991e1f97b86536b2a96284c88db854b13997409e5dec4a57450fa9740f94597b",
+    "headings": [
+      "# Best Practices for Search",
+      "## Query Optimization",
+      "### Keep your query under 1500 characters",
+      "### Break complex queries into sub-queries",
+      "## Search Depth",
+      "### Content types",
+      "### `basic` vs `advanced`",
+      "### Fast + Ultra-Fast",
+      "### Using `search_depth=advanced`",
+      "## Filtering Results",
+      "### By date",
+      "### By topic",
+      "### By domain",
+      "### By language",
+      "## Response Content",
+      "### `max_results`",
+      "### `include_raw_content`",
+      "### `auto_parameters`",
+      "## Exact Match",
+      "## Async & Batch Search",
+      "### Parallelize with bounded concurrency",
+      "### Deduplication",
+      "### Operational checklist",
+      "## Post-Processing",
+      "### Using metadata",
+      "### Score-based filtering",
+      "# Filter results with score > 0.7",
+      "### Regex extraction",
+      "# Extract location",
+      "# Extract all emails"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/changelog.md",
+    "sha256": "dad4173c4c5a054f7cdb8a3ea90336a8f501e4a6d4256da460da46c5454fdc02",
+    "headings": [
+      "# Changelog"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-credits.md",
+    "sha256": "33e39e70fe99098f09de88cc74f40dca8d0dcf6a57f05c199dfdded2a42b38da",
+    "headings": [
+      "# Credits & Pricing",
+      "## Free API Credits",
+      "## Pricing Overview",
+      "## API Credits Costs",
+      "### Tavily Search",
+      "### Tavily Extract",
+      "### Tavily Map",
+      "### Tavily Crawl",
+      "### Tavily Research"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-reference_endpoint_crawl.md",
+    "sha256": "6240c5b149b7c477456fab505c1a067e0eeabc12da623e132ae32709f3fe9973",
+    "headings": [
+      "# Tavily Crawl",
+      "## OpenAPI"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-reference_endpoint_extract.md",
+    "sha256": "b5e2f4679e3e3da83044ae8f30c54215d2bcb0d4aeb9e46715e3b3cf9fe70a62",
+    "headings": [
+      "# Tavily Extract",
+      "## OpenAPI"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-reference_endpoint_logs.md",
+    "sha256": "32ee911734cb1278a1f15bc325c3386e539edd81bb8c6398f80a02b7d7749769",
+    "headings": [
+      "# Logs",
+      "## OpenAPI"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-reference_endpoint_map.md",
+    "sha256": "7ba0d81bb01e86120a252feb4488e46dfaf093ee02250e35d59a8ba6d9b395cf",
+    "headings": [
+      "# Tavily Map",
+      "## OpenAPI"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-reference_endpoint_research.md",
+    "sha256": "eea2d646096b7b68e0767b406e1a359bf36bd4ee931ce384e968f98b017e978e",
+    "headings": [
+      "# Create Research Task",
+      "## OpenAPI"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-reference_endpoint_search.md",
+    "sha256": "62b67a36f9685e2a73f604a3d02e98166de3e843692b629f52b1e431d0e96d68",
+    "headings": [
+      "# Tavily Search",
+      "## OpenAPI"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-reference_endpoint_usage.md",
+    "sha256": "1d512af1f3568d3098a8f03bc1677a0a78692405b580ad7a4bf825f341521de8",
+    "headings": [
+      "# Usage",
+      "## OpenAPI"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_api-reference_introduction.md",
+    "sha256": "645fc2552b2684a174b9bca5e216cb6c5e07e9d91e958bdf5749371a960b6806",
+    "headings": [
+      "# Introduction",
+      "## Base URL",
+      "## Authentication",
+      "## Endpoints",
+      "## Project Tracking",
+      "## Session Tracking"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_keyless.md",
+    "sha256": "ffba31554204da8c27fd5a66f6d99cb11f5baa2493cf94db0e0f4ec3b66524b3",
+    "headings": [
+      "# Try Tavily Without an API Key",
+      "## Why Tavily?",
+      "## Direct API",
+      "## MCP Server",
+      "### Agent-installable prompt",
+      "## Supported endpoints",
+      "## Rate limits",
+      "## FAQ"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/documentation_rate-limits.md",
+    "sha256": "9d4e3b4d143958648b5ff89cd12662fe101819ca09409c0672e8c1d0cabdd527",
+    "headings": [
+      "# Rate Limits",
+      "## Crawl Endpoint Rate Limits",
+      "## Research Endpoint Rate Limits",
+      "## Usage Endpoint Rate Limits",
+      "## Handling Rate Limit Responses"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/pricing.html",
+    "sha256": "2aabea0c8f55386787840403abf2496fc23cee5127c568e46448d3c13a5ba42d",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/.tv/terms.html",
+    "sha256": "e2a8e3c17e2917f1f54843712d7588bb0aceda68265e3da11c03d68d63980159",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/AGENTS-current-observed.md",
+    "sha256": "af344830f82908ee3cc02363e172d9fb7fe7573c73cd2cfea8b94dfcf701e956",
+    "headings": [
+      "# Shiftwork: project and execution instructions",
+      "## 1. Operating principles",
+      "## 2. Read order and authority",
+      "## 3. Current direction and authorization",
+      "## 4. Product definition and scope filters",
+      "### Hatchery mechanisms that may be imported",
+      "## 5. Required software-factory process",
+      "## 6. Execution discipline",
+      "### Before editing",
+      "### While working",
+      "### Context budget and handoff",
+      "### Mistake logging",
+      "### Verification",
+      "## 7. Long unattended runs",
+      "### Progress state",
+      "### Autonomy and hard stops",
+      "### Context and output hygiene",
+      "## 8. Technology and evidence boundaries for later gates",
+      "## 9. Adjudication warnings and proof boundaries",
+      "## 10. Repository history and closed directions"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/AGENTS.md",
+    "sha256": "4c5489ef463a42407e802821d2f09f1f14c13e9d5d6561bc2ddeb90d61798b49",
+    "headings": [
+      "# Shiftwork: project and execution instructions",
+      "## 1. Operating principles",
+      "## 2. Read order and authority",
+      "## 3. Current direction and authorization",
+      "## 4. Product definition and scope filters",
+      "### Hatchery mechanisms that may be imported",
+      "## 5. Required software-factory process",
+      "## 6. Execution discipline",
+      "### Before editing",
+      "### While working",
+      "### Context budget and handoff",
+      "### Mistake logging",
+      "### Verification",
+      "## 7. Long unattended runs",
+      "### Progress state",
+      "### Autonomy and hard stops",
+      "### Context and output hygiene",
+      "## 8. Technology and evidence boundaries for later gates",
+      "## 9. Adjudication warnings and proof boundaries",
+      "## 10. Repository history and closed directions"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/adr/0001-sealed-evaluator-isolation.md",
+    "sha256": "f8b290809927e4167865e2fe07ccf325e54549014265f3d8e2a4f4647047c3c6",
+    "headings": [
+      "# ADR 0001 \u2014 Sealed-evaluator isolation",
+      "## Context",
+      "## Decision",
+      "## Consequences",
+      "## Update 2026-09-19: loader ownership superseded",
+      "## Update 2026-09-28: two clauses narrowed for the protected comparison phase"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/adr/0002-deterministic-ledger-ownership-and-replay.md",
+    "sha256": "d189a5ae52fd53c05bfae1a4b2d604e240c5d876e927224f7de7fd5a58952d42",
+    "headings": [
+      "# ADR 0002 \u2014 Deterministic ledger ownership and replay",
+      "## Context",
+      "## Decision",
+      "## Consequences",
+      "## Implementation status 2026-09-19"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/adr/0003-artifact-versioning-and-restoration.md",
+    "sha256": "9a4866453d1c4dde7469e324633e43bce06e4d48bbeb7f4b7493c47ed9b11ce0",
+    "headings": [
+      "# ADR 0003 \u2014 Artifact versioning and restoration semantics",
+      "## Context",
+      "## Decision",
+      "## Consequences",
+      "## Implementation status 2026-09-19"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/adr/0005-final-pivot-experiments-and-operating-selection.md",
+    "sha256": "f5e916b765e914d94289c7484d6fd53bb1f9831c40d72a429dc1a0c3c090778c",
+    "headings": [
+      "# ADR 0005: Experiments, operating selection and retained evidence",
+      "## Context",
+      "## Decision",
+      "## Supersession map",
+      "## Consequences and evidence limits",
+      "## Implementation note 2026-09-30 (Slice 20)"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/adr/0006-protected-comparison-stimulus-boundary.md",
+    "sha256": "c533dcb48c89b9cf4ebadb39d6ec47e1d3376d105d3265d4e34e6c97a6178b22",
+    "headings": [
+      "# ADR 0006: Protected comparison stimulus boundary",
+      "## Context",
+      "## Decision",
+      "## Supersession map",
+      "## Consequences"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/HATCHERY_PLAN.md",
+    "sha256": "b1d5cbf4088ed6fb534416442cc1b105681885209f63b1e01411d5189f3931e0",
+    "headings": [
+      "# Hatchery \u2014 working brief and evidence register",
+      "## 1. Product thesis and full vision",
+      "## 2. What the user has and has not decided",
+      "### Why the plan was revised",
+      "### Ranked product changes and scope tradeoffs",
+      "### Binding product filters",
+      "## 3. Organiser technology: unresolved requirement conflict",
+      "## 4. Track fit and deadline",
+      "## 5. Independent reality check \u2014 dated research snapshot",
+      "### Earlier follow-up verification, 2026-09-14",
+      "### Latest independent review, 2026-09-14",
+      "### Dated triggers and their limits",
+      "### Source register",
+      "## 6. Tavily as a centerpiece",
+      "### Living rehearsals \u2014 show the consequence",
+      "### Scoped discovery \u2014 find what the notice missed",
+      "### Removed from the initial scope",
+      "## 7. Candidate scope and technical guardrails \u2014 for later gates",
+      "## 8. Highest-risk assumptions and decisive tests",
+      "## 9. Conditional scores and the remaining target gap",
+      "### Latest independent assessment of the current proposal",
+      "### Revised conditional best case \u2014 current planning basis",
+      "## 10. Proposed 2:45 demo",
+      "## 11. Planning sequence and immediate open decisions",
+      "## 12. Historical boundaries and checkout context"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/northline-deployment-protocol.md",
+    "sha256": "c8cc74bedc19cbfedcb6b78c55a29bedb601374874c02236e2fb151af63b8463",
+    "headings": [
+      "# Northline deployment action protocol",
+      "## Stable intent from received inputs",
+      "## Booking assertions and receipts"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/hatchery/00-status.md",
+    "sha256": "b4ffbb76915611fe2d7930b1b64557f55fbcc1528ca98dfb9ae9ec7a9a5b3c61",
+    "headings": [
+      "# Status: Hatchery",
+      "## Slices",
+      "## Notes for a fresh session",
+      "## Approval history"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/hatchery/01-product.md",
+    "sha256": "356a522662875217b59fe83fb244fc7dcd1ef0b9fbbc36cd58b12c0a6b0054b3",
+    "headings": [
+      "# Product: Hatchery",
+      "## Problem",
+      "## Success metric",
+      "## Product decisions proposed at Gate 1",
+      "## Announcement \u2014 the blog post before the feature",
+      "## Screen journey",
+      "## Screens",
+      "## Unresolved product decisions"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/hatchery/mockups/01-week-draft.html",
+    "sha256": "678f5a2b6af0d7f5d1be4a07281d29dff45fd21ef36ff963c16e0092756866a4",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/hatchery/mockups/02-correct-once.html",
+    "sha256": "30c3c42f269c64e41458f2a9760e13a2665ac3b3ff9d50a653e8617677e34f18",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/hatchery/mockups/03-workshop.html",
+    "sha256": "5496452b14abc3e1eed93364a41e18f15a769f9fe9bc67830dddbfb4c32ad996",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/hatchery/mockups/04-later-case.html",
+    "sha256": "be26881da162b9059f7f9f22b6736f22684b7d41eaab1ed739c315ffee5b9509",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/hatchery/mockups/05-responsibility-controls.html",
+    "sha256": "fe13a91d77b4103c66da371174c163283cd9a721d208947ad42cb3c2c5473543",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/00-status.md",
+    "sha256": "7e0bd2698f82ae45da78e97be6a70fb438be46d2d3e285936711e0088dfd5892",
+    "headings": [
+      "# Status: Shiftwork",
+      "## Historical S22a owning-pack execution checkpoint verified offline: 2026-10-03",
+      "## Historical S22a assistance compatibility repair verified offline: 2026-10-03",
+      "## S22a verified Git hold and diagnosed failures: 2026-10-03",
+      "## Historical pre-diagnosis S22a assistance hold: 2026-10-03",
+      "## S22a registry implementation checkpoint: 2026-10-03",
+      "## S22a start and scoped Gate 3 re-approval: 2026-10-03",
+      "## S21 review-fix publication and main integration: 2026-10-03",
+      "## S21 independent-review repair round: 2026-10-02",
+      "## S21 publication and main integration: 2026-10-02",
+      "## S21 implementation and offline verification: 2026-10-02",
+      "## Slice 20 offline implementation and verification: 2026-09-30",
+      "### What landed",
+      "### Working result and demo",
+      "### Verification, all under `.venv313/Scripts/python.exe`",
+      "### Two proof defects this round found, and their repairs",
+      "### Independent review round and repairs: 2026-10-01",
+      "### Second independent review round and Limits repair: 2026-10-01",
+      "### Mirror and ADR corrections in this record",
+      "### Limits",
+      "### Stretch chain achieved: 2026-10-01 UTC, verified 2026-10-02",
+      "### Stretch chain pre-change anchor round and offline baseline: 2026-10-01",
+      "### Stretch chain post-change round, rehearsal and live attempt: 2026-10-01",
+      "### Stretch chain delegated decision and SSE repair: 2026-10-01",
+      "### Stretch chain stored-record verification: 2026-10-02",
+      "### S20 stretch housekeeping, publication authority and completion: 2026-10-02",
+      "## Slice 19 branch and main publication and user acceptance: 2026-09-30",
+      "## Slice 19 offline implementation and verification: 2026-09-30",
+      "### S19 anchor-repair round: 2026-09-30",
+      "## Three-board scope direction, revision memo and approval: 2026-09-30"
+    ],
+    "s24_lines": [
+      {
+        "line": 5521,
+        "text": "- [ ] Slice 24: GTM selection, operation and inheritance offline with the pipeline consequence vocabulary"
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/01-product.md",
+    "sha256": "4df6b71dfe54205e684771c182f9b2eb2d23e00e5b200f20607c3ff08cb79e80",
+    "headings": [
+      "# Product: Shiftwork",
+      "## Problem",
+      "## Success metric",
+      "## Approved product decisions",
+      "### S1. A continuing service, not a sequence of coding quizzes",
+      "### S2. Explain and test before accepting a diagnosis",
+      "### S3. Separate experiment, choose and operate",
+      "### S4. Make a comparison fair and useful",
+      "### S5. Make later consequences causal without hindsight grading",
+      "### S6. Keep the scope narrow",
+      "## Concrete Bellwether example",
+      "## Visual direction and screen journey",
+      "## Announcement: the blog post before the feature",
+      "## Open product hypotheses and evidence questions"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/02-architecture.md",
+    "sha256": "c6fab1be7213d9ba1732ea3f5e0cda171b4ed3a7407f9240901528ac99f431c3",
+    "headings": [
+      "# Architecture: Shiftwork final pivot",
+      "## 1. Fit",
+      "## 2. Runtime and module boundaries",
+      "## 3. Endpoints",
+      "## 4. Data",
+      "## 5. Flow",
+      "### Legacy first-choice bootstrap",
+      "### Investigate and experiment",
+      "### Choose and operate",
+      "## 6. Versioning, selection, restart and restoration",
+      "## 7. Evaluator, credential and sealed-case isolation",
+      "## 8. Fair comparison and repeated-probing controls",
+      "### 8.1 Protected task stimuli: distinct phases, frozen together, never public",
+      "## 9. Deterministic ledger ownership and replay",
+      "## 10. Nemotron responsibilities and learner authorship",
+      "## 11. Tavily mission-curation boundary",
+      "## 12. External services and configuration",
+      "## 13. Observability and execution evidence",
+      "## 14. Local development and delivery boundary",
+      "## 15. Track fit and evidence limits",
+      "## 16. Verified foundation and unverified integration",
+      "## 17. Failure containment",
+      "## 18. Decisions to challenge before approval",
+      "## 19. ADR reconciliation",
+      "## 20. Handoff to the next gates",
+      "## 21. Three-board engagement packs, consequence vocabulary and per-board comparison registration",
+      "### 21.1 The engagement pack as a declared concept",
+      "### 21.2 What the registration replaces",
+      "### 21.3 Go-To-Market pipeline consequence vocabulary",
+      "### 21.4 Forward Deployed Engineer discovery and rollout records"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/03-program-design.md",
+    "sha256": "b0f7e04ee0b2d3740740204fd59130c5b9ffa022b68c4fc249c5d1b159de1072",
+    "headings": [
+      "# Program Design: Shiftwork final pivot",
+      "## 1. Decisions fixed at this gate",
+      "## 2. Exact file map",
+      "### Existing production files to change",
+      "### New production files",
+      "### Tests to add or change",
+      "## 3. Types and signatures",
+      "### 3.1 Identity, purpose and captured context",
+      "### 3.2 Investigation and assistance",
+      "### 3.3 Public task contract and service response",
+      "### 3.4 Evaluator and comparison policy",
+      "### 3.5 Experiments, runs, observations and gateway",
+      "### 3.6 Selection, ancestry and orchestration",
+      "### 3.7 Public API projections",
+      "### 3.8 Curation, offline only",
+      "### 3.9 Protected comparison stimuli (approved Gate 2 section 8.1)",
+      "### 3.10 Engagement pack declaration and registration",
+      "### 3.11 New-board pack contracts, consequence rules and acceptance aspects",
+      "## 4. Storage and migration",
+      "### New tables",
+      "### Existing-table changes",
+      "### v5 migration rules",
+      "## 5. Final API surface",
+      "## 6. Call stacks and transactions",
+      "### 6.0 Open a legacy first-choice shift",
+      "### 6.1 Investigate",
+      "### 6.2 Freeze candidates",
+      "### 6.3 Create a qualifying comparison",
+      "### 6.4 Execute and finalize an experimental trial",
+      "### 6.5 Select"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/04-slices.md",
+    "sha256": "6601681fbdf883eabe6acd707fcd9622fd1fc3f7a2647d63aad85c7fe3c0d11a",
+    "headings": [
+      "# Vertical Slice Plan: Shiftwork final pivot",
+      "## 1. Authority, baseline and exit rule",
+      "## 2. Proposed dependency order",
+      "## 3. Slice exit contracts",
+      "### Slice 10: v5 history to v6 without invented choice",
+      "### Slice 11: investigate a task-relevant failure",
+      "### Slice 12: capability spike and hard stop",
+      "### Slice 13: one fresh, isolated service request",
+      "### Slice 14: optional assistance after learner commitment",
+      "### Slice 15: paired candidate execution",
+      "### Slice 16: fair outcome, invalidation and recovery",
+      "### Slice 17: choose an eligible exact version",
+      "### Slice 18: operate only the selected service",
+      "### Slice 19: semantic replay of captured consequences",
+      "### Slice 20: inherit and test the retained alternative later",
+      "### Slice 21: complete the Bellwether room journey",
+      "### Slice 22a: FDE material, registration and offline reproduction",
+      "### Slice 22b: execute the FDE board journey",
+      "### Slice 23: the GTM pack and its offline comparison",
+      "### Slice 24: GTM consequences, operation and inheritance offline",
+      "### Slice 25: complete the GTM revenue floor",
+      "### Slice 26: optional Tavily curation",
+      "### Slice 27: full-pivot package and honest judge evidence",
+      "### Slice 28: conditional hosted demo",
+      "## 4. Gate 3 assertion-clause trace",
+      "## 5. No-go conditions and evidence boundaries",
+      "## 6. Approval boundary"
+    ],
+    "s24_lines": [
+      {
+        "line": 850,
+        "text": "### Slice 24: GTM consequences, operation and inheritance offline"
+      },
+      {
+        "line": 868,
+        "text": "  obligation 58, the GTM arms of 25, 28, 29, 30 to 34 and 45's operation"
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/client-visual-direction.md",
+    "sha256": "0489754397aad3efc5a0ebb13c456c36f8ae76563d8420f03447260e08f945f3",
+    "headings": [
+      "# Client visual direction: operational diorama",
+      "## Reference",
+      "## Product intent",
+      "## Station map",
+      "### Board 1 \u00b7 Bellwether service room",
+      "### Board 2 \u00b7 revenue floor",
+      "### Board 3 \u00b7 Northline deployment workshop",
+      "## Interaction rules",
+      "## State changes across the journey",
+      "## Responsive and accessibility acceptance",
+      "## Product comprehension acceptance"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/gate1-manual-test-kit.md",
+    "sha256": "8252914ea9566e4b27dad64bdc601ad360a0791eeb0553618261c209440faba4",
+    "headings": [
+      "# Gate 1 Manual Test Kit: Shiftwork",
+      "## Purpose and limits",
+      "## Setup",
+      "## Tests, tasks and pass conditions",
+      "### 1. Product comprehension",
+      "### 2. Diagnosis before help",
+      "### 3. Fair comparison and genuine choice",
+      "### 4. Experiment, choose and operate",
+      "### 5. Later consequences without hindsight",
+      "### 6. Authority and evidence",
+      "### 7. Reduced-assistance transfer and incident quality",
+      "### 8. Motivation and cognitive load",
+      "### 9. Accessibility sanity",
+      "## Recording sheet",
+      "### Participant ___ / date ___ / coding background ___ / duration ___",
+      "## Decision rule"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/mockups/00-workplace.html",
+    "sha256": "7f4da4e971f181dbfe0a47c837f5c0f1b8d9ca7d4b979f7c54fe1dcaeed9a0c8",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/mockups/01-shift-board.html",
+    "sha256": "7eb02641da7f4cf49d0b9f3ad84a681f04667a6386b770eae6bf08b9715dac1a",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/mockups/02-owner-brief.html",
+    "sha256": "2c9d6d928d9bab31356b05b37f02fab60d1ddca0f59900bc13df1e9469aa0115",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/mockups/03-customer-shift.html",
+    "sha256": "ad2a6492419673407ada8b5f3be0694d97d73cd41ec2b2748cac60d41499627e",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/mockups/04-incident-review.html",
+    "sha256": "2f60e608f111e8a8b07202439e7c0f974254719cd63f2230f5e52f3452b65508",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/mockups/05-inherited-shift.html",
+    "sha256": "b1dd7f316a2a3a04f777f369c3fc97b361a2f6d8157e933be9fefe6e7bb0b125",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/mockups/06-revenue-floor.html",
+    "sha256": "eb2a2a489fe2a42132102c2db7cf05387f3365b60a828d019a67cb642521bbe6",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/mockups/07-northline-deployment.html",
+    "sha256": "b0d1af9976bced607fc3f45e431d70afa3ea2b42abeb357fe039b502bb70799a",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/references/role-scope-research-2026-09-30.md",
+    "sha256": "045922f0e53331f6fe062e1a0e018b081edcc2a58cb23e527d86cdf4638ccf66",
+    "headings": [
+      "# Role-scope research: GTM Engineer and Forward Deployed Engineer",
+      "## GTM Engineer (go-to-market engineer)",
+      "## Forward Deployed Engineer",
+      "## Sources"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice14-implementation-plan.md",
+    "sha256": "e577696d18f3b8a12a26d8a714ed87ab2201fc175d45b923ef06dd5a9a6b01fc",
+    "headings": [
+      "# Slice 14: optional assistance after learner commitment",
+      "## Scope",
+      "## Offline proof",
+      "## Authorized live check and observed limit",
+      "## As-built deltas from Gate 3 section 3.2"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice15-implementation-plan.md",
+    "sha256": "da443b5334c644d46ce1af3f0f45d12c2cbc00f89cd9da040d72cda4c5037b29",
+    "headings": [
+      "# Slice 15: paired candidate execution",
+      "## Scope",
+      "## Draft fixtures awaiting review",
+      "## Offline proof",
+      "## Verified offline results (2026-09-27)",
+      "## Authorizations still needed",
+      "## 2026-09-28 completion checks and remaining gates",
+      "## 2026-09-28 adversarial review repair and Gate 2 hold",
+      "## 2026-09-28 protected-phase proof round and mutation repair"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice15-operator-review-packet.md",
+    "sha256": "75cd18ea36297152a25efa3be18aedbb34b82cd12f758903e58a082262029d43",
+    "headings": [
+      "# Slice 15 operator review packet",
+      "## What changed since the previous revision",
+      "## Exact public material",
+      "## Protected inventory requiring separate sealing",
+      "## Candidate differences and fairness challenge",
+      "## Decision recorded: sealed by the operator, 2026-09-29"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice16-implementation-plan.md",
+    "sha256": "765d7341c648cd365cffd7701f2210f021b59abf4567950e22505e0bd1bc5147",
+    "headings": [
+      "# Slice 16 implementation plan",
+      "## Result to build",
+      "## Verification",
+      "## Boundaries"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice21-implementation-plan.md",
+    "sha256": "53a1cf44f7702b607a3845cba0b338818880c8b7f0e48809138d9fc5b883d0be",
+    "headings": [
+      "# S21 implementation plan: Bellwether room journey"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22a-handoff-2026-10-03.md",
+    "sha256": "34507e296315095055b2fb9a921316b6a4a67d02d50a59f313d8fa186e31d9fa",
+    "headings": [
+      "# S22a handoff, 2026-10-03: Northline draft packet",
+      "## Historical pre-closeout continuation prompt",
+      "## Historical pre-seal continuation prompt",
+      "## Historical schema-only continuation prompt",
+      "## Historical privacy-repair boundary and open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review",
+      "## Historical pre-diagnosis resume boundary",
+      "## Historical pre-diagnosis continuation prompt",
+      "## Historical pre-diagnosis review prompt",
+      "## Historical draft-only boundary",
+      "## Known limits and next step",
+      "## Historical draft-only continuation prompt",
+      "## Historical typed acceptance handoff",
+      "## Completed",
+      "## Verified evidence and limits",
+      "## Decisions and traps",
+      "## Changed files this continuation",
+      "## Open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22a-implementation-plan.md",
+    "sha256": "e0b02851b92ee028b1f8db83a6ecea37342457029a7c855a94f934251e8efe31",
+    "headings": [
+      "# S22a implementation plan",
+      "## Authority and entry state",
+      "## Checklist",
+      "## Design defect and re-approved correction",
+      "## Historical pre-diagnosis resume boundary",
+      "## Entry baseline and document verification",
+      "## Historical registry verifier hold, resolved on resume"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22a-northline-operator-review-packet.md",
+    "sha256": "f5686fdcd4a005e73790f21aef58a03acce8a98a4db4f1e995576f4eff1e2db5",
+    "headings": [
+      "# S22a Northline exact-byte operator review packet",
+      "## Decisions the operator can review",
+      "## Read in journey order",
+      "## Concrete compatibility and coverage limits",
+      "## Public workload map",
+      "## Restricted protected coverage for the operator",
+      "## Exact raw draft bytes",
+      "## Canonical payloads, not seals",
+      "## Exact proposed seal and registration changes",
+      "## Historical initial draft verification"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-comparison-inheritance-handoff-2026-10-04.md",
+    "sha256": "a06a2f57c52fa26fb7860f530bf62ecc31912135fecacec7f1e818831627fd04",
+    "headings": [
+      "# S22b comparison and inheritance session transfer",
+      "## Completed",
+      "## Decisions",
+      "## Traps",
+      "## Working agreements",
+      "## Files changed this proof step",
+      "## Open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-completion-plan-2026-10-05.md",
+    "sha256": "9b3bfc7a7579b412097612820d77a63534acf4b674d2e0de7fe47f60b958e412",
+    "headings": [
+      "# S22b remaining exits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-completion-preflight-checkpoint-2026-10-05.md",
+    "sha256": "71ff9c3595a13cdc9093f307f577d12da34d948a595684ca8882a76c80132e66",
+    "headings": [
+      "# S22b remaining execution prepared and verified offline",
+      "## Verified preparation",
+      "## Verification and retained failures",
+      "## Remaining conditions"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-gate3-deployment-evidence.md",
+    "sha256": "c0e8b1a0f365ad7b4962be2a426dea1a91f21311428b26ae1a1d03cc76654d66",
+    "headings": [
+      "# Gate 3 scoped correction: independent Northline deployment evidence",
+      "## Concrete problem",
+      "## Proposed decisions",
+      "## Types and signatures to add",
+      "## File ownership and call stacks",
+      "## Required falsification",
+      "## Approval boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-gate3-independent-review.md",
+    "sha256": "5a206ae5d98e66ba22deacc58c4c6aeb95c1132dbb98b29729ee28e44c5bd86a",
+    "headings": [
+      "# S22b Gate 3 independent review, 2026-10-04",
+      "## Findings",
+      "## Independent checks",
+      "## Required disposition before approval",
+      "## Exact candidate publication scope"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-gate3-review-corrections.md",
+    "sha256": "c266fcc6ab90c47fbbaba98f7c7d47ef538361064f3e3da0a279041b77580d90",
+    "headings": [
+      "# S22b Gate 3 corrections for R1 to R6",
+      "## Decisions",
+      "## Signatures and ownership",
+      "# Approved R2 addition, implementation pending:",
+      "# Existing conformance repairs:",
+      "## Exact operator packet already approved",
+      "## Publication and acceptance boundaries",
+      "## Verification at this checkpoint"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-handoff-2026-10-04.md",
+    "sha256": "10da92b20ba703d2dc3063bd1b1b49e0e4cb80dcd4f90957516386def73cc390",
+    "headings": [
+      "# S22b session handoff: 2026-10-04",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-implementation-plan.md",
+    "sha256": "5ff1fa1726c30fd7e934fb99a1d5a41b945eff5f4ab6ecccdd784aa23f3bc704",
+    "headings": [
+      "# S22b implementation plan"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-intent-v2-offline-checkpoint.md",
+    "sha256": "125501900dc00f08363dae57b269795f426b6a2ae3cc1f24ea378b031c2cdd04",
+    "headings": [
+      "# S22b intent header and exact v2 offline checkpoint",
+      "## Implemented scope",
+      "## Evidence",
+      "## Remaining boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-journey-offline-checkpoint.md",
+    "sha256": "72cd29bc503548497c80ec98fbbf5ba7697baa8bbe389dbeeb30b8d1812fe2f9",
+    "headings": [
+      "# S22b comparison and inheritance offline checkpoint",
+      "## Observed result",
+      "## Failing-capable checks",
+      "## Verification and retained diagnostics",
+      "## Remaining work and limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-journey-offline-proof-plan.md",
+    "sha256": "b05f676ff491ecf6fe01f9ec9653526421e767c7a63474436681274cd92c5ab7",
+    "headings": [
+      "# S22b comparison and inheritance offline proof"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-live-completion-checkpoint-2026-10-05.md",
+    "sha256": "14d1b6343f9643ff79658ebd35b0f5e1a70313fa759da8912c18017c1fd3c097",
+    "headings": [
+      "# S22b live completion and acceptance review",
+      "## Observed live result",
+      "## Actual hint quality",
+      "## Audit repair and verification",
+      "## Whole-slice review and preservation",
+      "## Acceptance boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-live-completion-packet-2026-10-05.md",
+    "sha256": "d445107825d2ef50f771e6efc918fd40e8ef67c00176f446f0d9137773e826fa",
+    "headings": [
+      "# S22b fresh live completion packet",
+      "## Candidate difference and choice",
+      "## Exercised sequence"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-live-diagnostic-checkpoint-2026-10-05.md",
+    "sha256": "c9cfca0c7c996af4352b56c4f09aa418f2e5b5db628029e82216f33d44937568",
+    "headings": [
+      "# S22b consumed edited public diagnostic and rendering repair",
+      "## Verified isolated execution",
+      "## Original public failure and offline repair",
+      "## Remaining S22b work"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-live-diagnostic-packet-2026-10-05.md",
+    "sha256": "d8764eadf6fbcf88510f2a4b46d2cc199803bd953b0bebf8e0772221df670c0d",
+    "headings": [
+      "# S22b next live packet: one edited public diagnostic",
+      "## Exact candidate bytes",
+      "## Reserved execution and decisive result",
+      "## Completed offline checks and limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-live-packet-2026-10-05.md",
+    "sha256": "09510737423b969cc8d5e742da027b09b1bf366b38bb34c6692836e3ca2d1d21",
+    "headings": [
+      "# S22b first live packet: one blank-starter operation",
+      "## Exact packet",
+      "## Sequence and decisive result",
+      "## Remaining independent live work"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-live-starter-checkpoint-2026-10-05.md",
+    "sha256": "0533c7ecba901df06eb888d1bcc9925cebcc5205705c79350ab6fb37193e17e3",
+    "headings": [
+      "# S22b consumed starter: live audit checkpoint",
+      "## Verified retained result",
+      "## Preservation and failed inspection evidence",
+      "## Remaining approved exit clauses"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-pilot-offline-checkpoint.md",
+    "sha256": "326dc8a9ebeb53665a396d4e6ca3ec62ca7ca74c5a8643da84e5decce4c7b2d4",
+    "headings": [
+      "# S22b pilot and handover offline checkpoint",
+      "## What is established",
+      "## Verification and falsifiers",
+      "## Preservation and limits",
+      "## Next work"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-pilot-offline-proof-plan.md",
+    "sha256": "a7148adf4086c91c90c5cce612d086463d85c30bf2eaec79a7b45b24c80b5a1a",
+    "headings": [
+      "# S22b pilot and handover offline proof"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-protected-retry-amendment.md",
+    "sha256": "8577c2994968917815fafcf023e0e43916aaac6b314ce5223212224a713cb977",
+    "headings": [
+      "# S22b protected retry input correction",
+      "## Reproduced blocker",
+      "## Exact proposed input",
+      "## Concrete unapplied operator packet",
+      "## Required proof after approval",
+      "## Boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-publication-2026-10-06.md",
+    "sha256": "93e452c1aa1057dfc1b1150c88cfdcb649fed7093b9a715df1a065cf986cbecb",
+    "headings": [
+      "# S22b acceptance and publication closeout",
+      "## Evidence and limits",
+      "## Cleanup and branch audit",
+      "## Publication verification"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-review-repair-plan.md",
+    "sha256": "0740a72fbf00a4b4a0118ada9a7c1b1672b100a2742aa549f2d4b2d3760ee452",
+    "headings": [
+      "# S22b review repair plan, 2026-10-04"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-ui-offline-checkpoint.md",
+    "sha256": "2c064b9fb1f2038d5dd8371b2edcd406240793dae36b2e661a914225b881bd31",
+    "headings": [
+      "# S22b native UI offline checkpoint",
+      "## Established behavior",
+      "## Verification and falsifiers",
+      "## Repairs and retained failed evidence",
+      "## Preservation and limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice22b-ui-offline-proof-plan.md",
+    "sha256": "51808e082e93b56106a82ae3ea463fbfb1dbe73760cc6be79feb9586b4fd6ced",
+    "headings": [
+      "# S22b native UI offline proof plan"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-application-plan-2026-10-07.md",
+    "sha256": "067b0679d59e5263f69e1df9c0f2e6de413dba051d2983fbe63feffea68695ba",
+    "headings": [
+      "# S23 approved application and offline completion"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-approved-application-handoff-2026-10-07.md",
+    "sha256": "baf50f1e1b47aa356bac230300483ae057d360bfed64f8d31871b2425d53de44",
+    "headings": [
+      "# S23 approved application handoff",
+      "## Completed and verified",
+      "## Approval and scope",
+      "## Traps and remaining status",
+      "## Files changed in the LF continuation",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-architecture-review-2026-10-07.md",
+    "sha256": "6a1b10b7e26e54407298097442174e9c2ee0f05dc8c85c27c745449e23fa0d57",
+    "headings": [
+      "# S23 architecture and cleanup preflight"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-gtm-operator-review-packet.md",
+    "sha256": "e5510402a78e260af8d5784c47d71d3fe4411f97444318df51522e9ac5a1b3ab",
+    "headings": [
+      "# S23 Stonebridge exact-byte operator review packet",
+      "## Material decision",
+      "## Six protected expected decisions",
+      "## Exact approval binding",
+      "## Proposed source application",
+      "## Verification and application boundary",
+      "## Incoming ignore-rule exception"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-handoff-2026-10-07.md",
+    "sha256": "dd53bfff5f73596dc98774d508afba511ffd9b9c52950325bd0d0ea8e0616e55",
+    "headings": [
+      "# S23 session transfer, 2026-10-07",
+      "## Files",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-implementation-plan.md",
+    "sha256": "8ebbd223c192f8c903a91f6e7ef362bea017e9ff965a5f9584ea959163e4e51b",
+    "headings": [
+      "# S23 offline implementation and operator-review preparation"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-lf-repair-architecture-preflight-2026-10-07.md",
+    "sha256": "5b8f586fab3021658ca36df68865a1cdb1b69abfe124a300e64ef45ce0ae9e09",
+    "headings": [
+      "# S23 LF repair architecture preflight"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-lf-repair-checkpoint-2026-10-07.md",
+    "sha256": "5949e433ebcd0f86cf433cf86fbafd168a5c89fa32d24f3022971f65bda19b80",
+    "headings": [
+      "# S23 LF repair checkpoint, 2026-10-07",
+      "## Verified repair",
+      "## Refreshed packet",
+      "## Preservation and limits",
+      "## Next authorized boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-lf-repair-plan-2026-10-07.md",
+    "sha256": "034461c6ec3619ff86ed8d33efb64771ea8ed9d12cb233299cd229462a8f46e1",
+    "headings": [
+      "# S23 LF repair and packet refresh"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice23-offline-checkpoint-2026-10-07.md",
+    "sha256": "82afb02d2e88291a44a3ca67d8c5c411c61db1ee464c050daed11dce1c2129b4",
+    "headings": [
+      "# S23 offline checkpoint, 2026-10-07"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/plans/shiftwork/slice9-implementation-plan.md",
+    "sha256": "0ec061e3bfa0aa1a9a21e8ae64cb367c7359b820c85939d44b1196e32e9678bb",
+    "headings": [
+      "# Slice 9 implementation plan",
+      "## Goal",
+      "## Architecture and design",
+      "## File responsibilities",
+      "## Execution checklist",
+      "## Review round: 2026-09-21",
+      "## Evidence limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/docs/SHIFTWORK_PLAN.md",
+    "sha256": "0407d9879b794a5ee0983552db51d6849f476a4edde709cb3a587102b392ddc7",
+    "headings": [
+      "# Shiftwork: working brief and adjudication register",
+      "## 1. Product thesis",
+      "## 2. Decisions and authority",
+      "## 3. Revised learning loop",
+      "## 4. Bellwether: a less predetermined incident",
+      "## 5. Comparison and evidence requirements",
+      "## 6. Authority boundary for subsequent gate revision",
+      "## 7. Organiser technology and track hypothesis",
+      "## 8. Tavily is optional",
+      "## 9. Evidence plan to revise at later gates",
+      "### Central mechanism",
+      "### Reduced-assistance transfer",
+      "### Tavily ablation",
+      "## 10. Scope and prior evidence retained",
+      "## 11. Forecast and adjudication history",
+      "## 12. Immediate next action"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/HACKATHON_REQUIREMENTS.md",
+    "sha256": "9a7dc9af1403ae678954959b9fb883ad9f565b22ffae8e2c864e27be398ab74f",
+    "headings": [
+      "# Nebius x NVIDIA Global AI Hackathon Requirements",
+      "## Dates",
+      "## Entrant eligibility",
+      "## Entry requirements",
+      "## Project requirements",
+      "## Track requirements",
+      "## Submission requirements",
+      "## Submission form fields (live Devpost form)",
+      "## Demonstration video requirements",
+      "## Repository, ownership, and testing requirements",
+      "## Judging",
+      "### Stage One: pass or fail",
+      "### Stage Two: scored 1-5 on four equally weighted criteria",
+      "### Push past the obvious"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/MISTAKES.md",
+    "sha256": "94c9a0b53e927069b6024eee495c98093869da9125ee8582b789198485d7b666",
+    "headings": [
+      "# Mistakes Log",
+      "## 2026-10-02 S20 publication: checkout converted byte-hashed evidence endings",
+      "## 2026-10-02 S20 publication: unstaged diff checks omitted new evidence files",
+      "## 2026-10-01 S20 demo proof: comparison included the evidence note wrapper",
+      "## 2026-10-01 S20 SSE proof runner: multiline anchors did not match CRLF source",
+      "## 2026-10-01 S20 live chain: the comparison died on an SSE server-error frame the adapter cannot resume",
+      "## 2026-10-01 S20 chain runner: the local executor produced backlog events where the recipe said incidents",
+      "## 2026-10-01 S20 stretch: test slips and a wrong-type meter crashed a guard",
+      "## 2026-10-01 S20 review: a demo boolean that could never be false",
+      "## 2026-10-01 S20 review: the record stated a mechanism and an attribution its captured evidence contradicts",
+      "## 2026-09-30 S18 mutation classifier missed bare pytest assertions",
+      "## 2026-09-29 S17 stale station label and ambiguous test patch",
+      "## 2026-09-29 S17 Compare panel crashed before the first board load",
+      "## 2026-09-28 Slice 15 render-fault run could not tell its preview from a foreign server",
+      "## 2026-09-28 Slice 15 compare-demo harness kept the pre-protected copy assertion",
+      "## 2026-09-28 Slice 15 protected-phase guards masked four older proof rows",
+      "## 2026-09-28 Slice 15 two proof shapes measured unprovable",
+      "## 2026-09-28 Slice 15 mutation run crashed at row 95 and left a stranded mutation",
+      "## 2026-09-28 Slice 15 reservation fault test assumed the wrong SQLite error class",
+      "## 2026-09-28 Slice 15 execution claim: stale fault and mutation targets",
+      "## 2026-09-27 Slice 15 browser proof: a wait condition true on the initial render hides a swallowed click",
+      "## 2026-09-27 Slice 15 browser proof: a transport timer shorter than the page deadline replaced the real error",
+      "## 2026-09-27 Slice 15 browser proof: rendered rows matched on an identity that duplicates",
+      "## 2026-09-27 Slice 14: live assist probe used a mismatched investigation",
+      "## 2026-09-27 Slice 14: assist test expected the wrong run status",
+      "## 2026-09-27 Slice 14: gateway unit test kept an invalid role argument",
+      "## 2026-09-27 Slice 14: old absence guards failed after the assist package landed",
+      "## 2026-09-27 Slice 14: reply metadata changed positional argument meaning",
+      "## 2026-09-16 \u2014 Gate 4 slice plan mapped tests by number, not by clause",
+      "## 2026-09-17 \u2014 Clause-level coverage repair verified only the clauses a reviewer named"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/client/index.html",
+    "sha256": "99d05d1ceedf9eae8fc76abfe09a1d3340db250a597067bf5f1c588e4dc16b2e",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/client/northline-deployment-protocol.html",
+    "sha256": "c94f6cb2f213de7cfc20c50f9ff47556b715b4d8a44df854221a872fb0cdcbff",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/artifacts/bookshop/change_log.md",
+    "sha256": "6fb5e4178ce5dfe61ea7270260cd671382fc5c047ea7fa0c955a104804cff26f",
+    "headings": [
+      "# Change log",
+      "## Shift 1"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/documents/gtm/qualification_routing_rules.md",
+    "sha256": "d22940c6afa06aba4fdaafb9dc203bb42274c35d1b98381f7e88e1902af10046",
+    "headings": [
+      "# Public qualification and routing contract",
+      "## task.required_results",
+      "## gtm.qualification",
+      "## gtm.pinned_routing",
+      "## gtm.exactly_once",
+      "## gtm.human_handoff",
+      "## response.structured_only"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/documents/gtm/revenue_team_brief.md",
+    "sha256": "71f72e619e08cb279339d70df19c583386e1e1ee3f310d4b19892ed15550ab66",
+    "headings": [
+      "# Stonebridge Software revenue team"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/documents/gtm/workflow_treatments.md",
+    "sha256": "6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29",
+    "headings": [
+      "# Proposed treatments and evidence limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/documents/northline/acceptance_contract.md",
+    "sha256": "545e1221a46e84c9f6446db40966e9fa1e9791f18a34f9a0305ee93c31de4949",
+    "headings": [
+      "# Customer acceptance contract"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/documents/northline/deployment_brief.md",
+    "sha256": "ab3187358a0ffecdebe4d80467b802f4137054858f684495c7c3fceef79ed461",
+    "headings": [
+      "# Northline Bike Cooperative: deployment brief",
+      "## Conflicting requirements",
+      "## Frozen fixture interface",
+      "## Your work"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/documents/northline/discovery_prompts.md",
+    "sha256": "22d3e41c515a86c49932d440b88c6e3c75e2615f0ba33ac6ff6d01fdd0e25143",
+    "headings": [
+      "# Discovery record prompts"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/documents/northline/handover_prompts.md",
+    "sha256": "5b6ec7abe14f6f56c705df109802129a76e5563c4de3459f384adac78ac48ab5",
+    "headings": [
+      "# Handover prompts"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/fixtures/documents/northline/rollout_checklist.md",
+    "sha256": "226389080b348b0dceab81afd5e90dc6261d69f88827d2fab8c62e1940ada518",
+    "headings": [
+      "# Rollout checklist"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/templates/artifact/northline/discovery.md",
+    "sha256": "7bc2075914d6e51735edf7e3beb280112f0fbd195bf48416e865ef15ed273ba3",
+    "headings": [
+      "# My discovery record",
+      "## Requirements and conflicts",
+      "## Cause and falsifier",
+      "## Input ownership and unknowns"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork/templates/artifact/northline/runbook.md",
+    "sha256": "4cd7b797d7f2cb112132c49a38820a77c8fd24045af1e79117927142b16203a6",
+    "headings": [
+      "# My Northline runbook",
+      "## Selected version and permissions",
+      "## Acceptance evidence and declared limits",
+      "## Recovery and manual escalation",
+      "## Unresolved incidents and next-shift responsibilities"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork_final_pivot.md",
+    "sha256": "668fe75f64de7578fcca9398d3d3c9225c7aa208f8bfd7fc367849ae0c732d0b",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/SHIFTWORK_PIVOT1.md",
+    "sha256": "3c5106bacb7b44cc3704e5810305095e03ebed56e785082d850fb8cab699726a",
+    "headings": [
+      "# Shiftwork Pivot 1: incident apprenticeship and engineering decision lab",
+      "## S1. Status and authority",
+      "## S2. The consolidated core",
+      "### Learning loop",
+      "### Ownership and presentation",
+      "## S3. Illustrative engagement",
+      "## S4. What changes and what can be retained",
+      "## S5. Against the user's requirements",
+      "### Organiser dependence",
+      "### Official-rule boundary",
+      "## S6. What is good about the idea",
+      "## S7. Material findings and challenges",
+      "### S7.1 Task relevance is a prerequisite for trustworthy assessment",
+      "### S7.2 Operational runs are not controlled comparison trials",
+      "### S7.3 Repeated inference complicates evidence",
+      "### S7.4 Student agency can be superficial",
+      "### S7.5 Safety and access remain delivery dependencies",
+      "### S7.6 A guided course could reproduce much of the experience",
+      "## S8. Relevant prior art and timing",
+      "## S9. Scores and independent-review record",
+      "### Scoring basis",
+      "### Main-agent forecast versus fresh second opinion",
+      "### Main-agent adjudication after review",
+      "### Scope of earlier branch scores",
+      "## S10. Smallest proposed refinement",
+      "## S11. Excluded branches and claims",
+      "## S12. Open decisions before adoption",
+      "## S13. Sources and evidence boundaries",
+      "### Repository sources",
+      "### Primary external sources"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/SHIFTWORK_PIVOT2.md",
+    "sha256": "a5158a70896ffcaa9e6934f5865d7550648ba54f8b5c36e4fe2f571c347699e3",
+    "headings": [
+      "# Shiftwork Pivot 2: Independent Product-Direction Review",
+      "## Verdict: revise, then pursue",
+      "## 1. What the core actually is",
+      "## 2. Strongest advantages",
+      "## 3. The serious weaknesses",
+      "### Fundamental product problems",
+      "#### A. The distinction from a strong course is narrower than the pitch might imply",
+      "#### B. The stock example is too easy to turn into a predetermined lesson",
+      "#### C. Surprise consequences can teach hindsight rather than judgment",
+      "#### D. Curriculum quality remains the bottleneck",
+      "### Solvable engineering and design problems",
+      "### Unverified assumptions",
+      "## 4. Existing overlap and the course-plus-debugger question",
+      "## 5. Assessment against the seven requirements",
+      "## 6. Independent score: original core only",
+      "## 7. Smallest substantive improvements worth considering",
+      "### 1. Strengthen the incident, not the feature list",
+      "### 2. Add the falsifier question",
+      "### 3. Add a controlled later-shift comparison",
+      "### Scope exclusions retained",
+      "## Sources",
+      "## Direct recommendation"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-application-2026-10-07/preimages/shiftwork_three_boards.md",
+    "sha256": "aa1608cbf6b557b75b2d63b49fd295aab878a81f8ff768d7028bf08154806a8a",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-approval-handoff-2026-10-07/preimages/docs/plans/shiftwork/00-status.md",
+    "sha256": "9c0d0ef2113e87a33aa942b373e707f1d9659cda382bf643b051503e1769695a",
+    "headings": [
+      "# Status: Shiftwork",
+      "## Historical S22a owning-pack execution checkpoint verified offline: 2026-10-03",
+      "## Historical S22a assistance compatibility repair verified offline: 2026-10-03",
+      "## S22a verified Git hold and diagnosed failures: 2026-10-03",
+      "## Historical pre-diagnosis S22a assistance hold: 2026-10-03",
+      "## S22a registry implementation checkpoint: 2026-10-03",
+      "## S22a start and scoped Gate 3 re-approval: 2026-10-03",
+      "## S21 review-fix publication and main integration: 2026-10-03",
+      "## S21 independent-review repair round: 2026-10-02",
+      "## S21 publication and main integration: 2026-10-02",
+      "## S21 implementation and offline verification: 2026-10-02",
+      "## Slice 20 offline implementation and verification: 2026-09-30",
+      "### What landed",
+      "### Working result and demo",
+      "### Verification, all under `.venv313/Scripts/python.exe`",
+      "### Two proof defects this round found, and their repairs",
+      "### Independent review round and repairs: 2026-10-01",
+      "### Second independent review round and Limits repair: 2026-10-01",
+      "### Mirror and ADR corrections in this record",
+      "### Limits",
+      "### Stretch chain achieved: 2026-10-01 UTC, verified 2026-10-02",
+      "### Stretch chain pre-change anchor round and offline baseline: 2026-10-01",
+      "### Stretch chain post-change round, rehearsal and live attempt: 2026-10-01",
+      "### Stretch chain delegated decision and SSE repair: 2026-10-01",
+      "### Stretch chain stored-record verification: 2026-10-02",
+      "### S20 stretch housekeeping, publication authority and completion: 2026-10-02",
+      "## Slice 19 branch and main publication and user acceptance: 2026-09-30",
+      "## Slice 19 offline implementation and verification: 2026-09-30",
+      "### S19 anchor-repair round: 2026-09-30",
+      "## Three-board scope direction, revision memo and approval: 2026-09-30"
+    ],
+    "s24_lines": [
+      {
+        "line": 5506,
+        "text": "- [ ] Slice 24: GTM selection, operation and inheritance offline with the pipeline consequence vocabulary"
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-approval-handoff-2026-10-07/preimages/docs/SHIFTWORK_PLAN.md",
+    "sha256": "fb5b00b5a58b68afc6e54699be5cc09391aab4cdb3c3f84299315b6dea6a1f4d",
+    "headings": [
+      "# Shiftwork: working brief and adjudication register",
+      "## 1. Product thesis",
+      "## 2. Decisions and authority",
+      "## 3. Revised learning loop",
+      "## 4. Bellwether: a less predetermined incident",
+      "## 5. Comparison and evidence requirements",
+      "## 6. Authority boundary for subsequent gate revision",
+      "## 7. Organiser technology and track hypothesis",
+      "## 8. Tavily is optional",
+      "## 9. Evidence plan to revise at later gates",
+      "### Central mechanism",
+      "### Reduced-assistance transfer",
+      "### Tavily ablation",
+      "## 10. Scope and prior evidence retained",
+      "## 11. Forecast and adjudication history",
+      "## 12. Immediate next action"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/docs/plans/shiftwork/00-status.md",
+    "sha256": "646a305c11379d7f6316b9df4a7d43d7d807f474412e44c0315d1e5d49c3bb27",
+    "headings": [
+      "# Status: Shiftwork",
+      "## Historical S22a owning-pack execution checkpoint verified offline: 2026-10-03",
+      "## Historical S22a assistance compatibility repair verified offline: 2026-10-03",
+      "## S22a verified Git hold and diagnosed failures: 2026-10-03",
+      "## Historical pre-diagnosis S22a assistance hold: 2026-10-03",
+      "## S22a registry implementation checkpoint: 2026-10-03",
+      "## S22a start and scoped Gate 3 re-approval: 2026-10-03",
+      "## S21 review-fix publication and main integration: 2026-10-03",
+      "## S21 independent-review repair round: 2026-10-02",
+      "## S21 publication and main integration: 2026-10-02",
+      "## S21 implementation and offline verification: 2026-10-02",
+      "## Slice 20 offline implementation and verification: 2026-09-30",
+      "### What landed",
+      "### Working result and demo",
+      "### Verification, all under `.venv313/Scripts/python.exe`",
+      "### Two proof defects this round found, and their repairs",
+      "### Independent review round and repairs: 2026-10-01",
+      "### Second independent review round and Limits repair: 2026-10-01",
+      "### Mirror and ADR corrections in this record",
+      "### Limits",
+      "### Stretch chain achieved: 2026-10-01 UTC, verified 2026-10-02",
+      "### Stretch chain pre-change anchor round and offline baseline: 2026-10-01",
+      "### Stretch chain post-change round, rehearsal and live attempt: 2026-10-01",
+      "### Stretch chain delegated decision and SSE repair: 2026-10-01",
+      "### Stretch chain stored-record verification: 2026-10-02",
+      "### S20 stretch housekeeping, publication authority and completion: 2026-10-02",
+      "## Slice 19 branch and main publication and user acceptance: 2026-09-30",
+      "## Slice 19 offline implementation and verification: 2026-09-30",
+      "### S19 anchor-repair round: 2026-09-30",
+      "## Three-board scope direction, revision memo and approval: 2026-09-30"
+    ],
+    "s24_lines": [
+      {
+        "line": 5491,
+        "text": "- [ ] Slice 24: GTM selection, operation and inheritance offline with the pipeline consequence vocabulary"
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/docs/plans/shiftwork/slice23-architecture-review-2026-10-07.md",
+    "sha256": "348940d31173936199c761aae59b100400ab1b20784446d35080f475bbce7d50",
+    "headings": [
+      "# S23 architecture and cleanup preflight"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/docs/plans/shiftwork/slice23-gtm-operator-review-packet.md",
+    "sha256": "cb59586c5c5be3254e4d2eaca664e118f166dae408e956259eb436b505606c18",
+    "headings": [
+      "# S23 Stonebridge exact-byte operator review packet",
+      "## Material decision",
+      "## Six protected expected decisions",
+      "## Exact approval binding",
+      "## Proposed source application",
+      "## Verification and application boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/docs/plans/shiftwork/slice23-handoff-2026-10-07.md",
+    "sha256": "7009b3b614a5ed8b6a0e68085b9d9a35b5e2f8e80a50174d4b9f7af12312a685",
+    "headings": [
+      "# S23 session transfer, 2026-10-07",
+      "## Files",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/docs/plans/shiftwork/slice23-offline-checkpoint-2026-10-07.md",
+    "sha256": "6c6e66bcb79448d525586c46f2f7af363fcdeaf00bcc497ff90750df638701f9",
+    "headings": [
+      "# S23 offline checkpoint, 2026-10-07"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/docs/SHIFTWORK_PLAN.md",
+    "sha256": "1dda324c2690753489cacad538a47df22686e013a0e3cf232dc08aa30c37b4ff",
+    "headings": [
+      "# Shiftwork: working brief and adjudication register",
+      "## 1. Product thesis",
+      "## 2. Decisions and authority",
+      "## 3. Revised learning loop",
+      "## 4. Bellwether: a less predetermined incident",
+      "## 5. Comparison and evidence requirements",
+      "## 6. Authority boundary for subsequent gate revision",
+      "## 7. Organiser technology and track hypothesis",
+      "## 8. Tavily is optional",
+      "## 9. Evidence plan to revise at later gates",
+      "### Central mechanism",
+      "### Reduced-assistance transfer",
+      "### Tavily ablation",
+      "## 10. Scope and prior evidence retained",
+      "## 11. Forecast and adjudication history",
+      "## 12. Immediate next action"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/MISTAKES.md",
+    "sha256": "98634dca84567d53e56997e22ccd9c3f41b995172c5cf238f9ae2169b08dc10d",
+    "headings": [
+      "# Mistakes Log",
+      "## 2026-10-02 S20 publication: checkout converted byte-hashed evidence endings",
+      "## 2026-10-02 S20 publication: unstaged diff checks omitted new evidence files",
+      "## 2026-10-01 S20 demo proof: comparison included the evidence note wrapper",
+      "## 2026-10-01 S20 SSE proof runner: multiline anchors did not match CRLF source",
+      "## 2026-10-01 S20 live chain: the comparison died on an SSE server-error frame the adapter cannot resume",
+      "## 2026-10-01 S20 chain runner: the local executor produced backlog events where the recipe said incidents",
+      "## 2026-10-01 S20 stretch: test slips and a wrong-type meter crashed a guard",
+      "## 2026-10-01 S20 review: a demo boolean that could never be false",
+      "## 2026-10-01 S20 review: the record stated a mechanism and an attribution its captured evidence contradicts",
+      "## 2026-09-30 S18 mutation classifier missed bare pytest assertions",
+      "## 2026-09-29 S17 stale station label and ambiguous test patch",
+      "## 2026-09-29 S17 Compare panel crashed before the first board load",
+      "## 2026-09-28 Slice 15 render-fault run could not tell its preview from a foreign server",
+      "## 2026-09-28 Slice 15 compare-demo harness kept the pre-protected copy assertion",
+      "## 2026-09-28 Slice 15 protected-phase guards masked four older proof rows",
+      "## 2026-09-28 Slice 15 two proof shapes measured unprovable",
+      "## 2026-09-28 Slice 15 mutation run crashed at row 95 and left a stranded mutation",
+      "## 2026-09-28 Slice 15 reservation fault test assumed the wrong SQLite error class",
+      "## 2026-09-28 Slice 15 execution claim: stale fault and mutation targets",
+      "## 2026-09-27 Slice 15 browser proof: a wait condition true on the initial render hides a swallowed click",
+      "## 2026-09-27 Slice 15 browser proof: a transport timer shorter than the page deadline replaced the real error",
+      "## 2026-09-27 Slice 15 browser proof: rendered rows matched on an identity that duplicates",
+      "## 2026-09-27 Slice 14: live assist probe used a mismatched investigation",
+      "## 2026-09-27 Slice 14: assist test expected the wrong run status",
+      "## 2026-09-27 Slice 14: gateway unit test kept an invalid role argument",
+      "## 2026-09-27 Slice 14: old absence guards failed after the assist package landed",
+      "## 2026-09-27 Slice 14: reply metadata changed positional argument meaning",
+      "## 2026-09-16 \u2014 Gate 4 slice plan mapped tests by number, not by clause",
+      "## 2026-09-17 \u2014 Clause-level coverage repair verified only the clauses a reviewer named"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/shiftwork/fixtures/documents/gtm/qualification_routing_rules.md",
+    "sha256": "d22940c6afa06aba4fdaafb9dc203bb42274c35d1b98381f7e88e1902af10046",
+    "headings": [
+      "# Public qualification and routing contract",
+      "## task.required_results",
+      "## gtm.qualification",
+      "## gtm.pinned_routing",
+      "## gtm.exactly_once",
+      "## gtm.human_handoff",
+      "## response.structured_only"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/shiftwork/fixtures/documents/gtm/revenue_team_brief.md",
+    "sha256": "71f72e619e08cb279339d70df19c583386e1e1ee3f310d4b19892ed15550ab66",
+    "headings": [
+      "# Stonebridge Software revenue team"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-lf-repair-2026-10-07/preimages/shiftwork/fixtures/documents/gtm/workflow_treatments.md",
+    "sha256": "6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29",
+    "headings": [
+      "# Proposed treatments and evidence limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/s23-offline-review.md",
+    "sha256": "29e4f14530a06e55dadf93f6b01f8aeed17da8d2ee4fca68b57c20208a16557f",
+    "headings": [
+      "# Shiftwork S23 offline review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/slice8-adversarial-review-2026-09-20.md",
+    "sha256": "33ae1b424ca5e88c7ba1b41c6ce58f40b8993dd04afdf952bd3d31e737edfe21",
+    "headings": [
+      "# Slice 8 adversarial review: close to inheritance plus Test 1 offline pre-proof",
+      "## Verdict",
+      "## Commands run and verbatim results",
+      "## Findings",
+      "### MAJOR-1: kill condition 5's evidence sentence is not computed",
+      "### MAJOR-2: kill condition 3's \"replay\" is a value compared to a recomputation of itself",
+      "### MAJOR-3: the future-wording leak scan has no scanner self-test",
+      "### MAJOR-4: test 32's draft-seeding assertion was vacuous (fixed in this review)",
+      "### MAJOR-5: the board's inherited-version fallback has no mutation row and fails only incidentally",
+      "### MAJOR-6: the full-suite claim is not stably reproducible",
+      "### MINOR-1: \"log bytes ... byte-for-byte\" names a surface no test populates or compares",
+      "### MINOR-2: \"resolved by the first passing run\" is prose, not a computed value",
+      "### MINOR-3: kill condition 1's wording overstates the case set, and its PASS is vacuous at zero runs",
+      "### MINOR-4: the causal rows carry body evidence that is never asserted",
+      "### MINOR-5: `test_next_shift_needs_the_six_variant_inventory` has no mutation row, and its natural mutation is caught incidentally",
+      "### MINOR-6: reconciliation happens only at startup, and the operational consequence is unstated",
+      "### NIT-1: duplicated declared limits double the ledger events",
+      "### NIT-2: the demo's socket block has no self-test",
+      "## Mandate A: item-by-item result",
+      "## Mandate B: rewrite table",
+      "### Failing-capability map for every Slice 8 test",
+      "## Could not verify",
+      "## What I tried that did not break",
+      "## Worktree state left for the author"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/evidence/test1-central-mechanism.md",
+    "sha256": "8cf748e4333ea7339186631d02c15e80ed7775b40b2f1784698ffc60000010a3",
+    "headings": [
+      "# Test 1 offline pre-proof: central mechanism",
+      "## Per-kill-condition verdict",
+      "## The arc",
+      "## Causal comparison (operator-only, same held-out stimuli)",
+      "### Re-scored CheckResults (offline replay)",
+      "### Ledger replay",
+      "### Future-wording scan",
+      "## Deferred to Slice 14"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/gate1-manual-test-kit.md",
+    "sha256": "8252914ea9566e4b27dad64bdc601ad360a0791eeb0553618261c209440faba4",
+    "headings": [
+      "# Gate 1 Manual Test Kit: Shiftwork",
+      "## Purpose and limits",
+      "## Setup",
+      "## Tests, tasks and pass conditions",
+      "### 1. Product comprehension",
+      "### 2. Diagnosis before help",
+      "### 3. Fair comparison and genuine choice",
+      "### 4. Experiment, choose and operate",
+      "### 5. Later consequences without hindsight",
+      "### 6. Authority and evidence",
+      "### 7. Reduced-assistance transfer and incident quality",
+      "### 8. Motivation and cognitive load",
+      "### 9. Accessibility sanity",
+      "## Recording sheet",
+      "### Participant ___ / date ___ / coding background ___ / duration ___",
+      "## Decision rule"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/mockups/00-workplace.html",
+    "sha256": "7f4da4e971f181dbfe0a47c837f5c0f1b8d9ca7d4b979f7c54fe1dcaeed9a0c8",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/mockups/01-shift-board.html",
+    "sha256": "7eb02641da7f4cf49d0b9f3ad84a681f04667a6386b770eae6bf08b9715dac1a",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/mockups/02-owner-brief.html",
+    "sha256": "2c9d6d928d9bab31356b05b37f02fab60d1ddca0f59900bc13df1e9469aa0115",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/mockups/03-customer-shift.html",
+    "sha256": "ad2a6492419673407ada8b5f3be0694d97d73cd41ec2b2748cac60d41499627e",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/mockups/04-incident-review.html",
+    "sha256": "2f60e608f111e8a8b07202439e7c0f974254719cd63f2230f5e52f3452b65508",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/mockups/05-inherited-shift.html",
+    "sha256": "b1dd7f316a2a3a04f777f369c3fc97b361a2f6d8157e933be9fefe6e7bb0b125",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/mockups/06-revenue-floor.html",
+    "sha256": "eb2a2a489fe2a42132102c2db7cf05387f3365b60a828d019a67cb642521bbe6",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/mockups/07-northline-deployment.html",
+    "sha256": "b0d1af9976bced607fc3f45e431d70afa3ea2b42abeb357fe039b502bb70799a",
+    "headings": [],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/references/role-scope-research-2026-09-30.md",
+    "sha256": "045922f0e53331f6fe062e1a0e018b081edcc2a58cb23e527d86cdf4638ccf66",
+    "headings": [
+      "# Role-scope research: GTM Engineer and Forward Deployed Engineer",
+      "## GTM Engineer (go-to-market engineer)",
+      "## Forward Deployed Engineer",
+      "## Sources"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice14-implementation-plan.md",
+    "sha256": "e577696d18f3b8a12a26d8a714ed87ab2201fc175d45b923ef06dd5a9a6b01fc",
+    "headings": [
+      "# Slice 14: optional assistance after learner commitment",
+      "## Scope",
+      "## Offline proof",
+      "## Authorized live check and observed limit",
+      "## As-built deltas from Gate 3 section 3.2"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice15-implementation-plan.md",
+    "sha256": "da443b5334c644d46ce1af3f0f45d12c2cbc00f89cd9da040d72cda4c5037b29",
+    "headings": [
+      "# Slice 15: paired candidate execution",
+      "## Scope",
+      "## Draft fixtures awaiting review",
+      "## Offline proof",
+      "## Verified offline results (2026-09-27)",
+      "## Authorizations still needed",
+      "## 2026-09-28 completion checks and remaining gates",
+      "## 2026-09-28 adversarial review repair and Gate 2 hold",
+      "## 2026-09-28 protected-phase proof round and mutation repair"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice15-operator-review-packet.md",
+    "sha256": "75cd18ea36297152a25efa3be18aedbb34b82cd12f758903e58a082262029d43",
+    "headings": [
+      "# Slice 15 operator review packet",
+      "## What changed since the previous revision",
+      "## Exact public material",
+      "## Protected inventory requiring separate sealing",
+      "## Candidate differences and fairness challenge",
+      "## Decision recorded: sealed by the operator, 2026-09-29"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice16-implementation-plan.md",
+    "sha256": "765d7341c648cd365cffd7701f2210f021b59abf4567950e22505e0bd1bc5147",
+    "headings": [
+      "# Slice 16 implementation plan",
+      "## Result to build",
+      "## Verification",
+      "## Boundaries"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice21-implementation-plan.md",
+    "sha256": "53a1cf44f7702b607a3845cba0b338818880c8b7f0e48809138d9fc5b883d0be",
+    "headings": [
+      "# S21 implementation plan: Bellwether room journey"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22a-handoff-2026-10-03.md",
+    "sha256": "34507e296315095055b2fb9a921316b6a4a67d02d50a59f313d8fa186e31d9fa",
+    "headings": [
+      "# S22a handoff, 2026-10-03: Northline draft packet",
+      "## Historical pre-closeout continuation prompt",
+      "## Historical pre-seal continuation prompt",
+      "## Historical schema-only continuation prompt",
+      "## Historical privacy-repair boundary and open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review",
+      "## Historical pre-diagnosis resume boundary",
+      "## Historical pre-diagnosis continuation prompt",
+      "## Historical pre-diagnosis review prompt",
+      "## Historical draft-only boundary",
+      "## Known limits and next step",
+      "## Historical draft-only continuation prompt",
+      "## Historical typed acceptance handoff",
+      "## Completed",
+      "## Verified evidence and limits",
+      "## Decisions and traps",
+      "## Changed files this continuation",
+      "## Open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22a-implementation-plan.md",
+    "sha256": "e0b02851b92ee028b1f8db83a6ecea37342457029a7c855a94f934251e8efe31",
+    "headings": [
+      "# S22a implementation plan",
+      "## Authority and entry state",
+      "## Checklist",
+      "## Design defect and re-approved correction",
+      "## Historical pre-diagnosis resume boundary",
+      "## Entry baseline and document verification",
+      "## Historical registry verifier hold, resolved on resume"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22a-northline-operator-review-packet.md",
+    "sha256": "f5686fdcd4a005e73790f21aef58a03acce8a98a4db4f1e995576f4eff1e2db5",
+    "headings": [
+      "# S22a Northline exact-byte operator review packet",
+      "## Decisions the operator can review",
+      "## Read in journey order",
+      "## Concrete compatibility and coverage limits",
+      "## Public workload map",
+      "## Restricted protected coverage for the operator",
+      "## Exact raw draft bytes",
+      "## Canonical payloads, not seals",
+      "## Exact proposed seal and registration changes",
+      "## Historical initial draft verification"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-comparison-inheritance-handoff-2026-10-04.md",
+    "sha256": "a06a2f57c52fa26fb7860f530bf62ecc31912135fecacec7f1e818831627fd04",
+    "headings": [
+      "# S22b comparison and inheritance session transfer",
+      "## Completed",
+      "## Decisions",
+      "## Traps",
+      "## Working agreements",
+      "## Files changed this proof step",
+      "## Open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-completion-plan-2026-10-05.md",
+    "sha256": "9b3bfc7a7579b412097612820d77a63534acf4b674d2e0de7fe47f60b958e412",
+    "headings": [
+      "# S22b remaining exits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-completion-preflight-checkpoint-2026-10-05.md",
+    "sha256": "71ff9c3595a13cdc9093f307f577d12da34d948a595684ca8882a76c80132e66",
+    "headings": [
+      "# S22b remaining execution prepared and verified offline",
+      "## Verified preparation",
+      "## Verification and retained failures",
+      "## Remaining conditions"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-gate3-deployment-evidence.md",
+    "sha256": "c0e8b1a0f365ad7b4962be2a426dea1a91f21311428b26ae1a1d03cc76654d66",
+    "headings": [
+      "# Gate 3 scoped correction: independent Northline deployment evidence",
+      "## Concrete problem",
+      "## Proposed decisions",
+      "## Types and signatures to add",
+      "## File ownership and call stacks",
+      "## Required falsification",
+      "## Approval boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-gate3-independent-review.md",
+    "sha256": "5a206ae5d98e66ba22deacc58c4c6aeb95c1132dbb98b29729ee28e44c5bd86a",
+    "headings": [
+      "# S22b Gate 3 independent review, 2026-10-04",
+      "## Findings",
+      "## Independent checks",
+      "## Required disposition before approval",
+      "## Exact candidate publication scope"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-gate3-review-corrections.md",
+    "sha256": "c266fcc6ab90c47fbbaba98f7c7d47ef538361064f3e3da0a279041b77580d90",
+    "headings": [
+      "# S22b Gate 3 corrections for R1 to R6",
+      "## Decisions",
+      "## Signatures and ownership",
+      "# Approved R2 addition, implementation pending:",
+      "# Existing conformance repairs:",
+      "## Exact operator packet already approved",
+      "## Publication and acceptance boundaries",
+      "## Verification at this checkpoint"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-handoff-2026-10-04.md",
+    "sha256": "10da92b20ba703d2dc3063bd1b1b49e0e4cb80dcd4f90957516386def73cc390",
+    "headings": [
+      "# S22b session handoff: 2026-10-04",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-implementation-plan.md",
+    "sha256": "5ff1fa1726c30fd7e934fb99a1d5a41b945eff5f4ab6ecccdd784aa23f3bc704",
+    "headings": [
+      "# S22b implementation plan"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-intent-v2-offline-checkpoint.md",
+    "sha256": "125501900dc00f08363dae57b269795f426b6a2ae3cc1f24ea378b031c2cdd04",
+    "headings": [
+      "# S22b intent header and exact v2 offline checkpoint",
+      "## Implemented scope",
+      "## Evidence",
+      "## Remaining boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-journey-offline-checkpoint.md",
+    "sha256": "72cd29bc503548497c80ec98fbbf5ba7697baa8bbe389dbeeb30b8d1812fe2f9",
+    "headings": [
+      "# S22b comparison and inheritance offline checkpoint",
+      "## Observed result",
+      "## Failing-capable checks",
+      "## Verification and retained diagnostics",
+      "## Remaining work and limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-journey-offline-proof-plan.md",
+    "sha256": "b05f676ff491ecf6fe01f9ec9653526421e767c7a63474436681274cd92c5ab7",
+    "headings": [
+      "# S22b comparison and inheritance offline proof"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-live-completion-checkpoint-2026-10-05.md",
+    "sha256": "14d1b6343f9643ff79658ebd35b0f5e1a70313fa759da8912c18017c1fd3c097",
+    "headings": [
+      "# S22b live completion and acceptance review",
+      "## Observed live result",
+      "## Actual hint quality",
+      "## Audit repair and verification",
+      "## Whole-slice review and preservation",
+      "## Acceptance boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-live-completion-packet-2026-10-05.md",
+    "sha256": "d445107825d2ef50f771e6efc918fd40e8ef67c00176f446f0d9137773e826fa",
+    "headings": [
+      "# S22b fresh live completion packet",
+      "## Candidate difference and choice",
+      "## Exercised sequence"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-live-diagnostic-checkpoint-2026-10-05.md",
+    "sha256": "c9cfca0c7c996af4352b56c4f09aa418f2e5b5db628029e82216f33d44937568",
+    "headings": [
+      "# S22b consumed edited public diagnostic and rendering repair",
+      "## Verified isolated execution",
+      "## Original public failure and offline repair",
+      "## Remaining S22b work"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-live-diagnostic-packet-2026-10-05.md",
+    "sha256": "d8764eadf6fbcf88510f2a4b46d2cc199803bd953b0bebf8e0772221df670c0d",
+    "headings": [
+      "# S22b next live packet: one edited public diagnostic",
+      "## Exact candidate bytes",
+      "## Reserved execution and decisive result",
+      "## Completed offline checks and limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-live-packet-2026-10-05.md",
+    "sha256": "09510737423b969cc8d5e742da027b09b1bf366b38bb34c6692836e3ca2d1d21",
+    "headings": [
+      "# S22b first live packet: one blank-starter operation",
+      "## Exact packet",
+      "## Sequence and decisive result",
+      "## Remaining independent live work"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-live-starter-checkpoint-2026-10-05.md",
+    "sha256": "0533c7ecba901df06eb888d1bcc9925cebcc5205705c79350ab6fb37193e17e3",
+    "headings": [
+      "# S22b consumed starter: live audit checkpoint",
+      "## Verified retained result",
+      "## Preservation and failed inspection evidence",
+      "## Remaining approved exit clauses"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-pilot-offline-checkpoint.md",
+    "sha256": "326dc8a9ebeb53665a396d4e6ca3ec62ca7ca74c5a8643da84e5decce4c7b2d4",
+    "headings": [
+      "# S22b pilot and handover offline checkpoint",
+      "## What is established",
+      "## Verification and falsifiers",
+      "## Preservation and limits",
+      "## Next work"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-pilot-offline-proof-plan.md",
+    "sha256": "a7148adf4086c91c90c5cce612d086463d85c30bf2eaec79a7b45b24c80b5a1a",
+    "headings": [
+      "# S22b pilot and handover offline proof"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-protected-retry-amendment.md",
+    "sha256": "8577c2994968917815fafcf023e0e43916aaac6b314ce5223212224a713cb977",
+    "headings": [
+      "# S22b protected retry input correction",
+      "## Reproduced blocker",
+      "## Exact proposed input",
+      "## Concrete unapplied operator packet",
+      "## Required proof after approval",
+      "## Boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-publication-2026-10-06.md",
+    "sha256": "93e452c1aa1057dfc1b1150c88cfdcb649fed7093b9a715df1a065cf986cbecb",
+    "headings": [
+      "# S22b acceptance and publication closeout",
+      "## Evidence and limits",
+      "## Cleanup and branch audit",
+      "## Publication verification"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-review-repair-plan.md",
+    "sha256": "0740a72fbf00a4b4a0118ada9a7c1b1672b100a2742aa549f2d4b2d3760ee452",
+    "headings": [
+      "# S22b review repair plan, 2026-10-04"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-ui-offline-checkpoint.md",
+    "sha256": "2c064b9fb1f2038d5dd8371b2edcd406240793dae36b2e661a914225b881bd31",
+    "headings": [
+      "# S22b native UI offline checkpoint",
+      "## Established behavior",
+      "## Verification and falsifiers",
+      "## Repairs and retained failed evidence",
+      "## Preservation and limits"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice22b-ui-offline-proof-plan.md",
+    "sha256": "51808e082e93b56106a82ae3ea463fbfb1dbe73760cc6be79feb9586b4fd6ced",
+    "headings": [
+      "# S22b native UI offline proof plan"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-acceptance-publication-2026-10-08.md",
+    "sha256": "bb855fec2e58af23fa9679340538e6c58e9de5ee559b95aa87fa6381f6db8845",
+    "headings": [
+      "# S23 accepted; authorized publication in progress"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-application-architecture-review-2026-10-07.md",
+    "sha256": "91ce1a7d74a82b9cde6a0ed3c9e6f8344db12ccbc4b3d22b1f32f7100e88de27",
+    "headings": [
+      "# S23 application architecture and preservation review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-application-checkpoint-2026-10-07.md",
+    "sha256": "a3c813fa954ab8ff14e9c2b0aaf1232ff5f2528839777bae6925e062cbbf870b",
+    "headings": [
+      "# S23 applied packet and offline completion checkpoint"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-application-handoff-2026-10-07.md",
+    "sha256": "176a0c371d09170f3adfa18aef1058e0b4f5274a7b642fb915c4ab341104f013",
+    "headings": [
+      "# Session Transfer",
+      "## Completed",
+      "## Decisions",
+      "## Traps",
+      "## Working Agreements",
+      "## Files Changed",
+      "## Open Work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-application-plan-2026-10-07.md",
+    "sha256": "fec8455fb2b4437472752217588336cbe407dc60d64282faf995cebcb7cda965",
+    "headings": [
+      "# S23 approved application and offline completion"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-approved-application-handoff-2026-10-07.md",
+    "sha256": "baf50f1e1b47aa356bac230300483ae057d360bfed64f8d31871b2425d53de44",
+    "headings": [
+      "# S23 approved application handoff",
+      "## Completed and verified",
+      "## Approval and scope",
+      "## Traps and remaining status",
+      "## Files changed in the LF continuation",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-architecture-review-2026-10-07.md",
+    "sha256": "6a1b10b7e26e54407298097442174e9c2ee0f05dc8c85c27c745449e23fa0d57",
+    "headings": [
+      "# S23 architecture and cleanup preflight"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-gtm-operator-review-packet.md",
+    "sha256": "e5510402a78e260af8d5784c47d71d3fe4411f97444318df51522e9ac5a1b3ab",
+    "headings": [
+      "# S23 Stonebridge exact-byte operator review packet",
+      "## Material decision",
+      "## Six protected expected decisions",
+      "## Exact approval binding",
+      "## Proposed source application",
+      "## Verification and application boundary",
+      "## Incoming ignore-rule exception"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-handoff-2026-10-07.md",
+    "sha256": "dd53bfff5f73596dc98774d508afba511ffd9b9c52950325bd0d0ea8e0616e55",
+    "headings": [
+      "# S23 session transfer, 2026-10-07",
+      "## Files",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-implementation-plan.md",
+    "sha256": "8ebbd223c192f8c903a91f6e7ef362bea017e9ff965a5f9584ea959163e4e51b",
+    "headings": [
+      "# S23 offline implementation and operator-review preparation"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-lf-repair-architecture-preflight-2026-10-07.md",
+    "sha256": "5b8f586fab3021658ca36df68865a1cdb1b69abfe124a300e64ef45ce0ae9e09",
+    "headings": [
+      "# S23 LF repair architecture preflight"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-lf-repair-checkpoint-2026-10-07.md",
+    "sha256": "5949e433ebcd0f86cf433cf86fbafd168a5c89fa32d24f3022971f65bda19b80",
+    "headings": [
+      "# S23 LF repair checkpoint, 2026-10-07",
+      "## Verified repair",
+      "## Refreshed packet",
+      "## Preservation and limits",
+      "## Next authorized boundary"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-lf-repair-plan-2026-10-07.md",
+    "sha256": "034461c6ec3619ff86ed8d33efb64771ea8ed9d12cb233299cd229462a8f46e1",
+    "headings": [
+      "# S23 LF repair and packet refresh"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-offline-checkpoint-2026-10-07.md",
+    "sha256": "82afb02d2e88291a44a3ca67d8c5c411c61db1ee464c050daed11dce1c2129b4",
+    "headings": [
+      "# S23 offline checkpoint, 2026-10-07"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice23-publication-checkpoint-2026-10-08.md",
+    "sha256": "da8a196a6652d661acf20a424c21f22747fc1bc309660a4cef2af07de65caf2c",
+    "headings": [
+      "# S23 accepted and published"
+    ],
+    "s24_lines": []
+  },
+  {
+    "path": "docs/plans/shiftwork/slice24-handoff-2026-10-08.md",
+    "sha256": "4ca6d4c9cd8b5530931799fac206e4fae6ef29f031442bad77ba386a85fa5bac",
+    "headings": [
+      "# S24 incomplete checkpoint",
+      "## Verified this turn",
+      "## Decisions and proof limits",
+      "## Traps retained",
+      "## Changed files",
+      "## Open work",
+      "## Prompt for New Chat",
+      "## Prompt for Handoff Review"
+    ],
+    "s24_lines": [
+      {
+        "line": 3,
+        "text": "2026-10-08 Asia/Singapore. The user said `Start s24`, then `almost time for handoff`."
+      },
+      {
+        "line": 106,
+        "text": "The user authorized Start s24, then requested a handoff checkpoint. S24 has offline go-ahead; it is incomplete, unaccepted, unstaged and uncommitted. No installation, credentials, live calls, spending, Git publication or S25 is authorized."
+      },
+      {
+        "line": 121,
+        "text": "Adversarially review the incomplete S24 draft in C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia, branch shiftwork/slice-24, HEAD 66f9b8d5d286f67bb2e7dd75acf24c0ed1e029c0. Read docs/plans/shiftwork/slice24-handoff-2026-10-08.md for exact changed files and receipts. Measure against approved Gate 4 S24 and Gate 3 section 3.11/obligation 58."
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/slice24-implementation-plan.md",
+    "sha256": "6298b4d254dd56acefd986aea79ef1a4f060cd650720c755eb1bf9c0539b3e8c",
+    "headings": [
+      "# S24: offline GTM operation and inheritance"
+    ],
+    "s24_lines": [
+      {
+        "line": 3,
+        "text": "2026-10-08 Asia/Singapore. User authorization: `Start s24`."
+      },
+      {
+        "line": 6,
+        "text": "Authority: approved Gate 4 S24 and Gate 3 section 3.11, obligation 58."
+      }
+    ]
+  },
+  {
+    "path": "docs/plans/shiftwork/slice9-implementation-plan.md",
+    "sha256": "0ec061e3bfa0aa1a9a21e8ae64cb367c7359b820c85939d44b1196e32e9678bb",
+    "headings": [
+      "# Slice 9 implementation plan",
+      "## Goal",
+      "## Architecture and design",
+      "## File responsibilities",
+      "## Execution checklist",
+      "## Review round: 2026-09-21",
+      "## Evidence limits"
+    ],
+    "s24_lines": []
+  }
+]

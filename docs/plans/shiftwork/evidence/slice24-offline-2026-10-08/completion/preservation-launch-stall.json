@@ -1,0 +1,7 @@
+{
+  "status": "STALLED_PREPARATION_TERMINATED",
+  "process_id": 31948,
+  "observation": "Zero reported CPU and no destination file; no audit executed.",
+  "cause": "UNCONFIRMED",
+  "recovery": "Only the task-owned stalled launcher was stopped; preparation moved to this saved script."
+}

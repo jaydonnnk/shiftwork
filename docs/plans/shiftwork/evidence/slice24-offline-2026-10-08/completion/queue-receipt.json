@@ -1,0 +1,16 @@
+{
+  "mode": "queue",
+  "argv": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice24-offline-2026-10-08\\completion\\review_queue_probe.py",
+    "-q",
+    "--tb=short",
+    "--junitxml=C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice24-offline-2026-10-08\\completion\\queue.xml"
+  ],
+  "cwd": "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia",
+  "returncode": 1,
+  "elapsed_seconds": 7.62,
+  "log_sha256": "90b7add24d6b55ab30b5554d672d233f48712075b41dba901b86e65490782f6f"
+}

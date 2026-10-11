@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="4.575" timestamp="2026-10-08T09:16:20.651441+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_operation_guards" name="test_later_gtm_comparison_refuses_unbound_ownership_history" time="4.159"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_operation_guards.py:186: in test_later_gtm_comparison_refuses_unbound_ownership_history
+    with pytest.raises(orchestrator.LifecycleError, match="observed pipeline history differs"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,26 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_ test_gtm_customer_projection_does_not_present_rejected_output_claims[sent_message] _
+tests\orchestrator\test_gtm_pipeline.py:684: in test_gtm_customer_projection_does_not_present_rejected_output_claims
+    assert_pipeline_surface_safe(projection["customer_answer"])
+tests\orchestrator\test_gtm_pipeline.py:659: in assert_pipeline_surface_safe
+    assert needle not in serialized, "unsafe pipeline surface: " + needle
+E   AssertionError: unsafe pipeline surface: "sent_message":
+E   assert '"sent_message":' not in '{"action": ...e_ms": null}'
+E     
+E     '"sent_message":' is contained here:
+E       fidence", "sent_message": true}}, {"kind": "handoff", "value": "revenue-review"}], "display_text": "Synthetic qualification: REVIEW. Synthetic owner: revenue-review. Synthetic pipeline record prepared for human handling. Human handoff to the revenue review queue; no message sent.", "evidence_refs": ["public:signal:pair-low-confidence"], "verified_record_age_ms": null}
+E     ?           +++++++++++++++
+============================== warnings summary ===============================
+..\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\fastapi\testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+..\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53
+  C:\Users\jayd0\OneDrive\Desktop\nebius_nvidia\.venv313\Lib\site-packages\starlette\testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/orchestrator/test_gtm_pipeline.py::test_gtm_customer_projection_does_not_present_rejected_output_claims[sent_message]
+1 failed, 2 warnings in 0.55s

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.551" timestamp="2026-10-08T09:00:15.010200+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_operation_guards" name="test_accepted_pipeline_capture_must_still_parse_as_its_request_envelope" time="0.013"><failure message="Failed: DID NOT RAISE ValueError">tests\orchestrator\test_gtm_operation_guards.py:52: in test_accepted_pipeline_capture_must_still_parse_as_its_request_envelope
+    with pytest.raises(ValueError, match="accepted pipeline capture is not a valid envelope"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.475" timestamp="2026-10-08T08:59:40.480944+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_consequence_classes_reduce_from_operational_captures_only" time="0.008"><failure message="AssertionError: assert ['SLA_CLOCK_S...LOCK_STARTED'] == ['OWNER_ASSIG...LOCK_STARTED']&#10;  &#10;  At index 0 diff: 'SLA_CLOCK_STARTED' != 'OWNER_ASSIGNED'&#10;  Right contains 2 more items, first extra item: 'OWNER_ASSIGNED'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:579: in test_gtm_consequence_classes_reduce_from_operational_captures_only
+    assert [d.event_type.value for d in drafts] == [
+E   AssertionError: assert ['SLA_CLOCK_S...LOCK_STARTED'] == ['OWNER_ASSIG...LOCK_STARTED']
+E     
+E     At index 0 diff: 'SLA_CLOCK_STARTED' != 'OWNER_ASSIGNED'
+E     Right contains 2 more items, first extra item: 'OWNER_ASSIGNED'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

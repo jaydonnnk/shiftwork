@@ -92,3 +92,6 @@ docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/** -text
 
 # Recognize preserved Windows receipt line endings without relaxing whitespace guards.
 docs/plans/shiftwork/evidence/slice23-publication-2026-10-08/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+# Preserve S24 offline, acceptance and publication receipts byte-for-byte.
+docs/plans/shiftwork/evidence/slice24-offline-2026-10-08/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+docs/plans/shiftwork/evidence/slice24-publication-2026-10-11/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

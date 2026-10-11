@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.338" timestamp="2026-10-08T09:22:23.180221+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_signal_inventory_branches_refuse_independently[duplicate_record_id]" time="0.001"><failure message="Failed: DID NOT RAISE ValidationError">tests\orchestrator\test_gtm_guards.py:73: in test_signal_inventory_branches_refuse_independently
+    with pytest.raises(ValidationError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValidationError</failure></testcase></testsuite></testsuites>

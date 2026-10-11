@@ -1,0 +1,24 @@
+{
+  "mode": "full",
+  "argv": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-m",
+    "pytest",
+    "tests",
+    "--ignore=tests/packaging",
+    "-q",
+    "--tb=short",
+    "--junitxml=C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice24-offline-2026-10-08\\completion\\full.xml"
+  ],
+  "cwd": "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia",
+  "returncode": 0,
+  "elapsed_seconds": 615.1,
+  "log_sha256": "42461330a08980df6961e5212c2df22fcff74f55d7c5718e58909ab3b02956db",
+  "junit": {
+    "tests": 1341,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "xml_sha256": "dfb6c18aa84e1ac379b7eaae9be02e9ed06aba50fd75c5e131e4424f9ce6018b"
+}

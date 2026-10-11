@@ -1,0 +1,1467 @@
+{
+  "S24": {
+    "status": "PASS",
+    "controls": 55,
+    "setup_errors": 0,
+    "named_assertion_matches": true,
+    "rows": [
+      {
+        "name": "operation_purpose",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[experiment]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "9889f4ea2bdfaff9cc2cafeb50f2bbd888ab1a1a95661f230c840ea8aad15462",
+        "xml_sha256": "72b53ca3b46da240f020b027a270d5ae01fdeff8bf58e5bd8151631c8d5538a0"
+      },
+      {
+        "name": "selection_binding",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[wrong_selection]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "da69546c36256b91a1af56a1e8b9539fec7a2a4344632d70bc704d967812399a",
+        "xml_sha256": "a2ffce74a110f722af7b788bc6f6cf4cf2ece7da39b7bc9ab4fcae10020e345f"
+      },
+      {
+        "name": "assessment_purpose",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[assessment_purpose]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "ccf8c5ff67a174ac626ca23a1224615df7d62eea7ebdc5027cce6bcca7e17239",
+        "xml_sha256": "ea26d44eddbd723be465c7396fba31a2d170df46f87b695eb021f655888d1bef"
+      },
+      {
+        "name": "assessment_run",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[assessment_run]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "8a45e9acde1ca68ebaae02690088043473fd8dd856f2b8545fa1ee5b21a5a7e5",
+        "xml_sha256": "ffa35bd44caaf391725a3b2f0f27ca967977932283f18246d4ed363f7894768b"
+      },
+      {
+        "name": "check_cardinality",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[duplicate_check]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "0346fadb7e4d12f4e1c399848ff5073c27a17af47df5c36357cbed43a3a73979",
+        "xml_sha256": "82f5b8556f91689eaa854724f711030aa78f376c5d7d82b3d40a2a033ec6e7e0"
+      },
+      {
+        "name": "check_inventory",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[extra_check]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "f54bc82df2b82965c83c32e64a7d234eddfab969fdd4df3a2518e7c302935264",
+        "xml_sha256": "9b365d0295bcd7d50ee9903f7724e5fc863e535197ef0939c918f1bc6abeec7d"
+      },
+      {
+        "name": "row_inventory",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[extra_row]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "a5629c30d29a52bf6a810c00ce947df53928f019ee25ae4c8a4d4756568ca5a9",
+        "xml_sha256": "a90557248995e122412414d370e36d28b4d17d922dfd8e6a4a23dbd93dd0c2b2"
+      },
+      {
+        "name": "output_cardinality",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[duplicate_output]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "6b4cef26b578052df2855deb9a1704208a4c8af9934120b818d98806ea1595e5",
+        "xml_sha256": "d3ac1dd19e4f38822d5a93cfb4ff86541c518876c6a18c1c7bf6ac9326566baa"
+      },
+      {
+        "name": "output_ordinals",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[extra_output]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "e1e6f6be687cc9a6004e8fea7cce0afd38e01da0714825ab057a286b40f0402a",
+        "xml_sha256": "c5e6f17d8528ade7d2bed7c4b6cf50c97d8d7af7bb46423f045c2e4d7bc82bd2"
+      },
+      {
+        "name": "output_run",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[foreign_run]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "7b371fd03471edbc65154a17bf85c42eb83bd185476d0124123167bba32efa79",
+        "xml_sha256": "89941d5cf594bdbb803be15ed80a94362c27b7384715a60487d357cf5329b6f5"
+      },
+      {
+        "name": "output_transport",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[transport]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "5237a0c7d139705b93c0a514f504b46344da91e008bd043da93f10e19156f85e",
+        "xml_sha256": "b6467f42944e6249202ca9b3986f041e87b0dd68f17dae9ac0fe0eaf25bdf447"
+      },
+      {
+        "name": "task_request",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[wrong_request]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "95ddf3de7aec50859119d1a23d29ed64037ecf1b482b5d4ce764ca2c62595aae",
+        "xml_sha256": "c85154c179c69e54b7a7cde6eeba567b3a95cb0e48b786fab6a687c28ab5856d"
+      },
+      {
+        "name": "check_run",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[foreign_check]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "7a1e3d1a2eae072644c0678dbe08374cf03f1f946dc961d3a9f52044a636aa3c",
+        "xml_sha256": "58c5e6103d59841c8c9b818de1df6a06c83045fe4c15ed9c55968ede72024c97"
+      },
+      {
+        "name": "check_output",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[foreign_output]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "159599807d81ac04123fe52082c3fbb10a1f6c87816e63663cf1bfb223a42978",
+        "xml_sha256": "998f034864cc381eb54933dabfd1b22747ee2611b41458167bf9294754b576fb"
+      },
+      {
+        "name": "check_verdict",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[wrong_verdict]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "f703737a0ab79118288c3371ccb41b5c3c5334b25cf3004fcdfdaabd38b65301",
+        "xml_sha256": "d79420cb14d5a44d71b190f77715edd6e42eabe030aa2d3ebb32a8ab11384428"
+      },
+      {
+        "name": "mission_owner",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_reduction_refuses_inconsistent_controller_evidence[foreign_mission]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "342822dbcc024a234344f589ca1d72d098e743f3cf788623964688c783c9709e",
+        "xml_sha256": "818888745da4f76cd7c9a507bdb962d071baeb3e6ca75eba65411dc3a57be57a"
+      },
+      {
+        "name": "owner_event",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "AssertionError: assert ['SLA_CLOCK_S...LOCK_STARTED'] == ['OWNER_ASSIG...LOCK_STARTED']\n  \n  At index 0 diff: 'SLA_CLOCK_STARTED' != 'OWNER_ASSIGNED'\n  Right contains 2 more items, first extra item: 'OWNER_ASSIGNED'\n  Use -v to get more diff",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "69201e413fe62b30c3fb6e6f4af9f3fd831e4e24da47d22e2f6964680919437e",
+        "xml_sha256": "fc958d9c69387e2b52bac79715029eeca591d74f9c2b1490202d383ebd14a858"
+      },
+      {
+        "name": "clock_event",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "AssertionError: assert ['OWNER_ASSIG...NER_ASSIGNED'] == ['OWNER_ASSIG...LOCK_STARTED']\n  \n  At index 1 diff: 'HANDOFF_ESCALATED' != 'SLA_CLOCK_STARTED'\n  Right contains 2 more items, first extra item: 'OWNER_ASSIGNED'\n  Use -v to get more diff",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "cca3c6aebe9beb7c898fdeff176fa5383b1722f6e55737466c2c96492e8eb668",
+        "xml_sha256": "66531bb7dd0f6cf4271f77fa3da87f619b1b7e2916b43be04de42289dc3455ab"
+      },
+      {
+        "name": "handoff_event",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "AssertionError: assert ['OWNER_ASSIG...LOCK_STARTED'] == ['OWNER_ASSIG...LOCK_STARTED']\n  \n  At index 2 diff: 'OWNER_ASSIGNED' != 'HANDOFF_ESCALATED'\n  Right contains one more item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "3d6832bace2cedd0d81e769efb3a931ea962ce3e43a1ea77c641aac98645890d",
+        "xml_sha256": "74f15b167c2b39bd8cbb48872d18c7e910efe0bf00d7a9b9ebff5afa2e0c7715"
+      },
+      {
+        "name": "human_terminal",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "AssertionError: assert 'SENT_MESSAGE' == 'HUMAN_HANDOFF'\n  \n  - HUMAN_HANDOFF\n  + SENT_MESSAGE",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "9ca3af8c137d6d9cd6af071f3b1eb1289e761c6b9a9a77e6884563e828e2be09",
+        "xml_sha256": "58ecdba77f2da1ef7543675a7db34bebbb2e3dd2d000c4a6b6d5fa8710b00d1b"
+      },
+      {
+        "name": "success_provenance",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "AssertionError: assert [('pipeline-r...ne-output-3')] == [('pipeline-r...ne-output-3')]\n  \n  At index 1 diff: ('pipeline-run', 'pipeline-check-1-owner', 'pipeline-output-1') != ('pipeline-run', 'pipeline-check-1-write', 'pipeline-output-1')\n  Use -v to get more diff",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "719ffa4542497074b1422e0249f42f8d4c5ba90f56597bcc304b6bea08ced3a2",
+        "xml_sha256": "adf3e378cb9ef7288bd7932b2c897794b1f420f3074e695124c57d648efc4113"
+      },
+      {
+        "name": "success_weight",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_consequence_classes_reduce_from_operational_captures_only",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "assert False\n +  where False = all(<generator object test_gtm_consequence_classes_reduce_from_operational_captures_only.<locals>.<genexpr> at 0x000001EBC41D5700>)",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "816d3ef07027d04d0014c01106d9c511e325b4d956488df32c4e52c3932c9c9c",
+        "xml_sha256": "eb6e92bc0bcde9824a75ef920b1589f4f218f8ecdc5d2bc439dfee4d72cce57b"
+      },
+      {
+        "name": "incident_trace",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[missing_handoff-REQUIRED_TASK_MISSING]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "AssertionError: assert [] == ['qualificati...e', 'handoff']\n  \n  Right contains 4 more items, first extra item: 'qualification'\n  Use -v to get more diff",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "20f3ab8656dba8f92e659785713db39ec7d9bfde823539a2b8aec998bf1d57ab",
+        "xml_sha256": "eac5495402f1ea19337ff575d88d27572cd3521630d9128340b38c71d0f79267"
+      },
+      {
+        "name": "incident_tasks",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[missing_owner-REQUIRED_TASK_MISSING]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "AssertionError: assert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "cf8a5bf26e45eb3cd0fd0f24400f40eb4e9ecd09985651c57c591795fa11bcb9",
+        "xml_sha256": "749d4260ef49782d769ec846497abc9ca267f14280cbb0b597a47608ec5dfd0a"
+      },
+      {
+        "name": "incident_provenance",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[wrong_owner-WRONG_ACTION]",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "AssertionError: assert ('pipeline-ru...ine-output-1') == ('pipeline-ru...ine-output-1')\n  \n  At index 1 diff: 'wrong-source-check' != 'pipeline-check-1-owner'\n  Use -v to get more diff",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "ee952d67b25833b7819d872136741dc1d7b0f32d737d465380f5e28fb648aabe",
+        "xml_sha256": "3551865813a4e19f13100841614851c1e38bb3757db53fffecf8ea515bb15398"
+      },
+      {
+        "name": "malformed_accepted_capture",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_accepted_pipeline_capture_must_still_parse_as_its_request_envelope",
+        "file": "shiftwork/ledger/reducer.py",
+        "message": "Failed: DID NOT RAISE ValueError",
+        "source_sha256": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+        "log_sha256": "7a52de635a252e876b7e6fde91316ff142536656d048712768d719eba100279d",
+        "xml_sha256": "88ed843cfe998e9b02c8b67ea7479acfa04ac893af1ae79f4043d208ad35667f"
+      },
+      {
+        "name": "history_record_ref",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[wrong_ref]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "9f407844d7d8b161924c8a771f211abde0337df37b846bc078837268f14ff5d1",
+        "xml_sha256": "cc14d532c7307322482ed17fa793f756ce42eeeb856d20d738f0caf16d3b52fe"
+      },
+      {
+        "name": "history_owner_empty",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[empty_owner]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "f08d6947d0af9828e7e52bf40922e28cd68661aab100cc31340ccdd4177a74bd",
+        "xml_sha256": "555c8262c6584f2a8d90dd758dfaffcb5034481ca399d6ded8fc2a5d42e45b89"
+      },
+      {
+        "name": "history_record_fields",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[extra_field]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "a5bafca2ab6ace352a5ad9cd471eb270303007d12ef67ba93c891530f7e22702",
+        "xml_sha256": "156bfe8ed3803dede54124a0f6a6e5c90c720155de6aa1d01531bf179cb21790"
+      },
+      {
+        "name": "history_owner_type",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[owner_not_text]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "5cb8abdf50f91c1c2fcf36a57f0ce812bfa29d267ad271941687fb932bfed566",
+        "xml_sha256": "55e83b69ebe0bcf9c6e0de748cb599a374269d150216d315a9bda72a28095ddc"
+      },
+      {
+        "name": "history_signal_prefix",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_inherited_records_are_validated_even_when_not_in_current_batch[signal_prefix]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "31d008341612dba2c79c1b826a6548fa02751b7bf506f3989a8a2347db60484d",
+        "xml_sha256": "52e4505bbfd96bedb8f39fd6cc1ca08b86ef3bc6ed69ebe7ebcd3acd868beb49"
+      },
+      {
+        "name": "history_conflict",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_pipeline_inheritance_refuses_corrupt_or_conflicting_record[conflicting_observation]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "d323289bf4ac1e717a2643bc3233c610d147005f31166d085e6abe1f4f027ca0",
+        "xml_sha256": "b1f9a5192060f3c98e802e7f4fc948b1567fa8a7267a89a82b72d13c78876d99"
+      },
+      {
+        "name": "history_overlay",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_pipeline_inheritance_uses_history_without_rewriting_reviewed_state",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "AssertionError: assert None == 'owner-apac-platform'",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "f70c0ba7de8a06add97d22639e3864061ffb3f9f0d6e4b2dd56427723df65844",
+        "xml_sha256": "783a96817c5dca6b0693fe91cb07e4ce3163f0ce910724d4f369f61bd6b5b35f"
+      },
+      {
+        "name": "rule_pack",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_rule_resolution_refuses_wrong_owner_or_unbound_history[foreign_pack]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "4c97306ddcec8be7285051b1355830d809c740a01cfbd68e8cd3d2df99740782",
+        "xml_sha256": "b42f3fd11bc88cc79b507cbb53dce4627c82840bb82a60f682ad03467b448684"
+      },
+      {
+        "name": "rule_handoff_weight",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_rule_resolution_refuses_wrong_owner_or_unbound_history[boolean_handoff]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "64ce89e85d91ca82cc19a70023f92e3c66964afa1dc61a30560eefa454be719f",
+        "xml_sha256": "d64d32ef5be4b929e2fedee828780a759cd3207cefe0dad8bfa6323eb47f83a1"
+      },
+      {
+        "name": "rule_history_hash",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_rule_resolution_refuses_wrong_owner_or_unbound_history[history_hash]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "dfec0fc2ad76fd0703a218f0f41651530eca7d317cfafafba889bfc84d46049d",
+        "xml_sha256": "3e4bfd43c1e7eff3259a80eb4b62e2417ed7f1799f08258315abbd6285b96d3c"
+      },
+      {
+        "name": "rule_success_events",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_frozen_consequence_rules_refuse_drift[wrong_events]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "5eb5d5ac98ef07cdf1d75c820ef5ae6ac0ecf627e5eef2c03c277f30fcbbdef8",
+        "xml_sha256": "53f0c18c1442e859e8359475362f90aa9ac0b4ebab1b9e622b4eeab9ed469ee4"
+      },
+      {
+        "name": "rule_rollout",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_frozen_consequence_rules_refuse_drift[rollout]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "115f0eb735d2059a12a62d200460adcab698c51204b873fdb5748f398dde69ad",
+        "xml_sha256": "6779c32607acd84be0bb635c439605ec9738900ecc769c7a4dcd132690141bd1"
+      },
+      {
+        "name": "rule_handover",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_frozen_consequence_rules_refuse_drift[handover]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "0a86f6bc3cf79f5182bd4278736109da630184448c8fbe68174e2dabd1f16b1d",
+        "xml_sha256": "383705a9433cbcc708a76553fa0bad59f2a9c73ba4e407bfe38ef24343869e8e"
+      },
+      {
+        "name": "freeze_broken_chain",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_freeze_refuses_broken_chain_before_inheriting",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "47ec38a0a0d929b2e9a6da5275ee2a2d64f094d5ec4900ce12a4ea3fd66efe2e",
+        "xml_sha256": "2c023a88d5a221750349aa9546118f95f4482352b1d515d774b1a8ed50a1b127"
+      },
+      {
+        "name": "freeze_duplicate_owner",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_pipeline_freeze_refuses_duplicate_owners_in_valid_chain",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "e94e71e6ea9dfdf224439e2b815d57b5b7d329b51462424e782850daf504d94b",
+        "xml_sha256": "7c320abb183e6c7ea1965adca76d0b832113084ab8e76564e47288b7a8155619"
+      },
+      {
+        "name": "freeze_history_overlay",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: reprocessing wrote another owner, record or clock\nassert [{'event_type...hetic': True}] == []\n  \n  Left contains 2 more items, first extra item: {'event_type': 'OWNER_ASSIGNED', 'cause_refs': ['run-0009', 'cr-0010', 'run-0009-out-1'], 'payload': {'catalog_version... 'consequence': 'owner', 'decision_trace': ['RULES_FIRST', 'QUALIFIED'], 'mission_version': 1, ...}, 'synthetic': True}\n  Use -v to get more diff",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "bc1da498fc6a8888e7a209b05ab6a9841afcb5271ab2c3528c75db60b47fd52d",
+        "xml_sha256": "4e98b5393e63dd8896f1b0728c4b9ac470a513b21058d7a42b1c17c234036071"
+      },
+      {
+        "name": "later_history_hash",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_later_gtm_comparison_refuses_unbound_ownership_history",
+        "file": "shiftwork/comparison_flow.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+        "log_sha256": "ae3e31290e09aa45d7af6ed1d8508c8a56db14c52de328906aa540a58574a00e",
+        "xml_sha256": "ab20e820adae7c7f6f20217e7d6c58dfde78652b2c4373ae122033e9df5d2b37"
+      },
+      {
+        "name": "later_history_overlay",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition",
+        "file": "shiftwork/comparison_flow.py",
+        "message": "AssertionError: {\"kind\":\"conflict\",\"detail\":\"the observed world changes more than dependency availability: records; the reviewed comparison workloads do not apply\"}\nassert 409 == 202\n +  where 409 = <Response [409 Conflict]>.status_code",
+        "source_sha256": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+        "log_sha256": "0cee197e74514e846702ae11d40748918f4eba862b571e3e9c4a866b56ad2ea6",
+        "xml_sha256": "9a6202809d52c9090ec9aba9bb94daf65cffe1932a56167fa41e80fbd6a49493"
+      },
+      {
+        "name": "later_pack_pins",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition",
+        "file": "shiftwork/comparison_flow.py",
+        "message": "AssertionError: {\"kind\":\"conflict\",\"detail\":\"only the two pinned reviewed candidates are executable as an offline comparison\"}\nassert 409 == 202\n +  where 409 = <Response [409 Conflict]>.status_code",
+        "source_sha256": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+        "log_sha256": "93399afd66b097fb0898ab95b2de00c8cd3fcfe40e6059491542559e74a075d9",
+        "xml_sha256": "85481152d37d0df8cfb641c84ccf41690bad4173bf8410b778f38288a00b7e7b"
+      },
+      {
+        "name": "stale_selection",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_exact_selection_operation_restart_inheritance_and_later_condition",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: {\"id\":\"sel-0002\",\"kind\":\"LEARNER_CHOICE\",\"selected_version_id\":\"ver-0002\",\"selected_content_hash\":\"80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33\",\"comparison_id\":\"experiment-gtm-shift-01-c1\",\"retained_alternative_version_id\":\"ver-0003\",\"rationale\":\"Choose the independently eligible rules-first repair.\",\"requirement_set_hash\":\"de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab\",\"prior_selection_id\":\"sel-0001\",\"state\":\"VALID\",\"created_at\":\"2026-10-08T01:16:50.498741Z\"}\nassert 201 == 409\n +  where 201 = <Response [201 Created]>.status_code",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "74898e19d915f7911bd55e824de8f1989e2de97a6917a74f9c09cb328029444e",
+        "xml_sha256": "c5f7070a4b3bfbc8409484bd5b5356fe024eaa8e35d9fbff0c64856f67db91fd"
+      },
+      {
+        "name": "operation_accounting",
+        "node": "tests/orchestrator/test_gtm_operation_guards.py::test_gtm_finalized_operation_guard_precedes_retry_and_storage",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "a7548e76180455795033b368f58114f2c309eb6e8a38adb3a5dfeae33ec45d4d",
+        "xml_sha256": "4298bd4fdc269f6c71d81f55e8d8327c927be39788e1b9833042bf1a6a099ccc"
+      },
+      {
+        "name": "projection_revenue",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_customer_projection_does_not_present_rejected_output_claims[revenue]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unsafe pipeline surface: \"revenue\":\nassert '\"revenue\":' not in '{\"action\": ...e_ms\": null}'\n  \n  '\"revenue\":' is contained here:\n    fidence\", \"revenue\": 50000}}, {\"kind\": \"handoff\", \"value\": \"revenue-review\"}], \"display_text\": \"Synthetic qualification: REVIEW. Synthetic owner: revenue-review. Synthetic pipeline record prepared for human handling. Human handoff to the revenue review queue; no message sent.\", \"evidence_refs\": [\"public:signal:pair-low-confidence\"], \"verified_record_age_ms\": null}\n  ?           ++++++++++",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "3bef593ca7076647f7437fc042703586c6c9203ced30bb6e6dd1a853f280e6bc",
+        "xml_sha256": "4f4b491cd20d93e71702d71eeaa051956988d97423933c9ba8601435eb482455"
+      },
+      {
+        "name": "projection_sent_message",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_customer_projection_does_not_present_rejected_output_claims[sent_message]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unsafe pipeline surface: \"sent_message\":\nassert '\"sent_message\":' not in '{\"action\": ...e_ms\": null}'\n  \n  '\"sent_message\":' is contained here:\n    fidence\", \"sent_message\": true}}, {\"kind\": \"handoff\", \"value\": \"revenue-review\"}], \"display_text\": \"Synthetic qualification: REVIEW. Synthetic owner: revenue-review. Synthetic pipeline record prepared for human handling. Human handoff to the revenue review queue; no message sent.\", \"evidence_refs\": [\"public:signal:pair-low-confidence\"], \"verified_record_age_ms\": null}\n  ?           +++++++++++++++",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "728211af24e19c3b68628100c458da5a38dc6b42a3b057be3c7cd290cc5308b5",
+        "xml_sha256": "5edb5088ab5656cf8f07096bb8e7324df93f014160849b02e02687e6c43befef"
+      },
+      {
+        "name": "operational_duplicate_owner",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[duplicate_owner-DUPLICATE_COMMITMENT]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "4500d755189eb390b9199934bc446fdbcf19ed4eb0bdbafab78c1d71cfad58aa",
+        "xml_sha256": "bdc11092fd36196db553caed8aafa6981bcfca65ff530eae13515c53bdf99613"
+      },
+      {
+        "name": "operational_duplicate_write",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[duplicate_write-DUPLICATE_COMMITMENT]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "cf1bb2909240b2274f26618c1c3ee0b040be211a8c35ebc271e43f85007a0ebf",
+        "xml_sha256": "d7abf79a7062f373f474aaaf5327b2f25881eb77c01a941e20e26db144354695"
+      },
+      {
+        "name": "operational_sent_message",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[sent_message-WRONG_ACTION]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "0c520118396c72b45f7fbd85c323e1c6f50780328e00fb5a66c7321bec980008",
+        "xml_sha256": "a44d4d643f9d0f21b6bcaedc039c3c1ecf7cfb26a4525c56e2865afc11bb98bc"
+      },
+      {
+        "name": "operational_revenue",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[revenue-WRONG_ACTION]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "6966e579c7c18baf103bcdac666bd3b7dc5eced350409e87a4e89ae28aa42084",
+        "xml_sha256": "b839964ffbf0bc759b98ea1d1c814541cfefb7cf74cbd85311be41a8d8885178"
+      },
+      {
+        "name": "operational_missing_owner",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[missing_owner-REQUIRED_TASK_MISSING]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['INCIDENT_OPENED']\n  \n  Right contains one more item: 'INCIDENT_OPENED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "a4e494b46a9daaafbd98134e90e17901bafabfe87c8238c8185dcc10573a5b2f",
+        "xml_sha256": "89c9b0a453224f01d6733122f0d247cea6e0e4fc0e7741edd1e3b4abc701f7c3"
+      },
+      {
+        "name": "operational_missing_handoff",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_one_traced_incident_per_failing_record[missing_handoff-REQUIRED_TASK_MISSING]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert ['OWNER_ASSIG...LOCK_STARTED'] == ['INCIDENT_OPENED']\n  \n  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'\n  Left contains one more item: 'SLA_CLOCK_STARTED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "be826a32a63df8aad5240462a35da85ebf60cb6429f7eaafb0c6c4d7c468bee2",
+        "xml_sha256": "aa56c48f691b59a39d77bee08c7c56c019f7508fe519513392822c1d5761eeb1"
+      }
+    ]
+  },
+  "S23_refreshed": {
+    "status": "PASS",
+    "controls": 106,
+    "setup_errors": 0,
+    "named_assertion_matches": false,
+    "rows": [
+      {
+        "name": "rubric_suppressed",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[suppressed-DISQUALIFIED]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'DISQUALIFIED'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'DISQUALIFIED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "15cbed17e7210a9350fd5db861048dda6d3000b19bfa232411305d4ff4768ec2",
+        "xml_sha256": "13bcb8b27ee444fcef455920e7a6bf39c2ba5e785f5027896c3e914287325998"
+      },
+      {
+        "name": "rubric_small_company",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[small_company-DISQUALIFIED]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'DISQUALIFIED'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'DISQUALIFIED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "7370be1f5f2437b49265760b948228835acd32db643956f705ccd06cdd700696",
+        "xml_sha256": "551ba288b987054de909389502622af1d899ec074fa9d74765c00685bbed4c05"
+      },
+      {
+        "name": "rubric_unavailable",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[unavailable-REVIEW]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'REVIEW'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'REVIEW'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "bb1ff675dd0f11a671a6b4212eab0e394b3338b7ce3a0e6bd52fb81f53aef186",
+        "xml_sha256": "6e9ebc721ec62546079f16061981077547889387c0469750444b387c40884b4c"
+      },
+      {
+        "name": "rubric_stale",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[stale-REVIEW]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'REVIEW'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'REVIEW'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "a61dc52b50a7d914755869a388a83918c80ded4bba385854880d46df9b6e1285",
+        "xml_sha256": "ee0586e0ddc3ad15495a27ad171d147962357ec291be58d35abb29dab6e13cb2"
+      },
+      {
+        "name": "rubric_unknown_region",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[unknown_region-REVIEW]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'REVIEW'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'REVIEW'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "67f97f61def0816c6d38d5229018d96cc11b801210c0226cfc87275b56161a64",
+        "xml_sha256": "23f170512f2c1f6538ff2a8125d4a3c41157b01d5096a2c3a705dc24cb7d674d"
+      },
+      {
+        "name": "rubric_unknown_product",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[unknown_product-REVIEW]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'REVIEW'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'REVIEW'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "45cf72df1555325e4e5192d3e48991c8c3b2262244ebaef232366ac9c1d2f255",
+        "xml_sha256": "69d61f4da6d0e97c592a90e615c6da893fe9135a051f8e8a8662e18613a49761"
+      },
+      {
+        "name": "rubric_low_confidence",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[low_confidence-REVIEW]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'REVIEW'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'REVIEW'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "1afd1244a7b76f7b4b821e8a9fafa5e0c528f4c68d5c52cdb08832273c23fff6",
+        "xml_sha256": "a5493c520c4e76dafeba17cd2a8bc4853d05f4ee392e5f835fdebfa250c6e72e"
+      },
+      {
+        "name": "rubric_ambiguous",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[ambiguous-REVIEW]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'REVIEW'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'REVIEW'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "c7d17c22a8db32897c68c49624fc90dd8b119271c6830b27ff885d12c828a9af",
+        "xml_sha256": "af2c3c63777d3395dd39333ad36e1f17464ca15b270d59ef319afb144b635c74"
+      },
+      {
+        "name": "rubric_research",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[research-DISQUALIFIED]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'QUALIFIED'} == {'DISQUALIFIED'}\n  \n  Extra items in the left set:\n  'QUALIFIED'\n  Extra items in the right set:\n  'DISQUALIFIED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "8da822881a9f826bf710803d16598c6aff040cdeb16a9dd0d97dcd3d6fd9f3ef",
+        "xml_sha256": "5c3e62c4fd4cea453f9be825a40b76b3c969fa2b2ca7389bbfa288d1fd7b82af"
+      },
+      {
+        "name": "rubric_freshness_boundary",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[freshness_boundary-QUALIFIED]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'REVIEW'} == {'QUALIFIED'}\n  \n  Extra items in the left set:\n  'REVIEW'\n  Extra items in the right set:\n  'QUALIFIED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "b1bde9e3a046aad80dd50fcca6795a2fcebe40bfaebb0532ac00132a60b59d3d",
+        "xml_sha256": "38360d1935e9914952182a4b4b63fbdb168ab4c132ac13cc5e37e771dcfbfbfb"
+      },
+      {
+        "name": "rubric_confidence_boundary",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[confidence_boundary-QUALIFIED]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'REVIEW'} == {'QUALIFIED'}\n  \n  Extra items in the left set:\n  'REVIEW'\n  Extra items in the right set:\n  'QUALIFIED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "03083f40c3e55b853311d504ac072e6c9997043782521654b9537a8cc5b3a22f",
+        "xml_sha256": "de6e2395f365584494430f835a6e8bdb6cfbd6bbb47b7089cddff5302b896b32"
+      },
+      {
+        "name": "rubric_size_boundary",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[size_boundary-QUALIFIED]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: qualification rule must return exactly its published decisions\nassert {'DISQUALIFIED'} == {'QUALIFIED'}\n  \n  Extra items in the left set:\n  'DISQUALIFIED'\n  Extra items in the right set:\n  'QUALIFIED'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "c799b3fb87e0c3fcd602da68628fd0a11dbcbcf226fe8057b88a34b61ecfc29d",
+        "xml_sha256": "61f5a3d2dc6846e995e2199afb8e2ee0f1541c5b3a48360ef862a8f9c13c8c1c"
+      },
+      {
+        "name": "result_entity",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_entity]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "a858e610a7fbf8c78fae533582e885fb3869501dc6066cca0368ac308539d715",
+        "xml_sha256": "681999fa039fcb9d535632a5ec0c8741101d5101cbafa497fe6daad0e1c61527"
+      },
+      {
+        "name": "claim_entity",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_claim_entity]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "b4e1e360bc89e90a490addf23254228f3467142067ab711a2b496987db90b412",
+        "xml_sha256": "13bcd8e8e8faa6ee0ebad78d923a361f9550709987a49e1c9dc110ddbc2a214e"
+      },
+      {
+        "name": "claim_kind",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_claim_kind]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "a2af07312a36969dfbb5aead9245db5ecdcf66e7d4ed87e9845e805b4181f344",
+        "xml_sha256": "04828e3bdf31f8ca59b0a24aae4c38e5841b1d1661b80c9f93952bdebd002240"
+      },
+      {
+        "name": "commitment",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[invented_commitment]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "22b3d8148d10dd8ce4755766cfbf5ad8f4b30b3f1d532697daefc480ca79a3ef",
+        "xml_sha256": "83d06646dbfe4f840d47b628e0317d83e3db93ded70f6c3f838ab008fb4cd15f"
+      },
+      {
+        "name": "evidence",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_evidence]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "4ad0a1e3eee2a4af7615ba49c2d9188993895477f393e419758ff09c4178aaee",
+        "xml_sha256": "7b03f8430bf7cce45df28f7c2f0fe236110facad7589ad9c029f30ecfac5958c"
+      },
+      {
+        "name": "row_keys",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[sent_field]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "f33da030e897b655e8edfdb3a2766a66150baa35e585ff78397ee7b02783deef",
+        "xml_sha256": "ae7f24f5a21ce1c0e403849a4950434d9e47e5b390392d0b323feadec58c12b1"
+      },
+      {
+        "name": "row_revenue",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[revenue_field]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "7a864ee8bfde964e9e208faaa7c057b5a5ad51ba4ae36884cfc3ac7b39476a4f",
+        "xml_sha256": "158b9d088e5fed7d58b46669160a863ede6b8b67c022255ddaa449ef986dcb6c"
+      },
+      {
+        "name": "row_owner",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_write_owner]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "cdb3d0c283f2d3600d628a8a4b69a193a26f519d55f26e8f5114eca91f31834f",
+        "xml_sha256": "7ae37d732d601d7510e524adb58b7cc023c80674d533fac00d875254e406e95e"
+      },
+      {
+        "name": "row_ref",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_record_ref]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "d8edaa8b3d738d074dae94dc39e42d9f0c6b3d04702546daf4d05596ee11a46e",
+        "xml_sha256": "74cd38e267a2ac44114a731e6fdcc7498732b4cd6444aeded376eb13a1cc5ce0"
+      },
+      {
+        "name": "trace_length",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[extra_trace_step]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "52960910ceccc9ed5dfadf3013b6e632f3b04a8a77c0d22140fe3500fa1726ce",
+        "xml_sha256": "26318add7def85937313406b7c34e47d4632db5802a3b4ab6b8780e961a97358"
+      },
+      {
+        "name": "trace_decision",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_trace]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "0661622d9bbb3510f2087f414be46e83f21d66f9f7a8f61a8d103a8dcaf547d5",
+        "xml_sha256": "ef2fd08214de2d2fa839d9be0adeab0f8cba2c7a720ee38491fbbee992e85ce1"
+      },
+      {
+        "name": "scalar_value",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_owner]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "c977ffba6ae1008b39ccf391263528729604a925f5356f62a87d382f4fc912e0",
+        "xml_sha256": "10803055914cb9fd6755255ac2fc6b9fca562c56b29c43a062002f7084b62583"
+      },
+      {
+        "name": "claim_cardinality",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[duplicate_owner]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "cedfeed8df45ec9397cccd1146aa76356b909ef474138d9dc52af2fffaacee0d",
+        "xml_sha256": "221ff5ea61569328bb9399f37b86f4e423bfb88d47870e1a986397e49d25a661"
+      },
+      {
+        "name": "write_cardinality",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[duplicate_write]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: fault must reach exactly its own task guard\nassert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "0dff9e9283d0f002f731c9a342af0dcbe03ad8ba766850d36885940e0061278e",
+        "xml_sha256": "80a79b2addcf445beb95f8d1bf2d4fec2a915a7676d406165fd6b5a580a80212"
+      },
+      {
+        "name": "active_status",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_assessor_secondary_shape_guards_are_independent[active_status]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "912b4875ff126fd91ebb2d2ec7be8fa23a7951da04058c76e5d639bf2533b955",
+        "xml_sha256": "7da5d711c50126282cd3a0f2052a7d4758dda2edd99f739b179b04f71bd67962"
+      },
+      {
+        "name": "retry_name",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_retry_names_the_actual_valid_prior_request",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: retry must name its captured prior\nassert False\n +  where False = any(<generator object test_retry_names_the_actual_valid_prior_request.<locals>.<genexpr> at 0x0000020510B4DD80>)",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "d343c16f36025645c86e68f78ddbffd23c2eed56fc9f1c7251879ad09e5302af",
+        "xml_sha256": "11b577758ae6ee063c0a081d27b6d71f2d988136371cf3123b3afda18674dfea"
+      },
+      {
+        "name": "prior_decision",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_retry_cannot_replace_a_previous_human_review_decision",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: retry cannot replace the first decision\nassert False\n +  where False = any(<generator object test_retry_cannot_replace_a_previous_human_review_decision.<locals>.<genexpr> at 0x0000026BA6AB5C00>)",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "06558f329d21dc5aa9842280d66c144363c68656fd446c47d1ac3d9af16fa85d",
+        "xml_sha256": "bf6f30bc0681f0bb6820e87d033d985128d14b9e7bef62e549a1ae6a1be17e50"
+      },
+      {
+        "name": "prior_validity",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_retry_requires_valid_captured_first_record_and_never_writes_twice",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "assert False\n +  where False = any(<generator object test_retry_requires_valid_captured_first_record_and_never_writes_twice.<locals>.<genexpr> at 0x0000020ADBF55C00>)",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "97a90f758be95389dee3304058bdffc72aeec795787266c2e423c59361f9cbc4",
+        "xml_sha256": "089a62ebb24b95606d2d9fe25f9874c27623ab2300e4416e76b76618b8aca0e6"
+      },
+      {
+        "name": "mission_owner",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_pipeline_assessor_requires_owning_mission_even_with_valid_gtm_state",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "Failed: DID NOT RAISE MissionSpecInvalid",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "66d341d9630bf5a6616a56cac5c9a3109ac7cb156857935aa8f57ce72a57e25d",
+        "xml_sha256": "c4d5d14d5b2e8aac46df33a3696d748836b6aefa221f5e6fcdbee0b7295873ef"
+      },
+      {
+        "name": "pinned_owner",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_frozen_expected_owner_cannot_disagree_with_routing_even_when_output_is_correct",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: pinned expected owner disagrees with frozen routing\nassert False\n +  where False = any(<generator object test_frozen_expected_owner_cannot_disagree_with_routing_even_when_output_is_correct.<locals>.<genexpr> at 0x000001EBB0641D80>)",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "9c7a369f6c3ed356c010c350779a555bc5025cce778a679af3eedfdbe56d5bb2",
+        "xml_sha256": "7d29737a3e3b2a4b48f3aa5b4002ff0b6f62f9a6248c5d45d6b9b8812e75a9e3"
+      },
+      {
+        "name": "pinned_decisions",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pinned_decision_cannot_be_widened_by_correct_route",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "assert not True\n +  where True = any(<generator object test_pinned_decision_cannot_be_widened_by_correct_route.<locals>.<genexpr> at 0x0000028FBB6DB340>)",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "55dc610d865a9b5752dc124c8e8840451b4ba2563ae7b9c6358bcedebc576359",
+        "xml_sha256": "eb69d9ad8de288dde2413a4c2a695d80089f59f8ff59cc457d3ccc8dd03529f4"
+      },
+      {
+        "name": "existing_owner",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_existing_owner_cannot_change_even_without_second_write",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: existing owner cannot be replaced\nassert not True\n +  where True = any(<generator object test_existing_owner_cannot_change_even_without_second_write.<locals>.<genexpr> at 0x000002A036E7B340>)",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "f4c6e3905f6062a5e73da23e70c27c1033cc2a246266830f0d1a84f8f1f24b44",
+        "xml_sha256": "f6d826e9351fc74ebe46b96dd10be93fed5b6c8ee5cab7889e514b512ffd3930"
+      },
+      {
+        "name": "snapshot_type",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_assessor_requires_pipeline_snapshot",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "Failed: DID NOT RAISE MissionSpecInvalid",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "8c134404054309f6ec82f17712c6cae2486bb8b2367c86f9ee880df19103f908",
+        "xml_sha256": "4c07da3d5a72d0f21237d6328ebfc3536e751c2c95cd14787efd1957b2b0068a"
+      },
+      {
+        "name": "inactive_status",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_inactive_task_secondary_guards_are_independent[status]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "a7de0f85b80fd53584eae591dd2911ca7e420b5534ad82ae2269aca06aa40ef7",
+        "xml_sha256": "89d20697791aaa85bf415677671b43c32b0e99d9f2a4603ae3ac9399beabf569"
+      },
+      {
+        "name": "inactive_claim",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_inactive_task_secondary_guards_are_independent[claim]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "33054a3ae31f55112d20582c401ee92b6baf04528e36dccc0d5b26f0e1990c15",
+        "xml_sha256": "0ee62229cae33a55d650178dc55e0d7f3775b2d4c6763ad30eda0666a0d41e8b"
+      },
+      {
+        "name": "inactive_commitment",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_inactive_task_secondary_guards_are_independent[commitment]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['owner']\n  \n  Right contains one more item: 'owner'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "8cb41f1e49e1c56c08b91fa8ee5244efb340a7f1381ab4f27b23b698a6757d3f",
+        "xml_sha256": "f41542ee309cfe584ac3feb42f6bc1190ea2e8ce06188f2bf6097172c1d31ca7"
+      },
+      {
+        "name": "trace_method",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_row_shape_branches_fail_only_write[trace_method]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "853d979aa9443e26be4b244015414fe96deab59ae9032a83e19dcf890ffb5b57",
+        "xml_sha256": "58926a623b963d988108c1853f0800e84a687b6918f787ec5f1d7c052e4e2b57"
+      },
+      {
+        "name": "trace_short",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_assessor_secondary_shape_guards_are_independent[trace_short]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "4751e02553a8e7ee6d4bd04b07c0a3b963d261398d0965018593ae9875d6a372",
+        "xml_sha256": "bf46473e123d6948861dcf9eb01a0e2231e739cff9c5a914866e9726d1399dbe"
+      },
+      {
+        "name": "row_type",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_assessor_secondary_shape_guards_are_independent[row_type]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "b88a52f1c851a1c1d8242f37d5248344d903acd58177ebcb750b376447cc36f0",
+        "xml_sha256": "0ddd25a709055de95ee736e8a899887181f7a18c4f52923473324f79fdedb49b"
+      },
+      {
+        "name": "trace_type",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_assessor_secondary_shape_guards_are_independent[trace_type]",
+        "file": "shiftwork/evaluator/evaluator.py",
+        "message": "AssertionError: assert [] == ['write']\n  \n  Right contains one more item: 'write'\n  Use -v to get more diff",
+        "source_sha256": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+        "log_sha256": "30f6627ccf053197442f85da11f1e27f2df3d4175f1f41de5f298cceaa8fcd86",
+        "xml_sha256": "a48e8a45ef0494d24cfb35bacb07cd87a9439437a752b98af3c4dfffb31bc422"
+      },
+      {
+        "name": "spec_extra_duplicate_task",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[extra_duplicate_task]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "f784fef215776846d47d7674705871b046e6cf5d1d851908177da2fc0453b6d4",
+        "xml_sha256": "d2f68a83b17da6889def59a5eaf57893313f05a8270cbd023ac68392a688da40"
+      },
+      {
+        "name": "spec_duplicate_kind",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[duplicate_kind]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "d4b0a742ef42704f7dca2915a89e7ab159fffecf656d59efc434d1e0974a2053",
+        "xml_sha256": "e7fa645aa6e86bb3ed001731c4c08553ccabc07e276557b513291ca85b6ce79f"
+      },
+      {
+        "name": "spec_duplicate_id",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[duplicate_id]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "1e0f8d5324cdf82d21cd39b88091acc7c67cf87607a08b5052350d869bf1cb43",
+        "xml_sha256": "a69fb79c2c1268de7b6f09d1a7523a3f0ed51a22a9096720359fba899ff7e75a"
+      },
+      {
+        "name": "spec_two_entities",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[two_entities]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "a92f71cfadcb7ed5ac1370d08ef083f043c73eb26412c99fe1e195e2d8a4452c",
+        "xml_sha256": "ee00f8887f4d08cfff6f2b1e27ca1f71e0a5d6b2a3b81bdc8012df779d1f6f2d"
+      },
+      {
+        "name": "spec_extra_condition",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[extra_condition]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "49277de41e7b9ef11fd1f6c24fe8f855349c916cc02eecb21ce6b99ade40c351",
+        "xml_sha256": "5c2764f74b84b83f047174672af5b10154acbf365f79c8e893b84a35e0c30db2"
+      },
+      {
+        "name": "spec_decisions_not_list",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[decisions_not_list]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "6ac83382fb41846cf7f2c29afeb89aaecd48be3c1d4977386cbef6fa99c085cc",
+        "xml_sha256": "9b496aac7236e29b1f89d2518e8a4ad67ba7bec208522a9cb46f96d004c294a9"
+      },
+      {
+        "name": "spec_empty_decisions",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[empty_decisions]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "ebf08cb5ffe21a9be2642d7830e472d42b18c9b7afda88f40ae43dfa2b487156",
+        "xml_sha256": "0a3b8536078aff962437d1aa3ab3e8ecb839d94c3a1734bbea68cbe7a2d40ed8"
+      },
+      {
+        "name": "spec_duplicate_decisions",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[duplicate_decisions]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "ccf15d224693eb8ff6a061a9f478b66bf514e98125697c38dae35f642f42abe1",
+        "xml_sha256": "1253818373e47d98f807e0ec1d6286ca9eb64312d3bc48e0257e4f18d7f3f241"
+      },
+      {
+        "name": "spec_owner_not_text",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[owner_not_text]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "946b7a80e09a971e3919de0def489a40072f162e67fc1eaad13907b567a838a9",
+        "xml_sha256": "2d23840a6f0a6ad5d6aca1f15cca778081fddfd67e9975b18f29fa2bc8379649"
+      },
+      {
+        "name": "spec_empty_owner",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[empty_owner]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "7c97344a48d7c44b81c1f11d3da8d98d823525f3621dcaf800baa299eaf5d1e5",
+        "xml_sha256": "592b6da97b161cfdda9cc5ac164ac21ef9282fe10bae47d1c346e2e68d84661d"
+      },
+      {
+        "name": "spec_repeat_not_text",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[repeat_not_text]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "50ec7668b20733740b38f41639f3f53ba7d23256de16548464791fa12c675905",
+        "xml_sha256": "b8933743716a4ae2d04461b0183aa411d13df001ca9811132d1475f7dd85e6f1"
+      },
+      {
+        "name": "spec_empty_repeat",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[empty_repeat]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "fab07bfc1c90a15b887d56998bf1db78fff936860947dc4417599c55c8c06fd9",
+        "xml_sha256": "53179e2a724720242fc8ef925eb9246a0bcc2151bd98c6ac07b12040e3936140"
+      },
+      {
+        "name": "spec_qualification_optional",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[qualification_optional]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "18a58b4fac745e1178c0a1a44a7fb08718d7078efadf5996c2c4ab82edaabe8b",
+        "xml_sha256": "b238aa541e6439d7652ea290dc73047a679b604fcb0e1923ecb00131efa6e956"
+      },
+      {
+        "name": "spec_conditional_required",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[conditional_required]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "9ac48d01f82db5d49ece1147e05d1e96e270b6214c48d872e2ce45b4b40588fd",
+        "xml_sha256": "640b5348bf9265bece5edf70bb1cdd81db59eb63d7b0eed85ed346fe12e346c6"
+      },
+      {
+        "name": "spec_wrong_signal",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[wrong_signal]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "6e4ee0a2f71b481b62fa476ff7363dd0cb5cd454668cbcf99865f3055216cebe",
+        "xml_sha256": "bdabb7507cf231182ed4a14af99a0e33a1ab9d2680927429e95f04b8f1ccf04d"
+      },
+      {
+        "name": "spec_disagreeing_conditions",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[disagreeing_conditions]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "eb960e29d71f069168e93a36569ba3054ed75cc616bd77796bbcc36e831bf14a",
+        "xml_sha256": "90ced695243de6323b01bac13edd971598c02b4a51fc7da33968bcea10c648b3"
+      },
+      {
+        "name": "spec_widen_review_owner",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[widen_review_owner]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "5f02f0f8620bf13158f171051639c85335f189daefa45f5cb97966c1f17eb7ad",
+        "xml_sha256": "a707d7338e72e1a6fe39ae340bb3f4fb71f939d72ea55895333ffa3d37725c12"
+      },
+      {
+        "name": "spec_missing_rule",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[missing_rule]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "b4367ef5a2e93bf9bc3671878aa8ad059afa4ee54bdd7806a03a749e66e70dfd",
+        "xml_sha256": "aa0ff974141cd384ec0c1deba3cd5692e80528eebdde41db100100620857cdea"
+      },
+      {
+        "name": "spec_decision_vocabulary",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[unknown_decision]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "473c93fe51099b661879d2b1b315a4ad1366a61b9b5f9350d6f23a890bf73244",
+        "xml_sha256": "79aa4a706797e615590f8f4215f8ab7311aaf9eddae7f338793391584e944030"
+      },
+      {
+        "name": "state_routes_missing",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[routes_missing]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "53308125ea97959f38d2993983e91a50916570954d66cd13757dc25f30df3e4c",
+        "xml_sha256": "dfaad854fe7c12162a67eab126393ac40d2fa78206ca1245fb307190e5298567"
+      },
+      {
+        "name": "state_empty_route",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[empty_route]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "f685aa253e921ecb174717558d61c636ff097ab8ac69f64d141cbacb27caa298",
+        "xml_sha256": "578b539912d7c8f71268bac177398444c3428e9d73d9c939670ce5a6f0a5532c"
+      },
+      {
+        "name": "state_review_route",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[review_route]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "a34e59f595064ca1c551247e599bafcbbcd4d05014f9f3e67026f5465373e7ca",
+        "xml_sha256": "c1d6fd1ae08a57c22edd983367d050c897bc79143e11cc908e0b75892cf4c85f"
+      },
+      {
+        "name": "state_extra_dependency",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[extra_dependency]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "513ea389b9e897c2f83a1fb168c3be8f7b456cdfd64e09cce44f63a849059cba",
+        "xml_sha256": "6b60a94a938fb7d2fe063635e1dc4d37188480dd3bac44ce5bf93fb4c5b7a040"
+      },
+      {
+        "name": "state_duplicate_record_id",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[duplicate_record_id]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "ad9164d366e84df01c8a7fe6ce8e4485d22471fa27cea78f9f253dbaabb58da1",
+        "xml_sha256": "9150771e8aa7ad66829af935643db59c2a9b7ef73b994b8ea27fa887d026a954"
+      },
+      {
+        "name": "state_duplicate_entity_ref",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[duplicate_entity_ref]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "ea36eec84c6cc94674e0bcdea1240e8c47957bd55bf4798f4d8092be707ef72f",
+        "xml_sha256": "cea007ee021ebbbb33ed8d2e1e18b7c1c33e9202a13f3e68146fac19b0db99d8"
+      },
+      {
+        "name": "state_orphan_entity",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[orphan_entity]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "204f1d5593e77e92007886679beb27b214155dffdaa3f94113be4eaeb3a08942",
+        "xml_sha256": "79e64083bb5782dc56b1729fd1f0465f2bed48f194f467367e3ad5482dc1abe0"
+      },
+      {
+        "name": "empty_existing_owner",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[empty_existing_owner]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "6f21243c397a77cf7b40760017d1b487bb1c96434c4700484482801e164603d6",
+        "xml_sha256": "9dbb4c3a10d91d32f9590cc7ddc8b8eeda77a5667aa1db51d5d0162fe80b47ac"
+      },
+      {
+        "name": "empty_existing_ref",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[empty_existing_ref]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE ValidationError",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "03e8986d30b2c24e032e72d0eca164af5c2beb78af13a1dc3c07d781af243783",
+        "xml_sha256": "eb1630029070cfbb2022f0505118465b911d0f04a1893c41bafe9cf8f22a04b3"
+      },
+      {
+        "name": "state_domain",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_signal_state_refuses_unusable_facts[wrong_domain]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "44e1f17ff6cfebcf93fc333e448dcfa77f1ff4b9010153b1237cba3074bc972d",
+        "xml_sha256": "a593848a6073f0f06ba54eadb6bd2d65c79c6c129649eecae0b28558c170e160"
+      },
+      {
+        "name": "existing_pair",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_signal_state_refuses_unusable_facts[incomplete_existing]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "9cd353aa5ed609e39af228cf8317bb45d7c5e386cec608a06b4bd9528c99f296",
+        "xml_sha256": "d540f1b7277f039dfeed76871c50fa9b2ad8bb6b2f99bb8ddc1b827bca7f0f99"
+      },
+      {
+        "name": "existing_ref",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_signal_state_refuses_unusable_facts[wrong_existing_ref]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "14606d34f9a3085d04177cc3992654c845fa5d788a0e8ca1d2c6b538163a82f9",
+        "xml_sha256": "189fc3d830223e4520b7efeaf7a03ecf3a18421b5e7c6ba3a9900b1294717380"
+      },
+      {
+        "name": "delta_currency",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_protected_signal_delta_refuses_invalid_inputs[currency]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "697b34a282564b2dd1d224b4411621ef41263b8629255b564d437db73bba9e6d",
+        "xml_sha256": "736edf4ad6823d9a378148cdf19baea6170f67ce0656a7b9d37d8e3fcca8d5ba"
+      },
+      {
+        "name": "delta_foreign_state",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_protected_signal_delta_refuses_invalid_inputs[foreign_state]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "1926d6c752b80c1813fea8ee50952468c519c03fddabf7f31c495e1b6704294d",
+        "xml_sha256": "e542f0b4f48be0b9d30eae0760b0c5d3f7a8e8e4a42fbd856b9041a9e25e8862"
+      },
+      {
+        "name": "delta_facts",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_protected_signal_delta_refuses_invalid_inputs[facts]",
+        "file": "shiftwork/domain/task_contract.py",
+        "message": "Failed: DID NOT RAISE PublicStateInvalid",
+        "source_sha256": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+        "log_sha256": "74e23b1219acb372dcfab0b6daf23e52d915c7511c5595a1ec14b2d99a7cd67d",
+        "xml_sha256": "021443cbc14d887c21b33d8a5f31dc76e2beedc7128a6cb00f13ef483a0c6a44"
+      },
+      {
+        "name": "incident_count",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_incident_binding_guards_are_independent[count]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE PackUnavailable",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "f6f5c8d168bbf9953c07e04014f8011ddfb06804fab48bd5964de073f2c6d2d5",
+        "xml_sha256": "e50e274d254f5d6f9f80247338036b80a69a64c1e9b27702498e81556a803c0f"
+      },
+      {
+        "name": "incident_request_id",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_incident_binding_guards_are_independent[request_id]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE PackUnavailable",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "0e3a1d856a6cfb8f65cc52f4a01412ccbe01ab9d9b9d2fa1ff3bc1b1413570c1",
+        "xml_sha256": "64611f27ad1440ad9274118621f29ab662231be255cad10e4edd70acce18e1fc"
+      },
+      {
+        "name": "incident_text",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_incident_binding_guards_are_independent[text]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE PackUnavailable",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "3b1a06a60e887834da038997d5de38334c2adb43afa1d93a6f457c5ff9077ab5",
+        "xml_sha256": "d4a8bbc77695784cdec89a01ca175f838adf7c1efded55d0e1be635c449f2a48"
+      },
+      {
+        "name": "incident_entity",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_incident_binding_guards_are_independent[entity]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE PackUnavailable",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "88bdfcf3560710384c6d819399c2e263de9c5a34f1be091b56960cca413fc704",
+        "xml_sha256": "680fe3f8b195e41c5f5f238ab6a615568b17a1da056650b461b1a1d82c3b5173"
+      },
+      {
+        "name": "family_tasks",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_admission_requires_gtm_family_tasks_after_independent_loading",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE PackUnavailable",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "5b25cf00e19068c684c811ff3b169150c303e9b4530d2175e3cc4cd8612f2580",
+        "xml_sha256": "da623691367a66d21d0d6ee76db802a6f7e62ca06142b41868b8a5d188d2f72e"
+      },
+      {
+        "name": "prior_protected_phase",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[protected_phase]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unbound evidence must not count as a committed prior record\nassert not ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)\n +  where ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),) = <built-in method get of dict object at 0x000001CD2DCBF200>('prior_pipeline_results')\n +    where <built-in method get of dict object at 0x000001CD2DCBF200> = {'prior_pipeline_results': ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', reque...), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)}.get",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "ddf7a5bac3bc63a2052940b44fee4c02d7bf124162291a368620584b2de0fcd9",
+        "xml_sha256": "68caa0b8644f2e3f5c23ed9d5699c53aa9b60dec70f4ab7e4d696b07f0a33e8b"
+      },
+      {
+        "name": "prior_foreign_context",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[foreign_context]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unbound evidence must not count as a committed prior record\nassert not ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)\n +  where ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),) = <built-in method get of dict object at 0x0000017BBF0BC180>('prior_pipeline_results')\n +    where <built-in method get of dict object at 0x0000017BBF0BC180> = {'prior_pipeline_results': ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', reque...), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)}.get",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "b566e088d7e7b0bf4e3c242c022d0e4150d134b0507deb67d2195c51d1b1d6f8",
+        "xml_sha256": "552c31b0cb6b39ba4a2a9ca4f59a06bc845354bf642121ab086b13243f5ac863"
+      },
+      {
+        "name": "prior_wrong_batch",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[wrong_batch]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unbound evidence must not count as a committed prior record\nassert not ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)\n +  where ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),) = <built-in method get of dict object at 0x0000023BE5A43BC0>('prior_pipeline_results')\n +    where <built-in method get of dict object at 0x0000023BE5A43BC0> = {'prior_pipeline_results': ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', reque...), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)}.get",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "8102c3e891f90bedf5dc625847db74ca682341a1a70d43ea5ffa42aa978601e7",
+        "xml_sha256": "d2e4d80a5df4f100cbea3cbfa3f84874f4d88cb07d66a9b0fbcc7048b1e37b79"
+      },
+      {
+        "name": "prior_duplicate_batch",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[duplicate_batch]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unbound evidence must not count as a committed prior record\nassert not ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)\n +  where ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),) = <built-in method get of dict object at 0x000002889AAA38C0>('prior_pipeline_results')\n +    where <built-in method get of dict object at 0x000002889AAA38C0> = {'prior_pipeline_results': ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', reque...), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)}.get",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "b245aabdfcd0ea11106cfb02e683c62948b5dde3724a678281e41890e08d47e6",
+        "xml_sha256": "ffb24d7aec03ac862e7d96ddf9cbb605a95cc934bbe3925e567f1d086c2920d0"
+      },
+      {
+        "name": "prior_zero_ordinal",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[zero_ordinal]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unbound evidence must not count as a committed prior record\nassert not ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)\n +  where ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),) = <built-in method get of dict object at 0x000002781A133B80>('prior_pipeline_results')\n +    where <built-in method get of dict object at 0x000002781A133B80> = {'prior_pipeline_results': ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', reque...), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)}.get",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "595403aaacd62b26647ef1f44bad46e0f950565213aa7283643f0c1a44c92b13",
+        "xml_sha256": "633ee477e38b45c1e93d68f3d5844fc9923e92a4774a890359cc7829762285ef"
+      },
+      {
+        "name": "prior_wrong_spec",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[wrong_spec]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unbound evidence must not count as a committed prior record\nassert not ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)\n +  where ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),) = <built-in method get of dict object at 0x0000017FB1BFB4C0>('prior_pipeline_results')\n +    where <built-in method get of dict object at 0x0000017FB1BFB4C0> = {'prior_pipeline_results': ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', reque...), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)}.get",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "52ac7b6a0ad92145b948361ca5c2f78915ab421124225265c10c0a8290c4e985",
+        "xml_sha256": "a1c314c660e26c0ae6a0e0da960c7d473b0c65dbd0fd95575e750f7af9d1723d"
+      },
+      {
+        "name": "prior_transport",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[transport]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: unbound evidence must not count as a committed prior record\nassert not ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)\n +  where ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', requested_entities=('signal:pair...(), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),) = <built-in method get of dict object at 0x000001E57B9DC240>('prior_pipeline_results')\n +    where <built-in method get of dict object at 0x000001E57B9DC240> = {'prior_pipeline_results': ((CustomerRequestSpec(id='gtm-pair03-002', text='Process the APAC demo signal once.', reque...), commitment_ref=None, explanation_code=None)), evidence_refs=('public:signal:pair-retry',), uncertainty_codes=())),)}.get",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "dedbeb7a7fc2291b61ec2ad6d82b6128becbc53425afccf8e2f6bd56493821c4",
+        "xml_sha256": "5d96c0dce817d6c3773c12eda4211bbab0544ba59968009d2d0c9d0f3cf954a0"
+      },
+      {
+        "name": "private_record_id",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[record_id]",
+        "file": "shiftwork/sealed/store.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d",
+        "log_sha256": "ea46515f269d89891f0d08c7c37f14da4b09e2ff9fd19c7cb5ab61fa5e9b268a",
+        "xml_sha256": "d436961f2cae18dd18501ddca4e3643a08cc8387e603d63d0e41a76691ecacfd"
+      },
+      {
+        "name": "private_entity_ref",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[entity_ref]",
+        "file": "shiftwork/sealed/store.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d",
+        "log_sha256": "5a4b3403f6edf26f5bebe2e4d9b51b58f11ad159847fb38190ffd1056d97ba56",
+        "xml_sha256": "10dabd5da9a6c59416a443b0ac5a68d74f0bec2018ba3f54d4141ae523695f20"
+      },
+      {
+        "name": "private_account_domain",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[account_domain]",
+        "file": "shiftwork/sealed/store.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d",
+        "log_sha256": "9b77c101a4ad2ebf6e9b257b3f7474ff60f446662f5b2c4d1ccf7ed9add67afc",
+        "xml_sha256": "73febfa8681e85905d9f03fd10a894293f5881dcaefa0171256199d4d330ed37"
+      },
+      {
+        "name": "private_existing_record_ref",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[existing_record_ref]",
+        "file": "shiftwork/sealed/store.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d",
+        "log_sha256": "70094ef15ddfa133fab00ed9b6134e643bf15d0f0f01354f259a2ad8cef970d7",
+        "xml_sha256": "9985a0dda881b5b1abfb425b669f1ae6b85b8c900837da32639c9fb94938c990"
+      },
+      {
+        "name": "private_company_name",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[company_name]",
+        "file": "shiftwork/sealed/store.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d",
+        "log_sha256": "85701bdfc24c48e0fbf9ae84b0f0d0847d6b8af924b2417be34f78acdcd320fd",
+        "xml_sha256": "7c095b66d7b98c3dfd33e920047500f59cb897ff8c98bd918043ec0a97e521b2"
+      },
+      {
+        "name": "private_domain",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[domain]",
+        "file": "shiftwork/sealed/store.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d",
+        "log_sha256": "520a32d9bdb04edf382717e6a7fbea9a44065ed423698b9e5ee9552a5898c263",
+        "xml_sha256": "3bcb65bc7aba2d0062d238708a292340479882e871e9631e83fcd83789a19187"
+      },
+      {
+        "name": "state_owner_public_state_path",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_admission_checks_each_state_owner_independently[public_state_path]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE PackUnavailable",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "773023566413448c275bec34b3067219c6858155702f0ef0f4f5516c356231ec",
+        "xml_sha256": "fe9c0026868a0558972c9d93ce355e070d389c452ebfad211d8e19941519ec70"
+      },
+      {
+        "name": "state_owner_comparison_state_path",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_admission_checks_each_state_owner_independently[comparison_state_path]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE PackUnavailable",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "7ce56d7e59c76096b6e1d8968b2c3e53fe36c34fb3dc9a888c569cb437cd97db",
+        "xml_sha256": "40fbbfc552ddd3fa7c254a4366ef7df12e8a13ec76436c2aa5bfd226e6ebea0d"
+      },
+      {
+        "name": "gtm_operation_rules_frozen",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_operation_freezes_declared_rules_before_execution",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: GTM frozen consequence rules omitted\nassert None == {'success_events': ['OWNER_ASSIGNED owner', 'SLA_CLOCK_STARTED sla'], 'rollout_event': None, 'handover_record_required': False}\n +  where None = <built-in method get of dict object at 0x0000022A2D098840>('consequence_rules')\n +    where <built-in method get of dict object at 0x0000022A2D098840> = {'ledger_head': '0000000000000000000000000000000000000000000000000000000000000000', 'unresolved_incident_ids': [], 'pipeline_records': {}}.get\n +      where {'ledger_head': '0000000000000000000000000000000000000000000000000000000000000000', 'unresolved_incident_ids': [], 'pipeline_records': {}} = ExecutionContext(id='context-0001', schema_version=1, engagement_slug='gtm', workloads=(FrozenWorkload(id='workload-01... 85258, tzinfo=datetime.timezone.utc), content_hash='8f181afaca1338158df33e13235b639bab4f510a513e153be7e46b46bf828c93').starting_business_state_json\n +  and   {'success_events': ['OWNER_ASSIGNED owner', 'SLA_CLOCK_STARTED sla'], 'rollout_event': None, 'handover_record_required': False} = model_dump(mode='json')\n +    where model_dump = ConsequenceRules(success_events=('OWNER_ASSIGNED owner', 'SLA_CLOCK_STARTED sla'), rollout_event=None, handover_record_required=False).model_dump\n +      where ConsequenceRules(success_events=('OWNER_ASSIGNED owner', 'SLA_CLOCK_STARTED sla'), rollout_event=None, handover_record_required=False) = EngagementPack(slug='gtm', schema_version=1, display=BoardDisplay(role_name='Go-To-Market Engineer', employer='Stonebr...res/documents/gtm/workflow_treatments.md', sha256='6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29'))).consequences\n +        where EngagementPack(slug='gtm', schema_version=1, display=BoardDisplay(role_name='Go-To-Market Engineer', employer='Stonebr...res/documents/gtm/workflow_treatments.md', sha256='6cb962ea773d0bf98eeab54c78d9ef93f3fa1dbc19a46db52e885c5c68027d29'))) = <function resolve_pack at 0x0000022A2BD854E0>('gtm')\n +          where <function resolve_pack at 0x0000022A2BD854E0> = registry.resolve_pack",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "1ccf4affa64a5c8c0cb51cec6fbea37eb88a0c515fd77f272d57522999d7a594",
+        "xml_sha256": "a8ba471d10488a35aa27b55feec482601ed4f8e11a61a2794559233c92f456c7"
+      },
+      {
+        "name": "experiment_execution_boundary",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_experimental_run_cannot_enter_selected_execution",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "7c8fff6e26b764f02e20ace8bc31744133f129eb305fdf15fe35f6794b990646",
+        "xml_sha256": "0c7b90cba0bd216b32d58d0a8d1c2e6b580fcb6e65fca8b7125cbec22cf775c8"
+      },
+      {
+        "name": "assist_projection_allowed_assist_roles_json",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_assist_projection_cannot_widen_registered_policy[allowed_assist_roles_json-[\"HINT\",\"DIAGNOSIS\",\"PATCH_PROPOSAL\"]]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "502239163cf79cfa2d4d7ac77867f888fd889077cc4fd3e330caf1a77d8a59d4",
+        "xml_sha256": "872b618752e5d70dae6a18ecdcfdee7d080f259109208cfb29fb583d3345c8de"
+      },
+      {
+        "name": "assist_projection_total_assist_budget_per_shift",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_assist_projection_cannot_widen_registered_policy[total_assist_budget_per_shift-3]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "d9a2d80cd8f94ec2847f18f477b474da67b68af42bc660b1b6e5f46be3465249",
+        "xml_sha256": "f52c612880d293b6317bd9fd42f9da2ab79c31e863c7234b70093a8a08df02c2"
+      },
+      {
+        "name": "assist_projection_assist_level",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_assist_projection_cannot_widen_registered_policy[assist_level-unrestricted]",
+        "file": "shiftwork/orchestrator.py",
+        "message": "Failed: DID NOT RAISE LifecycleError",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "6dc08358bb98547a54278f343169f4b6cf61317e94ec444b37d2e8d1ebe3292c",
+        "xml_sha256": "cae231a67af62a923c033d2d50c94aa2328b5cee310a2c97dbf72550f3628242"
+      },
+      {
+        "name": "assist_role",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_role_guard_does_not_depend_on_patch_budget",
+        "file": "shiftwork/orchestrator.py",
+        "message": "AssertionError: GTM role refusal must hold before any provider call\nassert (200 == 409)\n +  where 200 = <Response [200 OK]>.status_code",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "4fd4f14f70f1b3b859f6571e0862f7f55ea9a460158f4778de86be476c085d4c",
+        "xml_sha256": "b6ec66c59364e601a2796b4e5e86a9815328018696f1905017ee72afa8b7332b"
+      },
+      {
+        "name": "assist_total",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_reviewed_production_runs_six_fair_slots_without_business_writes",
+        "file": "shiftwork/orchestrator.py",
+        "message": "assert (200 == 409)\n +  where 200 = <Response [200 OK]>.status_code",
+        "source_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+        "log_sha256": "6c28de0f82ecb6d57254320a3a76c1664ea8f677dc4b7dab93878fd3073d18c5",
+        "xml_sha256": "8bbc8b32617b4f74c951cab4270606c254ff55e8c751b0f11eb954d173d395e6"
+      },
+      {
+        "name": "experiment_ledger_write",
+        "node": "tests/orchestrator/test_gtm_pipeline.py::test_reviewed_production_runs_six_fair_slots_without_business_writes",
+        "file": "shiftwork/comparison_flow.py",
+        "message": "AssertionError: public/protected experiments must preserve every business row and selection\nassert {'ledger_even...cea2', ...),)} == {'ledger_even...cea2', ...),)}\n  \n  Omitting 2 identical items, use -vv to show\n  Differing items:\n  {'ledger_events': (('gtm', 1, 'INCIDENT_OPENED', '[\"run-0001\",\"cr-0002\",\"run-0001-out-1\"]', '{\"catalog_version\":1,\"dec...peration-ledger-v3\",\"signal_ref\":\"signal:incident-apac\"}', 1, ...), ('gtm', 2, 'INCIDENT_OPENED', '[]', '{}', 1, ...))} != {'ledger_events': (('gtm', 1, 'INCIDENT_OPENED', '[\"run-0001\",\"cr-0002\",\"run-0001-out-1\"]', '{\"catalog_version\":1,\"dec...,\"request_id\":\"gtm-incident-001\",\"rule_version\":\"operation-ledger-v3\",\"signal_ref\":\"signal:incident-apac\"}', 1, ...),)}\n  Use -v to get more diff",
+        "source_sha256": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+        "log_sha256": "35066e91bef7859ded2c8b2b6c7e9c13c70696334bf9694bc11cd47e67536eca",
+        "xml_sha256": "9ceb52c7015a78717cc4756edfa4f9bd551004a01f9559634e89a629ddd8d330"
+      },
+      {
+        "name": "gtm_aspect_NAMED_TASK_OUTCOMES",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_typed_aspects_pass_and_fail_independently[NAMED_TASK_OUTCOMES]",
+        "file": "shiftwork/domain/comparison.py",
+        "message": "AssertionError: assert not True\n +  where True = <function protected_acceptance at 0x00000221225454E0>(SealedCase(id='gtm-private-case-01', schema_version=1, family='pipeline_ownership', check_id='chk-gtm-private-01', req... 'existing_owner': None, 'existing_record_ref': None}, record_age_ms=1000, dependency='enrichment', currency=None),)))), (TaskAssessment(request_id='gtm-private-stimulus-01', request_ordinal=4, task_id='qualification', outcome=<TaskOutcome...task_id='handoff', outcome=<TaskOutcome.USEFUL_COMPLETION: 'USEFUL_COMPLETION'>, mandatory_pass=True, reason_codes=())))\n +    where <function protected_acceptance at 0x00000221225454E0> = <module 'shiftwork.domain.comparison' from 'C:\\\\sw24-y6rzzs69\\\\shiftwork\\\\domain\\\\comparison.py'>.protected_acceptance",
+        "source_sha256": "a8321c001ef1c36d05d0258dd8b308147da5e523dc52dbc8a3740730cce21db8",
+        "log_sha256": "c253a68bbd026c36f2e5e9924fd564b17ea5156045140977f1d56f8ca94d08bb",
+        "xml_sha256": "54abca161b40afae6367767fe636f018c0006486c6de9eb77e91a1835e1df735"
+      },
+      {
+        "name": "gtm_aspect_NO_TASK_REASON_CODE",
+        "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_typed_aspects_pass_and_fail_independently[NO_TASK_REASON_CODE]",
+        "file": "shiftwork/domain/comparison.py",
+        "message": "AssertionError: assert not True\n +  where True = <function protected_acceptance at 0x0000011CD15B5580>(SealedCase(id='gtm-private-case-01', schema_version=1, family='pipeline_ownership', check_id='chk-gtm-private-01', req... 'existing_owner': None, 'existing_record_ref': None}, record_age_ms=1000, dependency='enrichment', currency=None),)))), (TaskAssessment(request_id='gtm-private-stimulus-01', request_ordinal=4, task_id='qualification', outcome=<TaskOutcome...task_id='handoff', outcome=<TaskOutcome.USEFUL_COMPLETION: 'USEFUL_COMPLETION'>, mandatory_pass=True, reason_codes=())))\n +    where <function protected_acceptance at 0x0000011CD15B5580> = <module 'shiftwork.domain.comparison' from 'C:\\\\sw24-y6rzzs69\\\\shiftwork\\\\domain\\\\comparison.py'>.protected_acceptance",
+        "source_sha256": "a8321c001ef1c36d05d0258dd8b308147da5e523dc52dbc8a3740730cce21db8",
+        "log_sha256": "5191322566e005d6803542fa7628bc92352de6578bde852f3769662c2d97538e",
+        "xml_sha256": "229d6dee07a6604d781f718b341c5ca42c2a9a98e8d94c7405504870c005a183"
+      }
+    ]
+  }
+}

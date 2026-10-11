@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="0.639" timestamp="2026-10-08T08:35:10.296901+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_customer_projection_does_not_present_rejected_output_claims[revenue]" time="0.013"><failure message="NameError: name 'TaskOutcome' is not defined">tests\orchestrator\test_gtm_pipeline.py:672: in test_gtm_customer_projection_does_not_present_rejected_output_claims
+    projection = orchestrator.output_evidence_for(None, kwargs["pipeline_outputs"][0], run)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+shiftwork\orchestrator.py:1864: in output_evidence_for
+    and row.mandatory_pass and row.outcome is TaskOutcome.USEFUL_COMPLETION}
+                                              ^^^^^^^^^^^
+E   NameError: name 'TaskOutcome' is not defined</failure></testcase><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_customer_projection_does_not_present_rejected_output_claims[sent_message]" time="0.010"><failure message="NameError: name 'TaskOutcome' is not defined">tests\orchestrator\test_gtm_pipeline.py:672: in test_gtm_customer_projection_does_not_present_rejected_output_claims
+    projection = orchestrator.output_evidence_for(None, kwargs["pipeline_outputs"][0], run)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+shiftwork\orchestrator.py:1864: in output_evidence_for
+    and row.mandatory_pass and row.outcome is TaskOutcome.USEFUL_COMPLETION}
+                                              ^^^^^^^^^^^
+E   NameError: name 'TaskOutcome' is not defined</failure></testcase></testsuite></testsuites>

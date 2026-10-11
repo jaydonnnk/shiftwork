@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.480" timestamp="2026-10-08T09:14:51.142158+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_consequence_classes_reduce_from_operational_captures_only" time="0.006"><failure message="AssertionError: assert 'SENT_MESSAGE' == 'HUMAN_HANDOFF'&#10;  &#10;  - HUMAN_HANDOFF&#10;  + SENT_MESSAGE">tests\orchestrator\test_gtm_pipeline.py:584: in test_gtm_consequence_classes_reduce_from_operational_captures_only
+    assert drafts[2].payload["terminal_action"] == "HUMAN_HANDOFF"
+E   AssertionError: assert 'SENT_MESSAGE' == 'HUMAN_HANDOFF'
+E     
+E     - HUMAN_HANDOFF
+E     + SENT_MESSAGE</failure></testcase></testsuite></testsuites>

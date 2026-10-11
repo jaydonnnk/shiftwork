@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="6.015" timestamp="2026-10-08T09:16:28.407636+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_exact_selection_operation_restart_inheritance_and_later_condition" time="5.586"><failure message="AssertionError: {&quot;kind&quot;:&quot;conflict&quot;,&quot;detail&quot;:&quot;the observed world changes more than dependency availability: records; the reviewed comparison workloads do not apply&quot;}&#10;assert 409 == 202&#10; +  where 409 = &lt;Response [409 Conflict]&gt;.status_code">tests\orchestrator\test_gtm_pipeline.py:855: in test_gtm_exact_selection_operation_restart_inheritance_and_later_condition
+    assert later.status_code == 202, later.text
+E   AssertionError: {"kind":"conflict","detail":"the observed world changes more than dependency availability: records; the reviewed comparison workloads do not apply"}
+E   assert 409 == 202
+E    +  where 409 = &lt;Response [409 Conflict]&gt;.status_code</failure></testcase></testsuite></testsuites>

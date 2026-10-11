@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "git",
+    "-c",
+    "core.autocrlf=false",
+    "diff",
+    "--no-index",
+    "--check",
+    "--",
+    "/dev/null",
+    "demos/gtm_operation.py"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "",
+  "checker_error": "Assumed new-file no-index --check must exit zero; no closeout receipt was written."
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.401" timestamp="2026-10-08T09:00:35.351404+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_operation_guards" name="test_inherited_records_are_validated_even_when_not_in_current_batch[signal_prefix]" time="0.001"><failure message="Failed: DID NOT RAISE PublicStateInvalid">tests\orchestrator\test_gtm_operation_guards.py:68: in test_inherited_records_are_validated_even_when_not_in_current_batch
+    with pytest.raises(PublicStateInvalid, match="invalid inherited pipeline record"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE PublicStateInvalid</failure></testcase></testsuite></testsuites>

@@ -1,0 +1,12 @@
+{
+  "mode": "material",
+  "argv": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-m",
+    "demos.gtm_reviewed"
+  ],
+  "cwd": "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia",
+  "returncode": 0,
+  "elapsed_seconds": 0.59,
+  "log_sha256": "f6230d28383413c8c187efe7d244a7a81d636d561c525fb80807fce87e6f047e"
+}

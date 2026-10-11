@@ -1,0 +1,150 @@
+{
+  "mode": "TRUSTED_LOCAL_DISPOSABLE_OPERATOR_MISSION_AND_REVIEW_STATE",
+  "confidence": 50,
+  "expected_decisions": [
+    "QUALIFIED",
+    "REVIEW"
+  ],
+  "operation": {
+    "id": "run-0008",
+    "shift_id": "gtm-shift-02",
+    "artifact_version_id": "ver-0002",
+    "attempt_number": 1,
+    "state": "FINALIZED",
+    "adapter": "local_process",
+    "failure_kind": null,
+    "started_at": "2026-10-08T01:21:03.759035Z",
+    "ended_at": "2026-10-08T01:21:04.023610Z",
+    "purpose": "OPERATION",
+    "evidence_mode": "TRUSTED_LOCAL",
+    "selection_id": "sel-0002"
+  },
+  "reprocessing": {
+    "id": "run-0009",
+    "shift_id": "gtm-shift-03",
+    "artifact_version_id": "ver-0002",
+    "attempt_number": 1,
+    "state": "FINALIZED",
+    "adapter": "local_process",
+    "failure_kind": null,
+    "started_at": "2026-10-08T01:21:04.276763Z",
+    "ended_at": "2026-10-08T01:21:04.556638Z",
+    "purpose": "OPERATION",
+    "evidence_mode": "TRUSTED_LOCAL",
+    "selection_id": "sel-0002"
+  },
+  "projection": {
+    "customer_answer": {
+      "action": "answer",
+      "display_text": "Synthetic qualification: REVIEW. Synthetic owner: revenue-review. Synthetic pipeline record prepared for human handling. Human handoff to the revenue review queue; no message sent.",
+      "claims": [
+        {
+          "kind": "qualification",
+          "value": "REVIEW"
+        },
+        {
+          "kind": "owner_assignment",
+          "value": "revenue-review"
+        },
+        {
+          "kind": "pipeline_write",
+          "value": {
+            "owner": "revenue-review",
+            "record_ref": "pipeline:signal:incident-apac",
+            "decision_trace": [
+              "RULES_FIRST",
+              "REVIEW"
+            ]
+          }
+        },
+        {
+          "kind": "handoff",
+          "value": "revenue-review"
+        }
+      ],
+      "evidence_refs": [
+        "public:signal:incident-apac"
+      ],
+      "verified_record_age_ms": null
+    },
+    "public_shop_record": null,
+    "public_shop_record_ref": null,
+    "public_shop_snapshot_hash": null
+  },
+  "drafts": [
+    {
+      "event_type": "OWNER_ASSIGNED",
+      "cause_refs": [
+        "run-0008",
+        "cr-0006",
+        "run-0008-out-1"
+      ],
+      "payload": {
+        "catalog_version": 1,
+        "consequence": "owner",
+        "decision_trace": [
+          "RULES_FIRST",
+          "REVIEW"
+        ],
+        "mission_version": 1,
+        "owner": "revenue-review",
+        "record_ref": "pipeline:signal:incident-apac",
+        "request_id": "gtm-incident-001",
+        "rule_version": "operation-ledger-v3",
+        "signal_ref": "signal:incident-apac",
+        "weight": 1
+      },
+      "synthetic": true
+    },
+    {
+      "event_type": "SLA_CLOCK_STARTED",
+      "cause_refs": [
+        "run-0008",
+        "cr-0007",
+        "run-0008-out-1"
+      ],
+      "payload": {
+        "catalog_version": 1,
+        "consequence": "sla",
+        "decision_trace": [
+          "RULES_FIRST",
+          "REVIEW"
+        ],
+        "mission_version": 1,
+        "owner": "revenue-review",
+        "record_ref": "pipeline:signal:incident-apac",
+        "request_id": "gtm-incident-001",
+        "rule_version": "operation-ledger-v3",
+        "signal_ref": "signal:incident-apac",
+        "weight": 1
+      },
+      "synthetic": true
+    },
+    {
+      "event_type": "HANDOFF_ESCALATED",
+      "cause_refs": [
+        "run-0008",
+        "cr-0008",
+        "run-0008-out-1"
+      ],
+      "payload": {
+        "catalog_version": 1,
+        "consequence": "handoff",
+        "decision_trace": [
+          "RULES_FIRST",
+          "REVIEW"
+        ],
+        "mission_version": 1,
+        "owner": "revenue-review",
+        "record_ref": "pipeline:signal:incident-apac",
+        "request_id": "gtm-incident-001",
+        "rule_version": "operation-ledger-v3",
+        "signal_ref": "signal:incident-apac",
+        "terminal_action": "HUMAN_HANDOFF",
+        "weight": 1
+      },
+      "synthetic": true
+    }
+  ],
+  "database_sha256": "88a0e22a2a4809a2e9d37627132d52a627269846c73721a7c4609890b5ff1b45"
+}

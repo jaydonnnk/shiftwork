@@ -1,0 +1,71 @@
+{
+  "shipped_material": {
+    "status": "PASS",
+    "mode": "PRODUCTION_REVIEWED_TRUSTED_LOCAL",
+    "database_sha256": "f0fe6a7e2355c2dfd8e407d1f32a73755ca4e068512780254ba3d4be96bc05a6",
+    "runs": 16,
+    "captured_outputs": 52,
+    "checks": 16,
+    "event_counts": {
+      "INCIDENT_OPENED": 2,
+      "LIMIT_DECLARED": 3,
+      "OWNER_ASSIGNED": 1,
+      "SLA_CLOCK_STARTED": 1,
+      "INCIDENT_RESOLVED": 1
+    },
+    "selected_operation": "run-0008",
+    "reprocessing": "run-0009",
+    "replays": {
+      "run-0008": {
+        "run_id": "run-0008",
+        "status": "IDENTICAL",
+        "check_differences": [],
+        "event_draft_differences": [],
+        "wrote_rows": false
+      },
+      "run-0009": {
+        "run_id": "run-0009",
+        "status": "IDENTICAL",
+        "check_differences": [],
+        "event_draft_differences": [],
+        "wrote_rows": false
+      }
+    },
+    "source_rows_written": 0
+  },
+  "disposable_operator_review": {
+    "status": "PASS",
+    "mode": "TRUSTED_LOCAL_DISPOSABLE_OPERATOR_MISSION_AND_REVIEW_STATE",
+    "database_sha256": "88a0e22a2a4809a2e9d37627132d52a627269846c73721a7c4609890b5ff1b45",
+    "runs": 9,
+    "captured_outputs": 27,
+    "checks": 12,
+    "event_counts": {
+      "INCIDENT_OPENED": 1,
+      "LIMIT_DECLARED": 2,
+      "OWNER_ASSIGNED": 1,
+      "SLA_CLOCK_STARTED": 1,
+      "HANDOFF_ESCALATED": 1,
+      "INCIDENT_RESOLVED": 1
+    },
+    "selected_operation": "run-0008",
+    "reprocessing": "run-0009",
+    "replays": {
+      "run-0008": {
+        "run_id": "run-0008",
+        "status": "IDENTICAL",
+        "check_differences": [],
+        "event_draft_differences": [],
+        "wrote_rows": false
+      },
+      "run-0009": {
+        "run_id": "run-0009",
+        "status": "IDENTICAL",
+        "check_differences": [],
+        "event_draft_differences": [],
+        "wrote_rows": false
+      }
+    },
+    "source_rows_written": 0
+  }
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.423" timestamp="2026-10-08T09:24:29.195413+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_admission_checks_each_state_owner_independently[comparison_state_path]" time="0.108"><failure message="Failed: DID NOT RAISE PackUnavailable">tests\orchestrator\test_gtm_guards.py:254: in test_admission_checks_each_state_owner_independently
+    with pytest.raises(registry.PackUnavailable, match="public state belongs"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE PackUnavailable</failure></testcase></testsuite></testsuites>

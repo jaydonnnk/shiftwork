@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="5.029" timestamp="2026-10-08T08:53:55.574767+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_exact_selection_operation_restart_inheritance_and_later_condition" time="4.672"><failure message="AssertionError: Regex pattern did not match.&#10;  Expected regex: 'observed pipeline history differs'&#10;  Actual message: 'only the two pinned reviewed candidates are executable as an offline comparison'">tests\orchestrator\test_gtm_pipeline.py:856: in test_gtm_exact_selection_operation_restart_inheritance_and_later_condition
+    with pytest.raises(orchestrator.LifecycleError, match="observed pipeline history differs"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   AssertionError: Regex pattern did not match.
+E     Expected regex: 'observed pipeline history differs'
+E     Actual message: 'only the two pinned reviewed candidates are executable as an offline comparison'</failure></testcase></testsuite></testsuites>

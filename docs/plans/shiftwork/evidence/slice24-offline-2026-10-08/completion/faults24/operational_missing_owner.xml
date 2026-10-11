@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.374" timestamp="2026-10-08T09:17:22.369782+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_one_traced_incident_per_failing_record[missing_owner-REQUIRED_TASK_MISSING]" time="0.005"><failure message="AssertionError: assert [] == ['INCIDENT_OPENED']&#10;  &#10;  Right contains one more item: 'INCIDENT_OPENED'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:628: in test_gtm_one_traced_incident_per_failing_record
+    assert [d.event_type.value for d in failing] == ["INCIDENT_OPENED"]
+E   AssertionError: assert [] == ['INCIDENT_OPENED']
+E     
+E     Right contains one more item: 'INCIDENT_OPENED'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

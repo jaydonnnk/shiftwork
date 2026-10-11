@@ -1,0 +1,540 @@
+{
+  "status": "PASS",
+  "matched_controls": 106,
+  "unchanged_reviewed_assertions": 105,
+  "explicit_S24_transition_assertions": 1,
+  "historical_receipt_sha256": "0cd5782308477b5067559d02b6f8cb8c1c38fb410094eb8d82b3b0a4931786db",
+  "rows": [
+    {
+      "name": "rubric_suppressed",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[suppressed-DISQUALIFIED]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_small_company",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[small_company-DISQUALIFIED]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_unavailable",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[unavailable-REVIEW]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_stale",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[stale-REVIEW]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_unknown_region",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[unknown_region-REVIEW]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_unknown_product",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[unknown_product-REVIEW]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_low_confidence",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[low_confidence-REVIEW]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_ambiguous",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[ambiguous-REVIEW]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_research",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[research-DISQUALIFIED]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_freshness_boundary",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[freshness_boundary-QUALIFIED]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_confidence_boundary",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[confidence_boundary-QUALIFIED]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "rubric_size_boundary",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_public_qualification_rule_has_a_correct_and_wrong_decision[size_boundary-QUALIFIED]",
+      "intended_assertion": "AssertionError: qualification rule must return exactly its published decisions"
+    },
+    {
+      "name": "result_entity",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_entity]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "claim_entity",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_claim_entity]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "claim_kind",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_claim_kind]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "commitment",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[invented_commitment]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "evidence",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_evidence]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "row_keys",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[sent_field]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "row_revenue",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[revenue_field]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "row_owner",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_write_owner]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "row_ref",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_record_ref]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "trace_length",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[extra_trace_step]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "trace_decision",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_trace]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "scalar_value",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[wrong_owner]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "claim_cardinality",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[duplicate_owner]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "write_cardinality",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_pipeline_output_fault_fails_its_named_task[duplicate_write]",
+      "intended_assertion": "AssertionError: fault must reach exactly its own task guard"
+    },
+    {
+      "name": "active_status",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_assessor_secondary_shape_guards_are_independent[active_status]",
+      "intended_assertion": "AssertionError: assert [] == ['owner']"
+    },
+    {
+      "name": "retry_name",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_retry_names_the_actual_valid_prior_request",
+      "intended_assertion": "AssertionError: retry must name its captured prior"
+    },
+    {
+      "name": "prior_decision",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_retry_cannot_replace_a_previous_human_review_decision",
+      "intended_assertion": "AssertionError: retry cannot replace the first decision"
+    },
+    {
+      "name": "prior_validity",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_retry_requires_valid_captured_first_record_and_never_writes_twice",
+      "intended_assertion": "assert False"
+    },
+    {
+      "name": "mission_owner",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_pipeline_assessor_requires_owning_mission_even_with_valid_gtm_state",
+      "intended_assertion": "Failed: DID NOT RAISE MissionSpecInvalid"
+    },
+    {
+      "name": "pinned_owner",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_frozen_expected_owner_cannot_disagree_with_routing_even_when_output_is_correct",
+      "intended_assertion": "AssertionError: pinned expected owner disagrees with frozen routing"
+    },
+    {
+      "name": "pinned_decisions",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pinned_decision_cannot_be_widened_by_correct_route",
+      "intended_assertion": "assert not True"
+    },
+    {
+      "name": "existing_owner",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_existing_owner_cannot_change_even_without_second_write",
+      "intended_assertion": "AssertionError: existing owner cannot be replaced"
+    },
+    {
+      "name": "snapshot_type",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_assessor_requires_pipeline_snapshot",
+      "intended_assertion": "Failed: DID NOT RAISE MissionSpecInvalid"
+    },
+    {
+      "name": "inactive_status",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_inactive_task_secondary_guards_are_independent[status]",
+      "intended_assertion": "AssertionError: assert [] == ['owner']"
+    },
+    {
+      "name": "inactive_claim",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_inactive_task_secondary_guards_are_independent[claim]",
+      "intended_assertion": "AssertionError: assert [] == ['owner']"
+    },
+    {
+      "name": "inactive_commitment",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_inactive_task_secondary_guards_are_independent[commitment]",
+      "intended_assertion": "AssertionError: assert [] == ['owner']"
+    },
+    {
+      "name": "trace_method",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_row_shape_branches_fail_only_write[trace_method]",
+      "intended_assertion": "AssertionError: assert [] == ['write']"
+    },
+    {
+      "name": "trace_short",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_assessor_secondary_shape_guards_are_independent[trace_short]",
+      "intended_assertion": "AssertionError: assert [] == ['write']"
+    },
+    {
+      "name": "row_type",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_assessor_secondary_shape_guards_are_independent[row_type]",
+      "intended_assertion": "AssertionError: assert [] == ['write']"
+    },
+    {
+      "name": "trace_type",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_assessor_secondary_shape_guards_are_independent[trace_type]",
+      "intended_assertion": "AssertionError: assert [] == ['write']"
+    },
+    {
+      "name": "spec_extra_duplicate_task",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[extra_duplicate_task]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_duplicate_kind",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[duplicate_kind]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_duplicate_id",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[duplicate_id]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_two_entities",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[two_entities]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_extra_condition",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[extra_condition]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_decisions_not_list",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[decisions_not_list]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_empty_decisions",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[empty_decisions]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_duplicate_decisions",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[duplicate_decisions]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_owner_not_text",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[owner_not_text]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_empty_owner",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[empty_owner]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_repeat_not_text",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[repeat_not_text]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_empty_repeat",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[empty_repeat]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_qualification_optional",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[qualification_optional]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_conditional_required",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_pipeline_spec_branches_refuse_independently[conditional_required]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_wrong_signal",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[wrong_signal]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_disagreeing_conditions",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[disagreeing_conditions]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_widen_review_owner",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[widen_review_owner]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_missing_rule",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[missing_rule]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "spec_decision_vocabulary",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_pinned_spec_cannot_weaken_pipeline_contract[unknown_decision]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "state_routes_missing",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[routes_missing]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "state_empty_route",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[empty_route]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "state_review_route",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[review_route]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "state_extra_dependency",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[extra_dependency]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "state_duplicate_record_id",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[duplicate_record_id]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "state_duplicate_entity_ref",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[duplicate_entity_ref]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "state_orphan_entity",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[orphan_entity]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "empty_existing_owner",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[empty_existing_owner]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "empty_existing_ref",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_signal_inventory_branches_refuse_independently[empty_existing_ref]",
+      "intended_assertion": "Failed: DID NOT RAISE ValidationError"
+    },
+    {
+      "name": "state_domain",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_signal_state_refuses_unusable_facts[wrong_domain]",
+      "intended_assertion": "Failed: DID NOT RAISE PublicStateInvalid"
+    },
+    {
+      "name": "existing_pair",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_signal_state_refuses_unusable_facts[incomplete_existing]",
+      "intended_assertion": "Failed: DID NOT RAISE PublicStateInvalid"
+    },
+    {
+      "name": "existing_ref",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_signal_state_refuses_unusable_facts[wrong_existing_ref]",
+      "intended_assertion": "Failed: DID NOT RAISE PublicStateInvalid"
+    },
+    {
+      "name": "delta_currency",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_protected_signal_delta_refuses_invalid_inputs[currency]",
+      "intended_assertion": "Failed: DID NOT RAISE PublicStateInvalid"
+    },
+    {
+      "name": "delta_foreign_state",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_protected_signal_delta_refuses_invalid_inputs[foreign_state]",
+      "intended_assertion": "Failed: DID NOT RAISE PublicStateInvalid"
+    },
+    {
+      "name": "delta_facts",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_protected_signal_delta_refuses_invalid_inputs[facts]",
+      "intended_assertion": "Failed: DID NOT RAISE PublicStateInvalid"
+    },
+    {
+      "name": "incident_count",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_incident_binding_guards_are_independent[count]",
+      "intended_assertion": "Failed: DID NOT RAISE PackUnavailable"
+    },
+    {
+      "name": "incident_request_id",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_incident_binding_guards_are_independent[request_id]",
+      "intended_assertion": "Failed: DID NOT RAISE PackUnavailable"
+    },
+    {
+      "name": "incident_text",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_incident_binding_guards_are_independent[text]",
+      "intended_assertion": "Failed: DID NOT RAISE PackUnavailable"
+    },
+    {
+      "name": "incident_entity",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_incident_binding_guards_are_independent[entity]",
+      "intended_assertion": "Failed: DID NOT RAISE PackUnavailable"
+    },
+    {
+      "name": "family_tasks",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_admission_requires_gtm_family_tasks_after_independent_loading",
+      "intended_assertion": "Failed: DID NOT RAISE PackUnavailable"
+    },
+    {
+      "name": "prior_protected_phase",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[protected_phase]",
+      "intended_assertion": "AssertionError: unbound evidence must not count as a committed prior record"
+    },
+    {
+      "name": "prior_foreign_context",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[foreign_context]",
+      "intended_assertion": "AssertionError: unbound evidence must not count as a committed prior record"
+    },
+    {
+      "name": "prior_wrong_batch",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[wrong_batch]",
+      "intended_assertion": "AssertionError: unbound evidence must not count as a committed prior record"
+    },
+    {
+      "name": "prior_duplicate_batch",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[duplicate_batch]",
+      "intended_assertion": "AssertionError: unbound evidence must not count as a committed prior record"
+    },
+    {
+      "name": "prior_zero_ordinal",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[zero_ordinal]",
+      "intended_assertion": "AssertionError: unbound evidence must not count as a committed prior record"
+    },
+    {
+      "name": "prior_wrong_spec",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[wrong_spec]",
+      "intended_assertion": "AssertionError: unbound evidence must not count as a committed prior record"
+    },
+    {
+      "name": "prior_transport",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_prior_pipeline_input_guards_refuse_unbound_evidence[transport]",
+      "intended_assertion": "AssertionError: unbound evidence must not count as a committed prior record"
+    },
+    {
+      "name": "private_record_id",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[record_id]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "private_entity_ref",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[entity_ref]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "private_account_domain",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[account_domain]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "private_existing_record_ref",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[existing_record_ref]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "private_company_name",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[company_name]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "private_domain",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_each_gtm_private_signal_field_is_blocked_on_serialized_surfaces[domain]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "state_owner_public_state_path",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_admission_checks_each_state_owner_independently[public_state_path]",
+      "intended_assertion": "Failed: DID NOT RAISE PackUnavailable"
+    },
+    {
+      "name": "state_owner_comparison_state_path",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_admission_checks_each_state_owner_independently[comparison_state_path]",
+      "intended_assertion": "Failed: DID NOT RAISE PackUnavailable"
+    },
+    {
+      "name": "gtm_operation_rules_frozen",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_operation_freezes_declared_rules_before_execution",
+      "intended_assertion": "AssertionError: GTM frozen consequence rules omitted"
+    },
+    {
+      "name": "experiment_execution_boundary",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_experimental_run_cannot_enter_selected_execution",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "assist_projection_allowed_assist_roles_json",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_assist_projection_cannot_widen_registered_policy[allowed_assist_roles_json-[\"HINT\",\"DIAGNOSIS\",\"PATCH_PROPOSAL\"]]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "assist_projection_total_assist_budget_per_shift",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_assist_projection_cannot_widen_registered_policy[total_assist_budget_per_shift-3]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "assist_projection_assist_level",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_gtm_assist_projection_cannot_widen_registered_policy[assist_level-unrestricted]",
+      "intended_assertion": "Failed: DID NOT RAISE LifecycleError"
+    },
+    {
+      "name": "assist_role",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_role_guard_does_not_depend_on_patch_budget",
+      "intended_assertion": "AssertionError: GTM role refusal must hold before any provider call"
+    },
+    {
+      "name": "assist_total",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_reviewed_production_runs_six_fair_slots_without_business_writes",
+      "intended_assertion": "assert (200 == 409)"
+    },
+    {
+      "name": "experiment_ledger_write",
+      "node": "tests/orchestrator/test_gtm_pipeline.py::test_reviewed_production_runs_six_fair_slots_without_business_writes",
+      "intended_assertion": "AssertionError: public/protected experiments must preserve every business row and selection"
+    },
+    {
+      "name": "gtm_aspect_NAMED_TASK_OUTCOMES",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_typed_aspects_pass_and_fail_independently[NAMED_TASK_OUTCOMES]",
+      "intended_assertion": "AssertionError: assert not True"
+    },
+    {
+      "name": "gtm_aspect_NO_TASK_REASON_CODE",
+      "node": "tests/orchestrator/test_gtm_guards.py::test_gtm_typed_aspects_pass_and_fail_independently[NO_TASK_REASON_CODE]",
+      "intended_assertion": "AssertionError: assert not True"
+    }
+  ],
+  "boundary": "Assertion sites verified; this is not exhaustive branch coverage."
+}

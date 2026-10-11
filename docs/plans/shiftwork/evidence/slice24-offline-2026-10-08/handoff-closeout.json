@@ -1,0 +1,105 @@
+{
+  "head": "66f9b8d5d286f67bb2e7dd75acf24c0ed1e029c0",
+  "branch": "shiftwork/slice-24",
+  "changed_entry_files": [
+    "MISTAKES.md",
+    "docs/SHIFTWORK_PLAN.md",
+    "docs/plans/shiftwork/00-status.md",
+    "shiftwork/comparison_flow.py",
+    "shiftwork/domain/task_contract.py",
+    "shiftwork/ledger/reducer.py",
+    "shiftwork/orchestrator.py",
+    "tests/orchestrator/test_gtm_guards.py",
+    "tests/orchestrator/test_gtm_pipeline.py",
+    "tests/packs/gtm_mutation_proofs.py"
+  ],
+  "unchanged_tracked_files": 1102,
+  "historical_status_brief_suffixes_exact": true,
+  "source_sha256": {
+    "shiftwork/domain/task_contract.py": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "docs/plans/shiftwork/00-status.md": "9449d6b797564fa2b9da12b168a3620d88eb2904fee25abbf7b8c3a87775319f",
+    "tests/orchestrator/test_gtm_guards.py": "01f05dee7debd4fa8194110742a58c638fa2bb4734ddfb44fb39edb3a891b99c",
+    "docs/plans/shiftwork/slice24-handoff-2026-10-08.md": "4ca6d4c9cd8b5530931799fac206e4fae6ef29f031442bad77ba386a85fa5bac",
+    "shiftwork/ledger/reducer.py": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "docs/SHIFTWORK_PLAN.md": "496748003d2910a69613eb880932a3c0f63ddc4ed1f7a82009ac8cbcb9f9a83b",
+    "shiftwork/orchestrator.py": "497a2347493c5d8eda97aa0d9c6534de0af2573c3c12ba60c377c6b3e7b9d7f3",
+    "shiftwork/comparison_flow.py": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+    "tests/orchestrator/test_gtm_pipeline.py": "7a9e8aa3e38087674aedfab1f1bf8144bc2636573356b30392720a7ff07f3121",
+    "docs/plans/shiftwork/slice24-implementation-plan.md": "6298b4d254dd56acefd986aea79ef1a4f060cd650720c755eb1bf9c0539b3e8c",
+    "tests/packs/gtm_mutation_proofs.py": "325c9e28f8737fc1ae51f8a201b69d0be7f049ee625ad47fdca3e8f83fa11084",
+    "MISTAKES.md": "e60193cd8beb7c8d1f0f08dc8580670f861d9d488f7529e5100b864dfb1bd27f",
+    "demos/gtm_operation.py": "2a023192ac4a34111f048a22dee1c0e8d7ed0bb41211eec7595a017424ccb158"
+  },
+  "whitespace_checks": [
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "warning: in the working copy of 'MISTAKES.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/SHIFTWORK_PLAN.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs/plans/shiftwork/00-status.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'shiftwork/comparison_flow.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'shiftwork/orchestrator.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tests/orchestrator/test_gtm_guards.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tests/orchestrator/test_gtm_pipeline.py', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'tests/packs/gtm_mutation_proofs.py', LF will be replaced by CRLF the next time Git touches it\n"
+    },
+    {
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "demos/gtm_operation.py"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "docs/plans/shiftwork/slice24-implementation-plan.md"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "git",
+        "-c",
+        "core.autocrlf=false",
+        "diff",
+        "--no-index",
+        "--check",
+        "--",
+        "/dev/null",
+        "docs/plans/shiftwork/slice24-handoff-2026-10-08.md"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "full_offline_suite_run": false,
+  "source_mutations_run": false,
+  "demo_run": false,
+  "slice_complete": false,
+  "accepted": false,
+  "known_blocker": "TaskOutcome is undefined in orchestrator.output_evidence_for; latest focused result 2 failed, 315 passed, 2 warnings.",
+  "scope_limit": "Ignored historical evidence and unchanged source-line byte preservation are not exhaustively audited.",
+  "handoff_document_final_whitespace": {
+    "returncode": 1,
+    "stdout": "",
+    "stderr": ""
+  }
+}

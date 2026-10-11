@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.668" timestamp="2026-10-08T09:14:12.195353+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_operation_guards" name="test_pipeline_reduction_refuses_inconsistent_controller_evidence[extra_output]" time="0.009"><failure message="Failed: DID NOT RAISE ValueError">tests\orchestrator\test_gtm_operation_guards.py:44: in test_pipeline_reduction_refuses_inconsistent_controller_evidence
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError</failure></testcase></testsuite></testsuites>

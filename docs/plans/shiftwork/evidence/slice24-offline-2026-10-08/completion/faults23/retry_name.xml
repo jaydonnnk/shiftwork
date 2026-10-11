@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.445" timestamp="2026-10-08T09:20:01.972685+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_retry_names_the_actual_valid_prior_request" time="0.005"><failure message="AssertionError: retry must name its captured prior&#10;assert False&#10; +  where False = any(&lt;generator object test_retry_names_the_actual_valid_prior_request.&lt;locals&gt;.&lt;genexpr&gt; at 0x0000020510B4DD80&gt;)">tests\orchestrator\test_gtm_pipeline.py:386: in test_retry_names_the_actual_valid_prior_request
+    assert any(not row.mandatory_pass for row in assessed(retry, response_for(retry, "QUALIFIED", repeat=True), prior)), "retry must name its captured prior"
+E   AssertionError: retry must name its captured prior
+E   assert False
+E    +  where False = any(&lt;generator object test_retry_names_the_actual_valid_prior_request.&lt;locals&gt;.&lt;genexpr&gt; at 0x0000020510B4DD80&gt;)</failure></testcase></testsuite></testsuites>

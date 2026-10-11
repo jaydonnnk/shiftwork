@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.614" timestamp="2026-10-08T09:19:05.285518+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_each_public_qualification_rule_has_a_correct_and_wrong_decision[size_boundary-QUALIFIED]" time="0.004"><failure message="AssertionError: qualification rule must return exactly its published decisions&#10;assert {'DISQUALIFIED'} == {'QUALIFIED'}&#10;  &#10;  Extra items in the left set:&#10;  'DISQUALIFIED'&#10;  Extra items in the right set:&#10;  'QUALIFIED'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:346: in test_each_public_qualification_rule_has_a_correct_and_wrong_decision
+    assert evaluator._pipeline_decisions(task_contract.SignalFacts.model_validate(facts), state.records[1], state,
+E   AssertionError: qualification rule must return exactly its published decisions
+E   assert {'DISQUALIFIED'} == {'QUALIFIED'}
+E     
+E     Extra items in the left set:
+E     'DISQUALIFIED'
+E     Extra items in the right set:
+E     'QUALIFIED'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

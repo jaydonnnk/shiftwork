@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.463" timestamp="2026-10-08T09:16:01.058058+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_frozen_consequence_rules_refuse_drift[handover]" time="0.002"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_pipeline.py:728: in test_gtm_frozen_consequence_rules_refuse_drift
+    with pytest.raises(orchestrator.LifecycleError, match="rules missing or invalid"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

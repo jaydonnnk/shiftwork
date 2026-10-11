@@ -1,0 +1,8 @@
+{
+  "status": "RESTORED_EXACT",
+  "expected_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+  "interrupted_sha256": "ac4e589646a50ee2071cb09a0c74ec733ea09f0d798bbd069d2ef24e93403b57",
+  "observed_sha256": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+  "restoration_failure": "OSError errno 22 while opening orchestrator.py for raw-byte restoration in the OneDrive worktree.",
+  "scope": "No further mutations will run in the shared worktree; use an exact disposable physical copy outside OneDrive."
+}

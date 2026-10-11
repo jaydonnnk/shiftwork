@@ -1,0 +1,15 @@
+{
+  "mode": "anchors24",
+  "argv": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-m",
+    "tests.packs.gtm_operation_mutation_proofs",
+    "--out",
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice24-offline-2026-10-08\\completion\\faults24",
+    "--check-anchors"
+  ],
+  "cwd": "C:\\sw24-y6rzzs69",
+  "returncode": 0,
+  "elapsed_seconds": 0.29,
+  "log_sha256": "741c10f74b57ec7369359f45ee533ff34ad96d8b56e973562d4df4439d5c0e35"
+}

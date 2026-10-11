@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="1.681" timestamp="2026-10-08T09:16:54.742194+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_operation_guards" name="test_gtm_finalized_operation_guard_precedes_retry_and_storage" time="0.995"><failure message="Failed: DID NOT RAISE LifecycleError">tests\orchestrator\test_gtm_operation_guards.py:151: in test_gtm_finalized_operation_guard_precedes_retry_and_storage
+    with pytest.raises(orchestrator.LifecycleError, match="one successful operation"):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE LifecycleError</failure></testcase></testsuite></testsuites>

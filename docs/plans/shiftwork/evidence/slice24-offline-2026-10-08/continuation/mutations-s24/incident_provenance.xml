@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.400" timestamp="2026-10-08T08:52:12.226716+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_one_traced_incident_per_failing_record[wrong_owner-WRONG_ACTION]" time="0.007"><failure message="AssertionError: assert 'REQUIRED_TASK_MISSING' == 'WRONG_ACTION'&#10;  &#10;  - WRONG_ACTION&#10;  + REQUIRED_TASK_MISSING">tests\orchestrator\test_gtm_pipeline.py:629: in test_gtm_one_traced_incident_per_failing_record
+    assert failing[0].payload["reason_code"] == expected
+E   AssertionError: assert 'REQUIRED_TASK_MISSING' == 'WRONG_ACTION'
+E     
+E     - WRONG_ACTION
+E     + REQUIRED_TASK_MISSING</failure></testcase></testsuite></testsuites>

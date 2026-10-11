@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.549" timestamp="2026-10-08T08:58:36.528783+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs[experiment]" time="0.010"><failure message="Failed: DID NOT RAISE ValueError">tests\orchestrator\test_gtm_pipeline.py:652: in test_gtm_reducer_refuses_unbound_or_experimental_pipeline_inputs
+    with pytest.raises(ValueError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE ValueError</failure></testcase></testsuite></testsuites>

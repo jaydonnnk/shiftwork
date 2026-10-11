@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.534" timestamp="2026-10-08T09:17:18.676254+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_one_traced_incident_per_failing_record[revenue-WRONG_ACTION]" time="0.009"><failure message="AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']&#10;  &#10;  At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'&#10;  Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:628: in test_gtm_one_traced_incident_per_failing_record
+    assert [d.event_type.value for d in failing] == ["INCIDENT_OPENED"]
+E   AssertionError: assert ['OWNER_ASSIG...FF_ESCALATED'] == ['INCIDENT_OPENED']
+E     
+E     At index 0 diff: 'OWNER_ASSIGNED' != 'INCIDENT_OPENED'
+E     Left contains 2 more items, first extra item: 'SLA_CLOCK_STARTED'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

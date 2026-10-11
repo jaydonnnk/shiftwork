@@ -1,0 +1,14 @@
+{
+  "mode": "faults23",
+  "argv": [
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\.venv313\\Scripts\\python.exe",
+    "-m",
+    "tests.packs.gtm_mutation_proofs",
+    "--out",
+    "C:\\Users\\jayd0\\OneDrive\\Desktop\\nebius_nvidia\\docs\\plans\\shiftwork\\evidence\\slice24-offline-2026-10-08\\completion\\faults23"
+  ],
+  "cwd": "C:\\sw24-y6rzzs69",
+  "returncode": 0,
+  "elapsed_seconds": 416.43,
+  "log_sha256": "17e018b0a6903f1b3a4cc3dae7e134ffb15d686c43286302961595b6387d0a8a"
+}

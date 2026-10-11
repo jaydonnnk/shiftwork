@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "copy": "C:\\sw24-y6rzzs69",
+  "verified_files": 6214,
+  "copy_drift": [],
+  "source_drift": [],
+  "source_bindings": {
+    "shiftwork/ledger/reducer.py": "fd5d2f25b0fcc5ec281f2b065e555bf866950dd498864ff051d6bb842f42774b",
+    "shiftwork/domain/task_contract.py": "91c12b3fae1272e872ba6ada4a57cb7aa2f3a27c5aa6eb5cfa16bf3b4c824a12",
+    "shiftwork/evaluator/evaluator.py": "f4d05cdf1c92dee25eaf48921e4781d18356729bb11a89ebd8197ce329cbdb3c",
+    "shiftwork/orchestrator.py": "0b8ecefaade47632df7958ac3fd7caf0b2d17b8b21e6943fe074d23406e12b26",
+    "shiftwork/comparison_flow.py": "c3fed267a10365e6316e1c70e1e6edd8bb1a8732171ab0297555b04260c4a1ea",
+    "shiftwork/sealed/store.py": "d817de0f51344a7fd092789ce7461f655f537ec3f75ba6c886aa71abed77851d",
+    "shiftwork/domain/comparison.py": "a8321c001ef1c36d05d0258dd8b308147da5e523dc52dbc8a3740730cce21db8",
+    "tests/packs/gtm_mutation_proofs.py": "325c9e28f8737fc1ae51f8a201b69d0be7f049ee625ad47fdca3e8f83fa11084",
+    "tests/packs/gtm_operation_mutation_proofs.py": "d2c0b0e5818558a93f94f86937987413e52807c700e1660551a96a7c822298f5",
+    "tests/orchestrator/test_gtm_pipeline.py": "7da82b3266d00e43efc1a8b74e9760120be073465d4769b5c30c4d29b050c4a2",
+    "tests/orchestrator/test_gtm_guards.py": "01f05dee7debd4fa8194110742a58c638fa2bb4734ddfb44fb39edb3a891b99c",
+    "tests/orchestrator/test_gtm_operation_guards.py": "7606bbeaf5b9948a2c62aca313b500452b54ab0105e6cfc10d52bb2c36ecce58"
+  }
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="6.319" timestamp="2026-10-08T09:17:27.413145+08:00" hostname="jaydonnks"><testcase classname="docs.plans.shiftwork.evidence.slice24-offline-2026-10-08.completion.review_queue_probe" name="test_review_queue_operation_and_inheritance" time="4.708"><failure message="AttributeError: 'dict' object has no attribute 'event_type'">docs\plans\shiftwork\evidence\slice24-offline-2026-10-08\completion\review_queue_probe.py:39: in test_review_queue_operation_and_inheritance
+    assert [row.event_type.value for row in drafts] == ["OWNER_ASSIGNED", "SLA_CLOCK_STARTED", "HANDOFF_ESCALATED"]
+            ^^^^^^^^^^^^^^
+E   AttributeError: 'dict' object has no attribute 'event_type'</failure></testcase></testsuite></testsuites>

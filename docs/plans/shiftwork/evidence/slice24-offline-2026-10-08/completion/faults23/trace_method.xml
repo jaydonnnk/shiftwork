@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.410" timestamp="2026-10-08T09:20:39.870370+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_guards" name="test_pipeline_row_shape_branches_fail_only_write[trace_method]" time="0.004"><failure message="AssertionError: assert [] == ['write']&#10;  &#10;  Right contains one more item: 'write'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_guards.py:87: in test_pipeline_row_shape_branches_fail_only_write
+    assert [row.task_id for row in rows if not row.mandatory_pass] == ["write"]
+E   AssertionError: assert [] == ['write']
+E     
+E     Right contains one more item: 'write'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>

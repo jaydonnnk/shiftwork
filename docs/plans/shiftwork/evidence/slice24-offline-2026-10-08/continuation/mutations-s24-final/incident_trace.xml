@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="1" skipped="0" tests="1" time="0.414" timestamp="2026-10-08T09:00:03.323288+08:00" hostname="jaydonnks"><testcase classname="tests.orchestrator.test_gtm_pipeline" name="test_gtm_one_traced_incident_per_failing_record[missing_handoff-REQUIRED_TASK_MISSING]" time="0.007"><failure message="AssertionError: assert [] == ['qualificati...e', 'handoff']&#10;  &#10;  Right contains 4 more items, first extra item: 'qualification'&#10;  Use -v to get more diff">tests\orchestrator\test_gtm_pipeline.py:631: in test_gtm_one_traced_incident_per_failing_record
+    assert [r["task_id"] for r in trace] == ["qualification", "owner", "write", "handoff"]
+E   AssertionError: assert [] == ['qualificati...e', 'handoff']
+E     
+E     Right contains 4 more items, first extra item: 'qualification'
+E     Use -v to get more diff</failure></testcase></testsuite></testsuites>
