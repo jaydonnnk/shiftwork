@@ -4,6 +4,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { once } from 'node:events';
+import { chromePath, pythonPath } from './env.mjs';
 
 const url = process.argv[2];
 assert.equal(new URL(url).hostname, '127.0.0.1');
@@ -11,7 +12,7 @@ const out = path.resolve(process.env.SHIFTWORK_ARTIFACT_DIR);
 await mkdir(out);
 const fixture = JSON.parse(await readFile(process.env.SHIFTWORK_TEST_INPUTS, 'utf8'));
 const profile = await mkdtemp(path.join(tmpdir(), 'shiftwork-northline-browser-'));
-const child = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless=new', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
+const child = spawn(chromePath, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
 const endpoint = await new Promise((resolve, reject) => {
   let stderr = '';
   const timer = setTimeout(() => reject(new Error('Chrome startup timeout')), 15000);
@@ -169,7 +170,7 @@ surface=json.load(sys.stdin)
 controls=all(serialized_contains({**surface,'serialized_dom':surface['serialized_dom']+form},needle) for needle in needles for form in (needle,needle.replace('\\\\','/'),json.dumps(needle)[1:-1]))
 print(json.dumps({'needles':len(needles),'controls':controls,'clean':not any(serialized_contains(surface,needle) for needle in needles)}))`;
   const scanned = await new Promise((resolve, reject) => {
-    const child = spawn(path.resolve('.venv313/Scripts/python.exe'), ['-c', script], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const child = spawn(pythonPath, ['-c', script], { stdio: ['pipe', 'pipe', 'pipe'] });
     let stdout = '', stderr = '';
     const timer = setTimeout(() => { child.kill(); reject(new Error('DOM scanner timed out')); }, 30000);
     child.stdout.on('data', data => { stdout += data; }); child.stderr.on('data', data => { stderr += data; });
@@ -190,8 +191,24 @@ async function verifyWorkplaceGuards() {
   await evaluate(() => { const select = document.getElementById('workplace-board'); select.value = 'bookshop'; select.dispatchEvent(new Event('change')); });
   assert.equal(await evaluate(() => document.getElementById('workplace-board').value), 'northline', 'Dirty programmatic board switch was accepted');
   await click('discard-draft-edit');
+  // Every registered board is admitted now, so fabricate one awaiting review to
+  // prove the client still refuses to open an unreviewed board.
+  await evaluate(async () => {
+    const original = window.fetch; window.__originalFetch = original;
+    window.fetch = async (...args) => {
+      const response = await original(...args);
+      if (args[0] !== '/api/boards') return response;
+      const payload = (await response.clone().json()).map(row => row.engagement_slug === 'gtm' ? { ...row, availability: 'AWAITING_OPERATOR_REVIEW' } : row);
+      return new Response(JSON.stringify(payload), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    };
+    document.getElementById('refresh').click();
+  });
+  await waitFor(() => [...document.getElementById('workplace-board').options].some(option => option.value === 'gtm' && option.textContent.includes('awaiting operator review')), 'Fabricated unreviewed board did not render');
+  await verifyRoom();
   await evaluate(() => { const select = document.getElementById('workplace-board'); select.value = 'gtm'; select.dispatchEvent(new Event('change')); });
   assert.equal(await evaluate(() => document.getElementById('workplace-board').value), 'northline', 'Unreviewed programmatic board switch was accepted');
+  await evaluate(() => { window.fetch = window.__originalFetch; document.getElementById('refresh').click(); });
+  await waitFor(() => document.body.dataset.loadState === 'ready' && ![...document.getElementById('workplace-board').options].some(option => option.disabled), 'Real workplace list did not return');
   // Delay an old Northline board response while selecting Bellwether, then
   // release it after the newer board has rendered. No persisted rows change.
   await evaluate(() => {

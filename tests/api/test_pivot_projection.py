@@ -71,7 +71,7 @@ def test_injected_experiment_request_field_returns_422_without_a_run(tmp_path):
 
 
 def test_bellwether_client_surfaces_exclude_private_material_with_scanner_controls(tmp_path, monkeypatch):
-    """S21's Bellwether arm; other boards remain future obligations."""
+    """S21's Bellwether arm; Northline's served-surface scan is in its browser harness."""
     monkeypatch.setenv("NEBIUS_API_KEY", "S21_TEST_PROVIDER_SECRET")
     monkeypatch.setenv("CONTREE_TOKEN", "S21_TEST_SANDBOX_SECRET")
     needles = (*sealed_identity_strings(), "S21_TEST_PROVIDER_SECRET",
@@ -86,6 +86,35 @@ def test_bellwether_client_surfaces_exclude_private_material_with_scanner_contro
         run = started.json()
         paths = ("/", "/app.js", "/evidence.js", "/styles.css", "/room.svg",
                  "/api/engagements/bookshop/board", "/api/engagements/bookshop/ledger",
+                 f"/api/shifts/{shift['id']}/investigations",
+                 f"/api/artifact-versions/{run['artifact_version_id']}",
+                 f"/api/runs/{run['id']}", f"/api/runs/{run['id']}/outputs",
+                 f"/api/runs/{run['id']}/checks")
+        for path in paths:
+            response = client.get(path)
+            assert response.status_code == 200, (path, response.text)
+            for needle in needles:
+                assert not serialized_contains({"client_text": response.text}, needle), (path, needle)
+
+
+def test_gtm_client_surfaces_exclude_private_material_with_scanner_controls(tmp_path, monkeypatch):
+    """S25's GTM arm: the revenue floor serves no sealed identity or credential."""
+    monkeypatch.setenv("NEBIUS_API_KEY", "S25_TEST_PROVIDER_SECRET")
+    monkeypatch.setenv("CONTREE_TOKEN", "S25_TEST_SANDBOX_SECRET")
+    needles = (*sealed_identity_strings(), "S25_TEST_PROVIDER_SECRET",
+               "S25_TEST_SANDBOX_SECRET")
+    for needle in needles:
+        for form in (needle, needle.replace("\\", "/"), json.dumps(needle)[1:-1]):
+            assert serialized_contains({"client_text": form}, needle), needle
+    with TestClient(create_app(str(tmp_path / "gtm-client-surfaces.db"))) as client:
+        shift = client.post("/api/engagements/gtm/shifts").json()
+        started = client.post(f"/api/shifts/{shift['id']}/runs",
+                              json={"client_request_id": "s25-projection"})
+        assert started.status_code == 202, started.text
+        run = started.json()
+        paths = ("/", "/app.js", "/evidence.js", "/styles.css", "/room.svg",
+                 "/api/boards", "/api/engagements/gtm/board",
+                 "/api/engagements/gtm/ledger",
                  f"/api/shifts/{shift['id']}/investigations",
                  f"/api/artifact-versions/{run['artifact_version_id']}",
                  f"/api/runs/{run['id']}", f"/api/runs/{run['id']}/outputs",
