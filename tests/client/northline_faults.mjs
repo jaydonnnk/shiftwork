@@ -4,6 +4,7 @@ import { mkdir, copyFile, writeFile, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { once } from 'node:events';
+import { pythonPath } from './env.mjs';
 
 const root = process.cwd();
 const base = path.resolve(process.argv[2]);
@@ -34,7 +35,7 @@ for (const [fault, [, , expected]] of Object.entries(faults)) {
     const database = path.join(directory, 'preview.db');
     await copyFile(path.join(snapshots, (snapshot === 'reach' ? 'closed' : snapshot) + '.db'), database);
     const code = "import runpy,sys; sys.argv=['northline_preview.py',*sys.argv[1:]]; runpy.run_path('tests/client/northline_preview.py',run_name='__main__')";
-    const preview = spawn(path.join(root, '.venv313/Scripts/python.exe'), ['-c', code, '--database', database, '--out', directory, '--port', String(port)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
+    const preview = spawn(pythonPath, ['-c', code, '--database', database, '--out', directory, '--port', String(port)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] });
     const previewOut = [], previewErr = [];
     preview.stdout.on('data', value => previewOut.push(value)); preview.stderr.on('data', value => previewErr.push(value));
     let browser;

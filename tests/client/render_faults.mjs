@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { once } from 'node:events';
 import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { pythonPath } from './env.mjs';
 
 // Failing-capability proof for the rendered-evidence harness. Every row serves a
 // mutated in-memory copy of the production app.js to the browser and requires
@@ -20,7 +21,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
 const portIndex = process.argv.indexOf('--port');
 const port = portIndex === -1 ? 8137 : Number(process.argv[portIndex + 1]);
-const python = path.join(root, '.venv313', 'Scripts', 'python.exe');
+const python = pythonPath;
 const artifactIndex = process.argv.indexOf('--artifact-dir');
 const artifactRoot = path.resolve(root, artifactIndex === -1 ? 'artifacts/slice21-checks' : process.argv[artifactIndex + 1]);
 await mkdir(path.dirname(artifactRoot), { recursive: true });

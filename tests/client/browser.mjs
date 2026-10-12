@@ -4,6 +4,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { once } from 'node:events';
+import { chromePath, pythonPath } from './env.mjs';
 
 // Fault-injection mode: with SHIFTWORK_FAULT set, the harness serves a mutated
 // in-memory copy of the production app.js to the browser and then requires this
@@ -17,7 +18,7 @@ const FAULTS = {
   draftSave: { needle: "[$('draft-file').value]: $('draft-source').value", replacement: "[$('draft-file').value]: $('draft-source').value + '\\n# wrong saved bytes'", expect: 'Draft editor saved different bytes' },
   unsavedFreeze: { needle: "function hasUnsavedDraft() { return $('draft-source').dataset.dirty === 'true'; }", replacement: 'function hasUnsavedDraft() { return false; }', expect: 'Unsaved draft can freeze a candidate' },
   candidateReload: { needle: 'state.candidates[candidate.label] ??= { id: candidate.artifact_version_id, content_hash: candidate.artifact_content_hash };', replacement: 'void candidate;', expect: 'Reload lost an API-backed frozen candidate' },
-  candidateReset: { needle: 'state.candidates = { A: null, B: null };', replacement: 'void state.candidates;', expect: 'Next shift presents the previous comparison as current' },
+  candidateReset: { needle: 'state.candidates = { A: null, B: null };\n    }', replacement: 'void state.candidates;\n    }', expect: 'Next shift presents the previous comparison as current' },
   clientLeak: { needle: "document.body.dataset.loadState = board.latest_shift ? 'ready' : 'empty';", replacement: "document.body.dataset.loadState = board.latest_shift ? 'ready' : 'empty'; document.body.dataset.privateMaterial = 'S21_TEST_PROVIDER_SECRET';", expect: 'Client DOM contains private material' },
   executionPurpose: { needle: "['purpose', 'Execution purpose', humanize(run.purpose)]", replacement: "['purpose', 'Execution purpose', 'experiment']", expect: 'Execution purpose differs from the run API' },
   executionMode: { needle: "['mode', 'Evidence mode', run.evidence_mode ?? 'unknown']", replacement: "['mode', 'Evidence mode', 'ISOLATED_LIVE']", expect: 'Execution mode differs from the run API' },
@@ -47,8 +48,8 @@ const FAULTS = {
     expect: 'Rendered check row does not match result',
   },
   event: {
-    needle: 'humanize(event.event_type)',
-    replacement: "'sale completed'",
+    needle: "humanize(event.event_type)), element('small'",
+    replacement: "'sale completed'), element('small'",
     expect: 'Rendered event row does not match event',
   },
   eligibility: {
@@ -138,7 +139,7 @@ if (fault) {
   assert.ok(FAULTS[fault], `Unknown fault: ${fault}`);
   assert.ok(!process.argv.includes('--exercise-run'), 'Fault runs never consume a preview attempt');
 }
-const browser = process.env.CHROME_PATH ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const browser = chromePath;
 const profile = await mkdtemp(path.join(tmpdir(), 'shiftwork-browser-'));
 const artifacts = path.resolve(process.env.SHIFTWORK_ARTIFACT_DIR ?? (fault ? `artifacts/slice21-faults/${fault}` : 'artifacts/slice21'));
 await mkdir(path.dirname(artifacts), { recursive: true });
@@ -231,7 +232,7 @@ surface=json.load(sys.stdin)
 controls=all(serialized_contains({**surface,'serialized_dom':surface['serialized_dom']+form},needle) for needle in needles for form in (needle,needle.replace('\\\\','/'),json.dumps(needle)[1:-1]))
 print(json.dumps({'needles':len(needles),'controls':controls,'clean':not any(serialized_contains(surface,needle) for needle in needles)}))`;
   const scanned = await new Promise((resolve, reject) => {
-    const scan = spawn(path.resolve('.venv313/Scripts/python.exe'), ['-c', script], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const scan = spawn(pythonPath, ['-c', script], { stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '', err = '';
     const timeout = setTimeout(() => { scan.kill(); reject(new Error('DOM scanner timed out')); }, 30000);
     scan.stdout.on('data', data => { out += data; });
