@@ -1,3 +1,120 @@
+**SLICE 25 GTM REVENUE FLOOR CLIENT ACCEPTED ON OFFLINE EVIDENCE; TWO PRE-EXISTING RED ROWS DEFERRED, 2026-10-12 Asia/Singapore.**
+
+S25 completed the GTM revenue floor client on `shiftwork/slice-25` from main `b5a9b95`,
+offline, with no gate, reviewed material, seal, pin, credential, live call, spend,
+commit, push or publication changed. The room renders the four station names the Gate 1
+mockup approved, in order, through a shared `buildStations()` helper that Northline now
+uses too: Signal intake, Qualification rules, Workflow bench and Pipeline wall. The
+registry's five `station_labels` remain a separate `/api/boards` projection the client
+never reads; reconciling the two name sets is an open product decision, not S25 scope.
+
+- [x] GTM journey from brief through inherited second-shift operation; 13 DOM needle
+  scans of 4406 needles each, every one clean with controls true.
+- [x] GTM served-source fault suite: 30 faults, 60 rows, all valid, 30 intended
+  assertion failures, sources preserved.
+- [x] Bellwether render-fault suite 47 of 47 as expected, exit 0, on digests matching
+  the worktree; the four rows red at the portability checkpoint are all caught.
+- [x] Projection arm: `tests/api/test_pivot_projection.py` 5 passed; obligations 39 and
+  56 discharged in prose with the `04-slices.md` table untouched.
+- [x] Northline harness repair regression: comparison snapshot clean, and dirtySwitch,
+  unreviewedSwitch and availability each caught on their named assertions.
+- [x] Full suite 1 failed, 1401 passed, 1 skipped; the failure is the deferred
+  `port_dead` row, matching the post-portability baseline.
+- [ ] Northline journey is red at its final mobile reach assertion; the same assertion
+  is red against the pre-S25 client at `b5a9b95`, so it is a pre-existing macOS defect,
+  deferred with its measurement.
+- [ ] `port_dead` conformance row still deferred from the portability checkpoint.
+- [ ] The live arm of S25 needs its own credentials and spend authorization.
+- [x] The two station-name sets stay divergent and documented: the client keeps the
+  Gate 1 mockup names and the registry keeps its `/api/boards` labels.
+
+The northline unreviewed-switch row needed repair because the S23 seal made board 2
+AVAILABLE, so its old premise (gtm awaiting operator review) went stale; the repair
+fabricates one unreviewed board through `/api/boards` interception, asserts the refusal
+against that, then restores the real list. The portability checkpoint's section 3.5
+attribution of the two red render-fault rows to duplicate anchors is corrected in place:
+the real needles each occur exactly once at `b5a9b95` and once now, and both rows are
+caught in the S25 run. Details, evidence paths and the verbatim limits are in checkpoint
+section 7.
+
+The user accepted S25 on this offline evidence on 2026-10-12 after the live-arm
+sequencing was made explicit: the GTM live-capable path arm needs its own credentials
+and spend authorization (`04-slices.md:902`), Tavily is the optional Slice 26 with its
+own authorization, and package and hosting follow at S27 and S28. Acceptance therefore
+claims no model quality, live execution, learning gain or Tavily discovery. The user
+also deferred the full 23-pair northline fault suite and chose to leave the two
+station-name sets divergent. Nothing is committed, merged or pushed; publication needs
+its own authorization.
+
+Earlier notices below remain historical; this notice supersedes their pending-state
+labels for S25 only.
+Current checkpoint: [slice25-portability-checkpoint-2026-10-11.md](slice25-portability-checkpoint-2026-10-11.md).
+
+**S25 PREREQUISITE PORTABILITY BATCH COMPLETE ON macOS; S25 CLIENT NOT STARTED, 2026-10-11 Asia/Singapore.**
+
+The user authorized `setup whatever environment u need and then start s25`. The
+repository had been freshly cloned onto macOS 26.5.1 with no virtual environment and
+no Node.js, so the environment was built first: `.venv` from CPython 3.13.12 with
+`uv pip install -r requirements.lock`, and Node.js v24.21.0 installed to
+`~/.local/node`. Chrome 155 was already present; no browser was installed. Work is on
+`shiftwork/slice-25` from main `b5a9b95`, entry worktree clean.
+
+The user then chose to repair the migration's portability defects before building the
+GTM client. The entry baseline was 6 failed, 1393 passed, 1 skipped. Five of the six
+are repaired, each proven failing-capable by mutating the guard it protects and
+requiring a real failure on a named assertion, with every mutated file restored
+byte-exactly under SHA-256 verification.
+
+- [x] Environment built on macOS; the mandated client harness chain runs there and all
+  7 of its baseline rows are green.
+- [x] Child-environment allowlist is platform-aware; control 20a still fires twice.
+- [x] Host-path scanner self-tests prove the escaping branches from a synthesized
+  needle shape instead of the checkout's own path shape.
+- [x] The sealed-locator needle arm is capable on both platforms and pinned by two
+  new self-tests. It had been vacuous on Windows and a false positive on POSIX.
+- [x] `tests/client/env.mjs` resolves the interpreter and browser portably across all
+  four harnesses; six hardcoded Windows paths removed.
+- [ ] `port_dead` conformance row deferred with its root cause proven.
+- [ ] Four render-fault rows are red on entry to S25 and are not caused by this batch.
+- [ ] Slice 25: no GTM room, journey, fault map or projection arm started.
+
+The deferred row is a fixture realization defect, not a product defect. The fixture
+makes a dead port by binding a socket and never listening; measured on this machine a
+connect to that port hangs for 5.001 seconds because macOS drops the SYN where Linux
+and Windows answer with RST, so the adapter correctly reports REQUEST_TIMEOUT instead
+of the pinned SERVICE_UNREACHABLE. The repair is to close the socket and re-pin
+`TRUSTED_LOCAL_FIXTURES["port_dead"]`, which changes fixture bytes quoted by
+historical S3 evidence and wants its own pass. Making the expectation platform-aware
+was rejected as weakening the recorded-versus-local equivalence the test exists to
+prove. It does not block S25, whose mandated tests are `browser.mjs`,
+`render_faults.mjs` and `test_pivot_projection.py`.
+
+The full render-fault suite was then run to completion on macOS and returned **43 of
+47 as expected, exit 1**: all 7 baselines green and 36 fault rows caught on their
+named assertions. Four rows are red. Two of them, `event` and `candidateReset`, are
+attributed with certainty to stale anchors rather than to this batch:
+`shiftwork/client/app.js` is unmodified here, the `browser.mjs` diff is three lines,
+and each anchor now occurs exactly twice in `app.js` where the harness requires one.
+That count is platform-independent, so both rows would fail on Windows as well, which
+means the full suite has not been re-run since the duplication landed and earlier
+green claims for it predate it. The other two, `requirementVersion` (CDP timeout) and
+`unsavedFreeze` (DOM scanner timeout), are timing-shaped and undiagnosed; one clean
+rerun of those two rows would separate a macOS scheduling difference from a genuine
+defect or a flake. S25 must not report the render-fault suite as green while these
+stand. Details in checkpoint section 3.5.
+
+After the batch, `tests/sealed tests/api tests/executor` report 1 failed, 336 passed,
+1 skipped, that failure being the deferred row. `git diff --check` is clean. Nothing
+is staged or committed. No gate, reviewed material, seal, pin, credential, live call,
+spend or publication changed, and no S25 client authority was exercised. The
+Windows-era interpreter rule in `AGENTS.md` section 6 does not apply on this machine
+and was not followed; correcting that instruction file is an open question for the
+user, not an edit made here.
+
+Current checkpoint: [slice25-portability-checkpoint-2026-10-11.md](slice25-portability-checkpoint-2026-10-11.md).
+Earlier notices below remain historical; this notice supersedes their pending-state
+labels for the portability batch only.
+
 **S24 ACCEPTED AND PUBLISHED, 2026-10-11 Asia/Singapore.**
 
 S24 was accepted by the user, committed in focused batches, fast-forwarded to
