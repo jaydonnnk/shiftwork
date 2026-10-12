@@ -2692,3 +2692,59 @@ The pending-state repair also covers opening/operating and close/next-shift comp
   characters, such as `C:\swNNfresh`, and read a fresh-clone failure's needle
   setup before treating it as a source defect. Scan databases and decompressed
   archive members for secrets with a word-boundary pattern, not ripgrep defaults.
+
+## 2026-10-12 (S25 session): GTM harness assertions written from another board's semantics
+
+- What happened: three first-run failures in the new S25 GTM browser harness.
+  (1) `attempts_remaining === 0` after the starter operation copied Bellwether's
+  two-attempt retry rule; GTM's limit is 3 and the second operation is refused by
+  the one-operation-per-shift rule, so the board still reported 2 remaining.
+  (2) `verifyRoom` collected `[data-file]` nodes to prove GTM hides the checks and
+  history tabs, but the draft textarea also carries `data-file="<name>"` once a
+  draft loads, so the closed snapshot added `service.py` to the tab list.
+  (3) The `pipelineClock` fault was caught by the owners group's assertion, not
+  the clocks one, because all three wall groups share one renderer and the owners
+  group is asserted first with a full-row equality that includes `record_ref`.
+- Root cause: assertions were written from a remembered sibling board or from the
+  renderer's shape instead of from the measured GTM surface, and a shared
+  renderer let one group's equality absorb another group's fault.
+- Prevention: copy every expected scalar from the probe output of the board under
+  test, never from a sibling board; scope DOM selectors to the container whose
+  contract they assert (`.file-tabs [data-file]`); when several groups share a
+  renderer, give each group's assertion only the keys its heading promises plus
+  shared provenance, so each fault fails exactly its named assertion.
+
+## 2026-10-12 (S25 session, second): substring includes() made a denominator fault vacuous
+
+- What happened: the GTM `comparisonDenominator` fault row passed in fault mode
+  instead of failing. The rendered summary showed `public requests per candidate
+  999` while the assertion asked whether the summary includes
+  `public requests per candidate 9`; GTM's true shared denominator is 9, and
+  `9` is a prefix of `999`, so the substring matched the mutated text.
+- Root cause: `assert.ok(summary.includes(label + value))` proves only that some
+  string starting with the expected value appears; it cannot distinguish 9 from
+  99 or 999. The Bellwether arm escapes the same defect only because its
+  recorded denominator is 6, which is not a prefix of 999.
+- Prevention: parse the labelled number out of the rendered summary and compare
+  with assert.equal, as gtm_browser.mjs now does for both denominators. When
+  reusing an assertion shape from an older board, check whether the new board's
+  actual value keeps the shape fail-capable instead of assuming it transfers.
+
+## 2026-10-12 (S25 session, third): red-row attribution built from truncated needles
+
+- What happened: the portability checkpoint's section 3.5 attributed the red `event`
+  and `candidateReset` render-fault rows to duplicate anchors, claiming each anchor
+  "occurs exactly twice in app.js where the harness requires one" and would fail on
+  Windows too. Direct measurement during the S25 regression batch falsified it: the
+  harness needles are the full strings `humanize(event.event_type)), element('small'`
+  and `state.candidates = { A: null, B: null };\n    }`, each occurring exactly once at
+  entry commit b5a9b95 and once in the S25 worktree, and both rows are CAUGHT in the
+  S25 run. The "exactly two" counts came from truncated substrings.
+- Root cause: the anchor count was taken from a remembered prefix of the needle instead
+  of the exact string the harness destructures at browser.mjs:478, which carries
+  trailing context and an embedded newline. A count on a prefix is not a count on the
+  needle, and the wrong attribution then propagated into a durable document.
+- Prevention: when attributing a fault-anchor failure, extract the needle from the
+  FAULTS map programmatically and count that exact string against both the entry commit
+  and the worktree before writing any causal claim, and record the measurement with the
+  claim. The checkpoint carries a dated correction in its section 3.5 and section 7.
