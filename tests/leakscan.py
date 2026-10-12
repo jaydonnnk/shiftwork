@@ -36,6 +36,22 @@ MIN_LENGTH = 8
 # A shared fragment at least this long is a paste, not a coincidental English word.
 WINDOW = 25
 
+REPO_ROOT = config.PACKAGE_DIR.parent
+
+
+def sealed_locators(path: Path) -> tuple[str, str]:
+    """The sealed file's repository-relative locator in both separator forms.
+
+    The absolute host path is a poor needle twice over: a JSON envelope doubles its
+    backslashes so it cannot match a serialized surface as written, and its leading
+    components are shared with every other host path in the same payload, so its
+    fragments match material that is not sealed at all. The relative locator names
+    the sealed store itself, so it catches an absolute or a relative leak on any
+    platform without colliding with the checkout's own prefix.
+    """
+    relative = path.relative_to(REPO_ROOT).as_posix()
+    return (relative, relative.replace("/", "\\"))
+
 
 def family_paths() -> tuple[Path, ...]:
     """One path per enabled sealed family, asserted to exist."""
@@ -74,7 +90,8 @@ def _cases():
 
 
 def all_sealed_strings(min_length: int = MIN_LENGTH) -> tuple[str, ...]:
-    """Every string in the sealed inventory, plus case identities and the file paths.
+    """Every string in the sealed inventory, plus case identities and the sealed
+    file names and repository-relative locators.
 
     Long strings are also expanded into their ``WINDOW``-character fragments: a full
     operator note is never a substring of a short learner-facing render string, so
@@ -86,7 +103,7 @@ def all_sealed_strings(min_length: int = MIN_LENGTH) -> tuple[str, ...]:
     for case in _cases():
         found.extend([case.id, case.check_id, case.family])
     for path in family_paths():
-        found.extend([path.name, str(path)])
+        found.extend([path.name, *sealed_locators(path)])
     expanded: list[str] = list(found)
     for value in found:
         expanded.extend(note_windows(value))

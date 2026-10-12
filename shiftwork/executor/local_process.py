@@ -21,6 +21,9 @@ from shiftwork.packs import registry
 
 
 CHILD_ENV_ALLOWLIST = ("SYSTEMROOT", "WINDIR")
+# macOS CoreFoundation and libc set these in every child process whatever env mapping
+# spawn receives, so they cannot be suppressed and are not controller state leaking.
+OS_INJECTED_ENV = ("LC_CTYPE", "__CF_USER_TEXT_ENCODING") if sys.platform == "darwin" else ()
 MAX_BODY_BYTES = 1024 * 1024
 
 

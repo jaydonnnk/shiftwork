@@ -420,11 +420,17 @@ def test_executor_env_exposes_no_controller_credentials(executor, monkeypatch, c
         logs = log_bytes(result)
         env_line = next(line for line in logs.splitlines() if line.startswith(b"child-env "))
         observed_env = json.loads(env_line.removeprefix(b"child-env "))
-        assert observed_env == spawn_envs[0]
+        reported = {key: value for key, value in observed_env.items() if key not in executor.local.OS_INJECTED_ENV}
+        assert reported == spawn_envs[0], (
+            "child-reported environment differs from the spawn environment once the pinned "
+            f"OS-injected names are set aside: extra={sorted(set(reported) - set(spawn_envs[0]))} "
+            f"missing={sorted(set(spawn_envs[0]) - set(reported))}"
+        )
     captured = b"".join(c.body for c in result.captures) + log_bytes(result)
     assert all(marker.encode() not in captured for marker in markers.values())
     with capsys.disabled():
-        print(f"credential-guard {adapter_name}: captures=2; injected markers absent from bodies/logs; " + ("no process or environment access" if adapter_name == "recorded" else "spawn env and child-reported env match SYSTEMROOT/WINDIR allowlist"))
+        allowed = "/".join(executor.local.CHILD_ENV_ALLOWLIST + executor.local.OS_INJECTED_ENV)
+        print(f"credential-guard {adapter_name}: captures=2; injected markers absent from bodies/logs; " + ("no process or environment access" if adapter_name == "recorded" else f"spawn env and child-reported env match {allowed} allowlist"))
 
 
 def test_local_process_uses_literal_requests_and_snapshot(executor):

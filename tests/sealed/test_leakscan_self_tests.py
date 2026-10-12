@@ -20,9 +20,13 @@ import pytest
 from leakscan import (
     BASE64_DECODINGS,
     MAX_JSON_NESTING,
+    REPO_ROOT,
+    all_sealed_strings,
     decoded_surfaces,
     family_paths,
+    leaks_in,
     sealed_identity_strings,
+    sealed_locators,
 )
 from shiftwork import config
 from shiftwork.sealed import store as sealed_store
@@ -107,3 +111,42 @@ def test_every_enabled_sealed_family_contributes_needles() -> None:
     for family in enabled:
         for case in sealed_store.load_family(family).cases:
             assert case.check_id in needles, f"{case.check_id} is not an identity needle"
+
+
+def test_sealed_string_needles_a_serialized_surface_cannot_carry_have_a_capable_twin() -> None:
+    """``all_sealed_strings`` gets the same non-vacuity proof as the identity set.
+
+    Its sealed-locator arm used to be the absolute host path. That needle fails in two
+    invisible ways at once: a JSON envelope doubles its backslashes, so it could never
+    match a serialized payload on Windows, and its leading fragments coincide with
+    every other host path in the same payload, so it fired on material that was not
+    sealed on POSIX. Only the first was silent, so the arm needs this pin.
+    """
+    needles = all_sealed_strings()
+    incapable = [needle for needle in needles
+                 if needle not in json.dumps({"probe": needle}, ensure_ascii=False)]
+    for needle in incapable:
+        twins = {needle.replace("\\", "/"), Path(needle).name}
+        capable = [twin for twin in twins if twin in needles and twin not in incapable]
+        assert capable, f"a needle a serialized surface cannot carry has no capable twin: {needle!r}"
+
+
+def test_sealed_locator_is_host_prefix_free_and_detected_in_a_serialized_payload() -> None:
+    """The locator arm names the sealed store, not the checkout, and really can match."""
+    needles = all_sealed_strings()
+    for path in family_paths():
+        forward, backslash = sealed_locators(path)
+        assert forward.startswith("shiftwork/sealed/cases/"), f"unexpected locator shape: {forward}"
+        assert str(REPO_ROOT) not in forward, "the locator carries the host prefix it exists to avoid"
+        assert "\\" not in forward and backslash.replace("\\", "/") == forward
+        assert forward in needles, f"{forward} is not a needle; the arm is absent"
+        assert forward in json.dumps({"probe": forward}), "the locator cannot match as serialized"
+
+        payload = json.dumps({"files": [{"path": forward}, {"path": str(config.FIXTURE_DIR)}]})
+        assert forward in leaks_in(payload, needles), (
+            "an injected sealed locator was not detected in a representative serialized payload"
+        )
+        unrelated = json.dumps({"files": [{"path": str(config.FIXTURE_DIR / "shop.json")}]})
+        assert not leaks_in(unrelated, needles), (
+            f"an ordinary repository host path matched a sealed needle: {leaks_in(unrelated, needles)[:3]}"
+        )

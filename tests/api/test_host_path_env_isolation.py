@@ -37,7 +37,7 @@ from shiftwork import config
 from shiftwork.api.schemas import RunOutputView
 from shiftwork.app import create_app
 from shiftwork.executor import base as executor_base
-from shiftwork.executor.local_process import CHILD_ENV_ALLOWLIST, LocalProcessAdapter
+from shiftwork.executor.local_process import CHILD_ENV_ALLOWLIST, OS_INJECTED_ENV, LocalProcessAdapter
 
 REPO_ROOT = config.PACKAGE_DIR.parent
 DB_MARKER = "sw6-env-marker-db"
@@ -91,6 +91,15 @@ def _scan(label: str, surfaces: list[str], needles: dict[str, str]) -> None:
     assert not leaks, f"{label} exposed host material: {leaks[:5]}"
 
 
+# The backslash-escaping hazard belongs to a needle's shape, not to the host platform:
+# a POSIX checkout has no backslash path, so deriving the needle from ``config`` alone
+# leaves the escaping branch unproven there. This literal keeps it proven everywhere.
+WINDOWS_SHAPED_PATH = (
+    "C:\\Users\\operator\\Desktop\\shiftwork\\shiftwork\\fixtures\\shop"
+    "\\bookshop_stale_snapshot.json"
+)
+
+
 def test_host_path_scan_detects_a_json_escaped_path() -> None:
     """Guards the scanner itself.
 
@@ -98,12 +107,19 @@ def test_host_path_scan_detects_a_json_escaped_path() -> None:
     ``needle in surface`` scan never matches and passes vacuously. This check fails
     if that escaping is ever unhandled again.
     """
-    needle = str(config.BOOKSHOP_SNAPSHOT)
-    assert "\\" in needle, "expected a Windows path; the escaping form would be untested"
-    surface = json.dumps({"path": needle})
-    assert needle not in surface, "precondition: the raw path must not match the escaped surface"
-    assert host_leaks(surface, {"snapshot": needle}), "host_leaks missed a JSON-escaped host path"
-    assert not host_leaks(json.dumps({"path": "unrelated"}), {"snapshot": needle})
+    for needle in (WINDOWS_SHAPED_PATH, str(config.BOOKSHOP_SNAPSHOT)):
+        surface = json.dumps({"path": needle})
+        assert host_leaks(surface, {"snapshot": needle}), (
+            f"host_leaks missed a host path in the serialized surface {surface!r}"
+        )
+        assert not host_leaks(json.dumps({"path": "unrelated"}), {"snapshot": needle})
+
+    escaped = json.dumps({"path": WINDOWS_SHAPED_PATH})
+    assert WINDOWS_SHAPED_PATH not in escaped, (
+        "precondition: the raw backslash path must not match its JSON-escaped surface, "
+        "or the escaping branch this test exists to prove could not fail"
+    )
+    assert host_leaks(escaped, {"snapshot": WINDOWS_SHAPED_PATH})
 
 
 def test_host_path_scan_detects_forward_slash_and_nested_json_forms() -> None:
@@ -113,16 +129,20 @@ def test_host_path_scan_detects_forward_slash_and_nested_json_forms() -> None:
     a path inside a nested JSON string is escaped twice, so the needle must be
     normalized on both sides and the serialized surface must be decoded.
     """
-    needle = str(config.BOOKSHOP_SNAPSHOT)
-    forward = json.dumps({"debug_path": needle.replace("\\", "/")})
-    assert host_leaks(forward, {"snapshot": needle}), "host_leaks missed a forward-slash host path"
+    for needle in (WINDOWS_SHAPED_PATH, str(config.BOOKSHOP_SNAPSHOT)):
+        forward = json.dumps({"debug_path": needle.replace("\\", "/")})
+        assert host_leaks(forward, {"snapshot": needle}), "host_leaks missed a forward-slash host path"
 
-    nested = json.dumps({"log": json.dumps({"path": needle})})
-    assert not host_leaks(nested, {"snapshot": needle}), (
+    # Only a backslash path is hidden by the envelope's escaping, so only that shape
+    # makes the decoded walk load-bearing: a POSIX path stays visible in the raw body
+    # and would let the nested assertion pass without the walk ever running.
+    nested = json.dumps({"log": json.dumps({"path": WINDOWS_SHAPED_PATH})})
+    assert not host_leaks(nested, {"snapshot": WINDOWS_SHAPED_PATH}), (
         "precondition: the raw nested form must not match; the decoded walk is what closes it"
     )
     surfaces = decoded_surfaces(nested)
-    assert any(host_leaks(surface, {"snapshot": needle}) for surface in surfaces), (
+    assert len(surfaces) > 1, "decoded_surfaces returned only the envelope; the nested walk is vacuous"
+    assert any(host_leaks(surface, {"snapshot": WINDOWS_SHAPED_PATH}) for surface in surfaces[1:]), (
         "host_leaks missed a host path inside a nested JSON string"
     )
 
@@ -156,8 +176,9 @@ def test_local_adapter_projection_exposes_no_env_value_or_host_path(
     )
     assert "child-env " in logged, "the env_probe fixture did not dump its environment"
     dumped = json.loads(logged.split("child-env ", 1)[1].splitlines()[0])
-    assert set(dumped) <= set(CHILD_ENV_ALLOWLIST), (
-        f"child environment exceeded the pinned allowlist: {sorted(set(dumped) - set(CHILD_ENV_ALLOWLIST))}"
+    allowed = set(CHILD_ENV_ALLOWLIST) | set(OS_INJECTED_ENV)
+    assert set(dumped) <= allowed, (
+        f"child environment exceeded the pinned allowlist: {sorted(set(dumped) - allowed)}"
     )
 
     _scan("RunOutputView", surfaces, _host_path_needles())
