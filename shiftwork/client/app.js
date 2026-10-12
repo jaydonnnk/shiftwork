@@ -5,6 +5,7 @@ const state = { board: null, loadedShiftId: null, draft: null, stationView: null
 state.slug = 'bookshop';
 state.workplaces = [];
 const northline = () => state.slug === 'northline';
+const gtm = () => state.slug === 'gtm';
 const engagementPath = suffix => `/engagements/${encodeURIComponent(state.slug)}/${suffix}`;
 let downloadUrl = null;
 let pollTimer = null;
@@ -50,11 +51,25 @@ async function switchWorkplace() {
   state.slug = slug; state.loadedShiftId = null; state.comparison = null;
   state.candidates = { A: null, B: null }; state.selected = null;
   for (const id of ['cause-input', 'falsifier-input', 'public-test-input', 'assist-message', 'treatment-input', 'selection-rationale']) $(id).value = '';
-  state.station = northline() ? 'brief' : 'service';
-  const url = new URL(location.href); url.searchParams.set('board', slug); url.hash = northline() ? 'brief' : 'board';
+  state.station = northline() ? 'brief' : gtm() ? 'signals' : 'service';
+  const url = new URL(location.href); url.searchParams.set('board', slug); url.hash = northline() ? 'brief' : gtm() ? 'signals' : 'board';
   history.replaceState(null, '', url);
   text('workplace-message', '');
   await refresh();
+}
+function buildStations(prefix, names, labels) {
+  const hotspots = $(`${prefix}-stations`);
+  if (hotspots.children.length) return;
+  names.forEach((name, index) => {
+    const button = element('button', undefined, `station ${prefix}-${name}`);
+    button.dataset.station = name;
+    button.append(element('span', String(index + 1).padStart(2, '0'), 'station-marker'), element('span', labels[index]));
+    button.addEventListener('click', () => activateStation(name));
+    hotspots.append(button);
+    const link = element('a', labels[index]); link.href = `#${name}`; link.dataset.view = name;
+    link.addEventListener('click', event => { event.preventDefault(); navigate(name); });
+    $(`${prefix}-journey`).append(link);
+  });
 }
 function renderRoom() {
   const display = state.workplaces.find(board => board.engagement_slug === state.slug);
@@ -63,30 +78,23 @@ function renderRoom() {
   document.title = `${display.client ?? display.employer} · Shiftwork`;
   text('client-name', `YOUR CLIENT / ${display.client ?? display.employer}`);
   text('role-description', `Your role: ${display.role_name}. Fictional client and simulated work.`);
-  text('room-title', northline() ? 'An integration the counter can trust.' : 'You keep this service running.');
-  text('artifact-name', northline() ? 'Northline integration' : 'Bellwether service');
+  text('room-title', northline() ? 'An integration the counter can trust.' : gtm() ? 'Route every signal to the right owner, once.' : 'You keep this service running.');
+  text('artifact-name', northline() ? 'Northline integration' : gtm() ? 'Stonebridge workflow' : 'Bellwether service');
   document.querySelector('[data-file="checks"]').textContent = northline() ? 'Acceptance tests' : 'Visible checks';
   document.querySelector('[data-file="history"]').textContent = northline() ? 'Discovery record' : 'Change log';
+  for (const file of ['checks', 'history']) document.querySelector(`[data-file="${file}"]`).hidden = gtm();
   const room = document.querySelector('.room');
-  room.setAttribute('aria-label', northline() ? 'Northline deployment workshop' : 'Bellwether operational room');
-  for (const id of ['bookshop-stations', 'bookshop-journey']) $(id).hidden = northline();
+  room.setAttribute('aria-label', northline() ? 'Northline deployment workshop' : gtm() ? 'Stonebridge revenue floor' : 'Bellwether operational room');
+  for (const id of ['bookshop-stations', 'bookshop-journey']) $(id).hidden = northline() || gtm();
   for (const id of ['northline-stations', 'northline-journey', 'northline-art']) $(id).toggleAttribute('hidden', !northline());
-  document.querySelector('img.room-art').hidden = northline();
-  document.querySelector('.room-bookplate').hidden = northline();
+  for (const id of ['gtm-stations', 'gtm-journey', 'gtm-art']) $(id).toggleAttribute('hidden', !gtm());
+  document.querySelector('img.room-art').hidden = northline() || gtm();
+  document.querySelector('.room-bookplate').hidden = northline() || gtm();
   $('deployment-protocol').hidden = !northline();
-  if (northline() && !$('northline-stations').children.length) {
-    const labels = ['Deployment brief', 'System map', 'Integration bench', 'Acceptance', 'Rollout', 'Handover'];
-    ['brief', 'map', 'bench', 'acceptance', 'rollout', 'handover'].forEach((name, index) => {
-      const button = element('button', undefined, `station northline-${name}`);
-      button.dataset.station = name;
-      button.append(element('span', String(index + 1).padStart(2, '0'), 'station-marker'), element('span', labels[index]));
-      button.addEventListener('click', () => activateStation(name));
-      $('northline-stations').append(button);
-      const link = element('a', labels[index]); link.href = `#${name}`; link.dataset.view = name;
-      link.addEventListener('click', event => { event.preventDefault(); navigate(name); });
-      $('northline-journey').append(link);
-    });
-  }
+  if (northline()) buildStations('northline', ['brief', 'map', 'bench', 'acceptance', 'rollout', 'handover'],
+    ['Deployment brief', 'System map', 'Integration bench', 'Acceptance', 'Rollout', 'Handover']);
+  if (gtm()) buildStations('gtm', ['signals', 'rules', 'workflow', 'wall'],
+    ['Signal intake', 'Qualification rules', 'Workflow bench', 'Pipeline wall']);
 }
 function deploymentFile(target, filename) {
   const selected = state.operatingVersion;
@@ -118,6 +126,84 @@ function renderDeployment() {
   $('handover-records').append(records);
   $('operate-pilot').disabled = $('run-shift').disabled;
   text('pilot-help', $('run-help').textContent);
+}
+const PIPELINE_GROUPS = [['pipeline-owners', 'OWNER_ASSIGNED'], ['pipeline-clocks', 'SLA_CLOCK_STARTED'],
+  ['pipeline-escalations', 'HANDOFF_ESCALATED']];
+function pipelineRow(event) {
+  const payload = event.payload;
+  const row = element('div', null, 'pipeline-row');
+  row.dataset.pipelineEvent = String(event.seq);
+  row.dataset.pipelineType = event.event_type;
+  row.dataset.pipelineSignal = payload.signal_ref ?? '';
+  row.dataset.pipelineOwner = payload.owner ?? '';
+  row.dataset.pipelineRecord = payload.record_ref ?? '';
+  row.dataset.pipelineTerminal = payload.terminal_action ?? '';
+  row.dataset.pipelineConsequence = payload.consequence ?? '';
+  row.dataset.pipelineWeight = String(payload.weight ?? '');
+  row.dataset.pipelineRun = event.cause_refs[0] ?? '';
+  row.dataset.pipelineCheck = event.cause_refs[1] ?? '';
+  row.dataset.pipelineOutput = event.cause_refs[2] ?? '';
+  row.dataset.synthetic = String(event.synthetic);
+  row.append(element('strong', `${payload.signal_ref} · ${payload.owner ?? humanize(event.event_type)}`));
+  row.append(element('small', `Event ${event.seq} · record ${payload.record_ref ?? 'none'} · terminal action ${payload.terminal_action ?? 'none'} · consequence ${payload.consequence ?? 'none'} · weight ${payload.weight ?? 'none'} · rules ${payload.rule_version} · catalog ${payload.catalog_version} · mission ${payload.mission_version}`, 'pipeline-fact'));
+  row.append(element('small', `Captured by run ${event.cause_refs[0]} · check ${event.cause_refs[1]} · output ${event.cause_refs[2]}`, 'evidence-meta'));
+  const detail = element('details');
+  detail.append(element('summary', 'Inspect the recorded payload'), element('pre', JSON.stringify(payload, null, 2)));
+  row.append(detail);
+  return row;
+}
+function renderPipelineWall() {
+  for (const [id] of PIPELINE_GROUPS) empty($(id), 'No verified data loaded.');
+  empty($('pipeline-incidents'), 'No verified data loaded.');
+  text('pipeline-counts', '');
+  if (!gtm() || !state.board) return;
+  const events = state.events;
+  for (const [id, type] of PIPELINE_GROUPS) {
+    const rows = events.filter(event => event.event_type === type);
+    if (rows.length) $(id).replaceChildren(...rows.map(pipelineRow));
+    else empty($(id), type === 'HANDOFF_ESCALATED'
+      ? 'No operation recorded a human-handoff escalation. The compared workloads that do escalate are experiments, and an experiment never writes pipeline state.'
+      : `No operation recorded ${humanize(type)}. Only operating the exact selection writes pipeline state.`);
+  }
+  const target = $('pipeline-incidents');
+  const opened = events.filter(event => event.event_type === 'INCIDENT_OPENED');
+  const rows = state.board.incidents.map(incident => {
+    const event = opened.find(item => item.seq === incident.opened_event_seq);
+    const row = element('div', null, 'pipeline-row');
+    row.dataset.pipelineIncident = incident.id;
+    row.dataset.pipelineIncidentState = incident.state;
+    row.dataset.pipelineIncidentReason = incident.reason_code;
+    row.dataset.pipelineIncidentRun = incident.opening_run_id;
+    row.dataset.pipelineIncidentOutput = incident.failing_output_ref;
+    row.dataset.pipelineIncidentCheck = incident.check_result_id;
+    row.dataset.pipelineIncidentEvent = String(incident.opened_event_seq);
+    row.dataset.pipelineSignal = event?.payload.signal_ref ?? '';
+    row.dataset.pipelineFailedTasks = (event?.payload.failed_task_ids ?? []).join(',');
+    row.dataset.pipelineTrace = String(event?.payload.decision_trace?.length ?? 0);
+    row.append(element('strong', `${incident.id} · ${humanize(incident.state)} · ${incident.reason_code}`));
+    row.append(element('small', `Signal ${event?.payload.signal_ref ?? 'not recorded'} · failed required tasks ${(event?.payload.failed_task_ids ?? []).join(', ') || 'none'} · decision trace ${event?.payload.decision_trace?.length ?? 0} recorded task results`, 'pipeline-fact'));
+    row.append(element('small', `Opened by run ${incident.opening_run_id} · check ${incident.check_result_id} · output ${incident.failing_output_ref} · ledger event ${incident.opened_event_seq}`, 'evidence-meta'));
+    return row;
+  });
+  for (const event of events.filter(item => item.event_type === 'INCIDENT_RESOLVED')) {
+    const row = element('div', null, 'pipeline-row');
+    row.dataset.pipelineIncident = event.payload.incident_id;
+    row.dataset.pipelineIncidentState = 'RESOLVED';
+    row.dataset.pipelineResolvingVersion = event.payload.resolving_version_id;
+    row.dataset.pipelineRun = event.cause_refs[0];
+    row.dataset.pipelineCheck = event.cause_refs[1];
+    row.dataset.pipelineEvent = String(event.seq);
+    row.dataset.synthetic = String(event.synthetic);
+    row.append(element('strong', `${event.payload.incident_id} · resolved`));
+    row.append(element('small', `Resolved by operating ${event.payload.resolving_version_id} · rules ${event.payload.rule_version}. A choice alone never closes an incident; only linked operational evidence does.`, 'pipeline-fact'));
+    row.append(element('small', `Recorded by run ${event.cause_refs[0]} · regression check ${event.cause_refs[1]} · ledger event ${event.seq}`, 'evidence-meta'));
+    rows.push(row);
+  }
+  if (rows.length) target.replaceChildren(...rows);
+  else empty(target, 'No incident was opened or resolved by an operation. An empty wall implies no outcome.');
+  text('pipeline-counts', `${state.board.incidents.length} unresolved of ${state.board.total_incidents} recorded in total · ${events.length} ledger events · chain ${humanize(state.board.chain_status)}`);
+  $('operate-pipeline').disabled = $('run-shift').disabled;
+  text('pipeline-help', $('run-help').textContent);
 }
 function clearEvidence() {
   if (downloadUrl) URL.revokeObjectURL(downloadUrl);
@@ -178,6 +264,9 @@ function clearData(message) {
   text('run-help', 'Refresh to load available actions.');
   for (const id of ['map-records', 'pilot-records', 'handover-records']) empty($(id), 'No verified data loaded.');
   $('operate-pilot').disabled = true;
+  for (const id of ['pipeline-owners', 'pipeline-clocks', 'pipeline-escalations', 'pipeline-incidents']) empty($(id), 'No verified data loaded.');
+  text('pipeline-counts', '');
+  $('operate-pipeline').disabled = true;
   renderDraftEditor();
 }
 
@@ -327,6 +416,7 @@ function renderBoard() {
     : 'Runs the selected version. A started attempt consumes one reservation, even if it fails.');
   renderArtifact();
   renderDeployment();
+  renderPipelineWall();
 }
 
 function renderArtifact() {
@@ -360,8 +450,8 @@ function renderArtifact() {
       const detail = element('details'); detail.append(element('summary', name), element('pre', content)); target.append(detail);
     }
   } else {
-    const name = northline() ? (state.file === 'checks' ? 'acceptance_tests.py' : 'discovery.md') : state.file === 'checks' ? 'checks.json' : 'change_log.md';
-    target.append(element('p', northline() ? 'Current draft worksheet. Independent acceptance comes from the captured service and controller checks.' : state.file === 'checks' ? 'Current draft checks. Visible-check scoring is not available in this build.' : 'Current draft change log. Decisions are not inferred from saves or runs.', 'empty'));
+    const name = northline() ? (state.file === 'checks' ? 'acceptance_tests.py' : 'discovery.md') : gtm() ? 'service.py' : state.file === 'checks' ? 'checks.json' : 'change_log.md';
+    target.append(element('p', northline() ? 'Current draft worksheet. Independent acceptance comes from the captured service and controller checks.' : gtm() ? 'Current draft workflow. Independent qualification comes from the captured output and controller checks.' : state.file === 'checks' ? 'Current draft checks. Visible-check scoring is not available in this build.' : 'Current draft change log. Decisions are not inferred from saves or runs.', 'empty'));
     target.append(files[name] ? element('pre', files[name]) : element('p', `No ${name} file in the draft.`, 'empty'));
   }
 }
@@ -526,7 +616,7 @@ function renderAssist(station) {
     else row.append(element('p', 'Help request reserved. Refresh for its result.', 'help-text'));
     return row;
   }));
-  $('request-assist').disabled = state.pending || !station || (northline() && !station.assist_available);
+  $('request-assist').disabled = state.pending || !station || ((northline() || gtm()) && !station.assist_available);
 }
 function renderDiagnostic(station) {
   const experiment = state.diagnostic ?? station?.latest_diagnostic ?? null;
@@ -761,7 +851,7 @@ function renderDraftEditor() {
   }
   const changedShift = source.dataset.shiftId !== shift.id;
   if (changedShift || !file.options.length) {
-    file.replaceChildren(...[...new Set([...Object.keys(files), ...(northline() ? [] : ['checks.json', 'change_log.md'])])].map(name => {
+    file.replaceChildren(...[...new Set([...Object.keys(files), ...(northline() || gtm() ? [] : ['checks.json', 'change_log.md'])])].map(name => {
       const option = element('option', name); option.value = name; return option;
     }));
     if ('service.py' in files) file.value = 'service.py';
@@ -1059,6 +1149,10 @@ const stations = {
   acceptance: ['Acceptance', 'INDEPENDENT TASK RESULTS', 'Inspect the actual request, captured reply, independent checks and their recorded consequences.'],
   rollout: ['Rollout', 'PILOT OPERATIONS', 'Synthetic pilot state. Only a fully accepted operation records rollout approval. Experiments write no pilot state.'],
   handover: ['Handover', 'WHAT THE CO-OP INHERITS', 'Close records the selected runbook, declared limits and unresolved incidents. Newer saves cannot replace this handover.'],
+  signals: ['Signal intake', 'FOLLOW ONE EXECUTED SIGNAL', 'Select a captured signal. The request, the exact output, the independent checks and the recorded consequence below all belong to that one request.'],
+  rules: ['Qualification rules', 'STONEBRIDGE / VISIBLE CONTRACT', 'The mandatory ownership rules are fixed and the selections are yours. This workflow prepares work for a person; it never sends a customer message.'],
+  workflow: ['Workflow bench', 'INVESTIGATE, COMPARE AND CHOOSE', 'State a cause and falsifier before help. Two help calls per shift and no patch proposals. Compare two exact workflows; no winner is chosen automatically.'],
+  wall: ['Pipeline wall', 'SYNTHETIC PIPELINE STATE', 'Owners, SLA clocks, escalations and missed-handoff incidents, derived only from operational captures. An experiment never moves an owner or starts a clock.'],
   service: ['Service workbench', 'YOUR WORKING ARTIFACT', 'Your version, contract and files belong to you. Independent scoring stays separate.'],
   owner: ['Requirements', 'OWNER DESK', 'Inspect the operating version\'s committed requirements and frozen requirement hash. Saved candidates keep their own contracts.'],
   customers: ['Customer evidence', 'FOLLOW AN EXECUTED REQUEST', 'Select a customer. Every output, public record, check and event below belongs to that request.'],
@@ -1088,25 +1182,28 @@ function activateStation(name, userIntent = true) {
     return;
   }
   if (northline()) name = ({ service: 'brief', owner: 'brief', customers: 'acceptance', pipeline: 'acceptance', ledger: 'rollout', repair: 'bench', investigate: 'bench', compare: 'bench', next: 'handover' })[name] ?? name;
+  if (gtm()) name = ({ service: 'signals', owner: 'rules', brief: 'rules', map: 'rules', customers: 'signals', pipeline: 'signals', acceptance: 'signals', ledger: 'wall', repair: 'workflow', investigate: 'workflow', compare: 'workflow', bench: 'workflow', next: 'wall', rollout: 'wall', handover: 'wall' })[name] ?? name;
   state.station = name;
   document.querySelectorAll('[data-station]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.station === name)));
   const [title, kicker, context] = stations[name] ?? stations.service;
   text('panel-title', title); text('panel-kicker', kicker); text('station-context', context);
   $('deferred-view').hidden = name !== 'evaluator';
-  $('customer-view').hidden = !['customers', 'pipeline', 'acceptance'].includes(name);
-  $('investigate-view').hidden = !['investigate', 'bench'].includes(name);
-  $('compare-view').hidden = !['compare', 'bench'].includes(name);
-  $('next-view').hidden = !['next', 'handover'].includes(name);
-  $('board-view').hidden = !['service', 'owner', 'ledger', 'repair', 'brief'].includes(name);
+  $('customer-view').hidden = !['customers', 'pipeline', 'acceptance', 'signals'].includes(name);
+  $('investigate-view').hidden = !['investigate', 'bench', 'workflow'].includes(name);
+  $('compare-view').hidden = !['compare', 'bench', 'workflow'].includes(name);
+  $('next-view').hidden = !['next', 'handover', 'wall'].includes(name);
+  $('board-view').hidden = !['service', 'owner', 'ledger', 'repair', 'brief', 'rules', 'signals'].includes(name);
   $('northline-brief').hidden = name !== 'brief';
+  $('gtm-rules').hidden = name !== 'rules';
   $('map-view').hidden = name !== 'map';
   $('rollout-view').hidden = name !== 'rollout';
+  $('pipeline-view').hidden = name !== 'wall';
   $('handover-record').hidden = !northline();
   if (name === 'evaluator') {
     text('deferred-title', 'Separate by design.');
     text('deferred-copy', 'The controller scores captured service outputs against independent checks. You can inspect recorded results at the customer queue, but this booth has no editing controls and never displays sealed expected values.');
   }
-  if (name === 'owner') { state.file = 'contract'; selectFile('contract'); }
+  if (name === 'owner' || name === 'rules') { state.file = 'contract'; selectFile('contract'); }
   if (state.board) text('service-tag', state.board.operating_selection
     ? `${state.board.operating_selection.selected_version_id} · ${humanize(state.board.operating_status)}`
     : state.board.latest_version ? `${state.board.latest_version.id} · candidate only` : 'Draft · not frozen');
@@ -1114,7 +1211,7 @@ function activateStation(name, userIntent = true) {
   renderInvestigate();
   renderCompare();
   renderNext();
-  const view = northline() ? name : { owner: 'contract', investigate: 'investigate', compare: 'compare', next: 'next' }[name] ?? 'board';
+  const view = northline() || gtm() ? name : { owner: 'contract', investigate: 'investigate', compare: 'compare', next: 'next' }[name] ?? 'board';
   state.view = view;
   if (userIntent) history.replaceState(null, '', `#${view}`);
   document.querySelectorAll('[data-view]').forEach(link => {
@@ -1130,6 +1227,7 @@ function selectFile(name) {
 function navigate(view, userIntent = true) {
   if (view === 'station-panel') return;
   if (northline()) { activateStation({ board: 'brief', contract: 'brief', investigate: 'bench', compare: 'bench', next: 'handover' }[view] ?? (['brief', 'map', 'bench', 'acceptance', 'rollout', 'handover'].includes(view) ? view : 'brief'), userIntent); return; }
+  if (gtm()) { activateStation({ board: 'signals', contract: 'rules', investigate: 'workflow', compare: 'workflow', next: 'wall', return: 'wall', customers: 'signals', repair: 'workflow' }[view] ?? (['signals', 'rules', 'workflow', 'wall'].includes(view) ? view : 'signals'), userIntent); return; }
   activateStation({ board: 'service', contract: 'owner', investigate: 'investigate', compare: 'compare', next: 'next', return: 'next', customers: 'customers', repair: 'repair' }[view] ?? 'service', userIntent);
   if (userIntent && state.board) $('station-panel').focus({ preventScroll: true });
 }
@@ -1195,6 +1293,7 @@ window.addEventListener('beforeunload', event => {
 });
 window.addEventListener('pagehide', () => { clearTimeout(pollTimer); if (downloadUrl) URL.revokeObjectURL(downloadUrl); });
 $('operate-pilot').addEventListener('click', () => $('run-shift').click());
+$('operate-pipeline').addEventListener('click', () => $('run-shift').click());
 $('workplace-board').addEventListener('change', switchWorkplace);
 const requestedSlug = new URL(location.href).searchParams.get('board');
 if (requestedSlug) state.slug = requestedSlug;

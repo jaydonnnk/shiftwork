@@ -15,6 +15,7 @@
     <a class="brand" href="#board" aria-label="Shiftwork shift board"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 3 12 7v13l-12 7-12-7V10Zm0 13L4 10m12 6 12-6M16 16v14"/></svg>Shiftwork<span class="brand-divider"></span><span class="workspace-label">THE WORKPLACE</span></a>
     <div class="board-picker"><label for="workplace-board">Role board</label><select id="workplace-board" disabled><option>Loading workplace…</option></select><p id="workplace-message" role="status"></p></div>
     <nav id="northline-journey" class="journey" aria-label="Deployment journey" hidden></nav>
+    <nav id="gtm-journey" class="journey" aria-label="Revenue journey" hidden></nav>
     <nav id="bookshop-journey" class="journey" aria-label="Shift journey">
       <a href="#board" data-view="board" aria-current="page"><span>01</span>Shift board</a>
       <a href="#contract" data-view="contract"><span>02</span>Requirements</a>
@@ -51,6 +52,36 @@
           <path fill="#d1c5a0" d="m577 597 102-55 58 35-101 55Z"/>
         </svg>
         <div id="northline-stations" class="room-hotspots" hidden></div>
+        <svg id="gtm-art" class="room-art" viewBox="0 0 1000 720" aria-hidden="true" hidden>
+          <path fill="#241f31" stroke="#5b5175" d="M110 430V200L500 60 890 210V440L500 690Z"/>
+          <path fill="#3a3350" d="M110 200 500 60 500 210 110 430Z"/>
+          <path fill="#2e2941" d="M500 60 890 210 890 440 500 210Z"/>
+          <path fill="#544a70" d="M110 430 500 210 890 440 500 690Z"/>
+          <path fill="#615583" d="m300 470 200-100 200 110-200 105Z"/>
+          <path fill="#d9cbaa" d="M170 178 370 107 370 217 170 288Z"/>
+          <path fill="#8d7c62" d="M170 178 370 107 370 117 170 188Z"/>
+          <g fill="#f2ead4">
+            <path d="m192 205 74-26v44l-74 27Z"/><path d="m280 174 74-26v44l-74 27Z"/>
+            <path d="m192 268 74-26v34l-74 27Z"/><path d="m280 237 74-26v34l-74 27Z"/>
+          </g>
+          <g fill="none" stroke="#8d7c62" stroke-width="4"><path d="m200 216 56-20m-56 12 56-20m16 8 56-20m-56 12 56-20"/></g>
+          <path fill="#c9a06a" d="M560 83 830 187 830 337 560 233Z"/>
+          <path fill="#e6dcc2" d="M560 83 830 187 830 200 560 96Z"/>
+          <g fill="#f6f0dd">
+            <path d="m584 122 62 24v40l-62-24Z"/><path d="m664 153 62 24v40l-62-24Z"/><path d="m744 184 62 24v40l-62-24Z"/>
+            <path d="m584 182 62 24v34l-62-24Z"/><path d="m664 213 62 24v34l-62-24Z"/>
+          </g>
+          <g fill="none" stroke="#a08b6c" stroke-width="4"><path d="m584 246 228 88"/></g>
+          <path fill="#7c6a52" d="m180 520 95-51 70 42v58l-70 40-95-51Z"/>
+          <path fill="#cbb791" d="m180 520 95-51 70 42-95 51Z"/>
+          <path fill="#e8dfc4" d="m206 512 44-24 30 18-44 24Z"/>
+          <path fill="#4e4464" d="m400 520 130-70 140 78v60l-140 74-130-72Z"/>
+          <path fill="#b39a72" d="m400 520 130-70 140 78-130 72Z"/>
+          <path fill="#3c3550" d="m470 452 74 40v56l-74-40Z"/>
+          <path fill="#9fb4c9" d="m478 464 58 31v38l-58-31Z"/>
+          <path fill="#d8c7a4" d="m577 597 102-55 58 35-101 55Z"/>
+        </svg>
+        <div id="gtm-stations" class="room-hotspots" hidden></div>
         <svg class="evidence-path" viewBox="0 0 1000 720" aria-hidden="true"><path d="M225 443 340 503 489 422 660 332 791 407"/><circle cx="225" cy="443" r="6"/><circle cx="489" cy="422" r="6"/><circle cx="660" cy="332" r="6"/><circle cx="791" cy="407" r="6"/></svg>
         <div id="bookshop-stations" class="room-hotspots" aria-label="Room stations">
           <button class="station station-owner" data-station="owner"><span class="station-marker">02</span><span>Owner desk<small>Contract · read only</small></span></button>
@@ -92,6 +123,22 @@
         <p class="help-text">Only a fully accepted operation writes pilot bookings and rollout approval. Experiments leave this history unchanged.</p>
         <button id="operate-pilot" class="button primary" disabled>Operate the exact selection</button><p id="pilot-help" class="help-text"></p>
         <div id="pilot-records"></div>
+      </section>
+      <section id="gtm-rules" class="panel-section" hidden>
+        <h3>One owner per signal, written once</h3>
+        <p>The committed constraint below is mandatory and identical for both workflows; the selections are yours. A signal never ends unowned, and reprocessing a delivered signal updates the record it already owns instead of writing a second one. An uncertain signal waits for a person rather than being guessed.</p>
+        <p class="help-text">This workflow prepares work for a person. Nothing here contacts a customer, and synthetic pipeline changes are never real revenue.</p>
+      </section>
+      <section id="pipeline-view" data-synthetic-region="pipeline" hidden>
+        <div class="section-heading"><h3>Pipeline wall</h3><span class="synthetic">Synthetic scenario</span></div>
+        <p class="help-text">Owners, SLA clocks, escalations and missed-handoff incidents, derived only from operational captures. An experiment never moves an owner or starts a clock.</p>
+        <p id="pipeline-counts" class="mono evidence-meta"></p>
+        <button id="operate-pipeline" class="button primary" disabled>Operate the exact selection</button>
+        <p id="pipeline-help" class="help-text"></p>
+        <section class="panel-section"><h3>Owners assigned</h3><div id="pipeline-owners"></div></section>
+        <section class="panel-section"><h3>SLA clocks started</h3><div id="pipeline-clocks"></div></section>
+        <section class="panel-section"><h3>Human-handoff escalations</h3><div id="pipeline-escalations"></div></section>
+        <section class="panel-section"><h3>Missed-handoff incidents</h3><div id="pipeline-incidents"></div></section>
       </section>
       <section id="board-view">
         <div class="service-card"><div class="service-card-heading"><span class="service-icon" aria-hidden="true">⌘</span><div><strong id="artifact-name">Bellwether service</strong><span id="version-state">Waiting for the board</span></div><span class="owner-label">Owned by you</span></div><p id="version-hash" class="mono hash"></p></div>

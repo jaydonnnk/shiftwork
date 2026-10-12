@@ -35,6 +35,23 @@ body[data-board="northline"] .station[aria-pressed="true"] { background: #3d5c4e
 .northline-acceptance { right: 0; top: 65%; }
 .northline-rollout { left: 12%; top: 76%; }
 .northline-handover { right: 13%; top: 86%; }
+body[data-board="gtm"] { --room: #241f31; --navy: #2b2540; }
+body[data-board="gtm"] .workplace { background: #2a2438; }
+body[data-board="gtm"] .evidence-path { display: none; }
+body[data-board="gtm"] .room-art { filter: drop-shadow(0 16px 12px #150f2480); }
+body[data-board="gtm"] .station { background: #2e2745ee; }
+body[data-board="gtm"] .station[aria-pressed="true"] { background: #4d4168; }
+.gtm-signals { left: 12%; top: 66%; }
+.gtm-rules { left: 11%; top: 26%; }
+.gtm-workflow { left: 40%; top: 72%; }
+.gtm-wall { left: 58%; top: 22%; }
+.pipeline-row { border-left: 2px solid var(--green); background: #486c5b0a; padding: 7px 9px; margin-top: 6px; overflow-wrap: anywhere; }
+.pipeline-row strong { display: block; font-size: 11px; }
+.pipeline-row .pipeline-fact { display: block; color: var(--ink); font-size: 10px; margin-top: 3px; }
+.pipeline-row[data-pipeline-incident-state="OPEN"], .pipeline-row[data-pipeline-incident-state="CLOSED_UNRESOLVED"] { border-left-color: var(--red); background: #b34f4509; }
+#pipeline-view pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+#pipeline-view .button { margin-top: 10px; }
+#pipeline-counts:empty { display: none; }
 .deployment-event { border-bottom: 1px solid var(--line); margin-top: 12px; padding-bottom: 12px; }
 .deployment-event pre, #map-records pre, #handover-records pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
 @media (max-width: 760px) {
@@ -45,6 +62,10 @@ body[data-board="northline"] .station[aria-pressed="true"] { background: #3d5c4e
   #northline-journey a { flex: 1 1 30%; min-height: 38px; padding: 4px; }
   #northline-stations .station { white-space: normal; font-size: 10px; padding: 5px; min-height: 49px; }
   #northline-stations .station-marker { width: 18px; padding-right: 3px; flex-shrink: 0; }
+  #gtm-journey { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #gtm-journey a { min-height: 38px; padding: 4px; }
+  #gtm-stations .station { white-space: normal; font-size: 10px; padding: 5px; min-height: 49px; }
+  #gtm-stations .station-marker { width: 18px; padding-right: 3px; flex-shrink: 0; }
 }
 button, input, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
