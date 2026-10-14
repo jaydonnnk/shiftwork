@@ -1,3 +1,58 @@
+**SLICE 26 LIVE TAVILY ARM RUN: LIVE DISCOVERY COMPLETE, PREREGISTERED ABLATION VERDICT DROP_TAVILY_CLAIM (0 OF 4 STRUCTURAL EVENTS DISCOVERED); NO DISCOVERY CLAIM IN THE PITCH, 2026-10-14 Asia/Singapore.**
+
+The live arm ran under Jaydon's 2026-10-14 go-ahead after he provisioned
+`TAVILY_API_KEY` (exported via `~/.zshenv`; the value is never recorded, echoed or
+present in the manifest, confirmed by a zero-hit scan). One `discover()`
+invocation made one HTTP POST per pinned query (8 runs, `disc-0001` to
+`disc-0008`). From the recorded receipts: 80 raw results, 66 quarantined sources
+across all four domains with in-window Tavily dates, and 14 drops that are all
+duplicate URLs from earlier queries (no result was dropped for domain or date
+reasons). The frozen digest still verifies and the preregistration was not
+touched. The comparator, run read-only on this data, returns the retained verdict
+DROP_TAVILY_CLAIM: 4 of 6 checks pass and both discovery checks fail (useful
+structural discoveries 0 against >= 2; distinct domains 0 against >= 2). DROP is a
+recorded outcome by design (exit 0). No re-run, diagnostic call, re-freeze or
+threshold change followed; the zero match describes the preregistered queries'
+top-10 results, not the pages' presence in Tavily's index (not measured).
+
+- [x] Receipts: `disc-0001..0008` in `outcomes.discovery_runs`, one per pinned
+  query with request ids and response times; 66 sources `src-0001..0066`, all
+  QUARANTINED; all 14 drops carry `drop_reason: duplicate` (URLs already kept
+  from earlier queries).
+- [x] Zero-match check, run at record time over all 80 raw results: normalized
+  URL equality and a product-keyword scan against all 12 preregistered events
+  returned zero matches; none of the 4 structural events (Tesla Powerwall, Joie
+  Serina, Dacia Duster, JOOM baby bottles) is among any query's top 10.
+- [x] Comparator output (reproduction: `python -m shiftwork.curation.ablation
+  --manifest docs/plans/shiftwork/evidence/test3-manifest.json`): VERDICT
+  DROP_TAVILY_CLAIM with the two discovery checks as the only DROP reasons;
+  `reviewed_candidates_per_useful_fixture`, `median_review_minutes`,
+  `unverified_or_non_allow_listed_effects` and `executable_change_rule` pass
+  vacuously with 0 fixtures.
+- [x] Human review consequence: no discovered candidate corresponds to any
+  preregistered event, so no honest event-linked fixture can be frozen and the
+  timed review has nothing to measure; no reviews or fixtures were recorded
+  (0 reviews, 0 frozen changes).
+- [x] Adjudication: Jaydon accepted the DROP on 2026-10-14 as the honest
+  outcome. Per the decision of record (Gate 4 S11 decision 5;
+  `HACKATHON_REQUIREMENTS.md` lines 105 to 112), the KEEP/DROP verdict governs
+  the pitch: no Tavily discovery claim. The factual qualification (a shipped,
+  operator-run CLI that made functional runtime Tavily calls) is true and
+  receipted; how the bonus question is answered at submission time remains the
+  user's call with this DROP on record.
+- [ ] The manifest now carries the run receipts and is uncommitted on
+  `shiftwork/slice-26` (force-add needed); this record is uncommitted;
+  committing and pushing need the user's go-ahead.
+- [ ] Limits: one run of the pinned queries; each query's top 10 is the entire
+  candidate pool and cross-run ranking variability was not measured; the two
+  vacuous PASS checks are not evidence of review-cost efficiency; no diagnostic
+  calls were made, so ranking versus indexing remains unexplained; the DROP
+  applies to the preregistered setup as frozen and is not evidence about Tavily
+  generally.
+
+Earlier notices below remain historical; this notice supersedes their pending-state
+labels for S26 only.
+
 **SLICE 26 CORPUS VERIFIED AND PREREGISTRATION FROZEN: 12/12 EVENTS HUMAN-VERIFIED BY JAYDON, DIGEST PINNED; LIVE ARM AND COMMIT STILL AWAIT THEIR OWN AUTHORIZATIONS, 2026-10-14 Asia/Singapore.**
 
 The corpus-instantiation phase ran under its own authorization. The 12-event corpus
