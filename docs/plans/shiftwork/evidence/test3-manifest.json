@@ -22,8 +22,150 @@
       "ACCC product safety recall",
       "Australian product safety ban"
     ],
-    "events": [],
-    "known_urls": [],
+    "events": [
+      {
+        "id": "ev-cpsc-known-1",
+        "domain": "cpsc.gov",
+        "kind": "known_page",
+        "title": "Cummins Power Generation portable generators recall page updated 29 January 2026 (remedy change and phone number update)",
+        "source_url": "https://www.cpsc.gov/Recalls/2010/Cummins-Power-Generation-Recalls-Portable-Generators-Due-to-Fire-Hazard",
+        "published_at": "2026-01-29T00:00:00Z",
+        "summary": "The CPSC recall page for the 2010 Cummins Power Generation portable generator recall carries a dated note that the remedy was changed and the contact phone number updated on 1/29/2026. The page URL existed before the change, so polling this known page can see the update without Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-cpsc-known-2",
+        "domain": "cpsc.gov",
+        "kind": "known_page",
+        "title": "Salewa Wild Country Ropeman 1 ascenders recall page updated 25 August 2025 (consumer contact information update)",
+        "source_url": "https://www.cpsc.gov/Recalls/2024/Salewa-USA-Recalls-Wild-Country-Ropeman-1-Ascenders-Due-to-a-Failure-to-Ascend",
+        "published_at": "2025-08-25T00:00:00Z",
+        "summary": "The CPSC recall page for the Salewa Wild Country Ropeman 1 ascenders carries a dated note that consumer contact information was updated on 8/25/2025. The page URL existed before the change, so polling this known page can see the update without Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-cpsc-structural",
+        "domain": "cpsc.gov",
+        "kind": "structural",
+        "title": "Tesla Powerwall 2 AC battery power systems recall announced 13 November 2025",
+        "source_url": "https://www.cpsc.gov/Recalls/2026/Tesla-Recalls-Powerwall-2-AC-Battery-Power-Systems-Due-to-Fire-and-Burn-Hazards-Risk-of-Serious-Injury-or-Death",
+        "published_at": "2025-11-13T00:00:00Z",
+        "summary": "CPSC announced a new recall of Tesla Powerwall 2 AC battery power systems due to fire and burn hazards, with the announcement dated 13 November 2025. The page is a new URL published inside the window and is not on the polling watch list, so polling the watched pages cannot see it; finding it requires discovery such as Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-govuk-known-1",
+        "domain": "gov.uk",
+        "kind": "known_page",
+        "title": "OPSS product recalls and alerts guidance updated 26 November 2025 (list of featured recalls and alerts updated)",
+        "source_url": "https://www.gov.uk/guidance/product-recalls-and-alerts",
+        "published_at": "2025-11-26T00:00:00Z",
+        "summary": "The gov.uk guidance page listing product recalls and alerts records a change history entry dated 26 November 2025: the list of featured recalls and alerts was updated. The page URL existed before the change, so polling this known page can see the update without Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-govuk-known-2",
+        "domain": "gov.uk",
+        "kind": "known_page",
+        "title": "A to Z of product safety guidance for businesses updated 2 March 2026 (asbestos testing technical advisory note link added)",
+        "source_url": "https://www.gov.uk/guidance/product-safety-for-businesses-a-to-z-of-industry-guidance",
+        "published_at": "2026-03-02T00:00:00Z",
+        "summary": "The gov.uk A to Z of product safety guidance records a change history entry dated 2 March 2026: a link was added to the asbestos testing technical advisory note. The page URL existed before the change, so polling this known page can see the update without Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-govuk-structural",
+        "domain": "gov.uk",
+        "kind": "structural",
+        "title": "OPSS product recall: Joie Serina Elephant Duo Swivel baby swing (2603-0090), published 27 March 2026",
+        "source_url": "https://www.gov.uk/product-safety-alerts-reports-recalls/product-recall-joie-serina-elephant-duo-swivel-baby-swing-2603-0090",
+        "published_at": "2026-03-27T00:00:00Z",
+        "summary": "A new OPSS product recall page for the Joie Serina Elephant Duo Swivel baby swing was published on 27 March 2026. The page is a new URL published inside the window and is not on the polling watch list, so polling the watched pages cannot see it; finding it requires discovery such as Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-ec-known-1",
+        "domain": "ec.europa.eu",
+        "kind": "known_page",
+        "title": "Safety Gate alert SR/01962/25 (Ford) corrigendum; portal card displays 18 June 2026",
+        "source_url": "https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10094475?lang=en",
+        "published_at": "2026-06-18T00:00:00Z",
+        "summary": "The Safety Gate alert detail page for SR/01962/25 (Ford) carries a corrigendum block: product identification was added. The Safety Gate search card for this alert displays the update date 18 June 2026 (original notification 30/05/2025). The alert URL existed before the corrigendum, so polling this known page can see the change without Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-ec-known-2",
+        "domain": "ec.europa.eu",
+        "kind": "known_page",
+        "title": "Safety Gate alert SR/04178/25 (DGTLS button batteries) corrigendum; portal card displays 11 June 2026",
+        "source_url": "https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10096517?lang=en",
+        "published_at": "2026-06-11T00:00:00Z",
+        "summary": "The Safety Gate alert detail page for SR/04178/25 (DGTLS button batteries) carries a corrigendum block: traceability information and measures were added, with the warning measure recorded as in force 18/05/2026. The Safety Gate search card for this alert displays the update date 11 June 2026 (original notification 28/11/2025). The alert URL existed before the corrigendum, so polling this known page can see the change without Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-ec-structural",
+        "domain": "ec.europa.eu",
+        "kind": "structural",
+        "title": "Safety Gate notification SR/03178/25 (Dacia Duster parking brake) published 5 September 2025, Report-2025-36",
+        "source_url": "https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10095773?lang=en",
+        "published_at": "2025-09-05T00:00:00Z",
+        "summary": "A new Safety Gate notification for the Dacia Duster parking brake (SR/03178/25, Report-2025-36) was published on 5 September 2025. The alert page is a new URL published inside the window and is not on the polling watch list, so polling the watched pages cannot see it; finding it requires discovery such as Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-au-known-1",
+        "domain": "productsafety.gov.au",
+        "kind": "known_page",
+        "title": "Santa Cruz Heckler 9 e-bike recall updated 14 May 2026 (incident information added); published 28 May 2025",
+        "source_url": "https://www.productsafety.gov.au/search-consumer-product-recalls/santa-cruz-heckler-9-e-bike-with-interchangeable-720w-lithium-ion-battery",
+        "published_at": "2026-05-14T00:00:00Z",
+        "summary": "The ACCC product safety recall page for the Santa Cruz Heckler 9 e-bike carries an update line: recall updated on 14 May 2026 with incident information added. The page URL existed before the update, so polling this known page can see the change without Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-au-known-2",
+        "domain": "productsafety.gov.au",
+        "kind": "known_page",
+        "title": "Honda Marine outboard engines recall updated 31 October 2025 (serial numbers list updated); published 4 July 2025",
+        "source_url": "https://www.productsafety.gov.au/search-consumer-product-recalls/honda-marine-outboard-engines-updated",
+        "published_at": "2025-10-31T00:00:00Z",
+        "summary": "The ACCC product safety recall page for Honda Marine outboard engines carries an update line: recall updated on 31 October 2025 with the serial numbers list updated (a prior update landed on 21 October 2025). The page URL existed before the update, so polling this known page can see the change without Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      },
+      {
+        "id": "ev-au-structural",
+        "domain": "productsafety.gov.au",
+        "kind": "structural",
+        "title": "ACCC recall published 19 June 2026: self-feeding baby bottles (JOOM), PRA 2026/20953",
+        "source_url": "https://www.productsafety.gov.au/search-consumer-product-recalls/self-feeding-baby-bottles",
+        "published_at": "2026-06-19T00:00:00Z",
+        "summary": "A new ACCC recall for self-feeding baby bottles (JOOM product, PRA number 2026/20953) was published on 19 June 2026. The page is a new URL published inside the window and is not on the polling watch list, so polling the watched pages cannot see it; finding it requires discovery such as Tavily.",
+        "verified_by": "Jaydon",
+        "verified_at": "2026-10-14T13:59:47Z"
+      }
+    ],
+    "known_urls": [
+      "https://www.cpsc.gov/Recalls/2010/Cummins-Power-Generation-Recalls-Portable-Generators-Due-to-Fire-Hazard",
+      "https://www.cpsc.gov/Recalls/2024/Salewa-USA-Recalls-Wild-Country-Ropeman-1-Ascenders-Due-to-a-Failure-to-Ascend",
+      "https://www.gov.uk/guidance/product-recalls-and-alerts",
+      "https://www.gov.uk/guidance/product-safety-for-businesses-a-to-z-of-industry-guidance",
+      "https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10094475?lang=en",
+      "https://ec.europa.eu/safety-gate-alerts/screen/webReport/alertDetail/10096517?lang=en",
+      "https://www.productsafety.gov.au/search-consumer-product-recalls/santa-cruz-heckler-9-e-bike-with-interchangeable-720w-lithium-ion-battery",
+      "https://www.productsafety.gov.au/search-consumer-product-recalls/honda-marine-outboard-engines-updated"
+    ],
     "thresholds": {
       "min_structural_discoveries": 2,
       "min_structural_domains": 2,
@@ -32,9 +174,14 @@
       "max_unverified_content_effects": 0
     },
     "selection_rule": "earliest_qualifying_publication_time",
-    "notes": "DRAFT authored 2026-10-14 during the Slice 26 offline build. The preregistered rules above retain the historical values. Still to be instantiated in a later, separately authorized step, backed by public-source research and human source verification per event: the 12 dated events (two known-page and one structural per domain, each with verified_by and verified_at) and the polling watch list (at least the eight known-page event URLs). freeze-preregistration refuses until the corpus, watch list and queries are complete, and the tree is frozen before any discovery call or comparator output."
+    "notes": "Instantiated 2026-10-14 during the Slice 26 corpus-research step from the public record of the four allow-listed domains, pending per-event source verification by Jaydon (verified_by/verified_at stay null until he confirms each event). Date convention: published_at is T00:00:00Z on the calendar date the source states; every source documents calendar dates only, never a time of day. known_page events sit on URLs that existed before the change and are on the polling watch list (polling can see them). structural events are new URLs published inside the window that the watch list does not contain (polling cannot see them). The 2010/2024-dated CPSC page URLs and the May 2025 ACCC/Australian and May 2025 EU pages predate the window; their in-window dated updates are what the events record. EU known-page events use the Safety Gate corrigendum display date on the search card because the alert pages themselves carry no revision-date marker."
   },
-  "freeze": null,
+  "freeze": {
+    "frozen_at": "2026-10-14T13:59:55.465165Z",
+    "human_verifier": "Jaydon",
+    "preregistered_digest": "11d8303f94d5e47f47d6fecb3426e42980085646a517572113e25fc493c67698",
+    "digest_recipe": "sha256(canonical_bytes(preregistered))"
+  },
   "outcomes": {
     "sources": [],
     "reviews": [],
