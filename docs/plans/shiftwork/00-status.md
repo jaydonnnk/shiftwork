@@ -38,8 +38,9 @@ no retry.
   inference calls were spent against the one-call-per-meter ceiling.
 - [ ] The date guard pins live runs to the 2026-10-14 rate check; a later run needs a
   fresh same-day check, updated constants and its own evidence directory.
-- [ ] Nothing is committed or pushed; the demo and the evidence records await the next
-  authorization.
+- [x] Committed in three focused batches (`492745e` the demo, `e1167a4` the 00-status
+  record, `8751413` the curated evidence), pushed on `shiftwork/slice-25-live`, and
+  fast-forwarded into main as `61c621d..8751413` on 2026-10-14.
 
 Evidence: `docs/plans/shiftwork/evidence/slice25-live-2026-10-14/` (`once.marker`,
 `preflight.md`, `receipt.json`, `meter.json`, `journey.db`, `live-run.md`,
