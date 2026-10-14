@@ -440,3 +440,120 @@ the post-portability baseline. `tests/sealed tests/api tests/executor`: 337 pass
   defect in id generation, not S25 scope).
 - port_dead re-pin pass remains deferred from the portability checkpoint.
 - AGENTS.md section 6 interpreter rule is Windows-only; editing it needs user approval.
+
+## 8. S25 live-arm authorization packet (2026-10-12, decisions only, nothing run)
+
+The user asked for the live-arm decisions to be settled before any credential spend.
+Everything below is a decision or a code-measured constraint. No call, credential,
+installation or spend was used to write it, and the live arm still needs its own
+explicit go-ahead on top of these numbers.
+
+### 8.1 Ceilings are frozen by the code, not chosen here
+
+`shiftwork/live_budget.py` already fixes the shapes, so there is no free choice:
+
+- A qualifying comparison must be exactly 6 slots and 18 requests, with
+  `max_operations = 12`, `max_calls = 18` and projected inference spend at or under
+  $0.10. `LiveComparisonBudget.preflight` raises unless the shape, the model and the
+  rate ceiling all match.
+- A selected operation must be exactly 1 Sandbox operation and 1 inference call, under
+  `LiveOperationBudget`, whose preflight requires `requests == 1`. The two meters are
+  deliberately incompatible, so a comparison ceiling cannot silently cover an operation.
+- Both meters count a failed spawn or a failed provider request and never refund it.
+
+At the reviewed rates used by the S16 precedent ($0.06 per million input, $0.24 per
+million output, 32768 reserved input tokens and 1024 reserved output tokens per call),
+the projection is $0.00221184 per call: $0.0398 for one comparison, $0.0022 for one
+operation. The whole GTM live arm below projects at roughly $0.0442, hard-capped by the
+meters rather than by a budget note.
+
+Assist is metered separately by the pack policy, not by these two classes: the GTM
+registry sets `total_calls_per_shift = 2` and the orchestrator refuses a third. The S22b
+precedent wraps the live gateway in `OneHintGateway`, and the GTM journey already
+asserts a third call is refused.
+
+### 8.2 Decisions
+
+1. Rates. Re-check the public model card on the day of the run and pin that date in a
+   guard that refuses on any other day, exactly as `demos/slice16_live_comparison.py:44-49`
+   does. The check is a prerequisite of the run, not of this packet.
+2. Model. `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B`, already the default of
+   `config.SERVICE_MODEL` and the model the S16 rate card was checked against. No
+   override: the demo asserts `config.SERVICE_MODEL` equals it and refuses otherwise.
+3. Stages that run live. Phase A proves the whole journey with a test-double adapter
+   under the same frozen meters and the same request shapes at zero spend, writing
+   `proof_scope: TRUSTED_LOCAL_TEST_DOUBLE`, following the S22b offline arm. Phase B then
+   runs once each: one qualifying comparison (6 slots, 18 calls), the shift-1 HINT and
+   DIAGNOSIS assist calls (2, pack policy), and the two operations, the starter
+   diagnostic in shift 1 and the inherited selected operation in shift 2, each under its
+   own one-spawn one-call meter. Selection, close and inheritance stay controller-side
+   and offline. Phase B is the only spending phase and runs once, with no retry and no
+   top-up.
+4. Evidence. `docs/plans/shiftwork/evidence/slice25-live-<date>/` holding `once.marker`,
+   `receipt.json` with the per-endpoint HTTP receipts and the `proof_scope`, `meter.json`
+   with operations, calls and projected spend for each meter, `journey.db`, and the
+   privacy receipt proving no credential value or private needle reached a response
+   payload.
+
+### 8.3 Credentials: `.env` works for scripts, not for the browser
+
+`.env` is ignored by Git (`.gitignore:2-3`) and the S16 demo hand-parses it into
+`os.environ` (`slice16_live_comparison.py:23-30`), so a `.env` file is safe and works for
+a script-driven run. It is not enough for the browser journey: nothing under
+`shiftwork/` loads `.env`, so `create_app` and the preview read only the real process
+environment. Two acceptable paths, both requiring the values to stay out of the repo and
+out of any log:
+
+- export `NEBIUS_API_KEY` and `NEBIUS_PROJECT_ID` in the shell that launches the run, or
+- keep a file outside the repository, for example `~/.config/shiftwork/live.env` with
+  mode 600, and `set -a; source` it before launching.
+
+Either way the demo must never print, log or persist a value, and the response-payload
+privacy check must include both values as needles.
+
+### 8.4 Not yet done
+
+The bounded demo itself is not written. It is new slice work and belongs on its own
+branch with its own go-ahead, in the two-phase shape above, and the entitlement question
+in the session handoff (whether the S12 project ID still returns Sandbox permissions)
+is still open.
+
+### 8.5 Blocker found by measurement on 2026-10-14: the live comparison cannot run
+
+The entitlement preflight passed the same day (all six permissions true, exit 0, one
+control-plane call, no spawn and no inference). New key, correct `aiproject-...` project
+ID. While preparing the demo, a second check falsified decision 3's comparison stage.
+
+`LiveComparisonBudget.preflight` requires exactly `slots == 6` and `requests == 18`, and
+`comparison_flow.py:1322-1323` calls it with `slots=len(slots)` and
+`requests=sum(slot.executed_request_count)`. Measured from the two recorded comparison
+databases:
+
+| Board | slots | executed requests per slot | sum | frozen requirement |
+| --- | --- | --- | --- | --- |
+| northline | 6 | 3 | 18 | matches |
+| gtm | 6 | 4 | 24 | does not match |
+
+In both boards the per-slot executed count is the manifest's declared `request_count`
+plus one, so the frozen 18 is the Northline and Bellwether realized shape, not a general
+one. The GTM comparison therefore calls a preflight that raises
+`live comparison shape, model or rate ceiling is unverified`, and the reservation fails
+closed before any spend. The frozen operation ceiling may bind as well: 6 slots at the
+S22b ratio imply more than the 12 permitted operations, though that was not measured.
+
+The live operations are unaffected. The GTM operational workload is exactly one request
+(`gtm-incident-001` in `fixtures/requests/gtm_pipeline_incident.jsonl`), which is what
+`LiveOperationBudget` requires, so a live selected operation is runnable today under a
+one-spawn one-call ceiling.
+
+Consequence: the live arm as scoped in 8.2 cannot run end to end. Either the live stages
+are reduced to the operations, keeping the comparison TRUSTED_LOCAL, or the frozen
+comparison shape is widened for GTM, which changes a reviewed S16 and S22b control and
+needs its own decision and review rather than a quiet edit. Nothing was spent.
+
+Decisions taken 2026-10-14: the live arm is reduced to the **operations only**, with the
+comparison, selection, close and inheritance staying TRUSTED_LOCAL, and the pinned
+$0.06 and $0.24 rates are kept as a conservative upper bound after the vendor pricing
+table could not be read. Two live operations project at $0.0044 in total. Both decisions
+and the verbatim preflight output are recorded in
+[evidence/slice25-live-2026-10-14/preflight.md](evidence/slice25-live-2026-10-14/preflight.md).
