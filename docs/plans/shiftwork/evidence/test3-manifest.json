@@ -1,0 +1,44 @@
+{
+  "kind": "shiftwork-curation-manifest",
+  "schema_version": 1,
+  "preregistered": {
+    "window": {
+      "start": "2025-08-01",
+      "end": "2026-07-31"
+    },
+    "domains": [
+      "cpsc.gov",
+      "gov.uk",
+      "ec.europa.eu",
+      "productsafety.gov.au"
+    ],
+    "queries": [
+      "CPSC product recall announcement",
+      "CPSC safety warning",
+      "OPSS product safety alert",
+      "UK product recall notice",
+      "EU Safety Gate dangerous product alert",
+      "European Commission product safety alert",
+      "ACCC product safety recall",
+      "Australian product safety ban"
+    ],
+    "events": [],
+    "known_urls": [],
+    "thresholds": {
+      "min_structural_discoveries": 2,
+      "min_structural_domains": 2,
+      "max_reviewed_candidates_per_useful_fixture": 10,
+      "max_median_review_minutes": 30,
+      "max_unverified_content_effects": 0
+    },
+    "selection_rule": "earliest_qualifying_publication_time",
+    "notes": "DRAFT authored 2026-10-14 during the Slice 26 offline build. The preregistered rules above retain the historical values. Still to be instantiated in a later, separately authorized step, backed by public-source research and human source verification per event: the 12 dated events (two known-page and one structural per domain, each with verified_by and verified_at) and the polling watch list (at least the eight known-page event URLs). freeze-preregistration refuses until the corpus, watch list and queries are complete, and the tree is frozen before any discovery call or comparator output."
+  },
+  "freeze": null,
+  "outcomes": {
+    "sources": [],
+    "reviews": [],
+    "frozen_changes": [],
+    "discovery_runs": []
+  }
+}
