@@ -1,3 +1,54 @@
+**SLICE 25 LIVE ARM PASSED: TWO BOUNDED LIVE OPERATIONS, COMPARISON TRUSTED_LOCAL, 2026-10-14 Asia/Singapore.**
+
+The operator exercised the live go-ahead the same day the entitlement preflight passed
+(all six Sandbox permissions true, no spend) and the rate check kept the raised 0.06 and
+0.24 pins after the vendor pricing table could not be read; both records are in
+`evidence/slice25-live-2026-10-14/preflight.md`. The live comparison fails closed (the
+frozen 18-request shape against GTM's realized 24), so the approved scope is operations
+only; widening that frozen shape remains its own decision and review. The run bound the
+exact approved manifest digest
+`d969ab95e0c65688281f034da87b1e84c0175717e43d918fef55803a54c57c10` and ran once, with
+no retry.
+
+- [x] `demos/slice25_live_gtm.py` (untracked) rehearsed offline first: Phase A PASS
+  twice at zero spend, proof_scope TRUSTED_LOCAL_TEST_DOUBLE, run ids and assertions
+  matching the S25 recorded journey.
+- [x] Phase B PASS: proof_scope LIVE, live_operations 2, inference_calls 0, 31 endpoint
+  receipts including both intended 409 refusals.
+- [x] `run-0001` (shift `gtm-shift-01`) executed `ver-0001`, content hash equal to the
+  `gtm_starter` pin, as Sandbox operation `01a1393f-0521-73bb-9dac-d1b78b720861`,
+  SUCCESS in 3795 ms, capture 1713 bytes read back from the result checkpoint and
+  verified by byte count and SHA-256; checks 2 fail (WRONG_ACTION) and 2 pass;
+  INCIDENT_OPENED written.
+- [x] `run-0008` (shift `gtm-shift-02`) executed `ver-0002`, content hash equal to the
+  `gtm_compare_candidate_a` pin, as Sandbox operation
+  `01a1393f-1727-7709-b80f-e7e5c97d27be`, SUCCESS in 3672 ms, capture 1697 bytes read
+  back and verified; checks 4 pass; OWNER_ASSIGNED and SLA_CLOCK_STARTED for
+  `signal:incident-apac` with owner `owner-apac-platform`; INCIDENT_RESOLVED; chain
+  VALID; replay IDENTICAL.
+- [x] The qualifying comparison (6 trials, all eligible), the selection of `ver-0002`
+  with `ver-0003` retained, the close and the inheritance ran TRUSTED_LOCAL in the same
+  journey and wrote no business history.
+- [x] Privacy: every response payload and the receipt were scanned at run time against
+  sealed, host and both credential needles; the independent post-run scan (202 needles,
+  all encodings; `privacy.json`) found zero hits in `receipt.json` and `meter.json`, and
+  journey.db needle strings are confined to the controller-side protected comparison
+  evidence.
+- [ ] Sandbox compute cost is unverified and no zero total-cost claim is made; zero
+  inference calls were spent against the one-call-per-meter ceiling.
+- [ ] The date guard pins live runs to the 2026-10-14 rate check; a later run needs a
+  fresh same-day check, updated constants and its own evidence directory.
+- [ ] Nothing is committed or pushed; the demo and the evidence records await the next
+  authorization.
+
+Evidence: `docs/plans/shiftwork/evidence/slice25-live-2026-10-14/` (`once.marker`,
+`preflight.md`, `receipt.json`, `meter.json`, `journey.db`, `live-run.md`,
+`privacy.json`), gitignored and force-added by convention at curation time.
+
+Earlier notices below remain historical; this notice supersedes their pending-state
+labels for S25 only.
+Current checkpoint: [slice25-portability-checkpoint-2026-10-11.md](slice25-portability-checkpoint-2026-10-11.md).
+
 **SLICE 25 GTM REVENUE FLOOR CLIENT ACCEPTED ON OFFLINE EVIDENCE; TWO PRE-EXISTING RED ROWS DEFERRED, 2026-10-12 Asia/Singapore.**
 
 S25 completed the GTM revenue floor client on `shiftwork/slice-25` from main `b5a9b95`,
