@@ -23,10 +23,11 @@ top-10 results, not the pages' presence in Tavily's index (not measured).
   preregistered event URLs or their distinctive identifiers (brand names, alert
   ids, recall numbers); none of the 4 structural events (Tesla Powerwall, Joie
   Serina, Dacia Duster, JOOM baby bottles) is among any query's top 10. The
-  only category adjacency to a structural event is two kept Australian sources
-  on baby bottle self-feeding devices (`src-0059`, `src-0066`): neither is the
-  JOOM recall page nor names JOOM, and even generously attributing them to
-  ev-au-structural stays at 1 discovery on 1 domain, below both thresholds.
+  only kept sources in the same product type as a structural event are two
+  Australian ones on baby bottle self-feeding devices (`src-0059`, `src-0066`):
+  neither is the JOOM recall page nor names JOOM, and even generously
+  attributing them to ev-au-structural stays at 1 discovery on 1 domain, below
+  both thresholds.
 - [x] Comparator output (reproduction: `python -m shiftwork.curation.ablation
   --manifest docs/plans/shiftwork/evidence/test3-manifest.json`): VERDICT
   DROP_TAVILY_CLAIM with the two discovery checks as the only DROP reasons;
@@ -49,8 +50,9 @@ top-10 results, not the pages' presence in Tavily's index (not measured).
   answered at submission time remains the user's call with this DROP on
   record.
 - [x] The manifest carries the run receipts and is committed: `da79fa4` (the
-  receipts) and `cdbc199` (this record) on `shiftwork/slice-26`, force-added
-  for the ignored evidence path, pushed, and fast-forward-merged into main as
+  receipts; its gitignored directory stages with the `git add -f` working form
+  per MISTAKES.md 2026-10-14) and `cdbc199` (this record) on
+  `shiftwork/slice-26`, pushed, and fast-forward-merged into main as
   `fbebb0c..cdbc199` under Jaydon's 2026-10-14 go-ahead.
 - [ ] Limits: one run of the pinned queries; each query's top 10 is the entire
   candidate pool and cross-run ranking variability was not measured; the two
