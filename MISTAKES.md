@@ -2773,3 +2773,26 @@ The pending-state repair also covers opening/operating and close/next-shift comp
   makes the claim's absence falsifiable); and record any commit count by
   enumerating the actual range at record time. Records corrected in place the same
   day; the pushed `46b6cdb` message stands corrected on record, not rewritten.
+
+## 2026-10-14 (S26 corpus freeze records): a staging claim written from check-ignore instead of the real `git add`
+
+- What happened: the S26 corpus/freeze notice in `00-status.md` first claimed the
+  tracked manifest "stages with a normal `git add`" because `git check-ignore`
+  answered "not ignored" for it; the next staging attempt exited 1 with the
+  ignored-paths warning and broke the `git add && git commit` chain. The bullet
+  was rewritten before its commit to say a plain `git add` "refuses" the path,
+  and a clean-room reproduction (git 2.50.1) then showed that too was imprecise:
+  the tracked edit IS staged despite the exit-1 warning (the warning stops an
+  `&&` chain, not the staging), while a new file in the directory is refused
+  outright until `git add -f`. The bullet was refined to that in a follow-up
+  record commit the same day; no run result or enforcement behavior was affected.
+- Root cause: staging behavior was inferred from `git check-ignore` output, which
+  without `--no-index` reports tracked files as not ignored regardless of the
+  rules, instead of from the operation itself; the rewrite then over-corrected
+  without reproducing the exit-1 path's actual effect on the index.
+- Prevention: prove a staging claim by running that exact operation on a
+  clean-room copy (never on the record itself), and reproduce an intermediate
+  claim before writing it; in this git version a tracked file under an ignored
+  directory stages with exit 1 and a warning while a new file there needs
+  `-f`; `git check-ignore` needs `--no-index` to reveal the rule for tracked
+  paths, and evidence-directory commits use `git add -f`.
