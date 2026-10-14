@@ -1,3 +1,112 @@
+**SLICE 26 OFFLINE BUILD COMPLETE: TAVILY CURATION PACKAGE, PREREGISTRATION MANIFEST AND OBLIGATION 48 SUITE; LIVE STEPS AWAIT THEIR OWN AUTHORIZATIONS, 2026-10-14 Asia/Singapore.**
+
+The user gave Slice 26 its go-ahead on 2026-10-14 after the pre-flight surfaced the
+operator prerequisites: a Tavily account and `TAVILY_API_KEY` for the live call,
+reserved human review time for the median-review-time threshold, and the separate
+authorizations still standing between this offline build and any live step. This
+build ran offline on `shiftwork/slice-26`: no credential, no live call, no spend,
+no push. Everything below is offline evidence only. The build is committed in
+focused batches on `shiftwork/slice-26` (this record is the final batch), and the
+corpus-instantiation phase follows under its own authorization.
+
+- [x] `shiftwork/curation/` implemented per Gate 3 section 3.8: `MissionSourceState`
+  and `MissionSource` with the approved fields; the operator lifecycle in
+  `pipeline.py` (`discover` with the live Tavily Search transport, `verify`,
+  `reject`, `freeze`, manifest load/save, and `freeze-preregistration` pinning
+  `sha256(canonical_bytes(preregistered))`); and the comparator in `ablation.py`.
+- [x] The live transport follows the vendored `.tv/` reference: one HTTP POST per
+  query to `https://api.tavily.com/search`, Bearer `TAVILY_API_KEY`, allow-listed
+  `include_domains`, the frozen `start_date`/`end_date`, `include_published_date`
+  and `filter_by_published_date`, no retries. The key is never stored in the
+  manifest, echoed in output or included in error messages; `discover` refuses an
+  unfrozen manifest and refuses a missing key before any request.
+- [x] The ablation compares the frozen curriculum (static control, covering none
+  of the fresh corpus by construction), the retained known-page polling watch
+  list (polling keeps known URLs and never gains them) and the live Tavily arm
+  over the retained 12-event corpus (two known-page and one structural event per
+  domain), selects the earliest qualifying publication time per event, and
+  returns `KEEP_TAVILY_CLAIM` only when all six pre-registered checks pass:
+  useful structural discoveries >= 2, distinct domains >= 2, reviewed candidates
+  per useful fixture <= 10, median review minutes <= 30, unverified or
+  non-allow-listed effects <= 0, and the executable-change rule. Each check is a
+  named DROP branch; DROP is a recorded outcome (CLI exit 0) while protocol
+  refusals (unfrozen manifest, digest mismatch, results dated before the freeze,
+  dangling references, missing reviews) exit 2.
+- [x] `tests/curation/test_ablation.py`: 22 tests passing, including one named
+  DROP branch per threshold with every other check passing, the polling
+  keep/never-grow mechanics, the earliest-qualifying selection and dedupe,
+  freeze retention refusals (window, domains, per-domain event shape, threshold
+  values, selection rule, watch-list placement, per-event verification), digest
+  immutability, results-before-freeze refusals, a canonical save/load round
+  trip, and the runtime import isolation in both directions.
+- [x] `tests/s26_mutation_proofs.py`: 17 rows, all `FAIL_CAUGHT`, each faulting
+  one guard (the six threshold branches, the selection rule, polling membership
+  and hash-change detection, the window and threshold retention checks, the
+  digest check, the freeze-before-results check, the comparator ordering
+  refusal, the structural-in-watch-list refusal, and each runtime import probe
+  via an injected import) with every target restored byte-for-byte.
+- [x] Import isolation (Gate 3 section 3.8): a static AST scan over every
+  runtime module (self-tested against plain, relative and `__import__` forms)
+  and two subprocess probes proving that importing `shiftwork.app` loads no
+  curation module and that importing curation loads neither `shiftwork.sealed`
+  nor `shiftwork.executor`.
+- [x] The draft preregistration `docs/plans/shiftwork/evidence/test3-manifest.json`
+  is authored and loads through the CLI: the retained 2025-08-01 to 2026-07-31
+  UTC window, the four official domains, the pinned threshold values, the
+  earliest-qualifying selection rule and eight draft queries are in place. The
+  12-event corpus and the polling watch list are intentionally still empty, so
+  `freeze-preregistration` refuses (by design) and `discover`/`ablation` refuse
+  the unfrozen manifest. The file sits inside the gitignored evidence directory
+  and needs a force-add when curation time comes.
+- [x] The operator CLIs run: `status`, `freeze-preregistration`, `discover`,
+  `verify`, `reject`, `freeze`, and
+  `python -m shiftwork.curation.ablation --manifest ...` prints the quarantined
+  discovery, human verification and frozen-change states plus the three-arm
+  table, the threshold table and a final `VERDICT:` line.
+- [x] Interpretation record, where the Slice 26 contract leaves mechanics open
+  (full text in the module docstrings): "useful" requires an executable frozen
+  fixture, and a link-only or prose-only outcome cannot be counted and fires the
+  executable-change rule when nothing executable was found; the review-cost
+  thresholds are scoped to the useful structural fixtures' candidate sets; the
+  pinned per-domain layout makes the two-domains clause collapse into the
+  two-discoveries clause under a retained corpus, so the domains branch is
+  enforced and mutation-proved through a superseded-corpus construction; scores
+  and response times are recorded as strings inside the S3.8 `JsonValue`
+  provenance because the repo's canonical JSON excludes floats, while the exact
+  floats stay in the discovery-run receipts.
+- [x] `shiftwork/domain/models.py`'s stale "curation models remain planned"
+  sentence corrected to point at `shiftwork.curation` (docstring only, no
+  behavior change).
+- [x] Verification: `python -m pytest tests/curation/test_ablation.py -q` 22
+  passed; the S26 mutation harness 17 of 17 caught with byte-exact restores; the
+  sealed import-graph and evaluator purity suites 43 passed; the non-packaging
+  full suite 1 failed, 1423 passed, 1 skipped, where the single failure is the
+  deferred `port_dead` row and the count matches the S25 baseline (1401) plus
+  the 22 new tests exactly.
+- [ ] The full run including `tests/packaging` shows one extra failure in
+  `test_clean_env_install_and_run`: its fresh-venv creation aborts in
+  `ensurepip` (SIGABRT) under this machine's managed interpreter before any repo
+  code executes. This reproduces standalone outside pytest and is a pre-existing
+  environment defect, unrelated to S26; packaging stays excluded per the
+  standing convention.
+- [ ] Still to run, each separately authorized: corpus instantiation research
+  over the public official sources plus the human per-event source verification,
+  then `freeze-preregistration`; the Tavily account/key and the bounded live
+  `discover()` run (one search per preregistered query); the timed human
+  candidate review; the fixture freezes; and the comparator output whose
+  KEEP/DROP verdict is the record that governs the hackathon Tavily answer
+  (`HACKATHON_REQUIREMENTS.md` lines 105 to 112).
+- [ ] Limits: the comparator has never seen real results; the review-time
+  threshold is untested against real review flows; the live transport's success
+  path is proven only against an injected fake response; every number above is
+  offline evidence and no discovery, verification or verdict has occurred.
+- Affected-ADR check: ADR 0001's forbidden-reader rule now also covers the new
+  package (the sealed import-graph scan is green with curation in the tree); no
+  ADR decision is changed by this build.
+
+Earlier notices below remain historical; this notice supersedes their pending-state
+labels for S26 only.
+
 **SLICE 25 LIVE-ARM REVIEW ROUND COMPLETE: TWO MINOR RECORD DEFECTS FIXED; S25 COMPLETE, 2026-10-14 Asia/Singapore.**
 
 An independent review round of the published live arm verified its records (receipt,
