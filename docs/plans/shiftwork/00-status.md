@@ -1,3 +1,72 @@
+**SLICE 26 CORPUS VERIFIED AND PREREGISTRATION FROZEN: 12/12 EVENTS HUMAN-VERIFIED BY JAYDON, DIGEST PINNED; LIVE ARM AND COMMIT STILL AWAIT THEIR OWN AUTHORIZATIONS, 2026-10-14 Asia/Singapore.**
+
+The corpus-instantiation phase ran under its own authorization. The 12-event corpus
+(two known-page and one structural event per domain across cpsc.gov, gov.uk,
+ec.europa.eu and productsafety.gov.au) was researched from the public record and
+presented to Jaydon per event with URLs, dates and per-event checks; he confirmed
+all 12 on 2026-10-14 and the preregistration is now frozen. Everything in this
+notice is offline evidence: no credential, no live call, no spend, no push. The
+manifest edits (corpus, verifications and freeze block) are uncommitted on
+`shiftwork/slice-26` pending the commit authorization; the live Tavily arm remains
+separately authorized.
+
+- [x] Corpus pinned in `docs/plans/shiftwork/evidence/test3-manifest.json`: 12/12
+  events (8 known_page, 4 structural; exactly two known-page and one structural
+  per domain), the 8-URL polling watch list (exactly the eight known-page event
+  URLs), the eight preregistered queries, and the pinned thresholds and
+  earliest-qualifying selection rule untouched.
+- [x] Human source verification recorded before freezing: `verified_by` =
+  "Jaydon" and `verified_at` = 2026-10-14T13:59:47Z on all 12 events, only after
+  his confirmation of every event. `status` printed 12 problem(s) (all "no
+  recorded human source verification") before the record and "ready to freeze"
+  after it.
+- [x] Freeze: `freeze-preregistration --verifier Jaydon` pinned
+  `preregistered_digest` = sha256(canonical_bytes(preregistered)) =
+  11d8303f94d5e47f47d6fecb3426e42980085646a517572113e25fc493c67698 at
+  2026-10-14T13:59:55.465165Z; `status` after the freeze reports "frozen: yes".
+  The digest makes the preregistration immutable: it is never re-frozen or
+  tuned.
+- [x] Curation suite re-run on the frozen manifest: `python -m pytest
+  tests/curation -q` 22 passed. No other test reads the real manifest; the only
+  other `test3-manifest.json` reference (`tests/curation/test_ablation.py:906`)
+  is a tmp-path fixture name.
+- [x] Post-slice cleanup scan (architect-reviewer, post-slice mode): no
+  orphaned modules in `shiftwork/**`, no unused imports and no unreferenced
+  public defs in the curation package, no stray or scratch files (working tree
+  holds only the two intended records), no skipped or xfailed curation tests.
+  The scan re-ran `tests/s26_mutation_proofs.py` on the frozen tree, where all
+  17 rows failed their named test at an assertion with byte-exact restores.
+  Nothing recommended for deletion.
+- [x] Honest evidence caveats, carried in the manifest notes: the two EU
+  known-page dates rest on the Safety Gate search-card display date, the weakest
+  basis in the corpus (the alert pages carry no revision-date marker); the CPSC
+  known-page dates rest on dated "Note:" markers and the ACCC ones on "Recall
+  updated on" lines on their pages; `published_at` is the source's calendar date
+  at T00:00:00Z because every source states dates without times.
+- [x] The offline build this phase extends is enumerated at this record's time:
+  `git log fbebb0c..27afc5e` lists five commits, `582c523` (curation package),
+  `2b62ef7` (obligation 48 tests), `0479f2a` (guard-mutation receipt), `640fb45`
+  (draft manifest, force-added into the gitignored evidence directory) and
+  `27afc5e` (offline-build 00-status record).
+- [ ] Still to run, each separately authorized: the Tavily account and
+  `TAVILY_API_KEY` preflight, the bounded live `discover()` run (one search per
+  preregistered query), the timed human candidate review, the fixture freezes,
+  and the comparator output whose KEEP/DROP verdict governs the hackathon Tavily
+  answer.
+- [x] The manifest corpus/verification/freeze edits are committed in focused
+  batches on `shiftwork/slice-26` (the frozen manifest, then this record; no
+  co-author footer) and pushed to origin under the user's 2026-10-14 go-ahead.
+  The force-add the offline-build notice anticipated is real: a plain
+  `git add` refuses the ignored evidence path even though the file is tracked,
+  so `git add -f` is needed, and any later receipts commit will need the same.
+- [ ] Limits: no discovery, review or comparator verdict has occurred; the
+  recorded dates are what the sources' own page annotations state, not
+  independently reconstructed revision histories; live Tavily behavior,
+  review-cost realism and the ablation outcome all remain untested.
+
+Earlier notices below remain historical; this notice supersedes their pending-state
+labels for S26 only.
+
 **SLICE 26 OFFLINE BUILD COMPLETE: TAVILY CURATION PACKAGE, PREREGISTRATION MANIFEST AND OBLIGATION 48 SUITE; LIVE STEPS AWAIT THEIR OWN AUTHORIZATIONS, 2026-10-14 Asia/Singapore.**
 
 The user gave Slice 26 its go-ahead on 2026-10-14 after the pre-flight surfaced the
