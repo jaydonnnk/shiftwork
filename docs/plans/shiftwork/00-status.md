@@ -19,10 +19,14 @@ top-10 results, not the pages' presence in Tavily's index (not measured).
   query with request ids and response times; 66 sources `src-0001..0066`, all
   QUARANTINED; all 14 drops carry `drop_reason: duplicate` (URLs already kept
   from earlier queries).
-- [x] Zero-match check, run at record time over all 80 raw results: normalized
-  URL equality and a product-keyword scan against all 12 preregistered events
-  returned zero matches; none of the 4 structural events (Tesla Powerwall, Joie
-  Serina, Dacia Duster, JOOM baby bottles) is among any query's top 10.
+- [x] Zero-match check over all 80 raw results: no result matches any of the 12
+  preregistered event URLs or their distinctive identifiers (brand names, alert
+  ids, recall numbers); none of the 4 structural events (Tesla Powerwall, Joie
+  Serina, Dacia Duster, JOOM baby bottles) is among any query's top 10. The
+  only category adjacency to a structural event is two kept Australian sources
+  on baby bottle self-feeding devices (`src-0059`, `src-0066`): neither is the
+  JOOM recall page nor names JOOM, and even generously attributing them to
+  ev-au-structural stays at 1 discovery on 1 domain, below both thresholds.
 - [x] Comparator output (reproduction: `python -m shiftwork.curation.ablation
   --manifest docs/plans/shiftwork/evidence/test3-manifest.json`): VERDICT
   DROP_TAVILY_CLAIM with the two discovery checks as the only DROP reasons;
@@ -36,13 +40,18 @@ top-10 results, not the pages' presence in Tavily's index (not measured).
 - [x] Adjudication: Jaydon accepted the DROP on 2026-10-14 as the honest
   outcome. Per the decision of record (Gate 4 S11 decision 5;
   `HACKATHON_REQUIREMENTS.md` lines 105 to 112), the KEEP/DROP verdict governs
-  the pitch: no Tavily discovery claim. The factual qualification (a shipped,
-  operator-run CLI that made functional runtime Tavily calls) is true and
-  receipted; how the bonus question is answered at submission time remains the
-  user's call with this DROP on record.
-- [ ] The manifest now carries the run receipts and is uncommitted on
-  `shiftwork/slice-26` (force-add needed); this record is uncommitted;
-  committing and pushing need the user's go-ahead.
+  the pitch: no Tavily discovery claim. The receipted facts (an operator-run
+  curation CLI that made functional runtime Tavily calls, with its discovery
+  receipts in the manifest) are true; whether the shipped CLI satisfies the
+  bonus qualification is an interpretation question under the same
+  `HACKATHON_REQUIREMENTS.md` clause, and it reached main only with the
+  2026-10-14 merge and push (`fbebb0c..cdbc199`). How the bonus question is
+  answered at submission time remains the user's call with this DROP on
+  record.
+- [x] The manifest carries the run receipts and is committed: `da79fa4` (the
+  receipts) and `cdbc199` (this record) on `shiftwork/slice-26`, force-added
+  for the ignored evidence path, pushed, and fast-forward-merged into main as
+  `fbebb0c..cdbc199` under Jaydon's 2026-10-14 go-ahead.
 - [ ] Limits: one run of the pinned queries; each query's top 10 is the entire
   candidate pool and cross-run ranking variability was not measured; the two
   vacuous PASS checks are not evidence of review-cost efficiency; no diagnostic
