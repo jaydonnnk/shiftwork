@@ -1,0 +1,30 @@
+{
+  "record": "post-run independent privacy scan of the S25 live evidence",
+  "written": "2026-10-14 Asia/Singapore",
+  "needles": {
+    "source": "orchestrator._private_public_needles()",
+    "count": 202,
+    "credential_values_included": false,
+    "credential_note": "the exported NEBIUS_API_KEY and NEBIUS_PROJECT_ID values were not available to this post-run scan; the demo scanned every response payload and the final receipt against them at run time and writes the receipt only after all scans pass (fail-closed)"
+  },
+  "method": "serialized_contains for JSON surfaces (raw, forward-slash, base64 and JSON-escaped forms with a recursive decoded-parts walk); raw byte scan for journey.db",
+  "surfaces": {
+    "receipt.json": {
+      "hits": [],
+      "result": "clean"
+    },
+    "meter.json": {
+      "hits": [],
+      "result": "clean"
+    },
+    "journey.db": {
+      "hits": "needle strings occur only in controller-side protected comparison evidence: protected_case_snapshots (payload_json, resolved_state_bytes) and the six trusted-local comparison runs' retained raw evidence (run_outputs ordinal 4 and task_assessments request ids for run-0002 through run-0007)",
+      "operation_runs_clean": [
+        "run-0001",
+        "run-0008"
+      ],
+      "result": "expected: the sealed comparison material is retained raw in the controller store and never reached a response payload served by the API"
+    }
+  },
+  "result": "PASS: no private needle reached a response payload archived in receipt.json"
+}

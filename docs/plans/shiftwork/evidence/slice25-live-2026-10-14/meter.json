@@ -1,0 +1,31 @@
+{
+  "pinned_rates": {
+    "input_usd_per_million": "0.06",
+    "output_usd_per_million": "0.24",
+    "rate_check_day": "2026-10-14"
+  },
+  "per_call_projected_usd": "0.00221184",
+  "worst_case_two_meter_ceiling_usd": "0.00442368",
+  "meters": {
+    "starter_operation": {
+      "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+      "operations": 1,
+      "calls": 0,
+      "projected_usd": "0.00000000",
+      "max_operations": 1,
+      "max_calls": 1,
+      "max_projected_usd": "0.10"
+    },
+    "inherited_operation": {
+      "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+      "operations": 1,
+      "calls": 0,
+      "projected_usd": "0.00000000",
+      "max_operations": 1,
+      "max_calls": 1,
+      "max_projected_usd": "0.10"
+    }
+  },
+  "note": "projected_usd is computed from spent calls; failed attempts are never refunded and the ceiling is the approved worst case",
+  "sandbox_charge": "unverified; no zero total-cost claim"
+}

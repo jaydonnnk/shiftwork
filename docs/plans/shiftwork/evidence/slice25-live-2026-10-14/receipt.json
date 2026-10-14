@@ -1,0 +1,2580 @@
+{
+  "status": "PASS",
+  "proof_scope": "LIVE",
+  "mode": "operations only; comparison, selection, close and inheritance stayed TRUSTED_LOCAL",
+  "manifest": {
+    "action": "S25_GTM_TWO_BOUNDED_LIVE_OPERATIONS",
+    "date": "2026-10-14 Asia/Singapore",
+    "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+    "image": "c7ad32fe-8621-3cd2-9022-521c6da02ac1",
+    "live_stages": [
+      "shift-1 starter diagnostic operation",
+      "shift-2 inherited selected operation"
+    ],
+    "trusted_local_stages": [
+      "investigation",
+      "candidate freezes",
+      "qualifying comparison",
+      "selection",
+      "close",
+      "inheritance"
+    ],
+    "meter_shape": {
+      "meters": 2,
+      "operations_per_meter": 1,
+      "calls_per_meter": 1,
+      "requests_required": 1,
+      "input_usd_per_million": "0.06",
+      "output_usd_per_million": "0.24",
+      "per_call_projected_usd": "0.00221184",
+      "worst_case_two_meter_ceiling_usd": "0.00442368"
+    },
+    "rate_check": {
+      "day": "2026-10-14",
+      "note": "the vendor pricing table could not be read; the raised 0.06 and 0.24 pins stay a conservative upper bound, recorded in evidence/slice25-live-2026-10-14/preflight.md"
+    },
+    "reviewed_material_approval_digest": "8d87c2dc279f31f3206ec389e0f72b34b50e038c59bc764ef60c13489b62d1fa",
+    "gtm_fixture_pins": {
+      "gtm_starter": [
+        "4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2",
+        "a24b2e15a4ac11e41806e7f7a74e4cc35c3806bc722d40af5d38675bc9cdfea8"
+      ],
+      "gtm_compare_candidate_a": [
+        "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+        "aa363640af12212a57f8b74f2f698c9773d2693154c4972eaa599d9c603c456d"
+      ],
+      "gtm_compare_candidate_b": [
+        "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+        "708ef678d36244d432455b0757feca0d4bd61a70eecc9493bf9a25419b91e7c2"
+      ]
+    },
+    "operational_workload": "fixtures/requests/gtm_pipeline_incident.jsonl (one request: gtm-incident-001)",
+    "inference_calls_expected": "the reviewed GTM workflows make no inference call; the meters cap one call each",
+    "sandbox_charge": "unverified; no zero total-cost claim",
+    "output_destination": "docs/plans/shiftwork/evidence/slice25-live-2026-10-14",
+    "retries": "none; stop on any failed phase, no new reservation or top-up"
+  },
+  "manifest_sha256": "d969ab95e0c65688281f034da87b1e84c0175717e43d918fef55803a54c57c10",
+  "http": [
+    {
+      "method": "POST",
+      "path": "/api/engagements/gtm/shifts",
+      "status": 201,
+      "body": {
+        "id": "gtm-shift-01",
+        "engagement_slug": "gtm",
+        "seq": 1,
+        "state": "open",
+        "opened_at": "2026-10-14T07:09:51.891338Z",
+        "closed_at": null,
+        "opening_mode": "STANDARD",
+        "operation_allowed": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/engagements/gtm/board",
+      "status": 200,
+      "body": {
+        "engagement_slug": "gtm",
+        "business_kind": "gtm",
+        "latest_shift": {
+          "id": "gtm-shift-01",
+          "engagement_slug": "gtm",
+          "seq": 1,
+          "state": "open",
+          "opened_at": "2026-10-14T07:09:51.891338Z",
+          "closed_at": null,
+          "opening_mode": "STANDARD",
+          "operation_allowed": true
+        },
+        "latest_version": {
+          "id": "ver-0001",
+          "shift_id": "gtm-shift-01",
+          "parent_id": null,
+          "content_hash": "4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2",
+          "contract": {
+            "catalog_version": 1,
+            "must_never": [
+              "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+            ],
+            "selections": {
+              "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+              "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+            },
+            "response_time_limit_ms": 3000,
+            "declared_limits": [
+              "Synthetic pipeline output; no CRM connection, message send or live model."
+            ]
+          },
+          "contract_catalog_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f",
+          "created_by": "template",
+          "created_at": "2026-10-14T07:09:51.891338Z"
+        },
+        "latest_run": null,
+        "operating_status": "STARTER_BASELINE",
+        "draft_base_version_id": "ver-0001",
+        "latest_saved_version_id": "ver-0001",
+        "operating_selection": {
+          "id": "sel-0001",
+          "kind": "STARTER_BASELINE",
+          "selected_version_id": "ver-0001",
+          "selected_content_hash": "4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2",
+          "comparison_id": null,
+          "retained_alternative_version_id": null,
+          "rationale": "Reviewed failing Stonebridge starter; wrong owner, not an eligible repair.",
+          "requirement_set_hash": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+          "prior_selection_id": null,
+          "state": "VALID",
+          "created_at": "2026-10-14T07:09:51.891338Z"
+        },
+        "inherited_requirements": null,
+        "artifact_files": [
+          "service.py"
+        ],
+        "requests_run": 0,
+        "attempts_used": 0,
+        "attempt_limit": 3,
+        "attempts_remaining": 3,
+        "incidents": [],
+        "total_incidents": 0,
+        "unresolved_limits": [],
+        "ledger_event_count": 0,
+        "ledger_totals": {},
+        "chain_status": "VALID"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/artifact-versions/ver-0001",
+      "status": 200,
+      "body": {
+        "id": "ver-0001",
+        "parent_id": null,
+        "content_hash": "4ee39e23810d0d58eed9eee1cdadb8c99010934da49ff581743e1564e9aecea2",
+        "files": {
+          "service.py": "\"\"\"Draft starter: routes every qualified signal to AMER/platform, ignoring region and product.\nSynthetic output records only; no model, CRM connection or message send.\n\"\"\"\nimport json\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib import Path\n\nsnapshot = json.loads(Path(\"shop.json\").read_text(encoding=\"utf-8\"))\nprocessed = {}\n\ndef decide(record):\n    value = record[\"value\"]\n    if value[\"suppressed\"] or value[\"employee_count\"] < 50:\n        return \"DISQUALIFIED\"\n    if snapshot[\"dependencies\"][record[\"dependency\"]] != \"available\" or record[\"record_age_ms\"] > 3600000:\n        return \"REVIEW\"\n    if value[\"region\"] == \"UNKNOWN\" or value[\"product\"] == \"UNKNOWN\" or value[\"confidence\"] < 80:\n        return \"REVIEW\"\n    # S23 uses synthetic recorded interpretation. It makes no inference call.\n    return {\"BUYING\": \"QUALIFIED\", \"RESEARCH\": \"DISQUALIFIED\", \"AMBIGUOUS\": \"REVIEW\"}[value[\"intent_label\"]]\n\ndef answer(request):\n    entity = request[\"entity_ref\"]\n    records = [r for r in snapshot[\"records\"] if r[\"entity_ref\"] == entity and r[\"kind\"] == \"signal\"]\n    if len(records) != 1:\n        return {\"request_id\": request[\"request_id\"], \"task_results\": [], \"evidence_refs\": [], \"uncertainty_codes\": []}\n    record = records[0]\n    value = record[\"value\"]\n    decision = decide(record)\n    owner = \"revenue-review\" if decision == \"REVIEW\" else snapshot[\"routing_rules\"].get(value[\"region\"] + \"/\" + value[\"product\"])\n    owner = \"owner-amer-platform\" if decision == \"QUALIFIED\" else owner\n    repeat = entity in processed or value[\"existing_record_ref\"] is not None\n    if entity in processed:\n        decision, owner = processed[entity]\n    tasks = []\n    def result(tid, kind, claim_value=None, active=True):\n        claims = [{\"kind\": kind, \"entity_ref\": entity, \"value\": claim_value, \"evidence_refs\": [record[\"record_id\"]]}] if active else []\n        tasks.append({\"task_id\": tid, \"status\": \"COMPLETED\" if active else \"NOT_APPLICABLE\", \"entity_ref\": entity,\n                      \"claims\": claims, \"commitment_ref\": None, \"explanation_code\": None})\n    result(\"qualification\", \"qualification\", decision)\n    active = decision != \"DISQUALIFIED\" and not repeat\n    result(\"owner\", \"owner_assignment\", owner, active)\n    result(\"write\", \"pipeline_write\", {\"owner\": owner, \"record_ref\": \"pipeline:\" + entity,\n           \"decision_trace\": [\"RECORDED_CLASSIFICATION\", decision]}, active)\n    result(\"handoff\", \"handoff\", \"revenue-review\", active and decision == \"REVIEW\")\n    if active:\n        processed[entity] = (decision, owner)\n    return {\"request_id\": request[\"request_id\"], \"task_results\": tasks, \"evidence_refs\": [record[\"record_id\"]], \"uncertainty_codes\": []}\n\nclass Handler(BaseHTTPRequestHandler):\n    def log_message(self, *_args):\n        pass\n    def do_POST(self):\n        request = json.loads(self.rfile.read(int(self.headers[\"Content-Length\"])))\n        body = json.dumps(answer(request), separators=(\",\", \":\")).encode()\n        self.send_response(200)\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\nif __name__ == \"__main__\":\n    with HTTPServer((\"127.0.0.1\", 0), Handler) as server:\n        print(json.dumps({\"port\": server.server_port}), flush=True)\n        server.serve_forever()\n"
+        },
+        "contract": {
+          "catalog_version": 1,
+          "must_never": [
+            "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+          ],
+          "selections": {
+            "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+            "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+          },
+          "response_time_limit_ms": 3000,
+          "declared_limits": [
+            "Synthetic pipeline output; no CRM connection, message send or live model."
+          ]
+        },
+        "authorship": "template"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/runs",
+      "status": 202,
+      "body": {
+        "id": "run-0001",
+        "shift_id": "gtm-shift-01",
+        "artifact_version_id": "ver-0001",
+        "attempt_number": 1,
+        "state": "QUEUED",
+        "adapter": "tokenfactory",
+        "failure_kind": null,
+        "started_at": "2026-10-14T07:09:51.933498Z",
+        "ended_at": null,
+        "purpose": "OPERATION",
+        "evidence_mode": "ISOLATED_LIVE",
+        "selection_id": "sel-0001"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/runs/run-0001",
+      "status": 200,
+      "body": {
+        "id": "run-0001",
+        "shift_id": "gtm-shift-01",
+        "artifact_version_id": "ver-0001",
+        "attempt_number": 1,
+        "state": "FINALIZED",
+        "adapter": "tokenfactory",
+        "failure_kind": null,
+        "started_at": "2026-10-14T07:09:51.933498Z",
+        "ended_at": "2026-10-14T07:09:56.026616Z",
+        "purpose": "OPERATION",
+        "evidence_mode": "ISOLATED_LIVE",
+        "selection_id": "sel-0001"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/runs/run-0001/outputs",
+      "status": 200,
+      "body": [
+        {
+          "id": "run-0001-out-1",
+          "run_id": "run-0001",
+          "request_ordinal": 1,
+          "request_text": "Process the APAC platform demo signal and hand it to its owner exactly once.",
+          "http_status": 200,
+          "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLWluY2lkZW50LTAwMSIsInRhc2tfcmVzdWx0cyI6W3sidGFza19pZCI6InF1YWxpZmljYXRpb24iLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJvd25lciIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJ2YWx1ZSI6Im93bmVyLWFtZXItcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hbWVyLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDppbmNpZGVudC1hcGFjIiwiZGVjaXNpb25fdHJhY2UiOlsiUkVDT1JERURfQ0xBU1NJRklDQVRJT04iLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+          "elapsed_ms": 2,
+          "transport_error": null,
+          "log_base64": "",
+          "customer_answer": {
+            "action": "answer",
+            "display_text": "Synthetic qualification: QUALIFIED. Some workflow task outputs were rejected by the independent assessment.",
+            "claims": [
+              {
+                "kind": "qualification",
+                "value": "QUALIFIED"
+              }
+            ],
+            "evidence_refs": [
+              "public:signal:incident-apac"
+            ],
+            "verified_record_age_ms": null
+          },
+          "public_shop_record": null,
+          "public_shop_record_ref": null,
+          "public_shop_snapshot_hash": null
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/runs/run-0001/checks",
+      "status": 200,
+      "body": [
+        {
+          "id": "cr-0001",
+          "run_id": "run-0001",
+          "verdict": "pass",
+          "observed_ref": "run-0001-out-1",
+          "expected_ref": null,
+          "reason_code": null,
+          "public_check_id": "task:gtm-incident-001:qualification"
+        },
+        {
+          "id": "cr-0002",
+          "run_id": "run-0001",
+          "verdict": "fail",
+          "observed_ref": "run-0001-out-1",
+          "expected_ref": null,
+          "reason_code": "WRONG_ACTION",
+          "public_check_id": "task:gtm-incident-001:owner"
+        },
+        {
+          "id": "cr-0003",
+          "run_id": "run-0001",
+          "verdict": "fail",
+          "observed_ref": "run-0001-out-1",
+          "expected_ref": null,
+          "reason_code": "WRONG_ACTION",
+          "public_check_id": "task:gtm-incident-001:write"
+        },
+        {
+          "id": "cr-0004",
+          "run_id": "run-0001",
+          "verdict": "pass",
+          "observed_ref": "run-0001-out-1",
+          "expected_ref": null,
+          "reason_code": null,
+          "public_check_id": "task:gtm-incident-001:handoff"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/engagements/gtm/ledger",
+      "status": 200,
+      "body": {
+        "chain_status": "VALID",
+        "events": [
+          {
+            "seq": 1,
+            "event_type": "INCIDENT_OPENED",
+            "cause_refs": [
+              "run-0001",
+              "cr-0002",
+              "run-0001-out-1"
+            ],
+            "payload": {
+              "catalog_version": 1,
+              "decision_trace": [
+                {
+                  "mandatory_pass": true,
+                  "outcome": "USEFUL_COMPLETION",
+                  "reason_codes": [],
+                  "request_id": "gtm-incident-001",
+                  "request_ordinal": 1,
+                  "task_id": "qualification"
+                },
+                {
+                  "mandatory_pass": false,
+                  "outcome": "INCORRECT_OUTPUT",
+                  "reason_codes": [
+                    "WRONG_ACTION"
+                  ],
+                  "request_id": "gtm-incident-001",
+                  "request_ordinal": 1,
+                  "task_id": "owner"
+                },
+                {
+                  "mandatory_pass": false,
+                  "outcome": "INCORRECT_OUTPUT",
+                  "reason_codes": [
+                    "WRONG_ACTION"
+                  ],
+                  "request_id": "gtm-incident-001",
+                  "request_ordinal": 1,
+                  "task_id": "write"
+                },
+                {
+                  "mandatory_pass": true,
+                  "outcome": "JUSTIFIED_REFUSAL",
+                  "reason_codes": [],
+                  "request_id": "gtm-incident-001",
+                  "request_ordinal": 1,
+                  "task_id": "handoff"
+                }
+              ],
+              "failed_task_ids": [
+                "owner",
+                "write"
+              ],
+              "mission_version": 1,
+              "reason_code": "WRONG_ACTION",
+              "request_id": "gtm-incident-001",
+              "rule_version": "operation-ledger-v3",
+              "signal_ref": "signal:incident-apac"
+            },
+            "synthetic": true,
+            "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+            "hash": "771d21a459ad9356c06644323a4639ebc3d36beb9f351731faffa48945fb57d8",
+            "derivation": {
+              "run_id": "run-0001",
+              "check_id": "cr-0002",
+              "observed_ref": "run-0001-out-1",
+              "request_ordinal": 1,
+              "request_text": "Process the APAC platform demo signal and hand it to its owner exactly once.",
+              "output_body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLWluY2lkZW50LTAwMSIsInRhc2tfcmVzdWx0cyI6W3sidGFza19pZCI6InF1YWxpZmljYXRpb24iLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJvd25lciIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJ2YWx1ZSI6Im93bmVyLWFtZXItcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hbWVyLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDppbmNpZGVudC1hcGFjIiwiZGVjaXNpb25fdHJhY2UiOlsiUkVDT1JERURfQ0xBU1NJRklDQVRJT04iLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+              "verdict": "fail",
+              "reason_code": "WRONG_ACTION"
+            },
+            "catalog": {
+              "catalog_version": 1,
+              "catalog_record": {
+                "engagement_slug": "gtm",
+                "version": 1,
+                "frozen_at": "2026-10-07T00:00:00Z",
+                "required_dimensions": [
+                  "MUST_NEVER",
+                  "ESCALATE_WHEN",
+                  "REPEAT_REQUEST_RULE"
+                ],
+                "options": [
+                  {
+                    "id": "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL",
+                    "dimension": "MUST_NEVER",
+                    "learner_label": "Every processed signal has its permitted owner and synthetic record exactly once.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  },
+                  {
+                    "id": "REVIEW_AMBIGUOUS_SIGNAL",
+                    "dimension": "ESCALATE_WHEN",
+                    "learner_label": "Ambiguous or low-confidence signals require a human review queue.",
+                    "evaluator_rule_id": "gtm.human_handoff"
+                  },
+                  {
+                    "id": "DEDUPLICATE_PIPELINE_BY_SIGNAL",
+                    "dimension": "REPEAT_REQUEST_RULE",
+                    "learner_label": "Retries keep the first owner and record without a second commitment.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  }
+                ],
+                "content_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/investigations",
+      "status": 201,
+      "body": {
+        "id": "inv-0001",
+        "source_run_id": "run-0001",
+        "source_request_ordinal": 1,
+        "cause": "The starter ignores the region/product owner map.",
+        "falsifier": "The captured APAC demo output already names its APAC owner.",
+        "public_test": "Compare the captured owner and record with the frozen route.",
+        "revision_of_id": null,
+        "authored_by": "learner",
+        "created_at": "2026-10-14T07:09:56.096660Z"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/shifts/gtm-shift-01/artifact",
+      "status": 200,
+      "body": {
+        "shift_id": "gtm-shift-01",
+        "files": {
+          "service.py": "\"\"\"Draft A: explicit commercial phrases route by rules; other plausible buying signals enter human review.\nSynthetic output records only; no model, CRM connection or message send.\n\"\"\"\nimport json\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib import Path\n\nsnapshot = json.loads(Path(\"shop.json\").read_text(encoding=\"utf-8\"))\nprocessed = {}\n\ndef decide(record):\n    value = record[\"value\"]\n    current = snapshot[\"dependencies\"][record[\"dependency\"]] == \"available\" and record[\"record_age_ms\"] <= 3600000\n    if value[\"suppressed\"] or value[\"employee_count\"] < 50:\n        return \"DISQUALIFIED\"\n    if not current or value[\"region\"] == \"UNKNOWN\" or value[\"product\"] == \"UNKNOWN\":\n        return \"REVIEW\"\n    if value[\"confidence\"] < 80 or value[\"intent_label\"] == \"AMBIGUOUS\":\n        return \"REVIEW\"\n    if value[\"intent_label\"] == \"RESEARCH\":\n        return \"DISQUALIFIED\"\n    return \"QUALIFIED\" if any(phrase in value[\"note\"].lower() for phrase in (\"demo\", \"pricing\", \"security review\")) else \"REVIEW\"\n\ndef answer(request):\n    entity = request[\"entity_ref\"]\n    records = [r for r in snapshot[\"records\"] if r[\"entity_ref\"] == entity and r[\"kind\"] == \"signal\"]\n    if len(records) != 1:\n        return {\"request_id\": request[\"request_id\"], \"task_results\": [], \"evidence_refs\": [], \"uncertainty_codes\": []}\n    record = records[0]\n    value = record[\"value\"]\n    decision = decide(record)\n    owner = \"revenue-review\" if decision == \"REVIEW\" else snapshot[\"routing_rules\"].get(value[\"region\"] + \"/\" + value[\"product\"])\n    # Preserve the region/product owner map.\n    repeat = entity in processed or value[\"existing_record_ref\"] is not None\n    if entity in processed:\n        decision, owner = processed[entity]\n    tasks = []\n    def result(tid, kind, claim_value=None, active=True):\n        claims = [{\"kind\": kind, \"entity_ref\": entity, \"value\": claim_value, \"evidence_refs\": [record[\"record_id\"]]}] if active else []\n        tasks.append({\"task_id\": tid, \"status\": \"COMPLETED\" if active else \"NOT_APPLICABLE\", \"entity_ref\": entity,\n                      \"claims\": claims, \"commitment_ref\": None, \"explanation_code\": None})\n    result(\"qualification\", \"qualification\", decision)\n    active = decision != \"DISQUALIFIED\" and not repeat\n    result(\"owner\", \"owner_assignment\", owner, active)\n    result(\"write\", \"pipeline_write\", {\"owner\": owner, \"record_ref\": \"pipeline:\" + entity,\n           \"decision_trace\": [\"RULES_FIRST\", decision]}, active)\n    result(\"handoff\", \"handoff\", \"revenue-review\", active and decision == \"REVIEW\")\n    if active:\n        processed[entity] = (decision, owner)\n    return {\"request_id\": request[\"request_id\"], \"task_results\": tasks, \"evidence_refs\": [record[\"record_id\"]], \"uncertainty_codes\": []}\n\nclass Handler(BaseHTTPRequestHandler):\n    def log_message(self, *_args):\n        pass\n    def do_POST(self):\n        request = json.loads(self.rfile.read(int(self.headers[\"Content-Length\"])))\n        body = json.dumps(answer(request), separators=(\",\", \":\")).encode()\n        self.send_response(200)\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\nif __name__ == \"__main__\":\n    with HTTPServer((\"127.0.0.1\", 0), Handler) as server:\n        print(json.dumps({\"port\": server.server_port}), flush=True)\n        server.serve_forever()\n"
+        },
+        "updated_at": "2026-10-14T07:09:56.101255Z"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/artifact/versions",
+      "status": 201,
+      "body": {
+        "id": "ver-0002",
+        "shift_id": "gtm-shift-01",
+        "parent_id": "ver-0001",
+        "content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+        "contract": {
+          "catalog_version": 1,
+          "must_never": [
+            "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+          ],
+          "selections": {
+            "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+            "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+          },
+          "response_time_limit_ms": 3000,
+          "declared_limits": [
+            "Synthetic pipeline output; no CRM connection, message send or live model."
+          ]
+        },
+        "contract_catalog_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f",
+        "created_by": "learner",
+        "created_at": "2026-10-14T07:09:56.106931Z"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/artifact-versions/ver-0002",
+      "status": 200,
+      "body": {
+        "id": "ver-0002",
+        "parent_id": "ver-0001",
+        "content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+        "files": {
+          "service.py": "\"\"\"Draft A: explicit commercial phrases route by rules; other plausible buying signals enter human review.\nSynthetic output records only; no model, CRM connection or message send.\n\"\"\"\nimport json\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib import Path\n\nsnapshot = json.loads(Path(\"shop.json\").read_text(encoding=\"utf-8\"))\nprocessed = {}\n\ndef decide(record):\n    value = record[\"value\"]\n    current = snapshot[\"dependencies\"][record[\"dependency\"]] == \"available\" and record[\"record_age_ms\"] <= 3600000\n    if value[\"suppressed\"] or value[\"employee_count\"] < 50:\n        return \"DISQUALIFIED\"\n    if not current or value[\"region\"] == \"UNKNOWN\" or value[\"product\"] == \"UNKNOWN\":\n        return \"REVIEW\"\n    if value[\"confidence\"] < 80 or value[\"intent_label\"] == \"AMBIGUOUS\":\n        return \"REVIEW\"\n    if value[\"intent_label\"] == \"RESEARCH\":\n        return \"DISQUALIFIED\"\n    return \"QUALIFIED\" if any(phrase in value[\"note\"].lower() for phrase in (\"demo\", \"pricing\", \"security review\")) else \"REVIEW\"\n\ndef answer(request):\n    entity = request[\"entity_ref\"]\n    records = [r for r in snapshot[\"records\"] if r[\"entity_ref\"] == entity and r[\"kind\"] == \"signal\"]\n    if len(records) != 1:\n        return {\"request_id\": request[\"request_id\"], \"task_results\": [], \"evidence_refs\": [], \"uncertainty_codes\": []}\n    record = records[0]\n    value = record[\"value\"]\n    decision = decide(record)\n    owner = \"revenue-review\" if decision == \"REVIEW\" else snapshot[\"routing_rules\"].get(value[\"region\"] + \"/\" + value[\"product\"])\n    # Preserve the region/product owner map.\n    repeat = entity in processed or value[\"existing_record_ref\"] is not None\n    if entity in processed:\n        decision, owner = processed[entity]\n    tasks = []\n    def result(tid, kind, claim_value=None, active=True):\n        claims = [{\"kind\": kind, \"entity_ref\": entity, \"value\": claim_value, \"evidence_refs\": [record[\"record_id\"]]}] if active else []\n        tasks.append({\"task_id\": tid, \"status\": \"COMPLETED\" if active else \"NOT_APPLICABLE\", \"entity_ref\": entity,\n                      \"claims\": claims, \"commitment_ref\": None, \"explanation_code\": None})\n    result(\"qualification\", \"qualification\", decision)\n    active = decision != \"DISQUALIFIED\" and not repeat\n    result(\"owner\", \"owner_assignment\", owner, active)\n    result(\"write\", \"pipeline_write\", {\"owner\": owner, \"record_ref\": \"pipeline:\" + entity,\n           \"decision_trace\": [\"RULES_FIRST\", decision]}, active)\n    result(\"handoff\", \"handoff\", \"revenue-review\", active and decision == \"REVIEW\")\n    if active:\n        processed[entity] = (decision, owner)\n    return {\"request_id\": request[\"request_id\"], \"task_results\": tasks, \"evidence_refs\": [record[\"record_id\"]], \"uncertainty_codes\": []}\n\nclass Handler(BaseHTTPRequestHandler):\n    def log_message(self, *_args):\n        pass\n    def do_POST(self):\n        request = json.loads(self.rfile.read(int(self.headers[\"Content-Length\"])))\n        body = json.dumps(answer(request), separators=(\",\", \":\")).encode()\n        self.send_response(200)\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\nif __name__ == \"__main__\":\n    with HTTPServer((\"127.0.0.1\", 0), Handler) as server:\n        print(json.dumps({\"port\": server.server_port}), flush=True)\n        server.serve_forever()\n"
+        },
+        "contract": {
+          "catalog_version": 1,
+          "must_never": [
+            "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+          ],
+          "selections": {
+            "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+            "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+          },
+          "response_time_limit_ms": 3000,
+          "declared_limits": [
+            "Synthetic pipeline output; no CRM connection, message send or live model."
+          ]
+        },
+        "authorship": "learner"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/shifts/gtm-shift-01/artifact",
+      "status": 200,
+      "body": {
+        "shift_id": "gtm-shift-01",
+        "files": {
+          "service.py": "\"\"\"Draft B: synthetic recorded intent at confidence 80 or higher routes directly; uncertain intent enters review.\nSynthetic output records only; no model, CRM connection or message send.\n\"\"\"\nimport json\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib import Path\n\nsnapshot = json.loads(Path(\"shop.json\").read_text(encoding=\"utf-8\"))\nprocessed = {}\n\ndef decide(record):\n    value = record[\"value\"]\n    if value[\"suppressed\"] or value[\"employee_count\"] < 50:\n        return \"DISQUALIFIED\"\n    if snapshot[\"dependencies\"][record[\"dependency\"]] != \"available\" or record[\"record_age_ms\"] > 3600000:\n        return \"REVIEW\"\n    if value[\"region\"] == \"UNKNOWN\" or value[\"product\"] == \"UNKNOWN\" or value[\"confidence\"] < 80:\n        return \"REVIEW\"\n    # S23 uses synthetic recorded interpretation. It makes no inference call.\n    return {\"BUYING\": \"QUALIFIED\", \"RESEARCH\": \"DISQUALIFIED\", \"AMBIGUOUS\": \"REVIEW\"}[value[\"intent_label\"]]\n\ndef answer(request):\n    entity = request[\"entity_ref\"]\n    records = [r for r in snapshot[\"records\"] if r[\"entity_ref\"] == entity and r[\"kind\"] == \"signal\"]\n    if len(records) != 1:\n        return {\"request_id\": request[\"request_id\"], \"task_results\": [], \"evidence_refs\": [], \"uncertainty_codes\": []}\n    record = records[0]\n    value = record[\"value\"]\n    decision = decide(record)\n    owner = \"revenue-review\" if decision == \"REVIEW\" else snapshot[\"routing_rules\"].get(value[\"region\"] + \"/\" + value[\"product\"])\n    # Preserve the region/product owner map.\n    repeat = entity in processed or value[\"existing_record_ref\"] is not None\n    if entity in processed:\n        decision, owner = processed[entity]\n    tasks = []\n    def result(tid, kind, claim_value=None, active=True):\n        claims = [{\"kind\": kind, \"entity_ref\": entity, \"value\": claim_value, \"evidence_refs\": [record[\"record_id\"]]}] if active else []\n        tasks.append({\"task_id\": tid, \"status\": \"COMPLETED\" if active else \"NOT_APPLICABLE\", \"entity_ref\": entity,\n                      \"claims\": claims, \"commitment_ref\": None, \"explanation_code\": None})\n    result(\"qualification\", \"qualification\", decision)\n    active = decision != \"DISQUALIFIED\" and not repeat\n    result(\"owner\", \"owner_assignment\", owner, active)\n    result(\"write\", \"pipeline_write\", {\"owner\": owner, \"record_ref\": \"pipeline:\" + entity,\n           \"decision_trace\": [\"RECORDED_CLASSIFICATION\", decision]}, active)\n    result(\"handoff\", \"handoff\", \"revenue-review\", active and decision == \"REVIEW\")\n    if active:\n        processed[entity] = (decision, owner)\n    return {\"request_id\": request[\"request_id\"], \"task_results\": tasks, \"evidence_refs\": [record[\"record_id\"]], \"uncertainty_codes\": []}\n\nclass Handler(BaseHTTPRequestHandler):\n    def log_message(self, *_args):\n        pass\n    def do_POST(self):\n        request = json.loads(self.rfile.read(int(self.headers[\"Content-Length\"])))\n        body = json.dumps(answer(request), separators=(\",\", \":\")).encode()\n        self.send_response(200)\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\nif __name__ == \"__main__\":\n    with HTTPServer((\"127.0.0.1\", 0), Handler) as server:\n        print(json.dumps({\"port\": server.server_port}), flush=True)\n        server.serve_forever()\n"
+        },
+        "updated_at": "2026-10-14T07:09:56.122668Z"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/artifact/versions",
+      "status": 201,
+      "body": {
+        "id": "ver-0003",
+        "shift_id": "gtm-shift-01",
+        "parent_id": "ver-0002",
+        "content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+        "contract": {
+          "catalog_version": 1,
+          "must_never": [
+            "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+          ],
+          "selections": {
+            "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+            "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+          },
+          "response_time_limit_ms": 3000,
+          "declared_limits": [
+            "Synthetic pipeline output; no CRM connection, message send or live model."
+          ]
+        },
+        "contract_catalog_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f",
+        "created_by": "learner",
+        "created_at": "2026-10-14T07:09:56.128923Z"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/artifact-versions/ver-0003",
+      "status": 200,
+      "body": {
+        "id": "ver-0003",
+        "parent_id": "ver-0002",
+        "content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+        "files": {
+          "service.py": "\"\"\"Draft B: synthetic recorded intent at confidence 80 or higher routes directly; uncertain intent enters review.\nSynthetic output records only; no model, CRM connection or message send.\n\"\"\"\nimport json\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib import Path\n\nsnapshot = json.loads(Path(\"shop.json\").read_text(encoding=\"utf-8\"))\nprocessed = {}\n\ndef decide(record):\n    value = record[\"value\"]\n    if value[\"suppressed\"] or value[\"employee_count\"] < 50:\n        return \"DISQUALIFIED\"\n    if snapshot[\"dependencies\"][record[\"dependency\"]] != \"available\" or record[\"record_age_ms\"] > 3600000:\n        return \"REVIEW\"\n    if value[\"region\"] == \"UNKNOWN\" or value[\"product\"] == \"UNKNOWN\" or value[\"confidence\"] < 80:\n        return \"REVIEW\"\n    # S23 uses synthetic recorded interpretation. It makes no inference call.\n    return {\"BUYING\": \"QUALIFIED\", \"RESEARCH\": \"DISQUALIFIED\", \"AMBIGUOUS\": \"REVIEW\"}[value[\"intent_label\"]]\n\ndef answer(request):\n    entity = request[\"entity_ref\"]\n    records = [r for r in snapshot[\"records\"] if r[\"entity_ref\"] == entity and r[\"kind\"] == \"signal\"]\n    if len(records) != 1:\n        return {\"request_id\": request[\"request_id\"], \"task_results\": [], \"evidence_refs\": [], \"uncertainty_codes\": []}\n    record = records[0]\n    value = record[\"value\"]\n    decision = decide(record)\n    owner = \"revenue-review\" if decision == \"REVIEW\" else snapshot[\"routing_rules\"].get(value[\"region\"] + \"/\" + value[\"product\"])\n    # Preserve the region/product owner map.\n    repeat = entity in processed or value[\"existing_record_ref\"] is not None\n    if entity in processed:\n        decision, owner = processed[entity]\n    tasks = []\n    def result(tid, kind, claim_value=None, active=True):\n        claims = [{\"kind\": kind, \"entity_ref\": entity, \"value\": claim_value, \"evidence_refs\": [record[\"record_id\"]]}] if active else []\n        tasks.append({\"task_id\": tid, \"status\": \"COMPLETED\" if active else \"NOT_APPLICABLE\", \"entity_ref\": entity,\n                      \"claims\": claims, \"commitment_ref\": None, \"explanation_code\": None})\n    result(\"qualification\", \"qualification\", decision)\n    active = decision != \"DISQUALIFIED\" and not repeat\n    result(\"owner\", \"owner_assignment\", owner, active)\n    result(\"write\", \"pipeline_write\", {\"owner\": owner, \"record_ref\": \"pipeline:\" + entity,\n           \"decision_trace\": [\"RECORDED_CLASSIFICATION\", decision]}, active)\n    result(\"handoff\", \"handoff\", \"revenue-review\", active and decision == \"REVIEW\")\n    if active:\n        processed[entity] = (decision, owner)\n    return {\"request_id\": request[\"request_id\"], \"task_results\": tasks, \"evidence_refs\": [record[\"record_id\"]], \"uncertainty_codes\": []}\n\nclass Handler(BaseHTTPRequestHandler):\n    def log_message(self, *_args):\n        pass\n    def do_POST(self):\n        request = json.loads(self.rfile.read(int(self.headers[\"Content-Length\"])))\n        body = json.dumps(answer(request), separators=(\",\", \":\")).encode()\n        self.send_response(200)\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\nif __name__ == \"__main__\":\n    with HTTPServer((\"127.0.0.1\", 0), Handler) as server:\n        print(json.dumps({\"port\": server.server_port}), flush=True)\n        server.serve_forever()\n"
+        },
+        "contract": {
+          "catalog_version": 1,
+          "must_never": [
+            "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+          ],
+          "selections": {
+            "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+            "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+          },
+          "response_time_limit_ms": 3000,
+          "declared_limits": [
+            "Synthetic pipeline output; no CRM connection, message send or live model."
+          ]
+        },
+        "authorship": "learner"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/experiments",
+      "status": 202,
+      "body": {
+        "id": "experiment-gtm-shift-01-c1",
+        "shift_id": "gtm-shift-01",
+        "kind": "QUALIFYING_COMPARISON",
+        "investigation_id": "inv-0001",
+        "declared_treatment": "Rules-first review versus recorded-confidence routing.",
+        "context_hash": "642054c9a76727d7273453a642e8c60d0ad261c5b69b0e076151457e7fe79b2b",
+        "context_evidence_class": "TRUSTED_LOCAL",
+        "condition": {
+          "id": "condition-normal",
+          "kind": "normal",
+          "public_label": "Normal public conditions",
+          "content_hash": "1a9d7cd051d691bcebed2917edc042ebc8f81dff6cf2b20b14f51c43bf9c834b"
+        },
+        "observed_run_id": null,
+        "workloads": [
+          {
+            "id": "workload-01",
+            "ordinal": 1,
+            "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+            "request_count": 3
+          },
+          {
+            "id": "workload-02",
+            "ordinal": 2,
+            "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+            "request_count": 3
+          },
+          {
+            "id": "workload-03",
+            "ordinal": 3,
+            "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+            "request_count": 3
+          }
+        ],
+        "candidates": [
+          {
+            "label": "A",
+            "artifact_version_id": "ver-0002",
+            "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33"
+          },
+          {
+            "label": "B",
+            "artifact_version_id": "ver-0003",
+            "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f"
+          }
+        ],
+        "trials": [
+          {
+            "pair_ordinal": 1,
+            "execution_ordinal": 1,
+            "candidate_label": "A",
+            "artifact_version_id": "ver-0002",
+            "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+            "workload_id": "workload-01",
+            "workload_ordinal": 1,
+            "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0002",
+            "state": "RESERVED",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [],
+            "observations": [],
+            "outputs": [],
+            "customer_text": null,
+            "missing_evidence": [
+              "the reserved comparison run has not finished"
+            ],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 1,
+            "execution_ordinal": 2,
+            "candidate_label": "B",
+            "artifact_version_id": "ver-0003",
+            "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+            "workload_id": "workload-01",
+            "workload_ordinal": 1,
+            "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0003",
+            "state": "RESERVED",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [],
+            "observations": [],
+            "outputs": [],
+            "customer_text": null,
+            "missing_evidence": [
+              "the reserved comparison run has not finished"
+            ],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 2,
+            "execution_ordinal": 3,
+            "candidate_label": "B",
+            "artifact_version_id": "ver-0003",
+            "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+            "workload_id": "workload-02",
+            "workload_ordinal": 2,
+            "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0004",
+            "state": "RESERVED",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [],
+            "observations": [],
+            "outputs": [],
+            "customer_text": null,
+            "missing_evidence": [
+              "the reserved comparison run has not finished"
+            ],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 2,
+            "execution_ordinal": 4,
+            "candidate_label": "A",
+            "artifact_version_id": "ver-0002",
+            "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+            "workload_id": "workload-02",
+            "workload_ordinal": 2,
+            "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0005",
+            "state": "RESERVED",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [],
+            "observations": [],
+            "outputs": [],
+            "customer_text": null,
+            "missing_evidence": [
+              "the reserved comparison run has not finished"
+            ],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 3,
+            "execution_ordinal": 5,
+            "candidate_label": "B",
+            "artifact_version_id": "ver-0003",
+            "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+            "workload_id": "workload-03",
+            "workload_ordinal": 3,
+            "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0006",
+            "state": "RESERVED",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [],
+            "observations": [],
+            "outputs": [],
+            "customer_text": null,
+            "missing_evidence": [
+              "the reserved comparison run has not finished"
+            ],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 3,
+            "execution_ordinal": 6,
+            "candidate_label": "A",
+            "artifact_version_id": "ver-0002",
+            "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+            "workload_id": "workload-03",
+            "workload_ordinal": 3,
+            "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0007",
+            "state": "RESERVED",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [],
+            "observations": [],
+            "outputs": [],
+            "customer_text": null,
+            "missing_evidence": [
+              "the reserved comparison run has not finished"
+            ],
+            "metrics": null
+          }
+        ],
+        "shared_public_denominator_requests": 9,
+        "protected_denominator_requests_per_candidate": 3,
+        "protected_counts": null,
+        "outcome": null,
+        "eligible": false,
+        "eligibility_reason": "No winner is derived here. Candidate eligibility requires a complete comparable outcome, and selection is a separate learner action.",
+        "state": "PLANNED"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/experiments/experiment-gtm-shift-01-c1",
+      "status": 200,
+      "body": {
+        "id": "experiment-gtm-shift-01-c1",
+        "shift_id": "gtm-shift-01",
+        "kind": "QUALIFYING_COMPARISON",
+        "investigation_id": "inv-0001",
+        "declared_treatment": "Rules-first review versus recorded-confidence routing.",
+        "context_hash": "642054c9a76727d7273453a642e8c60d0ad261c5b69b0e076151457e7fe79b2b",
+        "context_evidence_class": "TRUSTED_LOCAL",
+        "condition": {
+          "id": "condition-normal",
+          "kind": "normal",
+          "public_label": "Normal public conditions",
+          "content_hash": "1a9d7cd051d691bcebed2917edc042ebc8f81dff6cf2b20b14f51c43bf9c834b"
+        },
+        "observed_run_id": null,
+        "workloads": [
+          {
+            "id": "workload-01",
+            "ordinal": 1,
+            "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+            "request_count": 3
+          },
+          {
+            "id": "workload-02",
+            "ordinal": 2,
+            "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+            "request_count": 3
+          },
+          {
+            "id": "workload-03",
+            "ordinal": 3,
+            "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+            "request_count": 3
+          }
+        ],
+        "candidates": [
+          {
+            "label": "A",
+            "artifact_version_id": "ver-0002",
+            "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33"
+          },
+          {
+            "label": "B",
+            "artifact_version_id": "ver-0003",
+            "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f"
+          }
+        ],
+        "trials": [
+          {
+            "pair_ordinal": 1,
+            "execution_ordinal": 1,
+            "candidate_label": "A",
+            "artifact_version_id": "ver-0002",
+            "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+            "workload_id": "workload-01",
+            "workload_ordinal": 1,
+            "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0002",
+            "state": "COMPLETE",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [
+              {
+                "request_id": "gtm-pair01-001",
+                "request_ordinal": 1,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-001",
+                "request_ordinal": 1,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-001",
+                "request_ordinal": 1,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-001",
+                "request_ordinal": 1,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-002",
+                "request_ordinal": 2,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-002",
+                "request_ordinal": 2,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-002",
+                "request_ordinal": 2,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-002",
+                "request_ordinal": 2,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-003",
+                "request_ordinal": 3,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-003",
+                "request_ordinal": 3,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-003",
+                "request_ordinal": 3,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-003",
+                "request_ordinal": 3,
+                "task_id": "handoff",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              }
+            ],
+            "observations": [],
+            "outputs": [
+              {
+                "request_ordinal": 1,
+                "request_text": "Process the APAC platform demo signal.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsInZhbHVlIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6eyJvd25lciI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItYXBhYyIsImRlY2lzaW9uX3RyYWNlIjpbIlJVTEVTX0ZJUlNUIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1hcGFjIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItYXBhYyJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 1,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 2,
+                "request_text": "Process the EMEA analytics demo signal.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWVtZWEiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItZW1lYSIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItZW1lYSIsInZhbHVlIjoib3duZXItZW1lYS1hbmFseXRpY3MiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1lbWVhIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOlt7ImtpbmQiOiJwaXBlbGluZV93cml0ZSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1lbWVhIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1lbWVhLWFuYWx5dGljcyIsInJlY29yZF9yZWYiOiJwaXBlbGluZTpzaWduYWw6cGFpci1lbWVhIiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWVtZWEiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiaGFuZG9mZiIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOltdLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1lbWVhIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 3,
+                "request_text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InF1YWxpZmljYXRpb24iLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJSRVZJRVciLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoib3duZXJfYXNzaWdubWVudCIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiLCJ2YWx1ZSI6InJldmVudWUtcmV2aWV3IiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50Il19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsInZhbHVlIjp7Im93bmVyIjoicmV2ZW51ZS1yZXZpZXciLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJSRVZJRVciXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6ImhhbmRvZmYiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              }
+            ],
+            "customer_text": null,
+            "missing_evidence": [],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 1,
+            "execution_ordinal": 2,
+            "candidate_label": "B",
+            "artifact_version_id": "ver-0003",
+            "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+            "workload_id": "workload-01",
+            "workload_ordinal": 1,
+            "request_batch_hash": "a73f842c6c196ff4e54ac189c0e17b8aa3fd75cca41fa215f31aa07637b6445f",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0003",
+            "state": "COMPLETE",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [
+              {
+                "request_id": "gtm-pair01-001",
+                "request_ordinal": 1,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-001",
+                "request_ordinal": 1,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-001",
+                "request_ordinal": 1,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-001",
+                "request_ordinal": 1,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-002",
+                "request_ordinal": 2,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-002",
+                "request_ordinal": 2,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-002",
+                "request_ordinal": 2,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-002",
+                "request_ordinal": 2,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-003",
+                "request_ordinal": 3,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-003",
+                "request_ordinal": 3,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-003",
+                "request_ordinal": 3,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair01-003",
+                "request_ordinal": 3,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              }
+            ],
+            "observations": [],
+            "outputs": [
+              {
+                "request_ordinal": 1,
+                "request_text": "Process the APAC platform demo signal.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsInZhbHVlIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6eyJvd25lciI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItYXBhYyIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1hcGFjIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItYXBhYyJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 2,
+                "request_text": "Process the EMEA analytics demo signal.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWVtZWEiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItZW1lYSIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItZW1lYSIsInZhbHVlIjoib3duZXItZW1lYS1hbmFseXRpY3MiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1lbWVhIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOlt7ImtpbmQiOiJwaXBlbGluZV93cml0ZSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1lbWVhIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1lbWVhLWFuYWx5dGljcyIsInJlY29yZF9yZWYiOiJwaXBlbGluZTpzaWduYWw6cGFpci1lbWVhIiwiZGVjaXNpb25fdHJhY2UiOlsiUkVDT1JERURfQ0xBU1NJRklDQVRJT04iLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWVtZWEiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiaGFuZG9mZiIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWVtZWEiLCJjbGFpbXMiOltdLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1lbWVhIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 3,
+                "request_text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMS0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InF1YWxpZmljYXRpb24iLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoib3duZXJfYXNzaWdubWVudCIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiLCJ2YWx1ZSI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoicGlwZWxpbmVfd3JpdGUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiaGFuZG9mZiIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              }
+            ],
+            "customer_text": null,
+            "missing_evidence": [],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 2,
+            "execution_ordinal": 3,
+            "candidate_label": "B",
+            "artifact_version_id": "ver-0003",
+            "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+            "workload_id": "workload-02",
+            "workload_ordinal": 2,
+            "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0004",
+            "state": "COMPLETE",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [
+              {
+                "request_id": "gtm-pair02-001",
+                "request_ordinal": 1,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-001",
+                "request_ordinal": 1,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-001",
+                "request_ordinal": 1,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-001",
+                "request_ordinal": 1,
+                "task_id": "handoff",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-002",
+                "request_ordinal": 2,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-002",
+                "request_ordinal": 2,
+                "task_id": "owner",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-002",
+                "request_ordinal": 2,
+                "task_id": "write",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-002",
+                "request_ordinal": 2,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-003",
+                "request_ordinal": 3,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-003",
+                "request_ordinal": 3,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-003",
+                "request_ordinal": 3,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-003",
+                "request_ordinal": 3,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              }
+            ],
+            "observations": [],
+            "outputs": [
+              {
+                "request_ordinal": 1,
+                "request_text": "Process the uncertain low-confidence signal with a human decision owner.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1sb3ctY29uZmlkZW5jZSIsInZhbHVlIjoiUkVWSUVXIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJjbGFpbXMiOlt7ImtpbmQiOiJvd25lcl9hc3NpZ25tZW50IiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiY2xhaW1zIjpbeyJraW5kIjoicGlwZWxpbmVfd3JpdGUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJ2YWx1ZSI6eyJvd25lciI6InJldmVudWUtcmV2aWV3IiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiZGVjaXNpb25fdHJhY2UiOlsiUkVDT1JERURfQ0xBU1NJRklDQVRJT04iLCJSRVZJRVciXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJjbGFpbXMiOlt7ImtpbmQiOiJoYW5kb2ZmIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 2,
+                "request_text": "Evaluate the suppressed signal without assigning an owner or pipeline record.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXN1cHByZXNzZWQiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXN1cHByZXNzZWQiLCJ2YWx1ZSI6IkRJU1FVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXN1cHByZXNzZWQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1zdXBwcmVzc2VkIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItc3VwcHJlc3NlZCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItc3VwcHJlc3NlZCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXN1cHByZXNzZWQiXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 3,
+                "request_text": "Process the APAC platform demo signal.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsInZhbHVlIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6eyJvd25lciI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItYXBhYyIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1hcGFjIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItYXBhYyJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              }
+            ],
+            "customer_text": null,
+            "missing_evidence": [],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 2,
+            "execution_ordinal": 4,
+            "candidate_label": "A",
+            "artifact_version_id": "ver-0002",
+            "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+            "workload_id": "workload-02",
+            "workload_ordinal": 2,
+            "request_batch_hash": "7f8013d7ed36d9cf74b41377275fe5c0a3f7dd959751d2f913f5f32e738afdde",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0005",
+            "state": "COMPLETE",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [
+              {
+                "request_id": "gtm-pair02-001",
+                "request_ordinal": 1,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-001",
+                "request_ordinal": 1,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-001",
+                "request_ordinal": 1,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-001",
+                "request_ordinal": 1,
+                "task_id": "handoff",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-002",
+                "request_ordinal": 2,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-002",
+                "request_ordinal": 2,
+                "task_id": "owner",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-002",
+                "request_ordinal": 2,
+                "task_id": "write",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-002",
+                "request_ordinal": 2,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-003",
+                "request_ordinal": 3,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-003",
+                "request_ordinal": 3,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-003",
+                "request_ordinal": 3,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair02-003",
+                "request_ordinal": 3,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              }
+            ],
+            "observations": [],
+            "outputs": [
+              {
+                "request_ordinal": 1,
+                "request_text": "Process the uncertain low-confidence signal with a human decision owner.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1sb3ctY29uZmlkZW5jZSIsInZhbHVlIjoiUkVWSUVXIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJjbGFpbXMiOlt7ImtpbmQiOiJvd25lcl9hc3NpZ25tZW50IiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiY2xhaW1zIjpbeyJraW5kIjoicGlwZWxpbmVfd3JpdGUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJ2YWx1ZSI6eyJvd25lciI6InJldmVudWUtcmV2aWV3IiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJSRVZJRVciXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiLCJjbGFpbXMiOlt7ImtpbmQiOiJoYW5kb2ZmIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWxvdy1jb25maWRlbmNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItbG93LWNvbmZpZGVuY2UiXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 2,
+                "request_text": "Evaluate the suppressed signal without assigning an owner or pipeline record.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXN1cHByZXNzZWQiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXN1cHByZXNzZWQiLCJ2YWx1ZSI6IkRJU1FVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXN1cHByZXNzZWQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1zdXBwcmVzc2VkIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItc3VwcHJlc3NlZCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItc3VwcHJlc3NlZCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXN1cHByZXNzZWQiXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 3,
+                "request_text": "Process the APAC platform demo signal.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMi0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6IlFVQUxJRklFRCIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsInZhbHVlIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLWFwYWMiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLWFwYWMiLCJ2YWx1ZSI6eyJvd25lciI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItYXBhYyIsImRlY2lzaW9uX3RyYWNlIjpbIlJVTEVTX0ZJUlNUIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1hcGFjIiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9XSwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItYXBhYyJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              }
+            ],
+            "customer_text": null,
+            "missing_evidence": [],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 3,
+            "execution_ordinal": 5,
+            "candidate_label": "B",
+            "artifact_version_id": "ver-0003",
+            "artifact_content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+            "workload_id": "workload-03",
+            "workload_ordinal": 3,
+            "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0006",
+            "state": "COMPLETE",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [
+              {
+                "request_id": "gtm-pair03-001",
+                "request_ordinal": 1,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-001",
+                "request_ordinal": 1,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-001",
+                "request_ordinal": 1,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-001",
+                "request_ordinal": 1,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-002",
+                "request_ordinal": 2,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-002",
+                "request_ordinal": 2,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-002",
+                "request_ordinal": 2,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-002",
+                "request_ordinal": 2,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-003",
+                "request_ordinal": 3,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-003",
+                "request_ordinal": 3,
+                "task_id": "owner",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-003",
+                "request_ordinal": 3,
+                "task_id": "write",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-003",
+                "request_ordinal": 3,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              }
+            ],
+            "observations": [],
+            "outputs": [
+              {
+                "request_ordinal": 1,
+                "request_text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InF1YWxpZmljYXRpb24iLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoib3duZXJfYXNzaWdubWVudCIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiLCJ2YWx1ZSI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoicGlwZWxpbmVfd3JpdGUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiaGFuZG9mZiIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 2,
+                "request_text": "Process the APAC demo signal once.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjoiUVVBTElGSUVEIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOlt7ImtpbmQiOiJvd25lcl9hc3NpZ25tZW50IiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwidmFsdWUiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOlt7ImtpbmQiOiJwaXBlbGluZV93cml0ZSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjp7Im93bmVyIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsInJlY29yZF9yZWYiOiJwaXBlbGluZTpzaWduYWw6cGFpci1yZXRyeSIsImRlY2lzaW9uX3RyYWNlIjpbIlJFQ09SREVEX0NMQVNTSUZJQ0FUSU9OIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZXRyeSJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOltdLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZXRyeSJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 3,
+                "request_text": "Retry the same signal without a second owner, record or handoff.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjoiUVVBTElGSUVEIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJldHJ5Il0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+                "elapsed_ms": 0,
+                "transport_error": null
+              }
+            ],
+            "customer_text": null,
+            "missing_evidence": [],
+            "metrics": null
+          },
+          {
+            "pair_ordinal": 3,
+            "execution_ordinal": 6,
+            "candidate_label": "A",
+            "artifact_version_id": "ver-0002",
+            "artifact_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+            "workload_id": "workload-03",
+            "workload_ordinal": 3,
+            "request_batch_hash": "bab8af2bba1e227f15a2e16898b0db2209fa619ff1c4c8cb00b1d10c91c9a568",
+            "request_count": 3,
+            "protected_request_count": 1,
+            "run_id": "run-0007",
+            "state": "COMPLETE",
+            "evidence_mode": "TRUSTED_LOCAL",
+            "task_assessments": [
+              {
+                "request_id": "gtm-pair03-001",
+                "request_ordinal": 1,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-001",
+                "request_ordinal": 1,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-001",
+                "request_ordinal": 1,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-001",
+                "request_ordinal": 1,
+                "task_id": "handoff",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-002",
+                "request_ordinal": 2,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-002",
+                "request_ordinal": 2,
+                "task_id": "owner",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-002",
+                "request_ordinal": 2,
+                "task_id": "write",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-002",
+                "request_ordinal": 2,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-003",
+                "request_ordinal": 3,
+                "task_id": "qualification",
+                "outcome": "USEFUL_COMPLETION",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-003",
+                "request_ordinal": 3,
+                "task_id": "owner",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-003",
+                "request_ordinal": 3,
+                "task_id": "write",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              },
+              {
+                "request_id": "gtm-pair03-003",
+                "request_ordinal": 3,
+                "task_id": "handoff",
+                "outcome": "JUSTIFIED_REFUSAL",
+                "mandatory_pass": true,
+                "reason_codes": []
+              }
+            ],
+            "observations": [],
+            "outputs": [
+              {
+                "request_ordinal": 1,
+                "request_text": "Process the high-confidence recorded intent with no explicit demo phrase.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDEiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InF1YWxpZmljYXRpb24iLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJSRVZJRVciLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiY2xhaW1zIjpbeyJraW5kIjoib3duZXJfYXNzaWdubWVudCIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZWNvcmRlZC1pbnRlbnQiLCJ2YWx1ZSI6InJldmVudWUtcmV2aWV3IiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50Il19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6IndyaXRlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsInZhbHVlIjp7Im93bmVyIjoicmV2ZW51ZS1yZXZpZXciLCJyZWNvcmRfcmVmIjoicGlwZWxpbmU6c2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJSRVZJRVciXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCIsImNsYWltcyI6W3sia2luZCI6ImhhbmRvZmYiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmVjb3JkZWQtaW50ZW50IiwidmFsdWUiOiJyZXZlbnVlLXJldmlldyIsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJlY29yZGVkLWludGVudCJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 2,
+                "request_text": "Process the APAC demo signal once.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDIiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjoiUVVBTElGSUVEIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOlt7ImtpbmQiOiJvd25lcl9hc3NpZ25tZW50IiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwidmFsdWUiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoid3JpdGUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOlt7ImtpbmQiOiJwaXBlbGluZV93cml0ZSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjp7Im93bmVyIjoib3duZXItYXBhYy1wbGF0Zm9ybSIsInJlY29yZF9yZWYiOiJwaXBlbGluZTpzaWduYWw6cGFpci1yZXRyeSIsImRlY2lzaW9uX3RyYWNlIjpbIlJVTEVTX0ZJUlNUIiwiUVVBTElGSUVEIl19LCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZXRyeSJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJoYW5kb2ZmIiwic3RhdHVzIjoiTk9UX0FQUExJQ0FCTEUiLCJlbnRpdHlfcmVmIjoic2lnbmFsOnBhaXItcmV0cnkiLCJjbGFpbXMiOltdLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6cGFpci1yZXRyeSJdLCJ1bmNlcnRhaW50eV9jb2RlcyI6W119",
+                "elapsed_ms": 0,
+                "transport_error": null
+              },
+              {
+                "request_ordinal": 3,
+                "request_text": "Retry the same signal without a second owner, record or handoff.",
+                "http_status": 200,
+                "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLXBhaXIwMy0wMDMiLCJ0YXNrX3Jlc3VsdHMiOlt7InRhc2tfaWQiOiJxdWFsaWZpY2F0aW9uIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbeyJraW5kIjoicXVhbGlmaWNhdGlvbiIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsInZhbHVlIjoiUVVBTElGSUVEIiwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6c2lnbmFsOnBhaXItcmV0cnkiXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoib3duZXIiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6Ik5PVF9BUFBMSUNBQkxFIiwiZW50aXR5X3JlZiI6InNpZ25hbDpwYWlyLXJldHJ5IiwiY2xhaW1zIjpbXSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6cGFpci1yZXRyeSIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDpwYWlyLXJldHJ5Il0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+                "elapsed_ms": 0,
+                "transport_error": null
+              }
+            ],
+            "customer_text": null,
+            "missing_evidence": [],
+            "metrics": null
+          }
+        ],
+        "shared_public_denominator_requests": 9,
+        "protected_denominator_requests_per_candidate": 3,
+        "protected_counts": {
+          "A": {
+            "reserved": 3,
+            "captured": 3,
+            "missing": 0
+          },
+          "B": {
+            "reserved": 3,
+            "captured": 3,
+            "missing": 0
+          }
+        },
+        "outcome": {
+          "experiment_id": "experiment-gtm-shift-01-c1",
+          "status": "COMPLETE",
+          "shared_public_denominator_requests": 9,
+          "candidate_metrics": [
+            {
+              "candidate_label": "A",
+              "candidate_version_id": "ver-0002",
+              "public_denominator_requests": 9,
+              "useful_completions": 9,
+              "incorrect_outputs": 0,
+              "justified_refusals": 6,
+              "justified_referrals": 0,
+              "justified_clarifications": 0,
+              "unjustified_refusals": 0,
+              "unjustified_referrals": 0,
+              "unjustified_clarifications": 0,
+              "missing_outputs": 0,
+              "protected_denominator": 3,
+              "protected_passed": 3,
+              "protected_failed": 0,
+              "protected_missing": 0,
+              "service_calls": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "service_latency_ms": 0,
+              "provisioning_latency_ms": null,
+              "cost_minor_units": null
+            },
+            {
+              "candidate_label": "B",
+              "candidate_version_id": "ver-0003",
+              "public_denominator_requests": 9,
+              "useful_completions": 9,
+              "incorrect_outputs": 0,
+              "justified_refusals": 8,
+              "justified_referrals": 0,
+              "justified_clarifications": 0,
+              "unjustified_refusals": 0,
+              "unjustified_referrals": 0,
+              "unjustified_clarifications": 0,
+              "missing_outputs": 0,
+              "protected_denominator": 3,
+              "protected_passed": 3,
+              "protected_failed": 0,
+              "protected_missing": 0,
+              "service_calls": 0,
+              "input_tokens": 0,
+              "output_tokens": 0,
+              "service_latency_ms": 0,
+              "provisioning_latency_ms": null,
+              "cost_minor_units": null
+            }
+          ],
+          "eligibility": [
+            {
+              "candidate_label": "A",
+              "candidate_version_id": "ver-0002",
+              "eligible": true,
+              "blocking_reason_codes": []
+            },
+            {
+              "candidate_label": "B",
+              "candidate_version_id": "ver-0003",
+              "eligible": true,
+              "blocking_reason_codes": []
+            }
+          ],
+          "drift_fields": [],
+          "noncompletion_incidence_non_additive": true
+        },
+        "eligible": true,
+        "eligibility_reason": "No winner is derived here. Candidate eligibility requires a complete comparable outcome, and selection is a separate learner action.",
+        "state": "FINALIZED"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/selections",
+      "status": 201,
+      "body": {
+        "id": "sel-0002",
+        "kind": "LEARNER_CHOICE",
+        "selected_version_id": "ver-0002",
+        "selected_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+        "comparison_id": "experiment-gtm-shift-01-c1",
+        "retained_alternative_version_id": "ver-0003",
+        "rationale": "Choose the independently eligible rules-first repair.",
+        "requirement_set_hash": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+        "prior_selection_id": "sel-0001",
+        "state": "VALID",
+        "created_at": "2026-10-14T07:09:56.817810Z"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/selections",
+      "status": 409,
+      "body": {
+        "kind": "conflict",
+        "detail": "expected prior selection is stale"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/runs",
+      "status": 409,
+      "body": {
+        "kind": "conflict",
+        "detail": "one successful operation is already finalized this shift"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-01/close",
+      "status": 200,
+      "body": {
+        "id": "gtm-shift-01",
+        "engagement_slug": "gtm",
+        "seq": 1,
+        "state": "closed",
+        "opened_at": "2026-10-14T07:09:51.891338Z",
+        "closed_at": "2026-10-14T07:09:56.844176Z",
+        "opening_mode": "STANDARD",
+        "operation_allowed": false
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/engagements/gtm/shifts",
+      "status": 201,
+      "body": {
+        "id": "gtm-shift-02",
+        "engagement_slug": "gtm",
+        "seq": 2,
+        "state": "open",
+        "opened_at": "2026-10-14T07:09:56.848032Z",
+        "closed_at": null,
+        "opening_mode": "STANDARD",
+        "operation_allowed": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/engagements/gtm/board",
+      "status": 200,
+      "body": {
+        "engagement_slug": "gtm",
+        "business_kind": "gtm",
+        "latest_shift": {
+          "id": "gtm-shift-02",
+          "engagement_slug": "gtm",
+          "seq": 2,
+          "state": "open",
+          "opened_at": "2026-10-14T07:09:56.848032Z",
+          "closed_at": null,
+          "opening_mode": "STANDARD",
+          "operation_allowed": true
+        },
+        "latest_version": {
+          "id": "ver-0003",
+          "shift_id": "gtm-shift-01",
+          "parent_id": "ver-0002",
+          "content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+          "contract": {
+            "catalog_version": 1,
+            "must_never": [
+              "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+            ],
+            "selections": {
+              "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+              "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+            },
+            "response_time_limit_ms": 3000,
+            "declared_limits": [
+              "Synthetic pipeline output; no CRM connection, message send or live model."
+            ]
+          },
+          "contract_catalog_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f",
+          "created_by": "learner",
+          "created_at": "2026-10-14T07:09:56.128923Z"
+        },
+        "latest_run": null,
+        "operating_status": "SELECTED",
+        "draft_base_version_id": "ver-0002",
+        "latest_saved_version_id": null,
+        "operating_selection": {
+          "id": "sel-0002",
+          "kind": "LEARNER_CHOICE",
+          "selected_version_id": "ver-0002",
+          "selected_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+          "comparison_id": "experiment-gtm-shift-01-c1",
+          "retained_alternative_version_id": "ver-0003",
+          "rationale": "Choose the independently eligible rules-first repair.",
+          "requirement_set_hash": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+          "prior_selection_id": "sel-0001",
+          "state": "VALID",
+          "created_at": "2026-10-14T07:09:56.817810Z"
+        },
+        "inherited_requirements": {
+          "comparison_id": "experiment-gtm-shift-01-c1",
+          "requirement_set_id": "public-rubric:gtm:v1",
+          "requirement_set_hash": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+          "visible_check_set_hash": "cafff3e6a4074a158725a9d3f88347121c40771480dea4c67a42a261b3f0daca"
+        },
+        "artifact_files": [
+          "service.py"
+        ],
+        "requests_run": 0,
+        "attempts_used": 0,
+        "attempt_limit": 2,
+        "attempts_remaining": 2,
+        "incidents": [
+          {
+            "id": "BWB-01",
+            "engagement_slug": "gtm",
+            "shift_id": "gtm-shift-01",
+            "opening_run_id": "run-0001",
+            "failing_output_ref": "run-0001-out-1",
+            "check_result_id": "cr-0002",
+            "reason_code": "WRONG_ACTION",
+            "opened_event_seq": 1,
+            "state": "CLOSED_UNRESOLVED",
+            "resolving_version_id": null,
+            "resolved_event_seq": null
+          }
+        ],
+        "total_incidents": 1,
+        "unresolved_limits": [
+          "Synthetic pipeline output; no CRM connection, message send or live model."
+        ],
+        "ledger_event_count": 2,
+        "ledger_totals": {
+          "INCIDENT_OPENED": 1,
+          "LIMIT_DECLARED": 1
+        },
+        "chain_status": "VALID"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/shifts/gtm-shift-02/artifact",
+      "status": 200,
+      "body": {
+        "shift_id": "gtm-shift-02",
+        "files": {
+          "service.py": "\"\"\"Draft A: explicit commercial phrases route by rules; other plausible buying signals enter human review.\nSynthetic output records only; no model, CRM connection or message send.\n\"\"\"\nimport json\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib import Path\n\nsnapshot = json.loads(Path(\"shop.json\").read_text(encoding=\"utf-8\"))\nprocessed = {}\n\ndef decide(record):\n    value = record[\"value\"]\n    current = snapshot[\"dependencies\"][record[\"dependency\"]] == \"available\" and record[\"record_age_ms\"] <= 3600000\n    if value[\"suppressed\"] or value[\"employee_count\"] < 50:\n        return \"DISQUALIFIED\"\n    if not current or value[\"region\"] == \"UNKNOWN\" or value[\"product\"] == \"UNKNOWN\":\n        return \"REVIEW\"\n    if value[\"confidence\"] < 80 or value[\"intent_label\"] == \"AMBIGUOUS\":\n        return \"REVIEW\"\n    if value[\"intent_label\"] == \"RESEARCH\":\n        return \"DISQUALIFIED\"\n    return \"QUALIFIED\" if any(phrase in value[\"note\"].lower() for phrase in (\"demo\", \"pricing\", \"security review\")) else \"REVIEW\"\n\ndef answer(request):\n    entity = request[\"entity_ref\"]\n    records = [r for r in snapshot[\"records\"] if r[\"entity_ref\"] == entity and r[\"kind\"] == \"signal\"]\n    if len(records) != 1:\n        return {\"request_id\": request[\"request_id\"], \"task_results\": [], \"evidence_refs\": [], \"uncertainty_codes\": []}\n    record = records[0]\n    value = record[\"value\"]\n    decision = decide(record)\n    owner = \"revenue-review\" if decision == \"REVIEW\" else snapshot[\"routing_rules\"].get(value[\"region\"] + \"/\" + value[\"product\"])\n    # Preserve the region/product owner map.\n    repeat = entity in processed or value[\"existing_record_ref\"] is not None\n    if entity in processed:\n        decision, owner = processed[entity]\n    tasks = []\n    def result(tid, kind, claim_value=None, active=True):\n        claims = [{\"kind\": kind, \"entity_ref\": entity, \"value\": claim_value, \"evidence_refs\": [record[\"record_id\"]]}] if active else []\n        tasks.append({\"task_id\": tid, \"status\": \"COMPLETED\" if active else \"NOT_APPLICABLE\", \"entity_ref\": entity,\n                      \"claims\": claims, \"commitment_ref\": None, \"explanation_code\": None})\n    result(\"qualification\", \"qualification\", decision)\n    active = decision != \"DISQUALIFIED\" and not repeat\n    result(\"owner\", \"owner_assignment\", owner, active)\n    result(\"write\", \"pipeline_write\", {\"owner\": owner, \"record_ref\": \"pipeline:\" + entity,\n           \"decision_trace\": [\"RULES_FIRST\", decision]}, active)\n    result(\"handoff\", \"handoff\", \"revenue-review\", active and decision == \"REVIEW\")\n    if active:\n        processed[entity] = (decision, owner)\n    return {\"request_id\": request[\"request_id\"], \"task_results\": tasks, \"evidence_refs\": [record[\"record_id\"]], \"uncertainty_codes\": []}\n\nclass Handler(BaseHTTPRequestHandler):\n    def log_message(self, *_args):\n        pass\n    def do_POST(self):\n        request = json.loads(self.rfile.read(int(self.headers[\"Content-Length\"])))\n        body = json.dumps(answer(request), separators=(\",\", \":\")).encode()\n        self.send_response(200)\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\nif __name__ == \"__main__\":\n    with HTTPServer((\"127.0.0.1\", 0), Handler) as server:\n        print(json.dumps({\"port\": server.server_port}), flush=True)\n        server.serve_forever()\n"
+        },
+        "updated_at": "2026-10-14T07:09:56.848032Z"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/engagements/gtm/board",
+      "status": 200,
+      "body": {
+        "engagement_slug": "gtm",
+        "business_kind": "gtm",
+        "latest_shift": {
+          "id": "gtm-shift-02",
+          "engagement_slug": "gtm",
+          "seq": 2,
+          "state": "open",
+          "opened_at": "2026-10-14T07:09:56.848032Z",
+          "closed_at": null,
+          "opening_mode": "STANDARD",
+          "operation_allowed": true
+        },
+        "latest_version": {
+          "id": "ver-0003",
+          "shift_id": "gtm-shift-01",
+          "parent_id": "ver-0002",
+          "content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f",
+          "contract": {
+            "catalog_version": 1,
+            "must_never": [
+              "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL"
+            ],
+            "selections": {
+              "ESCALATE_WHEN": "REVIEW_AMBIGUOUS_SIGNAL",
+              "REPEAT_REQUEST_RULE": "DEDUPLICATE_PIPELINE_BY_SIGNAL"
+            },
+            "response_time_limit_ms": 3000,
+            "declared_limits": [
+              "Synthetic pipeline output; no CRM connection, message send or live model."
+            ]
+          },
+          "contract_catalog_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f",
+          "created_by": "learner",
+          "created_at": "2026-10-14T07:09:56.128923Z"
+        },
+        "latest_run": null,
+        "operating_status": "SELECTED",
+        "draft_base_version_id": "ver-0002",
+        "latest_saved_version_id": null,
+        "operating_selection": {
+          "id": "sel-0002",
+          "kind": "LEARNER_CHOICE",
+          "selected_version_id": "ver-0002",
+          "selected_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+          "comparison_id": "experiment-gtm-shift-01-c1",
+          "retained_alternative_version_id": "ver-0003",
+          "rationale": "Choose the independently eligible rules-first repair.",
+          "requirement_set_hash": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+          "prior_selection_id": "sel-0001",
+          "state": "VALID",
+          "created_at": "2026-10-14T07:09:56.817810Z"
+        },
+        "inherited_requirements": {
+          "comparison_id": "experiment-gtm-shift-01-c1",
+          "requirement_set_id": "public-rubric:gtm:v1",
+          "requirement_set_hash": "de6e3794ccb3d1c4e5b0c29cff587ee0dad587bfc00f2751227dada2e02243ab",
+          "visible_check_set_hash": "cafff3e6a4074a158725a9d3f88347121c40771480dea4c67a42a261b3f0daca"
+        },
+        "artifact_files": [
+          "service.py"
+        ],
+        "requests_run": 0,
+        "attempts_used": 0,
+        "attempt_limit": 2,
+        "attempts_remaining": 2,
+        "incidents": [
+          {
+            "id": "BWB-01",
+            "engagement_slug": "gtm",
+            "shift_id": "gtm-shift-01",
+            "opening_run_id": "run-0001",
+            "failing_output_ref": "run-0001-out-1",
+            "check_result_id": "cr-0002",
+            "reason_code": "WRONG_ACTION",
+            "opened_event_seq": 1,
+            "state": "CLOSED_UNRESOLVED",
+            "resolving_version_id": null,
+            "resolved_event_seq": null
+          }
+        ],
+        "total_incidents": 1,
+        "unresolved_limits": [
+          "Synthetic pipeline output; no CRM connection, message send or live model."
+        ],
+        "ledger_event_count": 2,
+        "ledger_totals": {
+          "INCIDENT_OPENED": 1,
+          "LIMIT_DECLARED": 1
+        },
+        "chain_status": "VALID"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/shifts/gtm-shift-02/artifact",
+      "status": 200,
+      "body": {
+        "shift_id": "gtm-shift-02",
+        "files": {
+          "service.py": "\"\"\"Draft A: explicit commercial phrases route by rules; other plausible buying signals enter human review.\nSynthetic output records only; no model, CRM connection or message send.\n\"\"\"\nimport json\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib import Path\n\nsnapshot = json.loads(Path(\"shop.json\").read_text(encoding=\"utf-8\"))\nprocessed = {}\n\ndef decide(record):\n    value = record[\"value\"]\n    current = snapshot[\"dependencies\"][record[\"dependency\"]] == \"available\" and record[\"record_age_ms\"] <= 3600000\n    if value[\"suppressed\"] or value[\"employee_count\"] < 50:\n        return \"DISQUALIFIED\"\n    if not current or value[\"region\"] == \"UNKNOWN\" or value[\"product\"] == \"UNKNOWN\":\n        return \"REVIEW\"\n    if value[\"confidence\"] < 80 or value[\"intent_label\"] == \"AMBIGUOUS\":\n        return \"REVIEW\"\n    if value[\"intent_label\"] == \"RESEARCH\":\n        return \"DISQUALIFIED\"\n    return \"QUALIFIED\" if any(phrase in value[\"note\"].lower() for phrase in (\"demo\", \"pricing\", \"security review\")) else \"REVIEW\"\n\ndef answer(request):\n    entity = request[\"entity_ref\"]\n    records = [r for r in snapshot[\"records\"] if r[\"entity_ref\"] == entity and r[\"kind\"] == \"signal\"]\n    if len(records) != 1:\n        return {\"request_id\": request[\"request_id\"], \"task_results\": [], \"evidence_refs\": [], \"uncertainty_codes\": []}\n    record = records[0]\n    value = record[\"value\"]\n    decision = decide(record)\n    owner = \"revenue-review\" if decision == \"REVIEW\" else snapshot[\"routing_rules\"].get(value[\"region\"] + \"/\" + value[\"product\"])\n    # Preserve the region/product owner map.\n    repeat = entity in processed or value[\"existing_record_ref\"] is not None\n    if entity in processed:\n        decision, owner = processed[entity]\n    tasks = []\n    def result(tid, kind, claim_value=None, active=True):\n        claims = [{\"kind\": kind, \"entity_ref\": entity, \"value\": claim_value, \"evidence_refs\": [record[\"record_id\"]]}] if active else []\n        tasks.append({\"task_id\": tid, \"status\": \"COMPLETED\" if active else \"NOT_APPLICABLE\", \"entity_ref\": entity,\n                      \"claims\": claims, \"commitment_ref\": None, \"explanation_code\": None})\n    result(\"qualification\", \"qualification\", decision)\n    active = decision != \"DISQUALIFIED\" and not repeat\n    result(\"owner\", \"owner_assignment\", owner, active)\n    result(\"write\", \"pipeline_write\", {\"owner\": owner, \"record_ref\": \"pipeline:\" + entity,\n           \"decision_trace\": [\"RULES_FIRST\", decision]}, active)\n    result(\"handoff\", \"handoff\", \"revenue-review\", active and decision == \"REVIEW\")\n    if active:\n        processed[entity] = (decision, owner)\n    return {\"request_id\": request[\"request_id\"], \"task_results\": tasks, \"evidence_refs\": [record[\"record_id\"]], \"uncertainty_codes\": []}\n\nclass Handler(BaseHTTPRequestHandler):\n    def log_message(self, *_args):\n        pass\n    def do_POST(self):\n        request = json.loads(self.rfile.read(int(self.headers[\"Content-Length\"])))\n        body = json.dumps(answer(request), separators=(\",\", \":\")).encode()\n        self.send_response(200)\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\nif __name__ == \"__main__\":\n    with HTTPServer((\"127.0.0.1\", 0), Handler) as server:\n        print(json.dumps({\"port\": server.server_port}), flush=True)\n        server.serve_forever()\n"
+        },
+        "updated_at": "2026-10-14T07:09:56.848032Z"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/shifts/gtm-shift-02/runs",
+      "status": 202,
+      "body": {
+        "id": "run-0008",
+        "shift_id": "gtm-shift-02",
+        "artifact_version_id": "ver-0002",
+        "attempt_number": 1,
+        "state": "QUEUED",
+        "adapter": "tokenfactory",
+        "failure_kind": null,
+        "started_at": "2026-10-14T07:09:56.929513Z",
+        "ended_at": null,
+        "purpose": "OPERATION",
+        "evidence_mode": "ISOLATED_LIVE",
+        "selection_id": "sel-0002"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/runs/run-0008",
+      "status": 200,
+      "body": {
+        "id": "run-0008",
+        "shift_id": "gtm-shift-02",
+        "artifact_version_id": "ver-0002",
+        "attempt_number": 1,
+        "state": "FINALIZED",
+        "adapter": "tokenfactory",
+        "failure_kind": null,
+        "started_at": "2026-10-14T07:09:56.929513Z",
+        "ended_at": "2026-10-14T07:10:00.882320Z",
+        "purpose": "OPERATION",
+        "evidence_mode": "ISOLATED_LIVE",
+        "selection_id": "sel-0002"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/runs/run-0008/outputs",
+      "status": 200,
+      "body": [
+        {
+          "id": "run-0008-out-1",
+          "run_id": "run-0008",
+          "request_ordinal": 1,
+          "request_text": "Process the APAC platform demo signal and hand it to its owner exactly once.",
+          "http_status": 200,
+          "body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLWluY2lkZW50LTAwMSIsInRhc2tfcmVzdWx0cyI6W3sidGFza19pZCI6InF1YWxpZmljYXRpb24iLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJvd25lciIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJ2YWx1ZSI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDppbmNpZGVudC1hcGFjIiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+          "elapsed_ms": 2,
+          "transport_error": null,
+          "log_base64": "",
+          "customer_answer": {
+            "action": "answer",
+            "display_text": "Synthetic qualification: QUALIFIED. Synthetic owner: owner-apac-platform. Synthetic pipeline record prepared for human handling. No additional owner, record or handoff is required.",
+            "claims": [
+              {
+                "kind": "qualification",
+                "value": "QUALIFIED"
+              },
+              {
+                "kind": "owner_assignment",
+                "value": "owner-apac-platform"
+              },
+              {
+                "kind": "pipeline_write",
+                "value": {
+                  "owner": "owner-apac-platform",
+                  "record_ref": "pipeline:signal:incident-apac",
+                  "decision_trace": [
+                    "RULES_FIRST",
+                    "QUALIFIED"
+                  ]
+                }
+              }
+            ],
+            "evidence_refs": [
+              "public:signal:incident-apac"
+            ],
+            "verified_record_age_ms": null
+          },
+          "public_shop_record": null,
+          "public_shop_record_ref": null,
+          "public_shop_snapshot_hash": null
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/runs/run-0008/checks",
+      "status": 200,
+      "body": [
+        {
+          "id": "cr-0005",
+          "run_id": "run-0008",
+          "verdict": "pass",
+          "observed_ref": "run-0008-out-1",
+          "expected_ref": null,
+          "reason_code": null,
+          "public_check_id": "task:gtm-incident-001:qualification"
+        },
+        {
+          "id": "cr-0006",
+          "run_id": "run-0008",
+          "verdict": "pass",
+          "observed_ref": "run-0008-out-1",
+          "expected_ref": null,
+          "reason_code": null,
+          "public_check_id": "task:gtm-incident-001:owner"
+        },
+        {
+          "id": "cr-0007",
+          "run_id": "run-0008",
+          "verdict": "pass",
+          "observed_ref": "run-0008-out-1",
+          "expected_ref": null,
+          "reason_code": null,
+          "public_check_id": "task:gtm-incident-001:write"
+        },
+        {
+          "id": "cr-0008",
+          "run_id": "run-0008",
+          "verdict": "pass",
+          "observed_ref": "run-0008-out-1",
+          "expected_ref": null,
+          "reason_code": null,
+          "public_check_id": "task:gtm-incident-001:handoff"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/api/engagements/gtm/ledger",
+      "status": 200,
+      "body": {
+        "chain_status": "VALID",
+        "events": [
+          {
+            "seq": 1,
+            "event_type": "INCIDENT_OPENED",
+            "cause_refs": [
+              "run-0001",
+              "cr-0002",
+              "run-0001-out-1"
+            ],
+            "payload": {
+              "catalog_version": 1,
+              "decision_trace": [
+                {
+                  "mandatory_pass": true,
+                  "outcome": "USEFUL_COMPLETION",
+                  "reason_codes": [],
+                  "request_id": "gtm-incident-001",
+                  "request_ordinal": 1,
+                  "task_id": "qualification"
+                },
+                {
+                  "mandatory_pass": false,
+                  "outcome": "INCORRECT_OUTPUT",
+                  "reason_codes": [
+                    "WRONG_ACTION"
+                  ],
+                  "request_id": "gtm-incident-001",
+                  "request_ordinal": 1,
+                  "task_id": "owner"
+                },
+                {
+                  "mandatory_pass": false,
+                  "outcome": "INCORRECT_OUTPUT",
+                  "reason_codes": [
+                    "WRONG_ACTION"
+                  ],
+                  "request_id": "gtm-incident-001",
+                  "request_ordinal": 1,
+                  "task_id": "write"
+                },
+                {
+                  "mandatory_pass": true,
+                  "outcome": "JUSTIFIED_REFUSAL",
+                  "reason_codes": [],
+                  "request_id": "gtm-incident-001",
+                  "request_ordinal": 1,
+                  "task_id": "handoff"
+                }
+              ],
+              "failed_task_ids": [
+                "owner",
+                "write"
+              ],
+              "mission_version": 1,
+              "reason_code": "WRONG_ACTION",
+              "request_id": "gtm-incident-001",
+              "rule_version": "operation-ledger-v3",
+              "signal_ref": "signal:incident-apac"
+            },
+            "synthetic": true,
+            "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+            "hash": "771d21a459ad9356c06644323a4639ebc3d36beb9f351731faffa48945fb57d8",
+            "derivation": {
+              "run_id": "run-0001",
+              "check_id": "cr-0002",
+              "observed_ref": "run-0001-out-1",
+              "request_ordinal": 1,
+              "request_text": "Process the APAC platform demo signal and hand it to its owner exactly once.",
+              "output_body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLWluY2lkZW50LTAwMSIsInRhc2tfcmVzdWx0cyI6W3sidGFza19pZCI6InF1YWxpZmljYXRpb24iLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJvd25lciIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJ2YWx1ZSI6Im93bmVyLWFtZXItcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hbWVyLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDppbmNpZGVudC1hcGFjIiwiZGVjaXNpb25fdHJhY2UiOlsiUkVDT1JERURfQ0xBU1NJRklDQVRJT04iLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+              "verdict": "fail",
+              "reason_code": "WRONG_ACTION"
+            },
+            "catalog": {
+              "catalog_version": 1,
+              "catalog_record": {
+                "engagement_slug": "gtm",
+                "version": 1,
+                "frozen_at": "2026-10-07T00:00:00Z",
+                "required_dimensions": [
+                  "MUST_NEVER",
+                  "ESCALATE_WHEN",
+                  "REPEAT_REQUEST_RULE"
+                ],
+                "options": [
+                  {
+                    "id": "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL",
+                    "dimension": "MUST_NEVER",
+                    "learner_label": "Every processed signal has its permitted owner and synthetic record exactly once.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  },
+                  {
+                    "id": "REVIEW_AMBIGUOUS_SIGNAL",
+                    "dimension": "ESCALATE_WHEN",
+                    "learner_label": "Ambiguous or low-confidence signals require a human review queue.",
+                    "evaluator_rule_id": "gtm.human_handoff"
+                  },
+                  {
+                    "id": "DEDUPLICATE_PIPELINE_BY_SIGNAL",
+                    "dimension": "REPEAT_REQUEST_RULE",
+                    "learner_label": "Retries keep the first owner and record without a second commitment.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  }
+                ],
+                "content_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f"
+              }
+            }
+          },
+          {
+            "seq": 2,
+            "event_type": "LIMIT_DECLARED",
+            "cause_refs": [
+              "gtm-shift-01"
+            ],
+            "payload": {
+              "catalog_version": 1,
+              "declared_limit": "Synthetic pipeline output; no CRM connection, message send or live model."
+            },
+            "synthetic": true,
+            "prev_hash": "771d21a459ad9356c06644323a4639ebc3d36beb9f351731faffa48945fb57d8",
+            "hash": "5922fb0b407ece1b1fda11edbbced3f0a729569ea7badfde07b2dcb753c4d2c4",
+            "derivation": null,
+            "catalog": {
+              "catalog_version": 1,
+              "catalog_record": {
+                "engagement_slug": "gtm",
+                "version": 1,
+                "frozen_at": "2026-10-07T00:00:00Z",
+                "required_dimensions": [
+                  "MUST_NEVER",
+                  "ESCALATE_WHEN",
+                  "REPEAT_REQUEST_RULE"
+                ],
+                "options": [
+                  {
+                    "id": "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL",
+                    "dimension": "MUST_NEVER",
+                    "learner_label": "Every processed signal has its permitted owner and synthetic record exactly once.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  },
+                  {
+                    "id": "REVIEW_AMBIGUOUS_SIGNAL",
+                    "dimension": "ESCALATE_WHEN",
+                    "learner_label": "Ambiguous or low-confidence signals require a human review queue.",
+                    "evaluator_rule_id": "gtm.human_handoff"
+                  },
+                  {
+                    "id": "DEDUPLICATE_PIPELINE_BY_SIGNAL",
+                    "dimension": "REPEAT_REQUEST_RULE",
+                    "learner_label": "Retries keep the first owner and record without a second commitment.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  }
+                ],
+                "content_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f"
+              }
+            }
+          },
+          {
+            "seq": 3,
+            "event_type": "OWNER_ASSIGNED",
+            "cause_refs": [
+              "run-0008",
+              "cr-0006",
+              "run-0008-out-1"
+            ],
+            "payload": {
+              "catalog_version": 1,
+              "consequence": "owner",
+              "decision_trace": [
+                "RULES_FIRST",
+                "QUALIFIED"
+              ],
+              "mission_version": 1,
+              "owner": "owner-apac-platform",
+              "record_ref": "pipeline:signal:incident-apac",
+              "request_id": "gtm-incident-001",
+              "rule_version": "operation-ledger-v3",
+              "signal_ref": "signal:incident-apac",
+              "weight": 1
+            },
+            "synthetic": true,
+            "prev_hash": "5922fb0b407ece1b1fda11edbbced3f0a729569ea7badfde07b2dcb753c4d2c4",
+            "hash": "31723aae822c4ff5cb64e49e5bab86fa21b96c51be659e969d91a4aa5fe28506",
+            "derivation": {
+              "run_id": "run-0008",
+              "check_id": "cr-0006",
+              "observed_ref": "run-0008-out-1",
+              "request_ordinal": 1,
+              "request_text": "Process the APAC platform demo signal and hand it to its owner exactly once.",
+              "output_body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLWluY2lkZW50LTAwMSIsInRhc2tfcmVzdWx0cyI6W3sidGFza19pZCI6InF1YWxpZmljYXRpb24iLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJvd25lciIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJ2YWx1ZSI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDppbmNpZGVudC1hcGFjIiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+              "verdict": "pass",
+              "reason_code": null
+            },
+            "catalog": {
+              "catalog_version": 1,
+              "catalog_record": {
+                "engagement_slug": "gtm",
+                "version": 1,
+                "frozen_at": "2026-10-07T00:00:00Z",
+                "required_dimensions": [
+                  "MUST_NEVER",
+                  "ESCALATE_WHEN",
+                  "REPEAT_REQUEST_RULE"
+                ],
+                "options": [
+                  {
+                    "id": "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL",
+                    "dimension": "MUST_NEVER",
+                    "learner_label": "Every processed signal has its permitted owner and synthetic record exactly once.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  },
+                  {
+                    "id": "REVIEW_AMBIGUOUS_SIGNAL",
+                    "dimension": "ESCALATE_WHEN",
+                    "learner_label": "Ambiguous or low-confidence signals require a human review queue.",
+                    "evaluator_rule_id": "gtm.human_handoff"
+                  },
+                  {
+                    "id": "DEDUPLICATE_PIPELINE_BY_SIGNAL",
+                    "dimension": "REPEAT_REQUEST_RULE",
+                    "learner_label": "Retries keep the first owner and record without a second commitment.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  }
+                ],
+                "content_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f"
+              }
+            }
+          },
+          {
+            "seq": 4,
+            "event_type": "SLA_CLOCK_STARTED",
+            "cause_refs": [
+              "run-0008",
+              "cr-0007",
+              "run-0008-out-1"
+            ],
+            "payload": {
+              "catalog_version": 1,
+              "consequence": "sla",
+              "decision_trace": [
+                "RULES_FIRST",
+                "QUALIFIED"
+              ],
+              "mission_version": 1,
+              "owner": "owner-apac-platform",
+              "record_ref": "pipeline:signal:incident-apac",
+              "request_id": "gtm-incident-001",
+              "rule_version": "operation-ledger-v3",
+              "signal_ref": "signal:incident-apac",
+              "weight": 1
+            },
+            "synthetic": true,
+            "prev_hash": "31723aae822c4ff5cb64e49e5bab86fa21b96c51be659e969d91a4aa5fe28506",
+            "hash": "5457f2796106d5d582ee71eb9e77441cf5a3feae552d1abaafd77e3b2bac4140",
+            "derivation": {
+              "run_id": "run-0008",
+              "check_id": "cr-0007",
+              "observed_ref": "run-0008-out-1",
+              "request_ordinal": 1,
+              "request_text": "Process the APAC platform demo signal and hand it to its owner exactly once.",
+              "output_body_base64": "eyJyZXF1ZXN0X2lkIjoiZ3RtLWluY2lkZW50LTAwMSIsInRhc2tfcmVzdWx0cyI6W3sidGFza19pZCI6InF1YWxpZmljYXRpb24iLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJjbGFpbXMiOlt7ImtpbmQiOiJxdWFsaWZpY2F0aW9uIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOiJRVUFMSUZJRUQiLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJvd25lciIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6Im93bmVyX2Fzc2lnbm1lbnQiLCJlbnRpdHlfcmVmIjoic2lnbmFsOmluY2lkZW50LWFwYWMiLCJ2YWx1ZSI6Im93bmVyLWFwYWMtcGxhdGZvcm0iLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzaWduYWw6aW5jaWRlbnQtYXBhYyJdfV0sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfSx7InRhc2tfaWQiOiJ3cml0ZSIsInN0YXR1cyI6IkNPTVBMRVRFRCIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W3sia2luZCI6InBpcGVsaW5lX3dyaXRlIiwiZW50aXR5X3JlZiI6InNpZ25hbDppbmNpZGVudC1hcGFjIiwidmFsdWUiOnsib3duZXIiOiJvd25lci1hcGFjLXBsYXRmb3JtIiwicmVjb3JkX3JlZiI6InBpcGVsaW5lOnNpZ25hbDppbmNpZGVudC1hcGFjIiwiZGVjaXNpb25fdHJhY2UiOlsiUlVMRVNfRklSU1QiLCJRVUFMSUZJRUQiXX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImhhbmRvZmYiLCJzdGF0dXMiOiJOT1RfQVBQTElDQUJMRSIsImVudGl0eV9yZWYiOiJzaWduYWw6aW5jaWRlbnQtYXBhYyIsImNsYWltcyI6W10sImNvbW1pdG1lbnRfcmVmIjpudWxsLCJleHBsYW5hdGlvbl9jb2RlIjpudWxsfV0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNpZ25hbDppbmNpZGVudC1hcGFjIl0sInVuY2VydGFpbnR5X2NvZGVzIjpbXX0=",
+              "verdict": "pass",
+              "reason_code": null
+            },
+            "catalog": {
+              "catalog_version": 1,
+              "catalog_record": {
+                "engagement_slug": "gtm",
+                "version": 1,
+                "frozen_at": "2026-10-07T00:00:00Z",
+                "required_dimensions": [
+                  "MUST_NEVER",
+                  "ESCALATE_WHEN",
+                  "REPEAT_REQUEST_RULE"
+                ],
+                "options": [
+                  {
+                    "id": "NEVER_UNOWNED_OR_DUPLICATE_SIGNAL",
+                    "dimension": "MUST_NEVER",
+                    "learner_label": "Every processed signal has its permitted owner and synthetic record exactly once.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  },
+                  {
+                    "id": "REVIEW_AMBIGUOUS_SIGNAL",
+                    "dimension": "ESCALATE_WHEN",
+                    "learner_label": "Ambiguous or low-confidence signals require a human review queue.",
+                    "evaluator_rule_id": "gtm.human_handoff"
+                  },
+                  {
+                    "id": "DEDUPLICATE_PIPELINE_BY_SIGNAL",
+                    "dimension": "REPEAT_REQUEST_RULE",
+                    "learner_label": "Retries keep the first owner and record without a second commitment.",
+                    "evaluator_rule_id": "gtm.exactly_once"
+                  }
+                ],
+                "content_hash": "6a50acfd6a3731ddaf6e3c7e8a58fddda21e3676c815f3e300fdc2250bce7c2f"
+              }
+            }
+          },
+          {
+            "seq": 5,
+            "event_type": "INCIDENT_RESOLVED",
+            "cause_refs": [
+              "run-0008",
+              "cr-0006",
+              "BWB-01"
+            ],
+            "payload": {
+              "incident_id": "BWB-01",
+              "resolving_version_id": "ver-0002",
+              "rule_version": "operation-ledger-v3"
+            },
+            "synthetic": true,
+            "prev_hash": "5457f2796106d5d582ee71eb9e77441cf5a3feae552d1abaafd77e3b2bac4140",
+            "hash": "7cf8d89e17fd7922416a64e4db0ce6aa46355a6478f83a21cafd29def6b3c3bc",
+            "derivation": null,
+            "catalog": null
+          }
+        ]
+      }
+    }
+  ],
+  "starter_operation": {
+    "id": "run-0001",
+    "shift_id": "gtm-shift-01",
+    "artifact_version_id": "ver-0001",
+    "attempt_number": 1,
+    "state": "FINALIZED",
+    "adapter": "tokenfactory",
+    "failure_kind": null,
+    "started_at": "2026-10-14T07:09:51.933498Z",
+    "ended_at": "2026-10-14T07:09:56.026616Z",
+    "purpose": "OPERATION",
+    "evidence_mode": "ISOLATED_LIVE",
+    "selection_id": "sel-0001"
+  },
+  "starter_check_verdicts": [
+    "fail",
+    "fail",
+    "pass",
+    "pass"
+  ],
+  "investigation": {
+    "id": "inv-0001",
+    "cause": "The starter ignores the region/product owner map.",
+    "falsifier": "The captured APAC demo output already names its APAC owner.",
+    "public_test": "Compare the captured owner and record with the frozen route."
+  },
+  "candidates": {
+    "A": {
+      "id": "ver-0002",
+      "content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33"
+    },
+    "B": {
+      "id": "ver-0003",
+      "content_hash": "ac90344963628ad964651f7877a64af9e35997ba7acb62e4636bca8d1087a10f"
+    }
+  },
+  "comparison": {
+    "id": "experiment-gtm-shift-01-c1",
+    "state": "FINALIZED",
+    "outcome_status": "COMPLETE",
+    "evidence_class": "TRUSTED_LOCAL",
+    "trials": 6
+  },
+  "selection": {
+    "id": "sel-0002",
+    "kind": "LEARNER_CHOICE",
+    "selected_version_id": "ver-0002",
+    "selected_content_hash": "80810dc77baccf00894634cf1d7b855346fc8e8bf05c1d983b621a0b7801eb33",
+    "retained_alternative_version_id": "ver-0003"
+  },
+  "inherited_shift": "gtm-shift-02",
+  "inherited_operation": {
+    "id": "run-0008",
+    "shift_id": "gtm-shift-02",
+    "artifact_version_id": "ver-0002",
+    "attempt_number": 1,
+    "state": "FINALIZED",
+    "adapter": "tokenfactory",
+    "failure_kind": null,
+    "started_at": "2026-10-14T07:09:56.929513Z",
+    "ended_at": "2026-10-14T07:10:00.882320Z",
+    "purpose": "OPERATION",
+    "evidence_mode": "ISOLATED_LIVE",
+    "selection_id": "sel-0002"
+  },
+  "ledger_event_types": [
+    "INCIDENT_OPENED",
+    "LIMIT_DECLARED",
+    "OWNER_ASSIGNED",
+    "SLA_CLOCK_STARTED",
+    "INCIDENT_RESOLVED"
+  ],
+  "adapter_operation_attempts": {
+    "starter_operation": 1,
+    "inherited_operation": 1
+  },
+  "live_operations": 2,
+  "inference_calls": 0
+}
