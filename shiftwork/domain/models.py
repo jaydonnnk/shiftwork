@@ -2,7 +2,8 @@
 
 Slice 2 carries the real contract, catalog, structured-response and ledger-draft
 types the thin vertical path needs. Later slices added rotation and assist
-models; curation models remain planned.
+models; the operator-only curation models live in ``shiftwork.curation``
+(Slice 26) outside the runtime application.
 """
 
 from datetime import datetime
