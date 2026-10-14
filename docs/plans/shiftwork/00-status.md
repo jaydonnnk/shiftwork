@@ -56,9 +56,12 @@ separately authorized.
 - [x] The manifest corpus/verification/freeze edits are committed in focused
   batches on `shiftwork/slice-26` (the frozen manifest, then this record; no
   co-author footer) and pushed to origin under the user's 2026-10-14 go-ahead.
-  The force-add the offline-build notice anticipated is real: a plain
-  `git add` refuses the ignored evidence path even though the file is tracked,
-  so `git add -f` is needed, and any later receipts commit will need the same.
+  The force-add the offline-build notice anticipated is real: for this path a
+  new file in the ignored evidence directory is refused until `git add -f`,
+  while a plain `git add` of the tracked manifest exits 1 with the
+  ignored-paths warning yet still stages the tracked edit, which stops a
+  `git add && git commit` chain; `git add -f` is the working form, and later
+  receipts commits need the same.
 - [ ] Limits: no discovery, review or comparator verdict has occurred; the
   recorded dates are what the sources' own page annotations state, not
   independently reconstructed revision histories; live Tavily behavior,
