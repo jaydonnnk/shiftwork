@@ -1,3 +1,55 @@
+**SLICE 25 LIVE-ARM REVIEW ROUND COMPLETE: TWO MINOR RECORD DEFECTS FIXED; S25 COMPLETE, 2026-10-14 Asia/Singapore.**
+
+An independent review round of the published live arm verified its records (receipt,
+journey database, meters, privacy rescan, document fidelity against committed bytes,
+an offline rehearsal repeat and a mutation proof) clean and returned two MINOR
+findings, both false claims in durable records rather than run defects. Both were
+reproduced and repaired the same day; every fail-closed outcome and every verified
+run fact is unchanged.
+
+- [x] Finding 1: checkpoint 8.5 attributed the GTM live-comparison refusal to the
+  `LiveComparisonBudget.preflight` message `live comparison shape, model or rate
+  ceiling is unverified`. The refusal actually comes from `execute_comparison`'s
+  fresh-slot guard (`comparison_flow.py:1314-1321`): its per-slot pin
+  (`request_count == 2`, `executed_request_count == 3`, line 1317) rejects GTM's
+  recorded 3-and-4 slots, and line 1321 raises `live comparison reservation does not
+  have six fresh bound slots` before the preflight at 1322-1323 is reached; the
+  preflight's `requests == 18` clause can never see 24 while that pin stands.
+  Reproduced against a `/tmp` copy of the recorded GTM journey database (guard
+  raised at line 1321, a preflight spy recorded zero calls, slot execution never
+  ran). The checkpoint carries a dated correction; a future widening must change
+  the per-slot pins, not only the preflight numbers.
+- [x] Finding 2: the publication record in the notice below and the `46b6cdb`
+  message counted three commits in `61c621d..8751413`; the range and
+  `shiftwork/slice-25-live` hold five (`264c1c0`, `80e15fb`, `492745e`, `e1167a4`,
+  `8751413`). The record is corrected in place; the already-pushed `46b6cdb`
+  message is published history and stands corrected on record rather than
+  rewritten.
+- [x] The review's remaining coverage verified clean: guard fail-capability (date,
+  model, inventory, pins, refusals, privacy scans), operations-only enforcement in
+  code, receipt and journey contents, meter arithmetic, the 202-needle privacy
+  rescan, document fidelity, the offline rehearsal repeat and the starter-verdict
+  mutation. Its standing limits are unchanged: credential values could not be
+  re-scanned offline, external-world claims were not re-verifiable offline, remote
+  state rests on local tracking refs, and the same-day rate guard pins any rerun to
+  a fresh rate check.
+- [x] Post-slice architect-reviewer cleanup scan (report only, nothing deleted):
+  no orphan, duplicate or dead artifact confirmed across the S25 footprint. All 13
+  added files are referenced, the live demo's imports are all used, no scratch or
+  junk files linger, and the only stale claims found were the two above.
+- [x] `MISTAKES.md` records both root causes: a refusal attributed from the shape
+  numbers without reproducing the refusing path, and a commit range counted from
+  session memory instead of enumerated.
+
+S25 is complete on the user's 2026-10-14 direction: the GTM revenue floor client,
+its offline acceptance and the reduced live arm are published, record-consistent
+and reviewed. The recorded limits remain as stated (unverified Sandbox compute
+cost, the same-day rate guard and the two deferred rows).
+
+Earlier notices below remain historical; this notice supersedes their pending-state
+labels for S25 only.
+Current checkpoint: [slice25-portability-checkpoint-2026-10-11.md](slice25-portability-checkpoint-2026-10-11.md).
+
 **SLICE 25 LIVE ARM PASSED: TWO BOUNDED LIVE OPERATIONS, COMPARISON TRUSTED_LOCAL, 2026-10-14 Asia/Singapore.**
 
 The operator exercised the live go-ahead the same day the entitlement preflight passed
@@ -38,9 +90,11 @@ no retry.
   inference calls were spent against the one-call-per-meter ceiling.
 - [ ] The date guard pins live runs to the 2026-10-14 rate check; a later run needs a
   fresh same-day check, updated constants and its own evidence directory.
-- [x] Committed in three focused batches (`492745e` the demo, `e1167a4` the 00-status
-  record, `8751413` the curated evidence), pushed on `shiftwork/slice-25-live`, and
-  fast-forwarded into main as `61c621d..8751413` on 2026-10-14.
+- [x] Committed in five focused batches (`264c1c0` the decisions and 8.5 blocker
+  record, `80e15fb` the entitlement and rate evidence, `492745e` the demo, `e1167a4`
+  the 00-status record, `8751413` the curated evidence), pushed on
+  `shiftwork/slice-25-live`, and fast-forwarded into main as `61c621d..8751413` on
+  2026-10-14.
 
 Evidence: `docs/plans/shiftwork/evidence/slice25-live-2026-10-14/` (`once.marker`,
 `preflight.md`, `receipt.json`, `meter.json`, `journey.db`, `live-run.md`,

@@ -541,6 +541,22 @@ one. The GTM comparison therefore calls a preflight that raises
 closed before any spend. The frozen operation ceiling may bind as well: 6 slots at the
 S22b ratio imply more than the 12 permitted operations, though that was not measured.
 
+**Correction, 2026-10-14.** The sentence above attributing the GTM refusal to the
+preflight is falsified and must not be relied on. `execute_comparison` refuses the
+reservation earlier: the fresh-slot guard at `comparison_flow.py:1314-1321` pins
+every slot to `request_count == 2` and `executed_request_count == 3`
+(`comparison_flow.py:1317`), so the GTM reservation's recorded 3-and-4 slots raise
+`live comparison reservation does not have six fresh bound slots`
+(`comparison_flow.py:1321`), and the preflight call at `comparison_flow.py:1322-1323`
+is never reached. The preflight's own `requests == 18` clause can never see 24 while
+that pin stands, because six pinned slots always sum to 18. Reproduced 2026-10-14
+against a copy of the recorded GTM journey database
+(`evidence/slice25-live-2026-10-14/journey.db`): the guard raised at line 1321, a
+preflight spy recorded zero calls, and slot execution never ran. The refusal still
+fails closed before any spend, so the operations-only decision and the consequences
+below are unchanged. A future widening of the frozen shape must change the per-slot
+pins at `comparison_flow.py:1314-1321`, not only the preflight numbers.
+
 The live operations are unaffected. The GTM operational workload is exactly one request
 (`gtm-incident-001` in `fixtures/requests/gtm_pipeline_incident.jsonl`), which is what
 `LiveOperationBudget` requires, so a live selected operation is runnable today under a

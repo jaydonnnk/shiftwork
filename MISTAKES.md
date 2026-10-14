@@ -2748,3 +2748,28 @@ The pending-state repair also covers opening/operating and close/next-shift comp
   FAULTS map programmatically and count that exact string against both the entry commit
   and the worktree before writing any causal claim, and record the measurement with the
   claim. The checkpoint carries a dated correction in its section 3.5 and section 7.
+
+## 2026-10-14 (S25 live-arm records): a refusal attributed from the shape numbers, and a pushed commit range counted from memory
+
+- What happened: the independent review round of the published S25 live arm found
+  two false claims in durable records; both were reproduced and repaired the same
+  day. (1) Checkpoint 8.5 said the GTM live comparison "calls a preflight that
+  raises `live comparison shape, model or rate ceiling is unverified`". Executing
+  that path against a copy of the recorded journey database shows the refusal
+  comes earlier: the fresh-slot guard at `comparison_flow.py:1314-1321` pins each
+  slot to `request_count == 2` / `executed_request_count == 3` (line 1317), the
+  GTM comparison's recorded 3-and-4 slots fail that pin, and line 1321 raises
+  `live comparison reservation does not have six fresh bound slots`; the preflight
+  at 1322-1323 is never reached. (2) The 00-status publication bullet and the
+  `46b6cdb` message recorded three commits on `shiftwork/slice-25-live`;
+  `git log --oneline 61c621d..8751413` shows five.
+- Root cause: the refusal mechanism was inferred from the frozen 18 against GTM's
+  realized 24 at the preflight's code location without executing the refusal path,
+  so the guard that actually binds was never observed; and the commit count was
+  written from the session's memory of the commits it had just made instead of
+  enumerating the pushed range.
+- Prevention: attribute a refusal to a code path only from a reproduction of that
+  exact path, capturing the raising file and line (a spy around the claimed caller
+  makes the claim's absence falsifiable); and record any commit count by
+  enumerating the actual range at record time. Records corrected in place the same
+  day; the pushed `46b6cdb` message stands corrected on record, not rewritten.
