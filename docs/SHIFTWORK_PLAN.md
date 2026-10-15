@@ -10,8 +10,8 @@ install; full offline pivot; three-board availability; labelled `OFFLINE_SKIP`),
 the report-guard injection caught 15 of 15 faults, the final suite ran 1,430
 passed with only the known `port_dead` failure and the known live skip, the
 browser baselines were Bellwether PASS and GTM PASS with Northline's known 390px
-reach failure reproduced, and the 9,408,227-byte source/assets zip (sha256
-`b98a799cfe0c522ea23b9f6cfe821dd0f3d6007da9cdee2070107832ecf595e8`) passed
+reach failure reproduced, and the 9,416,208-byte rebuilt source/assets zip (sha256
+`f2f4f26eb467e9418c7db7f3587f9a42c6622aac5846848c42dfa05105dde0b8`) passed
 member-scan (synthetic matches only) and extraction-run checks. Judge evidence
 and the video-script draft are in
 `docs/plans/shiftwork/slice27-judge-evidence.md`. The branch was then pushed,

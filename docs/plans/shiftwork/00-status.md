@@ -42,23 +42,24 @@ visible and nothing was fixed silently.
   packaging test parses (an earlier all-at-once parse failed on the mixed log).
   Receipt: `docs/plans/shiftwork/evidence/slice27-package-2026-10-15/report-guards.json`
   (gitignored; stages with `git add -f` per MISTAKES.md 2026-10-14).
-- [x] Source/assets zip: 1,731 members, 9,408,227 bytes (under the 35,000,000-byte
-  upload-channel target), sha256 `b98a799cfe0c522ea23b9f6cfe821dd0f3d6007da9cdee2070107832ecf595e8`,
+- [x] Source/assets zip: 1,733 members, 9,416,208 bytes (under the 35,000,000-byte
+  upload-channel target), sha256 `f2f4f26eb467e9418c7db7f3587f9a42c6622aac5846848c42dfa05105dde0b8`,
   built from `shiftwork/`, `demos/`, `tests/`, `docs/` (working tree, evidence
   receipts included) plus `requirements.lock`, `pyproject.toml`, `README.md`,
   `LICENSE` and `HACKATHON_REQUIREMENTS.md`, with `.git`, `.venv`, `.env*` and
   `__pycache__` excluded. Decompressed member scan (boundary-anchored patterns,
-  nested S24 receipts zip one level deep): 2,410 members, 43,277,618 bytes, 7
-  matches in two test files, all adjudicated synthetic (the S22b render-fault
-  harness needle and the `tvly-test-secret` transport fixture); no live
-  credential value is present. Extracted to `/tmp/shiftwork-s27-zip-extract`
-  (at least 8 characters, per the S24 scanner-needle lesson) where the packaging
-  test passed against the extracted tree, and renaming the extracted `LICENSE`
-  made the same run fail at that exact path, proving the run reads the extracted
-  bytes. Receipt: `source-package.json` in the same evidence directory. The zip
-  is a local draft at
+  nested S24 receipts zip one level deep): 2,412 members, 43,335,143 bytes, 9
+  matches, all synthetic or self-referential (the S22b render-fault harness
+  needle, the `tvly-test-secret` transport fixture, and two record files that
+  quote that fixture name in prose); no live credential value is present.
+  Extract-and-run verification: the first build passed the packaging test
+  against the extracted tree and a rename mutation failed at that exact
+  extracted path, proving the run reads the extracted bytes; the zip was then
+  rebuilt after the publication record and the rebuilt archive passed the
+  extraction run again (`7 passed in 19.04s`). Receipt: `source-package.json`
+  in the same evidence directory. The zip is a local draft at
   `/Users/jayd0/Desktop/shiftwork-dist/shiftwork-slice27-source-2026-10-15.zip`;
-  no upload or URL exists.
+  no upload occurred.
 - [x] Judge evidence: `docs/plans/shiftwork/slice27-judge-evidence.md` records the
   Best Apps and Agents track and MIT license decisions, the observed S12 to S25
   model-use inventory, the single S20 chain (not a splice), the
