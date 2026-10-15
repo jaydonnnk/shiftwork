@@ -2796,3 +2796,15 @@ The pending-state repair also covers opening/operating and close/next-shift comp
   directory stages with exit 1 and a warning while a new file there needs
   `-f`; `git check-ignore` needs `--no-index` to reveal the rule for tracked
   paths, and evidence-directory commits use `git add -f`.
+
+## 2026-10-15 (S27 baseline): fresh-board readiness required a shift before the browser could open one
+
+- What happened: the first GTM/Northline browser launch wrapper timed out before
+  starting Chrome. Its healthy GTM preview had zero shifts; the wrapper demanded
+  a non-null `latest_shift`. The failed attempt is retained in
+  `/tmp/shiftwork-s27-board-baseline-e8vs2zm3/`.
+- Root cause: a readiness predicate from a seeded comparison-snapshot runner was
+  reused for an empty-board journey. The browser itself opens the first shift.
+- Prevention: check the requested board's identity for fresh-board readiness;
+  require a shift only when the preview contract seeds one. Inspect the preview
+  and browser entry steps before reusing their launch wrapper.
