@@ -1,13 +1,13 @@
-**SLICE 27 LOCAL FULL-PIVOT PACKAGE AND REPORT-GUARD EVIDENCE BUILT AND VERIFIED, LOCAL COMMITS ONLY, 2026-10-15 Asia/Singapore.**
+**SLICE 27 FULL-PIVOT PACKAGE BUILT AND VERIFIED; BRANCH PUSHED, MAIN FAST-FORWARDED AND THE REPOSITORY MADE PUBLIC, 2026-10-15 Asia/Singapore.**
 
 The S27 offline work ran under its own go-ahead: a pre-packaging baseline
 (non-packaging suite plus three browser journeys), obligation 47's packaging test
 rewritten for the approved-lock clean install and the full offline pivot, a
 report-guard fault injection, and a local source/assets zip built, scanned and
 extraction-tested. The only installs were the approved locked clean-environment
-installs inside the packaging test. No live call was made, no S27 run required a
-credential, and no push, tag, release, upload, recording or publication happened.
-Every number below
+installs inside the packaging test. No live call was made and no S27 run required
+a credential; the push, merge and visibility change documented below are the only
+outward actions. Every number below
 comes from a command run in this session; the two known baseline failures stay
 visible and nothing was fixed silently.
 
@@ -73,21 +73,34 @@ visible and nothing was fixed silently.
   36 judge-doc links and 5 `00-status` section anchors resolve, and the six new
   environment-scrub tests have no duplicate coverage elsewhere. Three product
   files carry a 2026-10-15 mtime with content identical to HEAD; no action.
+- [x] Publication and public visibility (separately authorized by Jaydon on
+  2026-10-15): `shiftwork/slice-27` pushed to origin (new branch), main
+  fast-forwarded `32d899a..a17e0de` and pushed, both remote refs verified at
+  `a17e0de559af5e596626ac223f0823dedf7b8807`; repository visibility changed
+  private to public through the GitHub API and verified by an unauthenticated
+  200 at `https://github.com/jaydonnnk/shiftwork`. A full-history blob scan
+  preceded the flip: 2,648 blobs, 92,912,759 bytes scanned, all 214 pattern hits
+  adjudicated as Tavily public-doc placeholder examples or deliberately
+  synthetic test fixtures (receipt: `history-secret-scan.json` in the S27
+  evidence directory). No tag or release was created.
 - [ ] Limits: port_dead and the Northline 390px reach failure remain open red
   rows; the credential scan is pattern-based and the nested receipts zip was
   scanned one level deep; the zip is a local draft and 35 MB is an upload-channel
   target, not an acceptance; the browser journeys are baseline checks, not new
-  regression coverage; no live call and no credential-dependent step ran, and no
-  push, tag, release, upload, recording, public repository or submission
-  occurred.
-- [ ] Outstanding authorizations, each still needing its own go-ahead: any fresh
-  live demo or inference call; release, tag or push of this branch; public
-  repository or build access; video recording and upload; Devpost submission;
-  S28 hosted demo; and the submission-time Tavily bonus answer.
+  regression coverage; no live call and no credential-dependent step ran during
+  this verification, and no tag, release, upload, recording or submission
+  occurred (the push and repository visibility change are recorded above).
+- [ ] Authorized but blocked: a fresh live call/demo waits on credential
+  provisioning (no Nebius key exists on this machine; Jaydon exports
+  `NEBIUS_API_KEY` and `NEBIUS_PROJECT_ID` per the S25 pattern). Still needing
+  Jaydon's own action or decision: video recording and upload, Devpost
+  submission, S28 hosted demo, the submission-time Tavily bonus answer and the
+  numeric model-feedback ratings.
 
-All of this is committed in focused local batches on `shiftwork/slice-27`; no
-push, merge or publication is included. Earlier notices below remain historical;
-this notice supersedes their pending-state labels for S27 only.
+All of this is committed in focused batches on `shiftwork/slice-27`, pushed and
+fast-forward-merged to main; no tag, release, upload or recording is included.
+Earlier notices below remain historical; this notice supersedes their
+pending-state labels for S27 only.
 
 **SLICE 26 LIVE TAVILY ARM RUN: LIVE DISCOVERY COMPLETE, PREREGISTERED ABLATION VERDICT DROP_TAVILY_CLAIM (0 OF 4 STRUCTURAL EVENTS DISCOVERED); NO DISCOVERY CLAIM IN THE PITCH, 2026-10-14 Asia/Singapore.**
 

@@ -1,4 +1,4 @@
-**SLICES 25 TO 27: S25 AND S26 ACCEPTED AND PUBLISHED; SLICE 27 LOCAL PACKAGE AND JUDGE EVIDENCE VERIFIED WITH LOCAL COMMITS ONLY, 2026-10-15 Asia/Singapore.**
+**SLICES 25 TO 27: S25 AND S26 ACCEPTED AND PUBLISHED; SLICE 27 VERIFIED, PUSHED AND THE REPOSITORY MADE PUBLIC, 2026-10-15 Asia/Singapore.**
 
 S25 was accepted 2026-10-12 and published on main (`61c621d`); its live arm was
 accepted and published 2026-10-14 (`61c621d..8751413`, fixes `fbebb0c`). S26
@@ -14,12 +14,13 @@ reach failure reproduced, and the 9,408,227-byte source/assets zip (sha256
 `b98a799cfe0c522ea23b9f6cfe821dd0f3d6007da9cdee2070107832ecf595e8`) passed
 member-scan (synthetic matches only) and extraction-run checks. Judge evidence
 and the video-script draft are in
-`docs/plans/shiftwork/slice27-judge-evidence.md`. No push, tag, release, upload
-or publication happened.
+`docs/plans/shiftwork/slice27-judge-evidence.md`. The branch was then pushed,
+main fast-forwarded to `a17e0de`, and the repository made public on GitHub after
+a clean 2,648-blob history scan; no tag, release, upload or recording happened.
 
 - [x] Slices 25 and 26: accepted and published as above.
-- [x] Slice 27: local package verified; focused local commits on
-  `shiftwork/slice-27` only.
+- [x] Slice 27: verified; committed, pushed and merged to main
+  (`32d899a..a17e0de`); repository made public.
 - [ ] Slice 28: conditional hosted demo; no go-ahead and no work started.
 
 Earlier notices below remain historical; this notice supersedes their

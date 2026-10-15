@@ -140,8 +140,9 @@ fine-tuning or other-model benchmark is claimed. Numeric feedback ratings remain
 unfilled where observed evidence does not support a score. S25's two live
 Sandbox operations made **zero inference calls**.
 
-**No currently authorized fresh live demo or public download URL is supplied.**
-For a supervised live demonstration, ask the operator to prepare a fresh bounded
+**The public repository at `https://github.com/jaydonnnk/shiftwork` was made
+public on 2026-10-15; no fresh live demo recording is supplied.** For a
+supervised live demonstration, ask the operator to prepare a fresh bounded
 packet, verify current model access, rates and Sandbox permissions, and obtain
 explicit call/spend approval. Only then provision `NEBIUS_API_KEY` and
 `NEBIUS_PROJECT_ID` through the controller environment. Do not send credentials
@@ -151,5 +152,6 @@ their old allowances were current. S28 hosting is not part of this package.
 S26 ended in `DROP_TAVILY_CLAIM`; no discovery-benefit claim enters this pitch.
 The Tavily bonus answer remains Jaydon's submission-time decision. Learning
 improvement, general model superiority, real business impact and total Sandbox
-compute cost are unproven. Publication, a public video and submission are still
-separate authorized actions, not consequences of running these commands.
+compute cost are unproven. The repository was pushed and made public on
+2026-10-15; a public video and the Devpost submission remain separate authorized
+actions, not consequences of running these commands.

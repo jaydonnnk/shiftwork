@@ -12,7 +12,11 @@ Date: 2026-10-15. Documentation deliverable only, not a gate revision or release
 - Learning, reduced-assistance transfer, voluntary return, business impact, job readiness and production readiness remain unproven. Synthetic events are not real sales, bookings, trust or revenue.
 - Neither vendor exclusivity nor advantage over ordinary code or other models is demonstrated. Independent deterministic assessment, not a second model, determines task outcomes and synthetic consequences.
 - The user separately authorized a clean locked install; the parent owns all runtime verification. No install, application runtime, credential read, network call, recording, upload, publication, commit or submission was performed for this file.
-- Recording, upload and publication are **not authorized** here. Public repository/build access, a download URL and judging-period availability require separate verification, not inference from historical branch publication.
+- Recording, upload and publication are **not authorized** by this document. The
+  repository was separately pushed and made public on 2026-10-15 (see
+  `00-status.md`); build access and judging-period availability beyond that
+  public repository remain unverified, not inferred from historical branch
+  publication.
 - [Requirements][rules] are a stored checklist checked 2026-09-11, with form fields supplied 2026-09-17. Current official rules were not re-fetched.
 
 ## 2. Observed model-use inventory
