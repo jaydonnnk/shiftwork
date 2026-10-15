@@ -1,14 +1,4 @@
-"""Test 51: a fresh environment installs requirements.lock, runs the demo and serves.
-
-Lands at Slice 1 and re-runs at Slice 16 (04-slices.md). The preferred path is a
-stdlib venv plus pip, exactly as specified, and that is the path selected on this
-machine (re-verified 2026-09-17: `clean-env mechanism: stdlib venv + pip`). A
-one-off `WinError 4551` Application Control block was seen once but is not
-reproducible on re-test; for machines where freshly created stdlib venv binaries
-genuinely cannot execute, the test probes the interpreter and falls back to a
-uv-managed venv plus `uv pip sync` against the same pins file, with identical
-assertions either way. Requires network access for the installer.
-"""
+"""Obligation 47: locked clean install and the full offline pivot, never a live PASS."""
 
 import json
 import os
@@ -24,7 +14,6 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-LOCKFILE = REPO_ROOT / "requirements.lock"
 
 
 def _venv_python(venv_dir: Path) -> Path:
@@ -43,26 +32,23 @@ def _runs(python: Path) -> bool:
     return probe.returncode == 0
 
 
-def _fresh_interpreter(tmp_path: Path) -> tuple[Path, list[str], str]:
+def _fresh_interpreter(tmp_path: Path, lockfile: Path) -> tuple[Path, list[str], str]:
     stdlib_dir = tmp_path / "venv-pip"
     try:
-        venv.create(stdlib_dir, with_pip=True)
+        venv.create(stdlib_dir, with_pip=True, symlinks=os.name != "nt")
         stdlib_python = _venv_python(stdlib_dir)
         if _runs(stdlib_python):
             return (
                 stdlib_python,
-                [str(stdlib_python), "-m", "pip", "install", "--quiet", "-r", str(LOCKFILE)],
+                [str(stdlib_python), "-m", "pip", "--isolated", "--disable-pip-version-check",
+                 "install", "--quiet", "--no-deps", "-r", str(lockfile)],
                 "stdlib venv + pip",
             )
     except OSError:
         pass
 
     uv = shutil.which("uv")
-    if uv is None:
-        pytest.skip(
-            "no usable fresh-environment mechanism: stdlib venv execution is blocked "
-            "by OS policy and uv is not installed"
-        )
+    assert uv is not None, "clean install BLOCKED: no usable fresh interpreter or installed uv"
     uv_dir = tmp_path / "venv-uv"
     create = subprocess.run(
         [uv, "venv", "--python", "3.12", str(uv_dir)],
@@ -75,7 +61,7 @@ def _fresh_interpreter(tmp_path: Path) -> tuple[Path, list[str], str]:
     uv_python = _venv_python(uv_dir)
     return (
         uv_python,
-        [uv, "pip", "sync", "--python", str(uv_python), str(LOCKFILE)],
+        [uv, "pip", "sync", "--python", str(uv_python), str(lockfile)],
         "uv venv + uv pip sync",
     )
 
@@ -90,18 +76,14 @@ _CREDENTIAL_MARKERS = ("API_KEY", "TOKEN", "SECRET", "PASSWORD", "SESSION")
 
 
 def _scrubbed_env() -> dict[str, str]:
-    """Host env with credential-bearing variables removed.
-
-    Program-design test 51 requires the clean-env run to complete without
-    credentials and to fail if it needs a key. Inheriting the full host env would
-    let a real NEBIUS_API_KEY (or similar) silently satisfy a run that secretly
-    needs one, so strip anything credential-shaped before launching children.
-    """
-    return {
+    env = {
         key: value
         for key, value in os.environ.items()
         if not any(marker in key.upper() for marker in _CREDENTIAL_MARKERS)
+        and not key.startswith(("SHIFTWORK_", "PYTHON", "PYTEST_", "PIP_", "UV_"))
+        and key != "VIRTUAL_ENV"
     }
+    return {**env, "SHIFTWORK_EXECUTOR_ADAPTER": "recorded", "PYTHONDONTWRITEBYTECODE": "1"}
 
 
 def _poll_board(port: int, timeout_s: float = 30.0) -> dict:
@@ -116,56 +98,120 @@ def _poll_board(port: int, timeout_s: float = 30.0) -> dict:
     raise AssertionError("uvicorn did not serve the board within the timeout")
 
 
-def test_clean_env_install_and_run(tmp_path):
-    python, install_command, mechanism = _fresh_interpreter(tmp_path)
-    print(f"clean-env mechanism: {mechanism}")
-    env = {
-        **_scrubbed_env(),
-        "UV_PYTHON_DOWNLOADS": "never",
-        "SHIFTWORK_DB_PATH": str(tmp_path / "clean-env.db"),
-    }
-
-    install = subprocess.run(
-        install_command, capture_output=True, text=True, env=env, timeout=900
-    )
-    assert install.returncode == 0, f"lock install failed:\n{install.stdout}\n{install.stderr}"
-
+def _offline_pivot(python: Path, source: Path, out: Path, env: dict) -> dict:
     demo = subprocess.run(
-        [str(python), "-m", "demos.lifecycle"],
-        cwd=REPO_ROOT,
-        env=env,
-        capture_output=True,
-        text=True,
-        timeout=300,
+        [str(python), "-m", "demos.final_pivot", "--stage", "inheritance",
+         "--preview-db", str(out / "bellwether.db")],
+        cwd=source, env=env, capture_output=True, text=True, timeout=300,
     )
-    assert demo.returncode == 0, f"demo failed:\n{demo.stdout}\n{demo.stderr}"
-    assert "FINALIZED" in demo.stdout
+    (out / "bellwether.log").write_text(demo.stdout + demo.stderr, encoding="utf-8")
+    assert demo.returncode == 0, f"pivot demo failed:\n{demo.stdout}\n{demo.stderr}"
+    report = json.loads(demo.stdout)
+    assert report["verdict"] == "PASS_OFFLINE_POLICY"
+    assert report["evidence_class"] == "TRUSTED_LOCAL_DRAFT_POLICY_ONLY"
+    assert report["inherited"]["draft_files_match_selected"] is True
+    assert report["inherited"]["chain_status"] == "VALID"
+    assert report["operational_run"]["evidence_mode"] == "TRUSTED_LOCAL"
+    assert report["operational_run"]["artifact_version_id"] == report["inherited"]["selected_version_id"]
+    later = report["later_condition_comparison"]
+    assert later["trial_states"] == ["COMPLETE"] * 6
+    assert later["outcome_status"] == "COMPLETE"
+    assert later["candidate_b_version_id"] == report["inherited"]["retained_alternative_version_id"]
+    assert later["operational_run_is_a_trial"] is False
+    assert report["prior_bytes_identical"] is True
+
+    gtm = subprocess.run(
+        [str(python), "-m", "demos.gtm_operation", "--out", str(out / "gtm")],
+        cwd=source, env=env, capture_output=True, text=True, timeout=300,
+    )
+    (out / "gtm.log").write_text(gtm.stdout + gtm.stderr, encoding="utf-8")
+    assert gtm.returncode == 0, f"GTM journey failed:\n{gtm.stdout}\n{gtm.stderr}"
+    gtm_report = json.loads(gtm.stdout)
+    assert gtm_report["mode"] == "PRODUCTION_REVIEWED_TRUSTED_LOCAL"
+    assert gtm_report["replay"] == "IDENTICAL"
+
+    northline = subprocess.run(
+        [str(python), "-m", "pytest",
+         "tests/orchestrator/test_fde_deployment.py::test_fde_later_alternative_diagnostic_preserves_pilot_and_handover",
+         "-q", "-p", "no:cacheprovider"],
+        cwd=source, env=env, capture_output=True, text=True, timeout=300,
+    )
+    (out / "northline.log").write_text(northline.stdout + northline.stderr, encoding="utf-8")
+    assert northline.returncode == 0, f"Northline journey failed:\n{northline.stdout}\n{northline.stderr}"
+    assert "1 passed" in northline.stdout and "skipped" not in northline.stdout
+    return {"bellwether": report, "gtm": gtm_report,
+            "northline": "PASS_TRUSTED_LOCAL_TEST_CONTROL",
+            "live_demo": "OFFLINE_SKIP: credentials excluded; a fresh live demo needs separate authorization"}
+
+
+def test_clean_env_install_and_run(tmp_path, capsys):
+    source = tmp_path / "source"
+    source.mkdir()
+    for directory in ("shiftwork", "demos", "tests", "docs"):
+        shutil.copytree(REPO_ROOT / directory, source / directory,
+                        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store", ".env", ".env.*"))
+    for filename in ("requirements.lock", "pyproject.toml", "README.md", "LICENSE", "HACKATHON_REQUIREMENTS.md"):
+        shutil.copyfile(REPO_ROOT / filename, source / filename)
+    assert not (source / ".venv").exists() and not (source / ".git").exists()
+    python, install_command, mechanism = _fresh_interpreter(tmp_path, source / "requirements.lock")
+    env = {**_scrubbed_env(), "UV_PYTHON_DOWNLOADS": "never",
+           "SHIFTWORK_DB_PATH": str(tmp_path / "serve.db")}
+    install = subprocess.run(install_command, capture_output=True, text=True, env=env, timeout=900)
+    (tmp_path / "install.log").write_text(install.stdout + install.stderr, encoding="utf-8")
+    assert install.returncode == 0, f"lock install failed:\n{install.stdout}\n{install.stderr}"
+    check_command = ([str(python), "-m", "pip", "check"] if mechanism == "stdlib venv + pip"
+                     else [install_command[0], "pip", "check", "--python", str(python)])
+    check = subprocess.run(check_command, capture_output=True, text=True, env=env, timeout=60)
+    assert check.returncode == 0, f"locked dependencies conflict:\n{check.stdout}\n{check.stderr}"
+    report = _offline_pivot(python, source, tmp_path, env)
 
     port = _free_port()
-    server = subprocess.Popen(
-        [
-            str(python),
-            "-m",
-            "uvicorn",
-            "shiftwork.app:create_app",
-            "--factory",
-            "--port",
-            str(port),
-        ],
-        cwd=REPO_ROOT,
-        env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-    )
-    try:
-        board = _poll_board(port)
-        assert board["engagement_slug"] == "bookshop"
-        assert board["chain_status"] == "VALID"
-    finally:
-        server.terminate()
+    with (tmp_path / "server.log").open("w", encoding="utf-8") as log:
+        server = subprocess.Popen(
+            [str(python), "-m", "uvicorn", "shiftwork.app:create_app", "--factory",
+             "--host", "127.0.0.1", "--port", str(port)],
+            cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT,
+        )
         try:
-            server.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            server.kill()
-            server.wait(timeout=10)
+            board = _poll_board(port)
+            assert board["engagement_slug"] == "bookshop"
+            assert board["chain_status"] == "VALID"
+            with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/boards") as response:
+                boards = json.load(response)
+            assert [(row["engagement_slug"], row["availability"]) for row in boards] == [
+                ("bookshop", "AVAILABLE"), ("gtm", "AVAILABLE"), ("northline", "AVAILABLE")]
+            for slug in ("bookshop", "northline", "gtm"):
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/engagements/{slug}/board") as response:
+                    assert json.load(response)["engagement_slug"] == slug
+            for asset in ("index.html", "app.js", "styles.css"):
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/{asset}") as response:
+                    assert response.read() == (source / "shiftwork/client" / asset).read_bytes()
+        finally:
+            server.terminate()
+            try:
+                server.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                server.kill()
+                server.wait(timeout=10)
+    (tmp_path / "offline-pivot.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    with capsys.disabled():
+        print(f"\nclean-env mechanism: {mechanism}; three-board offline pivot PASS")
+        print(report["live_demo"])
+        print(f"package receipts: {tmp_path}")
+
+
+@pytest.mark.parametrize("name,value", [
+    ("SHIFTWORK_EXECUTOR_ADAPTER", "tokenfactory"),
+    ("SHIFTWORK_DB_PATH", "/host/database.db"),
+    ("SHIFTWORK_MODEL_ID", "host-model"),
+    ("PYTHONPATH", "/host/packages"),
+    ("VIRTUAL_ENV", "/host/environment"),
+    ("PYTEST_ADDOPTS", "--collect-only"),
+])
+def test_offline_environment_ignores_host_execution_settings(monkeypatch, name, value):
+    monkeypatch.setenv(name, value)
+    env = _scrubbed_env()
+    if name == "SHIFTWORK_EXECUTOR_ADAPTER":
+        assert env[name] == "recorded"
+    else:
+        assert name not in env
