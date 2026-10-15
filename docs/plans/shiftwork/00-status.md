@@ -1,3 +1,89 @@
+**SLICE 27 LOCAL FULL-PIVOT PACKAGE AND REPORT-GUARD EVIDENCE BUILT AND VERIFIED, LOCAL COMMITS ONLY, 2026-10-15 Asia/Singapore.**
+
+The S27 offline work ran under its own go-ahead: a pre-packaging baseline
+(non-packaging suite plus three browser journeys), obligation 47's packaging test
+rewritten for the approved-lock clean install and the full offline pivot, a
+report-guard fault injection, and a local source/assets zip built, scanned and
+extraction-tested. The only installs were the approved locked clean-environment
+installs inside the packaging test. No live call was made, no S27 run required a
+credential, and no push, tag, release, upload, recording or publication happened.
+Every number below
+comes from a command run in this session; the two known baseline failures stay
+visible and nothing was fixed silently.
+
+- [x] Baseline before packaging: non-packaging suite 1,423 passed, 1 failed
+  (`test_conformance_suite_recorded_local[port_dead]`), 1 known live skip; browser
+  journeys Bellwether PASS and GTM PASS, and Northline's native journey reproduced
+  the known 390px reach failure (receipts in
+  `/tmp/shiftwork-s27-bellwether-baseline-20261015` and
+  `/tmp/shiftwork-s27-board-baseline-fixed-4xku6axq`).
+- [x] Obligation 47 packaging test: `tests/packaging/test_clean_env_install_and_run.py`
+  rewritten (the previous file held one test; the new file holds seven). It builds
+  a stdlib venv with pip (uv venv + uv pip sync as fallback), installs only
+  `requirements.lock`, runs `pip check`, then the full offline pivot
+  (`demos.final_pivot --stage inheritance`, `demos.gtm_operation`, the Northline
+  FDE test control), serves the controller and asserts `/api/boards` declaration
+  availability (bookshop, gtm, northline), each board route and three served
+  client assets byte-identical, and prints a labelled `OFFLINE_SKIP` for the
+  excluded live credentials, never a live PASS. Verified from the repo
+  (`7 passed in 19.92s`, mechanism `stdlib venv + pip`, receipts under the
+  pytest-188 tmp dir) and again from the extracted zip (`7 passed in 19.02s`,
+  pytest-192 tmp dir).
+- [x] Defect found by the first full-suite run and repaired: the new `/api/boards`
+  assertion expected northline at index 1, but the declaration order is bookshop,
+  gtm, northline (`shiftwork/packs/registry.py`). That run recorded 2 failed
+  (port_dead plus this assertion), 1,429 passed, 1 skipped; after the fix the
+  final full suite recorded `1 failed, 1430 passed, 1 skipped` in 188.11s with the
+  known port_dead case as the only failure: observed REQUEST_TIMEOUT at wall
+  5,003 ms against the recorded SERVICE_UNREACHABLE at 55 ms.
+- [x] Report-guard fault injection: 15 of 15 serialized report faults caught on
+  their named assertions with valid receipts accepted. The replay splits each
+  receipt log into its leading JSON body and trailing stderr, mirroring what the
+  packaging test parses (an earlier all-at-once parse failed on the mixed log).
+  Receipt: `docs/plans/shiftwork/evidence/slice27-package-2026-10-15/report-guards.json`
+  (gitignored; stages with `git add -f` per MISTAKES.md 2026-10-14).
+- [x] Source/assets zip: 1,731 members, 9,408,227 bytes (under the 35,000,000-byte
+  upload-channel target), sha256 `b98a799cfe0c522ea23b9f6cfe821dd0f3d6007da9cdee2070107832ecf595e8`,
+  built from `shiftwork/`, `demos/`, `tests/`, `docs/` (working tree, evidence
+  receipts included) plus `requirements.lock`, `pyproject.toml`, `README.md`,
+  `LICENSE` and `HACKATHON_REQUIREMENTS.md`, with `.git`, `.venv`, `.env*` and
+  `__pycache__` excluded. Decompressed member scan (boundary-anchored patterns,
+  nested S24 receipts zip one level deep): 2,410 members, 43,277,618 bytes, 7
+  matches in two test files, all adjudicated synthetic (the S22b render-fault
+  harness needle and the `tvly-test-secret` transport fixture); no live
+  credential value is present. Extracted to `/tmp/shiftwork-s27-zip-extract`
+  (at least 8 characters, per the S24 scanner-needle lesson) where the packaging
+  test passed against the extracted tree, and renaming the extracted `LICENSE`
+  made the same run fail at that exact path, proving the run reads the extracted
+  bytes. Receipt: `source-package.json` in the same evidence directory. The zip
+  is a local draft at
+  `/Users/jayd0/Desktop/shiftwork-dist/shiftwork-slice27-source-2026-10-15.zip`;
+  no upload or URL exists.
+- [x] Judge evidence: `docs/plans/shiftwork/slice27-judge-evidence.md` records the
+  Best Apps and Agents track and MIT license decisions, the observed S12 to S25
+  model-use inventory, the single S20 chain (not a splice), the
+  condition-by-condition Gate 4 section 5 assessment and the public-video script
+  draft. Numeric model-feedback ratings stay blank pending Jaydon's judgment, and
+  the Tavily bonus answer remains his submission-time decision with S26's DROP on
+  record. `README.md` (setup, modes, limits, judge path) and `LICENSE`
+  (MIT, Jaydon Kua) were added, and `MISTAKES.md` logs the S27 baseline
+  board-readiness incident.
+- [ ] Limits: port_dead and the Northline 390px reach failure remain open red
+  rows; the credential scan is pattern-based and the nested receipts zip was
+  scanned one level deep; the zip is a local draft and 35 MB is an upload-channel
+  target, not an acceptance; the browser journeys are baseline checks, not new
+  regression coverage; no live call and no credential-dependent step ran, and no
+  push, tag, release, upload, recording, public repository or submission
+  occurred.
+- [ ] Outstanding authorizations, each still needing its own go-ahead: any fresh
+  live demo or inference call; release, tag or push of this branch; public
+  repository or build access; video recording and upload; Devpost submission;
+  S28 hosted demo; and the submission-time Tavily bonus answer.
+
+All of this is committed in focused local batches on `shiftwork/slice-27`; no
+push, merge or publication is included. Earlier notices below remain historical;
+this notice supersedes their pending-state labels for S27 only.
+
 **SLICE 26 LIVE TAVILY ARM RUN: LIVE DISCOVERY COMPLETE, PREREGISTERED ABLATION VERDICT DROP_TAVILY_CLAIM (0 OF 4 STRUCTURAL EVENTS DISCOVERED); NO DISCOVERY CLAIM IN THE PITCH, 2026-10-14 Asia/Singapore.**
 
 The live arm ran under Jaydon's 2026-10-14 go-ahead after he provisioned
