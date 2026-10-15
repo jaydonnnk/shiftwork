@@ -1,0 +1,115 @@
+{
+  "mode": "OFFLINE_SERIALIZED_REPORT_FAULT_INJECTION",
+  "receipt_source": "/private/var/folders/zn/8xx89l71235c5k2qhc_k3ck80000gn/T/pytest-of-jayd0/pytest-188/test_clean_env_install_and_run0",
+  "log_structure": {
+    "bellwether.log": {
+      "json_body_len": 4723,
+      "trailing_stderr_len": 360,
+      "parsed_json": true
+    },
+    "gtm.log": {
+      "json_body_len": 604,
+      "trailing_stderr_len": 1,
+      "parsed_json": true
+    },
+    "northline.log": {
+      "json_body_len": 0,
+      "trailing_stderr_len": 1149,
+      "parsed_json": false
+    }
+  },
+  "limits": "Subprocess outputs replay real package receipts with one field changed per fault. The bellwether and gtm logs were split into their leading JSON object and trailing stderr before replay, mirroring what the packaging test parses. This checks packaging assertions, not fresh runtime mutations or live behavior.",
+  "valid_receipts": "PASS",
+  "faults": [
+    {
+      "surface": "bellwether",
+      "field": "verdict",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert report[\"verdict\"] == \"PASS_OFFLINE_POLICY\""
+    },
+    {
+      "surface": "bellwether",
+      "field": "evidence_class",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert report[\"evidence_class\"] == \"TRUSTED_LOCAL_DRAFT_POLICY_ONLY\""
+    },
+    {
+      "surface": "bellwether",
+      "field": "inherited.draft_files_match_selected",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert report[\"inherited\"][\"draft_files_match_selected\"] is True"
+    },
+    {
+      "surface": "bellwether",
+      "field": "inherited.chain_status",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert report[\"inherited\"][\"chain_status\"] == \"VALID\""
+    },
+    {
+      "surface": "bellwether",
+      "field": "operational_run.evidence_mode",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert report[\"operational_run\"][\"evidence_mode\"] == \"TRUSTED_LOCAL\""
+    },
+    {
+      "surface": "bellwether",
+      "field": "operational_run.artifact_version_id",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert report[\"operational_run\"][\"artifact_version_id\"] == report[\"inherited\"][\"selected_version_id\"]"
+    },
+    {
+      "surface": "bellwether",
+      "field": "later_condition_comparison.trial_states",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert later[\"trial_states\"] == [\"COMPLETE\"] * 6"
+    },
+    {
+      "surface": "bellwether",
+      "field": "later_condition_comparison.outcome_status",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert later[\"outcome_status\"] == \"COMPLETE\""
+    },
+    {
+      "surface": "bellwether",
+      "field": "later_condition_comparison.candidate_b_version_id",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert later[\"candidate_b_version_id\"] == report[\"inherited\"][\"retained_alternative_version_id\"]"
+    },
+    {
+      "surface": "bellwether",
+      "field": "later_condition_comparison.operational_run_is_a_trial",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert later[\"operational_run_is_a_trial\"] is False"
+    },
+    {
+      "surface": "bellwether",
+      "field": "prior_bytes_identical",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert report[\"prior_bytes_identical\"] is True"
+    },
+    {
+      "surface": "gtm",
+      "field": "mode",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert gtm_report[\"mode\"] == \"PRODUCTION_REVIEWED_TRUSTED_LOCAL\""
+    },
+    {
+      "surface": "gtm",
+      "field": "replay",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert gtm_report[\"replay\"] == \"IDENTICAL\""
+    },
+    {
+      "surface": "northline",
+      "field": "1 skipped",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert \"1 passed\" in northline.stdout and \"skipped\" not in northline.stdout"
+    },
+    {
+      "surface": "northline",
+      "field": "1 passed, 1 skipped",
+      "result": "FAULT_CAUGHT",
+      "assertion": "assert \"1 passed\" in northline.stdout and \"skipped\" not in northline.stdout"
+    }
+  ]
+}

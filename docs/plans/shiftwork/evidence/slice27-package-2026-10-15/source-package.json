@@ -1,0 +1,48 @@
+{
+  "mode": "LOCAL_SOURCE_PACKAGE_BUILD",
+  "zip": "/Users/jayd0/Desktop/shiftwork-dist/shiftwork-slice27-source-2026-10-15.zip",
+  "zip_bytes": 9408227,
+  "zip_sha256": "b98a799cfe0c522ea23b9f6cfe821dd0f3d6007da9cdee2070107832ecf595e8",
+  "members": 1731,
+  "includes": [
+    "shiftwork/",
+    "demos/",
+    "tests/",
+    "docs/ (working tree, including evidence receipts)",
+    "requirements.lock",
+    "pyproject.toml",
+    "README.md",
+    "LICENSE",
+    "HACKATHON_REQUIREMENTS.md"
+  ],
+  "excludes": [
+    ".git",
+    ".venv",
+    ".env*",
+    "__pycache__",
+    "*.pyc",
+    ".DS_Store",
+    ".pytest_cache"
+  ],
+  "credential_scan": {
+    "method": "decompressed member scan, boundary-anchored provider-prefix, sk-prefix and assignment-shape patterns; nested zip members scanned one level deep; matched values never printed",
+    "members_scanned": 2410,
+    "nested_members_scanned": 679,
+    "bytes_scanned": 43277618,
+    "matches": 7,
+    "member_locations": [
+      "tests/client/northline_browser.mjs",
+      "tests/curation/test_ablation.py"
+    ],
+    "adjudication": "All 7 matches are synthetic fixtures: the S22b render-fault harness needle in northline_browser.mjs and the tvly-test-secret transport-test literal; no live credential value is present.",
+    "known_limit": "Pattern-based scan; the .env file holding the local live keys is excluded by name and was not needed for any packaged path."
+  },
+  "extraction_run": {
+    "extracted_to": "/tmp/shiftwork-s27-zip-extract",
+    "fixture_run": ".venv python -B -m pytest tests/packaging/test_clean_env_install_and_run.py -q -p no:cacheprovider -> 7 passed in 19.02s, mechanism stdlib venv + pip, OFFLINE_SKIP printed",
+    "mutation_proof": "renaming the extracted LICENSE made the same run fail at /private/tmp/shiftwork-s27-zip-extract/LICENSE (FileNotFoundError), proving the run reads the extracted bytes; LICENSE restored by move"
+  },
+  "report_guards_receipt_included_in_zip": true,
+  "limits": "Local draft artifact; not published, not a release tag, no upload performed. The 35,000,000-byte check is an upload-channel target, not a Devpost acceptance. The nested s24 receipts zip was scanned one level deep only.",
+  "measured_at": "2026-10-15 Asia/Singapore"
+}
