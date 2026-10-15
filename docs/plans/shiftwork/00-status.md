@@ -68,6 +68,11 @@ visible and nothing was fixed silently.
   record. `README.md` (setup, modes, limits, judge path) and `LICENSE`
   (MIT, Jaydon Kua) were added, and `MISTAKES.md` logs the S27 baseline
   board-readiness incident.
+- [x] Post-slice cleanup scan (architect-reviewer, post-slice mode, read-only): no
+  orphaned or stray files from this slice, no dead fixtures or unused imports, all
+  36 judge-doc links and 5 `00-status` section anchors resolve, and the six new
+  environment-scrub tests have no duplicate coverage elsewhere. Three product
+  files carry a 2026-10-15 mtime with content identical to HEAD; no action.
 - [ ] Limits: port_dead and the Northline 390px reach failure remain open red
   rows; the credential scan is pattern-based and the nested receipts zip was
   scanned one level deep; the zip is a local draft and 35 MB is an upload-channel
