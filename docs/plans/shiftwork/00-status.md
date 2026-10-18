@@ -1,3 +1,29 @@
+**S28 PREFLIGHT RECORDED; HOSTING AND LIVE STARTUP REMAIN INCOMPLETE, 2026-10-18 Asia/Singapore.**
+
+The S28 handoff authorizes the free host, demo URL, live calls within existing
+Token Factory credits and focused local commits. Entry Git state matched the
+handoff at `81245f0`. Before changes, the full suite reproduced only port_dead:
+1 failed, 1,430 passed, 1 skipped, 2 warnings in 192.90 seconds. The separate
+package check passed 7 in 19.29 seconds with labelled OFFLINE_SKIP. The existing
+9,416,208-byte downloadable zip still matches its S27 SHA-256.
+
+Render's current free-tier sleep, ephemeral disk, no-card and Python-version
+terms were checked. No service was created or deployed. Nebius credentials are
+absent; preflight returned missing_environment without a provider request.
+An offline startup probe also reproduced HTTP 409: the ordinary tokenfactory
+app factory supplies no live operation budget. Existing operation/comparison
+meters and assistance need explicit hosting wiring; environment variables alone
+do not establish a working live demo. That wiring's fit with the "unchanged
+controller" wording remains to be resolved before product edits.
+
+[S28 preflight checkpoint](slice28-hosting-preflight-2026-10-18.md) records the
+commands, receipts, platform sources, proposed resolution and [unknown] items.
+S28 is not complete. Hosting access, secrets, current credit/rate checks, public
+URL, restart/reset, monitoring, deployed browser checks, live inference and the
+post-slice cleanup scan remain pending. Northline's known 390px red row is
+carried, not rerun or repaired. No product source, gate approval, push, main
+integration or submission changed. Earlier notices remain historical.
+
 **SLICE 28 ROUTE SELECTED: FREE PLATFORM HOST WITH LIVE TOKEN FACTORY INFERENCE, 2026-10-15 Asia/Singapore.**
 
 Jaydon explicitly selected option A and directed this plan revision. Nebius
