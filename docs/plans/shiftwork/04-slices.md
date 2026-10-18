@@ -1,3 +1,16 @@
+**SLICE 28 ROUTE REVISION APPROVED BY THE USER'S EXPLICIT INSTRUCTION, 2026-10-15 Asia/Singapore.**
+
+Nebius Console credits and Token Factory credits are separate ledgers. Jaydon's
+$27 balance exists only in Token Factory, and the Nebius Compute VM route would
+need Console spend, so that route is dropped. Token Factory Sandboxes cannot host
+the controller: their documented transport is stdin/stdout with no public
+ingress, and the S12 record shows sandboxed service code running with networking
+disabled. Slice 28 now targets a free platform web host running the unchanged
+single-process controller with live Nemotron inference from the existing Token
+Factory credits. The S28 section below is revised in place; no spend, deployment,
+external call or slice work occurred with this revision. Older notices below
+retain their original bytes.
+
 **S22b ACCEPTED AND PUBLISHED, 2026-10-06 Asia/Singapore.**
 
 S22b was committed in 13 focused batches, published on its branch and
@@ -956,19 +969,39 @@ one.
   repository/build/video, YouTube upload and submission each require their own
   authorization. None is performed by Gate 4 approval alone.
 
-### Slice 28: conditional hosted demo
+### Slice 28: free-platform hosted demo with live Token Factory inference
 
-- **Working result and demo:** only if S12 proves a suitable delivery route and
-  the user selects hosting, show a public HTTPS controller/client, restart it,
-  verify persistent state or an explicitly documented deterministic reset, check
-  monitoring and judge access, and keep the downloadable build available.
+- **Route revision, approved by Jaydon's explicit instruction on 2026-10-15.**
+  Nebius Console credits and Token Factory credits are separate ledgers; his $27
+  balance exists only in Token Factory, so the Nebius Compute VM route is
+  dropped and no Console spend is authorized. Token Factory Sandboxes cannot
+  host the controller: their documented transport is stdin/stdout with no public
+  ingress, and the S12 record shows sandboxed service code running with
+  networking disabled.
+- **Working result and demo:** a public HTTPS controller/client on a free
+  platform web host (candidate at implementation time: Render's free web
+  service; verify sleep policy, ephemeral disk and no-card terms first), still
+  the unchanged single-process FastAPI controller with SQLite. Show a restart
+  (platform restart or redeploy, recorded), verify persistent state or an
+  explicitly documented deterministic reset (on an ephemeral free disk a fresh
+  practice database is the documented reset and must be reproduced in the
+  evidence), check monitoring and judge access, keep the downloadable build
+  available, and keep live Nemotron inference enabled when `NEBIUS_API_KEY` and
+  `NEBIUS_PROJECT_ID` are present, with the recorded adapter as the labelled
+  fallback when they are absent. Inference draws only on the existing Token
+  Factory credits.
 - **Tests:** repeat package and representative six-screen/browser checks against
-  the deployed URL, with actual restart evidence. No Gate 3 numbered obligation
-  depends on hosting.
-- **Limits:** public multi-user auth/database redesign is not approved. If safe
-  hosting needs one, backtrack Gate 2/3 or use the downloadable build. Funded
-  availability and hackathon submission claims require separate review.
-- **Authorization:** explicit deployment, spend and publication authority.
+  the deployed URL, with actual restart evidence and the deterministic-reset
+  documentation reproduced. No Gate 3 numbered obligation depends on hosting.
+- **Limits:** free tiers sleep and cold-start, and they are not a paid
+  availability guarantee; both must be documented. A public multi-user
+  auth/database redesign is not approved; if the chosen host needs one,
+  backtrack Gate 2/3 or use the downloadable build. Any paid platform tier,
+  Nebius Console spend, funded availability claim or hackathon submission claim
+  requires separate review.
+- **Authorization:** deployment to the free host (no spend) and publication of
+  the demo URL, plus live inference calls within the existing Token Factory
+  credits. No Nebius Console spend and no paid platform tier.
 
 ## 4. Gate 3 assertion-clause trace
 

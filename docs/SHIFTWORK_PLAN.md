@@ -21,7 +21,8 @@ a clean 2,648-blob history scan; no tag, release, upload or recording happened.
 - [x] Slices 25 and 26: accepted and published as above.
 - [x] Slice 27: verified; committed, pushed and merged to main
   (`32d899a..a17e0de`); repository made public.
-- [ ] Slice 28: conditional hosted demo; no go-ahead and no work started.
+- [ ] Slice 28: route selected 2026-10-15 (free platform host with live Token
+  Factory inference); implementation not started.
 
 Earlier notices below remain historical; this notice supersedes their
 pending-state labels for S25 to S27.

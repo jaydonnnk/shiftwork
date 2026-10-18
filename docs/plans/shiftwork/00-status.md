@@ -1,3 +1,19 @@
+**SLICE 28 ROUTE SELECTED: FREE PLATFORM HOST WITH LIVE TOKEN FACTORY INFERENCE, 2026-10-15 Asia/Singapore.**
+
+Jaydon explicitly selected option A and directed this plan revision. Nebius
+Console credits and Token Factory credits are separate ledgers; his $27 balance
+exists only in Token Factory, so the Nebius Compute VM route is dropped. Token
+Factory Sandboxes cannot host the controller (stdin/stdout transport, no public
+ingress, and the S12 record shows networking disabled inside). Slice 28 now
+targets a free platform web host running the unchanged single-process controller,
+live Nemotron inference from the existing Token Factory credits, a documented
+deterministic reset where the free tier's disk is ephemeral, and the downloadable
+build kept available. No spend, deployment, external call or slice work happened
+with this record; `04-slices.md` carries the revised contract.
+
+Earlier notices below remain historical; this notice supersedes their S28
+pending-state labels only.
+
 **SLICE 27 FULL-PIVOT PACKAGE BUILT AND VERIFIED; BRANCH PUSHED, MAIN FAST-FORWARDED AND THE REPOSITORY MADE PUBLIC, 2026-10-15 Asia/Singapore.**
 
 The S27 offline work ran under its own go-ahead: a pre-packaging baseline
