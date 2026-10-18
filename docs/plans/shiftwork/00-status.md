@@ -84,6 +84,9 @@ visible and nothing was fixed silently.
   adjudicated as Tavily public-doc placeholder examples or deliberately
   synthetic test fixtures (receipt: `history-secret-scan.json` in the S27
   evidence directory). No tag or release was created.
+- [x] Acceptance: Jaydon declared Slice 27 done on 2026-10-15 and directed the
+  work toward Slice 28 planning; the two known red rows and the blocked
+  live-demo item stay recorded below.
 - [ ] Limits: port_dead and the Northline 390px reach failure remain open red
   rows; the credential scan is pattern-based and the nested receipts zip was
   scanned one level deep; the zip is a local draft and 35 MB is an upload-channel
