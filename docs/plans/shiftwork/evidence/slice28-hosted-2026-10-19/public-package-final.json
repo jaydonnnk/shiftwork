@@ -1,0 +1,15 @@
+{
+  "url": "https://codeload.github.com/jaydonnnk/shiftwork/zip/9f0adba1a966ffa944dbadc6794157bfb127041e",
+  "status": 200,
+  "commit": "9f0adba1a966ffa944dbadc6794157bfb127041e",
+  "bytes": 10235456,
+  "sha256": "4d39413cdaf5e5ed86e8745637e39bafbd8326e60f30a3269615a473fce23bc2",
+  "members": 1901,
+  "code_bytes_match": true,
+  "package_test": {
+    "passed": 7,
+    "seconds": 20.73,
+    "live_result": "OFFLINE_SKIP",
+    "mechanism": "stdlib venv + pip"
+  }
+}

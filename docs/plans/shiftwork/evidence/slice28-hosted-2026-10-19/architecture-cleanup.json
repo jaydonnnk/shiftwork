@@ -1,0 +1,30 @@
+{
+  "scope": "S28 post-slice architecture cleanup scan; bounded to new/changed mechanisms with repository import inventory",
+  "non_evidence_files_in_inventory": 361,
+  "production_modules_parsed": 60,
+  "new_files": [
+    "shiftwork/hosted.py",
+    "tests/api/test_hosted.py",
+    "tests/client/hosted_browser.mjs",
+    "tests/s28_mutation_proofs.py",
+    ".python-version"
+  ],
+  "orphans_found": [],
+  "dead_fixtures_added": 0,
+  "dependencies_or_sealed_material_changed": false,
+  "budget_classes_changed": false,
+  "notes": [
+    "hosted factory is referenced by the existing app entry point",
+    "runtime route uses the existing router and vanilla client",
+    "CLI proof runners remain test-only and are referenced by S28 documentation",
+    "Python version file is consumed by Render",
+    "dated preflight checkpoint needs an explicit historical label",
+    "no deletion proposed; preserved historical evidence and gate records"
+  ],
+  "limits": [
+    "no public multi-user redesign or scalability claim",
+    "private account billing and continuous availability are outside this static scan"
+  ],
+  "dated_checkpoint_label_added": true,
+  "cleanup_processes": "Four owned local preview servers stopped; no repository deletion proposed."
+}

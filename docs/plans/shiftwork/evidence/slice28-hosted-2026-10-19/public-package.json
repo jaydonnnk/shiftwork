@@ -1,0 +1,17 @@
+{
+  "url": "https://codeload.github.com/jaydonnnk/shiftwork/zip/refs/heads/main",
+  "bytes": 10084231,
+  "sha256": "390eddc092e514b19af3a440e9808231141b30e9eb0c17adac867596d0565638",
+  "members": 1896,
+  "hosted_module_matches": true,
+  "packaging_verification": {
+    "passed": 7,
+    "seconds": 20.53,
+    "live_result": "OFFLINE_SKIP",
+    "mechanism": "stdlib venv + pip"
+  },
+  "commit": "6e9baec1b05eb509f9cdcf10057944ee0f22268d",
+  "zip_comment_matches_commit": true,
+  "pinned_source_url": "https://codeload.github.com/jaydonnnk/shiftwork/zip/6e9baec1b05eb509f9cdcf10057944ee0f22268d",
+  "pinned_source_url_status": 200
+}

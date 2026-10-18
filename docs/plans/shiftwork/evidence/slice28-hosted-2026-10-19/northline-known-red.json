@@ -1,0 +1,12 @@
+{
+  "full_current_native_journey": "PASS",
+  "closed_snapshot_390px_reach": {
+    "baseline_assets": "FAIL",
+    "current_assets": "PASS"
+  },
+  "same_closed_database_used": true,
+  "current_controller_in_both_checks": true,
+  "no_reach_repair_claim": true,
+  "scope": "trusted local FDE test fixtures; no live inference",
+  "interpretation": "S28 notice assets changed layout; reach logic was not modified. Historical issue remains open and no general repair is claimed."
+}
