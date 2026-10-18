@@ -1,0 +1,84 @@
+{
+  "url": "https://shiftwork.onrender.com",
+  "scope": "read-only representative views; no inference or model-quality proof",
+  "screens": [
+    {
+      "view": "board",
+      "width": 1440,
+      "visible": true
+    },
+    {
+      "view": "contract",
+      "width": 1440,
+      "visible": true
+    },
+    {
+      "view": "investigate",
+      "width": 1440,
+      "visible": true
+    },
+    {
+      "view": "compare",
+      "width": 1440,
+      "visible": true
+    },
+    {
+      "view": "customers",
+      "width": 1440,
+      "visible": true
+    },
+    {
+      "view": "next",
+      "width": 1440,
+      "visible": true
+    },
+    {
+      "view": "board",
+      "width": 390,
+      "visible": true
+    },
+    {
+      "view": "contract",
+      "width": 390,
+      "visible": true
+    },
+    {
+      "view": "investigate",
+      "width": 390,
+      "visible": true
+    },
+    {
+      "view": "compare",
+      "width": 390,
+      "visible": true
+    },
+    {
+      "view": "customers",
+      "width": 390,
+      "visible": true
+    },
+    {
+      "view": "next",
+      "width": 390,
+      "visible": true
+    }
+  ],
+  "boards": [
+    {
+      "status": 200,
+      "slug": "bookshop",
+      "chain": "VALID"
+    },
+    {
+      "status": 200,
+      "slug": "gtm",
+      "chain": "VALID"
+    },
+    {
+      "status": 200,
+      "slug": "northline",
+      "chain": "VALID"
+    }
+  ],
+  "consoleExceptions": []
+}
