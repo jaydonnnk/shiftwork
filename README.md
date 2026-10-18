@@ -8,6 +8,36 @@ operations workflow. Sales, bookings, ownership and incidents are **synthetic**.
 **Submission track:** Best Apps and Agents, confirmed by Jaydon on 2026-10-15.
 **License:** [MIT](LICENSE). Dependencies retain their own licenses.
 
+## Hosted practice demo
+
+Open [Shiftwork on Render](https://shiftwork.onrender.com). This is one shared
+fictional practice database. Other visitors can change the same shift; it has no
+private learner accounts. Use the downloadable/local build to retain your own
+history.
+
+The free service sleeps after 15 idle minutes. Render describes wake-up as about
+one minute; actual observations and current S28 limits are in the
+[S28 hosted evidence](docs/plans/shiftwork/slice28-hosted-evidence-2026-10-19.md).
+Sleep, restart or redeploy starts a fresh practice database. The next visit
+shows all three boards with no shift; choose a board and open a new shift.
+Free hosting is not an availability guarantee.
+
+With both provider credentials present, startup checks Sandbox permissions and
+enables Token Factory diagnostics, eligible selected operations and help. Each
+operation/comparison receives its own existing bounded meter. Bellwether's
+first baseline stays a labelled saved inspection under its original contract;
+its edited diagnostics and later eligible choices can execute in isolation.
+The runtime notice reports configuration; each action reports its actual
+`RECORDED_INSPECTION`, `TRUSTED_LOCAL` or `ISOLATED_LIVE` evidence separately.
+
+Without either credential, the service labels its recorded fallback. Saved
+inspections replay captures; comparisons and selected operations may execute
+byte-pinned fixtures as `TRUSTED_LOCAL`. No live inference is claimed. Credentials
+belong only in Render's secret settings, never in source, a database or logs.
+GTM's previously recorded live-comparison request-shape limitation remains;
+S28 does not raise its ceiling. The known port_dead and Northline 390px red rows
+also remain visible. Hosted verification is in progress, not accepted yet.
+
 ## Start locally
 
 Use Python 3.12 or 3.13. The current packaging verification runs on macOS with
@@ -38,8 +68,8 @@ SHIFTWORK_EXECUTOR_ADAPTER=recorded SHIFTWORK_DB_PATH=./practice.db \
 
 Open `http://127.0.0.1:8009`. Choose a workplace and open a shift. Stop the server
 with Ctrl+C; restarting with the same database retains history. Use a different
-new database filename to start over. Do not expose this single-user controller
-on a public interface. On Windows set the two environment variables in the
+new database filename to start over. Keep this persistent local controller
+on loopback. The hosted practice demo above uses an ephemeral shared database. On Windows set the two environment variables in the
 shell before running the same uvicorn arguments.
 
 For a disposable Bellwether preview with labelled recorded help:
@@ -147,7 +177,7 @@ packet, verify current model access, rates and Sandbox permissions, and obtain
 explicit call/spend approval. Only then provision `NEBIUS_API_KEY` and
 `NEBIUS_PROJECT_ID` through the controller environment. Do not send credentials
 to a learner, place them in source, or rerun date-pinned historical runners as if
-their old allowances were current. S28 hosting is not part of this package.
+their old allowances were current. The separate S28 hosted practice demo is linked above; the S27 source zip remains an offline download with its recorded limits.
 
 S26 ended in `DROP_TAVILY_CLAIM`; no discovery-benefit claim enters this pitch.
 The Tavily bonus answer remains Jaydon's submission-time decision. Learning

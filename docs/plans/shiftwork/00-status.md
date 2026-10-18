@@ -1,3 +1,29 @@
+**S28 HOSTED WIRING VERIFIED LOCALLY; FREE RENDER DEPLOY IN PROGRESS, 2026-10-19 Asia/Singapore.**
+
+Jaydon confirmed the hosted service, authorized minimal per-action meter/gateway
+wiring and pushing code to production, and reported both secrets in Render with
+no Token Factory credit expiry. No gate reopened. The public boards endpoint was
+independently verified. Account and credit details remain user reports.
+
+Local checks: 30 wiring tests pass; the full suite records 1 failed, 1,460 passed,
+1 skipped, 2 warnings in 185.13 seconds, with only known port_dead red; packaging
+passes 7 in 18.15 seconds with labelled OFFLINE_SKIP. Accepted proof has 44 backend
+mutations and one rendered-notice mutation, each caught by assertion with exact
+restoration and a passing rerun. Rejected attempts are retained, not counted.
+
+The fresh Bellwether baseline remains a labelled saved inspection under its
+original contract; edited diagnostics and eligible selected operations use the
+existing isolated contexts. No requirement/hash guard or budget ceiling was
+removed. Recorded fallback discloses that pinned comparisons and selected
+operations can be TRUSTED_LOCAL. Concurrent operation workers now claim one
+queued run atomically. No dependency or database redesign was introduced.
+
+[S28 hosted evidence](slice28-hosted-evidence-2026-10-19.md) records commands,
+proof and limits. Public URL: https://shiftwork.onrender.com. Hosted preflight,
+live inference, restart/reset, idle cold start, monitoring, deployed browser
+checks, post-slice cleanup and acceptance remain pending. Northline's known 390px
+red row is carried. Earlier notices retain their original scope and bytes.
+
 **S28 PREFLIGHT RECORDED; HOSTING AND LIVE STARTUP REMAIN INCOMPLETE, 2026-10-18 Asia/Singapore.**
 
 The S28 handoff authorizes the free host, demo URL, live calls within existing
