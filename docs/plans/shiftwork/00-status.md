@@ -14,7 +14,11 @@ An offline startup probe also reproduced HTTP 409: the ordinary tokenfactory
 app factory supplies no live operation budget. Existing operation/comparison
 meters and assistance need explicit hosting wiring; environment variables alone
 do not establish a working live demo. That wiring's fit with the "unchanged
-controller" wording remains to be resolved before product edits.
+controller" wording was decided the same day: it is an architecture constraint,
+not a source freeze, so minimal startup and route wiring is inside S28's
+authority under the guardrails and per-branch proofs recorded in the S28
+section of `04-slices.md`. No gate reopened and no product code had changed
+when the decision was recorded.
 
 [S28 preflight checkpoint](slice28-hosting-preflight-2026-10-18.md) records the
 commands, receipts, platform sources, proposed resolution and [unknown] items.

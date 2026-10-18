@@ -978,6 +978,22 @@ one.
   host the controller: their documented transport is stdin/stdout with no public
   ingress, and the S12 record shows sandboxed service code running with
   networking disabled.
+- **Wiring interpretation, decided 2026-10-18.** "Unchanged controller" is an
+  architecture constraint, not a source freeze: one FastAPI process, SQLite,
+  the existing executors, guards and evidence boundaries. Minimal startup and
+  route wiring that supplies the existing live budgets and assistance gateway
+  is inside S28's deployment authority, provided it reuses the existing budget
+  classes and ceilings unchanged, allocates a fresh meter for each bounded
+  action with an explicit lifetime instead of reusing or silently resetting a
+  consumed one, selects `tokenfactory` only when both `NEBIUS_API_KEY` and
+  `NEBIUS_PROJECT_ID` are present and otherwise serves the labelled recorded
+  fallback, configures the assistance gateway from those same credentials,
+  fails closed on any missing piece, adds no dependency, and keeps the
+  single-process SQLite architecture. Each wiring branch needs its own
+  fail-capable test and mutation. This interpretation resolves the open question
+  in the S28 preflight checkpoint, reopens no gate, and does not authorize a
+  paid tier, Console spend, multi-user/auth redesign, removed guard or raised
+  ceiling.
 - **Working result and demo:** a public HTTPS controller/client on a free
   platform web host (candidate at implementation time: Render's free web
   service; verify sleep policy, ephemeral disk and no-card terms first), still
