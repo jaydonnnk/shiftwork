@@ -268,7 +268,7 @@ recording or remove the known red rows. S28 acceptance is still pending.
   in `ensurepip`; `port_dead` and Northline mobile reach remain recorded red rows,
   not fixed by this document.
 - Missing live credentials require an explicit offline skip, not a live PASS. An offline-only package is not claimed as the approved qualifying demonstration ([Gate 4][slices]).
-- Confirm packaged license/source/assets/setup instructions, test-build access and judging availability; no release or hosted-access claim here.
+- S28 now records public hosted access and a tested public source archive. Availability throughout judging is not guaranteed by a free tier; no release or submission claim follows. The S27 source zip and its original limits remain separate.
 - Script needs permitted recording, timing and rights review, then separately authorized upload/public visibility/submission. No fabricated media or guessed URL.
 
 ## Local source register

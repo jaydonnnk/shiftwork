@@ -13,7 +13,8 @@ operations workflow. Sales, bookings, ownership and incidents are **synthetic**.
 Open [Shiftwork on Render](https://shiftwork.onrender.com). This is one shared
 fictional practice database. Other visitors can change the same shift; it has no
 private learner accounts. Use the downloadable/local build to retain your own
-history.
+history. A [public source build at the tested S28 code revision](https://codeload.github.com/jaydonnnk/shiftwork/zip/9f0adba1a966ffa944dbadc6794157bfb127041e)
+is available without a login; its clean-environment packaging check passed.
 
 The free service sleeps after 15 idle minutes. Render describes wake-up as about
 one minute; actual observations and current S28 limits are in the
@@ -36,7 +37,7 @@ byte-pinned fixtures as `TRUSTED_LOCAL`. No live inference is claimed. Credentia
 belong only in Render's secret settings, never in source, a database or logs.
 GTM's previously recorded live-comparison request-shape limitation remains;
 S28 does not raise its ceiling. The known port_dead and Northline 390px red rows
-also remain visible. Hosted verification is in progress, not accepted yet.
+also remain visible. S28 is implemented and verified; user acceptance is pending. The controlled wake request took 43.438 seconds after 16 idle minutes and returned a fresh database.
 
 ## Start locally
 

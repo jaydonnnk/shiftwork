@@ -1,3 +1,13 @@
+**S28 HOSTED DEMO IMPLEMENTED AND VERIFIED; USER ACCEPTANCE PENDING, 2026-10-19 Asia/Singapore.**
+
+The free shared practice demo is https://shiftwork.onrender.com. The public source
+build, one new hosted Nemotron diagnostic, redeploy/reset, measured 43.438-second
+wake after 16 idle minutes, browser/package checks and preserved limits are in
+`docs/plans/shiftwork/slice28-hosted-evidence-2026-10-19.md`. The controller stays
+one FastAPI process with SQLite and existing executors/budget ceilings. No gate
+reopened. Acceptance is pending; no slice follows S28. Earlier S28 pending-state
+notices below are historical. `00-status.md` remains authoritative.
+
 **SLICES 25 TO 27: S25 AND S26 ACCEPTED AND PUBLISHED; SLICE 27 VERIFIED, PUSHED AND THE REPOSITORY MADE PUBLIC, 2026-10-15 Asia/Singapore.**
 
 S25 was accepted 2026-10-12 and published on main (`61c621d`); its live arm was

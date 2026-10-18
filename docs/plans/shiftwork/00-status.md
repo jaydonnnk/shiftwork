@@ -1,3 +1,49 @@
+**S28 IMPLEMENTED, HOSTED AND VERIFIED; ACCEPTANCE PENDING, 2026-10-19 Asia/Singapore.**
+
+The free hosted practice demo is https://shiftwork.onrender.com. Jaydon authorized
+minimal wiring and production publication; main and shiftwork/slice-28 include
+code revision 9f0adba, with no gate reopened. The Free/Hobby/no-payment-method
+settings and no Token Factory credit expiry are user reports, not a billing audit.
+
+- [x] Hosted startup: Python 3.13.12, tokenfactory with both credentials, all six
+  Sandbox permissions true. Missing credentials select labelled recorded fallback;
+  pinned local actions retain their truthful TRUSTED_LOCAL labels. The first
+  Bellwether baseline stays a saved inspection under its original contract.
+- [x] Existing meters are fresh per bounded action and their ceilings are
+  unchanged. Atomic QUEUED claims prevent duplicate operation and diagnostic
+  workers. Final suite: 1 failed, 1,461 passed, 1 skipped, 2 warnings in 181.53s;
+  only known port_dead red. Wiring tests: 31 passed. Proof: 45 backend and one
+  rendered-notice mutation caught by assertion, exact restore and passing rerun.
+- [x] One hosted diagnostic finalized as ISOLATED_LIVE: one Sandbox operation,
+  one Nemotron call, 96 input / 152 output tokens, 1,194ms inference, 4,775ms
+  Sandbox wall time, 5,611ms POST-to-terminal observation. Checkpoint readback
+  verified 2,283 bytes. Estimated inference USD 0.00004224 at historical rates;
+  actual billing and Sandbox cost are unknown. No retry or full live-chain claim.
+- [x] Redeploy removed the recorded prior shift. After a controlled 960.226-second
+  idle interval, the wake request took 43.438s and returned a new boot and fresh
+  practice DB: zero runs, attempts, incidents and ledger events, chain VALID.
+  Free sleep/reset and shared state are visible in the client and judge docs.
+- [x] Five external board polls returned 200; served assets matched source.
+  Final native Chrome checks pass six representative screens at desktop and
+  390px, three board reads and zero JavaScript exceptions. Public source archive
+  9f0adba, 10,235,456 bytes, passes 7 clean-environment checks in 20.73s with
+  OFFLINE_SKIP. The original S27 zip remains available and unchanged.
+- [x] Architect-reviewer cleanup: bounded inventory/import/fixture scan; no orphan
+  or deletion proposed, no dependency/budget-class/sealed-fixture change. Local
+  preview processes stopped. The older preflight is labelled historical.
+- [ ] Limits remain visible: port_dead; Northline's historical 390px reach issue
+  stays open. With the same closed DB, old assets fail and S28 notice assets pass
+  that reach case; no reach logic was edited or general repair claimed. GTM's
+  frozen live-comparison request-shape limit is unchanged. No funded availability,
+  model-quality score, learner gain, production-readiness or submission claim.
+- [ ] User acceptance pending. No further implementation slice follows S28.
+  Video, upload, Devpost, Tavily answer and numeric ratings remain Jaydon's actions.
+
+[S28 hosted evidence](slice28-hosted-evidence-2026-10-19.md) carries commands,
+receipts, exact scope and remaining unknowns. The live action ran on 6e9baec;
+9f0adba adds the independently proved diagnostic claim guard, with no additional
+provider request. Later notices below retain their historical scope and bytes.
+
 **S28 HOSTED WIRING VERIFIED LOCALLY; FREE RENDER DEPLOY IN PROGRESS, 2026-10-19 Asia/Singapore.**
 
 Jaydon confirmed the hosted service, authorized minimal per-action meter/gateway

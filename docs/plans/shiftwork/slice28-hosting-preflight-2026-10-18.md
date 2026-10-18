@@ -1,3 +1,8 @@
+Historical checkpoint. The wiring interpretation was resolved in the S28
+section of `04-slices.md`; current hosting verification is in
+[slice28-hosted-evidence-2026-10-19.md](slice28-hosted-evidence-2026-10-19.md).
+The original preflight below retains its dated observations.
+
 # S28 hosting preflight, 2026-10-18 Asia/Singapore
 
 S28 is incomplete. This checkpoint records local verification and platform
