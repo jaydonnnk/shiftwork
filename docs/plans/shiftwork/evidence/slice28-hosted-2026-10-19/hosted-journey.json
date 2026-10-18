@@ -1,0 +1,836 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/runtime",
+    "status": 200,
+    "wall_ms": 796,
+    "body": {
+      "hosted": true,
+      "configured_executor": "tokenfactory",
+      "python_version": "3.13.12",
+      "boot_id": "b7b8c5b7-48cb-440f-80a0-a7de8b1e101f",
+      "preflight_permissions": {
+        "cancel": true,
+        "import": true,
+        "list": true,
+        "set_image_tag": true,
+        "spawn": true,
+        "spawn_disposable": true
+      },
+      "notice": "Hosted tokenfactory executor: shared practice demo. Token Factory diagnostics, eligible selected operations and help are enabled. The first Bellwether baseline remains a labelled saved inspection. Free hosting sleeps after 15 idle minutes; waking may take about a minute. Sleep, restart or redeploy begins a fresh practice database. Download the build to keep your own history."
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/engagements/bookshop/board",
+    "status": 200,
+    "wall_ms": 287,
+    "body": {
+      "engagement_slug": "bookshop",
+      "business_kind": "bookshop",
+      "latest_shift": null,
+      "latest_version": null,
+      "latest_run": null,
+      "operating_status": null,
+      "draft_base_version_id": null,
+      "latest_saved_version_id": null,
+      "operating_selection": null,
+      "inherited_requirements": null,
+      "artifact_files": [],
+      "requests_run": 0,
+      "attempts_used": 0,
+      "attempt_limit": 3,
+      "attempts_remaining": 3,
+      "incidents": [],
+      "total_incidents": 0,
+      "unresolved_limits": [],
+      "ledger_event_count": 0,
+      "ledger_totals": {},
+      "chain_status": "VALID"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/engagements/bookshop/shifts",
+    "status": 201,
+    "wall_ms": 262,
+    "body": {
+      "id": "bookshop-shift-01",
+      "engagement_slug": "bookshop",
+      "seq": 1,
+      "state": "open",
+      "opened_at": "2026-10-18T16:16:36.838445Z",
+      "closed_at": null,
+      "opening_mode": "STANDARD",
+      "operation_allowed": true
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/shifts/bookshop-shift-01/runs",
+    "status": 202,
+    "wall_ms": 256,
+    "body": {
+      "id": "run-0001",
+      "shift_id": "bookshop-shift-01",
+      "artifact_version_id": "ver-0001",
+      "attempt_number": 1,
+      "state": "QUEUED",
+      "adapter": "recorded",
+      "failure_kind": null,
+      "started_at": "2026-10-18T16:16:37.095400Z",
+      "ended_at": null,
+      "purpose": "OPERATION",
+      "evidence_mode": "RECORDED_INSPECTION",
+      "selection_id": "sel-0001"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/runs/run-0001",
+    "status": 200,
+    "wall_ms": 338,
+    "body": {
+      "id": "run-0001",
+      "shift_id": "bookshop-shift-01",
+      "artifact_version_id": "ver-0001",
+      "attempt_number": 1,
+      "state": "FINALIZED",
+      "adapter": "recorded",
+      "failure_kind": null,
+      "started_at": "2026-10-18T16:16:37.095400Z",
+      "ended_at": "2026-10-18T16:16:37.193491Z",
+      "purpose": "OPERATION",
+      "evidence_mode": "RECORDED_INSPECTION",
+      "selection_id": "sel-0001"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/runs/run-0001/outputs",
+    "status": 200,
+    "wall_ms": 564,
+    "body": [
+      {
+        "id": "run-0001-out-1",
+        "run_id": "run-0001",
+        "request_ordinal": 1,
+        "request_text": "Do you still have the hardback of Dune on the shelf?",
+        "http_status": 200,
+        "body_base64": "eyJhY3Rpb24iOiJhbnN3ZXIiLCJjbGFpbXMiOlt7ImtpbmQiOiJzdG9jayIsInZhbHVlIjoiaW5fc3RvY2sifV0sImV2aWRlbmNlX3JlZnMiOltdfQ==",
+        "elapsed_ms": 55,
+        "transport_error": null,
+        "log_base64": null,
+        "customer_answer": {
+          "action": "answer",
+          "display_text": "Answer: stock = in_stock.",
+          "claims": [
+            {
+              "kind": "stock",
+              "value": "in_stock"
+            }
+          ],
+          "evidence_refs": [],
+          "verified_record_age_ms": null
+        },
+        "public_shop_record": {
+          "record_id": "catalog:9780441013593",
+          "kind": "stock",
+          "title": "Dune",
+          "edition": "hardback",
+          "value": "in_stock",
+          "record_age_ms": 5400000
+        },
+        "public_shop_record_ref": "catalog:9780441013593",
+        "public_shop_snapshot_hash": "230d6f8aeb3eff61cb5d68ebaafe1fa5ce365aba4c9a9c0b96b85b8541cc0131"
+      }
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/api/shifts/bookshop-shift-01/investigations",
+    "status": 201,
+    "wall_ms": 278,
+    "body": {
+      "id": "inv-0001",
+      "source_run_id": "run-0001",
+      "source_request_ordinal": 1,
+      "cause": "The starter routes the budget under \u00a320 as a price task and omits collection and alternative tasks.",
+      "falsifier": "The captured result includes both required tasks, or the price route is not selected for this request.",
+      "public_test": "Check collection and the conditional alternative independently against the same frozen request.",
+      "revision_of_id": null,
+      "authored_by": "learner",
+      "created_at": "2026-10-18T16:16:38.254824Z"
+    }
+  },
+  {
+    "method": "PUT",
+    "path": "/api/shifts/bookshop-shift-01/artifact",
+    "status": 200,
+    "wall_ms": 273,
+    "body": {
+      "shift_id": "bookshop-shift-01",
+      "files": {
+        "service.py": "\"\"\"Draft candidate: guard-first repair that routes its first action through Nemotron.\n\nSame proposed rule set as candidate A (resolve each task's necessary records\nbefore claiming anything; answer the optional price fact when the requested\nedition has a current price record), with one model-in-the-loop step per\ncustomer request: the service asks the controller's frozen gateway to choose\nthe first public information action (public_record_lookup or\npublic_catalog_search), executes that tool call against the frozen public\nstate, and records the choice and its outcome. The guard code then establishes\nevery claim under the reviewed record rules, so the required tasks complete\nwhether or not the model call succeeds.\n\nRequest-shape convention (reviewed with the three comparison workloads): a\nrequest containing \"collect\" asks for collection plus a conditional\nalternative; a request containing \"how much\" asks for price and stock facts.\nThe collection date is the day after the snapshot's own observed date, because\nthe frozen snapshot clock is the only clock this service may read.\n\nThe gateway call's ``request_ordinal`` comes from a per-process request\ncounter, never from the request body's own ordinal. The controller binds each\ninference capability to the position of the request in the batch it streamed\n(first streamed request is ordinal 1), while a protected one-request batch\ncarries the stimulus ordinal 3 in its body. A counter that tracks served\nrequests keeps the two in agreement without reading the body.\n\"\"\"\n\nimport http.client\nimport json\nimport os\nimport re\nimport sys\nfrom datetime import datetime, timedelta\nfrom http.server import BaseHTTPRequestHandler, HTTPServer\nfrom pathlib import Path\n\nMAX_RECORD_AGE_MS = 3600000\nALLOWED_TOOL_NAMES = (\"public_record_lookup\", \"public_catalog_search\")\n_REQUESTS_SERVED = 0\n\n\ndef observe(kind, **detail):\n    entry = {\"source\": \"service_reported\", \"kind\": kind, **detail}\n    sys.stderr.buffer.write(json.dumps(entry, separators=(\",\", \":\")).encode(\"utf-8\") + b\"\\n\")\n    sys.stderr.buffer.flush()\n\n\ndef gateway_call(path, payload):\n    port = int(os.environ[\"SHIFTWORK_GATEWAY_PORT\"])\n    connection = http.client.HTTPConnection(\"127.0.0.1\", port, timeout=25)\n    raw = json.dumps(payload).encode(\"utf-8\")\n    connection.request(\"POST\", path, body=raw, headers={\"Content-Type\": \"application/json\"})\n    response = connection.getresponse()\n    body = response.read()\n    status = response.status\n    connection.close()\n    if status != 200:\n        raise RuntimeError(\"controller gateway refused: %d\" % status)\n    return json.loads(body)\n\n\ndef next_request_ordinal():\n    \"\"\"One per served request; the controller's gateway policy ordinal, not the body's.\"\"\"\n    global _REQUESTS_SERVED\n    _REQUESTS_SERVED += 1\n    return _REQUESTS_SERVED\n\n\ndef choose_first_action(text):\n    ordinal = next_request_ordinal()\n    prompt = (\n        \"Choose the first public information action needed for this bookshop request. \"\n        \"Reply with exactly one allowed name, no explanation: public_record_lookup \"\n        \"(read a price, stock or collection record for the requested title and edition) \"\n        \"or public_catalog_search (find similar titles in the same genre). \"\n        \"Customer request: \" + text\n    )\n    try:\n        reply = gateway_call(\"/infer\", {\"request_ordinal\": ordinal, \"input_text\": prompt})\n    except (OSError, ValueError, RuntimeError):\n        return None, ordinal, \"GATEWAY_UNAVAILABLE\"\n    choice = reply.get(\"selected_tool\")\n    if choice not in ALLOWED_TOOL_NAMES:\n        return None, ordinal, \"UNLISTED_CHOICE\"\n    return choice, ordinal, None\n\n\ndef run_first_action(choice, text, snapshot, entity_ref):\n    if choice == \"public_catalog_search\":\n        genre = snapshot.get(\"entities\", {}).get(entity_ref, {}).get(\"genre\")\n        if genre is None:\n            observe(\"tool_call\", tool=choice, entity_ref=entity_ref, status=\"skipped_no_genre\")\n            return\n        try:\n            hit = gateway_call(\"/tool\", {\"tool\": choice, \"genre\": genre})\n            observe(\"tool_call\", tool=choice, genre=genre, status=\"ok\",\n                    entity_count=len(hit.get(\"entity_refs\", [])))\n        except (OSError, ValueError, RuntimeError):\n            observe(\"tool_call\", tool=choice, genre=genre, status=\"failed\")\n        return\n    record_kind = \"availability\" if \"collect\" in text.lower() else \"price\"\n    try:\n        hit = gateway_call(\"/tool\", {\"tool\": choice, \"entity_ref\": entity_ref,\n                                     \"record_kind\": record_kind})\n        observe(\"tool_call\", tool=choice, entity_ref=entity_ref, record_kind=record_kind,\n                status=\"ok\", record_count=len(hit.get(\"records\", [])))\n    except (OSError, ValueError, RuntimeError):\n        observe(\"tool_call\", tool=choice, entity_ref=entity_ref, record_kind=record_kind,\n                status=\"failed\")\n\n\ndef requested_date(snapshot):\n    observed = datetime.fromisoformat(snapshot[\"observed_at\"].replace(\"Z\", \"+00:00\"))\n    return (observed.date() + timedelta(days=1)).isoformat()\n\n\ndef current_record(snapshot, entity_ref, kind, date=None):\n    \"\"\"Newest current available record, None when absent, \"conflict\" when unresolved.\"\"\"\n    rows = [\n        record\n        for record in snapshot[\"records\"]\n        if record[\"entity_ref\"] == entity_ref\n        and record[\"kind\"] == kind\n        and record[\"record_age_ms\"] <= MAX_RECORD_AGE_MS\n        and snapshot[\"dependencies\"].get(record[\"dependency\"]) == \"available\"\n        and (\n            date is None\n            or (isinstance(record[\"value\"], dict) and record[\"value\"].get(\"collection_date\") == date)\n        )\n    ]\n    if not rows:\n        return None\n    if len({json.dumps(row[\"value\"], sort_keys=True) for row in rows}) > 1:\n        return \"conflict\"\n    return min(rows, key=lambda row: (row[\"record_age_ms\"], row[\"record_id\"]))\n\n\ndef claim(record):\n    return {\n        \"kind\": record[\"kind\"],\n        \"entity_ref\": record[\"entity_ref\"],\n        \"value\": record[\"value\"],\n        \"evidence_refs\": [record[\"record_id\"]],\n    }\n\n\ndef completed(task_id, entity_ref, claims):\n    return {\n        \"task_id\": task_id, \"status\": \"COMPLETED\", \"entity_ref\": entity_ref,\n        \"claims\": claims, \"commitment_ref\": None, \"explanation_code\": None,\n    }\n\n\ndef referred(task_id, entity_ref):\n    return {\n        \"task_id\": task_id, \"status\": \"REFERRED\", \"entity_ref\": entity_ref,\n        \"claims\": [], \"commitment_ref\": None, \"explanation_code\": \"PUBLIC_DATA_UNAVAILABLE\",\n    }\n\n\ndef refused(task_id, entity_ref, code):\n    return {\n        \"task_id\": task_id, \"status\": \"REFUSED\", \"entity_ref\": entity_ref,\n        \"claims\": [], \"commitment_ref\": None, \"explanation_code\": code,\n    }\n\n\ndef not_applicable(task_id, entity_ref):\n    return {\n        \"task_id\": task_id, \"status\": \"NOT_APPLICABLE\", \"entity_ref\": entity_ref,\n        \"claims\": [], \"commitment_ref\": None, \"explanation_code\": None,\n    }\n\n\ndef price_result(snapshot, task_id, entity_ref):\n    record = current_record(snapshot, entity_ref, \"price\")\n    if record is None or record == \"conflict\":\n        return referred(task_id, entity_ref)\n    return completed(task_id, entity_ref, [claim(record)])\n\n\ndef stock_result(snapshot, task_id, entity_ref):\n    record = current_record(snapshot, entity_ref, \"stock\")\n    if record is None or record == \"conflict\":\n        return referred(task_id, entity_ref)\n    return completed(task_id, entity_ref, [claim(record)])\n\n\ndef collection_outcome(snapshot, entity_ref, date):\n    \"\"\"The collection result plus whether collection was confirmed, or (result, None).\"\"\"\n    availability = current_record(snapshot, entity_ref, \"availability\", date)\n    if availability is None or availability == \"conflict\":\n        return referred(\"collection\", entity_ref), None\n    claims = [claim(availability)]\n    if availability[\"value\"].get(\"can_collect\") is True:\n        stock = current_record(snapshot, entity_ref, \"stock\")\n        if (\n            stock is None\n            or stock == \"conflict\"\n            or not isinstance(stock[\"value\"], int)\n            or stock[\"value\"] <= 0\n        ):\n            return referred(\"collection\", entity_ref), None\n        claims.append(claim(stock))\n    return completed(\"collection\", entity_ref, claims), availability[\"value\"].get(\"can_collect\") is True\n\n\ndef alternative_outcome(snapshot, requested, date, limit):\n    genre = snapshot[\"entities\"][requested][\"genre\"]\n    qualifying = []\n    unresolved = False\n    for entity_ref, entity in snapshot[\"entities\"].items():\n        if entity_ref == requested or entity[\"genre\"] != genre:\n            continue\n        price = current_record(snapshot, entity_ref, \"price\")\n        stock = current_record(snapshot, entity_ref, \"stock\")\n        availability = current_record(snapshot, entity_ref, \"availability\", date)\n        if \"conflict\" in (price, stock, availability) or None in (price, stock, availability):\n            unresolved = True\n            continue\n        if not isinstance(price[\"value\"], int) or price[\"value\"] >= limit:\n            continue\n        if not isinstance(stock[\"value\"], int) or stock[\"value\"] <= 0:\n            continue\n        if availability[\"value\"].get(\"can_collect\") is not True:\n            continue\n        qualifying.append((price[\"value\"], entity_ref, [claim(price), claim(stock), claim(availability)]))\n    if qualifying:\n        _, entity_ref, claims = min(qualifying, key=lambda entry: (entry[0], entry[1]))\n        return completed(\"alternative\", entity_ref, claims)\n    if unresolved:\n        return referred(\"alternative\", requested)\n    return refused(\"alternative\", requested, \"NO_MATCHING_ALTERNATIVE\")\n\n\ndef answer(request, snapshot):\n    text = request[\"text\"]\n    entity_ref = request[\"entity_ref\"]\n    shape = \"collection\" if \"collect\" in text.lower() else \"facts\"\n    choice, ordinal, failure = choose_first_action(text)\n    if choice is None:\n        observe(\"model_choice\", request_id=request[\"request_id\"], ordinal=ordinal,\n                method=\"gateway_tool_selection\", choice=\"public_record_lookup\",\n                fallback=failure)\n        choice = \"public_record_lookup\"\n    else:\n        observe(\"model_choice\", request_id=request[\"request_id\"], ordinal=ordinal,\n                method=\"gateway_tool_selection\", choice=choice, fallback=None)\n    run_first_action(choice, text, snapshot, entity_ref)\n    observe(\"interpretation\", request_id=request[\"request_id\"], method=\"guard_after_model_route\",\n            shape=shape)\n    results = []\n    if shape == \"collection\":\n        date = requested_date(snapshot)\n        price = current_record(snapshot, entity_ref, \"price\")\n        if price is not None and price != \"conflict\":\n            results.append(completed(\"price\", entity_ref, [claim(price)]))\n        collection, confirmed = collection_outcome(snapshot, entity_ref, date)\n        results.append(collection)\n        match = re.search(r\"\u00a3\\s*(\\d+)\", text)\n        limit = int(match.group(1)) * 100 if match else None\n        if confirmed:\n            results.append(not_applicable(\"alternative\", entity_ref))\n        elif limit is None:\n            results.append(referred(\"alternative\", entity_ref))\n        else:\n            results.append(alternative_outcome(snapshot, entity_ref, date, limit))\n    else:\n        results.append(price_result(snapshot, \"price\", entity_ref))\n        results.append(stock_result(snapshot, \"stock\", entity_ref))\n    evidence_refs = []\n    for result in results:\n        for item in result[\"claims\"]:\n            for ref in item[\"evidence_refs\"]:\n                if ref not in evidence_refs:\n                    evidence_refs.append(ref)\n    return {\n        \"request_id\": request[\"request_id\"],\n        \"task_results\": results,\n        \"evidence_refs\": evidence_refs,\n        \"uncertainty_codes\": [],\n    }\n\n\nclass Handler(BaseHTTPRequestHandler):\n    protocol_version = \"HTTP/1.1\"\n\n    def do_POST(self):\n        if self.path != \"/\":\n            self.send_error(404)\n            return\n        try:\n            length = int(self.headers.get(\"Content-Length\", \"0\"))\n            if not 0 < length <= 65536:\n                raise ValueError(\"invalid request length\")\n            request = json.loads(self.rfile.read(length))\n            if not isinstance(request, dict) or any(\n                not isinstance(request.get(key), str) or not request[key].strip()\n                for key in (\"request_id\", \"text\", \"entity_ref\")\n            ):\n                raise ValueError(\"invalid request fields\")\n        except (ValueError, UnicodeDecodeError):\n            self.send_error(400)\n            return\n        body = json.dumps(answer(request, self.server.snapshot), separators=(\",\", \":\")).encode(\"utf-8\")\n        self.send_response(200)\n        self.send_header(\"Content-Type\", \"application/json\")\n        self.send_header(\"Content-Length\", str(len(body)))\n        self.end_headers()\n        self.wfile.write(body)\n\n    def log_message(self, *args):\n        pass\n\n\nif __name__ == \"__main__\":\n    with HTTPServer((\"127.0.0.1\", 0), Handler) as server:\n        server.snapshot = json.loads(Path(\"shop.json\").read_bytes())\n        print(json.dumps({\"port\": server.server_port}), flush=True)\n        server.serve_forever()\n"
+      },
+      "updated_at": "2026-10-18T16:16:38.545944Z"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/shifts/bookshop-shift-01/artifact/versions",
+    "status": 201,
+    "wall_ms": 279,
+    "body": {
+      "id": "ver-0002",
+      "shift_id": "bookshop-shift-01",
+      "parent_id": "ver-0001",
+      "content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd",
+      "contract": {
+        "catalog_version": 3,
+        "must_never": [
+          "NEVER_INVENT_PRICE_STOCK_POLICY"
+        ],
+        "selections": {
+          "STANCE": "USE_NEWEST_RECORD_WITH_AGE"
+        },
+        "response_time_limit_ms": 3000,
+        "declared_limits": [
+          "Public collection and alternative answers only; no reservations or business writes."
+        ]
+      },
+      "contract_catalog_hash": "d9f18ddafd0cd7f791bd13b58b72b165954c1c51df824c96127ad4796bf7736a",
+      "created_by": "learner",
+      "created_at": "2026-10-18T16:16:38.810197Z"
+    }
+  },
+  {
+    "method": "POST",
+    "path": "/api/shifts/bookshop-shift-01/experiments",
+    "status": 202,
+    "wall_ms": 382,
+    "body": {
+      "id": "experiment-bookshop-shift-01-d1",
+      "shift_id": "bookshop-shift-01",
+      "kind": "DIAGNOSTIC",
+      "investigation_id": "inv-0001",
+      "declared_treatment": "Run this frozen learner-owned service once in the isolated Sandbox against the reviewed initial public request and state; no protected case, eligibility or business consequence is reserved.",
+      "context_hash": "a2e53b110d5390e135378651a73d8db5cb442b6eed2a74dfa3720e1a3f3bdda8",
+      "context_evidence_class": "ISOLATED_LIVE",
+      "condition": null,
+      "observed_run_id": null,
+      "workloads": [
+        {
+          "id": "workload-01",
+          "ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1
+        }
+      ],
+      "candidates": [
+        {
+          "label": "A",
+          "artifact_version_id": "ver-0002",
+          "artifact_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+        }
+      ],
+      "trials": [
+        {
+          "pair_ordinal": 1,
+          "execution_ordinal": 1,
+          "candidate_label": "A",
+          "artifact_version_id": null,
+          "artifact_content_hash": null,
+          "workload_id": "workload-01",
+          "workload_ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1,
+          "protected_request_count": 0,
+          "run_id": "run-0002",
+          "state": "RESERVED",
+          "evidence_mode": "ISOLATED_LIVE",
+          "task_assessments": [],
+          "observations": [],
+          "outputs": [],
+          "customer_text": null,
+          "missing_evidence": [
+            "no capture was produced for the frozen request"
+          ],
+          "metrics": null
+        }
+      ],
+      "shared_public_denominator_requests": null,
+      "protected_denominator_requests_per_candidate": null,
+      "protected_counts": null,
+      "outcome": null,
+      "eligible": false,
+      "eligibility_reason": "A public diagnostic reserves no protected case and compares no candidates, so it can never qualify a version.",
+      "state": "RUNNING"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/experiments/experiment-bookshop-shift-01-d1",
+    "status": 200,
+    "wall_ms": 298,
+    "body": {
+      "id": "experiment-bookshop-shift-01-d1",
+      "shift_id": "bookshop-shift-01",
+      "kind": "DIAGNOSTIC",
+      "investigation_id": "inv-0001",
+      "declared_treatment": "Run this frozen learner-owned service once in the isolated Sandbox against the reviewed initial public request and state; no protected case, eligibility or business consequence is reserved.",
+      "context_hash": "a2e53b110d5390e135378651a73d8db5cb442b6eed2a74dfa3720e1a3f3bdda8",
+      "context_evidence_class": "ISOLATED_LIVE",
+      "condition": null,
+      "observed_run_id": null,
+      "workloads": [
+        {
+          "id": "workload-01",
+          "ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1
+        }
+      ],
+      "candidates": [
+        {
+          "label": "A",
+          "artifact_version_id": "ver-0002",
+          "artifact_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+        }
+      ],
+      "trials": [
+        {
+          "pair_ordinal": 1,
+          "execution_ordinal": 1,
+          "candidate_label": "A",
+          "artifact_version_id": null,
+          "artifact_content_hash": null,
+          "workload_id": "workload-01",
+          "workload_ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1,
+          "protected_request_count": 0,
+          "run_id": "run-0002",
+          "state": "RUNNING",
+          "evidence_mode": "ISOLATED_LIVE",
+          "task_assessments": [],
+          "observations": [],
+          "outputs": [],
+          "customer_text": null,
+          "missing_evidence": [
+            "no capture was produced for the frozen request"
+          ],
+          "metrics": null
+        }
+      ],
+      "shared_public_denominator_requests": null,
+      "protected_denominator_requests_per_candidate": null,
+      "protected_counts": null,
+      "outcome": null,
+      "eligible": false,
+      "eligibility_reason": "A public diagnostic reserves no protected case and compares no candidates, so it can never qualify a version.",
+      "state": "RUNNING"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/experiments/experiment-bookshop-shift-01-d1",
+    "status": 200,
+    "wall_ms": 281,
+    "body": {
+      "id": "experiment-bookshop-shift-01-d1",
+      "shift_id": "bookshop-shift-01",
+      "kind": "DIAGNOSTIC",
+      "investigation_id": "inv-0001",
+      "declared_treatment": "Run this frozen learner-owned service once in the isolated Sandbox against the reviewed initial public request and state; no protected case, eligibility or business consequence is reserved.",
+      "context_hash": "a2e53b110d5390e135378651a73d8db5cb442b6eed2a74dfa3720e1a3f3bdda8",
+      "context_evidence_class": "ISOLATED_LIVE",
+      "condition": null,
+      "observed_run_id": null,
+      "workloads": [
+        {
+          "id": "workload-01",
+          "ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1
+        }
+      ],
+      "candidates": [
+        {
+          "label": "A",
+          "artifact_version_id": "ver-0002",
+          "artifact_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+        }
+      ],
+      "trials": [
+        {
+          "pair_ordinal": 1,
+          "execution_ordinal": 1,
+          "candidate_label": "A",
+          "artifact_version_id": null,
+          "artifact_content_hash": null,
+          "workload_id": "workload-01",
+          "workload_ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1,
+          "protected_request_count": 0,
+          "run_id": "run-0002",
+          "state": "RUNNING",
+          "evidence_mode": "ISOLATED_LIVE",
+          "task_assessments": [],
+          "observations": [],
+          "outputs": [],
+          "customer_text": null,
+          "missing_evidence": [
+            "no capture was produced for the frozen request"
+          ],
+          "metrics": null
+        }
+      ],
+      "shared_public_denominator_requests": null,
+      "protected_denominator_requests_per_candidate": null,
+      "protected_counts": null,
+      "outcome": null,
+      "eligible": false,
+      "eligibility_reason": "A public diagnostic reserves no protected case and compares no candidates, so it can never qualify a version.",
+      "state": "RUNNING"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/experiments/experiment-bookshop-shift-01-d1",
+    "status": 200,
+    "wall_ms": 259,
+    "body": {
+      "id": "experiment-bookshop-shift-01-d1",
+      "shift_id": "bookshop-shift-01",
+      "kind": "DIAGNOSTIC",
+      "investigation_id": "inv-0001",
+      "declared_treatment": "Run this frozen learner-owned service once in the isolated Sandbox against the reviewed initial public request and state; no protected case, eligibility or business consequence is reserved.",
+      "context_hash": "a2e53b110d5390e135378651a73d8db5cb442b6eed2a74dfa3720e1a3f3bdda8",
+      "context_evidence_class": "ISOLATED_LIVE",
+      "condition": null,
+      "observed_run_id": null,
+      "workloads": [
+        {
+          "id": "workload-01",
+          "ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1
+        }
+      ],
+      "candidates": [
+        {
+          "label": "A",
+          "artifact_version_id": "ver-0002",
+          "artifact_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+        }
+      ],
+      "trials": [
+        {
+          "pair_ordinal": 1,
+          "execution_ordinal": 1,
+          "candidate_label": "A",
+          "artifact_version_id": null,
+          "artifact_content_hash": null,
+          "workload_id": "workload-01",
+          "workload_ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1,
+          "protected_request_count": 0,
+          "run_id": "run-0002",
+          "state": "RUNNING",
+          "evidence_mode": "ISOLATED_LIVE",
+          "task_assessments": [],
+          "observations": [],
+          "outputs": [],
+          "customer_text": null,
+          "missing_evidence": [
+            "no capture was produced for the frozen request"
+          ],
+          "metrics": null
+        }
+      ],
+      "shared_public_denominator_requests": null,
+      "protected_denominator_requests_per_candidate": null,
+      "protected_counts": null,
+      "outcome": null,
+      "eligible": false,
+      "eligibility_reason": "A public diagnostic reserves no protected case and compares no candidates, so it can never qualify a version.",
+      "state": "RUNNING"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/experiments/experiment-bookshop-shift-01-d1",
+    "status": 200,
+    "wall_ms": 342,
+    "body": {
+      "id": "experiment-bookshop-shift-01-d1",
+      "shift_id": "bookshop-shift-01",
+      "kind": "DIAGNOSTIC",
+      "investigation_id": "inv-0001",
+      "declared_treatment": "Run this frozen learner-owned service once in the isolated Sandbox against the reviewed initial public request and state; no protected case, eligibility or business consequence is reserved.",
+      "context_hash": "a2e53b110d5390e135378651a73d8db5cb442b6eed2a74dfa3720e1a3f3bdda8",
+      "context_evidence_class": "ISOLATED_LIVE",
+      "condition": null,
+      "observed_run_id": null,
+      "workloads": [
+        {
+          "id": "workload-01",
+          "ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1
+        }
+      ],
+      "candidates": [
+        {
+          "label": "A",
+          "artifact_version_id": "ver-0002",
+          "artifact_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+        }
+      ],
+      "trials": [
+        {
+          "pair_ordinal": 1,
+          "execution_ordinal": 1,
+          "candidate_label": "A",
+          "artifact_version_id": null,
+          "artifact_content_hash": null,
+          "workload_id": "workload-01",
+          "workload_ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1,
+          "protected_request_count": 0,
+          "run_id": "run-0002",
+          "state": "RUNNING",
+          "evidence_mode": "ISOLATED_LIVE",
+          "task_assessments": [],
+          "observations": [],
+          "outputs": [],
+          "customer_text": null,
+          "missing_evidence": [
+            "no capture was produced for the frozen request"
+          ],
+          "metrics": null
+        }
+      ],
+      "shared_public_denominator_requests": null,
+      "protected_denominator_requests_per_candidate": null,
+      "protected_counts": null,
+      "outcome": null,
+      "eligible": false,
+      "eligibility_reason": "A public diagnostic reserves no protected case and compares no candidates, so it can never qualify a version.",
+      "state": "RUNNING"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/experiments/experiment-bookshop-shift-01-d1",
+    "status": 200,
+    "wall_ms": 376,
+    "body": {
+      "id": "experiment-bookshop-shift-01-d1",
+      "shift_id": "bookshop-shift-01",
+      "kind": "DIAGNOSTIC",
+      "investigation_id": "inv-0001",
+      "declared_treatment": "Run this frozen learner-owned service once in the isolated Sandbox against the reviewed initial public request and state; no protected case, eligibility or business consequence is reserved.",
+      "context_hash": "a2e53b110d5390e135378651a73d8db5cb442b6eed2a74dfa3720e1a3f3bdda8",
+      "context_evidence_class": "ISOLATED_LIVE",
+      "condition": null,
+      "observed_run_id": null,
+      "workloads": [
+        {
+          "id": "workload-01",
+          "ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1
+        }
+      ],
+      "candidates": [
+        {
+          "label": "A",
+          "artifact_version_id": "ver-0002",
+          "artifact_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+        }
+      ],
+      "trials": [
+        {
+          "pair_ordinal": 1,
+          "execution_ordinal": 1,
+          "candidate_label": "A",
+          "artifact_version_id": null,
+          "artifact_content_hash": null,
+          "workload_id": "workload-01",
+          "workload_ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1,
+          "protected_request_count": 0,
+          "run_id": "run-0002",
+          "state": "RUNNING",
+          "evidence_mode": "ISOLATED_LIVE",
+          "task_assessments": [],
+          "observations": [],
+          "outputs": [],
+          "customer_text": null,
+          "missing_evidence": [
+            "no capture was produced for the frozen request"
+          ],
+          "metrics": null
+        }
+      ],
+      "shared_public_denominator_requests": null,
+      "protected_denominator_requests_per_candidate": null,
+      "protected_counts": null,
+      "outcome": null,
+      "eligible": false,
+      "eligibility_reason": "A public diagnostic reserves no protected case and compares no candidates, so it can never qualify a version.",
+      "state": "RUNNING"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/experiments/experiment-bookshop-shift-01-d1",
+    "status": 200,
+    "wall_ms": 296,
+    "body": {
+      "id": "experiment-bookshop-shift-01-d1",
+      "shift_id": "bookshop-shift-01",
+      "kind": "DIAGNOSTIC",
+      "investigation_id": "inv-0001",
+      "declared_treatment": "Run this frozen learner-owned service once in the isolated Sandbox against the reviewed initial public request and state; no protected case, eligibility or business consequence is reserved.",
+      "context_hash": "a2e53b110d5390e135378651a73d8db5cb442b6eed2a74dfa3720e1a3f3bdda8",
+      "context_evidence_class": "ISOLATED_LIVE",
+      "condition": null,
+      "observed_run_id": null,
+      "workloads": [
+        {
+          "id": "workload-01",
+          "ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1
+        }
+      ],
+      "candidates": [
+        {
+          "label": "A",
+          "artifact_version_id": "ver-0002",
+          "artifact_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+        }
+      ],
+      "trials": [
+        {
+          "pair_ordinal": 1,
+          "execution_ordinal": 1,
+          "candidate_label": "A",
+          "artifact_version_id": null,
+          "artifact_content_hash": null,
+          "workload_id": "workload-01",
+          "workload_ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1,
+          "protected_request_count": 0,
+          "run_id": "run-0002",
+          "state": "RUNNING",
+          "evidence_mode": "ISOLATED_LIVE",
+          "task_assessments": [],
+          "observations": [],
+          "outputs": [],
+          "customer_text": null,
+          "missing_evidence": [
+            "no capture was produced for the frozen request"
+          ],
+          "metrics": null
+        }
+      ],
+      "shared_public_denominator_requests": null,
+      "protected_denominator_requests_per_candidate": null,
+      "protected_counts": null,
+      "outcome": null,
+      "eligible": false,
+      "eligibility_reason": "A public diagnostic reserves no protected case and compares no candidates, so it can never qualify a version.",
+      "state": "RUNNING"
+    }
+  },
+  {
+    "method": "GET",
+    "path": "/api/experiments/experiment-bookshop-shift-01-d1",
+    "status": 200,
+    "wall_ms": 341,
+    "body": {
+      "id": "experiment-bookshop-shift-01-d1",
+      "shift_id": "bookshop-shift-01",
+      "kind": "DIAGNOSTIC",
+      "investigation_id": "inv-0001",
+      "declared_treatment": "Run this frozen learner-owned service once in the isolated Sandbox against the reviewed initial public request and state; no protected case, eligibility or business consequence is reserved.",
+      "context_hash": "a2e53b110d5390e135378651a73d8db5cb442b6eed2a74dfa3720e1a3f3bdda8",
+      "context_evidence_class": "ISOLATED_LIVE",
+      "condition": null,
+      "observed_run_id": null,
+      "workloads": [
+        {
+          "id": "workload-01",
+          "ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1
+        }
+      ],
+      "candidates": [
+        {
+          "label": "A",
+          "artifact_version_id": "ver-0002",
+          "artifact_content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd"
+        }
+      ],
+      "trials": [
+        {
+          "pair_ordinal": 1,
+          "execution_ordinal": 1,
+          "candidate_label": "A",
+          "artifact_version_id": null,
+          "artifact_content_hash": null,
+          "workload_id": "workload-01",
+          "workload_ordinal": 1,
+          "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+          "request_count": 1,
+          "protected_request_count": 0,
+          "run_id": "run-0002",
+          "state": "COMPLETE",
+          "evidence_mode": "ISOLATED_LIVE",
+          "task_assessments": [
+            {
+              "request_id": "bellwether-collection-001",
+              "request_ordinal": 1,
+              "task_id": "price",
+              "outcome": "USEFUL_COMPLETION",
+              "mandatory_pass": true,
+              "reason_codes": []
+            },
+            {
+              "request_id": "bellwether-collection-001",
+              "request_ordinal": 1,
+              "task_id": "collection",
+              "outcome": "USEFUL_COMPLETION",
+              "mandatory_pass": true,
+              "reason_codes": []
+            },
+            {
+              "request_id": "bellwether-collection-001",
+              "request_ordinal": 1,
+              "task_id": "alternative",
+              "outcome": "USEFUL_COMPLETION",
+              "mandatory_pass": true,
+              "reason_codes": []
+            }
+          ],
+          "observations": [
+            {
+              "kind": "INTERPRETATION",
+              "public_payload_json": {
+                "artifact_sha256": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd",
+                "networking_enabled": false,
+                "operation_bound": true,
+                "source": "controller_verified"
+              }
+            },
+            {
+              "kind": "INFERENCE_REQUEST",
+              "public_payload_json": {
+                "allowed_tool_names": [
+                  "public_record_lookup",
+                  "public_catalog_search"
+                ],
+                "input_bytes": 408,
+                "input_sha256": "6a0f5b94149cf7c1c2788732c7afcb71734ca98cb0c4748c01890c58fb8548c7",
+                "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+                "request_ordinal": 1,
+                "source": "controller_verified"
+              }
+            },
+            {
+              "kind": "INFERENCE_RESULT",
+              "public_payload_json": {
+                "elapsed_ms": 1194,
+                "finish_reason": "stop",
+                "input_tokens": 96,
+                "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+                "output_tokens": 152,
+                "request_ordinal": 1,
+                "selected_tool": "public_record_lookup",
+                "source": "controller_verified"
+              }
+            },
+            {
+              "kind": "INTERPRETATION",
+              "public_payload_json": {
+                "inference_meter_complete": true,
+                "request_ordinal": 1,
+                "service_calls": 1,
+                "source": "controller_verified"
+              }
+            },
+            {
+              "kind": "USAGE",
+              "public_payload_json": {
+                "sandbox_status": "SUCCESS",
+                "source": "controller_verified",
+                "wall_ms": 4775
+              }
+            },
+            {
+              "kind": "INTERPRETATION",
+              "public_payload_json": {
+                "capture_bytes": 2283,
+                "capture_sha256": "51c7a8616a2135f2aea618c116d761f8212ca91c30c4fd1896e8c15ad06eee7c",
+                "checkpoint_readback": true,
+                "request_ordinal": 1,
+                "source": "controller_verified"
+              }
+            },
+            {
+              "kind": "INTERPRETATION",
+              "public_payload_json": {
+                "kind": "inference_result",
+                "request_ordinal": 1,
+                "selected_tool": "public_record_lookup",
+                "source": "driver_verified"
+              }
+            },
+            {
+              "kind": "TOOL_RESULT",
+              "public_payload_json": {
+                "kind": "tool_result",
+                "record_ids": [
+                  "public:salt-roads:paperback:collection"
+                ],
+                "request_ordinal": 1,
+                "source": "driver_verified",
+                "tool": "public_record_lookup"
+              }
+            }
+          ],
+          "outputs": [
+            {
+              "request_ordinal": 1,
+              "request_text": "Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under \u00a320.",
+              "http_status": 200,
+              "body_base64": "eyJyZXF1ZXN0X2lkIjoiYmVsbHdldGhlci1jb2xsZWN0aW9uLTAwMSIsInRhc2tfcmVzdWx0cyI6W3sidGFza19pZCI6InByaWNlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6ImJvb2s6c2FsdC1yb2FkczpwYXBlcmJhY2siLCJjbGFpbXMiOlt7ImtpbmQiOiJwcmljZSIsImVudGl0eV9yZWYiOiJib29rOnNhbHQtcm9hZHM6cGFwZXJiYWNrIiwidmFsdWUiOjE4MDAsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNhbHQtcm9hZHM6cGFwZXJiYWNrOnByaWNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImNvbGxlY3Rpb24iLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoiYm9vazpzYWx0LXJvYWRzOnBhcGVyYmFjayIsImNsYWltcyI6W3sia2luZCI6ImF2YWlsYWJpbGl0eSIsImVudGl0eV9yZWYiOiJib29rOnNhbHQtcm9hZHM6cGFwZXJiYWNrIiwidmFsdWUiOnsiY29sbGVjdGlvbl9kYXRlIjoiMjAyNi0wOS0yNiIsImNhbl9jb2xsZWN0IjpmYWxzZX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNhbHQtcm9hZHM6cGFwZXJiYWNrOmNvbGxlY3Rpb24iXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiYWx0ZXJuYXRpdmUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoiYm9vazpoYXJib3VyLWF0bGFzOnBhcGVyYmFjayIsImNsYWltcyI6W3sia2luZCI6InByaWNlIiwiZW50aXR5X3JlZiI6ImJvb2s6aGFyYm91ci1hdGxhczpwYXBlcmJhY2siLCJ2YWx1ZSI6MTYwMCwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6aGFyYm91ci1hdGxhczpwYXBlcmJhY2s6cHJpY2UiXX0seyJraW5kIjoic3RvY2siLCJlbnRpdHlfcmVmIjoiYm9vazpoYXJib3VyLWF0bGFzOnBhcGVyYmFjayIsInZhbHVlIjozLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpoYXJib3VyLWF0bGFzOnBhcGVyYmFjazpzdG9jayJdfSx7ImtpbmQiOiJhdmFpbGFiaWxpdHkiLCJlbnRpdHlfcmVmIjoiYm9vazpoYXJib3VyLWF0bGFzOnBhcGVyYmFjayIsInZhbHVlIjp7ImNvbGxlY3Rpb25fZGF0ZSI6IjIwMjYtMDktMjYiLCJjYW5fY29sbGVjdCI6dHJ1ZX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOmhhcmJvdXItYXRsYXM6cGFwZXJiYWNrOmNvbGxlY3Rpb24iXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzYWx0LXJvYWRzOnBhcGVyYmFjazpwcmljZSIsInB1YmxpYzpzYWx0LXJvYWRzOnBhcGVyYmFjazpjb2xsZWN0aW9uIiwicHVibGljOmhhcmJvdXItYXRsYXM6cGFwZXJiYWNrOnByaWNlIiwicHVibGljOmhhcmJvdXItYXRsYXM6cGFwZXJiYWNrOnN0b2NrIiwicHVibGljOmhhcmJvdXItYXRsYXM6cGFwZXJiYWNrOmNvbGxlY3Rpb24iXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+              "elapsed_ms": 1751,
+              "transport_error": null
+            }
+          ],
+          "customer_text": "Salt Roads (paperback) costs \u00a318.00. Salt Roads (paperback) is not confirmed for collection on 2026-09-26. Harbour Atlas (paperback) is a same-genre alternative at \u00a316.00, available for collection on 2026-09-26.",
+          "missing_evidence": [],
+          "metrics": null
+        }
+      ],
+      "shared_public_denominator_requests": null,
+      "protected_denominator_requests_per_candidate": null,
+      "protected_counts": null,
+      "outcome": null,
+      "eligible": false,
+      "eligibility_reason": "A public diagnostic reserves no protected case and compares no candidates, so it can never qualify a version.",
+      "state": "FINALIZED"
+    }
+  }
+]

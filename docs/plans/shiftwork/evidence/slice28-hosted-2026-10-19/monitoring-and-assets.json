@@ -1,0 +1,47 @@
+{
+  "scope": "five external HTTP samples, not a continuous uptime guarantee",
+  "polls": [
+    {
+      "sample": 1,
+      "status": 200,
+      "elapsed_ms": 590
+    },
+    {
+      "sample": 2,
+      "status": 200,
+      "elapsed_ms": 479
+    },
+    {
+      "sample": 3,
+      "status": 200,
+      "elapsed_ms": 1028
+    },
+    {
+      "sample": 4,
+      "status": 200,
+      "elapsed_ms": 583
+    },
+    {
+      "sample": 5,
+      "status": 200,
+      "elapsed_ms": 393
+    }
+  ],
+  "assets": [
+    {
+      "asset": "index.html",
+      "status": 200,
+      "sha256": "506c217aef5600949f2e3c17b8f3adf36aa5445b366a8e18290c9a91d19ca035"
+    },
+    {
+      "asset": "app.js",
+      "status": 200,
+      "sha256": "212e9a69953ae771f56d345a019e0888946e04b510789e87c29aa2321e8f9ac2"
+    },
+    {
+      "asset": "styles.css",
+      "status": 200,
+      "sha256": "20793cea89e37c2ec1298ba04397f7dae777d300b7e8b094e5bb39407a802545"
+    }
+  ]
+}

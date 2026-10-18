@@ -1,0 +1,73 @@
+{
+  "polls": [
+    {
+      "at": "2026-10-19T00:14:43.249189+08:00",
+      "status": 404,
+      "elapsed_ms": 275
+    },
+    {
+      "at": "2026-10-19T00:14:53.526641+08:00",
+      "status": 404,
+      "elapsed_ms": 301
+    },
+    {
+      "at": "2026-10-19T00:15:03.830872+08:00",
+      "status": 404,
+      "elapsed_ms": 2664
+    },
+    {
+      "at": "2026-10-19T00:15:16.500394+08:00",
+      "status": 404,
+      "elapsed_ms": 880
+    },
+    {
+      "at": "2026-10-19T00:15:27.383564+08:00",
+      "status": 200,
+      "elapsed_ms": 304,
+      "asset_matches": true
+    }
+  ],
+  "deployment": {
+    "runtime": {
+      "hosted": true,
+      "configured_executor": "tokenfactory",
+      "python_version": "3.13.12",
+      "boot_id": "b7b8c5b7-48cb-440f-80a0-a7de8b1e101f",
+      "preflight_permissions": {
+        "cancel": true,
+        "import": true,
+        "list": true,
+        "set_image_tag": true,
+        "spawn": true,
+        "spawn_disposable": true
+      },
+      "notice": "Hosted tokenfactory executor: shared practice demo. Token Factory diagnostics, eligible selected operations and help are enabled. The first Bellwether baseline remains a labelled saved inspection. Free hosting sleeps after 15 idle minutes; waking may take about a minute. Sleep, restart or redeploy begins a fresh practice database. Download the build to keep your own history."
+    },
+    "board": {
+      "engagement_slug": "bookshop",
+      "business_kind": "bookshop",
+      "latest_shift": null,
+      "latest_version": null,
+      "latest_run": null,
+      "operating_status": null,
+      "draft_base_version_id": null,
+      "latest_saved_version_id": null,
+      "operating_selection": null,
+      "inherited_requirements": null,
+      "artifact_files": [],
+      "requests_run": 0,
+      "attempts_used": 0,
+      "attempt_limit": 3,
+      "attempts_remaining": 3,
+      "incidents": [],
+      "total_incidents": 0,
+      "unresolved_limits": [],
+      "ledger_event_count": 0,
+      "ledger_totals": {},
+      "chain_status": "VALID"
+    },
+    "app_js_sha256": "212e9a69953ae771f56d345a019e0888946e04b510789e87c29aa2321e8f9ac2",
+    "observed_after_ms": 45013
+  },
+  "expected_app_js_sha256": "212e9a69953ae771f56d345a019e0888946e04b510789e87c29aa2321e8f9ac2"
+}

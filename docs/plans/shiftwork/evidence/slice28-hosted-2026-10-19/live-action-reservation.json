@@ -1,0 +1,8 @@
+{
+  "reserved_at": "2026-10-19T00:16:35.394995+08:00",
+  "max_sandbox_operations": 1,
+  "max_inference_calls": 1,
+  "source_inspection": "recorded",
+  "candidate_sha256": "fd770c1d86707ae8b69043939316a5e44fedc721641ab86ff529033290f26248",
+  "retry_authorized": false
+}

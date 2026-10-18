@@ -1,0 +1,165 @@
+{
+  "state": "FINALIZED",
+  "wall_ms_to_terminal": 5611,
+  "experiment_id": "experiment-bookshop-shift-01-d1",
+  "trials": [
+    {
+      "pair_ordinal": 1,
+      "execution_ordinal": 1,
+      "candidate_label": "A",
+      "artifact_version_id": null,
+      "artifact_content_hash": null,
+      "workload_id": "workload-01",
+      "workload_ordinal": 1,
+      "request_batch_hash": "26b92339361f42b61c818d05c19d2f06cd92f10533332d6be39068ab040f299a",
+      "request_count": 1,
+      "protected_request_count": 0,
+      "run_id": "run-0002",
+      "state": "COMPLETE",
+      "evidence_mode": "ISOLATED_LIVE",
+      "task_assessments": [
+        {
+          "request_id": "bellwether-collection-001",
+          "request_ordinal": 1,
+          "task_id": "price",
+          "outcome": "USEFUL_COMPLETION",
+          "mandatory_pass": true,
+          "reason_codes": []
+        },
+        {
+          "request_id": "bellwether-collection-001",
+          "request_ordinal": 1,
+          "task_id": "collection",
+          "outcome": "USEFUL_COMPLETION",
+          "mandatory_pass": true,
+          "reason_codes": []
+        },
+        {
+          "request_id": "bellwether-collection-001",
+          "request_ordinal": 1,
+          "task_id": "alternative",
+          "outcome": "USEFUL_COMPLETION",
+          "mandatory_pass": true,
+          "reason_codes": []
+        }
+      ],
+      "observations": [
+        {
+          "kind": "INTERPRETATION",
+          "public_payload_json": {
+            "artifact_sha256": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd",
+            "networking_enabled": false,
+            "operation_bound": true,
+            "source": "controller_verified"
+          }
+        },
+        {
+          "kind": "INFERENCE_REQUEST",
+          "public_payload_json": {
+            "allowed_tool_names": [
+              "public_record_lookup",
+              "public_catalog_search"
+            ],
+            "input_bytes": 408,
+            "input_sha256": "6a0f5b94149cf7c1c2788732c7afcb71734ca98cb0c4748c01890c58fb8548c7",
+            "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+            "request_ordinal": 1,
+            "source": "controller_verified"
+          }
+        },
+        {
+          "kind": "INFERENCE_RESULT",
+          "public_payload_json": {
+            "elapsed_ms": 1194,
+            "finish_reason": "stop",
+            "input_tokens": 96,
+            "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+            "output_tokens": 152,
+            "request_ordinal": 1,
+            "selected_tool": "public_record_lookup",
+            "source": "controller_verified"
+          }
+        },
+        {
+          "kind": "INTERPRETATION",
+          "public_payload_json": {
+            "inference_meter_complete": true,
+            "request_ordinal": 1,
+            "service_calls": 1,
+            "source": "controller_verified"
+          }
+        },
+        {
+          "kind": "USAGE",
+          "public_payload_json": {
+            "sandbox_status": "SUCCESS",
+            "source": "controller_verified",
+            "wall_ms": 4775
+          }
+        },
+        {
+          "kind": "INTERPRETATION",
+          "public_payload_json": {
+            "capture_bytes": 2283,
+            "capture_sha256": "51c7a8616a2135f2aea618c116d761f8212ca91c30c4fd1896e8c15ad06eee7c",
+            "checkpoint_readback": true,
+            "request_ordinal": 1,
+            "source": "controller_verified"
+          }
+        },
+        {
+          "kind": "INTERPRETATION",
+          "public_payload_json": {
+            "kind": "inference_result",
+            "request_ordinal": 1,
+            "selected_tool": "public_record_lookup",
+            "source": "driver_verified"
+          }
+        },
+        {
+          "kind": "TOOL_RESULT",
+          "public_payload_json": {
+            "kind": "tool_result",
+            "record_ids": [
+              "public:salt-roads:paperback:collection"
+            ],
+            "request_ordinal": 1,
+            "source": "driver_verified",
+            "tool": "public_record_lookup"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "request_ordinal": 1,
+          "request_text": "Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under \u00a320.",
+          "http_status": 200,
+          "body_base64": "eyJyZXF1ZXN0X2lkIjoiYmVsbHdldGhlci1jb2xsZWN0aW9uLTAwMSIsInRhc2tfcmVzdWx0cyI6W3sidGFza19pZCI6InByaWNlIiwic3RhdHVzIjoiQ09NUExFVEVEIiwiZW50aXR5X3JlZiI6ImJvb2s6c2FsdC1yb2FkczpwYXBlcmJhY2siLCJjbGFpbXMiOlt7ImtpbmQiOiJwcmljZSIsImVudGl0eV9yZWYiOiJib29rOnNhbHQtcm9hZHM6cGFwZXJiYWNrIiwidmFsdWUiOjE4MDAsImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNhbHQtcm9hZHM6cGFwZXJiYWNrOnByaWNlIl19XSwiY29tbWl0bWVudF9yZWYiOm51bGwsImV4cGxhbmF0aW9uX2NvZGUiOm51bGx9LHsidGFza19pZCI6ImNvbGxlY3Rpb24iLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoiYm9vazpzYWx0LXJvYWRzOnBhcGVyYmFjayIsImNsYWltcyI6W3sia2luZCI6ImF2YWlsYWJpbGl0eSIsImVudGl0eV9yZWYiOiJib29rOnNhbHQtcm9hZHM6cGFwZXJiYWNrIiwidmFsdWUiOnsiY29sbGVjdGlvbl9kYXRlIjoiMjAyNi0wOS0yNiIsImNhbl9jb2xsZWN0IjpmYWxzZX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOnNhbHQtcm9hZHM6cGFwZXJiYWNrOmNvbGxlY3Rpb24iXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH0seyJ0YXNrX2lkIjoiYWx0ZXJuYXRpdmUiLCJzdGF0dXMiOiJDT01QTEVURUQiLCJlbnRpdHlfcmVmIjoiYm9vazpoYXJib3VyLWF0bGFzOnBhcGVyYmFjayIsImNsYWltcyI6W3sia2luZCI6InByaWNlIiwiZW50aXR5X3JlZiI6ImJvb2s6aGFyYm91ci1hdGxhczpwYXBlcmJhY2siLCJ2YWx1ZSI6MTYwMCwiZXZpZGVuY2VfcmVmcyI6WyJwdWJsaWM6aGFyYm91ci1hdGxhczpwYXBlcmJhY2s6cHJpY2UiXX0seyJraW5kIjoic3RvY2siLCJlbnRpdHlfcmVmIjoiYm9vazpoYXJib3VyLWF0bGFzOnBhcGVyYmFjayIsInZhbHVlIjozLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpoYXJib3VyLWF0bGFzOnBhcGVyYmFjazpzdG9jayJdfSx7ImtpbmQiOiJhdmFpbGFiaWxpdHkiLCJlbnRpdHlfcmVmIjoiYm9vazpoYXJib3VyLWF0bGFzOnBhcGVyYmFjayIsInZhbHVlIjp7ImNvbGxlY3Rpb25fZGF0ZSI6IjIwMjYtMDktMjYiLCJjYW5fY29sbGVjdCI6dHJ1ZX0sImV2aWRlbmNlX3JlZnMiOlsicHVibGljOmhhcmJvdXItYXRsYXM6cGFwZXJiYWNrOmNvbGxlY3Rpb24iXX1dLCJjb21taXRtZW50X3JlZiI6bnVsbCwiZXhwbGFuYXRpb25fY29kZSI6bnVsbH1dLCJldmlkZW5jZV9yZWZzIjpbInB1YmxpYzpzYWx0LXJvYWRzOnBhcGVyYmFjazpwcmljZSIsInB1YmxpYzpzYWx0LXJvYWRzOnBhcGVyYmFjazpjb2xsZWN0aW9uIiwicHVibGljOmhhcmJvdXItYXRsYXM6cGFwZXJiYWNrOnByaWNlIiwicHVibGljOmhhcmJvdXItYXRsYXM6cGFwZXJiYWNrOnN0b2NrIiwicHVibGljOmhhcmJvdXItYXRsYXM6cGFwZXJiYWNrOmNvbGxlY3Rpb24iXSwidW5jZXJ0YWludHlfY29kZXMiOltdfQ==",
+          "elapsed_ms": 1751,
+          "transport_error": null
+        }
+      ],
+      "customer_text": "Salt Roads (paperback) costs \u00a318.00. Salt Roads (paperback) is not confirmed for collection on 2026-09-26. Harbour Atlas (paperback) is a same-genre alternative at \u00a316.00, available for collection on 2026-09-26.",
+      "missing_evidence": [],
+      "metrics": null
+    }
+  ],
+  "source_run_id": "run-0001",
+  "version_id": "ver-0002",
+  "provider_calls_not_yet_classified": false,
+  "inference_calls": 1,
+  "sandbox_operations": 1,
+  "inference": {
+    "elapsed_ms": 1194,
+    "finish_reason": "stop",
+    "input_tokens": 96,
+    "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+    "output_tokens": 152,
+    "request_ordinal": 1,
+    "selected_tool": "public_record_lookup",
+    "source": "controller_verified"
+  },
+  "estimated_inference_usd": "0.00004224",
+  "rate_basis": "historical conservative projection, not a newly verified rate card or actual ledger debit",
+  "sandbox_compute_cost": "unknown"
+}
