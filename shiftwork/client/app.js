@@ -279,6 +279,8 @@ async function refresh(runId = null) {
   document.body.dataset.loadState = 'loading';
   clearData('Loading your shift…');
   try {
+    const runtime = await api('/runtime');
+    text('runtime-notice', runtime.notice);
     const workplaces = await api('/boards');
     const available = workplaces.find(item => item.engagement_slug === state.slug && item.availability === 'AVAILABLE');
     state.workplaces = workplaces;

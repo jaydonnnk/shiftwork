@@ -303,3 +303,5 @@ summary { cursor: pointer; color: var(--green); padding: 5px 0; }
   .detail-panel { padding-inline: 20px; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+#runtime-notice { margin: 0; padding: 12px 20px; color: #e7edf3; background: #25344a; font-size: 13px; line-height: 1.55; }
