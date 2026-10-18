@@ -2808,3 +2808,49 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - Prevention: check the requested board's identity for fresh-board readiness;
   require a shift only when the preview contract seeds one. Inspect the preview
   and browser entry steps before reusing their launch wrapper.
+
+
+## 2026-10-18 S28: detached proof runner left no receipts
+
+- What happened: a Python launcher started the disposable mutation runner with
+  Popen, then exited its tool call. At inspection the child no longer existed
+  and its log was empty. No mutation result is claimed from that attempt.
+- Root cause: the proof run had no retained tool session to monitor or finish.
+  The child's exit status and termination cause are unknown.
+- Prevention: launch long verification commands directly in a controllable exec
+  session. Wait for its exit code and inspect its receipts before reporting proof.
+
+
+## 2026-10-18 S28: disposable-copy filter removed essential artifact fixtures
+
+- What happened: the first monitored mutation run could not set up eight action
+  tests. Its copy filter ignored every directory named artifacts, including
+  shiftwork/fixtures/artifacts. None of that run is counted as accepted proof.
+- Root cause: a root-output exclusion was applied at every directory depth, and
+  the copied test module had not first passed a complete clean baseline.
+- Prevention: exclude generated artifacts only at the repository root. Run the
+  full targeted clean suite inside each disposable copy before any mutation.
+
+
+## 2026-10-19 S28: wrong hash domain in a fresh-starter repair and masked meter-type control
+
+- What happened: routing Bellwether's legacy baseline into selected operation
+  correctly returned 409 because its historical contract hash is not the newer
+  mission hash. Separately, the wrong-meter mutation survived because that test
+  lacked credentials and an independent credential guard returned the same 409.
+- Root cause: the first repair inferred baseline compatibility without checking
+  both requirement-hash domains; the mutation test did not isolate its guard.
+- Prevention: preserve the baseline as an explicit saved inspection, route edited
+  diagnostics and eligible choices through existing isolated contexts, and check
+  fresh-host behavior. Supply synthetic credentials when probing meter type so
+  only the intended wiring guard can produce the refusal. Keep rejected receipts.
+
+
+## 2026-10-19 S28: browser profile cleanup raced Chrome shutdown
+
+- What happened: all twelve rendered views and three board reads passed, but the
+  browser command exited 1 when recursive removal raced Chrome writing its profile.
+- Root cause: cleanup sent termination and removed the profile without awaiting
+  the owned Chrome process exit.
+- Prevention: await the exit event before removing the owned temporary profile,
+  and require the entire browser command, including cleanup, to exit successfully.
