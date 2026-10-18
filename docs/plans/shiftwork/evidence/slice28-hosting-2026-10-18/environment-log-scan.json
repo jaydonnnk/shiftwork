@@ -1,0 +1,27 @@
+{
+  "scope": "bounded environment-value scan of retained pytest logs; not a repository or history audit",
+  "forms": [
+    "raw",
+    "JSON-escaped",
+    "base64",
+    "URL-encoded"
+  ],
+  "distinct_needles": 2,
+  "in_memory_injection_controls_caught_on_AssertionError": 4,
+  "logs": [
+    {
+      "file": "shiftwork-s28-baseline-full-20261018.log",
+      "sha256": "e3fba0f7cd67c23ead736a9d0a66390172d559392b4d5c8b635bace82bf6af94",
+      "clean_matches": 0,
+      "byte_identical_after_controls": true,
+      "clean_rerun_passed": true
+    },
+    {
+      "file": "shiftwork-s28-baseline-package-20261018.log",
+      "sha256": "1ee5056dea9095447c7948271749a24d8a989f158dda6ff4eecd8929d0f05820",
+      "clean_matches": 0,
+      "byte_identical_after_controls": true,
+      "clean_rerun_passed": true
+    }
+  ]
+}

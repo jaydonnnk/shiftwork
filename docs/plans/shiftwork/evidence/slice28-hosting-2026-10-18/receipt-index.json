@@ -1,0 +1,19 @@
+{
+  "logs": [
+    {
+      "file": "shiftwork-s28-baseline-full-20261018.log.gz",
+      "decoded_filename": "shiftwork-s28-baseline-full-20261018.log",
+      "decoded_sha256": "e3fba0f7cd67c23ead736a9d0a66390172d559392b4d5c8b635bace82bf6af94",
+      "decoded_bytes": 7614,
+      "byte_identical_roundtrip": true
+    },
+    {
+      "file": "shiftwork-s28-baseline-package-20261018.log.gz",
+      "decoded_filename": "shiftwork-s28-baseline-package-20261018.log",
+      "decoded_sha256": "1ee5056dea9095447c7948271749a24d8a989f158dda6ff4eecd8929d0f05820",
+      "decoded_bytes": 388,
+      "byte_identical_roundtrip": true
+    }
+  ],
+  "note": "Gzip preserves the exact pytest output, including its whitespace-only source excerpt. Raw local copies remain ignored."
+}

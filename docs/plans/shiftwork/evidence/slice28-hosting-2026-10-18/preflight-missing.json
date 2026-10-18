@@ -1,0 +1,1 @@
+{"command": ".venv/bin/python -m demos.gateway_spike --phase preflight", "exit_code": 3, "output": {"probe": "sandbox_whoami", "result": "missing_environment"}, "provider_requests": 0}

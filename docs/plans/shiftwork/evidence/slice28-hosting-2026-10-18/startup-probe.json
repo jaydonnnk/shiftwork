@@ -1,0 +1,28 @@
+{
+  "scope": "OFFLINE_STARTUP_INSPECTION",
+  "configured_executor": "tokenfactory",
+  "boards": [
+    [
+      "bookshop",
+      "AVAILABLE"
+    ],
+    [
+      "gtm",
+      "AVAILABLE"
+    ],
+    [
+      "northline",
+      "AVAILABLE"
+    ]
+  ],
+  "operation_budget_configured": false,
+  "comparison_budget_configured": false,
+  "assist_gateway_configured": false,
+  "run_status": 409,
+  "run_response": {
+    "kind": "conflict",
+    "detail": "live operation requires a bounded run budget"
+  },
+  "provider_requests": 0,
+  "mutation_coverage_claim": false
+}
