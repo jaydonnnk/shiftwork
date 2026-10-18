@@ -16,11 +16,12 @@ from tests.orchestrator.test_selection_operation import (
     selected_migrated, _FakeTokenFactoryAdapter, _candidate,
 )
 from demos.final_pivot import create_v5_sample
-from shiftwork import comparison_flow
+from shiftwork import comparison_flow, experiments
 from shiftwork.store import db, repo
 from tests.orchestrator import pivot_flow
 from tests.packs.material import staged_material
 from threading import Barrier, Thread
+from threading import local
 
 PERMISSIONS = ('cancel', 'import', 'list', 'set_image_tag', 'spawn', 'spawn_disposable')
 
@@ -363,3 +364,50 @@ def test_distinct_operations_receive_distinct_fresh_meters(selected_migrated, mo
     assert meters[0] is not meters[1]
     assert all(adapter.kwargs.get('live_budget') is meter for adapter, meter in zip(_FakeTokenFactoryAdapter.calls, meters))
     assert [(meter.operations, meter.calls) for meter in meters] == [(1, 1), (1, 1)]
+
+
+def test_duplicate_diagnostic_workers_execute_only_once(hosted_environment, monkeypatch, tmp_path):
+    database = tmp_path / 'duplicate-diagnostic.db'
+    with TestClient(create_app(str(database))) as client:
+        sid = client.post('/api/engagements/bookshop/shifts').json()['id']
+        source = client.post(f'/api/shifts/{sid}/runs', json={'client_request_id': 'duplicate-source'}).json()
+        entry = client.post(f'/api/shifts/{sid}/investigations', json={
+            'source_run_id': source['id'], 'source_request_ordinal': 1,
+            'cause': 'the price route omits collection', 'falsifier': 'collection completes',
+            'public_test': 'check collection independently', 'client_request_id': 'duplicate-investigation',
+        })
+        assert entry.status_code == 201
+        version = _candidate(client, sid, 'A')
+        with monkeypatch.context() as queued:
+            queued.setattr(experiments, 'execute_experiment_task', lambda *_: None)
+            response = client.post(f'/api/shifts/{sid}/experiments', json={
+                'kind': 'DIAGNOSTIC', 'candidate_a_version_id': version['id'],
+                'investigation_id': entry.json()['id'], 'client_request_id': 'duplicate-diagnostic',
+            })
+            assert response.status_code == 202
+            run_id = response.json()['trials'][0]['run_id']
+    real_context = repo.get_execution_context
+    barrier, seen = Barrier(2), local()
+    def concurrent_context(conn, context_id):
+        value = real_context(conn, context_id)
+        if not getattr(seen, 'loaded', False):
+            seen.loaded = True
+            barrier.wait(timeout=10)
+        return value
+    monkeypatch.setattr(repo, 'get_execution_context', concurrent_context)
+    monkeypatch.setattr(orchestrator, 'TokenFactoryAdapter', _FakeTokenFactoryAdapter)
+    _FakeTokenFactoryAdapter.calls = []
+    errors = []
+    def execute():
+        conn = db.connect(database)
+        try:
+            experiments.execute_experiment(conn, run_id)
+        except Exception as exc:
+            errors.append(type(exc).__name__)
+        finally:
+            conn.close()
+    threads = [Thread(target=execute) for _ in range(2)]
+    for thread in threads: thread.start()
+    for thread in threads: thread.join(timeout=15)
+    assert len(_FakeTokenFactoryAdapter.calls) == 1, 'duplicate diagnostics must not create a second isolated execution'
+    assert not errors, 'the losing diagnostic worker must preserve the successful action'

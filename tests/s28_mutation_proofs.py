@@ -147,6 +147,12 @@ row('fresh_action_meter_cached', ROUTES,
     'test_distinct_operations_receive_distinct_fresh_meters')
 
 
+row('lost_diagnostic_claim_ignored', 'shiftwork/experiments.py',
+    'if not repo.claim_run_execution(conn, run_id):',
+    'if repo.claim_run_execution(conn, run_id) and False:',
+    'test_duplicate_diagnostic_workers_execute_only_once')
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--out', type=Path, required=True)

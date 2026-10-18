@@ -236,7 +236,9 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
         conn.commit()
         return repo.get_run(conn, run_id)
 
-    repo.update_run(conn, run_id, RunState.RUNNING)
+    if not repo.claim_run_execution(conn, run_id):
+        conn.rollback()
+        return repo.get_run(conn, run_id)
     repo.set_run_snapshot_bytes(conn, run_id, snapshot_bytes)
     conn.commit()
     try:
