@@ -13,8 +13,23 @@ from shiftwork.domain.errors import ShiftworkDomainError
 from shiftwork.domain.models import AssistRole, ContractParams, InvestigationRequest, SelectionRequest
 from shiftwork.orchestrator import LifecycleError
 from shiftwork.store import db
+from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
 
 router = APIRouter(prefix="/api")
+
+
+def _action_budget(configured, expected_type):
+    budget = configured() if callable(configured) else configured
+    if budget is not None and not isinstance(budget, expected_type):
+        raise orchestrator.LifecycleError("conflict", "live budget wiring is invalid")
+    return budget
+
+
+@router.get("/runtime")
+def runtime(request: Request) -> dict:
+    return getattr(request.app.state, "hosted_runtime", {
+        "hosted": False, "notice": "Local practice controller. Keep this server on loopback.",
+    })
 
 
 def get_conn(request: Request) -> Iterator[sqlite3.Connection]:
@@ -115,7 +130,7 @@ def start_run(
     # A live configured executor needs its own bounded operation ceiling before a
     # reservation exists, mirroring the live comparison gate.
     live = request.app.state.executor == "tokenfactory"
-    live_budget = request.app.state.live_operation_budget if live else None
+    live_budget = _action_budget(request.app.state.live_operation_budget, LiveOperationBudget) if live else None
     if live and live_budget is None:
         raise orchestrator.LifecycleError("conflict", "live operation requires a bounded run budget")
     run = orchestrator.start_run(
@@ -240,8 +255,11 @@ def create_experiment(
     # the body names the candidates and, for a comparison, the learner's declared
     # treatment for the difference between them.
     adapter = "tokenfactory" if request.app.state.executor == "tokenfactory" else "local_process"
+    live_budget = None
+    if adapter == "tokenfactory" and body.kind in ("QUALIFYING_COMPARISON", "LATER_CONDITION_COMPARISON"):
+        live_budget = _action_budget(request.app.state.live_comparison_budget, LiveComparisonBudget)
     if body.kind == "QUALIFYING_COMPARISON":
-        if adapter == "tokenfactory" and request.app.state.live_comparison_budget is None:
+        if adapter == "tokenfactory" and live_budget is None:
             raise orchestrator.LifecycleError("conflict", "live comparison requires a bounded run budget")
         experiment = comparison_flow.create_qualifying_comparison(
             conn,
@@ -254,15 +272,15 @@ def create_experiment(
             adapter=adapter,
         )
         if experiment.state == "PLANNED" and comparison_flow.comparison_run(conn, experiment.id) is not None:
-            if request.app.state.live_comparison_budget is None:
+            if live_budget is None:
                 background.add_task(comparison_flow.execute_comparison_task,
                                     request.app.state.db_path, experiment.id)
             else:
                 background.add_task(comparison_flow.execute_comparison_task,
                                     request.app.state.db_path, experiment.id,
-                                    request.app.state.live_comparison_budget)
+                                    live_budget)
     elif body.kind == "LATER_CONDITION_COMPARISON":
-        if adapter == "tokenfactory" and request.app.state.live_comparison_budget is None:
+        if adapter == "tokenfactory" and live_budget is None:
             raise orchestrator.LifecycleError("conflict", "live comparison requires a bounded run budget")
         experiment = comparison_flow.create_later_condition_comparison(
             conn,
@@ -273,13 +291,13 @@ def create_experiment(
             adapter=adapter,
         )
         if experiment.state == "PLANNED" and comparison_flow.comparison_run(conn, experiment.id) is not None:
-            if request.app.state.live_comparison_budget is None:
+            if live_budget is None:
                 background.add_task(comparison_flow.execute_comparison_task,
                                     request.app.state.db_path, experiment.id)
             else:
                 background.add_task(comparison_flow.execute_comparison_task,
                                     request.app.state.db_path, experiment.id,
-                                    request.app.state.live_comparison_budget)
+                                    live_budget)
     else:
         experiment = experiments.create_diagnostic_experiment(
             conn,

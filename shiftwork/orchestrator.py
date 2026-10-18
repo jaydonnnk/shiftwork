@@ -754,6 +754,11 @@ def start_run(
         shift = _require_open_shift(conn, shift_id)
         selection, version = _selected_operating_version(conn, shift)
         adapter = executor or config.EXECUTOR_ADAPTER
+        # Bellwether's legacy baseline is a saved inspection with its original
+        # contract hash. Live diagnostics and later choices use frozen contexts.
+        if (adapter == TokenFactoryAdapter.name and shift.engagement_slug == "bookshop"
+                and selection.kind == "STARTER_BASELINE"):
+            adapter = "recorded"
         if ((selection.kind == "LEARNER_CHOICE" and selection.comparison_id is not None)
                 or (shift.engagement_slug in ("northline", "gtm") and selection.kind == "STARTER_BASELINE")):
             run = _reserve_selected_operation(
@@ -1024,7 +1029,9 @@ def execute_selected_operation(conn: sqlite3.Connection, run_id: str,
             repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
             conn.commit()
             return repo.get_run(conn, run.id)
-    repo.update_run(conn, run.id, RunState.RUNNING)
+    if not repo.claim_run_execution(conn, run.id):
+        conn.rollback()
+        return repo.get_run(conn, run.id)
     repo.set_run_snapshot_bytes(conn, run.id, state_bytes)
     conn.commit()
     try:

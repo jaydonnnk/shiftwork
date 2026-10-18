@@ -496,6 +496,15 @@ def update_run(
     )
 
 
+def claim_run_execution(conn: sqlite3.Connection, run_id: str) -> bool:
+    """Only one worker may consume the allowance for a queued action."""
+    changed = conn.execute(
+        "UPDATE runs SET state = 'RUNNING' WHERE id = ? AND state = 'QUEUED'",
+        (run_id,),
+    )
+    return changed.rowcount == 1
+
+
 def get_run(conn: sqlite3.Connection, run_id: str) -> Run | None:
     row = conn.execute("SELECT * FROM runs WHERE id = ?", (run_id,)).fetchone()
     return _run(row) if row else None

@@ -3,6 +3,8 @@ admitted engagements, reconciles work a restart left nonterminal and mounts the
 static client."""
 
 from contextlib import asynccontextmanager
+from collections.abc import Callable
+import os
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -39,14 +41,18 @@ def create_app(
     executor: str | None = None,
     shop_snapshot: str | Path | None = None,
     assist_gateway: AssistGateway | None = None,
-    live_comparison_budget: LiveComparisonBudget | None = None,
-    live_operation_budget: LiveOperationBudget | None = None,
+    live_comparison_budget: LiveComparisonBudget | Callable[[], LiveComparisonBudget] | None = None,
+    live_operation_budget: LiveOperationBudget | Callable[[], LiveOperationBudget] | None = None,
 ) -> FastAPI:
     """Build the controller app; ``executor`` and ``shop_snapshot`` are the
     controller-side run binding new runs persist (program design 2: adapter
     selection). Both default to the shipped constants at call time; the learner
     never selects an executor or a snapshot through the API.
     """
+    if executor is None and os.environ.get("RENDER") == "true":
+        from shiftwork.hosted import create_hosted_app
+
+        return create_hosted_app(db_path)
     app = FastAPI(title="Shiftwork", version="0.2.0-thin", lifespan=lifespan)
     app.state.db_path = db_path or config.db_path()
     app.state.executor = executor or config.EXECUTOR_ADAPTER
