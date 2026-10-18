@@ -1,0 +1,18 @@
+{
+  "name": "runtime_notice_rendering_removed",
+  "status": "FAIL_CAUGHT",
+  "failure_type": "AssertionError",
+  "baseline_passed": true,
+  "sha256_before": "212e9a69953ae771f56d345a019e0888946e04b510789e87c29aa2321e8f9ac2",
+  "sha256_after": "212e9a69953ae771f56d345a019e0888946e04b510789e87c29aa2321e8f9ac2",
+  "restored_rerun_passed": true,
+  "browser_checks": {
+    "widths": [
+      1440,
+      390
+    ],
+    "screens_per_width": 6,
+    "boards": 3
+  },
+  "scope": "read-only rendered views; no provider request or full Northline journey"
+}

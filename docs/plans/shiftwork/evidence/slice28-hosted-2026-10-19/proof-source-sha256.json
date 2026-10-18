@@ -1,0 +1,8 @@
+{
+  "shiftwork/app.py": "30cbc6c629480848007ae7a83a8eec4506f9f7a96bc8c1f559e4034dab2494a4",
+  "shiftwork/hosted.py": "c879103848756c47185455a4e535f248336c5c12c66de6d8923f910e5f38b16f",
+  "shiftwork/api/routes.py": "ee51ccab9a41c94e964072a6c34aa28fe28a507ba1366a6a0600b91dfe7be9a6",
+  "shiftwork/store/repo.py": "fe17f308d4f246bdc448c18b6f4da4e69fa577449725dbecb9e95b5e7e65d94f",
+  "shiftwork/orchestrator.py": "15443d8d6b669fece85560c3c792909dd0d3b3eb29e89e8576ba188eaa59e15a",
+  "shiftwork/client/app.js": "212e9a69953ae771f56d345a019e0888946e04b510789e87c29aa2321e8f9ac2"
+}

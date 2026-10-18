@@ -1,0 +1,89 @@
+{
+  "/api/boards": {
+    "status": 200,
+    "elapsed_ms": 22712,
+    "sha256": "9811012a4065ae706a675daecdc4d7562e51da8a9974a801e0d97d082f21895c",
+    "body": [
+      {
+        "engagement_slug": "bookshop",
+        "role_name": "Junior Applied AI Engineer",
+        "employer": null,
+        "client": "Bellwether Books",
+        "room_id": "bookshop",
+        "station_labels": [
+          "Incident board",
+          "Workbench",
+          "Comparison bench",
+          "Customer queue",
+          "Shift handover"
+        ],
+        "availability": "AVAILABLE"
+      },
+      {
+        "engagement_slug": "gtm",
+        "role_name": "Go-To-Market Engineer",
+        "employer": "Stonebridge Software",
+        "client": "Revenue team",
+        "room_id": "gtm",
+        "station_labels": [
+          "Signal inbox",
+          "Workflow",
+          "Comparison bench",
+          "Pipeline wall",
+          "Handoff queue"
+        ],
+        "availability": "AVAILABLE"
+      },
+      {
+        "engagement_slug": "northline",
+        "role_name": "Forward Deployed Engineer",
+        "employer": null,
+        "client": "Northline Bike Cooperative",
+        "room_id": "northline",
+        "station_labels": [
+          "Deployment brief",
+          "Discovery",
+          "Permissions",
+          "Acceptance tests",
+          "Rollout",
+          "Handover"
+        ],
+        "availability": "AVAILABLE"
+      }
+    ]
+  },
+  "/api/engagements/bookshop/board": {
+    "status": 200,
+    "elapsed_ms": 258,
+    "sha256": "a3f220ac559cadee6dccfdf7aaad75c9950d379937fef6f445999b27577b831b",
+    "body": {
+      "engagement_slug": "bookshop",
+      "business_kind": "bookshop",
+      "latest_shift": null,
+      "latest_version": null,
+      "latest_run": null,
+      "operating_status": null,
+      "draft_base_version_id": null,
+      "latest_saved_version_id": null,
+      "operating_selection": null,
+      "inherited_requirements": null,
+      "artifact_files": [],
+      "requests_run": 0,
+      "attempts_used": 0,
+      "attempt_limit": 3,
+      "attempts_remaining": 3,
+      "incidents": [],
+      "total_incidents": 0,
+      "unresolved_limits": [],
+      "ledger_event_count": 0,
+      "ledger_totals": {},
+      "chain_status": "VALID"
+    }
+  },
+  "/app.js": {
+    "status": 200,
+    "elapsed_ms": 1136,
+    "sha256": "a9d284f29cc6f0c8f745d646b0655d64ffe16654b763877cb3bc0aef232a9843"
+  },
+  "created_shift_for_reset_probe": "bookshop-shift-01"
+}

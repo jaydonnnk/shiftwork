@@ -1,0 +1,310 @@
+[
+  {
+    "name": "render_flag_ignored",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: local defaults must remain unchanged assert 'tokenfactory' == 'recorded'      - recorded   + t [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "render_explicit_executor_ignored",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: assert 'tokenfactory' == 'local_process'      - local_process   + tokenfactory [1 failed, 2 warnings in 0.17s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "render_delegation_removed",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: both credentials must enable live execution assert 'recorded' == 'tokenfactory'      - tokenfa [1 failed, 2 warnings in 0.16s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "key_not_required",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: fallback must serve without a provider assert 'rejected' == 200 [1 failed, 2 warnings in 0.16s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "project_not_required",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: fallback must serve without a provider assert 'rejected' == 200 [1 failed, 2 warnings in 0.16s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "fallback_wrong_executor",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: fallback must never execute trusted local code as recorded assert 'local_process' == 'recorded [1 failed, 2 warnings in 0.19s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "live_help_missing",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: live help must be configured assert False  +  where False = isinstance(None, LiveAssistGateway [1 failed, 2 warnings in 0.16s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "partial_credentials_enable_help",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: partial credentials cannot enable assistance assert <shiftwork.assist.gateway.LiveAssistGatewa [1 failed, 2 warnings in 0.19s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "fallback_operation_meter_enabled",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "assert <function operation_budget at 0x108448680> is None  +  where <function operation_budget at 0x108448680> [1 failed, 2 warnings in 0.18s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "fallback_comparison_meter_enabled",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "assert <function comparison_budget at 0x104be4860> is None  +  where <function comparison_budget at 0x104be486 [1 failed, 2 warnings in 0.18s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "key_whitespace_accepted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: invalid credential configuration must stop startup assert 200 == 'rejected' [1 failed, 2 warnings in 0.21s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "project_whitespace_accepted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: invalid credential configuration must stop startup assert 200 == 'rejected' [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "generic_project_accepted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: invalid credential configuration must stop startup assert 200 == 'rejected' [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "permission_cancel_omitted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: every required Sandbox permission must be true assert 200 == 'rejected' [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "permission_import_omitted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: every required Sandbox permission must be true assert 200 == 'rejected' [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "permission_list_omitted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: every required Sandbox permission must be true assert 200 == 'rejected' [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "permission_set_image_tag_omitted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: every required Sandbox permission must be true assert 200 == 'rejected' [1 failed, 2 warnings in 0.21s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "permission_spawn_omitted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: every required Sandbox permission must be true assert 200 == 'rejected' [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "permission_spawn_disposable_omitted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: every required Sandbox permission must be true assert 200 == 'rejected' [1 failed, 2 warnings in 0.21s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "permission_guard_bypassed",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: every required Sandbox permission must be true assert 200 == 'rejected' [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "truthy_permission_accepted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: missing or non-boolean permissions cannot authorize live execution assert 200 == 'rejected' [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "preflight_exception_ignored",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: failed entitlement verification must stop startup assert 200 == 'rejected' [1 failed, 2 warnings in 0.21s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "preflight_exception_leaked",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: startup errors must not echo provider details assert 'S28_SYNTHETI...OVIDER_CANARY' == 'Hosted [1 failed, 2 warnings in 0.17s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "operation_meter_reused",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: independent actions must not share a meter assert LiveOperationBudget(model='nvidia/NVIDIA-Nem [1 failed, 2 warnings in 0.14s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "comparison_meter_reused",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: independent actions must not share a meter assert LiveComparisonBudget(model='nvidia/NVIDIA-Ne [1 failed, 2 warnings in 0.17s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "operation_factory_wrong_type",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: each action needs its correct meter type assert (False)  +  where False = isinstance(LiveCompa [1 failed, 2 warnings in 0.16s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "operation_factory_ceiling_raised",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: consumed allowances must stay consumed assert False [1 failed, 2 warnings in 0.15s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "comparison_factory_ceiling_raised",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: assert (12, 19, Decimal('0.10')) == (12, 18, Decimal('0.10'))      At index 1 diff: 19 != 18   [1 failed, 2 warnings in 0.16s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "operation_handoff_missing",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: the route must pass the resolved operation meter assert 'FAILED' == 'FINALIZED'      - FINALIZ [1 failed, 2 warnings in 0.75s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "budget_factory_not_resolved",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "assert 409 == 202  +  where 409 = <Response [409 Conflict]>.status_code [1 failed, 2 warnings in 0.76s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "wrong_meter_type_accepted",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: invalid action wiring must refuse before reservation assert 202 == 409  +  where 202 = <Respon [1 failed, 2 warnings in 0.76s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "comparison_factory_not_resolved",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: resolve exactly one meter for this comparison assert 0 == 1  +  where 0 = len([])  +  and   1  [1 failed, 2 warnings in 0.25s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "qualifying_meter_handoff_missing",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: pass the resolved comparison meter into its worker assert None is LiveComparisonBudget(model=' [1 failed, 2 warnings in 0.26s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "later_meter_handoff_missing",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: pass the resolved comparison meter into its worker assert None is LiveComparisonBudget(model=' [1 failed, 2 warnings in 0.89s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "operation_claim_not_conditional",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: a consumed action must never be reclaimed assert True is False  +  where True = <function clai [1 failed, 2 warnings in 0.73s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "lost_operation_claim_ignored",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: duplicate requests must not spawn twice using fresh meters assert 2 == 1  +  where 2 = len([<t [1 failed, 2 warnings in 0.77s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "runtime_mode_untruthful",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: assert 'recorded' == 'tokenfactory'      - tokenfactory   + recorded [1 failed, 2 warnings in 0.20s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "reset_warning_removed",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: assert 'fresh practice database' in 'Hosted tokenfactory executor: shared practice demo. Token [1 failed, 2 warnings in 0.24s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "boot_marker_reused",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: each boot needs its own observable marker assert ('same-boot' and 'same-boot' != 'same-boot')  [1 failed, 2 warnings in 0.24s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "runtime_key_leak",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "assert 'S28_SYNTHET...VIDER_CANARY' not in '{\"hosted\": ...n history.\"}'      'S28_SYNTHETIC_PROVIDER_CANARY' i [1 failed, 2 warnings in 0.24s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "runtime_project_leak",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "assert 'aiproject-S28-SYNTHETIC' not in '{\"hosted\": ...n history.\"}'      'aiproject-S28-SYNTHETIC' is contain [1 failed, 2 warnings in 0.23s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "fresh_bellwether_binding_removed",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: the legacy first inspection must remain runnable without relaxing its requirements assert 'FAI [1 failed, 2 warnings in 0.23s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "fallback_local_disclosure_missing",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: fallback notice must disclose pinned local execution assert 'TRUSTED_LOCAL' in 'Hosted recorde [1 failed, 2 warnings in 0.19s]",
+    "restored_rerun_passed": true
+  },
+  {
+    "name": "fresh_action_meter_cached",
+    "sha256_restored": true,
+    "status": "FAIL_CAUGHT",
+    "detail": "AssertionError: a later action must not inherit a consumed meter assert 'FAILED' == 'FINALIZED'      - FINALIZ [1 failed, 2 warnings in 0.85s]",
+    "restored_rerun_passed": true
+  }
+]
