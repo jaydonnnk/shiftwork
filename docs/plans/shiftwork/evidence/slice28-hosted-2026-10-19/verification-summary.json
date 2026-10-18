@@ -1,0 +1,36 @@
+{
+  "backend_assertion_controls": 45,
+  "rendered_assertion_controls": 1,
+  "each_target_restored_byte_identically": true,
+  "each_restored_test_rerun_passed": true,
+  "references": [
+    "wiring-mutations.json",
+    "diagnostic-claim-mutation.json",
+    "ui-mutation.json"
+  ],
+  "new_diagnostic_source_sha256": "d0358447c02b368d1b4ccf294fe19d4c504586f63960a093b2867738b1bb40e2",
+  "cold_wait_seconds": 960.226,
+  "wake_request_ms": 43438,
+  "reset_verified_fields": [
+    "latest_shift",
+    "latest_version",
+    "latest_run",
+    "operating_selection",
+    "requests_run",
+    "attempts_used",
+    "total_incidents",
+    "ledger_event_count",
+    "chain_status"
+  ],
+  "final_suite": {
+    "passed": 1461,
+    "failed": 1,
+    "skipped": 1,
+    "warnings": 2,
+    "seconds": 181.53,
+    "only_failure": "test_conformance_suite_recorded_local[port_dead]"
+  },
+  "wiring_tests_passed": 31,
+  "live_check_code_revision": "6e9baec1b05eb509f9cdcf10057944ee0f22268d",
+  "diagnostic_claim_fix_revision": "9f0adba1a966ffa944dbadc6794157bfb127041e"
+}

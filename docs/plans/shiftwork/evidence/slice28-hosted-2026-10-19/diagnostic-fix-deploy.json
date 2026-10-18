@@ -1,0 +1,62 @@
+{
+  "expected_code_revision": "9f0adba1a966ffa944dbadc6794157bfb127041e",
+  "observed_new_boot": true,
+  "runtime": {
+    "hosted": true,
+    "configured_executor": "tokenfactory",
+    "python_version": "3.13.12",
+    "boot_id": "76e68b07-5547-4157-9185-a878692aea81",
+    "preflight_permissions": {
+      "cancel": true,
+      "import": true,
+      "list": true,
+      "set_image_tag": true,
+      "spawn": true,
+      "spawn_disposable": true
+    },
+    "notice": "Hosted tokenfactory executor: shared practice demo. Token Factory diagnostics, eligible selected operations and help are enabled. The first Bellwether baseline remains a labelled saved inspection. Free hosting sleeps after 15 idle minutes; waking may take about a minute. Sleep, restart or redeploy begins a fresh practice database. Download the build to keep your own history."
+  },
+  "polls": [
+    {
+      "status": 200,
+      "elapsed_ms": 303,
+      "new_boot": false
+    },
+    {
+      "status": 200,
+      "elapsed_ms": 377,
+      "new_boot": false
+    },
+    {
+      "status": 200,
+      "elapsed_ms": 373,
+      "new_boot": false
+    },
+    {
+      "status": 200,
+      "elapsed_ms": 461,
+      "new_boot": false
+    },
+    {
+      "status": 200,
+      "elapsed_ms": 294,
+      "new_boot": false
+    },
+    {
+      "status": 200,
+      "elapsed_ms": 310,
+      "new_boot": false
+    },
+    {
+      "status": 200,
+      "elapsed_ms": 332,
+      "new_boot": false
+    },
+    {
+      "status": 200,
+      "elapsed_ms": 304,
+      "new_boot": true
+    }
+  ],
+  "inference_requests_by_this_probe": 0
+}

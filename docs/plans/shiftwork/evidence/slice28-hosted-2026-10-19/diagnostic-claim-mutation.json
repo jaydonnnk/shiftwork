@@ -1,0 +1,7 @@
+{
+  "name": "lost_diagnostic_claim_ignored",
+  "sha256_restored": true,
+  "status": "FAIL_CAUGHT",
+  "detail": "AssertionError: duplicate diagnostics must not create a second isolated execution assert 2 == 1  +  where 2 =  [1 failed, 2 warnings in 0.21s]",
+  "restored_rerun_passed": true
+}

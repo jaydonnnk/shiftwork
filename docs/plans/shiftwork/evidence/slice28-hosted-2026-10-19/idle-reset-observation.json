@@ -1,0 +1,239 @@
+{
+  "before": {
+    "at": "2026-10-19T00:19:38.825355+08:00",
+    "runtime": {
+      "hosted": true,
+      "configured_executor": "tokenfactory",
+      "python_version": "3.13.12",
+      "boot_id": "b7b8c5b7-48cb-440f-80a0-a7de8b1e101f",
+      "preflight_permissions": {
+        "cancel": true,
+        "import": true,
+        "list": true,
+        "set_image_tag": true,
+        "spawn": true,
+        "spawn_disposable": true
+      },
+      "notice": "Hosted tokenfactory executor: shared practice demo. Token Factory diagnostics, eligible selected operations and help are enabled. The first Bellwether baseline remains a labelled saved inspection. Free hosting sleeps after 15 idle minutes; waking may take about a minute. Sleep, restart or redeploy begins a fresh practice database. Download the build to keep your own history."
+    },
+    "board": {
+      "engagement_slug": "bookshop",
+      "business_kind": "bookshop",
+      "latest_shift": {
+        "id": "bookshop-shift-01",
+        "engagement_slug": "bookshop",
+        "seq": 1,
+        "state": "open",
+        "opened_at": "2026-10-18T16:16:36.838445Z",
+        "closed_at": null,
+        "opening_mode": "STANDARD",
+        "operation_allowed": true
+      },
+      "latest_version": {
+        "id": "ver-0002",
+        "shift_id": "bookshop-shift-01",
+        "parent_id": "ver-0001",
+        "content_hash": "fad72798c92b2b483084b08fb13bbbea72c8ea19d6e4f5de91b897042f9a0dfd",
+        "contract": {
+          "catalog_version": 3,
+          "must_never": [
+            "NEVER_INVENT_PRICE_STOCK_POLICY"
+          ],
+          "selections": {
+            "STANCE": "USE_NEWEST_RECORD_WITH_AGE"
+          },
+          "response_time_limit_ms": 3000,
+          "declared_limits": [
+            "Public collection and alternative answers only; no reservations or business writes."
+          ]
+        },
+        "contract_catalog_hash": "d9f18ddafd0cd7f791bd13b58b72b165954c1c51df824c96127ad4796bf7736a",
+        "created_by": "learner",
+        "created_at": "2026-10-18T16:16:38.810197Z"
+      },
+      "latest_run": {
+        "id": "run-0002",
+        "shift_id": "bookshop-shift-01",
+        "artifact_version_id": "ver-0002",
+        "attempt_number": 2,
+        "state": "FINALIZED",
+        "adapter": "tokenfactory",
+        "failure_kind": null,
+        "started_at": "2026-10-18T16:16:39.098880Z",
+        "ended_at": "2026-10-18T16:16:44.162494Z",
+        "purpose": "EXPERIMENT",
+        "evidence_mode": "ISOLATED_LIVE",
+        "selection_id": null
+      },
+      "operating_status": "STARTER_BASELINE",
+      "draft_base_version_id": "ver-0002",
+      "latest_saved_version_id": "ver-0002",
+      "operating_selection": {
+        "id": "sel-0001",
+        "kind": "STARTER_BASELINE",
+        "selected_version_id": "ver-0001",
+        "selected_content_hash": "a1c1093fcc456ebb5afc07241bb24f34ca4ca80877a7fff00fe5c82e2c542f28",
+        "comparison_id": null,
+        "retained_alternative_version_id": null,
+        "rationale": "Reviewed failing Bellwether starter; executable offline, not a qualified repair or live service.",
+        "requirement_set_hash": "9c753c69a4f3f1f2eeafe142f2ae49275a7a57cb2c0365f61dae7c110720881a",
+        "prior_selection_id": null,
+        "state": "VALID",
+        "created_at": "2026-10-18T16:16:36.838445Z"
+      },
+      "inherited_requirements": null,
+      "artifact_files": [
+        "service.py"
+      ],
+      "requests_run": 1,
+      "attempts_used": 1,
+      "attempt_limit": 3,
+      "attempts_remaining": 2,
+      "incidents": [
+        {
+          "id": "BWB-01",
+          "engagement_slug": "bookshop",
+          "shift_id": "bookshop-shift-01",
+          "opening_run_id": "run-0001",
+          "failing_output_ref": "run-0001-out-1",
+          "check_result_id": "cr-0001",
+          "reason_code": "MISSING_EVIDENCE",
+          "opened_event_seq": 1,
+          "state": "OPEN",
+          "resolving_version_id": null,
+          "resolved_event_seq": null
+        },
+        {
+          "id": "BWB-02",
+          "engagement_slug": "bookshop",
+          "shift_id": "bookshop-shift-01",
+          "opening_run_id": "run-0001",
+          "failing_output_ref": "run-0001-out-1",
+          "check_result_id": "cr-0002",
+          "reason_code": "MISSING_EVIDENCE",
+          "opened_event_seq": 2,
+          "state": "OPEN",
+          "resolving_version_id": null,
+          "resolved_event_seq": null
+        },
+        {
+          "id": "BWB-03",
+          "engagement_slug": "bookshop",
+          "shift_id": "bookshop-shift-01",
+          "opening_run_id": "run-0001",
+          "failing_output_ref": "run-0001-out-1",
+          "check_result_id": "cr-0003",
+          "reason_code": "MISSING_EVIDENCE",
+          "opened_event_seq": 3,
+          "state": "OPEN",
+          "resolving_version_id": null,
+          "resolved_event_seq": null
+        }
+      ],
+      "total_incidents": 3,
+      "unresolved_limits": [],
+      "ledger_event_count": 3,
+      "ledger_totals": {
+        "INCIDENT_OPENED": 3
+      },
+      "chain_status": "VALID"
+    },
+    "intended_idle_seconds": 960,
+    "scope": "this verifier sends no requests during the wait; unrelated public visitor traffic is unknown"
+  },
+  "actual_idle_wait_seconds": 960.226,
+  "first_wake_request": {
+    "status": 200,
+    "elapsed_ms": 43438,
+    "at": "2026-10-19T00:36:22.548715+08:00"
+  },
+  "after_runtime": {
+    "hosted": true,
+    "configured_executor": "tokenfactory",
+    "python_version": "3.13.12",
+    "boot_id": "e8c153bf-f1fc-430b-bb00-4d7fabbab149",
+    "preflight_permissions": {
+      "cancel": true,
+      "import": true,
+      "list": true,
+      "set_image_tag": true,
+      "spawn": true,
+      "spawn_disposable": true
+    },
+    "notice": "Hosted tokenfactory executor: shared practice demo. Token Factory diagnostics, eligible selected operations and help are enabled. The first Bellwether baseline remains a labelled saved inspection. Free hosting sleeps after 15 idle minutes; waking may take about a minute. Sleep, restart or redeploy begins a fresh practice database. Download the build to keep your own history."
+  },
+  "after_board": {
+    "engagement_slug": "bookshop",
+    "business_kind": "bookshop",
+    "latest_shift": null,
+    "latest_version": null,
+    "latest_run": null,
+    "operating_status": null,
+    "draft_base_version_id": null,
+    "latest_saved_version_id": null,
+    "operating_selection": null,
+    "inherited_requirements": null,
+    "artifact_files": [],
+    "requests_run": 0,
+    "attempts_used": 0,
+    "attempt_limit": 3,
+    "attempts_remaining": 3,
+    "incidents": [],
+    "total_incidents": 0,
+    "unresolved_limits": [],
+    "ledger_event_count": 0,
+    "ledger_totals": {},
+    "chain_status": "VALID"
+  },
+  "boards": [
+    {
+      "engagement_slug": "bookshop",
+      "role_name": "Junior Applied AI Engineer",
+      "employer": null,
+      "client": "Bellwether Books",
+      "room_id": "bookshop",
+      "station_labels": [
+        "Incident board",
+        "Workbench",
+        "Comparison bench",
+        "Customer queue",
+        "Shift handover"
+      ],
+      "availability": "AVAILABLE"
+    },
+    {
+      "engagement_slug": "gtm",
+      "role_name": "Go-To-Market Engineer",
+      "employer": "Stonebridge Software",
+      "client": "Revenue team",
+      "room_id": "gtm",
+      "station_labels": [
+        "Signal inbox",
+        "Workflow",
+        "Comparison bench",
+        "Pipeline wall",
+        "Handoff queue"
+      ],
+      "availability": "AVAILABLE"
+    },
+    {
+      "engagement_slug": "northline",
+      "role_name": "Forward Deployed Engineer",
+      "employer": null,
+      "client": "Northline Bike Cooperative",
+      "room_id": "northline",
+      "station_labels": [
+        "Deployment brief",
+        "Discovery",
+        "Permissions",
+        "Acceptance tests",
+        "Rollout",
+        "Handover"
+      ],
+      "availability": "AVAILABLE"
+    }
+  ],
+  "new_boot_observed": true,
+  "fresh_database_observed": true,
+  "inference_calls_by_this_probe": 0
+}
