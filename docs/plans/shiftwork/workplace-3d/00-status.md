@@ -207,6 +207,42 @@ The temporary server is stopped after verification; the HTML remains usable
 directly from disk. Final 3D appearance, nested acquired import closure, runtime
 fallback/disposal, performance and learner comprehension remain unproved.
 
+## Gates 1 to 3 approval and publication: 2026-10-19
+
+Jaydon approved Gate 3 with "seems good. I approve." and separately requested
+batch commits and a main push for Gates 1 to 3, then a report. Gates 1 and 2
+retain their earlier approvals. This publication does not begin Gate 4.
+
+Switched the existing checkout from `shiftwork/slice-28` to the equal local
+`main` at `1a943d9`. Created six focused commits, with explicit file lists and
+no co-author footers:
+
+- `dafc66e`: approved product and core decision screens, five files.
+- `7323e8d`: operation and board-specific structure studies, four files.
+- `1f5041a`: approved Three.js architecture and historical handoff, two files.
+- `b139365`: approved program design and visual treatment, three files.
+- `6f4ae62`: product/architecture authority mirrors, four files.
+- `f9f5589`: gate approvals, bounded evidence and planning incidents, four files.
+
+The 22-file planning packet was pushed to main. Live `git ls-remote` verified
+remote main at `f9f558928912314f3824b7ea25c9b55cf11c8b63`, equal to local
+main and origin/main, with left/right counts `0 0` and a clean working tree.
+Remote `shiftwork/slice-28` remained at
+`1a943d946bc402f586677cf8bfc2bf60ffce5428`. This receipt is a separate follow-up
+to that verified publication checkpoint, not a claim that its own commit was
+already present in that earlier remote read.
+
+Fresh document checks passed for nine HTML studies and scoped links, with four
+isolated validator faults rejected. Approval state, absence of Gate 4 and
+`git diff --check` passed. Committed bytes matched the reviewed packet. No
+credential-pattern match was found in the packet. Product source, tests,
+dependencies and AGENTS.md remain unchanged from `1a943d9`.
+
+The earlier flaky focus probe and all S28/runtime/graphics evidence limits remain
+attached. No product suite, new rendering proof, dependency acquisition, provider
+call, implementation or deployment was performed for publication. Stop after
+the receipt push and final remote verification.
+
 ## Stop boundary
 
 Gates 1 to 3 are approved. The current instruction authorizes focused commits
