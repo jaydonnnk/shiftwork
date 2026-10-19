@@ -12,6 +12,26 @@ let downloadUrl = null;
 let pollTimer = null;
 let workplaceHost = null, latestPresentation = null, hostEpoch = 0, hostLoading = false, hostTimer = null;
 let inspection = { mode: 'current', historicalRunId: null };
+let expandedWork = false;
+const REPORTED_TEST_STATES = new Set(['RESERVED', 'RUNNING', 'COMPLETE', 'FAILED']);
+function renderTestBench(view) {
+  const label = $('test-tag');
+  const experiment = view.tests.diagnostic;
+  if (!experiment) {
+    label.textContent = 'No diagnostic reported';
+    label.dataset.state = 'NONE';
+    delete label.dataset.missingEvidence;
+    return;
+  }
+  const trial = experiment.trials[0] ?? null;
+  const state = trial && REPORTED_TEST_STATES.has(trial.state) ? trial.state : 'UNREPORTED';
+  const missing = trial?.missingEvidenceCount;
+  label.dataset.state = state;
+  if (missing == null) delete label.dataset.missingEvidence;
+  else label.dataset.missingEvidence = String(missing);
+  label.textContent = state === 'UNREPORTED' ? 'Diagnostic state not reported'
+    : `Diagnostic ${state}${missing ? ` · ${missing} missing evidence` : ''}`;
+}
 function publishPresentation(reason) {
   const context = { board: state.slug, shiftId: state.loadedShiftId, inspection: { ...inspection } };
   let publication;
@@ -29,6 +49,7 @@ function publishPresentation(reason) {
       diagnostic: state.diagnostic, candidates: state.candidates,
       selectedOutputId: state.selected, activeStation: state.station });
     publication = { kind: 'accepted', view, generation: state.generation, intent: state.intent, reason };
+    renderTestBench(view);
     const verdicts = view.evidence?.checks.map(check => `${check.verdict}: ${check.reasonCode ?? 'recorded check'}`).join('; ');
     text('workplace-state', view.consistency === 'conflict' ? 'Recorded reads disagree. Inspect the workbench; current labels are unavailable.' :
       `${view.context.inspection.mode === 'history' ? 'Historical inspection. ' : 'Current inspection. '}Operating choice: ${view.operating ? `${view.operating.versionId} (${view.operating.validity})` : 'None selected'}. Saved version: ${view.saved.latestVersionId ?? 'None'}. ` +
@@ -58,6 +79,7 @@ async function initializeGraphics() {
         if (!document.querySelector(`#bookshop-stations [data-station="${stationId}"]`)) return;
         activateStation(stationId);
       } });
+    if (expandedWork) workplaceHost.setExpanded(true);
     if (latestPresentation) workplaceHost.publish(latestPresentation);
   } catch {
     if (epoch !== hostEpoch) return;
@@ -105,6 +127,7 @@ async function switchWorkplace() {
     text('workplace-message', 'Save or discard the draft and finish the current action before changing boards.');
     return;
   }
+  if (expandedWork) setExpandedWork(false);
   state.generation += 1; state.intent += 1;
   inspection = { mode: 'current', historicalRunId: null };
   publishPresentation('context');
@@ -295,6 +318,10 @@ function clearData(message) {
   empty($('orientation-list'), 'Orientation loads with your shift.');
   empty($('investigation-list'), 'No verified entries loaded.');
   empty($('diagnostic-result'), 'No verified diagnostic loaded.');
+  text('test-tag', 'No diagnostic reported');
+  $('test-tag').dataset.state = 'NONE';
+  delete $('test-tag').dataset.missingEvidence;
+  empty($('failed-request'), 'No executed request loaded.');
   text('investigate-state', 'No shift loaded');
   text('source-note', '');
   text('diagnostic-note', '');
@@ -349,7 +376,10 @@ async function refresh(runId = null) {
     renderWorkplace();
     if (!available) throw new Error('This board is awaiting operator review. Choose an available role board.');
     const board = await api(engagementPath('board'));
-    const run = runId ? await api(`/runs/${encodeURIComponent(runId)}`) : board.latest_run;
+    const historicalRunId = !runId && inspection.mode === 'history' ? inspection.historicalRunId : null;
+    const run = runId ? await api(`/runs/${encodeURIComponent(runId)}`)
+      : historicalRunId ? await api(`/runs/${encodeURIComponent(historicalRunId)}`)
+      : board.latest_run;
     const [draft, stationView, ledger, outputs, checks, operatingVersion] = await Promise.all([
       board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/artifact`) : null,
       board.latest_shift ? api(`/shifts/${encodeURIComponent(board.latest_shift.id)}/investigations`) : null,
@@ -411,7 +441,7 @@ function renderBoard() {
   text('incident-tag', `${board.incidents.length} unresolved · Synthetic scenario`);
   text('repair-tag', board.incidents.length ? 'Incident available · read only' : 'No unresolved incident');
   const entries = state.stationView?.investigations ?? [];
-  text('investigation-tag', !state.stationView ? 'Not loaded' : entries.length ? `${entries.length} recorded` : 'Orientation only');
+  text('investigation-tag', !state.stationView ? 'Not loaded' : entries.length ? `${entries.length} recorded · ${state.stationView.latest_investigation_id ?? 'identity unknown'}` : 'Orientation only');
   text('version-state', version ? `${version.id} · latest saved${board.operating_selection?.selected_version_id === version.id ? ' and selected' : ''}` : 'Draft · no frozen version');
   text('version-hash', version ? `Content hash ${version.content_hash}` : '');
   const choice = board.operating_selection;
@@ -692,6 +722,7 @@ function renderAssist(station) {
 function renderDiagnostic(station) {
   const experiment = state.diagnostic ?? station?.latest_diagnostic ?? null;
   const trial = experiment?.trials?.[0] ?? null;
+  const trialState = trial && REPORTED_TEST_STATES.has(trial.state) ? trial.state : null;
   const output = trial?.outputs?.[0] ?? null;
   const result = $('diagnostic-result');
   $('run-diagnostic').disabled = state.pending || !(station?.latest_investigation_id || station?.bootstrap_available) || !state.board?.latest_saved_version_id;
@@ -709,13 +740,15 @@ function renderDiagnostic(station) {
   result.replaceChildren();
   for (const [label, value] of [
     ['Evidence class', `${experiment.context_evidence_class} · ${humanize(experiment.kind)}`],
-    ['Trial state', trial ? `${trial.state} · candidate ${trial.candidate_label}` : 'No trial reserved'],
+    ['Trial state', trial ? `${trialState ?? 'Not reported'} · candidate ${trial.candidate_label}` : 'No trial reserved'],
     ['Frozen context', `${experiment.context_hash} · workload ${trial?.workload_id ?? 'not reserved'}`],
   ]) {
     const line = element('div', null, 'contract-line');
     line.append(element('span', label), element('strong', value));
     result.append(line);
   }
+  const missing = trial?.missing_evidence ?? [];
+  if (missing.length) result.append(element('p', `Missing evidence: ${missing.join('; ')}`, 'denial'));
   if (!trial || !['COMPLETE', 'FAILED'].includes(trial.state)) return;
   let step = 0;
   if (output) {
@@ -770,12 +803,38 @@ function renderDiagnostic(station) {
   line.dataset.eligible = String(experiment.eligible);
   line.append(element('strong', experiment.eligible ? 'Eligible' : 'Not eligible · this diagnostic cannot qualify a version'), element('small', experiment.eligibility_reason));
   eligibility.append(line);
-  if (trial.missing_evidence.length) eligibility.append(element('p', `Missing evidence: ${trial.missing_evidence.join('; ')}`, 'denial'));
   result.append(eligibility);
+}
+function failedRequestOutput() {
+  const linkedFailure = output => selectEvidence(output, state.checks, state.events).checks.some(check => check.verdict !== 'pass');
+  return state.outputs.find(output => output.id === state.selected && linkedFailure(output))
+    ?? state.outputs.find(linkedFailure)
+    ?? state.outputs.find(output => output.id === state.selected)
+    ?? state.outputs[0] ?? null;
+}
+function renderFailedRequest() {
+  const target = $('failed-request');
+  const run = state.run;
+  target.replaceChildren();
+  if (!run) return empty(target, 'No executed request is loaded. Refresh to inspect a recorded failure.');
+  const output = failedRequestOutput();
+  if (!output) return empty(target, run.state === 'FAILED' ? 'The run failed before a customer request was executed.' : 'No customer output is recorded for this run.');
+  const linked = selectEvidence(output, state.checks, state.events);
+  target.dataset.runId = run.id;
+  target.dataset.outputId = output.id;
+  target.append(element('p', output.request_text, 'evidence-text request-quote'));
+  target.append(element('p', `Run ${run.id} · request ${output.request_ordinal} · executed ${run.artifact_version_id} · ${humanize(run.purpose)} · ${run.evidence_mode ?? 'unknown mode'}`, 'evidence-meta'));
+  target.append(element('p', output.customer_answer?.display_text ?? 'No validated customer answer is recorded for this request.', 'evidence-text'));
+  const failed = linked.checks.filter(check => check.verdict !== 'pass');
+  target.append(element('p', failed.length
+    ? `Reported independent evidence: ${failed.map(check => `${humanize(check.verdict)}${check.reason_code ? ` · ${check.reason_code}` : ''}`).join('; ')}`
+    : linked.checks.length ? 'Reported independent evidence is linked. Read it before stating a cause.' : 'Independent evidence is incomplete for this request.',
+    'evidence-meta'));
 }
 function renderInvestigate() {
   const station = state.stationView;
   text('investigate-state', station ? `${station.shift_id} · ${station.opening_mode ? humanize(station.opening_mode) : 'opening mode unknown'} · ${station.latest_investigation_id ?? 'no entry yet'}` : 'No shift loaded');
+  renderFailedRequest();
   const orientation = $('orientation-list');
   orientation.replaceChildren(...(station?.orientation?.steps ?? ['Orientation loads with your shift.']).map(step => element('li', step)));
   if (station) renderInvestigations(station); else empty($('investigation-list'), 'No verified entries loaded.');
@@ -911,6 +970,18 @@ function renderCompare() {
   }));
 }
 function hasUnsavedDraft() { return $('draft-source').dataset.dirty === 'true'; }
+function setExpandedWork(value) {
+  if (expandedWork === value) return;
+  const editor = $('draft-source');
+  const hadFocus = document.activeElement === editor;
+  const range = hadFocus ? { start: editor.selectionStart, end: editor.selectionEnd, direction: editor.selectionDirection } : null;
+  expandedWork = value;
+  document.querySelector('main').dataset.expanded = String(value);
+  $('expand-work').setAttribute('aria-expanded', String(value));
+  $('expand-work').textContent = value ? 'Restore the room' : 'Expand the workbench';
+  workplaceHost?.setExpanded(value);
+  if (hadFocus) { editor.focus({ preventScroll: true }); editor.setSelectionRange(range.start, range.end, range.direction); }
+}
 function renderDraftEditor() {
   const shift = state.board?.latest_shift;
   const files = state.draft?.files;
@@ -1182,10 +1253,27 @@ async function decideAssist(eventId, accepted) {
     if (state.board) { renderInvestigate(); renderCompare(); }
   }
 }
+function diagnosticOwner() {
+  return { slug: state.slug, shiftId: state.board?.latest_shift?.id ?? null,
+    generation: state.generation, intent: state.intent, inspection: { ...inspection } };
+}
+function diagnosticPublicationAllowed(owner) {
+  return owner.generation === state.generation && owner.intent === state.intent &&
+    owner.inspection.mode === inspection.mode &&
+    owner.inspection.historicalRunId === inspection.historicalRunId;
+}
+function acceptDiagnostic(owner, experiment) {
+  if (owner.slug !== state.slug || owner.shiftId !== state.loadedShiftId ||
+      owner.shiftId !== experiment?.shift_id) return;
+  state.diagnostic = experiment;
+  renderInvestigate();
+  if (diagnosticPublicationAllowed(owner)) publishPresentation('diagnostic');
+}
 async function runDiagnostic() {
   const shiftId = state.board?.latest_shift?.id;
   const versionId = state.board?.latest_saved_version_id;
   if (!shiftId || !versionId || state.pending) return;
+  const owner = diagnosticOwner();
   state.pending = true; renderBoard(); renderInvestigate();
   try {
     let experiment = await api(`/shifts/${encodeURIComponent(shiftId)}/experiments`, { method: 'POST', body: JSON.stringify({
@@ -1194,14 +1282,12 @@ async function runDiagnostic() {
       candidate_a_version_id: versionId,
       client_request_id: requestId('diagnostic'),
     }) });
-    state.diagnostic = experiment;
-    renderInvestigate();
+    acceptDiagnostic(owner, experiment);
     const deadline = Date.now() + 75000;
     while (!['COMPLETE', 'FAILED'].includes(experiment.trials[0]?.state) && Date.now() < deadline) {
       await new Promise(resolve => setTimeout(resolve, 400));
       experiment = await api(`/experiments/${encodeURIComponent(experiment.id)}`);
-      state.diagnostic = experiment;
-      renderInvestigate();
+      acceptDiagnostic(owner, experiment);
     }
     await refresh();
   } catch (error) {
@@ -1381,6 +1467,17 @@ window.addEventListener('pageshow', async event => {
 });
 $('operate-pilot').addEventListener('click', () => $('run-shift').click());
 $('operate-pipeline').addEventListener('click', () => $('run-shift').click());
+$('expand-work').addEventListener('pointerdown', event => {
+  if (document.activeElement === $('draft-source')) event.preventDefault();
+});
+$('expand-work').addEventListener('click', () => setExpandedWork(!expandedWork));
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape' || !expandedWork) return;
+  if (event.target !== $('expand-work') && event.target !== $('station-panel')) return;
+  event.preventDefault();
+  setExpandedWork(false);
+  $('expand-work').focus({ preventScroll: true });
+});
 $('workplace-board').addEventListener('change', switchWorkplace);
 const requestedSlug = new URL(location.href).searchParams.get('board');
 if (requestedSlug) state.slug = requestedSlug;

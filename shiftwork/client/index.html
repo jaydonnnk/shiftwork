@@ -96,7 +96,7 @@
           <button class="station station-ledger" data-station="ledger"><span class="station-marker">≡</span><span>Incident &amp; ledger wall<small id="incident-tag">Not loaded · Synthetic scenario</small></span></button>
           <button class="station station-repair" data-station="repair"><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small></span></button>
           <button class="station station-investigate" data-station="investigate"><span class="station-marker" aria-hidden="true">◎</span><span>Investigate<small id="investigation-tag">Not loaded</small></span></button>
-          <button class="station station-compare" data-station="compare"><span class="station-marker" aria-hidden="true">⇄</span><span>Compare<small id="compare-tag">Not loaded</small></span></button>
+          <button class="station station-compare" data-station="compare"><span class="station-marker" aria-hidden="true">⇄</span><span>Compare<small id="compare-tag">Not loaded</small><small id="test-tag">No diagnostic reported</small></span></button>
           <button class="station station-next" data-station="next"><span class="station-marker" aria-hidden="true">▷</span><span>Next shift<small id="next-tag">Not loaded</small></span></button>
         </div>
         <div class="room-caption"><span class="tiny-square"></span>A real output. An independent check. A recorded consequence.</div>
@@ -168,10 +168,14 @@
       </section>
       <section id="investigate-view" hidden>
         <p id="investigate-state" class="mono evidence-meta">No shift loaded</p>
+        <section class="panel-section" data-synthetic-region="failed-request">
+          <div class="section-heading"><h3>The failed request stays visible</h3><span class="synthetic">Synthetic scenario</span></div>
+          <div id="failed-request"></div>
+        </section>
         <section class="panel-section"><h3>Before you write</h3><ol id="orientation-list" class="orientation-list"></ol></section>
         <section class="panel-section"><h3>Your investigation entries</h3><div id="investigation-list"></div></section>
         <section class="panel-section">
-          <h3>Append your entry</h3>
+          <h3>Record your prediction: cause and falsifier</h3>
           <div class="field"><label for="cause-input">Cause you believe explains the gap</label><textarea id="cause-input" rows="2"></textarea></div>
           <div class="field"><label for="falsifier-input">Falsifier: an observation that would prove your cause wrong</label><textarea id="falsifier-input" rows="2"></textarea></div>
           <div class="field"><label for="public-test-input">Public test that distinguishes your cause</label><textarea id="public-test-input" rows="2"></textarea></div>
@@ -206,7 +210,7 @@
         <div id="compare-evidence" class="artifact-detail"></div>
         <p id="compare-state" class="mono evidence-meta">No shift loaded</p>
         <section class="panel-section">
-          <h3>Edit your draft</h3>
+          <div class="section-heading"><h3>Edit your draft</h3><button id="expand-work" class="expand-work" type="button" aria-expanded="false" aria-controls="station-panel">Expand the workbench</button></div>
           <details id="deployment-protocol">
             <summary>Northline deployment action protocol</summary>
             <p class="help-text">Use the received X-Shiftwork-Intent-Key header for booking retries. It comes only from the current request text and request ID. The original request body stays unchanged.</p>

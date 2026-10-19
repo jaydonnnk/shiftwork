@@ -352,3 +352,11 @@ body:not([data-board="bookshop"]) .workplace-state { display: none; }
   .journey { grid-template-columns: minmax(0,1fr); }
   body[data-board="bookshop"] .room-hotspots { grid-template-columns: minmax(0,1fr); }
 }
+.expand-work { width: auto; min-height: 44px; padding: 8px 12px; border: 1px solid #adb8ae; background: transparent; color: var(--green); font-size: 12px; }
+body:not([data-board="bookshop"]) #expand-work { display: none; }
+#test-tag[data-state="RESERVED"], #test-tag[data-state="RUNNING"] { color: #ebca8b; }
+#test-tag[data-state="COMPLETE"] { color: #b7d5bd; }
+#test-tag[data-state="FAILED"], #test-tag[data-state="UNREPORTED"] { color: #e3a29a; }
+main[data-expanded="true"] { grid-template-columns: minmax(0, 1fr); }
+main[data-expanded="true"] .room { display: none; }
+main[data-expanded="true"] .detail-panel { position: static; width: 100%; max-width: 1120px; height: auto; overflow: visible; margin: 0 auto; }
