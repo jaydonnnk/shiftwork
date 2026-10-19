@@ -9,9 +9,12 @@ import time
 import urllib.error
 import urllib.request
 import venv
+import zipfile
+import hashlib
 from pathlib import Path
 
 import pytest
+from test_client_asset_closure import verify_records, verify_http_delivery
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -153,6 +156,19 @@ def test_clean_env_install_and_run(tmp_path, capsys):
     for filename in ("requirements.lock", "pyproject.toml", "README.md", "LICENSE", "HACKATHON_REQUIREMENTS.md"):
         shutil.copyfile(REPO_ROOT / filename, source / filename)
     assert not (source / ".venv").exists() and not (source / ".git").exists()
+    archive = tmp_path / 'shiftwork-source.zip'
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as bundle:
+        for file in sorted(source.rglob('*')):
+            if file.is_file():
+                bundle.write(file, file.relative_to(source))
+    assert archive.stat().st_size < 35_000_000, 'Source archive exceeds submission limit'
+    (tmp_path / 'archive.json').write_text(json.dumps({'bytes': archive.stat().st_size,
+        'sha256': hashlib.sha256(archive.read_bytes()).hexdigest()}) + '\n')
+    extracted = tmp_path / 'extracted'
+    with zipfile.ZipFile(archive) as bundle:
+        bundle.extractall(extracted)
+    source = extracted
+    graph = verify_records(source / 'shiftwork/client')
     python, install_command, mechanism = _fresh_interpreter(tmp_path, source / "requirements.lock")
     env = {**_scrubbed_env(), "UV_PYTHON_DOWNLOADS": "never",
            "SHIFTWORK_DB_PATH": str(tmp_path / "serve.db")}
@@ -183,9 +199,39 @@ def test_clean_env_install_and_run(tmp_path, capsys):
             for slug in ("bookshop", "northline", "gtm"):
                 with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/engagements/{slug}/board") as response:
                     assert json.load(response)["engagement_slug"] == slug
-            for asset in ("index.html", "app.js", "styles.css"):
+            def fetch_asset(asset):
                 with urllib.request.urlopen(f"http://127.0.0.1:{port}/{asset}") as response:
-                    assert response.read() == (source / "shiftwork/client" / asset).read_bytes()
+                    return response.read(), response.headers.get_content_type()
+            verify_http_delivery(source / 'shiftwork/client', graph | {'vendor/three-r180/LICENSE',
+                'vendor/three-r180/manifest.json', 'workplace-assets.json', 'THIRD_PARTY_NOTICES.md'}, fetch_asset)
+            node = shutil.which('node')
+            assert node, 'Extracted browser proof unavailable: Node is missing'
+            browser_out = tmp_path / 'extracted-browser'
+            browser = subprocess.run([node, 'tests/client/workplace_browser.mjs',
+                f'http://127.0.0.1:{port}', str(browser_out), '--empty'],
+                cwd=source, env={**env, 'SHIFTWORK_PYTHON': str(python)},
+                capture_output=True, text=True, timeout=180)
+            (tmp_path / 'browser.log').write_text(browser.stdout + browser.stderr)
+            assert browser.returncode == 0, f'Extracted browser proof failed:\n{browser.stdout}\n{browser.stderr}'
+            preview_port = _free_port()
+            with (tmp_path / 'recorded-preview.log').open('w') as preview_log:
+                preview = subprocess.Popen([str(python), '-m', 'demos.client', '--port', str(preview_port)],
+                    cwd=source, env={**env, 'TMPDIR': str(tmp_path)}, stdout=preview_log, stderr=subprocess.STDOUT)
+                try:
+                    _poll_board(preview_port)
+                    fallback = subprocess.run([node, 'tests/client/workplace_browser.mjs',
+                        f'http://127.0.0.1:{preview_port}', str(tmp_path / 'extracted-fallback'), 'constructor'],
+                        cwd=source, env={**env, 'SHIFTWORK_PYTHON': str(python)},
+                        capture_output=True, text=True, timeout=180)
+                    (tmp_path / 'fallback-browser.log').write_text(fallback.stdout + fallback.stderr)
+                    assert fallback.returncode == 0, f'Extracted fallback workbench failed:\n{fallback.stdout}\n{fallback.stderr}'
+                finally:
+                    preview.terminate()
+                    try:
+                        preview.wait(timeout=10)
+                    except subprocess.TimeoutExpired:
+                        preview.kill()
+                        preview.wait(timeout=10)
         finally:
             server.terminate()
             try:
