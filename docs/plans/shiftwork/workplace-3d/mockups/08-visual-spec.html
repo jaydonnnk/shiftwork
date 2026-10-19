@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Shiftwork | Gate 3 colour and composition study</title>
+  <style>
+    :root { color-scheme: light; font: 16px/1.5 "Segoe UI",system-ui,sans-serif; color: #263443; background: #f4f6f8; --navy: #202c40; --amber: #edbd68; --line: #c7d0d9; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: inherit; text-underline-offset: 4px; }
+    a:focus-visible,summary:focus-visible,button:focus-visible { outline: 3px solid #176799; outline-offset: 4px; }
+    .skip { position: absolute; left: 12px; top: -120px; padding: 12px; background: white; z-index: 2; }
+    .skip:focus { top: 12px; }
+    header { padding: 16px 24px; background: var(--navy); color: white; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+    .brand { font-weight: 700; font-size: 24px; letter-spacing: -.6px; text-decoration: none; }
+    .brand span { color: var(--amber); }
+    header nav { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-left: auto; }
+    header nav a { min-height: 44px; display: inline-flex; align-items: center; }
+    .planning { margin: 0; padding: 12px 24px; background: #dce5ee; color: #263443; border-bottom: 1px solid var(--line); }
+    .hosting { margin: 0; padding: 12px 24px; background: white; border-bottom: 1px solid var(--line); max-width: none; }
+    main { max-width: 1600px; margin: auto; padding: 24px; }
+    h1,h2,h3,p { margin: 0; }
+    h1 { font-size: 28px; line-height: 1.2; letter-spacing: -.5px; font-weight: 650; }
+    h2 { font-size: 22px; line-height: 1.3; font-weight: 650; }
+    h3 { font-size: 18px; line-height: 1.4; }
+    p + p { margin-top: 12px; }
+    .intro { margin-bottom: 24px; }
+    .intro p { margin-top: 8px; max-width: 68ch; }
+    .task-strip { margin-bottom: 20px; padding: 12px 16px; border-left: 4px solid #344f6b; background: #e4edf4; }
+    .task-strip p { margin: 4px 0; }
+    .task-strip a { display: inline-flex; min-height: 44px; align-items: center; font-weight: 650; }
+    .workspace { display: grid; grid-template-columns: minmax(0,1.38fr) minmax(480px,1fr); gap: 24px; align-items: start; }
+    .room { background: #202c40; color: #f4f6f8; padding: 20px; min-width: 0; }
+    .room h2 { color: #edbd68; }
+    .room .role { color: #c3cdd8; font-size: 14px; margin: 4px 0 12px; }
+    figure { margin: 0; }
+    .room svg { display: block; width: 100%; height: auto; }
+    figcaption { color: #c3cdd8; font-size: 14px; padding: 10px 0; }
+    .station-list { display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid #627085; padding-top: 14px; }
+    .station-list a { min-height: 44px; padding: 8px 12px; border: 1px solid #8b9bad; border-radius: 4px; text-decoration: none; }
+    .station-list .active { background: #edbd68; color: #202c40; border-color: #edbd68; }
+    .room-note { margin-top: 12px; font-size: 14px; color: #c3cdd8; }
+    .workbench { background: #fff; min-width: 0; border: 1px solid var(--line); padding: 20px; scroll-margin-top: 16px; }
+    .workbench:focus { outline: 3px solid #176799; outline-offset: 3px; }
+    .kind { display: inline-block; color: #344f6b; background: #e4edf4; padding: 4px 9px; font-size: 14px; margin-bottom: 12px; border-radius: 3px; }
+    .identities { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px 0; margin: 0; border-bottom: 1px solid var(--line); }
+    dt { color: #526273; font-size: 14px; }
+    dd { margin: 2px 0 0; font-weight: 650; }
+    .evidence { padding: 16px 0; border-bottom: 1px solid var(--line); }
+    .evidence h3 { margin-bottom: 8px; }
+    blockquote { margin: 0; padding: 0 0 0 12px; border-left: 3px solid #8b9bad; }
+    .failure { border-left: 4px solid #a43832; padding: 12px; background: #fbefed; margin-top: 16px; }
+    .failure strong { color: #922e29; }
+    .failure p { margin-top: 4px; }
+    .prediction { margin-top: 16px; }
+    .prediction p { color: #526273; margin-top: 8px; }
+    .field { border: 1px solid #8b9bad; padding: 10px 12px; background: #f4f6f8; margin-top: 10px; border-radius: 3px; }
+    .field span { display: block; font-size: 14px; color: #526273; margin-bottom: 4px; }
+    button { font: inherit; min-height: 44px; margin-top: 14px; padding: 10px 16px; border: 1px solid #8b9bad; background: #e4e9ef; color: #526273; border-radius: 4px; }
+    .small { font-size: 14px; color: #526273; }
+    .section { margin-top: 36px; }
+    .section > p { margin-top: 8px; max-width: 80ch; }
+    .story { margin: 18px 0 0; padding-left: 24px; display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px 40px; }
+    .story li { padding-left: 4px; }
+    .story li::marker { font-weight: 700; color: #344f6b; }
+    .story p { margin-top: 6px; }
+    .tworooms { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+    .tworooms article { min-width: 0; }
+    .tworooms .room { padding: 20px; }
+    .tworooms svg { max-height: 350px; }
+    .tworooms article > p { margin-top: 12px; }
+    .northline { background: #28494a; }
+    .swatches { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 16px 0; }
+    .swatches span { display: inline-flex; align-items: center; gap: 8px; }
+    .swatches i { width: 28px; height: 28px; border: 1px solid #8391a0; border-radius: 3px; }
+    details { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 12px 0; margin-top: 16px; }
+    summary { cursor: pointer; min-height: 44px; padding: 10px 0; font-weight: 650; }
+    details p { margin: 10px 0; max-width: 80ch; }
+    footer { border-top: 1px solid var(--line); padding: 20px 24px; margin-top: 36px; color: #526273; }
+    @media(max-width:1099px) { .workspace { grid-template-columns: minmax(0,1fr); } .room svg { max-height: 440px; } .workbench { max-width: none; } }
+    @media(max-width:760px) {
+      header,main { padding: 16px; } header nav { margin-left: 0; gap: 4px 16px; }
+      .planning,.hosting { padding: 12px 16px; }
+      h1 { font-size: 26px; } .workspace,.tworooms { gap: 20px; }
+      .room,.workbench,.tworooms .room { padding: 16px; }
+      .room svg { height: 240px; }
+      .story,.tworooms { grid-template-columns: minmax(0,1fr); }
+      .story { gap: 18px; }
+      .station-list a { flex: 1 1 130px; text-align: center; }
+      .identities { grid-template-columns: minmax(0,1fr); }
+    }
+    @media(max-width:420px) { .room svg { height: 200px; } }
+    @media(prefers-reduced-motion:reduce) { * { scroll-behavior: auto; } }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#selected-work">Skip to selected work</a>
+  <header>
+    <a class="brand" href="00-review.html"><span>◇</span> Shiftwork</a>
+    <nav aria-label="Study sections"><a href="#bellwether">Bellwether</a><a href="#journey">The decision journey</a><a href="#other-rooms">Other workplaces</a></nav>
+  </header>
+  <p class="planning"><strong>Gate 3 design study.</strong> Original 2D diagrams of planned geometry. All states and copy below are illustrative. No execution, saved choice, service call, final artwork or working 3D.</p>
+  <p class="hosting">Planned hosting row: shared practice history may reset when the host sleeps or restarts. In production, retain the actual runtime disclosure here across both columns.</p>
+  <main>
+    <section class="intro">
+      <h1>The work stays in view. The choice stays yours.</h1>
+      <p>Navy cutaway rooms, material depth and objects that explain the engineering work. The persistent workbench keeps requests, failed tasks and deliberate actions readable.</p>
+    </section>
+    <section class="task-strip" aria-label="Illustrative current task and identity">
+      <strong>Bellwether Books. Explain the missed task.</strong>
+      <p>Operating choice: none selected. Evidence: illustrative recorded inspection.</p>
+      <a href="#selected-work">Review the failed request</a>
+    </section>
+    <div class="workspace" id="bellwether">
+      <section class="room" aria-labelledby="bellwether-title">
+        <h2 id="bellwether-title">Bellwether Books</h2>
+        <p class="role">Applied AI Engineer. Fictional client and simulated role.</p>
+        <figure>
+          <svg viewBox="0 0 680 460" role="img" aria-labelledby="bellwether-art-title bellwether-art-desc">
+            <title id="bellwether-art-title">Bellwether service room composition</title>
+            <desc id="bellwether-art-desc">A bookshop service console between an intake tray, two equal test stands, an independent assessment plinth and a separate incident wall. No operating version is selected in this illustration.</desc>
+            <polygon points="68,278 340,119 620,279 348,439" fill="#182333"/>
+            <polygon points="68,260 340,101 620,261 348,421" fill="#a89477"/>
+            <polygon points="68,260 68,118 340,12 340,101" fill="#344a62"/>
+            <polygon points="340,12 620,118 620,261 340,101" fill="#2a3c53"/>
+            <path d="M68 118 340 12 620 118M68 260V118M620 261V118" fill="none" stroke="#7890a6" stroke-width="2"/>
+            <g transform="translate(94 122)">
+              <polygon points="0,0 135,-53 135,30 0,98" fill="#6c5943"/>
+              <path d="m0 33 135-57m-135 91 135-62m-135 93V0l135-53v83" fill="none" stroke="#b99a70" stroke-width="6"/>
+              <path d="m12 22V2m12 16V-3m14 15V-8m17 11v-18m14 11v-20m14 14v-23m14 16v-19m17 14v-21M12 61V42m15 13V34m16 15V28m17 14V20m18 14V14m17 13V6m18 13V0" stroke="#ddd1b5" stroke-width="8"/>
+            </g>
+            <g transform="translate(265 110)">
+              <polygon points="0,0 64,-26 102,-5 38,25" fill="#b99a70"/>
+              <polygon points="0,0 38,25 38,54 0,29" fill="#796449"/>
+              <polygon points="38,25 102,-5 102,24 38,54" fill="#8d7759"/>
+              <polygon points="17,-2 52,-16 75,-4 40,12" fill="#e7deca"/>
+              <path d="m37 0 15-6m-10 12 22-10" stroke="#5b6a77" stroke-width="2"/>
+            </g>
+            <g transform="translate(424 96)">
+              <polygon points="0,0 141,54 141,153 0,99" fill="#c6b18b"/>
+              <polygon points="8,11 133,59 133,143 8,95" fill="#384b60"/>
+              <polygon points="18,26 64,44 64,65 18,47" fill="#e7deca"/>
+              <polygon points="77,49 122,66 122,87 77,70" fill="#e7deca"/>
+              <polygon points="18,59 64,77 64,98 18,80" fill="#d1a08d"/>
+              <polygon points="77,82 122,99 122,120 77,103" fill="#e7deca"/>
+            </g>
+            <g transform="translate(258 249)">
+              <polygon points="-12,37 70,-7 166,48 83,95" fill="#725c42" opacity=".4"/>
+              <polygon points="0,0 73,-41 157,8 84,51" fill="#b99a70"/>
+              <polygon points="0,0 84,51 84,91 0,40" fill="#7e674a"/>
+              <polygon points="84,51 157,8 157,48 84,91" fill="#927955"/>
+              <polygon points="41,-49 89,-22 89,13 41,-14" fill="#202c40" stroke="#7890a6" stroke-width="3"/>
+              <polygon points="47,-39 82,-19 82,0 47,-20" fill="#48617a"/>
+              <polygon points="74,35 105,18 125,30 94,47" fill="#edbd68"/>
+              <path d="m85 33 19-10m-13 15 20-11" stroke="#74552d" stroke-width="2"/>
+            </g>
+            <g transform="translate(102 268)">
+              <polygon points="0,0 66,-37 102,-16 38,23" fill="#c5ad85"/>
+              <polygon points="0,0 38,23 38,54 0,31" fill="#826a4e"/>
+              <polygon points="38,23 102,-16 102,16 38,54" fill="#9b805b"/>
+              <polygon points="12,-3 59,-29 86,-14 39,13" fill="#e7deca"/>
+              <path d="m30-4 27-15m-20 20 28-15" stroke="#a43832" stroke-width="3"/>
+            </g>
+            <g transform="translate(455 268)">
+              <polygon points="0,0 52,-29 90,-7 38,23" fill="#94a4ae"/>
+              <polygon points="0,0 38,23 38,63 0,40" fill="#48617a"/>
+              <polygon points="38,23 90,-7 90,33 38,63" fill="#627e93"/>
+              <polygon points="28,-37 50,-50 70,-38 70,-15 50,-1 28,-14" fill="#e7deca" stroke="#263443" stroke-width="2"/>
+              <path d="m39-29 20 11m-20-2 20 11" fill="none" stroke="#526273" stroke-width="3"/>
+            </g>
+            <g transform="translate(275 370)">
+              <polygon points="0,0 62,-35 133,6 71,42" fill="#8294a4"/>
+              <polygon points="0,0 71,42 71,58 0,17" fill="#48617a"/>
+              <polygon points="71,42 133,6 133,22 71,58" fill="#627e93"/>
+              <polygon points="15,-8 40,-22 63,-9 38,6" fill="#e7deca"/>
+              <polygon points="73,8 98,-6 121,7 96,22" fill="#e7deca"/>
+              <text x="35" y="-5" font-size="13" fill="#263443">A</text><text x="94" y="11" font-size="13" fill="#263443">B</text>
+            </g>
+            <path d="M231 289 254 276M420 278 446 263" stroke="#8b9bad" stroke-width="3" stroke-dasharray="5 5"/>
+            <g fill="#edbd68"><circle cx="148" cy="252" r="5"/><circle cx="327" cy="245" r="5"/><circle cx="490" cy="249" r="5"/></g>
+          </svg>
+          <figcaption>Stable three-quarter view. Warm paper and wood; separate test stands, operating console and consequence wall. No selected version or completed sale is implied.</figcaption>
+        </figure>
+        <nav class="station-list" aria-label="Illustrative room destinations">
+          <a href="#selected-work" class="active">Inspect failure</a><a href="#prediction">Cause and falsifier</a><a href="#compare-beat">Compare repairs</a><a href="#inherit-beat">Inherited history</a>
+        </nav>
+        <p class="room-note">Study links navigate this document only. The production station list retains every existing destination and complete work controls.</p>
+      </section>
+      <section class="workbench" id="selected-work" tabindex="-1" aria-labelledby="work-title">
+        <span class="kind">Illustrative recorded inspection</span>
+        <h2 id="work-title">Explain the missed task.</h2>
+        <dl class="identities"><div><dt>Operating choice</dt><dd>None selected</dd></div><div><dt>Evidence mode</dt><dd>Illustration only</dd></div></dl>
+        <section class="evidence">
+          <h3>Customer request</h3>
+          <blockquote>Can I collect the Salt Roads paperback tomorrow? If not, suggest something similar under £20.</blockquote>
+        </section>
+        <section class="evidence">
+          <h3>Observed answer</h3>
+          <blockquote>The paperback costs £18.</blockquote>
+          <p class="small">This invented example comes from the approved product storyboard. It is not a captured run or new fixture.</p>
+        </section>
+        <div class="failure"><strong>Mandatory task missed</strong><p>No collection availability or alternative was provided. A true price alone does not complete the request.</p></div>
+        <section class="prediction" id="prediction">
+          <h3>Your prediction comes first.</h3>
+          <p>Example learner wording, shown for design review.</p>
+          <div class="field"><span>Cause</span>Request handling stops after the price lookup.</div>
+          <div class="field"><span>What would disprove it?</span>A multi-part request still gets availability and an alternative.</div>
+          <button type="button" disabled>Record prediction: preview only</button>
+          <p class="small">Optional help follows the learner's recorded commitment. Nothing in this study submits an action.</p>
+        </section>
+      </section>
+    </div>
+    <section class="section" id="journey" aria-labelledby="journey-title">
+      <h2 id="journey-title">One room, seven changes of responsibility.</h2>
+      <p>Each beat keeps the exact version, evidence purpose and next valid action in view. The room explains the record. The learner decides what to do.</p>
+      <ol class="story">
+        <li><h3>Inspect failure</h3><p>The failed request and independent result stay linked. Reopened history is still.</p></li>
+        <li><h3>State cause and falsifier</h3><p>The diagnosis desk holds the learner's prediction. Help cannot supply a commitment on their behalf.</p></li>
+        <li><h3>Test</h3><p>Only the test bench changes. Reported trial states replace invented progress.</p></li>
+        <li id="compare-beat"><h3>Compare repairs</h3><p>Equal A/B stands, exact identities, shared conditions and visible blockers. No default winner.</p></li>
+        <li><h3>Select exact version</h3><p>An accepted explicit choice changes the operating plate. The consequence wall stays unchanged.</p></li>
+        <li><h3>Operate</h3><p>Only linked, independently checked synthetic events change the wall. Finalized does not mean successful.</p></li>
+        <li id="inherit-beat"><h3>Inherit consequences</h3><p>The next shift opens quietly with the original choice and unresolved history. A later alternative remains experimental.</p></li>
+      </ol>
+    </section>
+    <section class="section" id="other-rooms" aria-labelledby="other-title">
+      <h2 id="other-title">Different work needs different objects.</h2>
+      <p>These room identities follow the complete Bellwether journey. They share materials and navigation rules, not an interchangeable factory layout.</p>
+      <div class="tworooms">
+        <article>
+          <div class="room">
+            <h3>Stonebridge Software</h3><p class="role">Go-To-Market Engineer</p>
+            <svg viewBox="0 0 600 350" role="img" aria-labelledby="stone-title stone-desc">
+              <title id="stone-title">Stonebridge signal-routing room</title><desc id="stone-desc">A branching routing table joins an intake rack to separate owner lanes and a human-handoff tray.</desc>
+              <polygon points="55,220 300,85 550,220 305,345" fill="#8b959f"/>
+              <polygon points="55,220 55,95 300,15 300,85" fill="#35495e"/>
+              <polygon points="300,15 550,100 550,220 300,85" fill="#293d54"/>
+              <g stroke="#d7bb75" stroke-width="4" fill="none"><path d="M332 62 524 127m-192-32 192 65m-192-32 192 65"/></g>
+              <g fill="#dce3e9"><polygon points="345,55 385,69 385,86 345,73"/><polygon points="425,115 466,129 466,146 425,133"/><polygon points="477,163 516,176 516,194 477,181"/></g>
+              <polygon points="178,225 285,166 411,232 305,293" fill="#61758a"/>
+              <polygon points="178,225 305,293 305,323 178,255" fill="#35495e"/>
+              <path d="m230 224 49-27 33 19m-33-19 53-28m-20 47 50 27" fill="none" stroke="#edbd68" stroke-width="4"/>
+              <g fill="#e7deca"><polygon points="211,222 231,211 247,220 227,232"/><polygon points="323,163 343,152 359,161 339,173"/><polygon points="353,240 373,229 389,238 369,250"/></g>
+              <polygon points="84,222 130,196 174,220 129,247" fill="#b4a17e"/>
+              <polygon points="84,222 129,247 129,282 84,257" fill="#61758a"/>
+              <polygon points="436,259 486,230 526,253 477,282" fill="#b4a17e"/>
+              <path d="m100 209 27-15m-19 24 27-15m-19 24 27-15" stroke="#e7deca" stroke-width="7"/>
+            </svg>
+            <p class="room-note">Signal intake, qualification rules, routing bench, owner lanes and handoff tray.</p>
+          </div>
+          <p>Recorded owner assignments and SLA starts keep their signal identities. Experiments never move owners or send messages. No real CRM or revenue is implied.</p>
+        </article>
+        <article>
+          <div class="room northline">
+            <h3>Northline Bike Cooperative</h3><p class="role">Forward Deployed Engineer</p>
+            <svg viewBox="0 0 600 350" role="img" aria-labelledby="north-title north-desc">
+              <title id="north-title">Northline integration workshop</title><desc id="north-desc">A bicycle stand and integration bench face a permission map, acceptance fixture, booking-slot rail and runbook shelf.</desc>
+              <polygon points="55,220 300,85 550,220 305,345" fill="#87978c"/>
+              <polygon points="55,220 55,95 300,15 300,85" fill="#365e5a"/>
+              <polygon points="300,15 550,100 550,220 300,85" fill="#28494a"/>
+              <g fill="none" stroke="#d3d9cf" stroke-width="5"><ellipse cx="117" cy="183" rx="33" ry="39"/><ellipse cx="235" cy="145" rx="33" ry="39"/><path d="m117 183 48-91 30 65-78 26 30-84 69-23 19 69m-40 12 21-81-14-19m-44 33 24-7"/></g>
+              <polygon points="354,60 519,117 519,189 354,132" fill="#657b7c"/>
+              <path d="m367 82 135 47m-135-28 135 47" stroke="#d3d9cf" stroke-width="5"/>
+              <path d="m367 120 135 47" stroke="#edbd68" stroke-width="5"/>
+              <polygon points="207,223 303,170 409,228 312,284" fill="#b4a17e"/>
+              <polygon points="207,223 312,284 312,317 207,256" fill="#657b7c"/>
+              <polygon points="312,284 409,228 409,262 312,317" fill="#486b6b"/>
+              <polygon points="259,174 303,198 303,232 259,208" fill="#202c40"/>
+              <path d="m264 185 32 17v17l-32-17Z" fill="#93a8a4"/>
+              <g fill="#d3d9cf"><polygon points="430,219 466,199 498,218 463,238"/><polygon points="441,252 477,232 509,251 474,271"/><polygon points="452,285 488,265 520,284 485,304"/></g>
+              <g stroke="#657b7c" stroke-width="2"><path d="m449 218 18-10m-7 43 18-10m-7 43 18-10"/></g>
+              <polygon points="91,263 138,236 176,258 129,285" fill="#b4a17e"/>
+              <path d="m108 259 27-15m-18 21 27-15" stroke="#e7deca" stroke-width="7"/>
+            </svg>
+            <p class="room-note">Read/write boundary, integration bench, acceptance fixture, pilot slots and runbook shelf.</p>
+          </div>
+          <p>A declared permission boundary is not permission proof. Only recorded pilot events create booking or approval markers. Handover declaration does not imply human acceptance.</p>
+        </article>
+      </div>
+    </section>
+    <section class="section" aria-labelledby="materials-title">
+      <h2 id="materials-title">Materials have a job. Motion has a cause.</h2>
+      <div class="swatches"><span><i style="background:#202c40"></i>Navy shell</span><span><i style="background:#edbd68"></i>Selected station</span><span><i style="background:#b99a70"></i>Bellwether wood</span><span><i style="background:#61758a"></i>Stonebridge steel</span><span><i style="background:#28494a"></i>Northline paint</span></div>
+      <p>Matte surfaces and one directional light give objects depth. No idle motion or glowing health score. A new accepted result may receive one short emphasis; history opens quietly.</p>
+      <details><summary>Expanded editing, refreshing and graphics failure</summary><p>Expanded editing uses the same workbench node at full width, with the current task and operating identity retained. Restore room does not replay history or overwrite the draft.</p><p>Ordinary polling keeps the previous room visibly marked as refreshing. Actual errors or inconsistent evidence break motion continuity. Missing evidence stays missing.</p><p>If graphics fails, the static overview, all labelled destinations and the complete workbench remain available. Graphics retry never submits a command.</p></details>
+    </section>
+  </main>
+  <footer><a href="00-review.html">Original structure studies</a> · <a href="../03-program-design.md">Gate 3 program design</a> · <a href="../visual-spec.md">Exact visual specification</a><p>This page is an approved design study. Performance, physical-device access, final 3D art and learner comprehension remain unproved.</p></footer>
+</body>
+</html>
