@@ -2908,3 +2908,233 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - Prevention rule: separate viewport changes from navigation verification, read
   settled URL/accessibility state before geometry, and report mixed results as a
   verification limit instead of overwriting the failed observation.
+
+
+## 2026-10-19 S29: disposable root used the macOS default temporary directory
+
+- What happened: the initial baseline copy used the macOS temporary directory instead of the approved /tmp/shiftwork-s29-* location. It was moved intact to /tmp before any test ran.
+- Root cause: tempfile.mkdtemp omitted its dir argument.
+- Prevention rule: pass dir="/tmp" explicitly for every S29 disposable root and assert its parent before writing artifacts.
+
+
+## 2026-10-19 S29: browser failure check assumed the latest preview run failed
+
+- What happened: the first connected browser check rendered WebGL2 but failed its independent-failure assertion because the latest preview run passed.
+- Root cause: the recorded preview contains two runs, and the failure belongs to the first incident-opening run.
+- Prevention rule: inspect actual preview records and navigate to the incident-opening run before asserting its literal failed check and captured answer. Preserve the rejected receipt.
+
+
+## 2026-10-19 S29: fallback focus probe chose the wrong editor panel
+
+- What happened: a graphics-failure probe preserved bytes and caret but reported lost focus.
+- Root cause: it selected Investigate, while the editable draft is in Compare. The hidden editor could never receive focus.
+- Prevention rule: inspect the current editor owner, select its visible panel and assert initial focus before releasing each graphics fault. The rejected receipt is retained.
+
+
+## 2026-10-19 S29: packaging and performance probes had invalid harness bounds
+
+- What happened: clean installation passed but the extracted browser rejected macOS /private/tmp, the canonical spelling of approved /tmp. A separate 30-second performance sample exceeded the runner's 30-second CDP deadline. Neither failed attempt counts as product proof.
+- Root cause: path validation ignored the macOS alias, and the command deadline equalled the entire sample duration. Review also found timer-paced samples and renderer.info reset after shadows would misattribute the limiting work.
+- Prevention rule: normalize owned path aliases, give CDP commands bounded overhead beyond samples, drive load with RAF, and reset renderer.info before the complete shadow/render pass. Retain rejected receipts.
+
+
+## 2026-10-19 S29: added identity header pushed native intake control out of reach
+
+- What happened: the unchanged Bellwether browser regression found the Customer queue control at y=871..921 in a 900px viewport at 390px width.
+- Root cause: the new evidence identity header increased vertical height while intake remained on the second station row.
+- Prevention rule: put inspection intake first in the labelled station list and run the existing native-touch initial-viewport reach assertion before accepting layout. No control or assertion was reduced.
+
+
+## 2026-10-19 S29: fractional scroll alignment clipped the selected panel edge
+
+- What happened: the unchanged GTM and Northline journeys reached their panels with focus, but the 390px panel top was -0.390625px and failed the required nonnegative reach assertion.
+- Root cause: scrollIntoView aligned a fractional layout coordinate to an integer scroll position with no scroll margin.
+- Prevention rule: give the selected panel an explicit scroll margin and reset desktop sticky styling at the actual stacked-layout breakpoint. Keep the precise reach assertion and rejected receipts.
+
+
+## 2026-10-19 S29: optional-host watchdog started too late
+
+- What happened: independent review found a hanging host import could remain loading indefinitely; the injected host-timeout case reproduced that failure.
+- Root cause: the eight-second watchdog lived only inside the optional host, after its own import completed.
+- Prevention rule: bound the outer optional import in the controller too, invalidate its epoch on timeout, and prove dirty-workbench fallback plus late-import rejection independently.
+
+
+## 2026-10-19 S29: review exposed stale graphics and projection ownership assumptions
+
+- What happened: independent review reproduced a failure notice hidden by history reset, a valid backend-nominated legacy first-choice inspection marked conflicting, an unchecked old-shift investigation, and static fallback art unhidden over WebGL by ordinary renderBoard. Failing focused probes retained each defect.
+- Root cause: graphics failure/visibility ownership was split across reset/render paths, while projection ownership assumed every current inspection belonged to the new shift.
+- Prevention rule: preserve latched graphics failure, let ready graphics own fallback visibility, check station shift ownership, and distinguish the backend-nominated legacy fallback without relaxing current-operation joins.
+
+
+## 2026-10-19 S29: delayed graphics construction rendered before suspension
+
+- What happened: review found a delayed import could construct and draw once after the scene became hidden, offscreen or expanded. Three isolated failing host checks reproduced allocation after suspension.
+- Root cause: suspension was applied after scene construction instead of before starting or accepting a mount.
+- Prevention rule: wait for observed visibility, cancel pending mount ownership when suspended, and test each suspension condition independently before accepting graphics lifecycle.
+
+
+## 2026-10-19 S29: lifecycle probes assumed visibility from scroll intent
+
+- What happened: the first lifecycle run waited for deferred graphics below its default viewport. A later offscreen probe counted a legitimate frame while the scene was still partly visible.
+- Root cause: the harness assumed the default viewport and scrolling to document end established the desired visibility condition.
+- Prevention rule: set the actual viewport explicitly and assert the canvas bounds establish offscreen state before interpreting frame counts. Keep both rejected attempts.
+
+
+## 2026-10-19 S29: cold-start loop observed the previous document
+
+- What happened: the corrected performance run printed five exactly identical cold timings. Those timings are rejected, not five measurements.
+- Root cause: Page.navigate returned before the old ready DOM was replaced; the readiness predicate did not require a new timeOrigin. Source interception also cannot certify native download timing.
+- Prevention rule: require five distinct document timeOrigin values, measure cold delivery with unmodified HTTP responses, and use separate injected instrumentation only for geometry/frame samples. Retain the rejected receipts.
+
+
+## 2026-10-19 S29: performance instrumentation reused a fault-only import gate
+
+- What happened: five native cold starts completed, but enabling frame instrumentation then left the scene import held and the warm-up failed. No complete performance receipt is claimed from that attempt.
+- Root cause: the plain-source measurement mode was incorrectly treated as a graphics-fault mode after instrumentation was enabled.
+- Prevention rule: exclude the plain measurement mode from fault-only import gates and persist each cold-start receipt before beginning frame samples.
+
+
+## 2026-10-19 S29: context cleanup fault was intercepted by earlier lifecycle work
+
+- What happened: geometry and material omission controls reached their intended assertions, but context omission hit the multiple-context guard before the intended old-context assertion. The context row is rejected.
+- Root cause: the context omission affected the preliminary error/recovery case as well as the targeted switch.
+- Prevention rule: enable the context omission only for the target switch and require the actual WebGL isContextLost assertion, then restore and rerun.
+
+
+## 2026-10-19 S29: repeated baseline browser run reused a consumed preview
+
+- What happened: a later baseline browser run expected two captured customers but the latest run was an earlier test diagnostic with one output.
+- Root cause: the runner reused a preview changed by a previous browser journey rather than creating a fresh baseline.
+- Prevention rule: start a new disposable preview for each complete baseline journey and retain failed fixture-state receipts. Do not change assertions to fit consumed state.
+
+## 2026-10-19 S29: rendered control boundaries inherited insufficient contrast
+
+- What happened: the rendered-style contrast check found unselected station borders at 1.71:1 and the graphics control focus ring below its approved 3:1 threshold.
+- Root cause: translucent legacy station borders and a blue focus color were reused on the navy workplace.
+- Prevention rule: measure the actual composed styles, use opaque boundaries and the approved amber focus on dark backgrounds, and keep text/control contrast checks beside the renderer.
+
+
+## 2026-10-19 S29: context limit was discovered after being exceeded
+
+- What happened: direct runtime-log inspection reported about 414k context against the project's 175k stop limit. Work had already continued beyond that limit. New work stopped and the current cleanup/handoff step finished.
+- Root cause: no visible usage indicator was surfaced, and the agent's context estimate was too low.
+- Prevention rule: inspect this chat's latest token_count.last_token_usage.input_tokens at phase boundaries when the UI indicator is absent. Stop at 175k unless the user explicitly extends it.
+
+## 2026-10-19 S29 continuation: preview probe guessed an API path
+
+- What happened: the first read-only preview probe returned 404 for
+  `/api/boards/bookshop/board`. No data changed. The existing documented
+  `/api/engagements/bookshop/board` returned 200.
+- Root cause: the probe inferred a route instead of copying the current client.
+- Prevention rule: copy `engagementPath()` or an existing browser request before
+  constructing preview probes, including read-only resumption checks.
+
+## 2026-10-19 S29: page-cache refresh lost restored editor focus
+
+- What happened: two actual persisted page-cache returns kept the same dirty
+  editor and backward caret range, but lost focus after controller refresh.
+- Root cause: refresh temporarily disables the editor during loading, which
+  drops the browser-restored focus after the pageshow event.
+- Prevention rule: capture editor focus/selection before the return refresh and
+  restore it only for the same generation, intent and node when another control
+  has not received focus. Require actual persisted events in the browser test.
+
+## 2026-10-19 S29: retry probe mixed data-refresh and graphics focus effects
+
+- What happened: explicit graphics retry recovered, but its continuity assertion
+  failed because the preceding test-only data refresh had already dropped focus.
+- Root cause: the runner measured two different actions under one focus assertion.
+- Prevention rule: assert or establish focus immediately before the action being
+  measured. Keep the same dirty bytes, caret and original failure receipt.
+
+
+## 2026-10-19 S29: zoom keyboard probe omitted Enter text
+
+- What happened: native 200% zoom was established at 1280px, but the keyboard
+  station activation probe did not activate the focused button.
+- Root cause: the new runner omitted the Enter text/unmodifiedText fields that
+  the existing browser runner supplies. The helper was corrected but not rerun
+  before the context stop. This remains unproved, not a passing zoom result.
+- Prevention rule: copy the current native-key helper contract before adding
+  keyboard checks. Retain both the rejected receipt and the unverified status.
+
+
+## 2026-10-19 S29 continuation: native zoom exposed narrow layout defects
+
+- What happened: the corrected zoom runner passed keyboard activation, then one
+  touch check failed. Diagnostic repeats reached the controls. Chrome also
+  clamped a requested 390px native window to 500px. After retaining native 200%
+  zoom and setting the exact viewport, the 195 CSS-pixel page overflowed to 266px.
+  The picker imposed its minimum content width. Two-column station labels also
+  escaped their cells. Visual inspection then found overlapping journey labels
+  despite a zero-overflow page measurement.
+- Root cause: the runner assumed the requested native window width was honored;
+  the layout and its checks had not covered the resulting narrow CSS width or
+  text escaping an otherwise bounded navigation cell.
+- Prevention rule: record native zoom, pinch scale, actual viewport and outer
+  window separately. Test label bounds as well as page bounds, inspect native
+  screenshots, and independently omit each narrow-layout rule. Keep controls
+  usable without clipping or reducing their target size.
+
+## 2026-10-19 S29 continuation: zoom input observations were intermittent
+
+- What happened: an early touch check failed once and passed diagnostic repeats.
+  A later layout omission run failed keyboard reach before its intended CSS
+  assertion. That row was rejected and did not count as a caught layout fault.
+  A short diagnostic also read document.body before document creation and failed.
+- Root cause: the input runner could observe a panel while smooth scrolling was
+  unfinished. The precise missed event was not captured, so timing is a suspected
+  cause, not an established explanation for every failed input observation. The
+  diagnostic's readiness predicate separately lacked a null-safe body check.
+- Prevention rule: wait for stable panel position, retain per-station focus and
+  bounds receipts, and check null-safe readiness. Isolate a layout omission at
+  its affected 195 CSS-pixel width before unrelated navigation. Clean/restored
+  runs still exercise all three widths. Do not erase earlier flaky receipts.
+
+## 2026-10-19 S29 continuation: fault table selected an inherited constructor
+
+- What happened: fresh packaging passed its locked install, backend journeys and
+  extracted room, then failed constructor fallback with "function is not
+  iterable" from the test runner. The failed package receipt remains retained.
+- Root cause: omissions[sceneFault] selected Object.prototype.constructor for the
+  existing constructor-failure case, then tried to destructure that function.
+  The previous continuation added the omission table after its last full package
+  proof, leaving this combination untested.
+- Prevention rule: use Object.hasOwn for fault-table membership, including new
+  tables. Repeat the real extracted constructor-failure workbench path after
+  fault-runner changes; unit or plain-room success cannot replace that check.
+
+## 2026-10-19 S29 native continuation: default temporary directory escaped the approved root
+
+- What happened: tempfile.mkdtemp used macOS TMPDIR under /var/folders instead
+  of the approved /tmp/shiftwork-s29-* receipt root. Only owned snapshot files
+  existed. They were moved intact to /tmp/shiftwork-s29-native-7w758y7j before
+  the probe or production edit.
+- Root cause: the helper relied on the platform default rather than an explicit
+  directory argument.
+- Prevention rule: use tempfile.mkdtemp(dir='/tmp', prefix='shiftwork-s29-') for
+  these bounded receipts and verify the actual returned path before more writes.
+
+## 2026-10-19 S29 native continuation: browser navigation and shortcuts changed probe conditions
+
+- What happened: Cmd+Home navigated Safari to its Home page, and new diagnostic
+  URLs reset native page zoom to 100%. The Home navigation was reversed; the
+  nonmatching zoom observations were retained and excluded from 200% claims.
+- Root cause: the probe assumed a scroll shortcut and persistent zoom across
+  native navigations.
+- Prevention rule: use observed native scroll controls, read Safari's actual zoom
+  menu after navigation and require the recorded viewport/DPR/pinch preconditions
+  before comparing variants. Native tool errors are not product-test passes.
+
+## 2026-10-19 S29 exact-viewport harness: touch landed during a smooth scroll
+
+- What happened: the new exact 640x900 and 390x844 checks failed with the touch
+  activating a different station, then with a null hit point. Mobile emulation
+  also reset native page zoom so innerWidth equaled the physical width.
+- Root cause: activateStation smooth-scrolls the focused panel. The harness
+  captured tap coordinates before that scroll settled, and mobile emulation
+  changed the zoom and DPR preconditions the check was measuring.
+- Prevention rule: use mobile=false for native-zoom viewport checks, wait for a
+  stable scroll position, assert the hit element is the intended control, blur
+  competing focus before a touch reach check and dispatch at freshly computed
+  coordinates.

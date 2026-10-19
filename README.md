@@ -8,6 +8,28 @@ operations workflow. Sales, bookings, ownership and incidents are **synthetic**.
 **Submission track:** Best Apps and Agents, confirmed by Jaydon on 2026-10-15.
 **License:** [MIT](LICENSE). Dependencies retain their own licenses.
 
+## Local 3D inspection work in S29
+
+The S29 working tree adds a locally served WebGL2 Bellwether room beside the
+existing workbench. Intake, the operating console and independent assessment
+open existing panels. Three.js r180 is pinned locally with its MIT notice;
+there is no CDN, frontend build step or second application server.
+Graphics failures retain the complete HTML workbench and recorded evidence.
+
+S29 is accepted locally under the approved narrowed scope but is not published.
+The scope is Gate 3 section 9: headless Chromium 155 on this macOS build at the
+exact 1280x720, 640x900 and 390x844 viewports, plus the recorded native Safari
+26.5 observations. See the
+[S29 checkpoint](docs/plans/shiftwork/workplace-3d/s29-checkpoint-2026-10-19.md)
+for measured local evidence and limits. The hosted demo remains S28.
+
+Local S29 checks now cover exact narrow viewports at 100% and 200% zoom,
+focus/retry and partial initialization. All three browser journeys and 16 fresh
+packaging checks pass. The full offline suite retains its known port_dead
+failure. Windows and Edge, Firefox, previous-stable Safari, physical iPhone and
+Pixel, audible VoiceOver and NVDA, and comprehension evidence are unverified
+and unclaimed by this scope.
+
 ## Hosted practice demo
 
 Open [Shiftwork on Render](https://shiftwork.onrender.com). This is one shared
