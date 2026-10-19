@@ -2,7 +2,7 @@ import * as THREE from './vendor/three-r180/three.module.js';
 import { roomDefinitions } from './workplace-rooms.js';
 
 export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure }) {
-  let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity;
+  let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity, pulse = null, indicatorMaterial = null;
   const geometries = new Set(), materials = new Set(), targets = [];
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-8,8,6,-6,.1,100);
@@ -12,13 +12,20 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   if (!room) throw new Error('Unsupported room');
   const listeners = [];
   const listen = (type,fn) => { renderer.domElement.addEventListener(type,fn); listeners.push([type,fn]); };
+  function settlePulse() { pulse = null; if (indicatorMaterial) indicatorMaterial.emissiveIntensity = 0; }
   function draw(now = performance.now()) {
     raf = null;
     if (disposed || suspended) return;
     if (tier === 'compact' && now - lastDraw < 1000 / 30 - .2) { raf = requestAnimationFrame(draw); return; }
     lastDraw = now;
+    if (pulse) {
+      const progress = (now - pulse.start) / 160;
+      if (progress >= 1) settlePulse();
+      else indicatorMaterial.emissiveIntensity = .8 * (1 - progress);
+    }
     try { renderer.render(scene, camera); }
     catch { onFailure('render-failed'); }
+    if (pulse) requestFrame();
   }
   function requestFrame() { if (!disposed && !suspended && raf === null) raf = requestAnimationFrame(draw); }
   function resize({width,height,pixelRatio}) {
@@ -38,6 +45,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   }
   function dispose() {
     if(disposed) return; disposed = true;
+    settlePulse();
     if(raf!==null) cancelAnimationFrame(raf); raf = null;
     for(const [type,fn] of listeners) renderer?.domElement.removeEventListener(type,fn);
     listeners.length = 0; targets.length = 0;
@@ -75,10 +83,22 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     }
     const rimMaterial = new THREE.MeshStandardMaterial({color:'#edbd68',roughness:1}); materials.add(rimMaterial);
     const rim = new THREE.Mesh(cube,rimMaterial); rim.scale.set(2.35,.06,1.5); scene.add(rim);
-    function apply(next) {
+    indicatorMaterial = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1}); materials.add(indicatorMaterial);
+    const indicator = new THREE.Mesh(cube,indicatorMaterial);
+    indicator.position.set(.7,1.5,2.88); indicator.scale.set(.78,.32,.04); scene.add(indicator);
+    const testColors = {RESERVED:'#edbd68',RUNNING:'#91acb9',COMPLETE:'#8fbf9f',FAILED:'#d98a7a'};
+    function apply(next, transitions = []) {
       if(disposed) return;
       view = next; const anchor = next && room.stationAnchors[next.station];
-      rim.visible = !!anchor; if(anchor) rim.position.set(anchor[0],.1,anchor[2]); requestFrame();
+      rim.visible = !!anchor; if(anchor) rim.position.set(anchor[0],.1,anchor[2]);
+      const trialState = next?.tests?.diagnostic?.trials?.[0]?.state;
+      indicatorMaterial.color.set(testColors[trialState] ?? '#6c5943');
+      if (!reducedMotion && transitions.some(item => item.kind === 'test-update')) {
+        pulse = { start: performance.now() };
+        indicatorMaterial.emissive.set('#edbd68');
+        indicatorMaterial.emissiveIntensity = .8;
+      }
+      requestFrame();
     }
     listen('pointerdown',event=>{ pointer = {x:event.clientX,y:event.clientY,id:event.pointerId,view}; });
     listen('pointercancel',()=>{ pointer=null; });
@@ -96,7 +116,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     apply(view,[]);
     resize({width:container.clientWidth,height:container.clientHeight,pixelRatio:devicePixelRatio});
     if(raf!==null) cancelAnimationFrame(raf); raf = null; draw();
-    return { apply, resize, setSuspended(value) { suspended=value; if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
-      setReducedMotion(value) { reducedMotion=value; requestFrame(); }, dispose };
+    return { apply, resize, setSuspended(value) { suspended=value; if(value) settlePulse(); if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
+      setReducedMotion(value) { reducedMotion=value; if(value) settlePulse(); requestFrame(); }, dispose };
   } catch(error) { dispose(); throw error; }
 }

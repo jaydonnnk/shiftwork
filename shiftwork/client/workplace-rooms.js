@@ -29,12 +29,28 @@ box('paper',[-4,1.31,2.5],[1.14,.06,.64],'customers');
 box('enamel',[3.3,1.4,-.2],[.85,.6,.65],'evaluator');
 box('paper',[3.3,1.73,-.2],[.65,.04,.45],'evaluator');
 box('navy',[2.1,.6,-.6],[.12,1.2,2.2],'evaluator');
+// Diagnosis desk: a two-part cause and falsifier worksheet with no written hypothesis.
+box('wood',[0,1,-2.5],[2.2,.22,1.25],'investigate');
+box('enamel',[0,.48,-2.5],[1.55,.95,.8],'investigate');
+box('edge',[0,.05,-2.5],[2.35,.09,1.4],'investigate');
+box('paper',[-.42,1.14,-2.5],[.78,.05,.5],'investigate');
+box('paper',[.42,1.14,-2.5],[.78,.05,.5],'investigate');
+// Paired test bench: equal stands with a public indicator for the reported test state.
+box('wood',[.7,.95,3],[2.6,.2,1.2],'compare');
+box('edge',[.7,.05,3],[2.75,.09,1.35],'compare');
+box('enamel',[-.15,.45,3],[.7,.8,.7],'compare');
+box('enamel',[1.55,.45,3],[.7,.8,.7],'compare');
+box('paper',[-.15,.9,3],[.5,.04,.4],'compare');
+box('paper',[1.55,.9,3],[.5,.04,.4],'compare');
+box('navy',[.7,1.5,2.75],[.95,.55,.08],'compare');
+box('screen',[.7,1.5,2.82],[.8,.4,.03],'compare');
 
 export const roomDefinitions = {
   bookshop: {
     bounds: { min: [-6,-.5,-4.6], max: [6,3.3,4.6] }, cameraTarget: [0,.8,0],
     materials: { floor:'#a89477', navy:'#202c40', edge:'#263443', wood:'#b99a70',
       shelf:'#6c5943', paper:'#e7deca', enamel:'#48617a', screen:'#91acb9' },
-    assemblies, stationAnchors: { customers: [-4,1,2.5], service: [0,1,1.1], evaluator: [3.3,1,-.2] },
+    assemblies, stationAnchors: { customers: [-4,1,2.5], service: [0,1,1.1], evaluator: [3.3,1,-.2],
+      investigate: [0,1.05,-2.5], compare: [.7,1.1,3] },
   },
 };
