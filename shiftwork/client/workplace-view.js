@@ -51,8 +51,9 @@ export function projectWorkplace(input) {
     const link = event.derivation;
     if (link && (link.run_id !== incident.opening_run_id || link.observed_ref !== incident.failing_output_ref || link.check_id !== incident.check_result_id)) conflict();
   }
-  const experiment = item => {
+  const experiment = (item, expectedKind) => {
     if (!item) return null;
+    if (item.kind !== expectedKind) return null;
     if (item.shift_id !== shiftId) { conflict(); return null; }
     return {
       id: item.id, shiftId: item.shift_id, kind: item.kind, state: item.state,
@@ -66,14 +67,17 @@ export function projectWorkplace(input) {
       }),
       trials: (item.trials ?? []).map(trial => ({ ordinal: trial.ordinal, candidateLabel: trial.candidate_label,
         runId: trial.run_id, versionId: trial.artifact_version_id, state: trial.state,
-        evidenceMode: trial.evidence_mode ?? null, missingEvidenceCount: trial.missing_evidence_count ?? null })),
+        evidenceMode: trial.evidence_mode ?? null, missingEvidenceCount: trial.missing_evidence?.length ?? null })),
       observedRunId: item.observed_run_id ?? null,
     };
   };
   const latest = stationView?.latest_experiment;
-  const tests = { diagnostic: experiment(input.diagnostic ?? stationView?.latest_diagnostic),
-    comparison: experiment(input.comparison ?? (latest?.kind === 'QUALIFYING_COMPARISON' ? latest : null)),
-    later: experiment(latest?.kind === 'LATER_CONDITION_COMPARISON' ? latest : null) };
+  const tests = { diagnostic: experiment(input.diagnostic ?? stationView?.latest_diagnostic, 'DIAGNOSTIC'),
+    comparison: experiment(input.comparison ?? latest, 'QUALIFYING_COMPARISON'),
+    later: experiment(latest, 'LATER_CONDITION_COMPARISON') };
+  if (selection?.comparison_id && tests.diagnostic?.id === selection.comparison_id) conflict();
+  const diagnosticRuns = new Set((tests.diagnostic?.trials ?? []).map(trial => trial.runId).filter(Boolean));
+  if (events.some(event => diagnosticRuns.has(event.derivation?.run_id))) conflict();
   return {
     schemaVersion: 1, context: { board: slug, shiftId, inspection }, station: input.activeStation,
     shiftState: board?.latest_shift?.state?.toLowerCase() ?? null,
@@ -110,11 +114,29 @@ export function projectWorkplace(input) {
   };
 }
 
+function diagnosticKey(summary) {
+  if (!summary) return null;
+  const trial = summary.trials[0] ?? null;
+  return [summary.id, summary.state, trial?.state ?? 'none', trial?.runId ?? 'none',
+    trial?.missingEvidenceCount ?? 'none'].join('|');
+}
+
 export function diffWorkplace(previous, next) {
   if (!previous || previous.consistency === 'conflict' || next.consistency === 'conflict') return [];
   if (previous.context.board !== next.context.board || previous.context.shiftId !== next.context.shiftId) return [];
-  if (previous.context.inspection.mode !== 'current' || next.context.inspection.mode !== 'current') return [];
-  if (previous.station === next.station) return [];
-  // S29 introduces station emphasis only. Causal travel belongs to S32.
-  return [{ key: `station:${next.station}`, kind: 'station-focus', stationId: next.station, publicRefs: [] }];
+  const beforeInspection = previous.context.inspection, afterInspection = next.context.inspection;
+  if (beforeInspection.mode !== afterInspection.mode || beforeInspection.historicalRunId !== afterInspection.historicalRunId) return [];
+  const transitions = [];
+  if (beforeInspection.mode === 'current' && previous.station !== next.station) {
+    transitions.push({ key: `station:${next.station}`, kind: 'station-focus', stationId: next.station, publicRefs: [] });
+  }
+  const diagnostic = next.tests?.diagnostic ?? null;
+  const before = diagnosticKey(previous.tests?.diagnostic);
+  const after = diagnosticKey(diagnostic);
+  if (before !== after && after !== null) {
+    const trial = diagnostic?.trials?.[0] ?? null;
+    transitions.push({ key: `test:diagnostic:${after}`, kind: 'test-update', stationId: 'compare',
+      publicRefs: (diagnostic ? [diagnostic.id, trial?.runId, trial?.versionId] : []).filter(Boolean) });
+  }
+  return transitions;
 }

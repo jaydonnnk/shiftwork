@@ -40,7 +40,7 @@ export function createWorkplaceHost({container,fallback,status,onStation}) {
     if(disposed || owner!==token) { handle.dispose(); return; }
     clearTimeout(timer); timer=null; mounting=false; scene=handle; previous=latest.view;
     fallback.hidden=true; container.parentElement.dataset.graphics='ready'; retryButton.hidden=true;
-    message('ready','3D Bellwether room. Select intake, the console or independent assessment.'); resize();
+    message('ready','3D Bellwether room. Select intake, the console, diagnosis or assessment.'); resize();
   }
   function publish(publication) {
     if(disposed) return;
@@ -57,7 +57,7 @@ export function createWorkplaceHost({container,fallback,status,onStation}) {
     previous=view.consistency==='conflict'?null:view;
     if(scene) { scene.apply(view,transitions); suspend(); }
     else mount();
-    if(scene) message('ready',view.consistency==='conflict'?'Recorded reads disagree. Inspect the workbench; no outcome is inferred.':'3D Bellwether room. Select intake, the console or independent assessment.');
+    if(scene) message('ready',view.consistency==='conflict'?'Recorded reads disagree. Inspect the workbench; no outcome is inferred.':'3D Bellwether room. Select intake, the console, diagnosis or assessment.');
   }
   function retry() { if(disposed || brokenModule) return; unavailable=false; release(); previous=null; mount(); }
   function onMotion() { scene?.setReducedMotion(motion.matches); }
