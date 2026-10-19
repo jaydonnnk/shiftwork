@@ -1,3 +1,47 @@
+**Post-S28 3D workplace: Gates 1 to 3 approved. 2026-10-19 Asia/Singapore.**
+
+The [program design](workplace-3d/03-program-design.md) now specifies exact
+modules, public-state publication, local engine closure, provenance records,
+lifecycle, access targets and numeric proof budgets. Its
+[visual specification](workplace-3d/visual-spec.md) and
+[static colour study](workplace-3d/mockups/08-visual-spec.html) make the original
+three-room story concrete. [Extension status](workplace-3d/00-status.md) records
+the current boundary and verification limits. Jaydon approved Gate 3 and
+separately authorized focused commits and a main push of Gates 1 to 3. S28
+remains accepted and Gate 4 is unwritten. Dependency acquisition, implementation,
+slice assignment and deployment remain unauthorized. Stop after publication.
+Earlier notices retain their original dated scope.
+
+**POST-S28 3D WORKPLACE: GATES 1 AND 2 APPROVED; HANDOFF READY, 2026-10-19 Asia/Singapore.**
+
+Jaydon approved Gate 1 and layout A, then explicitly said "Sure i approve" to
+[Gate 2 architecture](workplace-3d/02-architecture.md) and requested a handoff.
+The approved extension uses a locally served Three.js view beside the existing
+workbench, with existing backend, API and domain/evidence boundaries preserved.
+Gate 3 program design is next and remains unwritten. Gate 4 and implementation
+remain unapproved. [Extension status](workplace-3d/00-status.md) and the
+[handoff](workplace-3d/handoff-2026-10-19.md) carry current scope and remaining work.
+S28 remains accepted with its original evidence and limits. No engine acquisition,
+implementation, new slice, provider call, commit, push or deployment occurred.
+Earlier pending Gate 1 and Gate 2 labels below are historical.
+
+**POST-S28 3D WORKPLACE PLANNING; GATE 1 SCOPED REOPENING, 2026-10-19 Asia/Singapore.**
+
+Jaydon requested a build plan from the agentic-factory design study using the
+software-factory skill, and explicitly chose "Plan toward a 3D workplace".
+The scoped presentation proposal is in
+[workplace-3d/00-status.md](workplace-3d/00-status.md), with its
+[Gate 1 product proposal](workplace-3d/01-product.md) and
+[HTML review hub](workplace-3d/mockups/00-review.html). Gate 1 is IN PROGRESS
+for this extension. Gates 2 to 4 have not been revised or approved for it.
+
+S28 remains complete and accepted. Earlier gate approvals and evidence retain
+their baseline scope. The existing implementation plan ends at S28; no new slice
+is planned at Gate 4, authorized or started. Planning and static mockups do not
+authorize a rendering engine, install, implementation, provider call, Git
+publication, deployment or submission action. The confirmed desktop notice/grid
+problem is included in the proposed presentation scope, not repaired here.
+
 **S28 ACCEPTED BY JAYDON, 2026-10-19 Asia/Singapore.**
 
 Jaydon stated "I accept" after the hosted S28 result was presented. Remote main

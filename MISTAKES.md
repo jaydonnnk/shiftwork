@@ -2854,3 +2854,57 @@ The pending-state repair also covers opening/operating and close/next-shift comp
   the owned Chrome process exit.
 - Prevention: await the exit event before removing the owned temporary profile,
   and require the entire browser command, including cleanup, to exit successfully.
+
+## 2026-10-19 Gate 1 mockup generator assumed a newer pathlib API
+
+- What happened: the first static mockup generator stopped before writing a
+  screen because the system Python does not support `Path.write_text(newline=)`.
+  No production code or evidence changed.
+- Root cause: the writer assumed an optional argument from a newer interpreter.
+- Prevention rule: write generated standalone HTML as explicit UTF-8 bytes, or
+  verify the selected interpreter's writer signature before using optional APIs.
+  The corrected generator uses byte writes and ran successfully.
+
+## 2026-10-19 Gate 1 mockup hosting notice inherited a paragraph width cap
+
+- What happened: the first desktop preview measured the proposed full-width
+  hosting notice at 605px in a 1280px viewport. The mockup was not yet accepted.
+- Root cause: the generic paragraph measure also constrained the notice block.
+- Prevention rule: exempt full-width notices from prose measure and assert their
+  rendered width against the viewport before claiming the composition is fixed.
+  The mockup selector now sets `max-width: none`. Production source is unchanged.
+
+## 2026-10-19 Gate 2 approval patch included an unverified sentence anchor
+
+- What happened: the first multi-file approval patch was rejected because one
+  proposed anchor sentence was absent. The patch changed no files.
+- Root cause: an unnecessary wording edit used assumed context instead of an
+  exact current-file anchor, contrary to the existing AGENTS.md rule.
+- Prevention rule: preflight every anchor before a multi-file patch; omit optional
+  edits whose context has not been copied from the file. The corrected patch
+  records approval without that unsupported edit.
+
+## 2026-10-19 Gate 3 design patch repeated an absent-anchor error
+
+- What happened: a documentation repair patch included a sentence absent from
+  the current draft. The tool rejected the patch before writing any files.
+- Root cause: a leftover hunk used text from a different document without
+  preflighting every anchor, repeating the logged Gate 2 patch mistake.
+- Prevention rule: read every exact target range immediately before a patch,
+  remove unrelated hunks and verify all anchors. The corrected patch changes
+  only the confirmed draft statements. No production code was affected.
+
+## 2026-10-19 Gate 3 static-study focus probe gave mixed observations
+
+- What happened: one call batched three viewport changes, an anchor click and an
+  immediate measurement. It saw no focused target and panel top 942.98px, after
+  an earlier separate probe had seen target focus and top 15.98px. A later click
+  followed by a fresh accessibility observation again saw focus and top 15.98px.
+  The study source was unchanged between these observations. Both receipts are
+  retained in `/tmp/shiftwork-gate3-browser.json` and
+  `/tmp/shiftwork-gate3-settled-focus.json`.
+- Root cause: unconfirmed. The combined resize/navigation/read probe was timing
+  sensitive; the later pass does not establish reliable automated focus proof.
+- Prevention rule: separate viewport changes from navigation verification, read
+  settled URL/accessibility state before geometry, and report mixed results as a
+  verification limit instead of overwriting the failed observation.

@@ -1,3 +1,18 @@
+**Post-S28 rendering design extension approved. 2026-10-19 Asia/Singapore.**
+
+The approved scoped [Gate 3 design](workplace-3d/03-program-design.md) extends this
+document's client rendering/file baseline with four vanilla-JavaScript modules,
+an optional locally served Three.js graph and original room definitions.
+The [visual specification](workplace-3d/visual-spec.md) fixes composition,
+materials, camera, evidence hierarchy and story transitions. These approved
+scoped documents govern the extension's client files; the existing backend,
+API, learner and evidence contracts below continue unchanged. The `room.svg`
+row below becomes the preserved static fallback, not the new renderer.
+Gates 1 to 3 are approved. Jaydon separately authorized focused commits and a
+main push of this planning packet. Gate 4 is unwritten, and no post-S28
+implementation, acquisition or deployment is authorized. S28 is accepted.
+Earlier notices retain their dated scope and bytes.
+
 **S22b ACCEPTED AND PUBLISHED, 2026-10-06 Asia/Singapore.**
 
 S22b was committed in 13 focused batches, published on its branch and
