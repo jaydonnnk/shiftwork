@@ -450,19 +450,27 @@ Only the code and tier go to diagnostics, never raw exceptions, payloads or path
 
 ## 9. Compatibility and numeric budgets
 
-These are proposed acceptance budgets, not measured performance. No device or
-browser passes until a later receipt names its exact OS, browser build, GPU,
-viewport, DPR, tier and power state. Do not label an emulator a physical device.
+These are acceptance budgets and the program's narrowed evidence scope, not
+claims about untested targets. No device or browser passes until a later receipt
+names its exact OS, browser build, GPU, viewport, DPR, tier and power state. Do
+not label an emulator a physical device. Targets outside this scope remain
+unproved and unclaimed.
 
-| Target | Required future checks |
+| Evidence area | Required checks for this program |
 |---|---|
-| Desktop Chromium | Chrome and Edge stable and previous stable at execution time, Windows 11, integrated Intel UHD 620-class GPU, 8GB RAM, 1280x720. |
-| Desktop WebKit | Safari stable and previous stable on supported macOS, Apple M1-class hardware, 1280x720. Record exact OS/browser versions rather than guessing future version numbers. |
-| Desktop Gecko | Firefox stable on Windows 11 or macOS, same desktop view; full workbench plus WebGL2 smoke and station journey. |
-| Narrow browser layout | 640x900 and 390x844 in Chromium and WebKit. Real viewport resize, not screenshot crop. Keyboard, touch and 200% zoom. |
-| Physical mobile | iPhone 12-class Safari and Pixel 6-class Chrome, native viewport and compact tier. These are targets, not available or verified hardware claims. |
-| Unsupported graphics | WebGL2 denied, software/disabled GPU, module 404, shader failure and context loss. Complete DOM workbench acceptance on every supported browser. |
-| Assistive access | Keyboard in Chromium and Safari; VoiceOver with Safari and NVDA with Edge for names, focus and live-status behavior. Browser AX data alone cannot claim audible screen-reader proof. |
+| Desktop Chromium | Chrome 155.0.8059.84 headless on macOS 26.5.1 build 25F80, Apple M4 Pro, 24 GiB RAM, 1280x720. Actual WebGL2 construction and render, complete workbench, fallback, lifecycle and package checks. No Windows, Edge or physical-GPU claim. |
+| Narrow browser layout | 640x900 and 390x844 in the same Chromium build at 100% and 200% native profile zoom, with keyboard, touch emulation, 44 CSS-pixel targets, no page overflow and editor continuity. Headless viewport emulation is layout and interaction evidence, not physical mobile proof. |
+| Native Safari | Safari 26.5 build 21624.2.5.11.4 on macOS 26.5.1, Apple M4 Pro. Actual WebGL2 rendering and station navigation observed in an owned native window, plus native 200% picker layout controls at 378x413 CSS pixels. The functional viewport was not recorded and the layout controls were hidden-page observations. No previous-stable Safari claim. |
+| Unsupported graphics | WebGL2 denied, software/disabled GPU, module 404, shader failure and context loss, with complete DOM workbench acceptance in Chromium. Native Safari failure isolation was not exercised. |
+| Assistive access | Keyboard in Chromium and the recorded native Safari observations. Audible VoiceOver with Safari and NVDA with Edge are unverified and not claimed by this program version. Browser AX data alone cannot claim audible screen-reader proof. |
+
+Deferred and unclaimed targets: Windows 11 Chrome/Edge stable and previous
+stable, Firefox, previous-stable Safari, physical iPhone 12-class and Pixel
+6-class devices, minimum Intel UHD 620-class hardware, physical-device
+performance and power records, audible VoiceOver and NVDA, and comprehension
+sessions. They remain unproved, are not passes and must not appear as
+supported-device claims. A later program decision may add targets and fresh
+evidence without rewriting earlier receipts.
 
 Do not UA-detect success. Require WebGL2 construction and actual render success.
 Default to compact rendering below 761 CSS pixels or when explicitly selected.
@@ -511,9 +519,10 @@ synthetic and separately run the real existing offline browser journeys. For eac
 sample retain frame intervals, draw counts, startup timings and exclusions.
 Compute p95 by nearest rank. Every sample must meet its tier budget; report misses
 without averaging them away. Software-rendered CI checks functional behavior,
-never certifies physical GPU performance. Missing physical targets remain unproved.
-If compact also fails on an intended device, keep work usable through fallback,
-record the miss and stop board expansion pending a design decision.
+never certifies physical GPU performance. Targets outside the narrowed scope
+remain unproved and unclaimed; they are not passes and do not block acceptance.
+If a tested compact tier fails, keep work usable through fallback, record the
+miss and stop board expansion pending a design decision.
 
 ## 10. Test plan and fail-capable controls
 
@@ -538,10 +547,10 @@ and known evidence limits attached to every later full-suite result.
 | `station_mapping_has_no_commands` | Every object and HTML station opens its existing panel. Record zero command requests from picks. Replace one mapping or call an action and require failure. |
 | `graphics_failure_keeps_complete_workbench` | Separately inject import 404, core-module 404, constructor throw, shader callback, render throw, timeout and context loss. Edit the same draft, inspect evidence and use valid offline controls through fallback. Hanging or throwing graphics must not block DOM. |
 | `expanded_work_keeps_draft_focus_and_caret` | Expand/restore, resize and page-cache return preserve the same node, dirty bytes, selection and focus. Copy/recreate editor or overwrite dirty bytes and require failure. |
-| `responsive_reach_and_keyboard` | At 1280, 640 and 390px verify actual notice span, no page overflow, target >=44 CSS pixels, focus and content reach. Include Northline acceptance, rollout and handover. Remove scroll/focus behavior and require the historical reach case to fail. |
+| `responsive_reach_and_keyboard` | At 1280x720, 640x900 and 390x844 in Chromium, and at the recorded native Safari state, verify actual notice span, no page overflow, target >=44 CSS pixels, focus and content reach. Include Northline acceptance, rollout and handover. Remove scroll/focus behavior and require the historical reach case to fail. |
 | `reduced_motion_and_visibility_settle` | Live preference change cancels travel, settled labels remain identical and hidden/expanded views stop drawing. Remove each cancellation independently. |
 | `disposal_has_one_owner` | Thirty board switches plus partial initialization failure, retry and double disposal meet section 9 resource limits. Omit each owned cleanup independently and require a matching resource/listener assertion. |
-| `performance_receipt_meets_named_tier` | Real target receipts meet every budget above. Synthetic slow frame, extra render loop and inflated geometry independently fail the relevant budget. Test injection is not a measured speedup. |
+| `performance_receipt_meets_named_tier` | The tested Chromium tiers meet every applicable budget above; native Safari performance and other untested targets remain unproved and unclaimed. Synthetic slow frame, extra render loop and inflated geometry independently fail the relevant budget. Test injection is not a measured speedup. |
 | `local_asset_graph_is_closed` | Parse all literal static/dynamic imports and re-exports and HTML/CSS URLs, recurse from `app.js`, compare to exact manifest inventory and fetch each via HTTP with correct MIME. Reject computed imports and external/bare dependencies. Remove core module, alter MIME, corrupt bytes or add external import independently and require failure. |
 | `extracted_build_runs_without_external_assets` | On clean extraction, block external hosts, load actual module graph in a browser, inspect all three rooms and trigger graphics failure fallback. A 200 response containing HTML instead of JS fails. Verify license/provenance records and archive limit. |
 | Existing product regressions | Bellwether, GTM and Northline journeys preserve exact comparison, explicit choice, operation and inheritance. Protected scans and relevant full offline suite retain their assertions. No provider calls or new fixture seals are needed for presentation tests. |
