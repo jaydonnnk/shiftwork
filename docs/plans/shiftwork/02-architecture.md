@@ -1,3 +1,23 @@
+**3D workplace Gates 1 to 3 approved, 2026-10-19 Asia/Singapore.**
+
+The approved scoped [Gate 2](workplace-3d/02-architecture.md) is unchanged.
+Its approved [program design](workplace-3d/03-program-design.md) now specifies
+local engine closure, filtered state, exact publication and graphics lifecycle.
+Focused commits and a main push of Gates 1 to 3 are separately authorized.
+No backend/API change, acquisition, implementation or deployment is authorized.
+Gate 4 remains unwritten and S28 remains accepted. Earlier
+notices retain their dated scope.
+
+**POST-S28 3D PRESENTATION GATE 2 APPROVED, 2026-10-19 Asia/Singapore.**
+
+Jaydon explicitly approved the [scoped architecture](workplace-3d/02-architecture.md).
+It adds a self-hosted Three.js presentation beside the existing workbench, while
+preserving the approved backend and domain boundaries below. Engine release,
+module/asset details and proof controls belong to the pending Gate 3 design.
+The approval does not authorize dependency acquisition or implementation. S28
+and its historical evidence remain intact. The prior rendering-baseline statements
+below describe that delivered baseline, not a prohibition on the approved extension.
+
 # Architecture: Shiftwork final pivot
 
 **GATE 2 SCOPED REVISION (THREE BOARDS): RE-APPROVED 2026-09-30.** The user

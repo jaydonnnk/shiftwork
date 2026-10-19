@@ -1,3 +1,31 @@
+**3D workplace Gates 1 to 3 approved, 2026-10-19 Asia/Singapore.**
+
+Gates 1 and 2 remain approved. The scoped
+[program design](workplace-3d/03-program-design.md) and
+[visual specification](workplace-3d/visual-spec.md) have Gate 3 approval.
+They preserve this product's learner, three-board and evidence contracts.
+Focused commits and a main push of Gates 1 to 3 are separately authorized.
+Gate 4 is unwritten. No implementation or new product runtime evidence follows.
+Earlier notices retain their dated scope; S28 remains accepted.
+
+**3D WORKPLACE GATES 1 AND 2 APPROVED, 2026-10-19 Asia/Singapore.**
+
+The [scoped product](workplace-3d/01-product.md) and
+[architecture](workplace-3d/02-architecture.md) are approved. The real 3D room
+beside a persistent workbench is the product direction; Three.js is the selected
+presentation engine. The existing three-board and learner-decision contracts
+below remain intact. Comprehension, final art and runtime performance remain
+unproved. Gate 3 remains unwritten. The older pending notices below are historical.
+
+**SCOPED GATE 1 REOPENING FOR A 3D WORKPLACE, 2026-10-19 Asia/Singapore.**
+
+The user requested post-S28 planning and selected a 3D workplace as the intended
+result. The [scoped product proposal](workplace-3d/01-product.md) is awaiting
+Gate 1 approval. It revises workplace presentation and interaction while retaining
+the existing learner, three-board and evidence contracts. The approved baseline
+below continues to describe S28. No new rendering or implementation authority
+follows from this planning request.
+
 # Product: Shiftwork
 
 **Gate state:** RE-APPROVED 2026-09-30 for the three-board reconciliation, after an

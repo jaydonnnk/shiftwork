@@ -1,3 +1,39 @@
+**3D workplace Gates 1 to 3 approved. 2026-10-19 Asia/Singapore.**
+
+The [program design](plans/shiftwork/workplace-3d/03-program-design.md) and
+[visual specification](plans/shiftwork/workplace-3d/visual-spec.md) now define
+the original rooms, exact presentation contracts, approved r180 pin and proof
+budgets. These are approved specifications, not implemented or measured results.
+Jaydon approved Gate 3 and separately authorized batch commits and a main push
+of Gates 1 to 3. S28 remains accepted and Gate 4 remains unwritten. No acquisition,
+implementation or deployment follows from this publication instruction.
+Earlier notices describe their original checkpoints.
+
+**3D WORKPLACE GATES 1 AND 2 APPROVED; HANDOFF READY, 2026-10-19 Asia/Singapore.**
+
+Jaydon approved the [post-S28 product](plans/shiftwork/workplace-3d/01-product.md)
+and [architecture](plans/shiftwork/workplace-3d/02-architecture.md). The direction
+is a real 3D workplace with a persistent HTML workbench, using a locally served
+Three.js view and unchanged backend/domain contracts. Gate 3 is the next planning
+stage; its exact design and Gate 4 slices remain unwritten. The
+[handoff](plans/shiftwork/workplace-3d/handoff-2026-10-19.md) records completed work,
+limits and remaining visual/storytelling work. No dependency acquisition,
+implementation, provider call, commit, push or deployment occurred. S28 stays
+accepted. Earlier pending approval statements below are historical.
+
+**POST-S28 3D WORKPLACE PLANNING REQUESTED, 2026-10-19 Asia/Singapore.**
+
+S28 remains accepted. Jaydon requested a software-factory build plan based on the
+agentic-factory study and explicitly selected a 3D workplace. A scoped Gate 1
+presentation revision is now IN PROGRESS in
+[workplace-3d](plans/shiftwork/workplace-3d/00-status.md). Its
+[product proposal](plans/shiftwork/workplace-3d/01-product.md) and
+[HTML review hub](plans/shiftwork/workplace-3d/mockups/00-review.html) preserve
+the existing three boards, learner decisions and evidence boundaries. Later gates
+remain pending for this extension. No post-S28 implementation, new dependency,
+provider call, commit, push or deployment is authorized. Older statements that
+no slice follows S28 describe the approved baseline, not an approved extension.
+
 **S28 ACCEPTED, 2026-10-19 Asia/Singapore.**
 
 Jaydon accepted the hosted S28 result. The approved implementation plan ends at

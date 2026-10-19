@@ -1,3 +1,36 @@
+**Concrete 3D visual specification approved at Gate 3. 2026-10-19 Asia/Singapore.**
+
+The [visual specification](workplace-3d/visual-spec.md) and
+[colour study](workplace-3d/mockups/08-visual-spec.html) now define the three
+distinct workplaces, stable camera, matte materials, lighting, expanded editing
+and truthful transitions. The [program design](workplace-3d/03-program-design.md)
+sets the exact delivery and state contracts. Gate 3 is approved. These
+are original planning diagrams, not final 3D art or performance evidence.
+Focused commits and a main push of Gates 1 to 3 are separately authorized.
+The approved grayscale studies remain unchanged. S28's shipped client remains
+the delivered baseline; the prior notices retain their original dated scope.
+
+**3D WORKPLACE PRODUCT AND ARCHITECTURE APPROVED, 2026-10-19 Asia/Singapore.**
+
+The user approved [Gate 1](workplace-3d/01-product.md), including layout A,
+and [Gate 2](workplace-3d/02-architecture.md), selecting a locally served
+Three.js scene beside the persistent workbench. Distinct original rooms, direct
+labelled access, full workbench fallbacks and confirmed-state motion remain
+required. The contextual-panel mockup is a comparison, not a second build.
+Final materials, lighting, detailed scene/motion mapping and release/asset pins
+remain Gate 3 work. No final-art, WebGL or performance proof exists. The older
+visual baseline remains the historical specification for the delivered S28 client.
+
+**3D WORKPLACE PRESENTATION REVISION PROPOSED, 2026-10-19 Asia/Singapore.**
+
+The user selected a 3D workplace as the intended post-S28 result. The
+[Gate 1 proposal](workplace-3d/01-product.md) and
+[grayscale HTML studies](workplace-3d/mockups/00-review.html) are under review.
+A stable room with a persistent workbench is recommended; a contextual-panel
+alternative is also shown. This is not approval of final art, an engine or
+implementation. The historical visual baseline below is preserved for S28 and
+remains operative until the scoped revision is approved through the relevant gates.
+
 # Client visual direction: operational diorama
 
 **Composition selected by the user:** 2026-09-18.
