@@ -1,3 +1,15 @@
+**S30 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
+
+The user accepted S30 with the two cleanup findings applied and authorized the
+working-tree commits and publication to main. Local evidence: 61 Node checks,
+53 of 53 source faults with production unchanged, 21 of 21 fresh-preview browser
+controls, both performance tiers within budget, nine asset checks, three board
+journeys at exit 0 and the full non-packaging suite at 1454 passed with the known
+port_dead failure, one skip and two warnings. The
+[S30 checkpoint](plans/shiftwork/workplace-3d/s30-checkpoint-2026-10-20.md)
+carries receipts and limits. Publication is recorded here after the push. S31
+requires its own go-ahead. The S29 notices below retain their historical scope.
+
 **S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
 
 The user approved a narrowed Gate 3 and Gate 4 evidence scope and accepted the

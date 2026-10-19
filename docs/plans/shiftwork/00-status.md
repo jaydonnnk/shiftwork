@@ -1,3 +1,22 @@
+**S30 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
+
+The user answered "Start S30 (Recommended)" on 2026-10-20. Work proceeded on
+`shiftwork/slice-30`, created from `272321c`. The user then accepted S30 with
+"Yep i accept and do the cleanup and hen commit the working tree and push to
+main if u havent already", authorizing the two cleanup findings, focused commits
+and publication to main. The failed request, prediction and falsifier entry,
+diagnosis desk, reported diagnostic states, non-qualifying guards, expanded
+editing and 160ms polling-continuity emphasis are implemented locally.
+
+Fresh results: 61 Node checks, 53 of 53 source fault controls with production
+unchanged, 21 of 21 fresh-preview browser controls as expected, 9 asset checks,
+three existing board journeys at exit 0, and the full non-packaging suite at
+1454 passed, one known port_dead failure, one skip and two warnings. Section 5
+performance met both tested tiers with no budget misses. Details, receipts and
+limits are in the [S30 checkpoint](workplace-3d/s30-checkpoint-2026-10-20.md).
+Publication is recorded here after the push. S30 is accepted; S31 has not
+started.
+
 **S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
 
 The user explicitly approved the narrowed Gate 3 and Gate 4 scope, reviewed the
