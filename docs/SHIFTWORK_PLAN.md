@@ -1,3 +1,67 @@
+**S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
+
+The user approved a narrowed Gate 3 and Gate 4 evidence scope and accepted the
+slice. All narrowed required checks have receipts. S29 remains uncommitted and
+unpublished; S30 needs its own go-ahead. Windows/Edge, Firefox, previous-stable
+Safari, physical iPhone/Pixel, minimum Intel hardware, audible VoiceOver/NVDA
+and comprehension sessions stay deferred and unclaimed, and the known port_dead
+failure remains carried. See the
+[S29 checkpoint](plans/shiftwork/workplace-3d/s29-checkpoint-2026-10-19.md).
+
+**S29 local continuation verified, 2026-10-19 Asia/Singapore.**
+
+Local Bellwether 200% zoom, focus/retry and partial-initialization controls now
+have passing receipts. Fresh results: 50 Node checks, 42 source controls, 27
+browser controls, 16 packaging checks and all three complete browser journeys.
+The full offline suite retains its one known port_dead failure. Required native
+browser/device/audible-screen-reader and comprehension evidence remains unmet.
+S29 stays INCOMPLETE and unaccepted. The latest local-continuation section in
+[S29 checkpoint](plans/shiftwork/workplace-3d/s29-checkpoint-2026-10-19.md) supersedes older pending-local-check notices below.
+No S30, publication, deployment, credentials, provider or protected-fixture work.
+
+**S29 local Bellwether room; acceptance INCOMPLETE. 2026-10-19 Asia/Singapore.**
+
+The approved first inspection path now renders real local WebGL2 geometry beside
+the existing workbench. [S29 checkpoint](plans/shiftwork/workplace-3d/s29-checkpoint-2026-10-19.md)
+records bounded local proofs and outstanding device, browser, assistive-technology
+and lifecycle checks. S29 is unaccepted and unpublished. The hosted demo stays
+at accepted S28. No later slice or publication is authorized. Earlier notices
+retain their historical scope.
+
+**S29 prerequisites APPROVED, 2026-10-19 Asia/Singapore.**
+
+The user replied "approve" to the four concrete S29 prerequisites: create
+and switch to `shiftwork/slice-29`, acquire and verify pinned Three.js
+`0.180.0`, install existing locked dependencies in disposable environments,
+and write disposable local preview/test artifacts under `/tmp/shiftwork-s29-*`.
+S29 implementation may proceed on its branch. Earlier pending-prerequisite
+notices below are historical. S30, Git publication, deployment, credentials,
+provider calls and protected-fixture authoring remain unauthorized.
+
+**3D workplace Gate 4 approved; S29 go-ahead recorded. 2026-10-19 Asia/Singapore.**
+
+The execution handoff records the user's instruction, "Okay start slice 29."
+This approves the presented [S29 to S35 plan](plans/shiftwork/workplace-3d/04-slices.md)
+and authorizes S29 implementation only. Implementation has not started.
+[Scoped status](plans/shiftwork/workplace-3d/00-status.md) records the fresh
+preflight and outstanding branch, pinned-engine acquisition, locked-install and
+disposable local-test prerequisites. Stop for those specific permissions.
+No S30, Git publication, provider call or deployment is authorized.
+Earlier draft, awaiting-approval and planning-only notices below are historical.
+S28 acceptance and all evidence limits remain unchanged.
+
+**3D workplace Gate 4 drafted, awaiting approval. 2026-10-19 Asia/Singapore.**
+
+The current planning-only request produced a proposed
+[S29 to S35 sequence](plans/shiftwork/workplace-3d/04-slices.md). A small visible
+3D inspection path tests delivery and failure isolation early; diagnosis,
+comparison, operation and inheritance complete Bellwether before the other
+workplaces. Exact approved Gate 3 budgets and separate evidence obligations
+remain acceptance requirements, not achieved results. Gates 1 to 3 stay approved
+and S28 stays accepted. No post-S28 implementation has started. Further Git
+publication and implementation require their own authority. Earlier unwritten-
+Gate-4 and stop-after-publication notices are historical.
+
 **3D workplace Gates 1 to 3 approved. 2026-10-19 Asia/Singapore.**
 
 The [program design](plans/shiftwork/workplace-3d/03-program-design.md) and

@@ -1,3 +1,44 @@
+**S29 local continuation verified, 2026-10-19 Asia/Singapore.**
+
+Local Bellwether 200% zoom, focus/retry and partial-initialization controls now
+have passing receipts. Fresh results: 50 Node checks, 42 source controls, 27
+browser controls, 16 packaging checks and all three complete browser journeys.
+The full offline suite retains its one known port_dead failure. Required native
+browser/device/audible-screen-reader and comprehension evidence remains unmet.
+S29 stays INCOMPLETE and unaccepted. The latest local-continuation section in
+[S29 checkpoint](workplace-3d/s29-checkpoint-2026-10-19.md) supersedes older pending-local-check notices below.
+No S30, publication, deployment, credentials, provider or protected-fixture work.
+
+**S29 prerequisites APPROVED, 2026-10-19 Asia/Singapore.**
+
+The user replied "approve" to the four concrete S29 prerequisites: create
+and switch to `shiftwork/slice-29`, acquire and verify pinned Three.js
+`0.180.0`, install existing locked dependencies in disposable environments,
+and write disposable local preview/test artifacts under `/tmp/shiftwork-s29-*`.
+S29 implementation may proceed on its branch. Earlier pending-prerequisite
+notices below are historical. S30, Git publication, deployment, credentials,
+provider calls and protected-fixture authoring remain unauthorized.
+
+**Post-S28 extension Gate 4 approved; S29 authorized. 2026-10-19 Asia/Singapore.**
+
+The execution handoff records "Okay start slice 29." This approves the presented
+[scoped S29 to S35 sequence](workplace-3d/04-slices.md) and gives S29 its go-ahead.
+This baseline plan still ends at accepted S28; its historical contracts are unchanged.
+S29 implementation awaits the separate branch, acquisition, locked-install and
+disposable local-test prerequisites recorded in [scoped status](workplace-3d/00-status.md).
+No later slice, Git publication or deployment is authorized.
+Earlier draft and no-implementation-approval notices below are historical.
+
+**Post-S28 extension plan drafted, awaiting approval. 2026-10-19 Asia/Singapore.**
+
+This historical approved plan ends at accepted S28. The scoped
+[3D workplace Gate 4 draft](workplace-3d/04-slices.md) proposes S29 to S35
+without renumbering earlier work or changing these exit contracts. It has no
+implementation approval. Gates 1 to 3 of that extension are approved; Gate 4
+approval and each slice go-ahead remain separate. Current authority is in
+[scoped status](workplace-3d/00-status.md). No publication or deployment follows.
+The older notices and evidence below retain their original dated scope.
+
 **SLICE 28 ROUTE REVISION APPROVED BY THE USER'S EXPLICIT INSTRUCTION, 2026-10-15 Asia/Singapore.**
 
 Nebius Console credits and Token Factory credits are separate ledgers. Jaydon's

@@ -1,3 +1,122 @@
+**S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
+
+The user explicitly approved the narrowed Gate 3 and Gate 4 scope, reviewed the
+acceptance package, and accepted S29. All narrowed required checks have
+receipts. S29 remains uncommitted and unpublished. S30 remains blocked until its
+own go-ahead. The known port_dead failure, the headless/emulated evidence limits
+and every deferred target stay documented and unclaimed.
+
+**Gate 3 and Gate 4 narrowed scope APPROVED, 2026-10-19 Asia/Singapore.**
+
+The user selected the narrowed-contract path after the exact-viewport Chromium
+evidence closed the Chromium half of the narrow-layout bullet, then explicitly
+approved the revised text. Gate 3 section 9 and its Gate 4 section 5 copy now
+define a Mac-only evidence scope: headless Chromium 155 on macOS 26.5.1 at exact
+1280x720, 640x900 and 390x844 viewports, plus the recorded native Safari 26.5
+observations. Windows and Edge, Firefox, previous-stable Safari, physical
+iPhone/Pixel, minimum Intel hardware, audible VoiceOver/NVDA and comprehension
+sessions are deferred and unclaimed. The README records the reduced claims. All
+narrowed required checks have receipts; S29 awaits explicit user acceptance.
+S30 remains gated separately.
+
+**S29 exact narrow-viewport Chromium evidence recorded, 2026-10-19 Asia/Singapore.**
+
+The Chromium half of the exact 640x900 and 390x844 narrow-layout bullet now
+passes at 100% and 200% zoom with keyboard, touch, 44 CSS-pixel targets, dirty
+editor continuity and three clean/fault/restored CSS omission controls. The
+change is additive test code; no production byte changed. WebKit,
+previous-stable browsers, native Safari/mobile/Windows hardware, audible AT and
+comprehension evidence remain unmet, and the known port_dead failure remains.
+S29 stays INCOMPLETE and unaccepted. The latest
+[S29 checkpoint](workplace-3d/s29-checkpoint-2026-10-19.md) section carries
+receipts and limits. No S30 or publication followed.
+
+**S29 native Safari continuation recorded, 2026-10-19 Asia/Singapore.**
+
+Native Safari exposed and verified repairs for narrow picker overflow and a
+24px select target. Only production styles.css and its manifest digest changed.
+Fresh checks: 50 Node, two native picker controls, three Chromium CSS controls,
+16 packaging checks and all three existing browser journeys. The full suite
+retains its one known port_dead failure. S29 remains INCOMPLETE and unaccepted.
+The user restricted this continuation to this Mac; the approved matrix was not
+relaxed. The latest S29 checkpoint and handoff carry receipts and the S29 to S35
+sequence. No S30 or publication followed.
+
+**S29 local continuation verified, 2026-10-19 Asia/Singapore.**
+
+Local Bellwether 200% zoom, focus/retry and partial-initialization controls now
+have passing receipts. Fresh results: 50 Node checks, 42 source controls, 27
+browser controls, 16 packaging checks and all three complete browser journeys.
+The full offline suite retains its one known port_dead failure. Required native
+browser/device/audible-screen-reader and comprehension evidence remains unmet.
+S29 stays INCOMPLETE and unaccepted. The latest local-continuation section in
+[S29 checkpoint](workplace-3d/s29-checkpoint-2026-10-19.md) supersedes older pending-local-check notices below.
+No S30, publication, deployment, credentials, provider or protected-fixture work.
+
+**S29 continuation checkpoint, 2026-10-19 Asia/Singapore.**
+
+Actual page-cache focus loss is repaired and fail-capable. Fresh checks pass:
+47 Node, nine assets, 39 source controls and eight isolated browser controls.
+Explicit/cached-module retry has bounded local proof. Zoom is incomplete and
+full regressions after the focus fix remain pending, along with the native
+browser/device/audible-screen-reader matrix. S29 stays incomplete and unaccepted.
+[S29 checkpoint](workplace-3d/s29-checkpoint-2026-10-19.md) records exact receipts and limits. New work stopped near
+the 175k context boundary. Existing approvals persist; no S30 or publication.
+Earlier notices retain their historical scope.
+
+**Execution halted at the context boundary, 2026-10-19 Asia/Singapore.**
+
+The runtime session log reported approximately 414k tokens of context, beyond
+AGENTS.md's 175k limit. This was discovered late; no budget extension was given.
+New work stopped. S29 remains incomplete. The checkpoint and fresh-session
+handoff record completed local evidence, pending checks and unchanged approvals.
+
+**S29 local implementation; acceptance INCOMPLETE. 2026-10-19 Asia/Singapore.**
+
+The approved first Bellwether WebGL2 inspection room is available locally on
+`shiftwork/slice-29`. [Scoped checkpoint](workplace-3d/s29-checkpoint-2026-10-19.md)
+records the real rendering, failure isolation, tests and remaining matrix/proof
+gaps. S29 is not complete, accepted or published. S28 remains accepted with its
+limits unchanged. No S30, commit, push, deployment or provider call follows.
+Older planning-only and pending-prerequisite labels below are historical.
+
+**S29 prerequisites APPROVED, 2026-10-19 Asia/Singapore.**
+
+The user replied "approve" to the four concrete S29 prerequisites: create
+and switch to `shiftwork/slice-29`, acquire and verify pinned Three.js
+`0.180.0`, install existing locked dependencies in disposable environments,
+and write disposable local preview/test artifacts under `/tmp/shiftwork-s29-*`.
+S29 implementation may proceed on its branch. Earlier pending-prerequisite
+notices below are historical. S30, Git publication, deployment, credentials,
+provider calls and protected-fixture authoring remain unauthorized.
+
+**Post-S28 Gate 4 approved; S29 go-ahead recorded. 2026-10-19 Asia/Singapore.**
+
+The execution handoff records the user's instruction, "Okay start slice 29."
+The presented [Gate 4 sequence](workplace-3d/04-slices.md) is approved, and S29
+has its implementation go-ahead. No S29 implementation has started.
+The [scoped preflight](workplace-3d/00-status.md) records current refs, preserved
+planning changes, available runtimes and the separately gated prerequisites.
+Branch creation, the pinned engine download, locked clean installation and
+disposable local-test writes await specific permission. Do not implement on main.
+S30 onward, Git publication, provider calls and deployment remain unauthorized.
+Earlier pending-approval and planning-only notices below retain historical scope.
+S28's acceptance, known failures and evidence limits are unchanged.
+
+**Post-S28 3D workplace Gate 4 drafted, awaiting approval. 2026-10-19 Asia/Singapore.**
+
+The current request authorizes [Gate 4 planning](workplace-3d/04-slices.md) only.
+It proposes S29 to S35: Bellwether inspection, diagnosis/test, comparison/choice,
+operation and inheritance, followed by distinct Stonebridge and Northline rooms.
+The complete Bellwether checkpoint precedes expansion. Gates 1 to 3 remain
+approved and S28 remains accepted. No new slice has started. Gate 4 approval
+and each implementation go-ahead are separate. No acquisition, install, branch,
+provider call, credentials, Git publication or deployment is authorized.
+[Scoped status](workplace-3d/00-status.md) carries current evidence limits.
+Earlier unwritten-Gate-4 and stop-after-publication notices in the authority
+documents describe completed checkpoints and do not govern this planning request.
+Historical evidence and approved decisions remain unchanged.
+
 **Post-S28 3D workplace: Gates 1 to 3 approved. 2026-10-19 Asia/Singapore.**
 
 The [program design](workplace-3d/03-program-design.md) now specifies exact
