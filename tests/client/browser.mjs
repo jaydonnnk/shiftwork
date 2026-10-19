@@ -825,7 +825,7 @@ try {
   }, process.argv.includes('--assist-demo'));
   await assertPublicDOM('assist-denial');
   const investigateLabels = await labels();
-  assert.deepEqual(investigateLabels, ['board', 'source', 'diagnostic']);
+  assert.deepEqual(investigateLabels, ['board', 'failed-request', 'source', 'diagnostic']);
   for (const journey of ['compare', 'next']) {
     await evaluate(journey => document.querySelector(`[data-view="${journey}"]`).click(), journey);
     assert.equal(await evaluate(() => document.getElementById('investigate-view').hidden), true,
