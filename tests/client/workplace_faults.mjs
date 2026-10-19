@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(out?.startsWith('/tmp/shiftwork-s29-')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -37,6 +37,15 @@ rows.push(
  {name:'saved',needle:'latestVersionId: board?.latest_saved_version_id ?? null',replacement:'latestVersionId: selection?.selected_version_id ?? null',test:'projection_separates_saved_selected_executed',expect:'projection_separates_saved_selected_executed'},
  {name:'source_absence',needle:'if (selection && !operatingVersion) incomplete();',replacement:'void 0;',test:'optional_selected_source_is_incomplete_not_conflict',expect:'optional_selected_source_is_incomplete_not_conflict'},
  {name:'serialized_leak',needle:'reasonCode: check.reason_code',replacement:'reasonCode: check.reason_code, expected: check.expected_ref',test:'projection_whitelists_scene_fields_and_detaches_arrays',expect:'projection_whitelists_scene_fields_and_detaches_arrays'},
+ {name:'diagnostic_purpose',needle:"diagnostic: experiment(input.diagnostic ?? stationView?.latest_diagnostic, 'DIAGNOSTIC')",replacement:"diagnostic: experiment(input.diagnostic ?? stationView?.latest_diagnostic, 'QUALIFYING_COMPARISON')",test:'diagnostic_purpose_guard_rejects_other_kinds',expect:'a comparison was accepted into the diagnostic slot'},
+ {name:'comparison_purpose',needle:"comparison: experiment(input.comparison ?? latest, 'QUALIFYING_COMPARISON')",replacement:"comparison: experiment(input.comparison ?? latest, 'DIAGNOSTIC')",test:'comparison_purpose_guard_rejects_other_kinds',expect:'a diagnostic was accepted into the comparison slot'},
+ {name:'later_purpose',needle:"later: experiment(latest, 'LATER_CONDITION_COMPARISON')",replacement:"later: experiment(latest, 'QUALIFYING_COMPARISON')",test:'later_purpose_guard_rejects_other_kinds',expect:'a qualifying comparison was accepted into the later slot'},
+ {name:'selection_promotion',needle:'if (selection?.comparison_id && tests.diagnostic?.id === selection.comparison_id) conflict();',replacement:'void 0;',test:'diagnostic_cannot_qualify_selection',expect:'a diagnostic was accepted as the selection comparison'},
+ {name:'wall_promotion',needle:'if (events.some(event => diagnosticRuns.has(event.derivation?.run_id))) conflict();',replacement:'void 0;',test:'diagnostic_cannot_derive_ledger_event',expect:'a diagnostic trial run derived a ledger event'},
+ {name:'test_update_duplicate',needle:'if (before !== after && after !== null) {',replacement:'if (after !== null) {',test:'diagnostic_test_update_is_continuous_and_duplicate_quiet',expect:'a duplicate accepted view produced a transition'},
+ {name:'test_update_removal',needle:'if (before !== after && after !== null) {',replacement:'if (before !== after) {',test:'diagnostic_test_update_is_continuous_and_duplicate_quiet',expect:'a removed diagnostic produced a transition'},
+ {name:'pending_evidence_suppression',needle:'if (before !== after && after !== null) {',replacement:"if (before !== after && after !== null && previous.evidence?.completeness === 'linked') {",test:'diagnostic_update_survives_pending_evidence_becoming_linked',expect:'a pending evidence route suppressed the test update'},
+ {name:'history_quiet',needle:'if (beforeInspection.mode !== afterInspection.mode || beforeInspection.historicalRunId !== afterInspection.historicalRunId) return [];',replacement:'void 0;',test:'diagnostic_history_and_context_changes_are_quiet',expect:'a history change emitted a fresh test update'},
 );
 const hostRows=[
  {name:'host_generation',needle:'if(publication.generation!=null && publication.generation<generation) return;',replacement:'void 0;',test:'host_reset_cannot_accept_older_generation',expect:'Older generation mounted after reset'},
@@ -45,6 +54,8 @@ const hostRows=[
  {name:'host_cached_retry',needle:'if(disposed || brokenModule) return;',replacement:'if(disposed) return;',test:'host_retry_refuses_a_cached_module_failure',expect:'Retry repeated a failed module import'},
  {name:'host_retry_newest',needle:'const prior=previous; latest=publication;',replacement:'const prior=previous; if(!unavailable) latest=publication;',test:'host_retry_accepts_the_newest_publication',expect:'Retry applied an older public view'},
  {name:'host_constructor_failure',needle:"catch { if(owner===token && !disposed) failure('init-failed'); return; }",replacement:'catch { return; }',test:'host_constructor_throw_is_latched_until_explicit_retry',expect:'Thrown initialization did not fail the host'},
+ {name:'host_loading_baseline',needle:"if(publication.kind==='loading') { if(!unavailable)",replacement:"if(publication.kind==='loading') { previous=null; if(!unavailable)",test:'host_loading_retains_test_baseline_and_duplicate_is_quiet',expect:'accepted test update did not reach the scene'},
+ {name:'host_expanded_reference',needle:"previous=view.consistency==='conflict'?null:view;",replacement:"if(!expanded) previous=view.consistency==='conflict'?null:view;",test:'host_expanded_updates_advance_the_reference_without_replay',expect:'a duplicate after expansion replayed the suspended update'},
  {name:'host_resize_cleanup',needle:'size.disconnect();',replacement:'void 0;',test:'host_loading_retains_one_scene_and_double_disposal_is_idempotent',expect:'Resize observer remains attached'},
  {name:'host_intersection_cleanup',needle:'intersection.disconnect();',replacement:'void 0;',test:'host_loading_retains_one_scene_and_double_disposal_is_idempotent',expect:'Intersection observer remains attached'},
  ...[

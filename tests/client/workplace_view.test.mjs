@@ -112,15 +112,15 @@ for(const relation of ['run','output','check']) test(`incident_${relation}_must_
   assert.equal(projectWorkplace(i).consistency,'conflict',`Incident ${relation} disagreement was accepted`);
 });
 test('projection_whitelists_scene_fields_and_detaches_arrays', async () => {
-  const { projectWorkplace } = await api(); const i = input(); const v = projectWorkplace(i);
+  const { projectWorkplace } = await api(); const i = input(); i.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []); const v = projectWorkplace(i);
   assert.deepEqual(Object.keys(v).sort(), ['schemaVersion','context','station','shiftState','operating','saved','run','evidence','investigation','tests','consequences','inheritance','consistency'].sort());
-  const needles = ['PRIVATE_RATIONALE','PRIVATE_SOURCE','PRIVATE_BODY','PRIVATE_REQUEST','PRIVATE_EXPECTED', '/Users/private/secret', '\\Users\\private\\secret'];
+  const needles = ['PRIVATE_RATIONALE','PRIVATE_SOURCE','PRIVATE_BODY','PRIVATE_REQUEST','PRIVATE_EXPECTED','PRIVATE_TREATMENT','PRIVATE_CUSTOMER_TEXT','PRIVATE_REASON', '/Users/private/secret', '\\Users\\private\\secret'];
   const scan = text => needles.filter(n => text.includes(n) || text.includes(JSON.stringify(n).slice(1,-1)) || text.includes(n.replaceAll('\\','/')));
   for (const needle of needles) assert.ok(scan(JSON.stringify({ value: needle })).includes(needle), 'serialized scanner cannot match its needle');
   assert.deepEqual(scan(JSON.stringify(v)), []);
   i.checks[0].verdict = 'pass'; assert.equal(v.evidence.checks[0].verdict, 'fail');
 });
-test('S29_focus_is_the_only_transition_and_history_is_quiet', async () => {
+test('station_focus_is_the_only_transition_without_a_diagnostic_update', async () => {
   const { projectWorkplace, diffWorkplace } = await api(); const i = input(); const a = projectWorkplace(i);
   assert.deepEqual(diffWorkplace(null, a), []); assert.deepEqual(diffWorkplace(a,a), []);
   i.activeStation = 'evaluator'; const b = projectWorkplace(i);
@@ -128,6 +128,103 @@ test('S29_focus_is_the_only_transition_and_history_is_quiet', async () => {
   i.inspection = { mode: 'history', historicalRunId: 'run-1' };
   assert.deepEqual(diffWorkplace(a, projectWorkplace(i)), []);
 });
+
+export function diagnostic(kind = 'DIAGNOSTIC', trialState = 'RUNNING', missing = ['pending capture']) {
+  return { id: 'experiment-diag-1', shift_id: 'shift-1', kind, context_evidence_class: 'TRUSTED_LOCAL',
+    context_hash: 'context-diag', declared_treatment: 'PRIVATE_TREATMENT', state: 'RUNNING',
+    eligible: false, eligibility_reason: 'PRIVATE_REASON',
+    candidates: [{ label: 'A', artifact_version_id: 'diag-version-9', artifact_content_hash: 'diag-hash-9' }],
+    trials: [{ ordinal: 1, candidate_label: 'A', run_id: 'diag-run-1', artifact_version_id: 'diag-version-9',
+      state: trialState, evidence_mode: 'TRUSTED_LOCAL', missing_evidence: missing,
+      outputs: [{ request_text: 'PRIVATE_REQUEST', body_base64: 'PRIVATE_BODY' }],
+      customer_text: 'PRIVATE_CUSTOMER_TEXT', task_assessments: [], observations: [] }] };
+}
+test('diagnostic_purpose_guard_rejects_other_kinds', async () => {
+  const { projectWorkplace } = await api(); const i = input();
+  i.diagnostic = diagnostic('QUALIFYING_COMPARISON');
+  assert.equal(projectWorkplace(i).tests.diagnostic, null, 'a comparison was accepted into the diagnostic slot');
+});
+test('comparison_purpose_guard_rejects_other_kinds', async () => {
+  const { projectWorkplace } = await api(); const i = input();
+  i.comparison = diagnostic('DIAGNOSTIC');
+  assert.equal(projectWorkplace(i).tests.comparison, null, 'a diagnostic was accepted into the comparison slot');
+});
+test('later_purpose_guard_rejects_other_kinds', async () => {
+  const { projectWorkplace } = await api(); const i = input();
+  i.stationView = { shift_id: 'shift-1', latest_experiment: diagnostic('QUALIFYING_COMPARISON') };
+  const v = projectWorkplace(i);
+  assert.equal(v.tests.later, null, 'a qualifying comparison was accepted into the later slot');
+});
+test('experiment_never_moves_operation_wall', async () => {
+  const { projectWorkplace } = await api();
+  const plain = projectWorkplace(input());
+  for (const change of [
+    i => { i.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []); },
+    i => { i.comparison = diagnostic('QUALIFYING_COMPARISON', 'COMPLETE', []); i.stationView = { shift_id: 'shift-1', latest_experiment: i.comparison }; },
+    i => { i.stationView = { shift_id: 'shift-1', latest_experiment: diagnostic('LATER_CONDITION_COMPARISON', 'COMPLETE', []) }; },
+  ]) {
+    const i = input(); change(i); const v = projectWorkplace(i);
+    assert.deepEqual(v.operating, plain.operating, 'an experiment moved the operating selection');
+    assert.deepEqual(v.consequences, plain.consequences, 'an experiment moved the consequence wall');
+    assert.deepEqual(v.inheritance, plain.inheritance, 'an experiment changed inheritance');
+    assert.equal(v.consistency, 'linked');
+  }
+});
+test('diagnostic_cannot_qualify_selection', async () => {
+  const { projectWorkplace } = await api(); const i = input();
+  i.board.operating_selection.comparison_id = 'experiment-diag-1';
+  i.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []);
+  assert.equal(projectWorkplace(i).consistency, 'conflict', 'a diagnostic was accepted as the selection comparison');
+});
+test('diagnostic_cannot_derive_ledger_event', async () => {
+  const { projectWorkplace } = await api(); const i = input();
+  i.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []);
+  i.events = [{ seq: 1, hash: 'event-diag', event_type: 'SALE_COMPLETED', synthetic: true,
+    derivation: { run_id: 'diag-run-1', check_id: 'check-1', observed_ref: 'output-1', request_ordinal: 1, verdict: 'pass' } }];
+  i.board.ledger_event_count = 1; i.board.ledger_totals = { SALE_COMPLETED: 1 };
+  assert.equal(projectWorkplace(i).consistency, 'conflict', 'a diagnostic trial run derived a ledger event');
+});
+test('diagnostic_test_update_is_continuous_and_duplicate_quiet', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const running = input(); running.diagnostic = diagnostic('DIAGNOSTIC', 'RUNNING', ['pending capture']);
+  const complete = input(); complete.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []);
+  const a = projectWorkplace(running), b = projectWorkplace(complete);
+  const expected = [{ key: 'test:diagnostic:experiment-diag-1|RUNNING|COMPLETE|diag-run-1|0', kind: 'test-update',
+    stationId: 'compare', publicRefs: ['experiment-diag-1', 'diag-run-1', 'diag-version-9'] }];
+  assert.deepEqual(diffWorkplace(a, b), expected);
+  assert.deepEqual(diffWorkplace(b, b), [], 'a duplicate accepted view produced a transition');
+  assert.deepEqual(diffWorkplace(b, a), [{ key: 'test:diagnostic:experiment-diag-1|RUNNING|RUNNING|diag-run-1|1',
+    kind: 'test-update', stationId: 'compare', publicRefs: ['experiment-diag-1', 'diag-run-1', 'diag-version-9'] }]);
+  assert.deepEqual(diffWorkplace(a, projectWorkplace(Object.assign(input(), { diagnostic: null }))), [], 'a removed diagnostic produced a transition');
+});
+test('diagnostic_update_survives_pending_evidence_becoming_linked', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const pending = input(); pending.diagnostic = diagnostic('DIAGNOSTIC', 'RUNNING', ['pending capture']); pending.checks = [];
+  const linked = input(); linked.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []);
+  const a = projectWorkplace(pending), b = projectWorkplace(linked);
+  assert.equal(a.evidence.completeness, 'missing'); assert.equal(b.evidence.completeness, 'linked');
+  assert.equal(diffWorkplace(a, b).filter(item => item.kind === 'test-update').length, 1, 'a pending evidence route suppressed the test update');
+});
+test('diagnostic_history_and_context_changes_are_quiet', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const current = input(); current.diagnostic = diagnostic('DIAGNOSTIC', 'RUNNING', ['pending capture']);
+  const a = projectWorkplace(current);
+  const history = input(); history.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []);
+  history.inspection = { mode: 'history', historicalRunId: 'run-1' };
+  assert.deepEqual(diffWorkplace(a, projectWorkplace(history)), [], 'a history change emitted a fresh test update');
+  const otherShift = input(); otherShift.loadedShiftId = null; otherShift.board.latest_shift = null;
+  otherShift.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []);
+  assert.deepEqual(diffWorkplace(a, projectWorkplace(otherShift)), [], 'a context change emitted a fresh test update');
+});
+test('diagnostic_history_test_update_is_continuous_within_the_same_inspection', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const running = input(); running.inspection = { mode: 'history', historicalRunId: 'run-1' }; running.diagnostic = diagnostic('DIAGNOSTIC', 'RUNNING', ['pending capture']);
+  const complete = input(); complete.inspection = { mode: 'history', historicalRunId: 'run-1' }; complete.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []);
+  const transitions = diffWorkplace(projectWorkplace(running), projectWorkplace(complete));
+  assert.equal(transitions.filter(item => item.kind === 'test-update').length, 1, 'a stable historical inspection suppressed the test update');
+  assert.equal(transitions.filter(item => item.kind === 'station-focus').length, 0, 'history navigation emitted focus motion');
+});
+
 
 async function hostFixture({ hidden=false, offscreen=false, delayed=false, failDuringCreate=false, moduleFailure=false, throwDuringCreate=false } = {}) {
   const node = () => {
@@ -147,7 +244,7 @@ async function hostFixture({ hidden=false, offscreen=false, delayed=false, failD
   globalThis.IntersectionObserver=class {constructor(fn){this.fn=fn;observers.push(this);}observe(){this.fn([{isIntersecting:!offscreen}]);}disconnect(){this.closed=true;}};
   const releases=[]; let allocations=0, disposals=0, picked=0, imports=0, suspension=[];
   const handles=[];
-  const module={createWorkplaceScene(options){if(throwDuringCreate) throw Error('injected construction failure');allocations++;const h={options,apply(){},resize(){},setSuspended(v){suspension.push(v);},setReducedMotion(){},dispose(){disposals++;}};handles.push(h);if(failDuringCreate) options.onFailure('shader-failed');return h;}};
+  const module={createWorkplaceScene(options){if(throwDuringCreate) throw Error('injected construction failure');allocations++;const h={options,applied:[],transitions:[],apply(view,transitions=[]){h.applied.push(view);h.transitions.push(transitions);},resize(){},setSuspended(v){suspension.push(v);},setReducedMotion(){},dispose(){disposals++;}};handles.push(h);if(failDuringCreate) options.onFailure('shader-failed');return h;}};
   globalThis.__s29LoadScene=()=>{imports++;return moduleFailure?Promise.reject(Error('injected module failure')):delayed?new Promise(r=>releases.push(()=>r(module))):Promise.resolve(module);};
   let source=process.env.WORKPLACE_HOST_SOURCE ? Buffer.from(process.env.WORKPLACE_HOST_SOURCE,'base64').toString() : await readFile(new URL('../../shiftwork/client/workplace-host.js',import.meta.url),'utf8');
   source=source.replace("'./workplace-view.js'",JSON.stringify(url.href)).replace("await import('./workplace-scene.js')",'await globalThis.__s29LoadScene()');
@@ -173,6 +270,44 @@ test('host_reset_cannot_accept_older_generation',async()=>{
   const f=await hostFixture();f.host.publish(f.accepted(4));await f.flush();
   f.host.publish({kind:'reset',context:f.view.context,reason:'error'});f.host.publish(f.accepted(3));await f.flush();
   assert.equal(f.counts.allocations,1,'Older generation mounted after reset');f.host.dispose();
+});
+function diagnosticSummary(trialState='RUNNING',missing=1) {
+  return { id:'d1', shiftId:'shift-1', kind:'DIAGNOSTIC', state:'RUNNING', evidenceClass:'TRUSTED_LOCAL',
+    contextHash:'context-diag', outcomeStatus:null, candidates:[], observedRunId:null,
+    trials:[{ordinal:1,candidateLabel:'A',runId:'r1',versionId:'v1',state:trialState,evidenceMode:'TRUSTED_LOCAL',missingEvidenceCount:missing}] };
+}
+test('host_loading_retains_test_baseline_and_duplicate_is_quiet',async()=>{
+  const f=await hostFixture();
+  const base={...f.view,tests:{...f.view.tests,diagnostic:diagnosticSummary('RUNNING',1)}};
+  f.host.publish(f.accepted(2,base));await f.flush();
+  const scene=f.handles[0];
+  f.host.publish({kind:'loading',context:base.context,generation:3});await f.flush();
+  assert.equal(scene.transitions.length,0,'loading published a test transition');
+  const next={...base,tests:{...base.tests,diagnostic:diagnosticSummary('COMPLETE',0)}};
+  f.host.publish(f.accepted(3,next));await f.flush();
+  assert.deepEqual(scene.transitions.at(-1),[{key:'test:diagnostic:d1|RUNNING|COMPLETE|r1|0',kind:'test-update',stationId:'compare',publicRefs:['d1','r1','v1']}],'accepted test update did not reach the scene');
+  f.host.publish(f.accepted(3,next));await f.flush();
+  assert.deepEqual(scene.transitions.at(-1),[],'duplicate accepted view produced a transition');
+  f.host.publish({kind:'reset',context:base.context,reason:'error'});await f.flush();
+  f.host.publish(f.accepted(4,next));await f.flush();
+  assert.equal(f.counts.allocations,2,'error recovery did not remount once');
+  assert.equal(f.handles[1].applied.length,0,'error recovery replayed a stale test update');
+  f.host.dispose();
+});
+test('host_expanded_updates_advance_the_reference_without_replay',async()=>{
+  const f=await hostFixture();
+  const base={...f.view,tests:{...f.view.tests,diagnostic:diagnosticSummary('RUNNING',1)}};
+  f.host.publish(f.accepted(2,base));await f.flush();
+  f.host.setExpanded(true);
+  const next={...base,tests:{...base.tests,diagnostic:diagnosticSummary('COMPLETE',0)}};
+  f.host.publish(f.accepted(3,next));await f.flush();
+  f.host.setExpanded(false);
+  const scene=f.handles[0];
+  assert.ok(f.suspension.includes(true)&&f.suspension.includes(false),'expanded suspension was not applied');
+  f.host.publish(f.accepted(3,next));await f.flush();
+  assert.deepEqual(scene.transitions.at(-1),[],'a duplicate after expansion replayed the suspended update');
+  assert.equal(f.counts.allocations,1,'expanded updates remounted the scene');
+  f.host.dispose();
 });
 for(const mode of ['hidden','offscreen','expanded']) test(`host_${mode}_import_completion_draws_nothing`,async()=>{
   const f=await hostFixture({delayed:true});f.host.publish(f.accepted());
