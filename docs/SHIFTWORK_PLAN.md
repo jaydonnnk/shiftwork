@@ -7,8 +7,10 @@ controls, both performance tiers within budget, nine asset checks, three board
 journeys at exit 0 and the full non-packaging suite at 1454 passed with the known
 port_dead failure, one skip and two warnings. The
 [S30 checkpoint](plans/shiftwork/workplace-3d/s30-checkpoint-2026-10-20.md)
-carries receipts and limits. Publication is recorded here after the push. S31
-requires its own go-ahead. The S29 notices below retain their historical scope.
+carries receipts and limits. S30 is committed on `shiftwork/slice-30` as
+`2a322bd..1662b81`, fast-forwarded to main and pushed as `272321c..1662b81`.
+S31 requires its own go-ahead. The S29 notices below retain their historical
+scope.
 
 **S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
 

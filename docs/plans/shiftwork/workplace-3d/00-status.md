@@ -12,8 +12,9 @@ fresh-preview browser controls, nine asset checks, three existing board journeys
 and the full non-packaging suite at 1454 passed with the one known port_dead
 failure, one skip and two warnings. Both performance tiers met their budgets. The
 [S30 checkpoint](s30-checkpoint-2026-10-20.md) carries receipts, limits and the
-unclaimed targets. Publication is recorded here after the push. S30 is accepted;
-S31 has not started.
+unclaimed targets. S30 is committed on `shiftwork/slice-30` as
+`2a322bd..1662b81`, fast-forwarded to main and pushed as `272321c..1662b81`.
+S30 is accepted and published; S31 has not started.
 
 **S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
 

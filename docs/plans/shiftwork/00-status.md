@@ -14,8 +14,9 @@ three existing board journeys at exit 0, and the full non-packaging suite at
 1454 passed, one known port_dead failure, one skip and two warnings. Section 5
 performance met both tested tiers with no budget misses. Details, receipts and
 limits are in the [S30 checkpoint](workplace-3d/s30-checkpoint-2026-10-20.md).
-Publication is recorded here after the push. S30 is accepted; S31 has not
-started.
+S30 is committed on `shiftwork/slice-30` as `2a322bd..1662b81`, fast-forwarded
+to main and pushed as `272321c..1662b81`. S30 is accepted and published; S31 has
+not started.
 
 **S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
 

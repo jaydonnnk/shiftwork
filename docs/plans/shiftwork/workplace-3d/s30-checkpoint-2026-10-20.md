@@ -2,20 +2,19 @@
 
 Updated: 2026-10-20 Asia/Singapore.
 
-**Status: S30 ACCEPTED on local evidence, 2026-10-20; commits and main
-publication are recorded below after the push.** The user answered "Start S30
-(Recommended)" on 2026-10-20, which authorized local implementation, tests and
-disposable evidence on `shiftwork/slice-30`. The user then accepted S30 with
-"Yep i accept and do the cleanup and hen commit the working tree and push to
-main if u havent already", authorizing the two cleanup findings, focused commits
-and publication to main. The earlier go-ahead did not cover deployment,
-credentials, provider calls, protected fixtures, browser installation, outreach
-or any change to the narrowed evidence scope. S31 has not started and still
-requires its own go-ahead.
+**Status: S30 ACCEPTED on local evidence and published on main, 2026-10-20.**
+The user answered "Start S30 (Recommended)" on 2026-10-20, which authorized local
+implementation, tests and disposable evidence on `shiftwork/slice-30`. The user
+then accepted S30 with "Yep i accept and do the cleanup and hen commit the
+working tree and push to main if u havent already", authorizing the two cleanup
+findings, focused commits and publication to main. The earlier go-ahead did not
+cover deployment, credentials, provider calls, protected fixtures, browser
+installation, outreach or any change to the narrowed evidence scope. S31 has not
+started and still requires its own go-ahead.
 
-The branch was created from the S29 publication tip `272321c` and confirmed with
-`git branch --show-current`. The commit and publication range is recorded after
-the push.
+The branch was created from the S29 publication tip `272321c`. The work is
+committed on `shiftwork/slice-30` as `2a322bd..1662b81`, fast-forwarded to main
+and pushed as `272321c..1662b81`.
 
 ## Scope and delivered contract
 
@@ -258,7 +257,7 @@ The acceptance and publication notices in the root status and the workplace
 status were updated in the same round. The test rename was re-verified with the
 61-check unit file. No production byte changed after the performance, asset,
 journey or full-suite runs, so those receipts remain valid for the committed
-tree.
+tree. S30 is published on main as `272321c..1662b81`.
 
 ## Limits and unclaimed targets
 
@@ -281,5 +280,5 @@ tree.
 ## Stop boundary
 
 S30 is accepted on the evidence above. S31 requires its own go-ahead and has not
-started. Focused commits and the main publication are recorded after the push;
-no deployment, credential, provider call or protected fixture follows.
+started. The work is committed and published on main as `272321c..1662b81`; no
+deployment, credential, provider call or protected fixture follows.
