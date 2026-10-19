@@ -2,7 +2,7 @@
 
 2026-10-19 Asia/Singapore. S29 was INCOMPLETE through these continuations and
 was ACCEPTED later on 2026-10-19 under the approved narrowed Gate 3 scope. It
-remains uncommitted and unpublished.
+is published on main as 25e3d14..7d6d68f.
 
 ## Authority and result
 
@@ -639,7 +639,7 @@ claims.
 
 The older "S29 MUST remain incomplete until" list above describes the
 pre-revision matrix. The approved narrowed Gate 3 section 9 scope supersedes it.
-S29 remains unaccepted until the user explicitly accepts the slice.
+The user accepted S29 later on 2026-10-19.
 
 ### Narrowed-scope acceptance package
 
@@ -667,7 +667,7 @@ Pre-revision copies of the gate documents and README are retained at
 ## S29 acceptance: 2026-10-19
 
 The user explicitly approved the narrowed Gate 3 and Gate 4 revision and then
-accepted S29 under it. S29 is accepted, uncommitted and unpublished. S30 remains
-blocked until its own go-ahead. No commit, push, deployment, provider call,
-credential use, browser installation, outreach or protected-fixture change
-followed acceptance.
+accepted S29 under it. S29 is accepted and published on main as
+25e3d14..7d6d68f. S30 remains blocked until its own go-ahead. Publication was
+the only Git operation; no deployment, provider call, credential use, browser
+installation, outreach or protected-fixture change followed acceptance.

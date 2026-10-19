@@ -1,8 +1,8 @@
 **S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
 
 The user approved a narrowed Gate 3 and Gate 4 evidence scope and accepted the
-slice. All narrowed required checks have receipts. S29 remains uncommitted and
-unpublished; S30 needs its own go-ahead. Windows/Edge, Firefox, previous-stable
+slice. All narrowed required checks have receipts. S29 is published on main as
+25e3d14..7d6d68f; S30 needs its own go-ahead. Windows/Edge, Firefox, previous-stable
 Safari, physical iPhone/Pixel, minimum Intel hardware, audible VoiceOver/NVDA
 and comprehension sessions stay deferred and unclaimed, and the known port_dead
 failure remains carried. See the

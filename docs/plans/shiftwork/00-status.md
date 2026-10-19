@@ -2,7 +2,7 @@
 
 The user explicitly approved the narrowed Gate 3 and Gate 4 scope, reviewed the
 acceptance package, and accepted S29. All narrowed required checks have
-receipts. S29 remains uncommitted and unpublished. S30 remains blocked until its
+receipts. S29 is published on main as 25e3d14..7d6d68f. S30 remains blocked until its
 own go-ahead. The known port_dead failure, the headless/emulated evidence limits
 and every deferred target stay documented and unclaimed.
 
@@ -16,8 +16,8 @@ define a Mac-only evidence scope: headless Chromium 155 on macOS 26.5.1 at exact
 observations. Windows and Edge, Firefox, previous-stable Safari, physical
 iPhone/Pixel, minimum Intel hardware, audible VoiceOver/NVDA and comprehension
 sessions are deferred and unclaimed. The README records the reduced claims. All
-narrowed required checks have receipts; S29 awaits explicit user acceptance.
-S30 remains gated separately.
+narrowed required checks have receipts; S29 was accepted and published on
+2026-10-19. S30 remains gated separately.
 
 **S29 exact narrow-viewport Chromium evidence recorded, 2026-10-19 Asia/Singapore.**
 

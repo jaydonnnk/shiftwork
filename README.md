@@ -16,10 +16,10 @@ open existing panels. Three.js r180 is pinned locally with its MIT notice;
 there is no CDN, frontend build step or second application server.
 Graphics failures retain the complete HTML workbench and recorded evidence.
 
-S29 is accepted locally under the approved narrowed scope but is not published.
-The scope is Gate 3 section 9: headless Chromium 155 on this macOS build at the
+S29 is accepted and published on main under the approved narrowed scope. The
+scope is Gate 3 section 9: headless Chromium 155 on this macOS build at the
 exact 1280x720, 640x900 and 390x844 viewports, plus the recorded native Safari
-26.5 observations. See the
+26.5 observations. The hosted demo remains S28. See the
 [S29 checkpoint](docs/plans/shiftwork/workplace-3d/s29-checkpoint-2026-10-19.md)
 for measured local evidence and limits. The hosted demo remains S28.
 
