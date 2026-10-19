@@ -1,0 +1,102 @@
+[
+  {
+    "asset_id": "index.html",
+    "board": "shared",
+    "source_path": "index.html",
+    "source_sha256": "5e33035a6690971e60e5e59ca2d43a51b2a7fe8508b419e1fe3fa732a9c72496",
+    "origin": "shiftwork-existing",
+    "author": "Shiftwork project, retained or extended existing source",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "app.js",
+    "board": "shared",
+    "source_path": "app.js",
+    "source_sha256": "71a17be7b32a0e2d37f9cb0d000960cdcf79c3619538b70a09a001e3d4cde48b",
+    "origin": "shiftwork-existing",
+    "author": "Shiftwork project, retained or extended existing source",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "evidence.js",
+    "board": "shared",
+    "source_path": "evidence.js",
+    "source_sha256": "9f4a8239fb07bc801b8da8564ac67a91cc04c3f54de83bda75c92a6a5964f983",
+    "origin": "shiftwork-existing",
+    "author": "Shiftwork project, retained or extended existing source",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "styles.css",
+    "board": "shared",
+    "source_path": "styles.css",
+    "source_sha256": "0865be7628b4c5d428798ef1d7b137f320d0e4b3957f293ef7f1197bc788688a",
+    "origin": "shiftwork-existing",
+    "author": "Shiftwork project, retained or extended existing source",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "room.svg",
+    "board": "shared",
+    "source_path": "room.svg",
+    "source_sha256": "8eaceb338b096dc5ed9d7e321619b853851dcd784aa74c62a91321af724d5c18",
+    "origin": "shiftwork-existing",
+    "author": "Shiftwork project, retained or extended existing source",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "northline-deployment-protocol.html",
+    "board": "shared",
+    "source_path": "northline-deployment-protocol.html",
+    "source_sha256": "c94f6cb2f213de7cfc20c50f9ff47556b715b4d8a44df854221a872fb0cdcbff",
+    "origin": "shiftwork-existing",
+    "author": "Shiftwork project, retained or extended existing source",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "workplace-view.js",
+    "board": "shared",
+    "source_path": "workplace-view.js",
+    "source_sha256": "db8e3a31f949e578b5648ba8d17d7c16a23713763309eb00f6356b34012db65a",
+    "origin": "shiftwork-original",
+    "author": "Shiftwork project, original S29 code authored with Codex",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "workplace-host.js",
+    "board": "shared",
+    "source_path": "workplace-host.js",
+    "source_sha256": "acd2d8cdef69e74a13564104549f8c9dfd324aabe5db977b31e4a19866fe24ee",
+    "origin": "shiftwork-original",
+    "author": "Shiftwork project, original S29 code authored with Codex",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "workplace-scene.js",
+    "board": "shared",
+    "source_path": "workplace-scene.js",
+    "source_sha256": "7f6e6d35434929b54dd6a72fac5b5862f81ec877b7cb90523a7c4c9a08d2c66f",
+    "origin": "shiftwork-original",
+    "author": "Shiftwork project, original S29 code authored with Codex",
+    "license": "MIT",
+    "external_inputs": []
+  },
+  {
+    "asset_id": "workplace-rooms.js",
+    "board": "bookshop",
+    "source_path": "workplace-rooms.js",
+    "source_sha256": "9e785f081a8dcd8b204e8bc2bfb666021bc5e5f249e4a6dd5761e19e54c32323",
+    "origin": "shiftwork-original",
+    "author": "Shiftwork project, original S29 code authored with Codex",
+    "license": "MIT",
+    "external_inputs": []
+  }
+]

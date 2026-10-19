@@ -1,0 +1,120 @@
+import { selectEvidence } from './evidence.js';
+
+const WALL_TYPES = {
+  bookshop: ['SALE_COMPLETED', 'REFUND_REQUIRED', 'ESCALATION_TO_HUMAN', 'BACKLOG_RECORDED', 'INCIDENT_OPENED', 'INCIDENT_RESOLVED', 'LIMIT_DECLARED'],
+  gtm: ['OWNER_ASSIGNED', 'SLA_CLOCK_STARTED', 'HANDOFF_ESCALATED', 'INCIDENT_OPENED', 'INCIDENT_RESOLVED', 'BACKLOG_RECORDED', 'LIMIT_DECLARED'],
+  northline: ['BOOKING_COMMITTED', 'ESCALATION_TO_HUMAN', 'COUNTER_FOLLOWUP_RECORDED', 'ROLLOUT_APPROVED', 'HANDOVER_DECLARED', 'INCIDENT_OPENED', 'INCIDENT_RESOLVED', 'BACKLOG_RECORDED', 'LIMIT_DECLARED'],
+};
+
+export function projectWorkplace(input) {
+  const { board, run, operatingVersion, stationView, slug } = input;
+  const outputs = input.outputs ?? [], checks = input.checks ?? [], events = input.events ?? [];
+  const selection = board?.operating_selection;
+  const shiftId = board?.latest_shift?.id ?? null;
+  const inspection = { mode: input.inspection.mode, historicalRunId: input.inspection.historicalRunId };
+  let consistency = 'linked';
+  const incomplete = () => { if (consistency !== 'conflict') consistency = 'incomplete'; };
+  const conflict = () => { consistency = 'conflict'; };
+  if (!board) incomplete();
+  if (board && board.engagement_slug !== slug) conflict();
+  if ((input.loadedShiftId ?? null) !== shiftId) conflict();
+  if (selection && !operatingVersion) incomplete();
+  if (selection && operatingVersion && operatingVersion.id !== selection.selected_version_id) conflict();
+  if (selection && operatingVersion && operatingVersion.content_hash !== selection.selected_content_hash) conflict();
+  const nominatedLegacy = run?.purpose === 'LEGACY_OPERATION' && board?.latest_shift?.opening_mode === 'LEGACY_FIRST_CHOICE' &&
+    board.latest_run?.id === run.id && board.latest_run.shift_id === run.shift_id && board.latest_run.artifact_version_id === run.artifact_version_id;
+  if (run && inspection.mode === 'current' && run.shift_id !== shiftId && !nominatedLegacy) conflict();
+  if (stationView && stationView.shift_id !== shiftId) conflict();
+  if (run && inspection.mode === 'history' && run.id !== inspection.historicalRunId) conflict();
+  if (run?.purpose === 'OPERATION' && inspection.mode === 'current') {
+    if (!selection || run.selection_id !== selection.id) conflict();
+    if (run.artifact_version_id !== selection?.selected_version_id) conflict();
+  }
+  if (outputs.some(output => output.run_id !== run?.id)) conflict();
+  if (checks.some(check => check.run_id !== run?.id)) conflict();
+  if (board && board.chain_status !== 'VALID') conflict();
+  if (input.ledgerStatus === 'unknown' || input.ledgerStatus == null) incomplete();
+  else if (input.ledgerStatus !== 'VALID') conflict();
+  if (board && board.ledger_event_count !== events.length) conflict();
+  const histogram = {};
+  for (const event of events) histogram[event.event_type] = (histogram[event.event_type] ?? 0) + 1;
+  for (const type of new Set([...Object.keys(histogram), ...Object.keys(board?.ledger_totals ?? {})])) {
+    if ((histogram[type] ?? 0) !== (board?.ledger_totals?.[type] ?? 0)) conflict();
+  }
+  const output = outputs.find(item => item.id === input.selectedOutputId);
+  const linked = selectEvidence(output, checks, events);
+  if (output && !linked.checks.length) incomplete();
+  if (input.selectedOutputId && !output) incomplete();
+  for (const incident of board?.incidents ?? []) {
+    const event = events.find(item => item.seq === incident.opened_event_seq);
+    if (!event) { incomplete(); continue; }
+    const link = event.derivation;
+    if (link && (link.run_id !== incident.opening_run_id || link.observed_ref !== incident.failing_output_ref || link.check_id !== incident.check_result_id)) conflict();
+  }
+  const experiment = item => {
+    if (!item) return null;
+    if (item.shift_id !== shiftId) { conflict(); return null; }
+    return {
+      id: item.id, shiftId: item.shift_id, kind: item.kind, state: item.state,
+      evidenceClass: item.context_evidence_class, contextHash: item.context_hash,
+      outcomeStatus: item.outcome?.status ?? null,
+      candidates: (item.candidates ?? []).map(candidate => {
+        const eligibility = item.outcome?.eligibility?.find(row => row.candidate_label === candidate.label);
+        return { label: candidate.label, versionId: candidate.artifact_version_id,
+          contentHash: candidate.artifact_content_hash, eligible: eligibility?.eligible ?? null,
+          blockingReasonCodes: [...(eligibility?.blocking_reason_codes ?? [])] };
+      }),
+      trials: (item.trials ?? []).map(trial => ({ ordinal: trial.ordinal, candidateLabel: trial.candidate_label,
+        runId: trial.run_id, versionId: trial.artifact_version_id, state: trial.state,
+        evidenceMode: trial.evidence_mode ?? null, missingEvidenceCount: trial.missing_evidence_count ?? null })),
+      observedRunId: item.observed_run_id ?? null,
+    };
+  };
+  const latest = stationView?.latest_experiment;
+  const tests = { diagnostic: experiment(input.diagnostic ?? stationView?.latest_diagnostic),
+    comparison: experiment(input.comparison ?? (latest?.kind === 'QUALIFYING_COMPARISON' ? latest : null)),
+    later: experiment(latest?.kind === 'LATER_CONDITION_COMPARISON' ? latest : null) };
+  return {
+    schemaVersion: 1, context: { board: slug, shiftId, inspection }, station: input.activeStation,
+    shiftState: board?.latest_shift?.state?.toLowerCase() ?? null,
+    operating: selection ? { selectionId: selection.id, kind: selection.kind,
+      versionId: selection.selected_version_id, contentHash: selection.selected_content_hash,
+      comparisonId: selection.comparison_id, retainedAlternativeId: selection.retained_alternative_version_id,
+      requirementSetHash: selection.requirement_set_hash, validity: selection.state } : null,
+    saved: { latestVersionId: board?.latest_saved_version_id ?? null, draftBaseVersionId: board?.draft_base_version_id ?? null },
+    run: run ? { id: run.id, shiftId: run.shift_id, versionId: run.artifact_version_id,
+      selectionId: run.selection_id, state: run.state, purpose: run.purpose, evidenceMode: run.evidence_mode } : null,
+    evidence: output ? { runId: output.run_id, outputId: output.id, ordinal: output.request_ordinal,
+      checks: linked.checks.map(check => ({ id: check.id, verdict: check.verdict, reasonCode: check.reason_code })),
+      linkedEventIds: linked.events.map(event => `${slug}:${event.seq}:${event.hash}`),
+      completeness: consistency === 'conflict' ? 'conflict' : linked.checks.length ? 'linked' : 'missing' } : null,
+    investigation: { latestEntryId: stationView?.latest_investigation_id ?? null, count: stationView?.investigations?.length ?? 0 },
+    tests,
+    consequences: { chainStatus: input.ledgerStatus === 'VALID' ? 'VALID' : 'unknown',
+      eventCount: board?.ledger_event_count ?? null,
+      totals: Object.entries(board?.ledger_totals ?? {}).map(([name, count]) => ({ name, count })),
+      events: events.filter(event => WALL_TYPES[slug]?.includes(event.event_type)).map(event => ({
+        id: `${slug}:${event.seq}:${event.hash}`, seq: event.seq, hash: event.hash, type: event.event_type,
+        synthetic: event.synthetic, link: event.derivation ? { runId: event.derivation.run_id,
+          checkId: event.derivation.check_id, outputId: event.derivation.observed_ref,
+          ordinal: event.derivation.request_ordinal, verdict: event.derivation.verdict } : null,
+        signalRef: null, owner: null, recordRef: null, incidentId: null, versionId: null,
+      })),
+      incidents: (board?.incidents ?? []).map(incident => ({ id: incident.id, state: incident.state,
+        reasonCode: incident.reason_code, openingRunId: incident.opening_run_id, openedEventSeq: incident.opened_event_seq })),
+    },
+    inheritance: { selectionId: selection?.id ?? null, comparisonId: board?.inherited_requirements?.comparison_id ?? null,
+      requirementSetHash: board?.inherited_requirements?.requirement_set_hash ?? null,
+      visibleCheckSetHash: board?.inherited_requirements?.visible_check_set_hash ?? null },
+    consistency,
+  };
+}
+
+export function diffWorkplace(previous, next) {
+  if (!previous || previous.consistency === 'conflict' || next.consistency === 'conflict') return [];
+  if (previous.context.board !== next.context.board || previous.context.shiftId !== next.context.shiftId) return [];
+  if (previous.context.inspection.mode !== 'current' || next.context.inspection.mode !== 'current') return [];
+  if (previous.station === next.station) return [];
+  // S29 introduces station emphasis only. Causal travel belongs to S32.
+  return [{ key: `station:${next.station}`, kind: 'station-focus', stationId: next.station, publicRefs: [] }];
+}

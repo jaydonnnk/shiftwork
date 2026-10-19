@@ -1,4 +1,5 @@
 import { bodyBytes, selectEvidence } from './evidence.js';
+import { projectWorkplace } from './workplace-view.js';
 
 const $ = id => document.getElementById(id);
 const state = { board: null, loadedShiftId: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
@@ -9,6 +10,63 @@ const gtm = () => state.slug === 'gtm';
 const engagementPath = suffix => `/engagements/${encodeURIComponent(state.slug)}/${suffix}`;
 let downloadUrl = null;
 let pollTimer = null;
+let workplaceHost = null, latestPresentation = null, hostEpoch = 0, hostLoading = false, hostTimer = null;
+let inspection = { mode: 'current', historicalRunId: null };
+function publishPresentation(reason) {
+  const context = { board: state.slug, shiftId: state.loadedShiftId, inspection: { ...inspection } };
+  let publication;
+  if (['error', 'context', 'history', 'page-lifecycle'].includes(reason)) {
+    publication = { kind: 'reset', context, reason };
+    text('workplace-state', reason === 'error' ? 'Recorded state unavailable. Refresh to inspect verified evidence.' : 'Loading recorded context.');
+  } else if (reason === 'loading') publication = { kind: 'loading', context, generation: state.generation };
+  else {
+    if (!state.board) return;
+    const view = projectWorkplace({ slug: state.slug, loadedShiftId: state.loadedShiftId,
+      generation: state.generation, intent: state.intent, loadState: document.body.dataset.loadState,
+      inspection, board: state.board, operatingVersion: state.operatingVersion,
+      stationView: state.stationView, run: state.run, outputs: state.outputs, checks: state.checks,
+      events: state.events, ledgerStatus: state.ledgerStatus, comparison: state.comparison,
+      diagnostic: state.diagnostic, candidates: state.candidates,
+      selectedOutputId: state.selected, activeStation: state.station });
+    publication = { kind: 'accepted', view, generation: state.generation, intent: state.intent, reason };
+    const verdicts = view.evidence?.checks.map(check => `${check.verdict}: ${check.reasonCode ?? 'recorded check'}`).join('; ');
+    text('workplace-state', view.consistency === 'conflict' ? 'Recorded reads disagree. Inspect the workbench; current labels are unavailable.' :
+      `${view.context.inspection.mode === 'history' ? 'Historical inspection. ' : 'Current inspection. '}Operating choice: ${view.operating ? `${view.operating.versionId} (${view.operating.validity})` : 'None selected'}. Saved version: ${view.saved.latestVersionId ?? 'None'}. ` +
+      (view.run ? `Inspected run: ${view.run.id}. Executed version: ${view.run.versionId}. ${view.run.purpose} / ${view.run.evidenceMode ?? 'unknown mode'}. ${verdicts || 'Independent evidence incomplete.'}` : 'No run loaded.'));
+  }
+  latestPresentation = publication;
+  workplaceHost?.publish(publication);
+}
+async function initializeGraphics() {
+  if (workplaceHost || hostLoading) return;
+  const epoch = ++hostEpoch; hostLoading = true;
+  hostTimer = setTimeout(() => {
+    if (epoch !== hostEpoch) return;
+    hostEpoch += 1; hostLoading = false; hostTimer = null;
+    $('graphics-status').dataset.state = 'unavailable';
+    text('graphics-status', '3D view unavailable. Your workbench is ready. (load-timeout)');
+    document.querySelector('[data-graphics-retry]').hidden = false;
+    document.querySelector('[data-graphics-retry]').disabled = false;
+  }, 8000);
+  try {
+    const { createWorkplaceHost } = await import('./workplace-host.js');
+    if (epoch !== hostEpoch) return;
+    clearTimeout(hostTimer); hostTimer = null;
+    workplaceHost = createWorkplaceHost({ container: $('workplace-canvas'), fallback: document.querySelector('img.room-art'), status: $('graphics-status'),
+      onStation({ board, shiftId, stationId }) {
+        if (latestPresentation?.kind !== 'accepted' || board !== state.slug || shiftId !== state.loadedShiftId || latestPresentation.generation !== state.generation || latestPresentation.intent !== state.intent) return;
+        if (!document.querySelector(`#bookshop-stations [data-station="${stationId}"]`)) return;
+        activateStation(stationId);
+      } });
+    if (latestPresentation) workplaceHost.publish(latestPresentation);
+  } catch {
+    if (epoch !== hostEpoch) return;
+    $('graphics-status').dataset.state = 'unavailable';
+    text('graphics-status', '3D view unavailable. Your workbench is ready. Graphics installation needs repair.');
+    document.querySelector('[data-graphics-retry]').hidden = false;
+    document.querySelector('[data-graphics-retry]').disabled = true;
+  } finally { if (epoch === hostEpoch) { clearTimeout(hostTimer); hostTimer = null; hostLoading = false; } }
+}
 const terminal = run => !run || ['FINALIZED', 'FAILED'].includes(run.state);
 const humanize = value => value.toLowerCase().replaceAll('_', ' ');
 const requestId = prefix => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -48,6 +106,8 @@ async function switchWorkplace() {
     return;
   }
   state.generation += 1; state.intent += 1;
+  inspection = { mode: 'current', historicalRunId: null };
+  publishPresentation('context');
   state.slug = slug; state.loadedShiftId = null; state.comparison = null;
   state.candidates = { A: null, B: null }; state.selected = null;
   for (const id of ['cause-input', 'falsifier-input', 'public-test-input', 'assist-message', 'treatment-input', 'selection-rationale']) $(id).value = '';
@@ -88,7 +148,7 @@ function renderRoom() {
   for (const id of ['bookshop-stations', 'bookshop-journey']) $(id).hidden = northline() || gtm();
   for (const id of ['northline-stations', 'northline-journey', 'northline-art']) $(id).toggleAttribute('hidden', !northline());
   for (const id of ['gtm-stations', 'gtm-journey', 'gtm-art']) $(id).toggleAttribute('hidden', !gtm());
-  document.querySelector('img.room-art').hidden = northline() || gtm();
+  document.querySelector('img.room-art').hidden = northline() || gtm() || room.dataset.graphics === 'ready';
   document.querySelector('.room-bookplate').hidden = northline() || gtm();
   $('deployment-protocol').hidden = !northline();
   if (northline()) buildStations('northline', ['brief', 'map', 'bench', 'acceptance', 'rollout', 'handover'],
@@ -214,6 +274,7 @@ function clearEvidence() {
   empty($('selected-evidence'), 'No executed customer request selected.');
 }
 function clearData(message) {
+  state.ledgerStatus = 'unknown';
   state.operatingVersion = null;
   state.board = null; state.draft = null; state.stationView = null; state.run = null;
   state.outputs = []; state.checks = []; state.events = []; state.selected = null; state.diagnostic = null;
@@ -277,6 +338,7 @@ async function refresh(runId = null) {
   const selected = state.selected;
   clearTimeout(pollTimer);
   document.body.dataset.loadState = 'loading';
+  publishPresentation('loading');
   clearData('Loading your shift…');
   try {
     const runtime = await api('/runtime');
@@ -304,8 +366,9 @@ async function refresh(runId = null) {
       catch { comparison = null; }
     }
     if (generation !== state.generation) return;
-    Object.assign(state, { board, loadedShiftId: board.latest_shift?.id ?? null, draft, stationView, run, outputs, checks, operatingVersion, comparison, events: ledger.events });
+    Object.assign(state, { board, loadedShiftId: board.latest_shift?.id ?? null, draft, stationView, run, outputs, checks, operatingVersion, comparison, events: ledger.events, ledgerStatus: ledger.chain_status });
     if (previousShiftId && previousShiftId !== board.latest_shift?.id) {
+      publishPresentation('context');
       state.candidates = { A: null, B: null };
     }
     if (state.comparison && state.comparison.shift_id === board.latest_shift?.id) for (const candidate of state.comparison.candidates) {
@@ -316,12 +379,14 @@ async function refresh(runId = null) {
     text('load-message', board.latest_shift ? '' : 'No shift yet. Open one to begin your service history.');
     renderBoard();
     activateStation(state.station, false);
+    publishPresentation('refresh');
     if (!terminal(run)) pollTimer = setTimeout(() => refresh(run.id), 1000);
     return true;
   } catch (error) {
     if (generation !== state.generation) return;
     clearData(error.message);
     document.body.dataset.loadState = 'error';
+    publishPresentation('error');
   }
 }
 
@@ -384,6 +449,8 @@ function renderBoard() {
     button.append(element('strong', `${incident.id} · ${humanize(incident.state)}`), element('span', incident.reason_code));
     button.addEventListener('click', async () => {
       const intent = ++state.intent;
+      inspection = { mode: 'history', historicalRunId: incident.opening_run_id };
+      publishPresentation('history');
       const accepted = await refresh(incident.opening_run_id);
       if (!accepted || intent !== state.intent || state.run?.id !== incident.opening_run_id) return;
       state.selected = state.outputs.find(output => output.id === incident.failing_output_ref)?.id ?? null;
@@ -465,6 +532,7 @@ function evidenceStep(number, label) {
   section.append(heading); return section;
 }
 function renderCustomers() {
+  text('inspection-verdict', 'Independent evidence incomplete.');
   const focusedOutput = document.activeElement?.dataset.outputId;
   clearEvidence();
   const run = state.run;
@@ -479,7 +547,7 @@ function renderCustomers() {
     button.dataset.outputId = output.id;
     button.setAttribute('aria-pressed', String(state.selected === output.id));
     button.append(element('span', String(output.request_ordinal).padStart(2, '0')), element('span', output.request_text));
-    button.addEventListener('click', () => { state.intent += 1; state.selected = output.id; renderCustomers(); });
+    button.addEventListener('click', () => { state.intent += 1; state.selected = output.id; renderCustomers(); publishPresentation('output'); });
     return button;
   }));
   if (focusedOutput) [...list.children].find(button => button.dataset.outputId === focusedOutput)?.focus({ preventScroll: true });
@@ -531,6 +599,7 @@ function renderCustomers() {
     : 'No public comparison record. Sealed expectations are not shown.', 'empty'));
   const comparison = evidenceStep(4, 'Independent check result');
   const linked = selectEvidence(output, state.checks, state.events);
+  text('inspection-verdict', linked.checks.length ? linked.checks.map(check => `${check.verdict}${check.reason_code ? `: ${check.reason_code}` : ''}`).join('; ') : 'Independent evidence incomplete.');
   if (!linked.checks.length) comparison.append(element('p', 'No independent result recorded for this output.', 'empty'));
   for (const check of linked.checks) {
     const row = element('div', null, 'result-row'); row.dataset.verdict = check.verdict; row.dataset.checkId = check.id;
@@ -1172,7 +1241,7 @@ function bringStationPanelIntoReach() {
   // selected station's panel so the authoritative view is immediately reachable.
   // Skipped before the first load paints, so a page open still starts at the room.
   if (!state.board) return;
-  if (!window.matchMedia('(max-width: 760px)').matches) return;
+  if (!window.matchMedia('(max-width: 1099px)').matches) return;
   const panel = $('station-panel');
   panel.focus({ preventScroll: true });
   panel.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
@@ -1190,7 +1259,7 @@ function activateStation(name, userIntent = true) {
   const [title, kicker, context] = stations[name] ?? stations.service;
   text('panel-title', title); text('panel-kicker', kicker); text('station-context', context);
   $('deferred-view').hidden = name !== 'evaluator';
-  $('customer-view').hidden = !['customers', 'pipeline', 'acceptance', 'signals'].includes(name);
+  $('customer-view').hidden = !['customers', 'pipeline', 'acceptance', 'signals', 'evaluator'].includes(name);
   $('investigate-view').hidden = !['investigate', 'bench', 'workflow'].includes(name);
   $('compare-view').hidden = !['compare', 'bench', 'workflow'].includes(name);
   $('next-view').hidden = !['next', 'handover', 'wall'].includes(name);
@@ -1220,6 +1289,7 @@ function activateStation(name, userIntent = true) {
     if (link.dataset.view === view) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
   });
   if (userIntent) bringStationPanelIntoReach();
+  publishPresentation('station');
 }
 function selectFile(name) {
   state.file = name;
@@ -1236,7 +1306,7 @@ function navigate(view, userIntent = true) {
 async function act(action) {
   if (state.pending) return;
   state.pending = true; renderBoard();
-  try { await action(); await refresh(); }
+  try { await action(); inspection = { mode: 'current', historicalRunId: null }; publishPresentation('history'); await refresh(); }
   catch (error) { await refresh(); text('load-message', error.message); }
   finally { state.pending = false; if (state.board) { renderBoard(); renderCompare(); } }
 }
@@ -1248,7 +1318,7 @@ $('run-shift').addEventListener('click', () => {
   act(() => api(`/shifts/${encodeURIComponent(shiftId)}/runs`, { method: 'POST',
     body: JSON.stringify({ client_request_id: requestId('operation') }) }));
 });
-$('refresh').addEventListener('click', () => refresh());
+$('refresh').addEventListener('click', () => { inspection = { mode: 'current', historicalRunId: null }; publishPresentation('history'); refresh(); });
 $('append-investigation').addEventListener('click', appendInvestigation);
 $('request-assist').addEventListener('click', requestAssist);
 $('run-diagnostic').addEventListener('click', runDiagnostic);
@@ -1293,7 +1363,22 @@ window.addEventListener('beforeunload', event => {
   event.preventDefault();
   event.returnValue = '';
 });
-window.addEventListener('pagehide', () => { clearTimeout(pollTimer); if (downloadUrl) URL.revokeObjectURL(downloadUrl); });
+window.addEventListener('pagehide', () => { clearTimeout(pollTimer); clearTimeout(hostTimer); hostTimer = null; if (downloadUrl) URL.revokeObjectURL(downloadUrl); hostEpoch += 1; hostLoading = false; workplaceHost?.dispose(); workplaceHost = null; publishPresentation('page-lifecycle'); });
+window.addEventListener('pageshow', async event => {
+  if (!event.persisted) return;
+  const editor = $('draft-source');
+  const focus = document.activeElement === editor
+    ? { start: editor.selectionStart, end: editor.selectionEnd, direction: editor.selectionDirection, intent: state.intent } : null;
+  initializeGraphics();
+  const refreshed = refresh(), generation = state.generation;
+  await refreshed;
+  // Loading temporarily disables the editor and drops native page-cache focus.
+  if (focus && generation === state.generation && focus.intent === state.intent && !editor.disabled &&
+      editor === $('draft-source') && [document.body, editor].includes(document.activeElement)) {
+    editor.focus({ preventScroll: true });
+    editor.setSelectionRange(focus.start, focus.end, focus.direction);
+  }
+});
 $('operate-pilot').addEventListener('click', () => $('run-shift').click());
 $('operate-pipeline').addEventListener('click', () => $('run-shift').click());
 $('workplace-board').addEventListener('change', switchWorkplace);
@@ -1301,3 +1386,5 @@ const requestedSlug = new URL(location.href).searchParams.get('board');
 if (requestedSlug) state.slug = requestedSlug;
 navigate(location.hash.slice(1) || 'board');
 refresh();
+document.querySelector('[data-graphics-retry]').addEventListener('click', () => { if (!workplaceHost && !hostLoading) initializeGraphics(); });
+initializeGraphics();
