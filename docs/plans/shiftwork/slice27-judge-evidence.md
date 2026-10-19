@@ -254,7 +254,7 @@ S28's separate [hosted practice demo](https://shiftwork.onrender.com) uses a fre
 Render service and an ephemeral shared SQLite database. It sleeps and resets;
 [the S28 record](slice28-hosted-evidence-2026-10-19.md) carries current verification
 and limits. This link does not turn the historical S20 chain into a new live
-recording or remove the known red rows. S28 acceptance is still pending.
+recording or remove the known red rows. Jaydon accepted S28 on 2026-10-19 with its recorded limits intact.
 
 - Quality/recommend/experience scores remain blank; no fine-tuning, other-model benchmark, learner study or production-readiness evidence.
 - S12 partial archives, S13 ceiling mismatch, S14 missing replies and S20/S22b absent raw directories remain gaps.

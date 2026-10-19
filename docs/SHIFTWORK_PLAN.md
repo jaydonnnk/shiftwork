@@ -1,3 +1,10 @@
+**S28 ACCEPTED, 2026-10-19 Asia/Singapore.**
+
+Jaydon accepted the hosted S28 result. The approved implementation plan ends at
+S28; submission actions remain his own. The measured evidence and all recorded
+limits remain in `docs/plans/shiftwork/00-status.md` and the S28 hosted evidence.
+Earlier acceptance-pending labels below are historical.
+
 **S28 HOSTED DEMO IMPLEMENTED AND VERIFIED; USER ACCEPTANCE PENDING, 2026-10-19 Asia/Singapore.**
 
 The free shared practice demo is https://shiftwork.onrender.com. The public source

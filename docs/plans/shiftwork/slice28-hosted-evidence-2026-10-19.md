@@ -1,6 +1,6 @@
 # S28 hosted evidence, 2026-10-19 Asia/Singapore
 
-S28 is implemented, demonstrated and verified. User acceptance is pending. Public URL: https://shiftwork.onrender.com.
+S28 is implemented, demonstrated and verified. Jaydon accepted it on 2026-10-19 with the recorded limits intact. Public URL: https://shiftwork.onrender.com.
 
 ## Authority and configuration
 
@@ -165,7 +165,7 @@ explicitly historical. Owned local preview servers were stopped. No dependency,
 locked budget class or sealed/reviewed fixture changed. Architecture cleanup is
 complete within this scope; public multi-user robustness is not claimed.
 
-S28 acceptance remains pending. The host-only credentials mean the separate S27
+Jaydon accepted S28 on 2026-10-19. No further implementation slice follows. The host-only credentials mean the separate S27
 local CLI service probe was not run; the new hosted product diagnostic is its
 own evidence. Numeric feedback, video, Tavily answer and submission remain the
 user's own actions. Record live

@@ -1,3 +1,14 @@
+**S28 ACCEPTED BY JAYDON, 2026-10-19 Asia/Singapore.**
+
+Jaydon stated "I accept" after the hosted S28 result was presented. Remote main
+and shiftwork/slice-28 were re-verified at f1219ff before this acceptance record.
+S28 is complete and accepted with the measured evidence and limits below intact:
+free shared ephemeral hosting, unknown actual billing/Sandbox cost, port_dead,
+the historical Northline reach issue and the unchanged GTM comparison limit.
+No further implementation slice follows. Video/upload, Devpost, the Tavily bonus
+answer and numeric feedback remain Jaydon's own actions. Earlier acceptance-
+pending notices are historical; acceptance does not enlarge their proof scope.
+
 **S28 IMPLEMENTED, HOSTED AND VERIFIED; ACCEPTANCE PENDING, 2026-10-19 Asia/Singapore.**
 
 The free hosted practice demo is https://shiftwork.onrender.com. Jaydon authorized

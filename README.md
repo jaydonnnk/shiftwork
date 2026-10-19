@@ -37,7 +37,7 @@ byte-pinned fixtures as `TRUSTED_LOCAL`. No live inference is claimed. Credentia
 belong only in Render's secret settings, never in source, a database or logs.
 GTM's previously recorded live-comparison request-shape limitation remains;
 S28 does not raise its ceiling. The known port_dead and Northline 390px red rows
-also remain visible. S28 is implemented and verified; user acceptance is pending. The controlled wake request took 43.438 seconds after 16 idle minutes and returned a fresh database.
+also remain visible. S28 was accepted by Jaydon on 2026-10-19, with the recorded limits intact. The controlled wake request took 43.438 seconds after 16 idle minutes and returned a fresh database.
 
 ## Start locally
 
