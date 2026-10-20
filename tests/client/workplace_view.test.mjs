@@ -440,7 +440,7 @@ test('comparison_projection_whitelists_private_material', async () => {
 });
 
 
-async function hostFixture({ hidden=false, offscreen=false, delayed=false, failDuringCreate=false, moduleFailure=false, throwDuringCreate=false } = {}) {
+async function hostFixture({ hidden=false, offscreen=false, delayed=false, failDuringCreate=false, moduleFailure=false, throwDuringCreate=false, startsConsequence=false } = {}) {
   const node = () => {
     const target=new EventTarget(), listeners=new Map();
     const add=target.addEventListener.bind(target), remove=target.removeEventListener.bind(target);
@@ -457,17 +457,17 @@ async function hostFixture({ hidden=false, offscreen=false, delayed=false, failD
   globalThis.ResizeObserver=class {constructor(fn){this.fn=fn;observers.push(this);}observe(){}disconnect(){this.closed=true;}};
   globalThis.IntersectionObserver=class {constructor(fn){this.fn=fn;observers.push(this);}observe(){this.fn([{isIntersecting:!offscreen}]);}disconnect(){this.closed=true;}};
   const releases=[]; let allocations=0, disposals=0, picked=0, imports=0, suspension=[];
-  const handles=[];
-  const module={createWorkplaceScene(options){if(throwDuringCreate) throw Error('injected construction failure');allocations++;const h={options,applied:[],transitions:[],apply(view,transitions=[]){h.applied.push(view);h.transitions.push(transitions);},resize(){},setSuspended(v){suspension.push(v);},setReducedMotion(){},dispose(){disposals++;}};handles.push(h);if(failDuringCreate) options.onFailure('shader-failed');return h;}};
+  const handles=[], consequences=[];
+  const module={createWorkplaceScene(options){if(throwDuringCreate) throw Error('injected construction failure');allocations++;const h={options,applied:[],transitions:[],apply(view,transitions=[]){h.applied.push(view);h.transitions.push(transitions);return startsConsequence;},resize(){},setSuspended(v){suspension.push(v);},setReducedMotion(){},dispose(){disposals++;}};handles.push(h);if(failDuringCreate) options.onFailure('shader-failed');return h;}};
   globalThis.__s29LoadScene=()=>{imports++;return moduleFailure?Promise.reject(Error('injected module failure')):delayed?new Promise(r=>releases.push(()=>r(module))):Promise.resolve(module);};
   let source=process.env.WORKPLACE_HOST_SOURCE ? Buffer.from(process.env.WORKPLACE_HOST_SOURCE,'base64').toString() : await readFile(new URL('../../shiftwork/client/workplace-host.js',import.meta.url),'utf8');
   source=source.replace("'./workplace-view.js'",JSON.stringify(url.href)).replace("await import('./workplace-scene.js')",'await globalThis.__s29LoadScene()');
   const {createWorkplaceHost}=await import('data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
-  const host=createWorkplaceHost({container,fallback,status,onStation(){picked++;}});
+  const host=createWorkplaceHost({container,fallback,status,onStation(){picked++;},onConsequence(payload){consequences.push(payload);}});
   const {projectWorkplace}=await api();const view=projectWorkplace(input());
   const accepted=(generation=2,v=view)=>({kind:'accepted',view:v,generation,intent:3,reason:'test'});
   const flush=async()=>{await new Promise(r=>setImmediate(r));};
-  return {host,status,fallback,observers,document,view,accepted,flush,handles,
+  return {host,status,fallback,observers,document,view,accepted,flush,handles,consequences,
     listenerCount(owner) {return [...({visibility:document,motion,retry,simpler}[owner]).listeners.values()].reduce((n,set)=>n+set.size,0);},
     release(index=0){releases[index]?.();},visible(value){observers[1].fn([{isIntersecting:value}]);},
     get counts(){return {allocations,disposals,picked};},get importCount(){return imports;},get suspension(){return suspension;}};
@@ -522,6 +522,48 @@ test('host_expanded_updates_advance_the_reference_without_replay',async()=>{
   assert.deepEqual(scene.transitions.at(-1),[],'a duplicate after expansion replayed the suspended update');
   assert.equal(f.counts.allocations,1,'expanded updates remounted the scene');
   f.host.dispose();
+});
+test('host_conflict_keeps_the_last_consistent_reference', async()=>{
+  const f=await hostFixture(); const {projectWorkplace}=await api();
+  const base=projectWorkplace(input());
+  f.host.publish(f.accepted(2,base)); await f.flush();
+  const scene=f.handles[0];
+  const conflict={...base,consistency:'conflict'};
+  f.host.publish(f.accepted(3,conflict)); await f.flush();
+  assert.deepEqual(scene.transitions.at(-1),[],'a conflicting view produced a transition');
+  const next={...base,tests:{...base.tests,diagnostic:diagnosticSummary('COMPLETE',0)}};
+  f.host.publish(f.accepted(4,next)); await f.flush();
+  assert.deepEqual(scene.transitions.at(-1).map(item=>item.kind),['test-update'],'a conflicting view cleared the consistent reference');
+  f.host.dispose();
+});
+test('host_reset_reference_replays_one_arrival_at_remount', async()=>{
+  const f=await hostFixture({delayed:true}); const {projectWorkplace}=await api();
+  const before=projectWorkplace(withoutWall([2,3,4],{INCIDENT_OPENED:1,LIMIT_DECLARED:1,OWNER_ASSIGNED:1}));
+  const after=projectWorkplace(wallInput());
+  f.host.publish(f.accepted(2,before)); f.release(0); await f.flush();
+  f.host.publish({kind:'reset',context:before.context,reason:'history'}); await f.flush();
+  f.host.publish(f.accepted(3,after)); f.release(1); await f.flush();
+  assert.equal(f.counts.allocations,2,'the reset did not remount once');
+  const arrivals=f.handles[1].transitions.flat().filter(item=>item.kind==='linked-consequence');
+  assert.equal(arrivals.length,1,'an arrival across a reset and remount was lost or replayed');
+  assert.equal(arrivals[0].count,1);
+  f.host.dispose();
+});
+test('host_consequence_callback_requires_a_started_trace', async()=>{
+  const {projectWorkplace}=await api();
+  const before=projectWorkplace(withoutWall([2,3,4],{INCIDENT_OPENED:1,LIMIT_DECLARED:1,OWNER_ASSIGNED:1}));
+  const after=projectWorkplace(wallInput());
+  const quiet=await hostFixture({startsConsequence:false});
+  quiet.host.publish(quiet.accepted(2,before)); await quiet.flush();
+  quiet.host.publish(quiet.accepted(3,after)); await quiet.flush();
+  assert.equal(quiet.consequences.length,0,'a consequence label fired without a scene trace');
+  quiet.host.dispose();
+  const visible=await hostFixture({startsConsequence:true});
+  visible.host.publish(visible.accepted(2,before)); await visible.flush();
+  visible.host.publish(visible.accepted(3,after)); await visible.flush();
+  assert.equal(visible.consequences.length,1,'a started trace produced no consequence label');
+  assert.equal(visible.consequences[0].count,1);
+  visible.host.dispose();
 });
 for(const mode of ['hidden','offscreen','expanded']) test(`host_${mode}_import_completion_draws_nothing`,async()=>{
   const f=await hostFixture({delayed:true});f.host.publish(f.accepted());
@@ -603,4 +645,241 @@ test('performance_receipt_guards_reject_separate_synthetic_faults',async()=>{
     [r=>{r.idle=1;},'Idle frame budget missed'],
     [r=>{r.estimatedBytes=49*1024**2;},'Estimated allocation budget missed'],
   ]) {const r=valid();change(r);assert.throws(()=>verifyPerformance(r),error=>error.message.includes(message));assert.doesNotThrow(()=>verifyPerformance(valid()));}
+});
+
+export function wallInput() {
+  const i = input();
+  i.checks[0].verdict = 'pass';
+  i.checks[0].reason_code = null;
+  i.run.purpose = 'OPERATION';
+  i.run.selection_id = 'choice-1';
+  i.run.artifact_version_id = 'selected-2';
+  i.run.state = 'FINALIZED';
+  i.events = [
+    { seq: 1, hash: 'event-current', event_type: 'SALE_COMPLETED', synthetic: true,
+      derivation: { run_id: 'run-1', check_id: 'check-1', observed_ref: 'output-1', request_ordinal: 1,
+        verdict: 'pass', reason_code: null } },
+    { seq: 2, hash: 'event-history', event_type: 'INCIDENT_OPENED', synthetic: true,
+      derivation: { run_id: 'run-old', check_id: 'old-check', observed_ref: 'old-output', request_ordinal: 1,
+        verdict: 'fail', reason_code: 'MISSING_EVIDENCE' } },
+    { seq: 3, hash: 'event-admin', event_type: 'LIMIT_DECLARED', synthetic: true, derivation: null },
+    { seq: 4, hash: 'event-other', event_type: 'OWNER_ASSIGNED', synthetic: true, derivation: null },
+  ];
+  i.board.ledger_event_count = 4;
+  i.board.ledger_totals = { SALE_COMPLETED: 1, INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 };
+  i.board.incidents = [{ id: 'incident-1', state: 'CLOSED_UNRESOLVED', reason_code: 'MISSING_EVIDENCE',
+    opening_run_id: 'run-old', opened_event_seq: 2, failing_output_ref: 'old-output',
+    check_result_id: 'old-check', shift_id: 'old-shift', resolved_event_seq: null,
+    resolving_version_id: null }];
+  return i;
+}
+function withoutWall(events, totals, incidents = []) {
+  const i = wallInput();
+  i.events = i.events.filter(event => events.includes(event.seq));
+  i.board.ledger_event_count = i.events.length;
+  i.board.ledger_totals = totals;
+  i.board.incidents = incidents;
+  return i;
+}
+function addSecondOperationEvidence(i) {
+  i.outputs.push({ id: 'output-2', run_id: 'run-1', request_ordinal: 2 });
+  i.checks.push({ id: 'check-2', run_id: 'run-1', observed_ref: 'output-2', verdict: 'fail',
+    reason_code: 'TASK_MISSED' });
+  i.events.push({ seq: 5, hash: 'event-current-2', event_type: 'BACKLOG_RECORDED', synthetic: true,
+    derivation: { run_id: 'run-1', check_id: 'check-2', observed_ref: 'output-2', request_ordinal: 2,
+      verdict: 'fail', reason_code: 'TASK_MISSED' } });
+  i.board.ledger_event_count = 5;
+  i.board.ledger_totals = { ...i.board.ledger_totals, BACKLOG_RECORDED: 1 };
+  return i;
+}
+test('wall_projection_labels_sources_links_and_incident_joins', async () => {
+  const { projectWorkplace } = await api(); const v = projectWorkplace(wallInput());
+  const [current, historical, administrative] = v.consequences.events;
+  assert.deepEqual(current, { id: 'bookshop:1:event-current', seq: 1, hash: 'event-current',
+    type: 'SALE_COMPLETED', synthetic: true, source: 'current', linkState: 'linked', meaning: 'recorded',
+    versionId: 'selected-2', reasonCode: null, contradiction: null, incidentId: null,
+    link: { runId: 'run-1', checkId: 'check-1', outputId: 'output-1', ordinal: 1, verdict: 'pass' } },
+    'the current linked consequence was mislabelled');
+  assert.deepEqual([historical.source, historical.linkState, historical.meaning, historical.versionId, historical.incidentId],
+    ['historical', 'historical', 'historical', null, 'incident-1'], 'the historical consequence was mislabelled');
+  assert.deepEqual([administrative.source, administrative.linkState, administrative.meaning, administrative.versionId],
+    ['administrative', 'none', 'administrative', null], 'the administrative record was mislabelled');
+  assert.equal(administrative.link, null);
+  assert.equal(v.consequences.otherEventCount, 1, 'a non-allowlisted event became a wall outcome');
+  assert.deepEqual(v.consequences.otherTypes, ['OWNER_ASSIGNED'], 'other recorded types were hidden');
+  assert.equal(v.consequences.eventCount, 4); assert.equal(v.consequences.ledgerEventLength, 4);
+  assert.equal(v.consequences.countMatches, true); assert.equal(v.consequences.histogramMatches, true);
+  assert.equal(v.consequences.chainStatus, 'VALID'); assert.equal(v.consequences.boardChainStatus, 'VALID');
+  assert.deepEqual([v.run.checkCount, v.run.failedCheckCount, v.run.outputCount], [1, 0, 1]);
+  assert.equal(v.consequences.incidents[0].openedEventId, 'bookshop:2:event-history');
+  assert.equal(v.consequences.incidents[0].failingOutputRef, 'old-output');
+  assert.equal(v.consequences.incidents[0].checkResultId, 'old-check');
+  assert.equal(v.consistency, 'linked');
+});
+test('wall_negative_event_keeps_its_meaning', async () => {
+  const { projectWorkplace } = await api(); const i = addSecondOperationEvidence(wallInput()); i.checks[0].verdict = 'fail';
+  const event = projectWorkplace(i).consequences.events.find(item => item.seq === 5);
+  assert.deepEqual([event.linkState, event.meaning, event.reasonCode], ['linked', 'negative', 'TASK_MISSED'],
+    'a linked failing consequence was reported as success');
+});
+test('wall_event_route_requires_its_loaded_output_and_ordinal', async () => {
+  const { projectWorkplace } = await api();
+  for (const [change, name] of [
+    [i => { i.events[0].derivation.observed_ref = 'other-output'; }, 'output'],
+    [i => { i.events[0].derivation.check_id = 'missing-check'; }, 'check'],
+  ]) {
+    const i = wallInput(); change(i); const v = projectWorkplace(i);
+    assert.equal(v.consequences.events[0].linkState, 'incomplete', `an event without its ${name} route was reported linked`);
+    assert.equal(v.consequences.events[0].meaning, 'pending', `an incomplete ${name} route implied an arrival`);
+    assert.equal(v.consistency, 'incomplete');
+  }
+});
+test('wall_event_route_contradictions_are_visible_and_conflicting', async () => {
+  const { projectWorkplace } = await api();
+  for (const [change, contradiction] of [
+    [i => { i.events[0].derivation.request_ordinal = 2; }, 'ordinal'],
+    [i => { i.checks[0].observed_ref = 'other-output'; }, 'link'],
+    [i => { i.checks[0].verdict = 'fail'; }, 'verdict'],
+  ]) {
+    const i = wallInput(); change(i); const v = projectWorkplace(i);
+    assert.equal(v.consequences.events[0].linkState, 'conflict', `a ${contradiction} contradiction was accepted as a linked event`);
+    assert.equal(v.consequences.events[0].contradiction, contradiction, `a ${contradiction} contradiction reported the wrong reason`);
+    assert.equal(v.consequences.events[0].meaning, 'conflict');
+    assert.equal(v.consistency, 'conflict');
+  }
+});
+test('wall_incident_opened_event_must_be_an_incident_open', async () => {
+  const { projectWorkplace } = await api(); const i = wallInput();
+  i.board.incidents[0] = { ...i.board.incidents[0], opened_event_seq: 1,
+    opening_run_id: 'run-1', failing_output_ref: 'output-1', check_result_id: 'check-1' };
+  assert.equal(projectWorkplace(i).consistency, 'conflict', 'a sale event was accepted as an incident opening');
+});
+test('wall_incident_resolution_join_is_explicit', async () => {
+  const { projectWorkplace } = await api();
+  const resolved = () => {
+    const i = wallInput();
+    i.events.push({ seq: 5, hash: 'event-resolved', event_type: 'INCIDENT_RESOLVED', synthetic: true,
+      derivation: { run_id: 'run-1', check_id: 'check-1', observed_ref: 'output-1', request_ordinal: 1,
+        verdict: 'pass', reason_code: null }, payload: { incident_id: 'incident-1' } });
+    i.board.ledger_event_count = 5;
+    i.board.ledger_totals = { ...i.board.ledger_totals, INCIDENT_RESOLVED: 1 };
+    i.board.incidents[0] = { ...i.board.incidents[0], resolved_event_seq: 5,
+      resolving_version_id: 'selected-2' };
+    return i;
+  };
+  const linked = projectWorkplace(resolved());
+  assert.equal(linked.consistency, 'linked', 'a valid incident resolution was rejected');
+  assert.equal(linked.consequences.incidents[0].resolvedEventId, 'bookshop:5:event-resolved');
+  assert.equal(linked.consequences.incidents[0].resolvingVersionId, 'selected-2');
+  const missing = resolved(); missing.events = missing.events.filter(event => event.seq !== 5);
+  missing.board.ledger_event_count = 4; delete missing.board.ledger_totals.INCIDENT_RESOLVED;
+  assert.equal(projectWorkplace(missing).consistency, 'incomplete', 'a missing resolution event was not incomplete');
+  const wrongIncident = resolved(); wrongIncident.events[4].payload.incident_id = 'other-incident';
+  assert.equal(projectWorkplace(wrongIncident).consistency, 'conflict', 'a resolution for another incident was accepted');
+  const wrongType = resolved(); wrongType.events[4] = { ...wrongType.events[4], event_type: 'SALE_COMPLETED' };
+  wrongType.board.ledger_totals = { SALE_COMPLETED: 2, INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 };
+  assert.equal(projectWorkplace(wrongType).consistency, 'conflict', 'a non-resolution event was accepted as a resolution');
+});
+test('wall_linked_consequence_arrival_is_one_transition_and_duplicate_quiet', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const before = projectWorkplace(withoutWall([2, 3, 4], { INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 },
+    wallInput().board.incidents));
+  const after = projectWorkplace(wallInput());
+  const expected = [{ key: 'consequence:bookshop:1:event-current', kind: 'linked-consequence',
+    stationId: 'ledger', publicRefs: ['bookshop:1:event-current'], count: 1 }];
+  assert.deepEqual(diffWorkplace(before, after), expected, 'a new linked operational event did not emit one arrival');
+  assert.deepEqual(diffWorkplace(after, after), [], 'a duplicate accepted view produced an arrival');
+  assert.deepEqual(diffWorkplace(after, before), [], 'a removed event produced an arrival');
+  assert.deepEqual(diffWorkplace(null, after), [], 'a first accepted view produced an arrival');
+  assert.deepEqual(diffWorkplace(before, after).filter(item => item.kind === 'linked-consequence').length, 1);
+});
+test('wall_multiple_linked_arrivals_share_one_counted_transition', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const before = projectWorkplace(withoutWall([2, 3, 4], { INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 },
+    wallInput().board.incidents));
+  const after = projectWorkplace(addSecondOperationEvidence(wallInput()));
+  const arrivals = diffWorkplace(before, after).filter(item => item.kind === 'linked-consequence');
+  assert.equal(arrivals.length, 1, 'multiple arrivals produced more than one trace');
+  assert.equal(arrivals[0].count, 2);
+  assert.deepEqual(arrivals[0].publicRefs, ['bookshop:1:event-current', 'bookshop:5:event-current-2']);
+  assert.ok(arrivals[0].key.includes('event-current') && arrivals[0].key.includes('event-current-2'));
+});
+test('wall_administrative_and_historical_arrivals_are_quiet', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const base = withoutWall([1], { SALE_COMPLETED: 1 }, []);
+  const before = projectWorkplace(base);
+  const admin = wallInput(); admin.events = admin.events.filter(event => event.seq !== 2);
+  admin.board.ledger_event_count = 3; admin.board.ledger_totals = { SALE_COMPLETED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 };
+  admin.board.incidents = [];
+  assert.deepEqual(diffWorkplace(before, projectWorkplace(admin)).filter(item => item.kind === 'linked-consequence'), [],
+    'an administrative record produced an arrival');
+  const historical = wallInput(); historical.events = historical.events.filter(event => event.seq !== 1);
+  historical.board.ledger_event_count = 3; historical.board.ledger_totals = { INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 };
+  assert.deepEqual(diffWorkplace(before, projectWorkplace(historical)).filter(item => item.kind === 'linked-consequence'), [],
+    'a historical record produced an arrival');
+});
+test('wall_arrival_requires_operation_purpose_selection_version_and_shift', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const before = projectWorkplace(withoutWall([2, 3, 4], { INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 },
+    wallInput().board.incidents));
+  const after = projectWorkplace(wallInput());
+  for (const [change, name] of [
+    [v => { v.run.purpose = 'EXPERIMENT'; }, 'purpose'],
+    [v => { v.run.selectionId = 'other-choice'; }, 'selection'],
+    [v => { v.run.versionId = 'other-version'; }, 'version'],
+    [v => { v.run.shiftId = 'other-shift'; }, 'shift'],
+    [v => { v.operating = null; }, 'operating identity'],
+  ]) {
+    const mutated = structuredClone(after); change(mutated);
+    assert.deepEqual(diffWorkplace(before, mutated), [], `an arrival ignored the ${name} guard`);
+  }
+});
+test('wall_arrival_requires_the_current_source_linked_route_and_synthetic_event', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const before = projectWorkplace(withoutWall([2, 3, 4], { INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 },
+    wallInput().board.incidents));
+  const after = projectWorkplace(wallInput());
+  for (const [change, name] of [
+    [v => { v.consequences.events[0].source = 'historical'; }, 'current source'],
+    [v => { v.consequences.events[0].linkState = 'incomplete'; }, 'linked route'],
+    [v => { v.consequences.events[0].synthetic = false; }, 'synthetic event'],
+  ]) {
+    const mutated = structuredClone(after); change(mutated);
+    assert.deepEqual(diffWorkplace(before, mutated), [], `an arrival ignored the ${name} guard`);
+  }
+});
+test('wall_arrival_survives_a_previously_pending_evidence_route', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const pending = withoutWall([2, 3, 4], { INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 },
+    wallInput().board.incidents);
+  pending.checks = [];
+  const before = projectWorkplace(pending);
+  assert.equal(before.evidence.completeness, 'missing');
+  const after = projectWorkplace(wallInput());
+  assert.equal(after.evidence.completeness, 'linked');
+  assert.equal(diffWorkplace(before, after).filter(item => item.kind === 'linked-consequence').length, 1,
+    'a previously pending evidence route suppressed the recorded arrival');
+});
+test('wall_arrival_is_quiet_in_history_conflict_and_context_changes', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const before = projectWorkplace(withoutWall([2, 3, 4], { INCIDENT_OPENED: 1, LIMIT_DECLARED: 1, OWNER_ASSIGNED: 1 },
+    wallInput().board.incidents));
+  const history = wallInput(); history.inspection = { mode: 'history', historicalRunId: 'run-1' };
+  assert.deepEqual(diffWorkplace(before, projectWorkplace(history)), [], 'history navigation produced an arrival');
+  const conflict = wallInput(); conflict.board.chain_status = 'BROKEN';
+  assert.deepEqual(diffWorkplace(before, projectWorkplace(conflict)), [], 'a conflicting read produced an arrival');
+  const otherShift = wallInput(); otherShift.loadedShiftId = 'shift-2';
+  otherShift.board.latest_shift = { id: 'shift-2', state: 'OPEN' };
+  assert.deepEqual(diffWorkplace(before, projectWorkplace(otherShift)), [], 'a shift change produced an arrival');
+});
+test('wall_projection_whitelists_record_payloads_and_bodies', async () => {
+  const { projectWorkplace } = await api(); const i = wallInput();
+  i.events[0].derivation.output_body_base64 = 'PRIVATE_BODY';
+  i.events[0].derivation.request_text = 'PRIVATE_REQUEST';
+  i.events[0].payload = { detail: 'PRIVATE_PAYLOAD' };
+  const v = projectWorkplace(i);
+  const needles = ['PRIVATE_BODY', 'PRIVATE_REQUEST', 'PRIVATE_PAYLOAD', 'PRIVATE_LIMIT'];
+  const scan = text => needles.filter(needle => text.includes(needle));
+  for (const needle of needles) assert.ok(scan(JSON.stringify({ value: needle })).includes(needle));
+  assert.deepEqual(scan(JSON.stringify(v)), [], 'private record material reached the scene projection');
 });

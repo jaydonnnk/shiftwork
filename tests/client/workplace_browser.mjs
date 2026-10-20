@@ -8,7 +8,7 @@ import { chromePath, repoRoot } from './env.mjs';
 
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -21,6 +21,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
   let importsReleased = false, instrumented = !['plain','page-cache'].includes(fault), selectionFailureUsed = false;
   const s30Mode = /^(?:diagnostic-|ownership-|expand-|motion-)/.test(fault);
   const s31Mode = /^(?:comparison-|selection-)/.test(fault);
+  const s32Mode = /^(?:s32|operation)-/.test(fault);
   const endpoint = await new Promise((resolve,reject) => {
     let stderr = ''; const timer = setTimeout(() => reject(Error('Chrome startup timed out')),15000);
     child.once('error',reject);
@@ -61,7 +62,34 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
     const fail = (['host-import','startup-blocking-host'].includes(fault) && name === '/workplace-host.js') ||
       (fault === 'scene-import' && name === '/workplace-scene.js') ||
       (fault === 'core-import' && name.endsWith('/three.core.js'));
-    if(fault && !s30Mode && !s31Mode && fault!=='startup-blocking-host' && !fault.startsWith('omit-') && !fault.startsWith('page-cache') && fault !== 'plain' && fault !== 'context' && (fail || name === '/workplace-scene.js' || ((hostTimeout || hostEvaluation) && name==='/workplace-host.js')) && !importsReleased) await new Promise(resolve=>gates.push(resolve));
+    if(fault && !s30Mode && !s31Mode && !s32Mode && fault!=='startup-blocking-host' && !fault.startsWith('omit-') && !fault.startsWith('page-cache') && fault !== 'plain' && fault !== 'context' && (fail || name === '/workplace-scene.js' || ((hostTimeout || hostEvaluation) && name==='/workplace-host.js')) && !importsReleased) await new Promise(resolve=>gates.push(resolve));
+    if(s32Mode && name==='/workplace-host.js') {
+      let source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
+      const publishNeedle="    const transitions = view.consistency==='conflict' ? [] : diffWorkplace(previous,view);";
+      assert.equal(source.split(publishNeedle).length-1,1,'Publish observation anchor changed');
+      source=source.replace(publishNeedle,publishNeedle+" globalThis.__s32Publishes ??= []; globalThis.__s32Publishes.push({state:view.run?.state ?? null,consistency:view.consistency,current:(view.consequences?.events ?? []).filter(event=>event.source==='current').map(event=>event.seq),scene:!!scene,previous:!!previous,kinds:transitions.map(item=>item.kind)});");
+      if(fault==='operation-omit-arrival-callback') {
+        const needle='      if(started && consequence) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});';
+        assert.equal(source.split(needle).length-1,1,'Consequence callback fault anchor changed');
+        source=source.replace(needle,'      void 0;');
+      }
+      if(fault==='operation-conflict-reference') {
+        const needle="if(view.consistency!=='conflict') previous=view;";
+        assert.equal(source.split(needle).length-1,1,'Conflict reference fault anchor changed');
+        source=source.replace(needle,"previous=view.consistency==='conflict'?null:view;");
+      }
+      if(fault==='operation-reset-reference') {
+        const needle="if(publication.kind==='reset') { release(); if(!unavailable)";
+        assert.equal(source.split(needle).length-1,1,'Reset reference fault anchor changed');
+        source=source.replace(needle,"if(publication.kind==='reset') { release(); previous=null; if(!unavailable)");
+      }
+      if(fault==='operation-omit-mount-replay') {
+        const needle='if(handle.apply(view,transitions) && consequence)';
+        assert.equal(source.split(needle).length-1,1,'Mount replay fault anchor changed');
+        source=source.replace(needle,'if(false)');
+      }
+      return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/javascript'}],body:Buffer.from(source).toString('base64')});
+    }
     if((hostTimeout || hostEvaluation) && name==='/workplace-host.js') {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
       const needle='export function createWorkplaceHost({container,fallback,status,onStation}) {';
@@ -139,7 +167,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
           source=source.replace(needle,'  void 0;');
         }
       }
-      if(s31Mode) {
+      if(s31Mode || s32Mode) {
         const publicationNeedle='  latestPresentation = publication;';
         assert.equal(source.split(publicationNeedle).length-1,1,'Publication observation anchor changed');
         source=source.replace(publicationNeedle,publicationNeedle+"\n  globalThis.__s31Publications ??= []; globalThis.__s31Publications.push({reason, kind:publication.kind, generation:publication.generation ?? null, intent:publication.intent ?? null, inspection:publication.context?.inspection ?? null, comparison:publication.view?.tests?.comparison?.state ?? null, operating:publication.view?.operating?.versionId ?? null});");
@@ -203,6 +231,16 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
           const needle="    document.body.dataset.loadState !== 'loading';";
           assert.equal(source.split(needle).length-1,1,'Comparison loading ownership anchor changed');
           source=source.replace(needle,'    true;');
+        }
+      }
+      if(s32Mode) {
+        const consequenceNeedle='      onConsequence({ count }) { showWallTrace(count); },';
+        assert.equal(source.split(consequenceNeedle).length-1,1,'Consequence callback observation anchor changed');
+        source=source.replace(consequenceNeedle,'      onConsequence({ count }) { globalThis.__s32Arrivals ??= []; globalThis.__s32Arrivals.push({ count }); showWallTrace(count); },');
+        if(fault==='operation-omit-wall-label') {
+          const needle="  label.textContent = count > 1 ? `Recorded evidence added · ${count} events` : 'Recorded evidence added';";
+          assert.equal(source.split(needle).length-1,1,'Wall trace label fault anchor changed');
+          source=source.replace(needle,'  void 0;');
         }
       }
       if(hostTimeout || hostEvaluation) {
@@ -314,9 +352,24 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       source = source.replace('return { apply, resize,', 'globalThis.__workplaceApply = station => apply({...view,station}, []); globalThis.__workplaceDispose = dispose; return { apply, resize,');
       source = source.replace('view = next;', 'view = next; globalThis.__s29Applied=structuredClone(next);');
       source = source.replace('return { apply, resize,', `globalThis.__workplaceStationPoint = station => { const p = new THREE.Vector3(...room.stationAnchors[station]); p.y=1.15; p.project(camera); const r=renderer.domElement.getBoundingClientRect(); return {x:r.left+(p.x+1)*r.width/2,y:r.top+(1-p.y)*r.height/2}; }; return { apply, resize,`);
-      source = source.replace('return { apply, resize, setSuspended(value)', `globalThis.__workplaceControls={pulse:()=>!!pulse,state:()=>({suspended,disposed,pulse:!!pulse,applied:view?.tests?.diagnostic?.trials?.[0]?.state??null,emissive:indicatorMaterial?.emissiveIntensity??0,comparisonPulse:!!comparisonPulse,comparisonDuration:comparisonPulse?.duration??null,selectionPulse:!!selectionPulse,selectionDuration:selectionPulse?.duration??null,comparisonId:view?.tests?.comparison?.id??null,comparisonState:view?.tests?.comparison?.state??null,candidates:Object.fromEntries(Object.entries(candidateMaterials).map(([label,material])=>[label,{color:material.color.getHexString(),emissive:material.emissiveIntensity,eligible:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.eligible??null,versionId:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.versionId??null,contentHash:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.contentHash??null}])),selection:{id:view?.operating?.selectionId??null,versionId:view?.operating?.versionId??null,contentHash:view?.operating?.contentHash??null,plate:plateMaterial?.color.getHexString()??null,emissive:plateMaterial?.emissiveIntensity??0}})}; return { apply, resize, setSuspended(value)`);
+      source = source.replace('return { apply, resize, setSuspended(value)', `globalThis.__workplaceControls={pulse:()=>!!pulse,state:()=>({suspended,disposed,pulse:!!pulse,applied:view?.tests?.diagnostic?.trials?.[0]?.state??null,emissive:indicatorMaterial?.emissiveIntensity??0,comparisonPulse:!!comparisonPulse,comparisonDuration:comparisonPulse?.duration??null,selectionPulse:!!selectionPulse,selectionDuration:selectionPulse?.duration??null,comparisonId:view?.tests?.comparison?.id??null,comparisonState:view?.tests?.comparison?.state??null,candidates:Object.fromEntries(Object.entries(candidateMaterials).map(([label,material])=>[label,{color:material.color.getHexString(),emissive:material.emissiveIntensity,eligible:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.eligible??null,versionId:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.versionId??null,contentHash:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.contentHash??null}])),selection:{id:view?.operating?.selectionId??null,versionId:view?.operating?.versionId??null,contentHash:view?.operating?.contentHash??null,plate:plateMaterial?.color.getHexString()??null,emissive:plateMaterial?.emissiveIntensity??0},wall:{color:wallMaterial?.color.getHexString()??null,emissive:wallMaterial?.emissiveIntensity??0},wallTrace:!!wallTrace,wallTraceDuration:wallTrace?.duration??null,wallTraceCount:wallTrace?.count??null,wallTraces:globalThis.__workplaceWallTraces??0,wallDurations:globalThis.__workplaceWallDurations??[],wallCounts:globalThis.__workplaceWallCounts??[]})}; return { apply, resize, setSuspended(value)`);
       source = source.replace('comparisonPulse = { start: performance.now(), duration: 160 };', 'comparisonPulse = { start: performance.now(), duration: 160 }; globalThis.__workplaceComparisonPulses=(globalThis.__workplaceComparisonPulses??0)+1; globalThis.__workplaceComparisonDurations ??= []; globalThis.__workplaceComparisonDurations.push(160);');
       source = source.replace('selectionPulse = { start: performance.now(), duration: 180 };', 'selectionPulse = { start: performance.now(), duration: 180 }; globalThis.__workplaceSelectionPulses=(globalThis.__workplaceSelectionPulses??0)+1; globalThis.__workplaceSelectionDurations ??= []; globalThis.__workplaceSelectionDurations.push(180);');
+      if(fault==='operation-omit-wall-trace') {
+        const needle='        wallTrace = { start: performance.now(), duration: 320, count: arrival.count ?? 1 };';
+        assert.equal(source.split(needle).length-1,1,'Wall trace fault anchor changed');
+        source=source.replace(needle,'        wallTrace = null;');
+      } else {
+        const needle='        wallTrace = { start: performance.now(), duration: 320, count: arrival.count ?? 1 };';
+        assert.equal(source.split(needle).length-1,1,'Wall trace observation anchor changed');
+        source=source.replace(needle, needle+' globalThis.__workplaceWallTraces=(globalThis.__workplaceWallTraces??0)+1; globalThis.__workplaceWallDurations ??= []; globalThis.__workplaceWallDurations.push(wallTrace.duration); globalThis.__workplaceWallCounts ??= []; globalThis.__workplaceWallCounts.push(wallTrace.count);');
+        if(fault==='operation-short-wall-trace') source=source.replace('wallTrace = { start: performance.now(), duration: 320, count: arrival.count ?? 1 };','wallTrace = { start: performance.now(), duration: 160, count: arrival.count ?? 1 };');
+      }
+      if(fault==='operation-omit-wall-settle') {
+        const needle='function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); settleWallTrace(); }';
+        assert.equal(source.split(needle).length-1,1,'Wall settle fault anchor changed');
+        source=source.replace(needle,'function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); }');
+      }
       if(fault==='motion-omit-settle') {
         const needle='setReducedMotion(value) { reducedMotion=value; if(value) settleAllPulses(); requestFrame(); }';
         assert.equal(source.split(needle).length-1,1,'Reduced motion settlement anchor changed');

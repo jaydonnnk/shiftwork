@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -18,8 +18,8 @@ const rows=[
  ['check_run', "if (checks.some(check => check.run_id !== run?.id)) conflict();"],
  ['ledger_status', "else if (input.ledgerStatus !== 'VALID') conflict();", 'else void 0;'],
  ['board_status', "if (board && board.chain_status !== 'VALID') conflict();"],
- ['ledger_count', "if (board && board.ledger_event_count !== events.length) conflict();"],
- ['ledger_histogram', "if ((histogram[type] ?? 0) !== (board?.ledger_totals?.[type] ?? 0)) conflict();"],
+ ['ledger_count', 'const countMatches = board ? board.ledger_event_count === events.length : null;', 'const countMatches = true;'],
+ ['ledger_histogram', 'if ((histogram[type] ?? 0) !== (board?.ledger_totals?.[type] ?? 0)) { histogramMatches = false; conflict(); }', 'if ((histogram[type] ?? 0) !== (board?.ledger_totals?.[type] ?? 0)) { histogramMatches = false; }'],
 ].map(([name,needle,replacement='void 0;'])=>({name,needle,replacement,test:`multi_read_conflict_${name}`,expect:`${name} disagreement was accepted`}));
 rows.push(
  ...[
@@ -59,6 +59,28 @@ rows.push(
  {name:'selection_duplicate',needle:'if (beforeSelection !== afterSelection && afterSelection !== null) {',replacement:'if (afterSelection !== null) {',test:'selection_update_is_continuous_and_duplicate_quiet',expect:'a duplicate accepted view produced a selection transition'},
  {name:'selection_removal',needle:'if (beforeSelection !== afterSelection && afterSelection !== null) {',replacement:'if (beforeSelection !== afterSelection) {',test:'selection_update_is_continuous_and_duplicate_quiet',expect:'a removed selection produced a transition'},
 );
+const wallRows=[
+ ['wall_source_label',"source = link.run_id === run?.id && !historyMode ? 'current' : 'historical';","source = 'current';",'wall_projection_labels_sources_links_and_incident_joins','the historical consequence was mislabelled'],
+ ['wall_event_run',"if (link.run_id !== run?.id) { linkState = 'historical'; meaning = 'historical'; }","if (false) { linkState = 'historical'; meaning = 'historical'; }",'wall_projection_labels_sources_links_and_incident_joins','the historical consequence was mislabelled'],
+ ['wall_event_output',"if (!sourceOutput) { linkState = 'incomplete'; meaning = 'pending'; incomplete(); }","if (false) { linkState = 'incomplete'; meaning = 'pending'; incomplete(); }",'wall_event_route_requires_its_loaded_output_and_ordinal','an event without its output route was reported linked'],
+ ['wall_event_check',"else if (!sourceCheck) { linkState = 'incomplete'; meaning = 'pending'; incomplete(); }","else if (false) { linkState = 'incomplete'; meaning = 'pending'; incomplete(); }",'wall_event_route_requires_its_loaded_output_and_ordinal','an event without its check route was reported linked'],
+ ['wall_event_ordinal',"else if (!ordinalMatches) { contradiction = 'ordinal'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }","else if (false) { contradiction = 'ordinal'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }",'wall_event_route_contradictions_are_visible_and_conflicting','a ordinal contradiction reported the wrong reason'],
+ ['wall_event_bridge',"else if (!bridged) { contradiction = 'link'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }","else if (false) { contradiction = 'link'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }",'wall_event_route_contradictions_are_visible_and_conflicting','a link contradiction was accepted as a linked event'],
+ ['wall_event_verdict',"else if (sourceCheck.verdict !== link.verdict) { contradiction = 'verdict'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }","else if (false) { contradiction = 'verdict'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }",'wall_event_route_contradictions_are_visible_and_conflicting','a verdict contradiction was accepted as a linked event'],
+ ['wall_incident_opened_type',"if (event.event_type !== 'INCIDENT_OPENED') { conflict(); continue; }","if (false) { conflict(); continue; }",'wall_incident_opened_event_must_be_an_incident_open','a sale event was accepted as an incident opening'],
+ ['wall_incident_resolved_missing','if (!resolved) incomplete();','if (false) incomplete();','wall_incident_resolution_join_is_explicit','a missing resolution event was not incomplete'],
+ ['wall_incident_resolved_type',"else if (resolvedType !== 'INCIDENT_RESOLVED') conflict();",'else if (false) conflict();','wall_incident_resolution_join_is_explicit','a non-resolution event was accepted as a resolution'],
+ ['wall_incident_resolved_id',"else if (resolved.payload?.incident_id !== incident.id) conflict();",'else if (false) conflict();','wall_incident_resolution_join_is_explicit','a resolution for another incident was accepted'],
+ ['wall_arrival_purpose',"const eligiblePurpose = run && run.purpose === 'OPERATION';",'const eligiblePurpose = Boolean(run);','wall_arrival_requires_operation_purpose_selection_version_and_shift','an arrival ignored the purpose guard'],
+ ['wall_arrival_shift',"const eligibleShift = run && run.shiftId === currentShift;",'const eligibleShift = Boolean(run);','wall_arrival_requires_operation_purpose_selection_version_and_shift','an arrival ignored the shift guard'],
+ ['wall_arrival_selection',"const eligibleSelection = run && operating && run.selectionId === operating.selectionId;",'const eligibleSelection = Boolean(run && operating);','wall_arrival_requires_operation_purpose_selection_version_and_shift','an arrival ignored the selection guard'],
+ ['wall_arrival_version',"const eligibleVersion = run && operating && run.versionId === operating.versionId;",'const eligibleVersion = Boolean(run && operating);','wall_arrival_requires_operation_purpose_selection_version_and_shift','an arrival ignored the version guard'],
+ ['wall_arrival_current',"const isCurrent = event.source === 'current';",'const isCurrent = true;','wall_arrival_requires_the_current_source_linked_route_and_synthetic_event','an arrival ignored the current source guard'],
+ ['wall_arrival_linked',"const isLinked = event.linkState === 'linked';",'const isLinked = true;','wall_arrival_requires_the_current_source_linked_route_and_synthetic_event','an arrival ignored the linked route guard'],
+ ['wall_arrival_synthetic',"const isSynthetic = event.synthetic === true;",'const isSynthetic = true;','wall_arrival_requires_the_current_source_linked_route_and_synthetic_event','an arrival ignored the synthetic event guard'],
+ ['wall_arrival_new',"const isNew = !beforeEvents.has(event.id);",'const isNew = true;','wall_linked_consequence_arrival_is_one_transition_and_duplicate_quiet','a duplicate accepted view produced an arrival'],
+].map(([name,needle,replacement,test,expect])=>({name,needle,replacement,test,expect}));
+rows.push(...wallRows);
 const hostRows=[
  {name:'host_generation',needle:'if(publication.generation!=null && publication.generation<generation) return;',replacement:'void 0;',test:'host_reset_cannot_accept_older_generation',expect:'Older generation mounted after reset'},
  {name:'host_import_token',needle:'if(disposed || owner!==token) return;',replacement:'if(disposed) return;',test:'host_replaced_import_owner_cannot_allocate',expect:'Old import allocated into a newer mount'},
@@ -67,7 +89,12 @@ const hostRows=[
  {name:'host_retry_newest',needle:'const prior=previous; latest=publication;',replacement:'const prior=previous; if(!unavailable) latest=publication;',test:'host_retry_accepts_the_newest_publication',expect:'Retry applied an older public view'},
  {name:'host_constructor_failure',needle:"catch { if(owner===token && !disposed) failure('init-failed'); return; }",replacement:'catch { return; }',test:'host_constructor_throw_is_latched_until_explicit_retry',expect:'Thrown initialization did not fail the host'},
  {name:'host_loading_baseline',needle:"if(publication.kind==='loading') { if(!unavailable)",replacement:"if(publication.kind==='loading') { previous=null; if(!unavailable)",test:'host_loading_retains_test_baseline_and_duplicate_is_quiet',expect:'accepted test update did not reach the scene'},
- {name:'host_expanded_reference',needle:"previous=view.consistency==='conflict'?null:view;",replacement:"if(!expanded) previous=view.consistency==='conflict'?null:view;",test:'host_expanded_updates_advance_the_reference_without_replay',expect:'a duplicate after expansion replayed the suspended update'},
+ {name:'host_expanded_reference',needle:"if(view.consistency!=='conflict') previous=view;",replacement:"if(!expanded && view.consistency!=='conflict') previous=view;",test:'host_expanded_updates_advance_the_reference_without_replay',expect:'a duplicate after expansion replayed the suspended update'},
+ {name:'host_conflict_reference',needle:"if(view.consistency!=='conflict') previous=view;",replacement:"previous=view.consistency==='conflict'?null:view;",test:'host_conflict_keeps_the_last_consistent_reference',expect:'a conflicting view cleared the consistent reference'},
+ {name:'host_reset_reference',needle:"if(publication.kind==='reset') { release(); if(!unavailable)",replacement:"if(publication.kind==='reset') { release(); previous=null; if(!unavailable)",test:'host_reset_reference_replays_one_arrival_at_remount',expect:'an arrival across a reset and remount was lost or replayed'},
+ {name:'host_mount_replay',needle:'if(handle.apply(view,transitions) && consequence) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});',replacement:'if(false) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});',test:'host_reset_reference_replays_one_arrival_at_remount',expect:'an arrival across a reset and remount was lost or replayed'},
+ {name:'host_consequence_started',needle:'if(started && consequence) onConsequence?.',replacement:'if(consequence) onConsequence?.',test:'host_consequence_callback_requires_a_started_trace',expect:'a consequence label fired without a scene trace'},
+ {name:'host_consequence_emitted',needle:'if(started && consequence) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});',replacement:'void 0;',test:'host_consequence_callback_requires_a_started_trace',expect:'a started trace produced no consequence label'},
  {name:'host_resize_cleanup',needle:'size.disconnect();',replacement:'void 0;',test:'host_loading_retains_one_scene_and_double_disposal_is_idempotent',expect:'Resize observer remains attached'},
  {name:'host_intersection_cleanup',needle:'intersection.disconnect();',replacement:'void 0;',test:'host_loading_retains_one_scene_and_double_disposal_is_idempotent',expect:'Intersection observer remains attached'},
  ...[
