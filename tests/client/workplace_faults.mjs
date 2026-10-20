@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -111,6 +111,27 @@ const hostRows=[
 ];
 rows.push(...hostRows.map(row=>({...row,host:true})));
 const receipts=[];
+rows.push(
+  {name:'gtm_scalar_refs',needle:"typeof value === 'string' ? value : null",replacement:'value',test:'gtm_reference_fields_refuse_objects',expect:'A structured GTM payload reached scene references'},
+  {name:'gtm_host_admission',host:true,needle:"board==='bookshop' || board==='gtm'",replacement:"board==='bookshop'",test:'host_gtm_mount_switch_and_stale_pick_keep_board_ownership',expect:'Stonebridge did not mount a real scene'},
+  ...[['testStation','compare','test'],['operatingStation','service','selection'],['wallStation','ledger','consequence']].map(([variable,fallback,kind])=>({
+    name:`gtm_station_${variable}`,needle:`const ${variable} = next.context.board === 'gtm' ? '${variable==='wallStation'?'wall':'workflow'}' : '${fallback}';`,
+    replacement:`const ${variable} = '${fallback}';`,test:'gtm_transitions_use_canonical_workflow_and_wall',expect:`GTM ${kind} targeted a bookshop station`,
+  })),
+);
+for (const type of ['OWNER_ASSIGNED', 'SLA_CLOCK_STARTED', 'HANDOFF_ESCALATED']) {
+  rows.push(
+    {name:`gtm_purpose_${type}`, needle:"if (link?.run_id === run?.id && run.purpose !== 'OPERATION') {",
+      replacement:`if (event.event_type !== '${type}' && link?.run_id === run?.id && run.purpose !== 'OPERATION') {`,
+      test:`gtm_purpose_${type}`, expect:`${type} experiment changed operational ownership`},
+    {name:`gtm_link_${type}`, needle:"else if (!link || !event.synthetic || !['linked', 'historical'].includes(linkState)) {",
+      replacement:`else if (event.event_type !== '${type}' && (!link || !event.synthetic || !['linked', 'historical'].includes(linkState))) {`,
+      test:`gtm_link_${type}`, expect:`${type} without a link changed operational ownership`},
+    {name:`gtm_synthetic_${type}`, needle:"!link || !event.synthetic || !['linked', 'historical'].includes(linkState)",
+      replacement:`!link || (!event.synthetic && event.event_type !== '${type}') || !['linked', 'historical'].includes(linkState)`,
+      test:`gtm_synthetic_${type}`, expect:`${type} non-synthetic event became a routing marker`},
+  );
+}
 function run(row,bytes) {
   const inline=row.host?bytes:bytes.replace("'./evidence.js'",JSON.stringify(new URL('../../shiftwork/client/evidence.js',import.meta.url).href));
   return spawnSync(process.execPath,['--test',`--test-name-pattern=^${row.test}$`,path.join(repoRoot,'tests/client/workplace_view.test.mjs')],{encoding:'utf8',env:{...process.env,[row.host?'WORKPLACE_HOST_SOURCE':'WORKPLACE_VIEW_SOURCE']:Buffer.from(inline).toString('base64')}});

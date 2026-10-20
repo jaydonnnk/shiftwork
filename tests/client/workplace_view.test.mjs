@@ -3,6 +3,111 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 
+const GTM_OUTCOMES = ['OWNER_ASSIGNED', 'SLA_CLOCK_STARTED', 'HANDOFF_ESCALATED'];
+function gtmInput(types = GTM_OUTCOMES) {
+  const i = input();
+  i.slug = 'gtm'; i.board.engagement_slug = 'gtm'; i.activeStation = 'wall';
+  i.run.purpose = 'OPERATION'; i.run.selection_id = 'choice-1'; i.run.artifact_version_id = 'selected-2';
+  i.checks[0].verdict = 'pass';
+  i.events = types.map((type, n) => ({ seq: n + 1, hash: `hash-${n}`, event_type: type, synthetic: true,
+    payload: { signal_ref: `signal:${n}`, owner: `owner-${n}`, record_ref: `pipeline:signal:${n}`, private: 'PRIVATE_PAYLOAD' },
+    derivation: { run_id: 'run-1', check_id: 'check-1', observed_ref: 'output-1', request_ordinal: 1, verdict: 'pass' } }));
+  i.board.ledger_event_count = i.events.length;
+  i.board.ledger_totals = Object.fromEntries(types.map(type => [type, types.filter(item => item === type).length]));
+  return i;
+}
+
+test('gtm_projection_keeps_each_record_on_its_exact_signal', async () => {
+  const { projectWorkplace } = await api();
+  const view = projectWorkplace(gtmInput());
+  assert.deepEqual(view.consequences.events.map(event => [event.type, event.signalRef, event.owner, event.recordRef]), [
+    ['OWNER_ASSIGNED', 'signal:0', 'owner-0', 'pipeline:signal:0'],
+    ['SLA_CLOCK_STARTED', 'signal:1', 'owner-1', 'pipeline:signal:1'],
+    ['HANDOFF_ESCALATED', 'signal:2', 'owner-2', 'pipeline:signal:2'],
+  ], 'GTM records lost their individual signal, owner or record');
+  assert.equal(JSON.stringify(view).includes('PRIVATE_PAYLOAD'), false, 'Raw GTM payload reached the scene');
+});
+for (const type of GTM_OUTCOMES) {
+  test(`gtm_purpose_${type}`, async () => {
+    const { projectWorkplace } = await api(); const i = gtmInput([type]);
+    i.run.purpose = 'EXPERIMENT';
+    const event = projectWorkplace(i).consequences.events[0];
+    assert.equal(event.owner, null, `${type} experiment changed operational ownership`);
+    assert.equal(event.signalRef, null, `${type} experiment changed a signal marker`);
+  });
+  test(`gtm_link_${type}`, async () => {
+    const { projectWorkplace } = await api(); const i = gtmInput([type]);
+    i.events[0].derivation = null;
+    const event = projectWorkplace(i).consequences.events[0];
+    assert.equal(event.owner, null, `${type} without a link changed operational ownership`);
+    assert.equal(event.recordRef, null, `${type} without a link changed a recorded marker`);
+  });
+  test(`gtm_synthetic_${type}`, async () => {
+    const { projectWorkplace } = await api(); const i = gtmInput([type]);
+    i.events[0].synthetic = false;
+    assert.equal(projectWorkplace(i).consequences.events[0].signalRef, null, `${type} non-synthetic event became a routing marker`);
+  });
+}
+test('gtm_missing_and_duplicate_owners_remain_visible', async () => {
+  const { projectWorkplace } = await api(); const i = gtmInput(['OWNER_ASSIGNED', 'OWNER_ASSIGNED']);
+  i.events[1].payload.signal_ref = 'signal:0';
+  delete i.events[0].payload.owner;
+  assert.deepEqual(projectWorkplace(i).consequences.events.map(event => [event.signalRef, event.owner]),
+    [['signal:0', null], ['signal:0', 'owner-1']], 'Missing or duplicate GTM ownership was hidden');
+});
+test('gtm_reference_fields_refuse_objects', async () => {
+  const { projectWorkplace } = await api(); const i = gtmInput(['OWNER_ASSIGNED']);
+  for (const key of ['signal_ref', 'owner', 'record_ref']) i.events[0].payload[key] = {private:'PRIVATE_REFERENCE_OBJECT'};
+  const event = projectWorkplace(i).consequences.events[0];
+  assert.deepEqual([event.signalRef,event.owner,event.recordRef], [null,null,null], 'A structured GTM payload reached scene references');
+});
+test('gtm_transitions_use_canonical_workflow_and_wall', async () => {
+  const {projectWorkplace,diffWorkplace} = await api();
+  const before = projectWorkplace(gtmInput([])), after = projectWorkplace(gtmInput());
+  assert.equal(diffWorkplace(before,after).find(row=>row.kind==='linked-consequence')?.stationId, 'wall', 'GTM consequence targeted a bookshop station');
+  const tested = structuredClone(before);
+  tested.tests.diagnostic = {id:'diagnostic-gtm',state:'FINALIZED',trials:[{runId:'trial-gtm',state:'COMPLETE'}]};
+  assert.equal(diffWorkplace(before,tested).find(row=>row.kind==='test-update')?.stationId, 'workflow', 'GTM test targeted a bookshop station');
+  const selected = structuredClone(before); selected.operating.selectionId = 'choice-2';
+  assert.equal(diffWorkplace(before,selected).find(row=>row.kind==='selection-update')?.stationId, 'workflow', 'GTM selection targeted a bookshop station');
+});
+test('gtm_experiment_and_history_preserve_recorded_owners_clocks_handoffs', async () => {
+  const { projectWorkplace, diffWorkplace } = await api(); const i = gtmInput();
+  const before = projectWorkplace(i);
+  i.run = { ...i.run, id: 'trial-run', purpose: 'EXPERIMENT' }; i.outputs = []; i.checks = []; i.selectedOutputId = null;
+  const trial = projectWorkplace(i);
+  const records = view => view.consequences.events.map(event => [event.id, event.signalRef, event.owner, event.recordRef]);
+  assert.deepEqual(records(trial), records(before), 'An experiment replaced recorded GTM ownership');
+  assert.equal(diffWorkplace(before, trial).some(item => item.kind === 'linked-consequence'), false);
+  i.inspection = { mode: 'history', historicalRunId: 'run-1' }; i.run = gtmInput().run;
+  i.outputs = gtmInput().outputs; i.checks = gtmInput().checks;
+  assert.deepEqual(records(projectWorkplace(i)), records(before), 'History replaced recorded GTM ownership');
+});
+test('gtm_room_has_original_routing_stations_and_no_bookcase', async () => {
+  const { roomDefinitions } = await import('../../shiftwork/client/workplace-rooms.js');
+  const room = roomDefinitions.gtm;
+  assert.ok(room, 'Stonebridge has no real room');
+  assert.deepEqual(Object.keys(room.stationAnchors).sort(), ['rules', 'signals', 'wall', 'workflow']);
+  assert.notDeepEqual(room.assemblies, roomDefinitions.bookshop.assemblies, 'Stonebridge reuses the bookshop furniture');
+  assert.equal(room.materials.floor, '#8b959f');
+});
+test('host_gtm_mount_switch_and_stale_pick_keep_board_ownership', async () => {
+  const f = await hostFixture();
+  const { projectWorkplace } = await api(); const gtm = projectWorkplace(gtmInput());
+  f.host.publish(f.accepted(2, gtm)); await f.flush();
+  assert.equal(f.counts.allocations, 1, 'Stonebridge did not mount a real scene');
+  assert.match(f.status.textContent, /Stonebridge/, 'Stonebridge retained a Bellwether graphics label');
+  const old = f.handles[0];
+  f.host.publish(f.accepted(3)); await f.flush();
+  old.options.onPick('wall');
+  assert.equal(f.counts.picked, 0, 'A stale Stonebridge callback navigated Bellwether');
+  assert.equal(f.counts.disposals, 1, 'Stonebridge resources survived the board switch');
+  f.host.publish(f.accepted(4, {...f.view, context:{...f.view.context, board:'northline'}}));
+  assert.equal(f.status.dataset.state, 'static', 'Northline lost its complete static fallback');
+  assert.equal(f.counts.disposals, 2, 'Bellwether resources survived the fallback switch');
+  f.host.dispose();
+});
+
 const url = new URL('../../shiftwork/client/workplace-view.js', import.meta.url);
 async function api() {
   assert.ok(existsSync(url), 'The engine-free workplace projection is missing');
@@ -749,6 +854,7 @@ test('wall_projection_labels_sources_links_and_incident_joins', async () => {
   assert.deepEqual(current, { id: 'bookshop:1:event-current', seq: 1, hash: 'event-current',
     type: 'SALE_COMPLETED', synthetic: true, source: 'current', linkState: 'linked', meaning: 'recorded',
     versionId: 'selected-2', reasonCode: null, contradiction: null, incidentId: null,
+    signalRef: null, owner: null, recordRef: null,
     link: { runId: 'run-1', checkId: 'check-1', outputId: 'output-1', ordinal: 1, verdict: 'pass' } },
     'the current linked consequence was mislabelled');
   assert.deepEqual([historical.source, historical.linkState, historical.meaning, historical.versionId, historical.incidentId],
