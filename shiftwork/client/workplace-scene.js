@@ -5,7 +5,8 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity, pulse = null, indicatorMaterial = null;
   let comparisonPulse = null, selectionPulse = null, plateMaterial = null, wallTrace = null, wallMaterial = null, traceMaterial = null, traceLine = null;
   let handoverMaterial = null, laterMaterial = null;
-  const candidateMaterials = {}, geometries = new Set(), materials = new Set(), targets = [];
+  let ownerMarker = null, routingLabel = null, routingTravel = null;
+  const candidateMaterials = {}, routingMaterials = {}, geometries = new Set(), materials = new Set(), targets = [];
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-8,8,6,-6,.1,100);
   camera.position.set(12,11,14); camera.lookAt(0,.8,0);
@@ -17,7 +18,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   function settlePulse() { pulse = null; if (indicatorMaterial) indicatorMaterial.emissiveIntensity = 0; }
   function settleComparisonPulse() { comparisonPulse = null; for (const material of Object.values(candidateMaterials)) material.emissiveIntensity = 0; }
   function settleSelectionPulse() { selectionPulse = null; if (plateMaterial) plateMaterial.emissiveIntensity = 0; }
-  function settleWallTrace() { wallTrace = null; if (traceLine) traceLine.visible = false; if (traceMaterial) traceMaterial.opacity = 0; if (wallMaterial) wallMaterial.emissiveIntensity = 0; }
+  function settleWallTrace() { wallTrace = null; if (routingTravel) ownerMarker.position.copy(routingTravel.to); routingTravel = null; if (traceLine) traceLine.visible = false; if (traceMaterial) traceMaterial.opacity = 0; if (wallMaterial) wallMaterial.emissiveIntensity = 0; }
   function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); settleWallTrace(); }
   function draw(now = performance.now()) {
     raf = null;
@@ -43,9 +44,15 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
       const progress = (now - wallTrace.start) / wallTrace.duration;
       if (progress >= 1) settleWallTrace();
       else {
+        if (routingTravel) ownerMarker.position.lerpVectors(routingTravel.from, routingTravel.to, Math.min(1, progress));
         if (traceMaterial) traceMaterial.opacity = .9 * (1 - progress);
         if (wallMaterial) wallMaterial.emissiveIntensity = .6 * (1 - progress);
       }
+    }
+    if (routingLabel && !routingLabel.hidden) {
+      const point = ownerMarker.position.clone().project(camera);
+      routingLabel.style.left = `${(point.x + 1) * 50}%`;
+      routingLabel.style.top = `${(1 - point.y) * 50}%`;
     }
     try { renderer.render(scene, camera); }
     catch { onFailure('render-failed'); }
@@ -80,6 +87,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     sceneLights.length = 0;
     renderer?.dispose(); renderer?.forceContextLoss(); renderer?.domElement.remove();
     renderer = null;
+    routingLabel?.remove(); routingLabel = null;
   }
   const sceneLights = [];
   try {
@@ -99,7 +107,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), scale = new THREE.Vector3();
     for(const [name,color] of Object.entries(room.materials)) {
       const definitions = room.assemblies.filter(item=>item.material===name);
-      const material = new THREE.MeshStandardMaterial({color,roughness:name==='wood'?.85: name==='paper'?1:.95,metalness:0}); materials.add(material);
+      const material = new THREE.MeshStandardMaterial({color,roughness:name==='metal'?.65:name==='wood'?.85: name==='paper'?1:.95,metalness:name==='metal'?.15:0}); materials.add(material);
       const mesh = new THREE.InstancedMesh(cube,material,definitions.length);
       definitions.forEach((item,index)=>{ matrix.compose(position.fromArray(item.position),new THREE.Quaternion(),scale.fromArray(item.size)); mesh.setMatrixAt(index,matrix); });
       mesh.castShadow = true; mesh.receiveShadow = true; mesh.userData.stations = definitions.map(item=>item.station);
@@ -109,7 +117,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     const rim = new THREE.Mesh(cube,rimMaterial); rim.scale.set(2.35,.06,1.5); scene.add(rim);
     indicatorMaterial = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1}); materials.add(indicatorMaterial);
     const indicator = new THREE.Mesh(cube,indicatorMaterial);
-    indicator.position.set(.7,1.5,2.88); indicator.scale.set(.78,.32,.04); scene.add(indicator);
+    indicator.position.fromArray(room.anchors?.indicator ?? [.7,1.5,2.88]); indicator.scale.set(.78,.32,.04); scene.add(indicator);
     for (const [label, anchor] of [['A', room.anchors?.candidateA], ['B', room.anchors?.candidateB]]) {
       if (!anchor) continue;
       const material = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1});
@@ -126,7 +134,22 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     wallMaterial = new THREE.MeshStandardMaterial({color:'#48617a',emissive:'#000000',emissiveIntensity:0,roughness:1});
     materials.add(wallMaterial);
     const wallPanel = new THREE.Mesh(cube, wallMaterial);
-    wallPanel.position.set(4,1.9,-2.69); wallPanel.scale.set(2.45,1.35,.04); scene.add(wallPanel);
+    wallPanel.position.fromArray(room.anchors?.wallPanel ?? [4,1.9,-2.69]);
+    wallPanel.scale.fromArray(room.anchors?.wallSize ?? [2.45,1.35,.04]); scene.add(wallPanel);
+    for (const [kind, anchor] of [['OWNER_ASSIGNED', room.anchors?.owner], ['SLA_CLOCK_STARTED', room.anchors?.clock], ['HANDOFF_ESCALATED', room.anchors?.handoff]]) {
+      if (!anchor) continue;
+      const material = new THREE.MeshStandardMaterial({color:'#35495e',roughness:.65,metalness:.15});
+      materials.add(material); routingMaterials[kind] = material;
+      const marker = new THREE.Mesh(cube,material);
+      marker.position.fromArray(anchor); marker.scale.set(.3,.16,.16); scene.add(marker);
+      if (kind === 'OWNER_ASSIGNED') {
+        ownerMarker = marker;
+        routingLabel = document.createElement('span');
+        routingLabel.className = 'workplace-routing-label';
+        routingLabel.setAttribute('aria-hidden', 'true'); routingLabel.hidden = true;
+        container.append(routingLabel);
+      }
+    }
     if (room.anchors?.handover) {
       handoverMaterial = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1});
       materials.add(handoverMaterial);
@@ -170,6 +193,13 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
       const negativeWall = currentWallEvents.some(event => event.meaning === 'negative' || event.meaning === 'pending');
       if (wallMaterial) wallMaterial.color.set(next?.consistency === 'conflict' ? '#263443' :
         negativeWall ? '#d98a7a' : currentWallEvents.some(event => event.linkState === 'linked') ? '#8fbf9f' : '#48617a');
+      for (const [kind, material] of Object.entries(routingMaterials)) {
+        const records = (next?.consequences?.events ?? []).filter(event => event.type === kind && event.signalRef && ['linked', 'historical'].includes(event.linkState));
+        const ownerCounts = new Map();
+        for (const event of records) ownerCounts.set(event.signalRef, (ownerCounts.get(event.signalRef) ?? 0) + 1);
+        const ownershipProblem = kind === 'OWNER_ASSIGNED' && records.some(event => !event.owner || ownerCounts.get(event.signalRef) > 1);
+        material.color.set(ownershipProblem ? '#d98a7a' : records.length ? '#d7bb75' : '#35495e');
+      }
       if (!reducedMotion && transitions.some(item => item.kind === 'test-update')) {
         pulse = { start: performance.now() };
         indicatorMaterial.emissive.set('#edbd68');
@@ -190,6 +220,23 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
         if (traceMaterial) traceMaterial.opacity = .9;
         if (wallMaterial) { wallMaterial.emissive.set('#edbd68'); wallMaterial.emissiveIntensity = .6; }
         startedConsequence = true;
+      }
+      if (ownerMarker) {
+        const owners = (next?.consequences?.events ?? []).filter(event => event.type === 'OWNER_ASSIGNED' && event.signalRef && ['linked', 'historical'].includes(event.linkState));
+        const unique = owners.filter(event => event.owner && owners.filter(other => other.signalRef === event.signalRef).length === 1);
+        const assigned = unique.find(event => arrival?.publicRefs.includes(event.id) && event.source === 'current' && event.linkState === 'linked' && event.synthetic === true);
+        const labelled = assigned ?? unique.find(event => event.id === routingLabel.dataset.eventId) ?? unique.at(-1);
+        if (routingTravel && labelled?.id !== routingLabel.dataset.eventId) {
+          ownerMarker.position.copy(routingTravel.to); routingTravel = null;
+        }
+        routingLabel.hidden = !labelled || next?.consistency === 'conflict';
+        routingLabel.textContent = labelled ? `${labelled.signalRef} · ${labelled.owner} · Synthetic recorded assignment` : '';
+        routingLabel.dataset.eventId = labelled?.id ?? '';
+        if (assigned && startedConsequence && !suspended) {
+          routingTravel = {from: new THREE.Vector3(...room.anchors.plate), to: new THREE.Vector3(...room.anchors.owner)};
+          ownerMarker.position.copy(routingTravel.from);
+        } else if (!routingTravel) ownerMarker.position.fromArray(room.anchors.owner);
+        if ((!labelled && routingTravel) || next?.consistency === 'conflict') settleWallTrace();
       }
       requestFrame();
       return startedConsequence;

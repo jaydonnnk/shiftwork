@@ -69,6 +69,47 @@ box('paper',[3.62,1.2,2.45],[.5,.05,.42],'next');
 box('paper',[4.38,1.2,2.45],[.5,.05,.42],'next');
 box('paper',[4,1.9,2.45],[.65,.05,.45],'next');
 
+// Original Stonebridge routing room. The metal table branches toward stepped
+// ownership lanes; no bookshop shelf, sales counter or borrowed asset is used.
+const routing = [];
+const routeBox = (material, position, size, station = null) => routing.push({material, position, size, station});
+routeBox('floor', [0,-.15,0], [12,.3,9]);
+routeBox('navy', [0,1.6,-4.5], [12,3.2,.18]);
+routeBox('navy', [-6,1.6,0], [.18,3.2,9]);
+for (const [position, size] of [[[0,-.3,4.5],[12,.2,.2]], [[6,-.3,0],[.2,.2,9]]]) routeBox('edge', position, size);
+// Open signal rack with upright folders, rather than a queue of invented leads.
+routeBox('metal', [-4,.55,2.2], [1.9,1.1,.8], 'signals');
+routeBox('edge', [-4,.08,2.2], [2.1,.12,1], 'signals');
+for (let n=0;n<4;n++) {
+  routeBox('paper', [-4.65+n*.42,1.36,2.2], [.08,.62,.58], 'signals');
+  routeBox('pin', [-4.65+n*.42,1.7,2.2], [.13,.1,.6], 'signals');
+}
+// Wall-mounted qualification sheet and its metal frame.
+routeBox('metal', [-3.5,1.85,-2.5], [2.25,1.65,.16], 'rules');
+routeBox('paper', [-3.5,1.85,-2.39], [1.98,1.37,.04], 'rules');
+for (const x of [-4.15,-2.85]) routeBox('edge', [x,.65,-2.5], [.12,1.3,.2], 'rules');
+for (const y of [1.48,1.85,2.22]) routeBox('lane', [-3.5,y,-2.34], [1.5,.07,.025], 'rules');
+// Broad team routing table with two equal candidate stands and branching pins.
+routeBox('metal', [0,1,.6], [4,.24,2.15], 'workflow');
+for (const x of [-1.55,1.55]) routeBox('edge', [x,.5,.6], [.22,1,1.6], 'workflow');
+routeBox('lane', [0,1.14,.75], [.12,.04,1.45], 'workflow');
+for (const x of [-.85,.85]) {
+  routeBox('lane', [x,1.14,.1], [1.7,.04,.12], 'workflow');
+  routeBox('paper', [x,1.18,1.1], [.65,.06,.5], 'workflow');
+  routeBox('pin', [x,1.18,.1], [.22,.1,.22], 'workflow');
+}
+routeBox('metal', [0,1.6,-.1], [1.05,.62,.12], 'workflow');
+routeBox('screen', [0,1.6,-.02], [.86,.43,.025], 'workflow');
+// Vertically separated owner lanes make the wall silhouette visibly stepped.
+for (const [x,y,height] of [[2.65,1.3,1.65],[3.7,1.65,2.35],[4.75,2,3.05]]) {
+  routeBox('lane', [x,y,-2], [.95,height,.22], 'wall');
+  routeBox('metal', [x,y-height/2,-1.78], [1.02,.12,.65], 'wall');
+  routeBox('paper', [x,y+.35,-1.85], [.65,.34,.035], 'wall');
+}
+routeBox('metal', [4.5,.5,.2], [1.65,.16,1], 'wall');
+routeBox('edge', [4.5,.25,.2], [1.35,.5,.75], 'wall');
+routeBox('paper', [4.5,.61,.2], [1.1,.06,.65], 'wall');
+
 export const roomDefinitions = {
   bookshop: {
     bounds: { min: [-6,-.5,-4.6], max: [6,3.3,4.6] }, cameraTarget: [0,.8,0],
@@ -79,5 +120,15 @@ export const roomDefinitions = {
       owner: [-3.7,1,-2.4], repair: [-4.2,.8,-.2], next: [4,1.2,2.5] },
     anchors: { candidateA: [-.15,1.02,3], candidateB: [1.55,1.02,3], plate: [0,1.2,1.25],
       wall: [4,1.9,-2.55], handover: [4,1.5,2.2], later: [2.2,1.2,3] },
+  },
+  gtm: {
+    bounds: { min: [-6,-.5,-4.6], max: [6,3.6,4.6] }, cameraTarget: [0,.8,0],
+    materials: {floor:'#8b959f', navy:'#202c40', edge:'#263443', metal:'#61758a',
+      pin:'#d7bb75', lane:'#35495e', paper:'#e7deca', screen:'#91acb9'},
+    assemblies: routing,
+    stationAnchors: {signals:[-4,1,2.2], rules:[-3.5,1.85,-2.5], workflow:[0,1,.6], wall:[3.7,1.65,-2]},
+    anchors: {candidateA:[-.85,1.25,1.1], candidateB:[.85,1.25,1.1], plate:[0,1.2,.6],
+      indicator:[0,1.6,.01], wall:[3.7,1.65,-1.76], wallPanel:[3.7,1.65,-1.76], wallSize:[.65,.9,.035],
+      owner:[2.65,1.45,-1.82], clock:[3.7,2,-1.82], handoff:[4.5,.7,.2]},
   },
 };
