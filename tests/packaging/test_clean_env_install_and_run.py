@@ -2,6 +2,7 @@
 
 import json
 import os
+import signal
 import shutil
 import socket
 import subprocess
@@ -147,6 +148,85 @@ def _offline_pivot(python: Path, source: Path, out: Path, env: dict) -> dict:
             "live_demo": "OFFLINE_SKIP: credentials excluded; a fresh live demo needs separate authorization"}
 
 
+def _run_owned_browser(args, *, cwd, env, timeout):
+    process = subprocess.Popen(args, cwd=cwd, env=env, stdout=subprocess.PIPE,
+                               stderr=subprocess.PIPE, text=True, start_new_session=os.name != 'nt')
+    try:
+        stdout, stderr = process.communicate(timeout=timeout)
+        return subprocess.CompletedProcess(args, process.returncode, stdout, stderr)
+    except subprocess.TimeoutExpired:
+        if os.name == 'nt':
+            subprocess.run(['taskkill', '/PID', str(process.pid), '/T', '/F'], capture_output=True, timeout=10)
+        else:
+            os.killpg(process.pid, signal.SIGKILL)
+        stdout, stderr = process.communicate(timeout=10)
+        return subprocess.CompletedProcess(args, 124, stdout, stderr + '\nBrowser process group timed out and was terminated.\n')
+
+
+def verify_three_browser_journeys(source: Path, python: Path, out: Path):
+    """Exercise extracted source with an explicit interpreter; never install here."""
+    node = shutil.which('node')
+    assert node, 'Browser proof unavailable: node is not installed'
+    out.mkdir(parents=True, exist_ok=True)
+    results = {}
+    env = {**_scrubbed_env(), 'SHIFTWORK_PYTHON': str(python),
+           'SHIFTWORK_BLOCK_EXTERNAL': '1', 'PYTHONPATH': str(source)}
+    for slug in ('bookshop', 'gtm', 'northline'):
+        port = _free_port()
+        inputs = out / (slug + '-input')
+        preview_args = ([str(python), '-m', 'demos.client', '--port', str(port)] if slug == 'bookshop'
+                        else [str(python), '-m', 'tests.client.' + slug + '_preview',
+                              '--port', str(port), '--database', str(out / (slug + '.db')),
+                              '--out', str(inputs)])
+        if slug == 'northline':
+            preview_args.append('--retained-diagnostic-control')
+        with (out / (slug + '-preview.log')).open('w') as log:
+            preview = subprocess.Popen(preview_args, cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT)
+            try:
+                _poll_board(port)
+                browser_file = 'browser.mjs' if slug == 'bookshop' else slug + '_browser.mjs'
+                url = f'http://127.0.0.1:{port}' + ('' if slug == 'bookshop' else f'/?board={slug}')
+                args = [node, 'tests/client/' + browser_file, url]
+                if slug == 'bookshop':
+                    args += ['--selection-demo', '--journey-demo']
+                run_env = {**env, 'SHIFTWORK_ARTIFACT_DIR': str(out / (slug + '-browser')),
+                           'SHIFTWORK_TEST_INPUTS': str(inputs / 'candidate-files.json')}
+                if slug == 'northline':
+                    run_env['SHIFTWORK_LATER_ALTERNATIVE'] = '1'
+                browser = _run_owned_browser(args, cwd=source, env=run_env, timeout=480)
+                (out / (slug + '-browser.log')).write_text(browser.stdout + browser.stderr)
+                assert browser.returncode == 0, f'{slug} extracted journey failed; see {out / (slug + "-browser.log")}'
+                if slug != 'bookshop':
+                    preview.terminate()
+                    preview.wait(timeout=10)
+                    room_db = out / (slug + '-room.db')
+                    shutil.copyfile(inputs / 'comparison.db', room_db)
+                    room_args = list(preview_args)
+                    room_args[room_args.index('--database') + 1] = str(room_db)
+                    preview = subprocess.Popen(room_args, cwd=source, env=env, stdout=log, stderr=subprocess.STDOUT)
+                    _poll_board(port)
+                room_code = ('import {runBrowser} from "./tests/client/workplace_browser.mjs";'
+                             f'console.log(await runBrowser("http://127.0.0.1:{port}",{json.dumps(str(out / (slug + "-room")))},"",false,{json.dumps(slug)}));')
+                room = _run_owned_browser([node, '--input-type=module', '-e', room_code], cwd=source, env=env, timeout=180)
+                (out / (slug + '-room.log')).write_text(room.stdout + room.stderr)
+                assert room.returncode == 0, f'{slug} extracted actual room failed'
+                if slug == 'northline':
+                    fallback_code = room_code.replace(json.dumps(str(out / (slug + '-room'))), json.dumps(str(out / 'northline-fallback'))).replace(',"",false,', ',"constructor",false,')
+                    fallback = _run_owned_browser([node, '--input-type=module', '-e', fallback_code], cwd=source, env=env, timeout=180)
+                    (out / 'northline-fallback.log').write_text(fallback.stdout + fallback.stderr)
+                    assert fallback.returncode == 0, 'Extracted Northline graphics-failure workbench failed'
+                results[slug] = {'journey': 'PASS', 'actual_room': 'PASS', 'external_asset_block': 'self-tested'}
+                (out / 'complete-browser-results.json').write_text(json.dumps(results, indent=2) + '\n')
+            finally:
+                preview.terminate()
+                try:
+                    preview.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    preview.kill()
+                    preview.wait(timeout=10)
+    return results
+
+
 def test_clean_env_install_and_run(tmp_path, capsys):
     source = tmp_path / "source"
     source.mkdir()
@@ -239,6 +319,7 @@ def test_clean_env_install_and_run(tmp_path, capsys):
             except subprocess.TimeoutExpired:
                 server.kill()
                 server.wait(timeout=10)
+    report['complete_browser_delivery'] = verify_three_browser_journeys(source, python, tmp_path / 'complete-browser-delivery')
     (tmp_path / "offline-pivot.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     with capsys.disabled():
         print(f"\nclean-env mechanism: {mechanism}; three-board offline pivot PASS")
