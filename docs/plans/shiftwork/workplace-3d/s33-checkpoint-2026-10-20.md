@@ -2,7 +2,7 @@
 
 Updated: 2026-10-20 Asia/Singapore.
 
-**Status: S33 ACCEPTED on local evidence, 2026-10-20. Publication authorized.**
+**Status: S33 ACCEPTED on local evidence and published on main, 2026-10-20.**
 The user answered "Start S33 now" on 2026-10-20, authorizing local
 implementation, fail-capable tests and disposable evidence under
 `/tmp/shiftwork-s33-*`. That authorization did not cover commits, pushes,
@@ -213,9 +213,9 @@ device or native performance proof.
 
 The user accepted S33 with "Okay yea i accept it please commit the changes and
 push to main and then the copy paste prompt for slice 34, pls reference this
-prompt". The work is committed on `shiftwork/slice-33` in focused batches,
-fast-forwarded to main and pushed. The exact commit range and main tip are
-recorded in the publication note below.
+prompt". The work is committed on `shiftwork/slice-33` in three focused commits,
+fast-forwarded to main and pushed as `6500175..259ace9`. This publication note
+is the following docs commit on main.
 
 **Stop boundary.** S33 is accepted. S34 remains unstarted and requires its own
 go-ahead. No deployment follows.

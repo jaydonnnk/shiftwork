@@ -1,4 +1,4 @@
-**S33 ACCEPTED on local evidence, 2026-10-20. Publication authorized.**
+**S33 ACCEPTED on local evidence and published on main, 2026-10-20.**
 
 The user answered "Start S33 now" on 2026-10-20, authorizing local
 implementation, fail-capable tests and disposable evidence under
@@ -15,10 +15,10 @@ journey, blocked-comparison baseline, composition, 30-switch lifecycle, exact
 tiers within budget and the full non-packaging suite at 1454 passed with the
 known port_dead failure, one skip and two warnings. The
 [S33 checkpoint](plans/shiftwork/workplace-3d/s33-checkpoint-2026-10-20.md)
-carries receipts and limits. S33 is accepted on local evidence. The user
-authorized the working-tree commits, the fast-forward to main and the push. No
-deployment, credentials, provider call, protected fixture change, gate reopening
-or S34 work followed.
+carries receipts and limits. S33 is accepted on local evidence, committed on
+`shiftwork/slice-33` as `6500175..259ace9`, fast-forwarded to main and pushed as
+`6500175..259ace9`. No deployment, credentials, provider call, protected fixture
+change, gate reopening or S34 work followed.
 
 **S32 ACCEPTED on local evidence and published on main, 2026-10-20.**
 
