@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { once } from 'node:events';
 import { chromePath, pythonPath } from './env.mjs';
+import { blockExternalAssets } from './local_network.mjs';
 
 // Fault-injection mode: with SHIFTWORK_FAULT set, the harness serves a mutated
 // in-memory copy of the production app.js to the browser and then requires this
@@ -492,6 +493,7 @@ try {
   const { targetId } = await send('Target.createTarget', { url: 'about:blank' }, false);
   session = (await send('Target.attachToTarget', { targetId, flatten: true }, false)).sessionId;
   await send('Page.enable'); await send('Runtime.enable');
+  await blockExternalAssets({socket,send,evaluate,url});
   if (fault) {
     const source = (await readFile(new URL('../../shiftwork/client/app.js', import.meta.url), 'utf8')).replaceAll('\r\n', '\n');
     const { needle, replacement } = FAULTS[fault];

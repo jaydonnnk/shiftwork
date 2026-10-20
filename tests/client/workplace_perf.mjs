@@ -24,7 +24,10 @@ export function verifyPerformance(tier) {
 
 async function main() {
 const [base,out]=process.argv.slice(2); await mkdir(out,{recursive:true});
-const report={scope:'Local headless browser measurements. Synthetic navigation stress. No physical-device certification.',host:{os:os.release(),architecture:os.arch(),powerState:'unmeasured'},tiers:[]};
+const board=process.env.SHIFTWORK_PERF_BOARD ?? 'bookshop';
+assert.ok(['bookshop','gtm'].includes(board));
+const page=parameters=>base+'/?'+new URLSearchParams({board,...parameters})+'#board';
+const report={board,scope:'Local headless browser measurements. Synthetic navigation stress. No physical-device certification.',host:{os:os.release(),architecture:os.arch(),powerState:'unmeasured'},tiers:[]};
 if(process.platform==='darwin') {
   report.host.macOS=execFileSync('/usr/bin/sw_vers',['-productVersion'],{encoding:'utf8'}).trim();
   report.host.build=execFileSync('/usr/bin/sw_vers',['-buildVersion'],{encoding:'utf8'}).trim();
@@ -42,8 +45,10 @@ for(const width of capCheck?[390]:process.argv.includes('--desktop-only')?[1280]
     await b.send('Network.emulateNetworkConditions',{offline:false,latency:150,downloadThroughput:10000000/8,uploadThroughput:10000000/8});
     for(let n=0;n<(capCheck?1:5);n++) {
       const oldOrigin=await b.evaluate(()=>performance.timeOrigin);
-      await b.send('Page.navigate',{url:base+`/?cold=${n}#board`});
-      assert.ok(await b.until(old=>performance.timeOrigin!==old && document.getElementById('graphics-status')?.dataset.state==='ready',15000,oldOrigin),'Graphics cold-start did not complete in a new document');
+      await b.send('Page.navigate',{url:page({cold:String(n)})});
+      assert.ok(await b.until(old=>performance.timeOrigin!==old && ['ready','empty'].includes(document.body?.dataset.loadState),15000,oldOrigin),'Cold workbench did not complete in a new document');
+      await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
+      assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready',15000),'Graphics cold-start did not complete in view');
       const timing=await b.evaluate(()=>{
         const entry=performance.getEntriesByType('resource').find(r=>r.name.endsWith('/workplace-host.js'));
         return {ms:performance.now()-entry.startTime,timeOrigin:performance.timeOrigin,pollingUpperBoundMs:40};
@@ -52,7 +57,7 @@ for(const width of capCheck?[390]:process.argv.includes('--desktop-only')?[1280]
     }
     await b.send('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
     if(capCheck) {
-      const count=await b.evaluate(async()=>{globalThis.__workplaceSamples=[];const end=performance.now()+1100;let n=0;while(performance.now()<end){globalThis.__workplaceApply(n++%2?'customers':'evaluator');await new Promise(requestAnimationFrame);}return globalThis.__workplaceSamples.length;});
+      const count=await b.evaluate(async()=>{globalThis.__workplaceSamples=[];const end=performance.now()+1100;let n=0;while(performance.now()<end){globalThis.__workplaceApply(n++%2?(document.body.dataset.board==='gtm'?'signals':'customers'):(document.body.dataset.board==='gtm'?'rules':'evaluator'));await new Promise(requestAnimationFrame);}return globalThis.__workplaceSamples.length;});
       assert.ok(count<=34,`Compact scene exceeded 30Hz drawing cap: ${count} frames in 1.1 seconds`);
       console.log(JSON.stringify({compactCapFrames:count})); continue;
     }
@@ -61,8 +66,10 @@ for(const width of capCheck?[390]:process.argv.includes('--desktop-only')?[1280]
     await writeFile(path.join(out,'performance.json'),JSON.stringify(report,null,2)+'\n');
     b.setInstrumentation(true);
     const oldOrigin=await b.evaluate(()=>performance.timeOrigin);
-    await b.send('Page.navigate',{url:base+'/?motion-sample=1#board'});
-    assert.ok(await b.until(old=>performance.timeOrigin!==old && document.getElementById('graphics-status')?.dataset.state==='ready',15000,oldOrigin));
+    await b.send('Page.navigate',{url:page({'motion-sample':'1'})});
+    assert.ok(await b.until(old=>performance.timeOrigin!==old && ['ready','empty'].includes(document.body?.dataset.loadState),15000,oldOrigin));
+    await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
+    assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready',15000));
     tier.browser=await b.send('Browser.getVersion',{},false);
     tier.gpu=await b.evaluate(()=>{const gl=document.querySelector('#workplace-canvas canvas').getContext('webgl2'), ext=gl.getExtension('WEBGL_debug_renderer_info');return ext?gl.getParameter(ext.UNMASKED_RENDERER_WEBGL):'unavailable';});
     await b.evaluate(async()=>{await new Promise(r=>setTimeout(r,5000));});
@@ -70,7 +77,7 @@ for(const width of capCheck?[390]:process.argv.includes('--desktop-only')?[1280]
       const result=await b.evaluate(async compact=>{
         globalThis.__workplaceSamples=[]; const end=performance.now()+30000;
         let n=0;
-        while(performance.now()<end) { globalThis.__workplaceApply(n++%2?'customers':'evaluator'); await new Promise(requestAnimationFrame); }
+        while(performance.now()<end) { globalThis.__workplaceApply(n++%2?(document.body.dataset.board==='gtm'?'signals':'customers'):(document.body.dataset.board==='gtm'?'rules':'evaluator')); await new Promise(requestAnimationFrame); }
         const samples=globalThis.__workplaceSamples; globalThis.__workplaceSamples=null; return samples;
       },width===390);
       const intervals=result.slice(1).map((r,i)=>r.time-result[i].time);

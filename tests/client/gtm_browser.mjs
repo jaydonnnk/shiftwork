@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { once } from 'node:events';
 import { chromePath, pythonPath } from './env.mjs';
+import { blockExternalAssets } from './local_network.mjs';
 
 const url = process.argv[2];
 assert.equal(new URL(url).hostname, '127.0.0.1');
@@ -214,7 +215,9 @@ async function verifyRoom() {
   assert.deepEqual(actual.names, ['Signal intake', 'Qualification rules', 'Workflow bench', 'Pipeline wall'], 'Native GTM station names differ from approved direction');
   assert.equal(actual.visible, 4, 'GTM exposes the wrong station count');
   assert.deepEqual(actual.tabs, ['contract', 'files'], 'GTM exposes draft files it does not own');
-  assert.equal(await evaluate(() => { const art = document.getElementById('gtm-art'); return !art.hasAttribute('hidden') && art.getBoundingClientRect().width > 0 && getComputedStyle(art).display !== 'none'; }), true, 'GTM artwork is not visible');
+  await waitFor(() => document.getElementById('graphics-status').dataset.state === 'ready', 'Stonebridge real room did not render');
+  assert.equal(await evaluate(() => Boolean(document.querySelector('#workplace-canvas canvas')) && getComputedStyle(document.getElementById('gtm-art')).display === 'none'), true, 'Stonebridge room did not replace its static fallback');
+  await screenshot('stonebridge-room');
 }
 
 async function assertPublicDOM(label) {
@@ -363,6 +366,7 @@ try {
   const { targetId } = await send('Target.createTarget', { url: 'about:blank' }, false);
   session = (await send('Target.attachToTarget', { targetId, flatten: true }, false)).sessionId;
   await send('Page.enable'); await send('Runtime.enable');
+  await blockExternalAssets({socket,send,evaluate,url});
   if (fault) {
     const source = (await readFile('shiftwork/client/app.js', 'utf8')).replaceAll('\r\n', '\n');
     const [needle, replacement] = FAULTS[fault];
