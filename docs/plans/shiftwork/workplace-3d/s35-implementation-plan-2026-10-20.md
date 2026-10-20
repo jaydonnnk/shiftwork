@@ -103,6 +103,7 @@ The user approved S35 after their own manual testing and directed closure. The
 harness still has no qualifying native 200% receipt: no visible record is
 378x413 CSS pixels and all 413 visible records are `dirty: false`. That effect is
 accepted on the user's manual test, not passed by the harness. The accepted
-archive size and SHA-256 are in `archive-accepted.json`. The work remains
-uncommitted on `shiftwork/slice-35`; no commit, push, installation, publication,
-deployment, credential or live call occurred.
+archive size and SHA-256 are in `archive-accepted.json`. The work is merged to
+main as `cd532d6..9e221bf` and pushed on 2026-10-21; the slice branch is pushed.
+Installation, demo publication, deployment, credentials and live calls remain
+excluded.

@@ -10,9 +10,10 @@ declaration and zoom-fault controls, 206 Node, 152 source, 35 served, nine asset
 and six environment checks, and a 1454-pass regression with the known `port_dead`
 failure. The accepted archive's size and SHA-256 are in
 `/tmp/shiftwork-s35-postcss-20261020-3/archive-accepted.json`. Exact Chrome .84
-and clean locked installation remain unproved. Installation, publication,
-deployment, credentials and live calls remain unauthorized. The work is
-uncommitted on `shiftwork/slice-35`; no commit or push occurred.
+and clean locked installation remain unproved. Installation, demo publication,
+deployment, credentials and live calls remain unauthorized. The work is merged
+to main as `cd532d6..9e221bf` and pushed on 2026-10-21; the slice branch is
+pushed as well.
 
 **S35 second continuation: local verification, still INCOMPLETE, unaccepted and unpublished.**
 
