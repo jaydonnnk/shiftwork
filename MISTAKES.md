@@ -3261,3 +3261,86 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - Prevention rule: run every new panel through the exact narrow and zoom matrix
   before accepting it, and keep view-dependent test steps explicit instead of
   relying on the previous loop iteration's station.
+
+## 2026-10-20 S34: baseline reused another session's consumed database
+
+- What happened: the first GTM baseline read an already completed S34 database
+  and failed its starter assertion. A Qoder verification runner was still using
+  the same receipt root. No product failure was established.
+- Root cause: the disposable directory name was assumed fresh without checking.
+- Prevention rule: assert a new evidence root is absent or create a unique root;
+  inspect active owners before sharing preview databases or receipt filenames.
+
+## 2026-10-20 S34: historical projection fixture omitted its loaded evidence
+
+- What happened: a new history test expected linked GTM records after clearing
+  its outputs and checks for an experiment. The projection correctly refused
+  that incomplete route.
+- Root cause: the fixture restored the historical run without its evidence.
+- Prevention rule: restore the whole public run/output/check tuple before
+  asserting linked historical markers. Keep missing-evidence controls separate.
+
+## 2026-10-20 S34: expanded scene contract and callback admission
+
+- What happened: adding the approved nullable GTM fields initially failed the
+  existing exact Bellwether projection assertion. Native Stonebridge picks then
+  hit the correct geometry but the controller ignored them.
+- Root cause: the literal expected shape lacked the new null fields, and the
+  controller still admitted only bookshop station buttons. The pick test also
+  forced every room's anchor to the bookshop desk height.
+- Prevention rule: update literal contracts when approved fields change, trace
+  picks from raycast through callback admission, and use each room's own anchors.
+
+## 2026-10-20 S34: browser harness edit used a nonunique anchor
+
+- What happened: the first parameterization script refused a repeated navigation
+  statement before writing a file.
+- Root cause: the anchor was checked against the whole module instead of the
+  owning function.
+- Prevention rule: scope harness edits to the named function and assert the
+  exact number of matches before saving.
+
+## 2026-10-20 S34: reused browser assumptions hid the GTM test preconditions
+
+- What happened: the room sweep expected the failed operation to remain loaded
+  after a comparison, then waited for a 390px offscreen scene to initialize.
+  The first exact-viewport extension also omitted its slug argument in one
+  page callback and crashed before its touch assertion.
+- Root cause: the shared harness assumed Bellwether's loaded run and header
+  geometry, and one serialized callback argument was missed.
+- Prevention rule: establish the selected historical run, bring optional
+  graphics into view before waiting for construction, and pass every callback
+  dependency explicitly. A harness crash does not prove a guard.
+
+## 2026-10-20 S34: ownership label overflowed at 390px and 200% zoom
+
+- What happened: the exact viewport check measured a 201px document at a 195px
+  CSS viewport. The artifact card's ownership label extended beyond the page.
+- Root cause: the longer Stonebridge title shared a nonwrapping flex row with
+  the ownership label.
+- Prevention rule: allow that heading row to wrap and test the initial intake
+  panel as well as the editor at 390px and native 200% zoom.
+
+## 2026-10-20 S34 review: movement and reset omissions
+
+- What happened: review found that the new owner markers only changed colour,
+  and that clearData omitted the new ownership-summary text. These remain open
+  at handoff. A proposed test-observer patch was rejected before writing because
+  its oversized anchor contained an invalid placeholder.
+- Root cause: the visual verb was not tested as motion, the new UI field was
+  not included in reset ownership, and the attempted patch did not use a clean
+  copied anchor.
+- Prevention rule: assert actual signal-bound marker travel, test every new
+  record label through refresh failure, and patch short verified anchors.
+
+## 2026-10-20 S34 continuation: marker identity and verification ownership
+
+- What happened: the first marker label used the room rather than canvas as its containing block; the first cancellation rule removed clock-only traces; a rapid second assignment relabelled the first signal travel. Each had a named browser RED before its repair. Contrast verification also found the selected Stonebridge boundary at 2.95:1 and now passes with the existing amber border.
+- Root cause: marker position, label identity and shared trace ownership were checked separately. One fault run also overlapped a CSS edit and correctly rejected its changed-source digest; the first exact-layout run used the closed, disabled-editor world instead of the open comparison checkpoint.
+- Prevention rule: test rendered label attachment, clock-only arrivals and overlapping exact signal IDs. Freeze watched source during fault runs. Establish an enabled editor before continuity tests and retain every failed receipt. The final checks use fresh roots under /tmp/shiftwork-s34-continuation-1.
+
+## 2026-10-20 S34 publication: receipt directory dependency raced
+
+- What happened: Node and asset-check redirections ran before a parallel command created their receipt directory. Neither check ran in that attempt.
+- Root cause: directory creation and its dependent writers were incorrectly treated as independent work.
+- Prevention rule: create receipt roots before starting parallel writers. The corrected checks use /tmp/shiftwork-s34-publication-20261020 and retain the failed tool output.
