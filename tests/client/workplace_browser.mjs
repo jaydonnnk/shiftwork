@@ -8,7 +8,7 @@ import { chromePath, repoRoot } from './env.mjs';
 
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -18,8 +18,9 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
   const child = spawn(chromePath, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0', `--window-size=${windowWidth},${windowHeight}`, `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore','ignore','pipe'] });
   let socket, session, sequence = 0;
   const pending = new Map(), exceptions = [], commands = [], requests = [], gates = [], events = [];
-  let importsReleased = false, instrumented = !['plain','page-cache'].includes(fault);
+  let importsReleased = false, instrumented = !['plain','page-cache'].includes(fault), selectionFailureUsed = false;
   const s30Mode = /^(?:diagnostic-|ownership-|expand-|motion-)/.test(fault);
+  const s31Mode = /^(?:comparison-|selection-)/.test(fault);
   const endpoint = await new Promise((resolve,reject) => {
     let stderr = ''; const timer = setTimeout(() => reject(Error('Chrome startup timed out')),15000);
     child.once('error',reject);
@@ -28,7 +29,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
   socket = new WebSocket(endpoint); await once(socket,'open');
   function send(method,params = {},scoped = true) {
     return new Promise((resolve,reject) => {
-      const id = ++sequence, timer = setTimeout(() => { pending.delete(id); reject(Error(`CDP timeout: ${method}`)); },60000);
+      const id = ++sequence, timer = setTimeout(() => { pending.delete(id); reject(Error(`CDP timeout: ${method}`)); },180000);
       pending.set(id,{resolve,reject,timer}); socket.send(JSON.stringify({id,method,params,...(scoped && session ? {sessionId:session} : {})}));
     });
   }
@@ -50,13 +51,17 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       return send('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});
     }
     if(!instrumented) return send('Fetch.continueRequest',{requestId});
-    const holdPost = ['diagnostic-hold-post','ownership-generation','ownership-intent','ownership-history','ownership-board'].includes(fault) && request.method === 'POST' && /^\/api\/shifts\/[^/]+\/experiments$/.test(name);
-    const holdPoll = fault === 'diagnostic-hold-poll' && request.method === 'GET' && /^\/api\/experiments\/[^/]+$/.test(name);
+    const holdPost = ['diagnostic-hold-post','ownership-generation','ownership-intent','ownership-history','ownership-board','comparison-hold-post','comparison-ownership-generation','comparison-ownership-intent','comparison-ownership-history'].includes(fault) && request.method === 'POST' && /^\/api\/shifts\/[^/]+\/experiments$/.test(name);
+    const holdPoll = (fault === 'diagnostic-hold-poll' || fault === 'comparison-hold-poll') && request.method === 'GET' && /^\/api\/experiments\/[^/]+$/.test(name);
     if ((holdPost || holdPoll) && !importsReleased) await new Promise(resolve => gates.push(resolve));
+    if(fault==='selection-fail-once' && request.method==='POST' && /^\/api\/shifts\/[^/]+\/selections$/.test(name) && !selectionFailureUsed) {
+      selectionFailureUsed = true;
+      return send('Fetch.fulfillRequest',{requestId,responseCode:409,responseHeaders:[{name:'Content-Type',value:'application/json'}],body:Buffer.from(JSON.stringify({detail:'injected selection failure'})).toString('base64')});
+    }
     const fail = (['host-import','startup-blocking-host'].includes(fault) && name === '/workplace-host.js') ||
       (fault === 'scene-import' && name === '/workplace-scene.js') ||
       (fault === 'core-import' && name.endsWith('/three.core.js'));
-    if(fault && !s30Mode && fault!=='startup-blocking-host' && !fault.startsWith('omit-') && !fault.startsWith('page-cache') && fault !== 'plain' && fault !== 'context' && (fail || name === '/workplace-scene.js' || ((hostTimeout || hostEvaluation) && name==='/workplace-host.js')) && !importsReleased) await new Promise(resolve=>gates.push(resolve));
+    if(fault && !s30Mode && !s31Mode && fault!=='startup-blocking-host' && !fault.startsWith('omit-') && !fault.startsWith('page-cache') && fault !== 'plain' && fault !== 'context' && (fail || name === '/workplace-scene.js' || ((hostTimeout || hostEvaluation) && name==='/workplace-host.js')) && !importsReleased) await new Promise(resolve=>gates.push(resolve));
     if((hostTimeout || hostEvaluation) && name==='/workplace-host.js') {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
       const needle='export function createWorkplaceHost({container,fallback,status,onStation}) {';
@@ -132,6 +137,72 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
           const needle="  if (document.activeElement === $('draft-source')) event.preventDefault();";
           assert.equal(source.split(needle).length-1,1,'Expanded pointer focus anchor changed');
           source=source.replace(needle,'  void 0;');
+        }
+      }
+      if(s31Mode) {
+        const publicationNeedle='  latestPresentation = publication;';
+        assert.equal(source.split(publicationNeedle).length-1,1,'Publication observation anchor changed');
+        source=source.replace(publicationNeedle,publicationNeedle+"\n  globalThis.__s31Publications ??= []; globalThis.__s31Publications.push({reason, kind:publication.kind, generation:publication.generation ?? null, intent:publication.intent ?? null, inspection:publication.context?.inspection ?? null, comparison:publication.view?.tests?.comparison?.state ?? null, operating:publication.view?.operating?.versionId ?? null});");
+        const acceptNeedle="function acceptComparison(owner, experiment) {\n  if (!comparisonPublicationAllowed(owner, experiment)) return;\n  state.comparison = experiment;\n  renderCompare();\n  publishPresentation('comparison');\n}";
+        assert.equal(source.split(acceptNeedle).length-1,1,'Comparison accept observation anchor changed');
+        source=source.replace(acceptNeedle,`function acceptComparison(owner, experiment) {
+  globalThis.__s31Attempts ??= []; globalThis.__s31Attempts.push({id:experiment?.id ?? null, state:experiment?.state ?? null, allowed:comparisonPublicationAllowed(owner, experiment), slug:owner.slug, shiftId:owner.shiftId, experimentShift:experiment?.shift_id ?? null, generation:owner.generation, intent:owner.intent, inspection:owner.inspection});
+  if (!comparisonPublicationAllowed(owner, experiment)) { return; }
+  state.comparison = experiment;
+  renderCompare();
+  publishPresentation('comparison');
+  globalThis.__s31Accepts ??= []; globalThis.__s31Accepts.push({id:experiment?.id ?? null, state:experiment?.state ?? null, outcome:experiment?.outcome?.status ?? null, missing:(experiment?.trials ?? []).filter(trial => !trial.run_id || (trial.missing_evidence?.length ?? 0)).length, latestReason:latestPresentation?.reason ?? null, latestComparison:latestPresentation?.view?.tests?.comparison?.state ?? null, operating:latestPresentation?.view?.operating?.versionId ?? null});
+}`);
+        source += "\nglobalThis.__s31State=()=>({generation:state.generation,intent:state.intent,slug:state.slug,shiftId:state.loadedShiftId,inspection:{...inspection}});\nglobalThis.__s31SetInspection=(mode,runId)=>{inspection={mode,historicalRunId:runId};};\nglobalThis.__s31SetSlug=value=>{state.slug=value;};\nglobalThis.__s31SetShift=value=>{state.loadedShiftId=value;};\nglobalThis.__s31Accept=acceptComparison;\nglobalThis.__s31Comparison=()=>state.comparison;";
+        {
+          const needle='    }) });\n    acceptComparison(owner, experiment);';
+          assert.equal(source.split(needle).length-1,1,'Initial comparison observation anchor changed');
+          source=source.replace(needle,'    }) });\n    globalThis.__s31Initial = experiment;\n    acceptComparison(owner, experiment);');
+        }
+        if(fault==='comparison-omit-initial') {
+          const needle='    acceptComparison(owner, experiment);\n    const deadline';
+          assert.equal(source.split(needle).length-1,1,'Initial comparison publication anchor changed');
+          source=source.replace(needle,'    const deadline');
+        }
+        if(fault==='comparison-omit-polled') {
+          const needle='      acceptComparison(owner, experiment);\n    }\n    await refresh();';
+          assert.equal(source.split(needle).length-1,1,'Polled comparison publication anchor changed');
+          source=source.replace(needle,'    }\n    await refresh();');
+        }
+        if(fault==='comparison-ownership-generation') {
+          const needle='    owner.generation === state.generation &&\n';
+          assert.equal(source.split(needle).length-1,1,'Comparison generation ownership anchor changed');
+          source=source.replace(needle,'');
+        }
+        if(fault==='comparison-ownership-intent') {
+          const needle='    owner.intent === state.intent &&\n';
+          assert.equal(source.split(needle).length-1,1,'Comparison intent ownership anchor changed');
+          source=source.replace(needle,'');
+        }
+        for(const name of ['comparison-ownership-inspection','comparison-ownership-history']) if(fault===name) {
+          const needle='    owner.inspection.mode === inspection.mode &&\n    owner.inspection.historicalRunId === inspection.historicalRunId &&\n';
+          assert.equal(source.split(needle).length-1,1,'Comparison inspection ownership anchor changed');
+          source=source.replace(needle,'    true &&\n');
+        }
+        if(fault==='comparison-ownership-context') {
+          const needle='  return owner.slug === state.slug &&\n';
+          assert.equal(source.split(needle).length-1,1,'Comparison context ownership anchor changed');
+          source=source.replace(needle,'  return true &&\n');
+        }
+        if(fault==='comparison-ownership-shift') {
+          const needle='    owner.shiftId === state.loadedShiftId &&\n';
+          assert.equal(source.split(needle).length-1,1,'Comparison shift ownership anchor changed');
+          source=source.replace(needle,'');
+        }
+        if(fault==='comparison-ownership-experiment') {
+          const needle='    owner.shiftId === experiment?.shift_id &&\n';
+          assert.equal(source.split(needle).length-1,1,'Comparison experiment ownership anchor changed');
+          source=source.replace(needle,'');
+        }
+        if(fault==='comparison-ownership-loading') {
+          const needle="    document.body.dataset.loadState !== 'loading';";
+          assert.equal(source.split(needle).length-1,1,'Comparison loading ownership anchor changed');
+          source=source.replace(needle,'    true;');
         }
       }
       if(hostTimeout || hostEvaluation) {
@@ -243,9 +314,11 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       source = source.replace('return { apply, resize,', 'globalThis.__workplaceApply = station => apply({...view,station}, []); globalThis.__workplaceDispose = dispose; return { apply, resize,');
       source = source.replace('view = next;', 'view = next; globalThis.__s29Applied=structuredClone(next);');
       source = source.replace('return { apply, resize,', `globalThis.__workplaceStationPoint = station => { const p = new THREE.Vector3(...room.stationAnchors[station]); p.y=1.15; p.project(camera); const r=renderer.domElement.getBoundingClientRect(); return {x:r.left+(p.x+1)*r.width/2,y:r.top+(1-p.y)*r.height/2}; }; return { apply, resize,`);
-      source = source.replace('return { apply, resize, setSuspended(value)', `globalThis.__workplaceControls={pulse:()=>!!pulse,state:()=>({suspended,disposed,pulse:!!pulse,applied:view?.tests?.diagnostic?.trials?.[0]?.state??null,emissive:indicatorMaterial?.emissiveIntensity??0})}; return { apply, resize, setSuspended(value)`);
+      source = source.replace('return { apply, resize, setSuspended(value)', `globalThis.__workplaceControls={pulse:()=>!!pulse,state:()=>({suspended,disposed,pulse:!!pulse,applied:view?.tests?.diagnostic?.trials?.[0]?.state??null,emissive:indicatorMaterial?.emissiveIntensity??0,comparisonPulse:!!comparisonPulse,comparisonDuration:comparisonPulse?.duration??null,selectionPulse:!!selectionPulse,selectionDuration:selectionPulse?.duration??null,comparisonId:view?.tests?.comparison?.id??null,comparisonState:view?.tests?.comparison?.state??null,candidates:Object.fromEntries(Object.entries(candidateMaterials).map(([label,material])=>[label,{color:material.color.getHexString(),emissive:material.emissiveIntensity,eligible:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.eligible??null,versionId:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.versionId??null,contentHash:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.contentHash??null}])),selection:{id:view?.operating?.selectionId??null,versionId:view?.operating?.versionId??null,contentHash:view?.operating?.contentHash??null,plate:plateMaterial?.color.getHexString()??null,emissive:plateMaterial?.emissiveIntensity??0}})}; return { apply, resize, setSuspended(value)`);
+      source = source.replace('comparisonPulse = { start: performance.now(), duration: 160 };', 'comparisonPulse = { start: performance.now(), duration: 160 }; globalThis.__workplaceComparisonPulses=(globalThis.__workplaceComparisonPulses??0)+1; globalThis.__workplaceComparisonDurations ??= []; globalThis.__workplaceComparisonDurations.push(160);');
+      source = source.replace('selectionPulse = { start: performance.now(), duration: 180 };', 'selectionPulse = { start: performance.now(), duration: 180 }; globalThis.__workplaceSelectionPulses=(globalThis.__workplaceSelectionPulses??0)+1; globalThis.__workplaceSelectionDurations ??= []; globalThis.__workplaceSelectionDurations.push(180);');
       if(fault==='motion-omit-settle') {
-        const needle='setReducedMotion(value) { reducedMotion=value; if(value) settlePulse(); requestFrame(); }';
+        const needle='setReducedMotion(value) { reducedMotion=value; if(value) settleAllPulses(); requestFrame(); }';
         assert.equal(source.split(needle).length-1,1,'Reduced motion settlement anchor changed');
         source=source.replace(needle,'setReducedMotion(value) { reducedMotion=value; requestFrame(); }');
       }
@@ -274,10 +347,11 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
     return false;
   }
   async function close() {
-    try { await send('Browser.close',{},false); } finally {
+    try { await send('Browser.close',{},false); } catch { /* the owned process is killed below */ }
+    try {
       socket.close(); if(child.exitCode === null && child.signalCode === null) { const exited = once(child,'exit'); child.kill(); await exited; }
       await rm(profile,{recursive:true,force:true,maxRetries:5,retryDelay:100});
-    }
+    } catch { /* receipt cleanup never replaces the control result */ }
   }
   return {send,evaluate,until,close,exceptions,commands,requests,events,setInstrumentation(value){instrumented=value;},releaseImports() {importsReleased=true; for(const resolve of gates) resolve(); gates.length=0;}};
 }

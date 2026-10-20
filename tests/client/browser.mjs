@@ -991,6 +991,19 @@ try {
     const pairs = payload.trials.reduce((acc, trial) => { (acc[trial.pair_ordinal] ??= new Set()).add(trial.workload_id); return acc; }, {});
     if (Object.values(pairs).some(workloads => workloads.size !== 1)) throw new Error('A pair does not share one frozen workload');
     if (!document.getElementById('compare-summary').textContent.includes('no winner derived here')) throw new Error('The Compare station does not state that it derives no winner');
+    const summaryText = document.getElementById('compare-summary').textContent;
+    for (const value of [String(payload.shared_public_denominator_requests), String(payload.protected_denominator_requests_per_candidate)]) {
+      if (!summaryText.includes(value)) throw new Error(`The comparison summary hides the shared denominator ${value}`);
+    }
+    const missingSlots = payload.trials.filter(trial => !trial.run_id || (trial.missing_evidence?.length ?? 0)).length;
+    if (!summaryText.includes(`${missingSlots} missing slot`)) throw new Error(`The comparison summary hides its ${missingSlots} missing slots`);
+    for (const candidate of payload.candidates) {
+      if (!summaryText.includes(candidate.artifact_version_id) || !summaryText.includes(candidate.artifact_content_hash.slice(0, 12))) throw new Error(`The comparison summary hides candidate ${candidate.label} identity`);
+    }
+    if (blocked) {
+      const denial = [...document.querySelectorAll('#comparison-outcome .denial')].map(node => node.textContent).join(' ');
+      if (!denial.includes('not comparable')) throw new Error('The blocked comparison hides its incomparable evidence');
+    }
     if (payload.outcome?.status !== (blocked ? 'NOT_COMPARABLE' : 'COMPLETE')) throw new Error('The terminal comparison has the wrong outcome status');
     if (blocked && !payload.outcome.eligibility.every(item => !item.eligible && item.blocking_reason_codes.length)) throw new Error('The blocked preview has no genuine API blocker');
     const cards = [...document.querySelectorAll('#comparison-outcome .comparison-outcome-card')];
@@ -1027,6 +1040,11 @@ try {
       const summary = document.getElementById('selection-summary').textContent;
       if (document.querySelector('[data-selection-field="operating-choice"] strong')?.textContent !== `${selection.selected_version_id} · ${selection.selected_content_hash} · ${humanize(selection.state)}`) throw new Error('Workbench selected version differs from the board API');
       if (![selection.selected_content_hash, selection.retained_alternative_version_id, selection.comparison_id, selection.requirement_set_hash, after.latest_saved_version_id].every(value => summary.includes(value))) throw new Error('The board hides selected or saved evidence');
+      const note = document.getElementById('selection-note').textContent;
+      if (!note.includes(`Choice ${selection.id} is recorded`)) throw new Error('The selection acknowledgement does not name the recorded choice');
+      for (const value of [selection.selected_version_id, selection.selected_content_hash, selection.retained_alternative_version_id]) {
+        if (!note.includes(value)) throw new Error(`The selection acknowledgement hides ${value}`);
+      }
       if (!document.getElementById('select-candidate-a').disabled || !document.getElementById('select-candidate-b').disabled) throw new Error('The same comparison offers a second choice');
     }
     if (JSON.stringify(await (await fetch('/api/engagements/bookshop/ledger')).json()) !== JSON.stringify(historyBefore) || JSON.stringify((await (await fetch('/api/engagements/bookshop/board')).json()).incidents) !== JSON.stringify(incidentsBefore)) throw new Error('Comparison or choice changed operational history');
