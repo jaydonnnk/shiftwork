@@ -1290,11 +1290,11 @@ function renderNext() {
     history.dataset.incidents = String(board.incidents.length);
     history.dataset.chainStatus = board.chain_status;
     const laterRuns = new Set(later ? later.trials.map(trial => trial.run_id).filter(Boolean) : []);
-    const run = board.latest_run && !laterRuns.has(board.latest_run.id) ? board.latest_run : null;
+    const run = ['OPERATION', 'LEGACY_OPERATION'].includes(board.latest_run?.purpose) && !laterRuns.has(board.latest_run.id) ? board.latest_run : null;
     history.dataset.latestRun = run?.id ?? '';
     history.replaceChildren();
     for (const [label, value] of [
-      ['Latest recorded run', run ? `${run.id} · ${humanize(run.purpose)} · ${humanize(run.state)} · ${run.evidence_mode ?? 'evidence mode unknown'}` : 'The newest run is a slot of the hypothetical experiment below, not operational history.'],
+      ['Latest recorded run', run ? `${run.id} · ${humanize(run.purpose)} · ${humanize(run.state)} · ${run.evidence_mode ?? 'evidence mode unknown'}` : 'No operational run loaded here. Inspect experiment results in their own panel.'],
       ['Unresolved incidents', board.incidents.map(incident => `${incident.id} · ${humanize(incident.state)}`).join(' · ') || 'none'],
       ['Declared limits in force', board.unresolved_limits.join(' · ') || 'none'],
       ['Ledger', `${board.ledger_event_count} recorded events · chain ${humanize(board.chain_status)}`],
@@ -1364,7 +1364,7 @@ async function freezeCandidate(label) {
     text('compare-error', error.message);
   } finally {
     state.pending = false;
-    if (state.board) { renderBoard(); renderCompare(); }
+    if (state.board) { renderBoard(); renderCompare(); renderInvestigate(); }
   }
 }
 function comparisonOwner() {
@@ -1563,15 +1563,18 @@ const stations = {
   next: ['Next shift', 'INHERITED EXACTLY, TESTED LATER', 'Close this shift and open the next one from the exact selection. Recorded operational history and a later-condition experiment are shown as two separate things: the experiment is hypothetical and never rewrites the history.'],
 };
 function bringStationPanelIntoReach() {
-  // Narrow layouts stack the panel below the room, so a station selection can
-  // leave its content entirely below the viewport. Move focus and scroll to the
-  // selected station's panel so the authoritative view is immediately reachable.
+  // Northline's evidence can sit below a tall header at native 200% zoom.
   // Skipped before the first load paints, so a page open still starts at the room.
   if (!state.board) return;
   if (!window.matchMedia('(max-width: 1099px)').matches) return;
   const panel = $('station-panel');
   panel.focus({ preventScroll: true });
-  panel.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  const content = northline() ? {
+    acceptance: document.querySelector('#selected-evidence .request-quote') ?? $('selected-evidence'),
+    rollout: $('operate-pilot'),
+    handover: $('handover-records'),
+  }[state.station] : null;
+  (content ?? panel).scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
 function activateStation(name, userIntent = true) {
   if (userIntent) state.intent += 1;

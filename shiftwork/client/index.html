@@ -129,7 +129,7 @@
         <p>Check current parts and mechanic availability before a final booking. Repeated deliveries must retain one commitment. Uninspected safety questions go to a human mechanic. Read availability and schedules; write repair slots only.</p>
         <p class="help-text">Start with the blank integration, inspect its failure, then record a cause and falsifier at the Integration bench. Compare two repairs and explicitly choose one. Close and open the next shift before running the selected pilot.</p>
       </section>
-      <section id="map-view" hidden><p class="help-text">Your discovery and permission worksheets belong to this integration. Edit them at the Integration bench. The selected version and current draft are shown separately.</p><div id="map-records"></div></section>
+      <section id="map-view" hidden><p class="help-text">Your discovery and permission worksheets belong to this integration. Edit them at the Integration bench. The selected version and current draft are shown separately. This declared map cannot grant, expand or prove permissions.</p><div id="map-records"></div></section>
       <section id="rollout-view" data-synthetic-region="pilot" hidden>
         <div class="section-heading"><h3>Pilot history</h3><span class="synthetic">Synthetic scenario</span></div>
         <p class="help-text">Only a fully accepted operation writes pilot bookings and rollout approval. Experiments leave this history unchanged.</p>
@@ -278,7 +278,8 @@
       </section>
       <section id="next-view" hidden>
         <section id="handover-record" class="panel-section" hidden>
-          <div class="section-heading"><h3>Selected runbook and recorded handovers</h3><span class="synthetic">Synthetic scenario</span></div><div id="handover-records"></div>
+          <div class="section-heading"><h3>Selected runbook and recorded handovers</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p class="help-text">A recorded HANDOVER_DECLARED is an administrative declaration. It does not prove a person received, read or accepted the handover.</p><div id="handover-records"></div>
         </section>
         <p id="next-state" class="mono evidence-meta">No shift loaded</p>
         <section class="panel-section">

@@ -8,8 +8,8 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
   const retryButton=controls.querySelector('[data-graphics-retry]');
   const simplerButton=controls.querySelector('[data-graphics-simple]');
   const contextKey=view=>JSON.stringify(view.context);
-  const hasRoom=board=>board==='bookshop' || board==='gtm';
-  const roomLabel=board=>board==='gtm' ? '3D Stonebridge room. Select signal intake, qualification, routing or ownership.' : '3D Bellwether room. Select intake, the console, diagnosis or assessment.';
+  const hasRoom=board=>board==='bookshop' || board==='gtm' || board==='northline';
+  const roomLabel=board=>board==='northline' ? '3D Northline workshop. Select the brief, permission map, bench, acceptance, rollout or handover.' : board==='gtm' ? '3D Stonebridge room. Select signal intake, qualification, routing or ownership.' : '3D Bellwether room. Select intake, the console, diagnosis or assessment.';
   function message(state,text) { status.dataset.state=state; status.textContent=text; }
   function release() { clearTimeout(timer); timer=null; token+=1; mounting=false; scene?.dispose(); scene=null; container.parentElement.dataset.graphics='fallback'; fallback.hidden=(latest?.view?.context.board ?? latest?.context?.board)!=='bookshop'; }
   function showFailure() { message('unavailable',`3D view unavailable. Your workbench is ready. (${failureCode})${brokenModule?' Graphics installation needs repair.':''}`); retryButton.hidden=false; retryButton.disabled=brokenModule; }

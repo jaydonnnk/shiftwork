@@ -178,14 +178,31 @@ export function projectWorkplace(input) {
     const publicRef = value => typeof value === 'string' ? value : null;
     let signalRef = null, owner = null, recordRef = null;
     if (gtmOutcome) {
-      if (link?.run_id === run?.id && run.purpose !== 'OPERATION') {
+      if (run && link?.run_id === run.id && run.purpose !== 'OPERATION') {
         linkState = 'conflict'; meaning = 'conflict'; conflict();
-      } else if (!link || !event.synthetic || !['linked', 'historical'].includes(linkState)) {
+      } else if (event.synthetic !== true || !['linked', 'historical'].includes(linkState)) {
         linkState = 'conflict'; meaning = 'conflict'; conflict();
       } else {
         signalRef = publicRef(event.payload?.signal_ref);
         owner = publicRef(event.payload?.owner);
         recordRef = publicRef(event.payload?.record_ref);
+      }
+    }
+    const northlineOutcome = slug === 'northline' && ['BOOKING_COMMITTED', 'ESCALATION_TO_HUMAN', 'COUNTER_FOLLOWUP_RECORDED', 'ROLLOUT_APPROVED'].includes(event.event_type);
+    if (northlineOutcome) {
+      if (run && link?.run_id === run.id && run.purpose !== 'OPERATION') {
+        linkState = 'conflict'; meaning = 'conflict'; conflict();
+      } else if (event.synthetic !== true || !['linked', 'historical'].includes(linkState)) {
+        linkState = 'conflict'; meaning = 'conflict'; conflict();
+      }
+    }
+    if (slug === 'northline' && event.event_type === 'HANDOVER_DECLARED') {
+      const runbook = publicRef(event.payload?.runbook_version_id);
+      if (event.synthetic === true && !link && runbook &&
+          event.cause_refs?.length === 2 && publicRef(event.cause_refs[0]) && event.cause_refs[1] === runbook) {
+        versionId = runbook;
+      } else {
+        versionId = null; linkState = 'conflict'; meaning = 'conflict'; conflict();
       }
     }
     return {
@@ -272,9 +289,9 @@ export function diffWorkplace(previous, next) {
   const beforeInspection = previous.context.inspection, afterInspection = next.context.inspection;
   if (beforeInspection.mode !== afterInspection.mode || beforeInspection.historicalRunId !== afterInspection.historicalRunId) return [];
   const transitions = [];
-  const testStation = next.context.board === 'gtm' ? 'workflow' : 'compare';
-  const operatingStation = next.context.board === 'gtm' ? 'workflow' : 'service';
-  const wallStation = next.context.board === 'gtm' ? 'wall' : 'ledger';
+  const testStation = next.context.board === 'northline' ? 'bench' : next.context.board === 'gtm' ? 'workflow' : 'compare';
+  const operatingStation = next.context.board === 'northline' ? 'bench' : next.context.board === 'gtm' ? 'workflow' : 'service';
+  const wallStation = next.context.board === 'northline' ? 'rollout' : next.context.board === 'gtm' ? 'wall' : 'ledger';
   if (beforeInspection.mode === 'current' && previous.station !== next.station) {
     transitions.push({ key: `station:${next.station}`, kind: 'station-focus', stationId: next.station, publicRefs: [] });
   }

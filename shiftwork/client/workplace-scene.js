@@ -6,7 +6,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   let comparisonPulse = null, selectionPulse = null, plateMaterial = null, wallTrace = null, wallMaterial = null, traceMaterial = null, traceLine = null;
   let handoverMaterial = null, laterMaterial = null;
   let ownerMarker = null, routingLabel = null, routingTravel = null;
-  const candidateMaterials = {}, routingMaterials = {}, geometries = new Set(), materials = new Set(), targets = [];
+  const candidateMaterials = {}, routingMaterials = {}, northlineMarkers = {}, geometries = new Set(), materials = new Set(), targets = [];
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-8,8,6,-6,.1,100);
   camera.position.set(12,11,14); camera.lookAt(0,.8,0);
@@ -104,14 +104,20 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     Object.assign(key.shadow.camera,{left:-9,right:9,top:9,bottom:-9,near:.1,far:30});
     scene.add(fill,key); sceneLights.push(fill,key);
     const cube = new THREE.BoxGeometry(1,1,1); geometries.add(cube);
-    const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), scale = new THREE.Vector3();
+    const wheel = room.assemblies.some(item=>item.shape==='wheel') ? new THREE.TorusGeometry(.5,.035,6,24) : null;
+    if(wheel) geometries.add(wheel);
+    const matrix = new THREE.Matrix4(), position = new THREE.Vector3(), scale = new THREE.Vector3(), rotation = new THREE.Quaternion();
     for(const [name,color] of Object.entries(room.materials)) {
-      const definitions = room.assemblies.filter(item=>item.material===name);
-      const material = new THREE.MeshStandardMaterial({color,roughness:name==='metal'?.65:name==='wood'?.85: name==='paper'?1:.95,metalness:name==='metal'?.15:0}); materials.add(material);
-      const mesh = new THREE.InstancedMesh(cube,material,definitions.length);
-      definitions.forEach((item,index)=>{ matrix.compose(position.fromArray(item.position),new THREE.Quaternion(),scale.fromArray(item.size)); mesh.setMatrixAt(index,matrix); });
-      mesh.castShadow = true; mesh.receiveShadow = true; mesh.userData.stations = definitions.map(item=>item.station);
-      scene.add(mesh); targets.push(mesh);
+      const metal = ['metal','steel'].includes(name);
+      const material = new THREE.MeshStandardMaterial({color,roughness:metal?.65:name==='wood'?.85: name==='paper'?1:.95,metalness:metal?.15:0}); materials.add(material);
+      for(const shape of ['box','wheel']) {
+        const definitions = room.assemblies.filter(item=>item.material===name && (item.shape ?? 'box')===shape);
+        if(!definitions.length) continue;
+        const mesh = new THREE.InstancedMesh(shape==='wheel'?wheel:cube,material,definitions.length);
+        definitions.forEach((item,index)=>{ rotation.setFromEuler(new THREE.Euler(...(item.rotation ?? [0,0,0]))); matrix.compose(position.fromArray(item.position),rotation,scale.fromArray(item.size)); mesh.setMatrixAt(index,matrix); });
+        mesh.castShadow = true; mesh.receiveShadow = true; mesh.userData.stations = definitions.map(item=>item.station);
+        scene.add(mesh); targets.push(mesh);
+      }
     }
     const rimMaterial = new THREE.MeshStandardMaterial({color:'#edbd68',roughness:1}); materials.add(rimMaterial);
     const rim = new THREE.Mesh(cube,rimMaterial); rim.scale.set(2.35,.06,1.5); scene.add(rim);
@@ -149,6 +155,13 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
         routingLabel.setAttribute('aria-hidden', 'true'); routingLabel.hidden = true;
         container.append(routingLabel);
       }
+    }
+    for(const [kind,anchor] of [['BOOKING_COMMITTED',room.anchors?.booking],['ROLLOUT_APPROVED',room.anchors?.approval],
+      ['HANDOVER_DECLARED',room.anchors?.declaration],['ESCALATION_TO_HUMAN',room.anchors?.escalation],['COUNTER_FOLLOWUP_RECORDED',room.anchors?.followup]]) {
+      if(!anchor) continue;
+      const material = new THREE.MeshStandardMaterial({color:'#edbd68',roughness:1}); materials.add(material);
+      const marker = new THREE.Mesh(cube,material); marker.position.fromArray(anchor); marker.scale.set(.32,.18,.14);
+      marker.visible=false; scene.add(marker); northlineMarkers[kind]=marker;
     }
     if (room.anchors?.handover) {
       handoverMaterial = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1});
@@ -199,6 +212,14 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
         for (const event of records) ownerCounts.set(event.signalRef, (ownerCounts.get(event.signalRef) ?? 0) + 1);
         const ownershipProblem = kind === 'OWNER_ASSIGNED' && records.some(event => !event.owner || ownerCounts.get(event.signalRef) > 1);
         material.color.set(ownershipProblem ? '#d98a7a' : records.length ? '#d7bb75' : '#35495e');
+      }
+      for(const [kind,marker] of Object.entries(northlineMarkers)) {
+        const records=(next?.consequences?.events ?? []).filter(event=>event.type===kind && event.synthetic===true &&
+          (kind==='HANDOVER_DECLARED'
+            ? event.source==='administrative' && event.linkState==='none' && Boolean(event.versionId)
+            : ['linked','historical'].includes(event.linkState)));
+        marker.userData.recordCount=records.length;
+        marker.visible=next?.consistency!=='conflict' && records.length>0;
       }
       if (!reducedMotion && transitions.some(item => item.kind === 'test-update')) {
         pulse = { start: performance.now() };

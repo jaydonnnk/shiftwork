@@ -110,6 +110,58 @@ routeBox('metal', [4.5,.5,.2], [1.65,.16,1], 'wall');
 routeBox('edge', [4.5,.25,.2], [1.35,.5,.75], 'wall');
 routeBox('paper', [4.5,.61,.2], [1.1,.06,.65], 'wall');
 
+// Original Northline workshop. The bicycle, open permission lanes and slot rail
+// have distinct silhouettes; all record labels remain in HTML.
+const workshop = [];
+const workshopPart = (material, position, size, station = null, shape = 'box', rotation = [0,0,0]) => workshop.push({material, position, size, station, shape, rotation});
+workshopPart('floor',[0,-.15,0],[12,.3,9]);
+workshopPart('wall',[0,1.6,-4.5],[12,3.2,.18]);
+workshopPart('wall',[-6,1.6,0],[.18,3.2,9]);
+workshopPart('edge',[0,-.3,4.5],[12,.2,.2]);
+workshopPart('edge',[6,-.3,0],[.2,.2,9]);
+// Repair counter and its requirements clipboard.
+workshopPart('wood',[-4,.65,2.5],[2.4,1.3,1.1],'brief');
+workshopPart('steel',[-4,1.34,2.5],[2.6,.14,1.25],'brief');
+workshopPart('edge',[-4,1.45,2.5],[.8,.06,.85],'brief');
+workshopPart('paper',[-4,1.49,2.5],[.65,.03,.68],'brief');
+// Two read lanes and a separated write lane. The boundary grants no access.
+for(const [x,width] of [[-4.45,.55],[-3.65,.55],[-2.6,.55]]) {
+  workshopPart('steel',[x,1.55,-2.2],[width,.12,2.2],'map');
+  workshopPart('paper',[x,1.65,-2.65],[width*.7,.08,.55],'map');
+}
+workshopPart('edge',[-3.13,1.75,-2.2],[.12,.5,2.5],'map');
+for(const x of [-4.5,-2.6]) workshopPart('steel',[x,.75,-2.2],[.14,1.5,1.7],'map');
+// Bicycle on a stand, beside the counter rather than on the integration bench.
+for(const x of [-4.6,-2.9]) workshopPart('edge',[x,.8,.15],[1.35,1.35,1],'brief','wheel');
+for(const [x,y,width,angle] of [[-4.16,.8,.9,0],[-3.38,.8,.9,0],[-4.03,1.19,1.15,1.03],[-3.43,1.19,1.15,-1.03],[-3.73,1.58,1.05,0]])
+  workshopPart('tool',[x,y,.15],[width,.075,.075],'brief','box',[0,0,angle]);
+workshopPart('steel',[-3.75,.8,.15],[.12,1.6,.12],'brief');
+workshopPart('steel',[-3.75,.08,.15],[1.1,.16,1.3],'brief');
+workshopPart('edge',[-4.25,1.7,.15],[.5,.1,.25],'brief');
+workshopPart('tool',[-2.94,1.55,.15],[.12,.8,.12],'brief');
+// Steel integration bench, equal candidate positions and learner worksheets.
+workshopPart('steel',[0,1,.6],[2.8,.22,1.8],'bench');
+for(const x of [-1.1,1.1]) workshopPart('edge',[x,.5,.6],[.15,1,1.55],'bench');
+for(const x of [-.7,.7]) workshopPart('paper',[x,1.15,.9],[.65,.06,.55],'bench');
+workshopPart('steel',[0,1.65,.05],[1,.65,.12],'bench');
+workshopPart('screen',[0,1.65,.13],[.8,.45,.03],'bench');
+// Independent acceptance fixture, separated from the learner's test bench.
+workshopPart('steel',[3.5,.7,-1.5],[1.65,1.4,1.1],'acceptance');
+workshopPart('tool',[3.5,1.5,-1.5],[1.8,.16,1.25],'acceptance');
+for(const x of [2.85,4.15]) workshopPart('edge',[x,1.95,-1.8],[.12,.9,.12],'acceptance');
+workshopPart('tool',[3.5,2.4,-1.8],[1.45,.12,.12],'acceptance');
+workshopPart('paper',[3.5,1.62,-1.4],[.8,.08,.55],'acceptance');
+// Pilot-slot rail: an aggregate recorded marker, never invented appointments.
+for(const x of [2.8,4.8]) workshopPart('steel',[x,.9,2.2],[.12,1.8,.12],'rollout');
+for(const y of [.85,1.65]) workshopPart('steel',[3.8,y,2.2],[2.3,.12,.12],'rollout');
+for(const x of [3.15,3.8,4.45]) workshopPart('wood',[x,1.15,2.2],[.46,.55,.08],'rollout');
+// Runbook shelf with open compartments and a separate human-review tray.
+for(const x of [-1,1]) workshopPart('steel',[x,1.2,-3],[.13,2.4,.75],'handover');
+for(const y of [.3,1.1,1.9]) workshopPart('wood',[0,y,-3],[2.15,.12,.85],'handover');
+for(const x of [-.6,0,.6]) workshopPart('paper',[x,1.45,-3],[.16,.55,.5],'handover');
+workshopPart('steel',[4.7,.6,.35],[1.1,.12,.85],'acceptance');
+workshopPart('paper',[4.7,.71,.35],[.7,.06,.5],'acceptance');
+
 export const roomDefinitions = {
   bookshop: {
     bounds: { min: [-6,-.5,-4.6], max: [6,3.3,4.6] }, cameraTarget: [0,.8,0],
@@ -130,5 +182,14 @@ export const roomDefinitions = {
     anchors: {candidateA:[-.85,1.25,1.1], candidateB:[.85,1.25,1.1], plate:[0,1.2,.6],
       indicator:[0,1.6,.01], wall:[3.7,1.65,-1.76], wallPanel:[3.7,1.65,-1.76], wallSize:[.65,.9,.035],
       owner:[2.65,1.45,-1.82], clock:[3.7,2,-1.82], handoff:[4.5,.7,.2]},
+  },
+  northline: {
+    bounds:{min:[-6,-.5,-4.6],max:[6,3.3,4.6]},cameraTarget:[0,.8,0],
+    materials:{floor:'#87978c',wall:'#28494a',edge:'#263443',steel:'#657b7c',wood:'#b4a17e',tool:'#d3d9cf',paper:'#e7deca',screen:'#91acb9'},
+    assemblies:workshop,
+    stationAnchors:{brief:[-4,1.4,2.5],map:[-3.7,1.6,-2.2],bench:[0,1,.6],acceptance:[3.5,1.6,-1.5],rollout:[3.8,1.2,2.2],handover:[0,1.4,-3]},
+    anchors:{candidateA:[-.7,1.21,.9],candidateB:[.7,1.21,.9],plate:[0,1.2,.5],indicator:[0,1.65,.15],
+      wall:[3.8,1.25,2.3],wallPanel:[3.5,2.1,-1.79],wallSize:[.8,.35,.04],
+      booking:[3.15,1.2,2.3],approval:[4.45,1.2,2.3],declaration:[0,1.97,-2.9],escalation:[4.7,.82,.35],followup:[4.7,.82,.8],later:[1.1,1.2,.8]},
   },
 };
