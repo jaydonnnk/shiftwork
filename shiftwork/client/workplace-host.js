@@ -8,6 +8,8 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
   const retryButton=controls.querySelector('[data-graphics-retry]');
   const simplerButton=controls.querySelector('[data-graphics-simple]');
   const contextKey=view=>JSON.stringify(view.context);
+  const hasRoom=board=>board==='bookshop' || board==='gtm';
+  const roomLabel=board=>board==='gtm' ? '3D Stonebridge room. Select signal intake, qualification, routing or ownership.' : '3D Bellwether room. Select intake, the console, diagnosis or assessment.';
   function message(state,text) { status.dataset.state=state; status.textContent=text; }
   function release() { clearTimeout(timer); timer=null; token+=1; mounting=false; scene?.dispose(); scene=null; container.parentElement.dataset.graphics='fallback'; fallback.hidden=(latest?.view?.context.board ?? latest?.context?.board)!=='bookshop'; }
   function showFailure() { message('unavailable',`3D view unavailable. Your workbench is ready. (${failureCode})${brokenModule?' Graphics installation needs repair.':''}`); retryButton.hidden=false; retryButton.disabled=brokenModule; }
@@ -21,7 +23,7 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
   const tier = () => simple || matchMedia('(max-width: 760px)').matches ? 'compact' : 'standard';
   function resize() { if(scene && mountedTier!==tier()) { release(); previous=null; mount(); return; } scene?.resize({width:container.clientWidth,height:container.clientHeight,pixelRatio:devicePixelRatio}); suspend(); }
   async function mount() {
-    if(disposed || suspended() || unavailable || mounting || scene || latest?.kind!=='accepted' || latest.view.context.board!=='bookshop') return;
+    if(disposed || suspended() || unavailable || mounting || scene || latest?.kind!=='accepted' || !hasRoom(latest.view.context.board)) return;
     const owner=++token; mounting=true; message('loading','Loading 3D view. Your workbench is ready.');
     timer=setTimeout(()=>{ if(owner===token && !disposed) failure('load-timeout'); },8000);
     let createWorkplaceScene;
@@ -42,7 +44,7 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
     const transitions=diffWorkplace(previous,view);
     previous=view.consistency==='conflict'?previous:view;
     fallback.hidden=true; container.parentElement.dataset.graphics='ready'; retryButton.hidden=true;
-    message('ready','3D Bellwether room. Select intake, the console, diagnosis or assessment.');
+    message('ready',roomLabel(view.context.board));
     if(transitions.length) {
       const consequence=transitions.find(item=>item.kind==='linked-consequence');
       if(handle.apply(view,transitions) && consequence) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});
@@ -57,7 +59,7 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
     if(publication.kind==='reset') { release(); if(!unavailable) message('waiting',publication.reason==='error'?'Recorded state unavailable. Refresh your workbench.':'Loading recorded context.'); return; }
     if(publication.kind==='loading') { if(!unavailable) message('loading','Refreshing recorded state'); return; }
     const view=publication.view;
-    if(view.context.board!=='bookshop') { release(); previous=view; message('static','This workplace keeps its existing static overview.'); return; }
+    if(!hasRoom(view.context.board)) { release(); previous=view; message('static','This workplace keeps its existing static overview.'); return; }
     if(unavailable) { previous=view; showFailure(); return; }
     if(prior && contextKey(prior)!==contextKey(view)) release();
     const transitions = view.consistency==='conflict' ? [] : diffWorkplace(previous,view);
@@ -67,7 +69,7 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
       const started=scene.apply(view,transitions); suspend();
       if(started && consequence) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});
     } else mount();
-    if(scene) message('ready',view.consistency==='conflict'?'Recorded reads disagree. Inspect the workbench; no outcome is inferred.':'3D Bellwether room. Select intake, the console, diagnosis or assessment.');
+    if(scene) message('ready',view.consistency==='conflict'?'Recorded reads disagree. Inspect the workbench; no outcome is inferred.':roomLabel(view.context.board));
   }
   function retry() { if(disposed || brokenModule) return; unavailable=false; release(); previous=null; mount(); }
   function onMotion() { scene?.setReducedMotion(motion.matches); }

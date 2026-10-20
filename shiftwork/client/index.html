@@ -145,11 +145,12 @@
         <div class="section-heading"><h3>Pipeline wall</h3><span class="synthetic">Synthetic scenario</span></div>
         <p class="help-text">Owners, SLA clocks, escalations and missed-handoff incidents, derived only from operational captures. An experiment never moves an owner or starts a clock.</p>
         <p id="pipeline-counts" class="mono evidence-meta"></p>
+        <p id="pipeline-ownership-status" class="help-text"></p>
         <button id="operate-pipeline" class="button primary" disabled>Operate the exact selection</button>
         <p id="pipeline-help" class="help-text"></p>
         <section class="panel-section"><h3>Owners assigned</h3><div id="pipeline-owners"></div></section>
-        <section class="panel-section"><h3>SLA clocks started</h3><div id="pipeline-clocks"></div></section>
-        <section class="panel-section"><h3>Human-handoff escalations</h3><div id="pipeline-escalations"></div></section>
+        <section class="panel-section"><h3>SLA clocks started</h3><p class="help-text">Recorded start only. No live countdown.</p><div id="pipeline-clocks"></div></section>
+        <section class="panel-section"><h3>Human-handoff escalations</h3><p class="help-text">Recorded review marker. No message sent.</p><div id="pipeline-escalations"></div></section>
         <section class="panel-section"><h3>Missed-handoff incidents</h3><div id="pipeline-incidents"></div></section>
       </section>
       <section id="board-view">

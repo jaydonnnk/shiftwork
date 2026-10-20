@@ -174,9 +174,24 @@ export function projectWorkplace(input) {
       }
       if (link.run_id !== run?.id) reasonCode = link.reason_code ?? null;
     }
+    const gtmOutcome = slug === 'gtm' && ['OWNER_ASSIGNED', 'SLA_CLOCK_STARTED', 'HANDOFF_ESCALATED'].includes(event.event_type);
+    const publicRef = value => typeof value === 'string' ? value : null;
+    let signalRef = null, owner = null, recordRef = null;
+    if (gtmOutcome) {
+      if (link?.run_id === run?.id && run.purpose !== 'OPERATION') {
+        linkState = 'conflict'; meaning = 'conflict'; conflict();
+      } else if (!link || !event.synthetic || !['linked', 'historical'].includes(linkState)) {
+        linkState = 'conflict'; meaning = 'conflict'; conflict();
+      } else {
+        signalRef = publicRef(event.payload?.signal_ref);
+        owner = publicRef(event.payload?.owner);
+        recordRef = publicRef(event.payload?.record_ref);
+      }
+    }
     return {
       id: wallEventId(event), seq: event.seq, hash: event.hash, type: event.event_type,
       synthetic: event.synthetic === true, source, linkState, meaning, versionId, reasonCode, contradiction,
+      signalRef, owner, recordRef,
       incidentId: openedIncident.get(event.seq)?.id ?? resolvedIncident.get(event.seq)?.id ?? null,
       link: link ? { runId: link.run_id, checkId: link.check_id, outputId: link.observed_ref,
         ordinal: link.request_ordinal, verdict: link.verdict } : null,
@@ -257,6 +272,9 @@ export function diffWorkplace(previous, next) {
   const beforeInspection = previous.context.inspection, afterInspection = next.context.inspection;
   if (beforeInspection.mode !== afterInspection.mode || beforeInspection.historicalRunId !== afterInspection.historicalRunId) return [];
   const transitions = [];
+  const testStation = next.context.board === 'gtm' ? 'workflow' : 'compare';
+  const operatingStation = next.context.board === 'gtm' ? 'workflow' : 'service';
+  const wallStation = next.context.board === 'gtm' ? 'wall' : 'ledger';
   if (beforeInspection.mode === 'current' && previous.station !== next.station) {
     transitions.push({ key: `station:${next.station}`, kind: 'station-focus', stationId: next.station, publicRefs: [] });
   }
@@ -265,21 +283,21 @@ export function diffWorkplace(previous, next) {
   const after = diagnosticKey(diagnostic);
   if (before !== after && after !== null) {
     const trial = diagnostic?.trials?.[0] ?? null;
-    transitions.push({ key: `test:diagnostic:${after}`, kind: 'test-update', stationId: 'compare',
+    transitions.push({ key: `test:diagnostic:${after}`, kind: 'test-update', stationId: testStation,
       publicRefs: (diagnostic ? [diagnostic.id, trial?.runId, trial?.versionId] : []).filter(Boolean) });
   }
   const comparison = next.tests?.comparison ?? null;
   const beforeComparison = comparisonKey(previous.tests?.comparison);
   const afterComparison = comparisonKey(comparison);
   if (beforeComparison !== afterComparison && afterComparison !== null) {
-    transitions.push({ key: `comparison:${afterComparison}`, kind: 'comparison-update', stationId: 'compare',
+    transitions.push({ key: `comparison:${afterComparison}`, kind: 'comparison-update', stationId: testStation,
       publicRefs: [comparison?.id, ...(comparison?.candidates ?? []).map(candidate => candidate.versionId)].filter(Boolean) });
   }
   const operating = next.operating ?? null;
   const beforeSelection = selectionKey(previous.operating);
   const afterSelection = selectionKey(operating);
   if (beforeSelection !== afterSelection && afterSelection !== null) {
-    transitions.push({ key: `selection:${afterSelection}`, kind: 'selection-update', stationId: 'service',
+    transitions.push({ key: `selection:${afterSelection}`, kind: 'selection-update', stationId: operatingStation,
       publicRefs: [operating?.selectionId, operating?.versionId].filter(Boolean) });
   }
   const run = next.run ?? null;
@@ -298,7 +316,7 @@ export function diffWorkplace(previous, next) {
       return isCurrent && isLinked && isSynthetic && isNew;
     });
     if (arrivals.length) transitions.push({ key: `consequence:${arrivals.map(event => event.id).join(',')}`,
-      kind: 'linked-consequence', stationId: 'ledger',
+      kind: 'linked-consequence', stationId: wallStation,
       publicRefs: arrivals.map(event => event.id), count: arrivals.length });
   }
   return transitions;

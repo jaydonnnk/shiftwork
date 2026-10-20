@@ -267,7 +267,7 @@ async function initializeGraphics() {
       onConsequence({ count }) { showWallTrace(count); },
       onStation({ board, shiftId, stationId }) {
         if (latestPresentation?.kind !== 'accepted' || board !== state.slug || shiftId !== state.loadedShiftId || latestPresentation.generation !== state.generation || latestPresentation.intent !== state.intent) return;
-        if (!document.querySelector(`#bookshop-stations [data-station="${stationId}"]`)) return;
+        if (!document.querySelector(`#${board}-stations [data-station="${stationId}"]`)) return;
         activateStation(stationId);
       } });
     if (expandedWork) workplaceHost.setExpanded(true);
@@ -430,8 +430,18 @@ function renderPipelineWall() {
   for (const [id] of PIPELINE_GROUPS) empty($(id), 'No verified data loaded.');
   empty($('pipeline-incidents'), 'No verified data loaded.');
   text('pipeline-counts', '');
+  text('pipeline-ownership-status', 'No verified ownership records loaded.');
   if (!gtm() || !state.board) return;
   const events = state.events;
+  const signals = [...new Set(events.map(event => event.payload.signal_ref).filter(Boolean))];
+  const problems = signals.flatMap(signal => {
+    const owners = events.filter(event => event.event_type === 'OWNER_ASSIGNED' && event.payload.signal_ref === signal);
+    const labels = [];
+    if (!owners.length || owners.some(event => !event.payload.owner)) labels.push(`${signal}: no recorded owner`);
+    if (owners.length > 1) labels.push(`${signal}: ${owners.length} duplicate owner records`);
+    return labels;
+  });
+  text('pipeline-ownership-status', problems.join(' · ') || 'No missing or duplicate owner records in the loaded ledger.');
   for (const [id, type] of PIPELINE_GROUPS) {
     const rows = events.filter(event => event.event_type === type);
     if (rows.length) $(id).replaceChildren(...rows.map(pipelineRow));
@@ -551,6 +561,7 @@ function clearData(message) {
   for (const id of ['pipeline-owners', 'pipeline-clocks', 'pipeline-escalations', 'pipeline-incidents']) empty($(id), 'No verified data loaded.');
   text('pipeline-counts', '');
   $('operate-pipeline').disabled = true;
+  text('pipeline-ownership-status', 'No verified ownership records loaded.');
   renderDraftEditor();
 }
 
