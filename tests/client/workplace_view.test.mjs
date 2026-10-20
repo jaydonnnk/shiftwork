@@ -225,6 +225,220 @@ test('diagnostic_history_test_update_is_continuous_within_the_same_inspection', 
   assert.equal(transitions.filter(item => item.kind === 'station-focus').length, 0, 'history navigation emitted focus motion');
 });
 
+export function comparison({ state = 'FINALIZED', outcome = 'COMPLETE', eligibleA = true, eligibleB = true,
+  blockersA = [], blockersB = [], missing = [] } = {}) {
+  const versions = { A: 'version-a', B: 'version-b' }, hashes = { A: 'hash-a', B: 'hash-b' };
+  const metrics = label => ({ candidate_label: label, candidate_version_id: versions[label],
+    public_denominator_requests: 6, useful_completions: 6, incorrect_outputs: 0,
+    justified_refusals: 0, justified_referrals: 0, justified_clarifications: 0,
+    unjustified_refusals: 0, unjustified_referrals: 0, unjustified_clarifications: 0,
+    missing_outputs: 0, protected_denominator: 3, protected_passed: 3, protected_failed: 0,
+    protected_missing: 0, service_calls: null, input_tokens: null, output_tokens: null,
+    service_latency_ms: null, provisioning_latency_ms: null, cost_minor_units: null });
+  const trials = [];
+  for (let pair = 1; pair <= 3; pair += 1) for (const [index, label] of ['A', 'B'].entries()) {
+    const ordinal = (pair - 1) * 2 + index + 1;
+    const unavailable = missing.includes(ordinal);
+    trials.push({ pair_ordinal: pair, execution_ordinal: ordinal, candidate_label: label,
+      artifact_version_id: versions[label], artifact_content_hash: hashes[label],
+      workload_id: `workload-${pair}`, request_count: 2, protected_request_count: 1,
+      run_id: unavailable ? null : `run-${label.toLowerCase()}-${pair}`,
+      state: unavailable ? 'RESERVED' : 'COMPLETE', evidence_mode: 'TRUSTED_LOCAL',
+      outputs: [{ request_text: 'PRIVATE_REQUEST', body_base64: 'PRIVATE_BODY' }],
+      missing_evidence: unavailable ? [`slot ${ordinal} has no capture`] : [],
+      task_assessments: [], observations: [] });
+  }
+  const out = outcome === null ? null : { experiment_id: 'experiment-cmp-1', status: outcome,
+    shared_public_denominator_requests: 6, candidate_metrics: [metrics('A'), metrics('B')],
+    eligibility: [
+      { candidate_label: 'A', candidate_version_id: 'version-a', eligible: eligibleA, blocking_reason_codes: blockersA },
+      { candidate_label: 'B', candidate_version_id: 'version-b', eligible: eligibleB, blocking_reason_codes: blockersB },
+    ], drift_fields: [], noncompletion_incidence_non_additive: true };
+  return { id: 'experiment-cmp-1', shift_id: 'shift-1', kind: 'QUALIFYING_COMPARISON',
+    investigation_id: 'investigation-1', declared_treatment: 'PRIVATE_TREATMENT',
+    context_hash: 'context-cmp', context_evidence_class: 'TRUSTED_LOCAL',
+    condition: { id: 'condition-1', kind: 'DEPENDENCY_OUTAGE', public_label: 'Dependency outage',
+      content_hash: 'PRIVATE_CONDITION_HASH' }, observed_run_id: null,
+    workloads: [{ id: 'workload-1', ordinal: 1, request_batch_hash: 'batch-1', request_count: 2 }],
+    candidates: [{ label: 'A', artifact_version_id: 'version-a', artifact_content_hash: 'hash-a' },
+      { label: 'B', artifact_version_id: 'version-b', artifact_content_hash: 'hash-b' }],
+    trials, shared_public_denominator_requests: 6, protected_denominator_requests_per_candidate: 3,
+    protected_counts: { A: { reserved: 3, captured: 3, missing: 0 }, B: { reserved: 3, captured: 3, missing: 0 } },
+    outcome: out, eligible: true, eligibility_reason: 'PRIVATE_REASON', state };
+}
+function comparisonInput(options = {}) {
+  const i = input(); i.board.operating_selection = null; i.operatingVersion = null;
+  i.comparison = comparison(options); return i;
+}
+test('comparison_projection_carries_public_condition_denominators_and_metrics', async () => {
+  const { projectWorkplace } = await api(); const v = projectWorkplace(comparisonInput());
+  const summary = v.tests.comparison;
+  assert.equal(summary.conditionLabel, 'Dependency outage');
+  assert.equal(summary.sharedPublicDenominatorRequests, 6);
+  assert.equal(summary.protectedDenominatorRequestsPerCandidate, 3);
+  assert.equal(summary.missingSlots, 0);
+  assert.equal(summary.incomparable, false);
+  assert.equal(summary.candidates.length, 2);
+  assert.deepEqual(summary.candidates.map(candidate => [candidate.label, candidate.versionId, candidate.contentHash, candidate.eligible]),
+    [['A', 'version-a', 'hash-a', true], ['B', 'version-b', 'hash-b', true]]);
+  assert.equal(summary.candidates[0].metrics.usefulCompletions, 6);
+  assert.equal(summary.trials.length, 6);
+  assert.deepEqual([summary.trials[0].ordinal, summary.trials[0].pairOrdinal, summary.trials[0].candidateLabel], [1, 1, 'A']);
+  assert.equal(summary.trials[5].ordinal, 6); assert.equal(summary.trials[5].candidateLabel, 'B');
+});
+test('comparison_projection_keeps_unknown_costs_unknown', async () => {
+  const { projectWorkplace } = await api(); const i = comparisonInput();
+  i.comparison.outcome.candidate_metrics[0].cost_minor_units = null;
+  i.comparison.outcome.candidate_metrics[0].service_calls = null;
+  const metrics = projectWorkplace(i).tests.comparison.candidates[0].metrics;
+  assert.strictEqual(metrics.costMinorUnits, null, 'an unknown cost was reported as a number');
+  assert.strictEqual(metrics.serviceCalls, null, 'an unknown call count was reported as zero');
+});
+test('comparison_projection_counts_missing_slots', async () => {
+  const { projectWorkplace } = await api(); const v = projectWorkplace(comparisonInput({ missing: [6] }));
+  assert.equal(v.tests.comparison.missingSlots, 1, 'a missing comparison slot was not counted');
+  assert.equal(v.tests.comparison.trials[5].missingEvidenceCount, 1, 'a missing slot hid its missing evidence');
+  assert.equal(v.tests.comparison.trials[5].runId, null);
+});
+test('comparison_projection_reports_blockers_and_incomparable_evidence', async () => {
+  const { projectWorkplace } = await api();
+  const blocked = projectWorkplace(comparisonInput({ state: 'FINALIZED', outcome: 'NOT_COMPARABLE',
+    eligibleA: false, eligibleB: false, blockersA: ['MANDATORY_TASK_FAILED'], blockersB: ['MISSING_CAPTURE'] }));
+  assert.equal(blocked.tests.comparison.outcomeStatus, 'NOT_COMPARABLE');
+  assert.equal(blocked.tests.comparison.incomparable, true, 'an incomparable comparison was reported as comparable');
+  assert.deepEqual(blocked.tests.comparison.candidates.map(candidate => candidate.blockingReasonCodes),
+    [['MANDATORY_TASK_FAILED'], ['MISSING_CAPTURE']], 'comparison blockers were hidden');
+  const invalidated = projectWorkplace(comparisonInput({ state: 'INVALIDATED', outcome: 'NOT_COMPARABLE',
+    eligibleA: false, eligibleB: false, blockersA: ['EXPOSURE_RETIRED'] }));
+  assert.equal(invalidated.tests.comparison.incomparable, true, 'an invalidated comparison was reported as comparable');
+});
+test('comparison_projection_has_no_default_winner_or_preselection', async () => {
+  const { projectWorkplace } = await api(); const v = projectWorkplace(comparisonInput());
+  assert.equal(v.operating, null, 'a completed comparison selected a version');
+  assert.equal(Object.hasOwn(v.tests.comparison, 'winner'), false, 'the projection implied a default winner');
+  for (const candidate of v.tests.comparison.candidates) {
+    assert.equal(Object.hasOwn(candidate, 'selected'), false, 'a candidate was preselected');
+    assert.equal(Object.hasOwn(candidate.metrics, 'score'), false, 'the projection invented a score');
+  }
+});
+test('comparison_selection_binding_accepts_the_public_choice', async () => {
+  const { projectWorkplace } = await api(); const i = comparisonInput();
+  i.board.operating_selection = { id: 'choice-cmp', kind: 'LEARNER_CHOICE', selected_version_id: 'version-a',
+    selected_content_hash: 'hash-a', comparison_id: 'experiment-cmp-1', retained_alternative_version_id: 'version-b',
+    requirement_set_hash: 'requirements-1', state: 'VALID', rationale: 'PRIVATE_RATIONALE' };
+  i.operatingVersion = { id: 'version-a', content_hash: 'hash-a', source: 'PRIVATE_SOURCE' };
+  assert.equal(projectWorkplace(i).consistency, 'linked', 'a public selection identity was rejected');
+});
+test('comparison_candidate_label_must_be_unique', async () => {
+  const { projectWorkplace } = await api(); const i = comparisonInput();
+  i.comparison.candidates.push({ label: 'A', artifact_version_id: 'version-a', artifact_content_hash: 'hash-a' });
+  assert.equal(projectWorkplace(i).consistency, 'conflict', 'a duplicate comparison candidate label was accepted');
+});
+test('comparison_trial_must_bind_the_exact_candidate_version', async () => {
+  const { projectWorkplace } = await api(); const i = comparisonInput();
+  i.comparison.trials[0].artifact_version_id = 'version-b';
+  assert.equal(projectWorkplace(i).consistency, 'conflict', 'a comparison trial carried a different candidate version');
+});
+test('comparison_selection_must_bind_one_candidate', async () => {
+  const { projectWorkplace } = await api(); const i = comparisonInput();
+  i.board.operating_selection = { id: 'choice-cmp', kind: 'LEARNER_CHOICE', selected_version_id: 'version-x',
+    selected_content_hash: 'hash-x', comparison_id: 'experiment-cmp-1', retained_alternative_version_id: 'version-b',
+    requirement_set_hash: 'requirements-1', state: 'VALID', rationale: 'PRIVATE_RATIONALE' };
+  i.operatingVersion = { id: 'version-x', content_hash: 'hash-x', source: 'PRIVATE_SOURCE' };
+  assert.equal(projectWorkplace(i).consistency, 'conflict', 'a selection cited a version outside its comparison');
+});
+test('comparison_selection_content_hash_must_match', async () => {
+  const { projectWorkplace } = await api(); const i = comparisonInput();
+  i.board.operating_selection = { id: 'choice-cmp', kind: 'LEARNER_CHOICE', selected_version_id: 'version-a',
+    selected_content_hash: 'hash-wrong', comparison_id: 'experiment-cmp-1', retained_alternative_version_id: 'version-b',
+    requirement_set_hash: 'requirements-1', state: 'VALID', rationale: 'PRIVATE_RATIONALE' };
+  i.operatingVersion = { id: 'version-a', content_hash: 'hash-wrong', source: 'PRIVATE_SOURCE' };
+  assert.equal(projectWorkplace(i).consistency, 'conflict', 'a selection content hash did not match its comparison candidate');
+});
+test('comparison_selection_retained_alternative_must_match', async () => {
+  const { projectWorkplace } = await api(); const i = comparisonInput();
+  i.board.operating_selection = { id: 'choice-cmp', kind: 'LEARNER_CHOICE', selected_version_id: 'version-a',
+    selected_content_hash: 'hash-a', comparison_id: 'experiment-cmp-1', retained_alternative_version_id: 'version-x',
+    requirement_set_hash: 'requirements-1', state: 'VALID', rationale: 'PRIVATE_RATIONALE' };
+  i.operatingVersion = { id: 'version-a', content_hash: 'hash-a', source: 'PRIVATE_SOURCE' };
+  assert.equal(projectWorkplace(i).consistency, 'conflict', 'a selection retained the wrong alternative');
+});
+test('comparison_update_is_continuous_and_duplicate_quiet', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const running = projectWorkplace(comparisonInput({ state: 'RUNNING', outcome: null }));
+  const complete = projectWorkplace(comparisonInput());
+  const transitions = diffWorkplace(running, complete);
+  const update = transitions.find(item => item.kind === 'comparison-update');
+  assert.ok(update, 'a completed comparison emitted no comparison update');
+  assert.equal(update.stationId, 'compare');
+  assert.equal(update.key, 'comparison:experiment-cmp-1|FINALIZED|COMPLETE|0|A:eligible:;B:eligible:');
+  assert.deepEqual(update.publicRefs, ['experiment-cmp-1', 'version-a', 'version-b']);
+  assert.equal(transitions.some(item => item.kind === 'selection-update'), false, 'a comparison moved the operating plate');
+  assert.deepEqual(diffWorkplace(complete, complete), [], 'a duplicate accepted view produced a comparison transition');
+  assert.deepEqual(diffWorkplace(running, projectWorkplace(comparisonInput({ state: 'RUNNING', outcome: null }))), [], 'a duplicate running view produced a comparison transition');
+  const without = comparisonInput(); without.comparison = null;
+  assert.deepEqual(diffWorkplace(complete, projectWorkplace(without)), [], 'a removed comparison produced a transition');
+});
+test('comparison_blocker_transition_is_visible', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const eligible = projectWorkplace(comparisonInput());
+  const blocked = projectWorkplace(comparisonInput({ state: 'FINALIZED', outcome: 'NOT_COMPARABLE',
+    eligibleA: false, eligibleB: false, blockersA: ['MANDATORY_TASK_FAILED'] }));
+  const update = diffWorkplace(eligible, blocked).find(item => item.kind === 'comparison-update');
+  assert.ok(update?.key.includes('A:blocked:MANDATORY_TASK_FAILED'), 'a blocker change produced no comparison update');
+});
+test('selection_update_is_continuous_and_duplicate_quiet', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const before = comparisonInput();
+  const after = comparisonInput();
+  after.board.operating_selection = input().board.operating_selection;
+  after.operatingVersion = input().operatingVersion;
+  const a = projectWorkplace(before), b = projectWorkplace(after);
+  const update = diffWorkplace(a, b).find(item => item.kind === 'selection-update');
+  assert.ok(update, 'a recorded choice emitted no selection update');
+  assert.equal(update.stationId, 'service');
+  assert.equal(update.key, 'selection:choice-1|selected-2|hash-2');
+  assert.deepEqual(update.publicRefs, ['choice-1', 'selected-2']);
+  assert.deepEqual(diffWorkplace(b, b), [], 'a duplicate accepted view produced a selection transition');
+  assert.deepEqual(diffWorkplace(b, a), [], 'a removed selection produced a transition');
+});
+test('first_baseline_conflict_context_and_history_are_quiet', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const completed = projectWorkplace(comparisonInput());
+  assert.deepEqual(diffWorkplace(null, completed), [], 'a first accepted comparison emitted motion');
+  const chosen = projectWorkplace(input());
+  assert.deepEqual(diffWorkplace(null, chosen), [], 'a first accepted selection emitted motion');
+  const conflict = comparisonInput();
+  conflict.board.chain_status = 'BROKEN';
+  conflict.board.operating_selection = { ...input().board.operating_selection, selected_version_id: 'version-a',
+    selected_content_hash: 'hash-a', comparison_id: 'experiment-cmp-1', retained_alternative_version_id: 'version-b' };
+  conflict.operatingVersion = { id: 'version-a', content_hash: 'hash-a', source: 'PRIVATE_SOURCE' };
+  assert.deepEqual(diffWorkplace(completed, projectWorkplace(conflict)), [], 'a conflict emitted comparison motion');
+  const history = comparisonInput(); history.inspection = { mode: 'history', historicalRunId: 'run-1' };
+  assert.deepEqual(diffWorkplace(completed, projectWorkplace(history)), [], 'a history change emitted comparison motion');
+  const otherShift = comparisonInput(); otherShift.loadedShiftId = null; otherShift.board.latest_shift = null;
+  assert.deepEqual(diffWorkplace(completed, projectWorkplace(otherShift)), [], 'a context change emitted comparison motion');
+});
+test('diagnostics_remain_non_qualifying_and_do_not_move_comparison_or_selection', async () => {
+  const { projectWorkplace, diffWorkplace } = await api();
+  const i = comparisonInput(); i.diagnostic = diagnostic('DIAGNOSTIC', 'RUNNING', ['pending capture']);
+  const a = projectWorkplace(i); i.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []);
+  const transitions = diffWorkplace(a, projectWorkplace(i));
+  assert.equal(transitions.filter(item => item.kind === 'test-update').length, 1, 'a diagnostic update was weakened');
+  assert.equal(transitions.filter(item => item.kind === 'comparison-update').length, 0, 'a diagnostic moved the comparison stands');
+  assert.equal(transitions.filter(item => item.kind === 'selection-update').length, 0, 'a diagnostic moved the operating plate');
+  assert.equal(projectWorkplace(i).tests.comparison.candidates.every(candidate => candidate.eligible), true);
+});
+test('comparison_projection_whitelists_private_material', async () => {
+  const { projectWorkplace } = await api(); const i = comparisonInput();
+  const v = projectWorkplace(i);
+  const needles = ['PRIVATE_TREATMENT', 'PRIVATE_REQUEST', 'PRIVATE_BODY', 'PRIVATE_REASON',
+    'PRIVATE_CONDITION_HASH', 'PRIVATE_RATIONALE', 'PRIVATE_SOURCE'];
+  const scan = text => needles.filter(needle => text.includes(needle));
+  for (const needle of needles) assert.ok(scan(JSON.stringify({ value: needle })).includes(needle), 'serialized scanner cannot match its needle');
+  assert.deepEqual(scan(JSON.stringify(v)), [], 'private comparison material reached the scene projection');
+});
+
 
 async function hostFixture({ hidden=false, offscreen=false, delayed=false, failDuringCreate=false, moduleFailure=false, throwDuringCreate=false } = {}) {
   const node = () => {

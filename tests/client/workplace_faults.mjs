@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -46,6 +46,18 @@ rows.push(
  {name:'test_update_removal',needle:'if (before !== after && after !== null) {',replacement:'if (before !== after) {',test:'diagnostic_test_update_is_continuous_and_duplicate_quiet',expect:'a removed diagnostic produced a transition'},
  {name:'pending_evidence_suppression',needle:'if (before !== after && after !== null) {',replacement:"if (before !== after && after !== null && previous.evidence?.completeness === 'linked') {",test:'diagnostic_update_survives_pending_evidence_becoming_linked',expect:'a pending evidence route suppressed the test update'},
  {name:'history_quiet',needle:'if (beforeInspection.mode !== afterInspection.mode || beforeInspection.historicalRunId !== afterInspection.historicalRunId) return [];',replacement:'void 0;',test:'diagnostic_history_and_context_changes_are_quiet',expect:'a history change emitted a fresh test update'},
+ {name:'comparison_label_unique',needle:'if (new Set(candidates.map(candidate => candidate.label)).size !== candidates.length) conflict();',replacement:'void 0;',test:'comparison_candidate_label_must_be_unique',expect:'a duplicate comparison candidate label was accepted'},
+ {name:'comparison_trial_version',needle:'return !bound || trial.artifact_version_id !== bound.artifact_version_id;',replacement:'return false;',test:'comparison_trial_must_bind_the_exact_candidate_version',expect:'a comparison trial carried a different candidate version'},
+ {name:'comparison_selected_member',needle:'const chosen = selected.length === 1 ? selected[0] : null;\n    if (!chosen) conflict();\n    else {',replacement:'const chosen = selected.length === 1 ? selected[0] : null;\n    if (chosen) {',test:'comparison_selection_must_bind_one_candidate',expect:'a selection cited a version outside its comparison'},
+ {name:'comparison_selected_hash',needle:'if (chosen.contentHash !== selection.selected_content_hash) conflict();',replacement:'void 0;',test:'comparison_selection_content_hash_must_match',expect:'a selection content hash did not match its comparison candidate'},
+ {name:'comparison_retained',needle:'if (alternative.length !== 1 || alternative[0].versionId !== selection.retained_alternative_version_id) conflict();',replacement:'void 0;',test:'comparison_selection_retained_alternative_must_match',expect:'a selection retained the wrong alternative'},
+ {name:'comparison_missing_slots',needle:'const missingSlots = (item.trials ?? []).filter(trial => !trial.run_id ||\n      (trial.missing_evidence?.length ?? 0) > 0).length;',replacement:'const missingSlots = 0;',test:'comparison_projection_counts_missing_slots',expect:'a missing comparison slot was not counted'},
+ {name:'comparison_incomparable',needle:"(item.state === 'INVALIDATED' || Boolean(item.outcome && item.outcome.status !== 'COMPLETE'))",replacement:'false',test:'comparison_projection_reports_blockers_and_incomparable_evidence',expect:'an incomparable comparison was reported as comparable'},
+ {name:'comparison_cost',needle:'costMinorUnits: metrics.cost_minor_units ?? null',replacement:'costMinorUnits: metrics.cost_minor_units ?? 0',test:'comparison_projection_keeps_unknown_costs_unknown',expect:'an unknown cost was reported as a number'},
+ {name:'comparison_duplicate',needle:'if (beforeComparison !== afterComparison && afterComparison !== null) {',replacement:'if (afterComparison !== null) {',test:'comparison_update_is_continuous_and_duplicate_quiet',expect:'a duplicate accepted view produced a comparison transition'},
+ {name:'comparison_removal',needle:'if (beforeComparison !== afterComparison && afterComparison !== null) {',replacement:'if (beforeComparison !== afterComparison) {',test:'comparison_update_is_continuous_and_duplicate_quiet',expect:'a removed comparison produced a transition'},
+ {name:'selection_duplicate',needle:'if (beforeSelection !== afterSelection && afterSelection !== null) {',replacement:'if (afterSelection !== null) {',test:'selection_update_is_continuous_and_duplicate_quiet',expect:'a duplicate accepted view produced a selection transition'},
+ {name:'selection_removal',needle:'if (beforeSelection !== afterSelection && afterSelection !== null) {',replacement:'if (beforeSelection !== afterSelection) {',test:'selection_update_is_continuous_and_duplicate_quiet',expect:'a removed selection produced a transition'},
 );
 const hostRows=[
  {name:'host_generation',needle:'if(publication.generation!=null && publication.generation<generation) return;',replacement:'void 0;',test:'host_reset_cannot_accept_older_generation',expect:'Older generation mounted after reset'},
