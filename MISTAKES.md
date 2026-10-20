@@ -1,5 +1,18 @@
 # Mistakes Log
 
+## 2026-10-20 S35 picker observer: asserted a specified value as a computed value
+
+- **What happened:** the first post-repair picker check failed all nine cells
+  because it required computed `overflow` to equal `hidden`. The served CSS was
+  correct; Chrome reports `clip` for a select whose specified overflow is
+  hidden. The layout measurements in the same run already passed.
+- **Root cause:** treated a declared CSS keyword as the computed value without
+  checking the user-agent mapping for form controls.
+- **Prevention rule:** assert the computed values a browser can actually return
+  (accept `hidden` or `clip` here), and keep the geometry assertion separate
+  from the declaration assertion so a wrong expectation cannot mask a layout
+  result.
+
 ## 2026-10-20 S32 control servers: missing imports and middleware added after startup
 
 - **What happened:** four scratch preview servers exited before serving. Three
@@ -3344,3 +3357,58 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: Node and asset-check redirections ran before a parallel command created their receipt directory. Neither check ran in that attempt.
 - Root cause: directory creation and its dependent writers were incorrectly treated as independent work.
 - Prevention rule: create receipt roots before starting parallel writers. The corrected checks use /tmp/shiftwork-s34-publication-20261020 and retain the failed tool output.
+
+
+## 2026-10-20 S35: context check arrived after the stop limit
+
+- What happened: the first runtime-log check reported 195398 context input tokens, beyond the 175k limit. New implementation stopped and only the current-step verification/checkpoint finished. A later attempt to append this note used a guessed patch anchor and was rejected without changing the file.
+- Root cause: broad document/tool output accumulated before a phase-boundary usage check; the note patch also failed to copy a current anchor.
+- Prevention rule: inspect this chat's latest token_count input_tokens before and after contract reads and before each implementation phase. Bound output per call. Append incident notes directly or use copied, verified anchors.
+
+## 2026-10-20 S35 continuation: run absence, boolean admission and overlapping handover proof
+
+- What happened: new boundary checks reproduced a null-run crash and truthy non-boolean synthetic admission in Northline and the shared GTM projection. The first source sweep also found that the handover scalar-reference fault survived.
+- Root cause: optional undefined IDs compared equal before dereferencing the absent run; admission used truthiness while rendering used strict booleans. The handover test broke both scalar typing and cause-version equality, so equality masked the typing fault.
+- Prevention rule: test absent optional inputs and non-boolean flags, retain quiet history without a loaded run, and make linked references equal when independently faulting their scalar type. Keep faults in memory, preserve the rejected receipt, and rerun the isolated and full checks after repair.
+
+## 2026-10-20 S35 continuation: inherited browser assumptions and a repeated station anchor
+
+- What happened: the first Northline journey stopped at an obsolete visible-static-art assertion, even though the new room intentionally covers that fallback. A subsequent source sweep refused a Northline station fault whose short ternary needle appeared twice. Neither attempt established a product failure.
+- Root cause: the old browser assertion predated Northline graphics; the fault needle omitted the owning variable name.
+- Prevention rule: verify real WebGL when ready and retain static-art checks for actual fallback. Include the owning declaration in similar station fault anchors, and preserve all rejected receipts. The corrected journey and 152-control sweep passed.
+
+## 2026-10-20 S35 second continuation: panel focus did not expose selected content
+
+- What happened: a real content check found six native-200% observations where the captured Acceptance request or Handover runbook remained below the viewport. The first repair put targets fractionally above the top edge.
+- Root cause: navigation scrolled the panel header rather than the selected content; the target had no scroll margin.
+- Prevention rule: assert settled geometry and actual content for keyboard and touch at both exact zoom targets. Preserve the failed observations and add a real margin instead of hiding clipping with a permissive assertion. Receipts are under `/tmp/shiftwork-s35-continuation-20261020-2/content-*`.
+
+## 2026-10-20 S35 second continuation: Diagnostic stayed disabled after freeze
+
+- What happened: the new later-alternative flow clicked a disabled Diagnostic button and timed out. A direct assertion reproduced the disabled control after freeze completion.
+- Root cause: freezeCandidate refreshed while pending, then cleared pending and rerendered Board/Compare without rerendering investigation controls. Earlier navigation rerendered those controls and masked the defect.
+- Prevention rule: prove each asynchronous action restores its affected controls before any navigation. The final freeze path rerenders Investigate; the new journey asserts the Diagnostic button is enabled. Keep `freeze-diagnostic-red.log` and both earlier later-journey failures.
+
+## 2026-10-20 S35 second continuation: later proof assumed stale helper contracts
+
+- What happened: the first later flow edited during refresh. A copied closed-world preview lacked in-memory test pins; an attempted startup restore queried tables before lifespan initialization. A later assertion read the nullable diagnostic trial version instead of candidate/run identity. Review also caught a proposed history assertion using the explicit Refresh action, which intentionally returns to current.
+- Root cause: existing helpers and asynchronous control states were assumed instead of fully checking their contracts.
+- Prevention rule: wait for enabled editing/save controls, restore only test-control pins in disposable previews after checking schema existence, and assert exact diagnostic candidate plus executed-run identity. Name synthetic persisted-pageshow history evidence as synthetic cache-refresh evidence, never ordinary polling or real BFCache proof.
+
+## 2026-10-20 S35 second continuation: extraction URL and process ownership
+
+- What happened: the first extraction wrapper supplied a board-query URL to the Bellwether runner, which appends `/#view` and therefore requested an invalid board. Review found that subprocess timeouts could leave Chrome descendants. An initial asset receipt also imported app code from the checkout because its working directory overrode PYTHONPATH.
+- Root cause: runner URL shape, child-process cleanup and Python import origin were not explicit preconditions.
+- Prevention rule: pass Bellwether a bare base URL, own the Node process group and test descendant termination, and assert imports resolve inside the extraction. Preserve failed archives and receipts. The corrected helper and source closure use these checks without installation.
+
+## 2026-10-20 S35 second continuation: history purpose and incident preconditions
+
+- What happened: the later browser flow initially tried to click an unresolved incident after the pilot resolved every incident. Direct inspection then reproduced a diagnostic run shown under operational history. My first purpose guard hid valid LEGACY_OPERATION rows too; a reviewer caught that omission, and a migrated v5 successor reproduced it.
+- Root cause: the harness assumed an unresolved incident survived success, and the production history filter excluded only paired later-condition trial IDs. The first repair omitted the backend's separately named legacy operational purpose.
+- Prevention rule: inspect pilot/handover DOM directly after a successful later diagnostic, and use an open comparison checkpoint for actual incident/history controls. Keep both OPERATION and LEGACY_OPERATION, reject EXPERIMENT, retain the later-trial ID exclusion, and prove ordinary and migrated worlds separately. All failed receipts and the migrated RED/GREEN remain in the second-continuation root.
+
+## 2026-10-20 S35 native continuation: select overflow and hidden-page controls
+
+- What happened: native 200% Safari reported a 410px page at a 378px viewport. Element/text bounds alone missed the overflow owner. Native background suspension and Page Menu/AX/user-interruption failures also prevented the final 200% keyboard cases from finishing before handoff.
+- Root cause: the role picker propagated the select's internal scroll overflow; native UI focus could change independently of retained pixels.
+- Prevention rule: measure per-element scrollWidth/clientWidth as well as rendered bounds, constrain the select itself, and require visible-page telemetry and settled content/focus observations. Preserve all attempts. The production narrow select repair has 100% native proof; final 200% and archive revalidation remain open at user-requested stop.

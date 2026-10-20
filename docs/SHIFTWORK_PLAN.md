@@ -1,3 +1,49 @@
+**S35 ACCEPTED by the user, 2026-10-21, with one recorded evidence gap.**
+
+The user approved S35 after their own manual testing and directed closure. The
+harness has no qualifying native 200% receipt: no visible observer record is
+378x413 CSS pixels and all 413 visible records are `dirty: false`. The native
+200% effect is accepted on the user's manual test, not passed by the harness.
+Chrome cannot reproduce the 378px overflow under the pre-repair selector. The
+accepted source passes the exact-viewport and picker matrices, the fail-capable
+declaration and zoom-fault controls, 206 Node, 152 source, 35 served, nine asset
+and six environment checks, and a 1454-pass regression with the known `port_dead`
+failure. The accepted archive's size and SHA-256 are in
+`/tmp/shiftwork-s35-postcss-20261020-3/archive-accepted.json`. Exact Chrome .84
+and clean locked installation remain unproved. Installation, publication,
+deployment, credentials and live calls remain unauthorized. The work is
+uncommitted on `shiftwork/slice-35`; no commit or push occurred.
+
+**S35 second continuation: local verification, still INCOMPLETE, unaccepted and unpublished.**
+
+Actual Northline content reach now passes 48 keyboard/touch/zoom/graphics cases.
+Freeze completion restores Diagnostic availability, and operational history
+excludes experiment runs while retaining legacy operations. Fresh evidence includes
+35 served controls, 152 source controls, 206 Node checks, all nine failure
+workbenches, full lifecycle and all three complete extracted journeys/rooms with
+external assets blocked. The full regression retains the known port_dead failure,
+1454 passes and one skip. Native Safari, exact Chrome .84 and separately authorized
+clean locked installation remain unproved. Both recorded performance tiers, drawing cap and panel latency pass. Native foreground verification is continuing after the user answered Ready.
+No installation, publication, deployment, credentials, live call or protected-fixture
+edit occurred. No requirement was waived. The latest S35 checkpoint/handoff
+sections and `/tmp/shiftwork-s35-continuation-20261020-2` supersede earlier next steps.
+
+**S35 local continuation; INCOMPLETE, unaccepted and unpublished, 2026-10-20.**
+
+The user's "Please proceed" resumed local S35 work on `shiftwork/slice-35` from
+`cd532d6`. Absent-run crashes and non-boolean synthetic admission are repaired
+with fresh RED-to-GREEN proof. Evidence now includes 206 Node checks, 152 isolated
+source controls, nine asset checks, the full existing Northline journey, actual
+WebGL room picks and exact panel-focus/zoom checks. Visible permission-map and
+handover limits have browser failure/repair evidence. Actual selected-content
+reach, served renderer mutations, lifecycle, performance, later/history and
+extracted delivery remain incomplete. The full non-packaging regression has
+1454 passes, the retained `port_dead` failure, one skip and two warnings. Clean locked installation remains required
+and separately unauthorized. No acceptance, commit, publication, deployment,
+credential, live call or protected-fixture edit. Work stopped near the 175k
+context limit; owned previews are stopped. See [S35 checkpoint](plans/shiftwork/workplace-3d/s35-checkpoint-2026-10-20.md) for current receipts,
+failed attempts and precise limits. Older S35 notices are historical.
+
 **S34 ACCEPTED on local evidence and published on main, 2026-10-20.**
 
 S34 was implemented on `shiftwork/slice-34` from `80f8818`. The user accepted

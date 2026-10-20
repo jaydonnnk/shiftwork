@@ -8,7 +8,24 @@ operations workflow. Sales, bookings, ownership and incidents are **synthetic**.
 **Submission track:** Best Apps and Agents, confirmed by Jaydon on 2026-10-15.
 **License:** [MIT](LICENSE). Dependencies retain their own licenses.
 
-## Local 3D inspection work in S29
+## Local 3D workplaces
+
+The S35 working tree adds the Northline workshop alongside Bellwether and
+Stonebridge. The user accepted S35 on 2026-10-21. The exact narrow Chromium
+content checks cover Acceptance, Rollout and Handover with keyboard, touch and
+native 200% zoom, including an unsaved draft and graphics failure. Native Safari
+rendered the actual WebGL2 room at 100%, but no qualifying native 200% harness
+receipt exists; the user accepted that recorded gap on their own manual test.
+Exact Chrome .84 and the separately authorized clean locked installation remain
+unproved. See the [S35 checkpoint](docs/plans/shiftwork/workplace-3d/s35-checkpoint-2026-10-20.md)
+for evidence and limits. The hosted demo remains S28.
+
+The source-delivery helper `verify_three_browser_journeys` in
+`tests/packaging/test_clean_env_install_and_run.py` exercises all three complete
+browser journeys, the three actual rooms and a Northline graphics-failure
+workbench with external asset requests blocked. It accepts an explicit existing
+interpreter and does not install dependencies. The clean-install test invokes
+the same helper after its separately authorized locked installation.
 
 The S29 working tree adds a locally served WebGL2 Bellwether room beside the
 existing workbench. Intake, the operating console and independent assessment
