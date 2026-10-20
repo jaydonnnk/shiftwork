@@ -1,3 +1,20 @@
+**S31 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
+
+The user answered "Start S31" on 2026-10-20, authorizing local implementation,
+tests and disposable evidence on `shiftwork/slice-31` from main `f4e794e`, then
+accepted S31 with "Yep accepted" and authorized the working-tree commits, the
+approved cleanup deletions and the push to main. The
+equal A/B stands, exact frozen versions and shared conditions, blockers and
+missing slots, explicit eligible choice and publication ownership guards are
+implemented locally. Fresh evidence: 78 Node checks, 65 of 65 source faults
+with production unchanged, 30 of 30 fresh-preview browser controls, nine asset
+checks, three board journeys plus a passing selection-demo journey, both
+performance tiers within budget, and the full non-packaging suite at 1454
+passed with the known port_dead failure, one skip and two warnings. The
+[S31 checkpoint](plans/shiftwork/workplace-3d/s31-checkpoint-2026-10-20.md)
+carries receipts and limits. The work is committed on `shiftwork/slice-31` and
+published to main; S32 requires its own go-ahead.
+
 **S30 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
 
 The user accepted S30 with the two cleanup findings applied and authorized the
@@ -9,8 +26,8 @@ port_dead failure, one skip and two warnings. The
 [S30 checkpoint](plans/shiftwork/workplace-3d/s30-checkpoint-2026-10-20.md)
 carries receipts and limits. S30 is committed on `shiftwork/slice-30` as
 `2a322bd..1662b81`, fast-forwarded to main and pushed as `272321c..1662b81`.
-S31 requires its own go-ahead. The S29 notices below retain their historical
-scope.
+S31 has since received its own go-ahead and is implemented locally; see the
+notice above. The S29 notices below retain their historical scope.
 
 **S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
 

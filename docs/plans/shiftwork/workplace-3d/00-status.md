@@ -1,3 +1,20 @@
+**S31 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
+
+The user answered "Start S31" on 2026-10-20, authorizing local implementation,
+tests and disposable evidence on `shiftwork/slice-31` from main `f4e794e`, then
+accepted S31 with "Yep accepted" and authorized the working-tree commits, the
+approved cleanup deletions and the push to main. The
+equal A/B stands, exact frozen versions and shared conditions, blocker and
+missing-slot evidence, explicit eligible A/B choice, selection-bound plate and
+publication ownership guards are implemented locally. Fresh checks: 78 Node,
+65 of 65 source faults with production unchanged, 30 of 30 fresh-preview
+browser controls, nine asset checks, three board journeys plus a passing
+selection-demo journey, both performance tiers within budget, and the full
+non-packaging suite at 1454 passed with the known port_dead failure, one skip
+and two warnings. The [S31 checkpoint](s31-checkpoint-2026-10-20.md) carries
+receipts, limits and the unclaimed targets. The work is committed on
+`shiftwork/slice-31` and published to main; S32 requires its own go-ahead.
+
 **S30 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
 
 The user answered "Start S30 (Recommended)" on 2026-10-20. The branch
@@ -14,7 +31,8 @@ failure, one skip and two warnings. Both performance tiers met their budgets. Th
 [S30 checkpoint](s30-checkpoint-2026-10-20.md) carries receipts, limits and the
 unclaimed targets. S30 is committed on `shiftwork/slice-30` as
 `2a322bd..1662b81`, fast-forwarded to main and pushed as `272321c..1662b81`.
-S30 is accepted and published; S31 has not started.
+S30 is accepted and published; S31 has since received its own go-ahead and
+is implemented locally, as recorded above.
 
 **S29 ACCEPTED under the narrowed scope, 2026-10-19 Asia/Singapore.**
 
