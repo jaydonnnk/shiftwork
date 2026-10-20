@@ -12,8 +12,9 @@ checks, three board journeys plus a passing selection-demo journey, both
 performance tiers within budget, and the full non-packaging suite at 1454
 passed with the known port_dead failure, one skip and two warnings. The
 [S31 checkpoint](plans/shiftwork/workplace-3d/s31-checkpoint-2026-10-20.md)
-carries receipts and limits. The work is committed on `shiftwork/slice-31` and
-published to main; S32 requires its own go-ahead.
+carries receipts and limits. S31 is committed on `shiftwork/slice-31` as `dc73a5b..e4f6e20`,
+fast-forwarded to main and pushed as `f4e794e..e4f6e20`. S32 requires its own
+go-ahead.
 
 **S30 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
 

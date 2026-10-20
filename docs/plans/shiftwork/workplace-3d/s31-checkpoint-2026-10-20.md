@@ -2,16 +2,16 @@
 
 Updated: 2026-10-20 Asia/Singapore.
 
-**Status: S31 ACCEPTED on local evidence, 2026-10-20. Publication in progress.**
+**Status: S31 ACCEPTED on local evidence and published on main, 2026-10-20.**
 The user answered "Start S31" on 2026-10-20, authorizing local implementation,
 tests and disposable evidence on `shiftwork/slice-31` under `/tmp/shiftwork-s31-*`.
 That authorization did not cover commits, pushes, merges, deployment,
 credentials, provider calls, protected fixtures, browser installation, outreach
 or any scope change. The user then accepted S31 with "Yep accepted" and
 authorized the working-tree commits, the two approved cleanup deletions and the
-push to main. The branch was created from the main tip `f4e794e`. The
-publication commit range is recorded at the end of this checkpoint after the
-fast-forward.
+push to main. The branch was created from the main tip `f4e794e`. The work is committed on
+`shiftwork/slice-31` as `dc73a5b..e4f6e20`, fast-forwarded to main and pushed as
+`f4e794e..e4f6e20`.
 
 ## Scope and delivered contract
 
@@ -267,6 +267,23 @@ record and harness items:
   instrumentation were removed as the only redundant hooks. The
   `ownership-generation-clean` control still passed after removal.
 
+## Acceptance and publication, 2026-10-20
+
+The user accepted S31 with "Yep accepted" and authorized the working-tree
+commits, the two approved cleanup deletions and the push to main. The two
+unused harness hooks were removed and `ownership-generation-clean` passed
+again. The work is committed on `shiftwork/slice-31` in five focused commits:
+
+- `dc73a5b` production comparison projection, publication guard, stands and
+  plate;
+- `ef5efe3` projection unit checks and source faults;
+- `f2af1c8` S31 browser controls and bookshop assertions;
+- `e808f63` acceptance, evidence and cleanup records;
+- `e4f6e20` harness mistake log.
+
+The branch was fast-forwarded to main and pushed as `f4e794e..e4f6e20`. No
+deployment followed.
+
 ## Limits and unclaimed targets
 
 - Evidence stays Mac-only headless Chromium 155 on macOS 26.5.1. S31 did not
@@ -285,5 +302,6 @@ record and harness items:
 
 ## Stop boundary
 
-S31 is accepted on the evidence above and is being published to main. S32
-requires its own go-ahead and has not started. No deployment follows.
+S31 is accepted on the evidence above and published on main as
+`f4e794e..e4f6e20`. S32 requires its own go-ahead and has not started. No
+deployment follows.
