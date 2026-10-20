@@ -1,3 +1,27 @@
+**S34 ACCEPTED on local evidence; publication in progress, 2026-10-20.**
+
+S34 was implemented on `shiftwork/slice-34` from `80f8818`. The user accepted
+it with "Okay yea i accept it please commit the changes and push to main" and
+authorized the S34 commits and publication to main. The inherited work is preserved. Both handoff findings and the review's rapid-arrival identity
+finding have browser RED-to-GREEN repairs. The exact synthetic signal/owner
+marker travels; failed refresh clears ownership text; overlapping arrivals
+settle without borrowing another signal's motion. Fresh proof includes 118 Node
+checks, 107 source faults, 14 new served-source fault controls, nine retained
+routing controls, partial-label cleanup, four retry modes, exact Chromium layouts
+and 30 switches. Both Stonebridge graphics tiers and startup/activation budgets
+pass. Three complete extracted browser journeys, both extracted real rooms and
+an extracted graphics-failure workbench pass with external assets blocked.
+Native Safari shows the final room after reload, exact 200% page zoom, keyboard
+navigation, panel focus/reach and recorded-clock/unsent-handoff wording. The
+native functional viewport is not numerically recorded; no new exact 378x413,
+device, audible-AT or Safari-performance claim follows. Nine asset checks pass.
+The full non-packaging suite remains 1454 passed, the known `port_dead` failure,
+one skip and two warnings. No code-review or cleanup finding remains open.
+S34 is accepted on this bounded evidence. Publication is in progress. S35
+implementation requires its own go-ahead; a requested handoff prompt is not that
+authorization.
+See the [S34 checkpoint](workplace-3d/s34-checkpoint-2026-10-20.md) for receipts and retained limits.
+
 **S33 ACCEPTED on local evidence and published on main, 2026-10-20.**
 
 The user answered "Start S33 now" on 2026-10-20, authorizing local

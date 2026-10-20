@@ -62,6 +62,19 @@ comprehension outcomes. See the
 [S33 checkpoint](docs/plans/shiftwork/workplace-3d/s33-checkpoint-2026-10-20.md)
 for measured limits.
 
+## S34 Stonebridge work accepted on local evidence
+
+Stonebridge has its own signal rack, qualification board, routing table and
+ownership lanes. One exact synthetic owner assignment moves a labelled marker;
+recorded clock starts are not countdowns and handoff markers send no messages.
+The handoff and code-review findings have failing-capable repairs. Both graphics
+tiers, exact Chromium narrow/zoom checks, native Safari rendering and 200%
+navigation, and all three complete extracted offline browser journeys pass.
+Extraction reuses installed dependencies. The known `port_dead` suite failure
+and the approved native/device/AT evidence limits remain visible. The user
+accepted S34 on 2026-10-20 and authorized publication to main. See the
+[S34 checkpoint](docs/plans/shiftwork/workplace-3d/s34-checkpoint-2026-10-20.md).
+
 ## Hosted practice demo
 
 Open [Shiftwork on Render](https://shiftwork.onrender.com). This is one shared
