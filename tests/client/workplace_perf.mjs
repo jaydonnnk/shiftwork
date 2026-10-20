@@ -25,7 +25,7 @@ export function verifyPerformance(tier) {
 async function main() {
 const [base,out]=process.argv.slice(2); await mkdir(out,{recursive:true});
 const board=process.env.SHIFTWORK_PERF_BOARD ?? 'bookshop';
-assert.ok(['bookshop','gtm'].includes(board));
+assert.ok(['bookshop','gtm','northline'].includes(board));
 const page=parameters=>base+'/?'+new URLSearchParams({board,...parameters})+'#board';
 const report={board,scope:'Local headless browser measurements. Synthetic navigation stress. No physical-device certification.',host:{os:os.release(),architecture:os.arch(),powerState:'unmeasured'},tiers:[]};
 if(process.platform==='darwin') {
@@ -57,7 +57,7 @@ for(const width of capCheck?[390]:process.argv.includes('--desktop-only')?[1280]
     }
     await b.send('Network.emulateNetworkConditions',{offline:false,latency:0,downloadThroughput:-1,uploadThroughput:-1});
     if(capCheck) {
-      const count=await b.evaluate(async()=>{globalThis.__workplaceSamples=[];const end=performance.now()+1100;let n=0;while(performance.now()<end){globalThis.__workplaceApply(n++%2?(document.body.dataset.board==='gtm'?'signals':'customers'):(document.body.dataset.board==='gtm'?'rules':'evaluator'));await new Promise(requestAnimationFrame);}return globalThis.__workplaceSamples.length;});
+      const count=await b.evaluate(async()=>{globalThis.__workplaceSamples=[];const end=performance.now()+1100;let n=0;while(performance.now()<end){globalThis.__workplaceApply(n++%2?(document.body.dataset.board==='northline'?'brief':document.body.dataset.board==='gtm'?'signals':'customers'):(document.body.dataset.board==='northline'?'map':document.body.dataset.board==='gtm'?'rules':'evaluator'));await new Promise(requestAnimationFrame);}return globalThis.__workplaceSamples.length;});
       assert.ok(count<=34,`Compact scene exceeded 30Hz drawing cap: ${count} frames in 1.1 seconds`);
       console.log(JSON.stringify({compactCapFrames:count})); continue;
     }
@@ -77,7 +77,7 @@ for(const width of capCheck?[390]:process.argv.includes('--desktop-only')?[1280]
       const result=await b.evaluate(async compact=>{
         globalThis.__workplaceSamples=[]; const end=performance.now()+30000;
         let n=0;
-        while(performance.now()<end) { globalThis.__workplaceApply(n++%2?(document.body.dataset.board==='gtm'?'signals':'customers'):(document.body.dataset.board==='gtm'?'rules':'evaluator')); await new Promise(requestAnimationFrame); }
+        while(performance.now()<end) { globalThis.__workplaceApply(n++%2?(document.body.dataset.board==='northline'?'brief':document.body.dataset.board==='gtm'?'signals':'customers'):(document.body.dataset.board==='northline'?'map':document.body.dataset.board==='gtm'?'rules':'evaluator')); await new Promise(requestAnimationFrame); }
         const samples=globalThis.__workplaceSamples; globalThis.__workplaceSamples=null; return samples;
       },width===390);
       const intervals=result.slice(1).map((r,i)=>r.time-result[i].time);

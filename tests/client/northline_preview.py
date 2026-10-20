@@ -1,5 +1,6 @@
 """Disposable trusted-local browser preview. No production pins are changed."""
 import argparse
+import base64
 import json
 from pathlib import Path
 import re
@@ -8,6 +9,8 @@ import sqlite3
 import pytest
 import uvicorn
 from shiftwork.app import create_app
+from shiftwork import config
+from shiftwork.domain import canonical
 from shiftwork.assist.gateway import AssistReply
 from shiftwork.store import db, repo
 from tests.orchestrator.test_fde_deployment import FDE_TEST_SERVICE, _fde_pin
@@ -18,6 +21,7 @@ def main():
     parser.add_argument('--database', required=True)
     parser.add_argument('--port', type=int, required=True)
     parser.add_argument('--out', required=True)
+    parser.add_argument('--retained-diagnostic-control', action='store_true')
     args = parser.parse_args()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -52,6 +56,18 @@ def main():
             finally:
                 conn.close()
 
+        conn = db.connect(args.database)
+        try:
+            existing = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='artifact_versions'").fetchone()
+            for row in conn.execute('SELECT id FROM artifact_versions ORDER BY rowid') if existing else ():
+                version = repo.get_version(conn, row[0])
+                label = next((label for label in ('A', 'B')
+                              if version.files.get('service.py') == candidates[label]['service.py']), None)
+                if label:
+                    _fde_pin({'id': version.id, 'content_hash': version.content_hash, 'files': version.files}, patch, label)
+        finally:
+            conn.close()
+
         @app.middleware('http')
         async def fixture_admission(request, call_next):
             response = await call_next(request)
@@ -71,6 +87,26 @@ def main():
             with sqlite3.connect(args.database) as source, sqlite3.connect(target) as destination:
                 source.backup(destination)
             return {'checkpoint': name}
+
+        if args.retained_diagnostic_control:
+            starter_pin = config.TRUSTED_LOCAL_FIXTURES['pivot_starter']
+
+            @app.post('/__test__/diagnostic-pin/{version_id}')
+            def diagnostic_pin(version_id: str):
+                if version_id == 'restore':
+                    patch.setitem(config.TRUSTED_LOCAL_FIXTURES, 'pivot_starter', starter_pin)
+                    return {'control': 'restored'}
+                conn = db.connect(args.database)
+                try:
+                    version = repo.get_version(conn, version_id)
+                    assert version is not None and version.files == candidates['B']
+                    file_hash = canonical.content_hash({name: base64.b64encode(value.encode()).decode()
+                                                        for name, value in version.files.items()})
+                    patch.setitem(config.TRUSTED_LOCAL_FIXTURES, 'pivot_starter',
+                                  (version.content_hash, file_hash))
+                    return {'control': 'test-only retained B diagnostic', 'version_id': version.id}
+                finally:
+                    conn.close()
 
         app.router.routes.append(static_mount)
 

@@ -62,12 +62,14 @@ async function screenshot(name) {
 async function api(endpoint) { return evaluate(async endpoint => { const r = await fetch(endpoint); if (!r.ok) throw new Error(`API ${endpoint}: ${r.status}`); return r.json(); }, endpoint); }
 async function editFiles(files) {
   for (const [name, source] of Object.entries(files)) {
+    await waitFor(()=>document.body.dataset.loadState==='ready' && !document.getElementById('draft-source').disabled,'Editor is not ready before changing a file');
     const changed = await evaluate((name, source) => {
       const select = document.getElementById('draft-file'); select.value = name; select.dispatchEvent(new Event('change'));
       const input = document.getElementById('draft-source'); const changed = input.value !== source; input.value = source; input.dispatchEvent(new Event('input')); return changed;
     }, name, source);
     if (!changed) continue;
     assert.equal(await evaluate(() => document.getElementById('workplace-board').disabled), true, 'Dirty draft permits board switching');
+    await waitFor(()=>!document.getElementById('save-draft').disabled,'Dirty draft has no enabled save action');
     await click('save-draft');
     await waitFor(() => document.getElementById('draft-source').dataset.dirty === 'false' && !document.getElementById('draft-source').disabled, `Save did not retain ${name}`);
   }
@@ -157,7 +159,14 @@ async function verifyRoom() {
   assert.equal(actual.room, 'Northline deployment workshop', 'Northline opens the wrong room');
   assert.deepEqual(actual.names, ['Deployment brief', 'System map', 'Integration bench', 'Acceptance', 'Rollout', 'Handover'], 'Native station names differ from approved direction');
   assert.equal(actual.visible, 6, 'Northline exposes the wrong station count');
-  assert.equal(await evaluate(() => { const art = document.getElementById('northline-art'); return !art.hasAttribute('hidden') && art.getBoundingClientRect().width > 0 && getComputedStyle(art).display !== 'none'; }), true, 'Northline artwork is not visible');
+  await evaluate(() => document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
+  await waitFor(() => ['ready','unavailable'].includes(document.getElementById('graphics-status')?.dataset.state), 'Northline graphics did not settle');
+  const graphics = await evaluate(() => {
+    const art=document.getElementById('northline-art'),canvas=document.querySelector('#workplace-canvas canvas');
+    return {state:document.getElementById('graphics-status').dataset.state,webgl:!!canvas?.getContext('webgl2'),fallback:!art.hidden && art.getBoundingClientRect().width>0 && getComputedStyle(art).display!=='none'};
+  });
+  if(graphics.state==='ready') {assert.equal(graphics.webgl,true,'Northline real WebGL2 workshop is missing');assert.equal(graphics.fallback,false,'Static artwork covers the real Northline room');}
+  else assert.equal(graphics.fallback,true,'Northline fallback artwork is not visible');
 }
 
 async function assertPublicDOM(label) {
@@ -248,12 +257,22 @@ async function verifyReach() {
       await evaluate(name => { const button = document.querySelector(`#northline-stations [data-station="${name}"]`); button.scrollIntoView({ block: 'center', behavior: 'instant' }); button.focus({ preventScroll: true }); }, name);
       await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' });
       await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
-      const reachable = await evaluate(async () => { await new Promise(resolve => setTimeout(resolve, 100)); const panel = document.getElementById('station-panel'); return { overflow: document.documentElement.scrollWidth > innerWidth, focus: document.activeElement === panel, top: panel.getBoundingClientRect().top, title: document.getElementById('panel-title').textContent }; });
+      const reachable = await evaluate(async name => {
+        const selector={acceptance:'#selected-evidence .request-quote',rollout:'#operate-pilot',handover:'#handover-records'}[name]??'#station-panel';
+        let last=null,stable=0,settled=false;
+        for(let n=0;n<180;n++) {
+          await new Promise(requestAnimationFrame);const top=document.querySelector(selector)?.getBoundingClientRect().top;
+          if(top===last){if(++stable>=6){settled=true;break;}}else{stable=0;last=top;}
+        }
+        const panel=document.getElementById('station-panel'),target=document.querySelector(selector),r=target?.getBoundingClientRect();
+        return {overflow:document.documentElement.scrollWidth>innerWidth,focus:document.activeElement===panel,settled,
+          reachable:!!r && r.top>=0 && r.top+Math.min(r.height,44)<=innerHeight && r.height>0 && !!target.textContent.trim(),title:document.getElementById('panel-title').textContent};
+      },name);
       assert.equal(reachable.title, title, 'Keyboard did not activate the Northline station');
       assert.equal(reachable.overflow, false, `Northline overflows at ${width}px`);
       if (width === 390) {
         assert.equal(reachable.focus, true, 'Mobile station does not focus its panel');
-        assert.ok(reachable.top >= 0 && reachable.top < 900, 'Mobile station panel is out of reach');
+        assert.ok(reachable.settled && reachable.reachable, `Mobile ${name} content is out of reach`);
         await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
         const point = await evaluate(name => { const button = document.querySelector(`#northline-stations [data-station="${name}"]`); button.scrollIntoView({ block: 'center', behavior: 'instant' }); const r = button.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }, name);
         await send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [point] });
@@ -267,6 +286,54 @@ async function verifyReach() {
     await station('handover'); await verifyFiles('#handover-records', 'runbook.md'); await screenshot(`${width}-handover`);
     await evaluate(() => window.scrollTo(0, 0)); await screenshot(`${width}-workshop`);
   }
+}
+
+async function verifyLaterAlternative(chosen) {
+  const closedLedger=await api('/api/engagements/northline/ledger');
+  await station('handover');await click('open-next-shift');
+  await waitFor(()=>!document.getElementById('run-shift').disabled,'Later Northline shift did not open');
+  await station('rollout');await click('operate-pilot');
+  await waitFor(()=>document.getElementById('run-state').textContent.includes('FINALIZED') && !document.getElementById('close-shift').disabled,'Later source operation did not finalize',120000);
+  const source=(await api('/api/engagements/northline/board')).latest_run;
+  await station('bench');
+  await evaluate(()=>{
+    for(const [id,value] of [['cause-input','Check the retained alternative booking receipt.'],['falsifier-input','Its resource trace creates duplicate commitments.'],['public-test-input','Replay the exact public booking once.']]) document.getElementById(id).value=value;
+  });
+  await click('append-investigation');
+  await waitFor(()=>document.querySelectorAll('#investigation-list [data-investigation-id]').length===1 && !document.getElementById('draft-source').disabled && !document.getElementById('freeze-candidate-b').disabled,'Later investigation was not recorded');
+  await editFiles(fixture.B);await click('freeze-candidate-b');
+  await waitFor(()=>!document.getElementById('draft-source').disabled,'Retained alternative copy did not freeze');
+  assert.equal(await evaluate(()=>document.getElementById('run-diagnostic').disabled),false,'Freeze completion leaves the diagnostic control disabled');
+  const before=await api('/api/engagements/northline/board');
+  const retained=await api(`/api/artifact-versions/${chosen.retained_alternative_version_id}`);
+  assert.equal(before.latest_version.content_hash,retained.content_hash,'Later diagnostic changed the retained alternative bytes');
+  const beforeLedger=await api('/api/engagements/northline/ledger');
+  assert.deepEqual(beforeLedger.events.slice(0,closedLedger.events.length),closedLedger.events,'Opening the later shift rewrote closed pilot/handover history');
+  const control=await evaluate(async id=>{
+    const r=await fetch('/__test__/diagnostic-pin/'+id,{method:'POST'});if(!r.ok)throw Error('Retained diagnostic control unavailable');return r.json();
+  },before.latest_version.id);
+  try {
+    await click('run-diagnostic');
+    await waitFor(()=>document.getElementById('diagnostic-result').textContent.includes('COMPLETE · candidate A') && !document.getElementById('draft-source').disabled, 'Later retained diagnostic did not complete',120000);
+  }finally{
+    await evaluate(async()=>{const r=await fetch('/__test__/diagnostic-pin/restore',{method:'POST'});if(!r.ok)throw Error('Diagnostic control restore failed');});
+  }
+  const after=await api('/api/engagements/northline/board');
+  const diagnostic=await api('/api/experiments/'+await evaluate(()=>document.getElementById('diagnostic-result').dataset.experimentId));
+  assert.equal(diagnostic.kind,'DIAGNOSTIC','Later run is not a diagnostic');
+  const diagnosticRun=await api('/api/runs/'+diagnostic.trials[0].run_id);
+  assert.equal(diagnostic.candidates[0].artifact_version_id,before.latest_version.id,'Later diagnostic reserved a different version');
+  assert.equal(diagnosticRun.artifact_version_id,before.latest_version.id,'Later diagnostic executed a different version');
+  assert.equal(diagnostic.trials[0].state,'COMPLETE','Later diagnostic has incomplete evidence');
+  assert.deepEqual(after.operating_selection,before.operating_selection,'Later diagnostic replaced the operating choice');
+  assert.deepEqual(await api('/api/engagements/northline/ledger'),beforeLedger,'Later diagnostic rewrote pilot/handover history');
+  assert.equal(after.operating_selection.selected_version_id,chosen.selected_version_id,'Later diagnostic promoted the newer saved version');
+  await station('rollout');await verifyEvents('#pilot-records',false);
+  await station('handover');await verifyFiles('#handover-records','runbook.md');
+  await verifyEvents('#handover-records',true);
+  assert.equal(await evaluate(run=>document.getElementById('next-history').dataset.latestRun===run,diagnosticRun.id),false,'Later diagnostic appears in operational history');
+  assert.deepEqual(await api('/api/engagements/northline/ledger'),beforeLedger,'Inspecting records changed pilot/handover history');
+  return {control,diagnostic,sourceRun:source.id,retainedVersion:retained.id,diagnosticVersion:before.latest_version.id,selection:after.operating_selection,ledgerUnchanged:true};
 }
 
 const fault = process.env.SHIFTWORK_FAULT;
@@ -324,6 +391,9 @@ try {
     await verifyComparison();
     await station('map'); await verifyFiles('#map-records', 'discovery.md');
     await verifyWorkplaceGuards(); await verifyComparison();
+  } else if (snapshot === 'later') {
+    const later=await verifyLaterAlternative((await api('/api/engagements/northline/board')).operating_selection);
+    await writeFile(path.join(out,'later-history.json'),JSON.stringify(later,null,2)+'\n',{flag:'wx'});
   } else if (snapshot === 'closed' || snapshot === 'reach') {
     await verifyOutput();
     const executionVersion = await evaluate(() => document.querySelector('[data-execution-field="version"] strong')?.textContent);
@@ -397,6 +467,10 @@ try {
     await evaluate(async () => { const r = await fetch('/__test__/checkpoint/closed', { method: 'POST' }); if (!r.ok) throw new Error('Closed checkpoint failed'); });
     await writeFile(path.join(out, 'journey.json'), JSON.stringify({ starter: starter.board.latest_run, comparison, choice: chosen, pilot: pilot.board.latest_run, ledger: await api('/api/engagements/northline/ledger'), mode: 'TRUSTED_LOCAL', test_only_pins: true }, null, 2), { flag: 'wx' });
     await verifyReach();
+    if(process.env.SHIFTWORK_LATER_ALTERNATIVE==='1') {
+      const later=await verifyLaterAlternative(chosen);
+      await writeFile(path.join(out,'later-history.json'),JSON.stringify(later,null,2)+'\n',{flag:'wx'});
+    }
   }
   await assertPublicDOM('final');
   assert.deepEqual(exceptions, [], 'Browser raised JavaScript exceptions');
