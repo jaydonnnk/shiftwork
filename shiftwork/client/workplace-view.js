@@ -35,11 +35,13 @@ export function projectWorkplace(input) {
   if (board && board.chain_status !== 'VALID') conflict();
   if (input.ledgerStatus === 'unknown' || input.ledgerStatus == null) incomplete();
   else if (input.ledgerStatus !== 'VALID') conflict();
-  if (board && board.ledger_event_count !== events.length) conflict();
+  const countMatches = board ? board.ledger_event_count === events.length : null;
+  if (countMatches === false) conflict();
   const histogram = {};
   for (const event of events) histogram[event.event_type] = (histogram[event.event_type] ?? 0) + 1;
+  let histogramMatches = board ? true : null;
   for (const type of new Set([...Object.keys(histogram), ...Object.keys(board?.ledger_totals ?? {})])) {
-    if ((histogram[type] ?? 0) !== (board?.ledger_totals?.[type] ?? 0)) conflict();
+    if ((histogram[type] ?? 0) !== (board?.ledger_totals?.[type] ?? 0)) { histogramMatches = false; conflict(); }
   }
   const output = outputs.find(item => item.id === input.selectedOutputId);
   const linked = selectEvidence(output, checks, events);
@@ -48,8 +50,16 @@ export function projectWorkplace(input) {
   for (const incident of board?.incidents ?? []) {
     const event = events.find(item => item.seq === incident.opened_event_seq);
     if (!event) { incomplete(); continue; }
+    if (event.event_type !== 'INCIDENT_OPENED') { conflict(); continue; }
     const link = event.derivation;
     if (link && (link.run_id !== incident.opening_run_id || link.observed_ref !== incident.failing_output_ref || link.check_id !== incident.check_result_id)) conflict();
+    if (incident.resolved_event_seq != null) {
+      const resolved = events.find(item => item.seq === incident.resolved_event_seq);
+      const resolvedType = resolved?.event_type;
+      if (!resolved) incomplete();
+      else if (resolvedType !== 'INCIDENT_RESOLVED') conflict();
+      else if (resolved.payload?.incident_id !== incident.id) conflict();
+    }
   }
   const publicMetrics = metrics => metrics ? {
     publicDenominatorRequests: metrics.public_denominator_requests,
@@ -121,6 +131,49 @@ export function projectWorkplace(input) {
   }
   const diagnosticRuns = new Set((tests.diagnostic?.trials ?? []).map(trial => trial.runId).filter(Boolean));
   if (events.some(event => diagnosticRuns.has(event.derivation?.run_id))) conflict();
+  const wallTypes = WALL_TYPES[slug] ?? [];
+  const wallEvents = events.filter(event => wallTypes.includes(event.event_type));
+  const otherEvents = events.filter(event => !wallTypes.includes(event.event_type));
+  const incidents = board?.incidents ?? [];
+  const openedIncident = new Map(incidents.map(incident => [incident.opened_event_seq, incident]));
+  const resolvedIncident = new Map(incidents.filter(incident => incident.resolved_event_seq != null)
+    .map(incident => [incident.resolved_event_seq, incident]));
+  const wallEventId = event => `${slug}:${event.seq}:${event.hash}`;
+  const historyMode = inspection.mode === 'history';
+  function projectWallEvent(event) {
+    const link = event.derivation ?? null;
+    let source = 'administrative', linkState = 'none', meaning = 'administrative', versionId = null, reasonCode = null, contradiction = null;
+    if (link) {
+      source = link.run_id === run?.id && !historyMode ? 'current' : 'historical';
+      versionId = link.run_id === run?.id ? run.artifact_version_id : null;
+      if (link.run_id !== run?.id) { linkState = 'historical'; meaning = 'historical'; }
+      else {
+        const sourceOutput = outputs.find(item => item.id === link.observed_ref);
+        const sourceCheck = checks.find(item => item.id === link.check_id);
+        const ordinalMatches = sourceOutput?.request_ordinal === link.request_ordinal;
+        const bridged = sourceOutput && sourceCheck && selectEvidence(sourceOutput, checks, events).events
+          .some(item => item.seq === event.seq && item.hash === event.hash);
+        reasonCode = sourceCheck?.reason_code ?? link.reason_code ?? null;
+        if (!sourceOutput) { linkState = 'incomplete'; meaning = 'pending'; incomplete(); }
+        else if (!sourceCheck) { linkState = 'incomplete'; meaning = 'pending'; incomplete(); }
+        else if (!ordinalMatches) { contradiction = 'ordinal'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }
+        else if (!bridged) { contradiction = 'link'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }
+        else if (sourceCheck.verdict !== link.verdict) { contradiction = 'verdict'; linkState = 'conflict'; meaning = 'conflict'; conflict(); }
+        else {
+          linkState = 'linked';
+          meaning = link.verdict === 'pass' ? 'recorded' : 'negative';
+        }
+      }
+      if (link.run_id !== run?.id) reasonCode = link.reason_code ?? null;
+    }
+    return {
+      id: wallEventId(event), seq: event.seq, hash: event.hash, type: event.event_type,
+      synthetic: event.synthetic === true, source, linkState, meaning, versionId, reasonCode, contradiction,
+      incidentId: openedIncident.get(event.seq)?.id ?? resolvedIncident.get(event.seq)?.id ?? null,
+      link: link ? { runId: link.run_id, checkId: link.check_id, outputId: link.observed_ref,
+        ordinal: link.request_ordinal, verdict: link.verdict } : null,
+    };
+  }
   return {
     schemaVersion: 1, context: { board: slug, shiftId, inspection }, station: input.activeStation,
     shiftState: board?.latest_shift?.state?.toLowerCase() ?? null,
@@ -130,7 +183,9 @@ export function projectWorkplace(input) {
       requirementSetHash: selection.requirement_set_hash, validity: selection.state } : null,
     saved: { latestVersionId: board?.latest_saved_version_id ?? null, draftBaseVersionId: board?.draft_base_version_id ?? null },
     run: run ? { id: run.id, shiftId: run.shift_id, versionId: run.artifact_version_id,
-      selectionId: run.selection_id, state: run.state, purpose: run.purpose, evidenceMode: run.evidence_mode } : null,
+      selectionId: run.selection_id, state: run.state, purpose: run.purpose, evidenceMode: run.evidence_mode,
+      failureKind: run.failure_kind ?? null, outputCount: outputs.length, checkCount: checks.length,
+      failedCheckCount: checks.filter(check => check.verdict !== 'pass').length } : null,
     evidence: output ? { runId: output.run_id, outputId: output.id, ordinal: output.request_ordinal,
       checks: linked.checks.map(check => ({ id: check.id, verdict: check.verdict, reasonCode: check.reason_code })),
       linkedEventIds: linked.events.map(event => `${slug}:${event.seq}:${event.hash}`),
@@ -138,17 +193,27 @@ export function projectWorkplace(input) {
     investigation: { latestEntryId: stationView?.latest_investigation_id ?? null, count: stationView?.investigations?.length ?? 0 },
     tests,
     consequences: { chainStatus: input.ledgerStatus === 'VALID' ? 'VALID' : 'unknown',
-      eventCount: board?.ledger_event_count ?? null,
+      boardChainStatus: board?.chain_status ?? null,
+      countMatches, histogramMatches,
+      eventCount: board?.ledger_event_count ?? null, ledgerEventLength: events.length,
       totals: Object.entries(board?.ledger_totals ?? {}).map(([name, count]) => ({ name, count })),
-      events: events.filter(event => WALL_TYPES[slug]?.includes(event.event_type)).map(event => ({
-        id: `${slug}:${event.seq}:${event.hash}`, seq: event.seq, hash: event.hash, type: event.event_type,
-        synthetic: event.synthetic, link: event.derivation ? { runId: event.derivation.run_id,
-          checkId: event.derivation.check_id, outputId: event.derivation.observed_ref,
-          ordinal: event.derivation.request_ordinal, verdict: event.derivation.verdict } : null,
-        signalRef: null, owner: null, recordRef: null, incidentId: null, versionId: null,
-      })),
-      incidents: (board?.incidents ?? []).map(incident => ({ id: incident.id, state: incident.state,
-        reasonCode: incident.reason_code, openingRunId: incident.opening_run_id, openedEventSeq: incident.opened_event_seq })),
+      otherEventCount: otherEvents.length,
+      otherTypes: [...new Set(otherEvents.map(event => event.event_type))],
+      events: wallEvents.map(projectWallEvent),
+      incidents: incidents.map(incident => {
+        const openedEvent = events.find(event => event.seq === incident.opened_event_seq);
+        const resolvedEvent = incident.resolved_event_seq != null
+          ? events.find(event => event.seq === incident.resolved_event_seq) : null;
+        return { id: incident.id, state: incident.state, reasonCode: incident.reason_code,
+          shiftId: incident.shift_id ?? null, openingRunId: incident.opening_run_id,
+          openedEventSeq: incident.opened_event_seq,
+          openedEventId: openedEvent ? wallEventId(openedEvent) : null,
+          failingOutputRef: incident.failing_output_ref, checkResultId: incident.check_result_id,
+          resolvedEventSeq: incident.resolved_event_seq ?? null,
+          resolvedEventId: resolvedEvent ? wallEventId(resolvedEvent) : null,
+          resolvingVersionId: incident.resolving_version_id ?? null,
+          source: incident.opening_run_id === run?.id && !historyMode ? 'current' : 'historical' };
+      }),
     },
     inheritance: { selectionId: selection?.id ?? null, comparisonId: board?.inherited_requirements?.comparison_id ?? null,
       requirementSetHash: board?.inherited_requirements?.requirement_set_hash ?? null,
@@ -208,6 +273,25 @@ export function diffWorkplace(previous, next) {
   if (beforeSelection !== afterSelection && afterSelection !== null) {
     transitions.push({ key: `selection:${afterSelection}`, kind: 'selection-update', stationId: 'service',
       publicRefs: [operating?.selectionId, operating?.versionId].filter(Boolean) });
+  }
+  const run = next.run ?? null;
+  const currentShift = next.context.shiftId;
+  const eligiblePurpose = run && run.purpose === 'OPERATION';
+  const eligibleShift = run && run.shiftId === currentShift;
+  const eligibleSelection = run && operating && run.selectionId === operating.selectionId;
+  const eligibleVersion = run && operating && run.versionId === operating.versionId;
+  if (eligiblePurpose && eligibleShift && eligibleSelection && eligibleVersion) {
+    const beforeEvents = new Set((previous.consequences?.events ?? []).map(event => event.id));
+    const arrivals = (next.consequences?.events ?? []).filter(event => {
+      const isCurrent = event.source === 'current';
+      const isLinked = event.linkState === 'linked';
+      const isSynthetic = event.synthetic === true;
+      const isNew = !beforeEvents.has(event.id);
+      return isCurrent && isLinked && isSynthetic && isNew;
+    });
+    if (arrivals.length) transitions.push({ key: `consequence:${arrivals.map(event => event.id).join(',')}`,
+      kind: 'linked-consequence', stationId: 'ledger',
+      publicRefs: arrivals.map(event => event.id), count: arrivals.length });
   }
   return transitions;
 }
