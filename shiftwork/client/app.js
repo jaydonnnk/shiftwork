@@ -869,7 +869,7 @@ function renderCompare() {
     compare.outcome.eligibility.some(item => item.candidate_label === label && item.eligible);
   for (const label of ['A', 'B']) $('select-candidate-' + label.toLowerCase()).disabled =
     state.pending || !shift || shift.state !== 'open' || selectedHere || !eligible(label) || !rationale;
-  text('selection-note', selectedHere ? `Choice ${board.operating_selection.id} is recorded. Saving or testing does not change it.`
+  text('selection-note', selectedHere ? `Choice ${board.operating_selection.id} is recorded. Selected ${board.operating_selection.selected_version_id} · ${board.operating_selection.selected_content_hash}; retained ${board.operating_selection.retained_alternative_version_id}. Saving or testing does not change it.`
     : !compare ? 'Run a qualifying comparison first.'
     : compare.outcome?.status !== 'COMPLETE' ? 'The comparison must finish complete and comparable before a choice.'
     : !eligible('A') && !eligible('B') ? 'Neither candidate is eligible under the frozen requirements.'
@@ -901,12 +901,18 @@ function renderCompare() {
   const protectedStatus = compare.protected_counts
     ? Object.entries(compare.protected_counts).map(([label, count]) => `${label}: ${count.captured} captured, ${count.missing} missing of ${count.reserved}`).join(' · ')
     : 'protected capture counts appear after the comparison ends';
+  const missingSlots = compare.trials.filter(trial => !trial.run_id || (trial.missing_evidence?.length ?? 0)).length;
   const outcome = compare.outcome;
-  text('compare-summary', `${compare.candidates.map(candidate => `Candidate ${candidate.label} · ${candidate.artifact_version_id} · ${candidate.artifact_content_hash.slice(0, 12)}…`).join(' · ')} · ${outcome?.status ?? 'INCOMPLETE'} · public requests per candidate ${compare.shared_public_denominator_requests} · protected steps per candidate ${compare.protected_denominator_requests_per_candidate} · ${protectedStatus} · no winner derived here`);
+  text('compare-summary', `${compare.candidates.map(candidate => `Candidate ${candidate.label} · ${candidate.artifact_version_id} · ${candidate.artifact_content_hash.slice(0, 12)}…`).join(' · ')} · ${outcome?.status ?? 'INCOMPLETE'} · public requests per candidate ${compare.shared_public_denominator_requests} · protected steps per candidate ${compare.protected_denominator_requests_per_candidate} · ${protectedStatus} · ${missingSlots} missing slot${missingSlots === 1 ? '' : 's'} · no winner derived here`);
   outcomeView.replaceChildren();
   if (outcome) {
     const note = element('p', `${compare.context_evidence_class} evidence. Public efficiency excludes protected steps. Non-completion categories are incidences and may overlap. Unknown usage or cost is never treated as zero.`, 'comparison-outcome-note');
     outcomeView.append(note);
+    if (compare.state === 'INVALIDATED' || outcome.status !== 'COMPLETE') {
+      outcomeView.append(element('p', compare.state === 'INVALIDATED'
+        ? 'This comparison was invalidated. Its evidence is not comparable and cannot qualify a version.'
+        : 'This comparison is not comparable. Its evidence cannot qualify a version until a complete comparable outcome is recorded.', 'denial'));
+    }
     const fields = [
       ['Public requests', 'public_denominator_requests'], ['Useful completions', 'useful_completions'],
       ['Incorrect outputs', 'incorrect_outputs'], ['Justified refusals', 'justified_refusals'],
@@ -927,6 +933,9 @@ function renderCompare() {
       card.dataset.candidateLabel = label;
       card.dataset.eligible = String(eligibility.eligible);
       card.append(element('h4', `Candidate ${label} · ${eligibility.eligible ? 'eligible' : 'blocked'}${eligibility.blocking_reason_codes.length ? ` · ${eligibility.blocking_reason_codes.join(', ')}` : ''}`));
+      card.append(element('p', eligibility.blocking_reason_codes.length
+        ? `Blocking reasons: ${eligibility.blocking_reason_codes.join(', ')}`
+        : 'Blocking reasons: none recorded.', 'evidence-meta'));
       const list = element('dl');
       for (const [name, key] of fields) {
         const value = element('dd', metrics[key] ?? 'unknown');
@@ -1145,10 +1154,31 @@ async function freezeCandidate(label) {
     if (state.board) { renderBoard(); renderCompare(); }
   }
 }
+function comparisonOwner() {
+  return { slug: state.slug, shiftId: state.board?.latest_shift?.id ?? null,
+    generation: state.generation, intent: state.intent, inspection: { ...inspection } };
+}
+function comparisonPublicationAllowed(owner, experiment) {
+  return owner.slug === state.slug &&
+    owner.shiftId === state.loadedShiftId &&
+    owner.shiftId === experiment?.shift_id &&
+    owner.generation === state.generation &&
+    owner.intent === state.intent &&
+    owner.inspection.mode === inspection.mode &&
+    owner.inspection.historicalRunId === inspection.historicalRunId &&
+    document.body.dataset.loadState !== 'loading';
+}
+function acceptComparison(owner, experiment) {
+  if (!comparisonPublicationAllowed(owner, experiment)) return;
+  state.comparison = experiment;
+  renderCompare();
+  publishPresentation('comparison');
+}
 async function runComparison() {
   const shiftId = state.board?.latest_shift?.id;
   const [a, b] = [state.candidates.A, state.candidates.B];
   if (!shiftId || !a || !b || state.pending) return;
+  const owner = comparisonOwner();
   state.pending = true; renderBoard(); renderCompare();
   try {
     let experiment = await api(`/shifts/${encodeURIComponent(shiftId)}/experiments`, { method: 'POST', body: JSON.stringify({
@@ -1159,14 +1189,12 @@ async function runComparison() {
       declared_treatment: $('treatment-input').value,
       client_request_id: requestId('comparison'),
     }) });
-    state.comparison = experiment;
-    renderCompare();
+    acceptComparison(owner, experiment);
     const deadline = Date.now() + 180000;
     while (!['FINALIZED', 'FAILED', 'INVALIDATED'].includes(experiment.state) && Date.now() < deadline) {
       await new Promise(resolve => setTimeout(resolve, 500));
       experiment = await api(`/experiments/${encodeURIComponent(experiment.id)}`);
-      state.comparison = experiment;
-      renderCompare();
+      acceptComparison(owner, experiment);
     }
     await refresh();
   } catch (error) {

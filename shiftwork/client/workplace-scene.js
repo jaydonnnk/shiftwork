@@ -3,7 +3,8 @@ import { roomDefinitions } from './workplace-rooms.js';
 
 export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure }) {
   let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity, pulse = null, indicatorMaterial = null;
-  const geometries = new Set(), materials = new Set(), targets = [];
+  let comparisonPulse = null, selectionPulse = null, plateMaterial = null;
+  const candidateMaterials = {}, geometries = new Set(), materials = new Set(), targets = [];
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-8,8,6,-6,.1,100);
   camera.position.set(12,11,14); camera.lookAt(0,.8,0);
@@ -13,6 +14,9 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   const listeners = [];
   const listen = (type,fn) => { renderer.domElement.addEventListener(type,fn); listeners.push([type,fn]); };
   function settlePulse() { pulse = null; if (indicatorMaterial) indicatorMaterial.emissiveIntensity = 0; }
+  function settleComparisonPulse() { comparisonPulse = null; for (const material of Object.values(candidateMaterials)) material.emissiveIntensity = 0; }
+  function settleSelectionPulse() { selectionPulse = null; if (plateMaterial) plateMaterial.emissiveIntensity = 0; }
+  function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); }
   function draw(now = performance.now()) {
     raf = null;
     if (disposed || suspended) return;
@@ -23,9 +27,19 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
       if (progress >= 1) settlePulse();
       else indicatorMaterial.emissiveIntensity = .8 * (1 - progress);
     }
+    if (comparisonPulse) {
+      const progress = (now - comparisonPulse.start) / comparisonPulse.duration;
+      if (progress >= 1) settleComparisonPulse();
+      else for (const material of Object.values(candidateMaterials)) material.emissiveIntensity = .8 * (1 - progress);
+    }
+    if (selectionPulse) {
+      const progress = (now - selectionPulse.start) / selectionPulse.duration;
+      if (progress >= 1) settleSelectionPulse();
+      else if (plateMaterial) plateMaterial.emissiveIntensity = .8 * (1 - progress);
+    }
     try { renderer.render(scene, camera); }
     catch { onFailure('render-failed'); }
-    if (pulse) requestFrame();
+    if (pulse || comparisonPulse || selectionPulse) requestFrame();
   }
   function requestFrame() { if (!disposed && !suspended && raf === null) raf = requestAnimationFrame(draw); }
   function resize({width,height,pixelRatio}) {
@@ -45,7 +59,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   }
   function dispose() {
     if(disposed) return; disposed = true;
-    settlePulse();
+    settleAllPulses();
     if(raf!==null) cancelAnimationFrame(raf); raf = null;
     for(const [type,fn] of listeners) renderer?.domElement.removeEventListener(type,fn);
     listeners.length = 0; targets.length = 0;
@@ -86,6 +100,19 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     indicatorMaterial = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1}); materials.add(indicatorMaterial);
     const indicator = new THREE.Mesh(cube,indicatorMaterial);
     indicator.position.set(.7,1.5,2.88); indicator.scale.set(.78,.32,.04); scene.add(indicator);
+    for (const [label, anchor] of [['A', room.anchors?.candidateA], ['B', room.anchors?.candidateB]]) {
+      if (!anchor) continue;
+      const material = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1});
+      materials.add(material); candidateMaterials[label] = material;
+      const marker = new THREE.Mesh(cube, material);
+      marker.position.fromArray(anchor); marker.scale.set(.55,.05,.4); scene.add(marker);
+    }
+    if (room.anchors?.plate) {
+      plateMaterial = new THREE.MeshStandardMaterial({color:'#263443',emissive:'#000000',emissiveIntensity:0,roughness:1});
+      materials.add(plateMaterial);
+      const plate = new THREE.Mesh(cube, plateMaterial);
+      plate.position.fromArray(room.anchors.plate); plate.scale.set(.8,.05,.42); scene.add(plate);
+    }
     const testColors = {RESERVED:'#edbd68',RUNNING:'#91acb9',COMPLETE:'#8fbf9f',FAILED:'#d98a7a'};
     function apply(next, transitions = []) {
       if(disposed) return;
@@ -93,10 +120,24 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
       rim.visible = !!anchor; if(anchor) rim.position.set(anchor[0],.1,anchor[2]);
       const trialState = next?.tests?.diagnostic?.trials?.[0]?.state;
       indicatorMaterial.color.set(testColors[trialState] ?? '#6c5943');
+      const comparison = next?.tests?.comparison;
+      for (const [label, material] of Object.entries(candidateMaterials)) {
+        const candidate = comparison?.candidates?.find(item => item.label === label);
+        material.color.set(candidate?.eligible === true ? '#8fbf9f' : candidate?.eligible === false ? '#d98a7a' : '#6c5943');
+      }
+      if (plateMaterial) plateMaterial.color.set(next?.operating ? '#edbd68' : '#263443');
       if (!reducedMotion && transitions.some(item => item.kind === 'test-update')) {
         pulse = { start: performance.now() };
         indicatorMaterial.emissive.set('#edbd68');
         indicatorMaterial.emissiveIntensity = .8;
+      }
+      if (!reducedMotion && transitions.some(item => item.kind === 'comparison-update')) {
+        comparisonPulse = { start: performance.now(), duration: 160 };
+        for (const material of Object.values(candidateMaterials)) { material.emissive.set('#edbd68'); material.emissiveIntensity = .8; }
+      }
+      if (!reducedMotion && transitions.some(item => item.kind === 'selection-update')) {
+        selectionPulse = { start: performance.now(), duration: 180 };
+        if (plateMaterial) { plateMaterial.emissive.set('#edbd68'); plateMaterial.emissiveIntensity = .8; }
       }
       requestFrame();
     }
@@ -116,7 +157,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     apply(view,[]);
     resize({width:container.clientWidth,height:container.clientHeight,pixelRatio:devicePixelRatio});
     if(raf!==null) cancelAnimationFrame(raf); raf = null; draw();
-    return { apply, resize, setSuspended(value) { suspended=value; if(value) settlePulse(); if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
-      setReducedMotion(value) { reducedMotion=value; if(value) settlePulse(); requestFrame(); }, dispose };
+    return { apply, resize, setSuspended(value) { suspended=value; if(value) settleAllPulses(); if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
+      setReducedMotion(value) { reducedMotion=value; if(value) settleAllPulses(); requestFrame(); }, dispose };
   } catch(error) { dispose(); throw error; }
 }

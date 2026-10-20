@@ -52,5 +52,6 @@ export const roomDefinitions = {
       shelf:'#6c5943', paper:'#e7deca', enamel:'#48617a', screen:'#91acb9' },
     assemblies, stationAnchors: { customers: [-4,1,2.5], service: [0,1,1.1], evaluator: [3.3,1,-.2],
       investigate: [0,1.05,-2.5], compare: [.7,1.1,3] },
+    anchors: { candidateA: [-.15,1.02,3], candidateB: [1.55,1.02,3], plate: [0,1.2,1.25] },
   },
 };

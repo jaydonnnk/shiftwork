@@ -51,21 +51,54 @@ export function projectWorkplace(input) {
     const link = event.derivation;
     if (link && (link.run_id !== incident.opening_run_id || link.observed_ref !== incident.failing_output_ref || link.check_id !== incident.check_result_id)) conflict();
   }
+  const publicMetrics = metrics => metrics ? {
+    publicDenominatorRequests: metrics.public_denominator_requests,
+    usefulCompletions: metrics.useful_completions, incorrectOutputs: metrics.incorrect_outputs,
+    justifiedRefusals: metrics.justified_refusals, justifiedReferrals: metrics.justified_referrals,
+    justifiedClarifications: metrics.justified_clarifications,
+    unjustifiedRefusals: metrics.unjustified_refusals, unjustifiedReferrals: metrics.unjustified_referrals,
+    unjustifiedClarifications: metrics.unjustified_clarifications, missingOutputs: metrics.missing_outputs,
+    protectedDenominator: metrics.protected_denominator, protectedPassed: metrics.protected_passed,
+    protectedFailed: metrics.protected_failed, protectedMissing: metrics.protected_missing,
+    serviceCalls: metrics.service_calls ?? null, inputTokens: metrics.input_tokens ?? null,
+    outputTokens: metrics.output_tokens ?? null, serviceLatencyMs: metrics.service_latency_ms ?? null,
+    provisioningLatencyMs: metrics.provisioning_latency_ms ?? null,
+    costMinorUnits: metrics.cost_minor_units ?? null,
+  } : null;
   const experiment = (item, expectedKind) => {
     if (!item) return null;
     if (item.kind !== expectedKind) return null;
     if (item.shift_id !== shiftId) { conflict(); return null; }
+    const candidates = item.candidates ?? [];
+    if (new Set(candidates.map(candidate => candidate.label)).size !== candidates.length) conflict();
+    const candidateByLabel = new Map(candidates.map(candidate => [candidate.label, candidate]));
+    if ((item.trials ?? []).some(trial => {
+      if (!trial.candidate_label) return false;
+      const bound = candidateByLabel.get(trial.candidate_label);
+      return !bound || trial.artifact_version_id !== bound.artifact_version_id;
+    })) conflict();
+    const missingSlots = (item.trials ?? []).filter(trial => !trial.run_id ||
+      (trial.missing_evidence?.length ?? 0) > 0).length;
     return {
       id: item.id, shiftId: item.shift_id, kind: item.kind, state: item.state,
       evidenceClass: item.context_evidence_class, contextHash: item.context_hash,
+      conditionLabel: item.condition?.public_label ?? null,
       outcomeStatus: item.outcome?.status ?? null,
-      candidates: (item.candidates ?? []).map(candidate => {
+      sharedPublicDenominatorRequests: item.shared_public_denominator_requests ?? null,
+      protectedDenominatorRequestsPerCandidate: item.protected_denominator_requests_per_candidate ?? null,
+      missingSlots,
+      incomparable: expectedKind === 'QUALIFYING_COMPARISON' &&
+        (item.state === 'INVALIDATED' || Boolean(item.outcome && item.outcome.status !== 'COMPLETE')),
+      candidates: candidates.map(candidate => {
         const eligibility = item.outcome?.eligibility?.find(row => row.candidate_label === candidate.label);
+        const metrics = item.outcome?.candidate_metrics?.find(row => row.candidate_label === candidate.label);
         return { label: candidate.label, versionId: candidate.artifact_version_id,
           contentHash: candidate.artifact_content_hash, eligible: eligibility?.eligible ?? null,
-          blockingReasonCodes: [...(eligibility?.blocking_reason_codes ?? [])] };
+          blockingReasonCodes: [...(eligibility?.blocking_reason_codes ?? [])],
+          metrics: publicMetrics(metrics) };
       }),
-      trials: (item.trials ?? []).map(trial => ({ ordinal: trial.ordinal, candidateLabel: trial.candidate_label,
+      trials: (item.trials ?? []).map(trial => ({ ordinal: trial.execution_ordinal ?? trial.ordinal,
+        pairOrdinal: trial.pair_ordinal ?? null, candidateLabel: trial.candidate_label,
         runId: trial.run_id, versionId: trial.artifact_version_id, state: trial.state,
         evidenceMode: trial.evidence_mode ?? null, missingEvidenceCount: trial.missing_evidence?.length ?? null })),
       observedRunId: item.observed_run_id ?? null,
@@ -76,6 +109,16 @@ export function projectWorkplace(input) {
     comparison: experiment(input.comparison ?? latest, 'QUALIFYING_COMPARISON'),
     later: experiment(latest, 'LATER_CONDITION_COMPARISON') };
   if (selection?.comparison_id && tests.diagnostic?.id === selection.comparison_id) conflict();
+  if (selection?.comparison_id && tests.comparison?.id === selection.comparison_id) {
+    const selected = tests.comparison.candidates.filter(candidate => candidate.versionId === selection.selected_version_id);
+    const chosen = selected.length === 1 ? selected[0] : null;
+    if (!chosen) conflict();
+    else {
+      if (chosen.contentHash !== selection.selected_content_hash) conflict();
+      const alternative = tests.comparison.candidates.filter(candidate => candidate !== chosen);
+      if (alternative.length !== 1 || alternative[0].versionId !== selection.retained_alternative_version_id) conflict();
+    }
+  }
   const diagnosticRuns = new Set((tests.diagnostic?.trials ?? []).map(trial => trial.runId).filter(Boolean));
   if (events.some(event => diagnosticRuns.has(event.derivation?.run_id))) conflict();
   return {
@@ -121,6 +164,20 @@ function diagnosticKey(summary) {
     trial?.missingEvidenceCount ?? 'none'].join('|');
 }
 
+function comparisonKey(summary) {
+  if (!summary) return null;
+  const candidates = summary.candidates.map(candidate => [candidate.label,
+    candidate.eligible === null ? 'unknown' : candidate.eligible ? 'eligible' : 'blocked',
+    candidate.blockingReasonCodes.join(',')].join(':')).sort().join(';');
+  return [summary.id, summary.state, summary.outcomeStatus ?? 'none',
+    summary.missingSlots ?? 'none', candidates].join('|');
+}
+
+function selectionKey(operating) {
+  if (!operating) return null;
+  return [operating.selectionId, operating.versionId, operating.contentHash].join('|');
+}
+
 export function diffWorkplace(previous, next) {
   if (!previous || previous.consistency === 'conflict' || next.consistency === 'conflict') return [];
   if (previous.context.board !== next.context.board || previous.context.shiftId !== next.context.shiftId) return [];
@@ -137,6 +194,20 @@ export function diffWorkplace(previous, next) {
     const trial = diagnostic?.trials?.[0] ?? null;
     transitions.push({ key: `test:diagnostic:${after}`, kind: 'test-update', stationId: 'compare',
       publicRefs: (diagnostic ? [diagnostic.id, trial?.runId, trial?.versionId] : []).filter(Boolean) });
+  }
+  const comparison = next.tests?.comparison ?? null;
+  const beforeComparison = comparisonKey(previous.tests?.comparison);
+  const afterComparison = comparisonKey(comparison);
+  if (beforeComparison !== afterComparison && afterComparison !== null) {
+    transitions.push({ key: `comparison:${afterComparison}`, kind: 'comparison-update', stationId: 'compare',
+      publicRefs: [comparison?.id, ...(comparison?.candidates ?? []).map(candidate => candidate.versionId)].filter(Boolean) });
+  }
+  const operating = next.operating ?? null;
+  const beforeSelection = selectionKey(previous.operating);
+  const afterSelection = selectionKey(operating);
+  if (beforeSelection !== afterSelection && afterSelection !== null) {
+    transitions.push({ key: `selection:${afterSelection}`, kind: 'selection-update', stationId: 'service',
+      publicRefs: [operating?.selectionId, operating?.versionId].filter(Boolean) });
   }
   return transitions;
 }
