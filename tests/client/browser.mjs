@@ -1141,7 +1141,18 @@ try {
       const ledger = await (await fetch('/api/engagements/bookshop/ledger')).json();
       const events = ledger.events.filter(event => event.derivation?.run_id === run.id);
       if (!events.length) throw new Error('Operation has no independently checked synthetic event');
-      return { run: run.id, version: run.artifact_version_id, mode: run.evidence_mode, selection: run.selection_id, events: events.map(event => event.seq) };
+      const rows = [...document.querySelectorAll('#wall-events .wall-event')].map(row => ({ id: row.dataset.wallEvent,
+        seq: row.dataset.wallSeq, source: row.dataset.wallSource, link: row.dataset.wallLink, meaning: row.dataset.wallMeaning }));
+      const shown = rows.filter(row => events.some(event => row.id === `bookshop:${event.seq}:${event.hash}`));
+      if (shown.length !== events.length) throw new Error('The consequence wall does not show every linked operational event');
+      if (!shown.every(row => row.source === 'current' && row.link === 'linked')) throw new Error('The consequence wall mislabels the operational event');
+      const status = document.getElementById('wall-status');
+      if (status.dataset.runState !== 'FINALIZED' || !status.textContent.includes(`Operation ${run.id} · FINALIZED`)
+          || !status.textContent.includes('Counts agree') || !status.textContent.includes('Type totals agree')) throw new Error('The consequence wall does not explain the finalized operation');
+      const totals = Object.fromEntries([...document.querySelectorAll('#ledger-totals .total-row')].map(row => [row.dataset.ledgerType, Number(row.dataset.ledgerCount)]));
+      if (JSON.stringify(Object.entries(totals).sort()) !== JSON.stringify(Object.entries(board.ledger_totals).sort())) throw new Error('The consequence wall totals disagree with the board record');
+      return { run: run.id, version: run.artifact_version_id, mode: run.evidence_mode, selection: run.selection_id,
+        events: events.map(event => event.seq), wall: shown.map(row => row.seq) };
     }, before);
     await evaluate(() => document.querySelector('[data-station="customers"]').click());
     operationJourney.evidence = await evaluate(verifyRenderedCustomerEvidence, operationJourney.run, 1);
