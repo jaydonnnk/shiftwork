@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -115,20 +115,20 @@ rows.push(
   {name:'gtm_scalar_refs',needle:"typeof value === 'string' ? value : null",replacement:'value',test:'gtm_reference_fields_refuse_objects',expect:'A structured GTM payload reached scene references'},
   {name:'gtm_host_admission',host:true,needle:"board==='bookshop' || board==='gtm'",replacement:"board==='bookshop'",test:'host_gtm_mount_switch_and_stale_pick_keep_board_ownership',expect:'Stonebridge did not mount a real scene'},
   ...[['testStation','compare','test'],['operatingStation','service','selection'],['wallStation','ledger','consequence']].map(([variable,fallback,kind])=>({
-    name:`gtm_station_${variable}`,needle:`const ${variable} = next.context.board === 'gtm' ? '${variable==='wallStation'?'wall':'workflow'}' : '${fallback}';`,
-    replacement:`const ${variable} = '${fallback}';`,test:'gtm_transitions_use_canonical_workflow_and_wall',expect:`GTM ${kind} targeted a bookshop station`,
+    name:`gtm_station_${variable}`,needle:`next.context.board === 'gtm' ? '${variable==='wallStation'?'wall':'workflow'}' : '${fallback}'`,
+    replacement:`'${fallback}'`,test:'gtm_transitions_use_canonical_workflow_and_wall',expect:`GTM ${kind} targeted a bookshop station`,
   })),
 );
 for (const type of ['OWNER_ASSIGNED', 'SLA_CLOCK_STARTED', 'HANDOFF_ESCALATED']) {
   rows.push(
-    {name:`gtm_purpose_${type}`, needle:"if (link?.run_id === run?.id && run.purpose !== 'OPERATION') {",
-      replacement:`if (event.event_type !== '${type}' && link?.run_id === run?.id && run.purpose !== 'OPERATION') {`,
+    {name:`gtm_purpose_${type}`, scope:'gtm', needle:"run.purpose !== 'OPERATION'",
+      replacement:`run.purpose !== 'OPERATION' && event.event_type !== '${type}'`,
       test:`gtm_purpose_${type}`, expect:`${type} experiment changed operational ownership`},
-    {name:`gtm_link_${type}`, needle:"else if (!link || !event.synthetic || !['linked', 'historical'].includes(linkState)) {",
-      replacement:`else if (event.event_type !== '${type}' && (!link || !event.synthetic || !['linked', 'historical'].includes(linkState))) {`,
+    {name:`gtm_link_${type}`, scope:'gtm', needle:"!['linked', 'historical'].includes(linkState)",
+      replacement:`(!['linked', 'historical'].includes(linkState) && event.event_type !== '${type}')`,
       test:`gtm_link_${type}`, expect:`${type} without a link changed operational ownership`},
-    {name:`gtm_synthetic_${type}`, needle:"!link || !event.synthetic || !['linked', 'historical'].includes(linkState)",
-      replacement:`!link || (!event.synthetic && event.event_type !== '${type}') || !['linked', 'historical'].includes(linkState)`,
+    {name:`gtm_synthetic_${type}`, scope:'gtm', needle:'event.synthetic !== true',
+      replacement:`(event.synthetic !== true && event.event_type !== '${type}')`,
       test:`gtm_synthetic_${type}`, expect:`${type} non-synthetic event became a routing marker`},
   );
 }
@@ -136,11 +136,46 @@ function run(row,bytes) {
   const inline=row.host?bytes:bytes.replace("'./evidence.js'",JSON.stringify(new URL('../../shiftwork/client/evidence.js',import.meta.url).href));
   return spawnSync(process.execPath,['--test',`--test-name-pattern=^${row.test}$`,path.join(repoRoot,'tests/client/workplace_view.test.mjs')],{encoding:'utf8',env:{...process.env,[row.host?'WORKPLACE_HOST_SOURCE':'WORKPLACE_VIEW_SOURCE']:Buffer.from(inline).toString('base64')}});
 }
+for (const [slug, types] of [['northline', ['BOOKING_COMMITTED','ESCALATION_TO_HUMAN','COUNTER_FOLLOWUP_RECORDED','ROLLOUT_APPROVED']], ['gtm', ['OWNER_ASSIGNED','SLA_CLOCK_STARTED','HANDOFF_ESCALATED']]]) {
+  for (const type of types) {
+    rows.push({name:`${slug}_null_run_${type}`,scope:slug,needle:'run && link?.run_id === run.id',replacement:'link?.run_id === run?.id',test:`${slug}_absent_run_and_derivation_${type}`,expect:`${type} absent run crashed ${slug} projection`});
+    rows.push({name:`${slug}_synthetic_type_${type}`,scope:slug,needle:'event.synthetic !== true',replacement:`(!event.synthetic || (event.synthetic !== true && event.event_type !== '${type}'))`,test:`${slug}_synthetic_string_${type}`,expect:`${type} admitted non-boolean synthetic string`});
+    if(slug !== 'northline') continue;
+    rows.push(
+      {name:`northline_mapping_${type}`,scope:'northline-wall',needle:`'${type}', `,replacement:'',test:`northline_mapping_${type}`,expect:`${type} has no recorded mapping`},
+      {name:`northline_purpose_${type}`,scope:slug,needle:"run.purpose !== 'OPERATION'",replacement:`run.purpose !== 'OPERATION' && event.event_type !== '${type}'`,test:`northline_purpose_${type}`,expect:`${type} ignored its purpose guard`},
+      {name:`northline_derivation_${type}`,scope:slug,needle:"!['linked', 'historical'].includes(linkState)",replacement:`(!['linked', 'historical'].includes(linkState) && event.event_type !== '${type}')`,test:`northline_derivation_${type}`,expect:`${type} ignored its derivation guard`},
+      {name:`northline_synthetic_${type}`,scope:slug,needle:'event.synthetic !== true',replacement:`(event.synthetic !== true && event.event_type !== '${type}')`,test:`northline_synthetic_${type}`,expect:`${type} ignored its synthetic guard`},
+      {name:`northline_link_state_${type}`,scope:slug,needle:"!['linked', 'historical'].includes(linkState)",replacement:`(!['linked', 'historical'].includes(linkState) && event.event_type !== '${type}')`,test:`northline_link_check_${type}`,expect:`${type} ignored its check link`},
+    );
+  }
+}
+for (const [name,needle,replacement,test,expect] of [
+  ['synthetic','event.synthetic === true && ','','northline_handover_synthetic','Handover ignored its synthetic guard'],
+  ['derivation','!link && ','','northline_handover_derivation','Handover ignored its derivation guard'],
+  ['reference',"const runbook = publicRef(event.payload?.runbook_version_id);","const runbook = event.payload?.runbook_version_id;",'northline_handover_reference','Handover ignored its reference guard'],
+  ['runbook','!link && runbook &&','!link &&','northline_handover_runbook','Handover ignored its runbook guard'],
+  ['shift','publicRef(event.cause_refs[0]) && ','','northline_handover_shift','Handover ignored its shift guard'],
+  ['arity','event.cause_refs?.length === 2 && ','','northline_handover_arity','Handover ignored its arity guard'],
+  ['version','event.cause_refs[1] === runbook','true','northline_handover_version','Handover ignored its version guard'],
+]) rows.push({name:`northline_handover_${name}`,scope:'handover',needle,replacement,test,expect});
+for (const [variable,value,kind] of [['testStation','bench','test'],['operatingStation','bench','selection'],['wallStation','rollout','outcome']]) rows.push({name:`northline_station_${variable}`,needle:`const ${variable} = next.context.board === 'northline' ? '${value}' : `,replacement:`const ${variable} = `,test:'northline_transitions_use_its_own_stations',expect:`Northline ${kind} targeted another room`});
+rows.push({name:'northline_host_admission',host:true,needle:" || board==='northline'",replacement:'',test:'host_gtm_mount_switch_and_stale_pick_keep_board_ownership',expect:'Northline did not mount its actual workshop'});
+function mutate(original,row) {
+  let start=0,end=original.length;
+  if(row.scope==='northline-wall') {start=original.indexOf('  northline:');end=original.indexOf('\n',start);}
+  else if(row.scope==='handover') {start=original.indexOf("if (slug === 'northline' && event.event_type === 'HANDOVER_DECLARED')");end=original.indexOf('\n    return {',start);}
+  else if(row.scope) {start=original.indexOf(`if (${row.scope}Outcome) {`);end=original.indexOf('\n    }',start)+6;}
+  assert.ok(start>=0 && end>start,`Fault scope ${row.name} is missing`);
+  const section=original.slice(start,end);
+  assert.equal(section.split(row.needle).length-1,1,`Fault anchor ${row.name} is not unique`);
+  return original.slice(0,start)+section.replace(row.needle,row.replacement)+original.slice(end);
+}
 for(const row of rows) {
   const original=row.host?hostSource:source;
-  assert.equal(original.split(row.needle).length-1,1,`Fault anchor ${row.name} is not unique`);
+  const changed=mutate(original,row);
   const clean=run(row,original); assert.equal(clean.status,0,`Clean check ${row.name} failed: ${clean.stdout}`);
-  const fault=run(row,original.replace(row.needle,row.replacement));
+  const fault=run(row,changed);
   const log=fault.stdout+fault.stderr; await writeFile(path.join(out,row.name+'.log'),log);
   assert.notEqual(fault.status,0,`Fault ${row.name} survived`);
   assert.ok(log.includes('ERR_ASSERTION') && log.includes(row.expect),`Fault ${row.name} missed its intended assertion`);

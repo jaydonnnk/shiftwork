@@ -6,9 +6,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromePath, repoRoot } from './env.mjs';
 
+const NORTHLINE_STATIONS = [['brief','Deployment brief'],['map','System map'],['acceptance','Acceptance'],['rollout','Rollout'],['handover','Handover'],['bench','Integration bench']];
+
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -24,6 +26,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
   const s32Mode = /^(?:s32|operation)-/.test(fault);
   const s33Mode = /^s33-/.test(fault);
   const s34Mode = /^s34-/.test(fault);
+  const s35Mode = /^s35-/.test(fault);
   const endpoint = await new Promise((resolve,reject) => {
     let stderr = ''; const timer = setTimeout(() => reject(Error('Chrome startup timed out')),15000);
     child.once('error',reject);
@@ -55,6 +58,13 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       return send('Fetch.failRequest',{requestId,errorReason:'BlockedByClient'});
     }
     if(!instrumented) return send('Fetch.continueRequest',{requestId});
+    if(name==='/' && fault.startsWith('s35-label-')) {
+      let source=await readFile(path.join(repoRoot,'shiftwork/client/index.html'),'utf8');
+      const needle=fault==='s35-label-map'?'This declared map cannot grant, expand or prove permissions.':'It does not prove a person received, read or accepted the handover.';
+      assert.equal(source.split(needle).length-1,1,'Northline label fault anchor changed');
+      source=source.replace(needle,'');
+      return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/html'}],body:Buffer.from(source).toString('base64')});
+    }
     const holdPost = ['diagnostic-hold-post','ownership-generation','ownership-intent','ownership-history','ownership-board','comparison-hold-post','comparison-ownership-generation','comparison-ownership-intent','comparison-ownership-history'].includes(fault) && request.method === 'POST' && /^\/api\/shifts\/[^/]+\/experiments$/.test(name);
     const holdPoll = (fault === 'diagnostic-hold-poll' || fault === 'comparison-hold-poll') && request.method === 'GET' && /^\/api\/experiments\/[^/]+$/.test(name);
     if ((holdPost || holdPoll) && !importsReleased) await new Promise(resolve => gates.push(resolve));
@@ -65,7 +75,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
     const fail = (['host-import','startup-blocking-host'].includes(fault) && name === '/workplace-host.js') ||
       (fault === 'scene-import' && name === '/workplace-scene.js') ||
       (fault === 'core-import' && name.endsWith('/three.core.js'));
-    if(fault && !s30Mode && !s31Mode && !s32Mode && !s33Mode && !s34Mode && fault!=='startup-blocking-host' && !fault.startsWith('omit-') && !fault.startsWith('page-cache') && fault !== 'plain' && fault !== 'context' && (fail || name === '/workplace-scene.js' || ((hostTimeout || hostEvaluation) && name==='/workplace-host.js')) && !importsReleased) await new Promise(resolve=>gates.push(resolve));
+    if(fault && !s30Mode && !s31Mode && !s32Mode && !s33Mode && !s34Mode && !s35Mode && fault!=='startup-blocking-host' && !fault.startsWith('omit-') && !fault.startsWith('page-cache') && fault !== 'plain' && fault !== 'context' && (fail || name === '/workplace-scene.js' || ((hostTimeout || hostEvaluation) && name==='/workplace-host.js')) && !importsReleased) await new Promise(resolve=>gates.push(resolve));
     if(s32Mode && name==='/workplace-host.js') {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
       const publishNeedle="    const transitions = view.consistency==='conflict' ? [] : diffWorkplace(previous,view);";
@@ -105,7 +115,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
     if(fail) return send('Fetch.fulfillRequest',{requestId,responseCode:404,body:''});
     if(name==='/styles.css' && fault.startsWith('zoom-omit-')) {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/styles.css'),'utf8');
-      const needles={'zoom-omit-picker':'.board-picker { display: grid; grid-template-columns: minmax(0,1fr); min-width: 0; gap: 5px; padding: 8px 0; }\n  .board-picker select { width: 100%; }',
+      const needles={'zoom-omit-picker':'.board-picker { display: grid; grid-template-columns: minmax(0,1fr); min-width: 0; gap: 5px; padding: 8px 0; }\n  .board-picker select { width: 100%; overflow: hidden; text-overflow: ellipsis; }',
         'zoom-omit-navigation':'.journey { grid-template-columns: minmax(0,1fr); }',
         'zoom-omit-station-column':'body[data-board="bookshop"] .room-hotspots { grid-template-columns: minmax(0,1fr); }'};
       assert.ok(Object.hasOwn(needles,fault),'Unknown zoom layout fault');
@@ -318,6 +328,34 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
     }
     if(name === '/workplace-scene.js') {
       let source = await readFile(path.join(repoRoot,'shiftwork/client/workplace-scene.js'),'utf8');
+      if(s35Mode) {
+        if(fault.startsWith('s35-marker-')) {
+          const [kind,guard]=fault.slice('s35-marker-'.length).split('--');
+          const guards={type:['event.type===kind', 'true'],synthetic:['event.synthetic===true','true'],
+            'synthetic-type':['event.synthetic===true','event.synthetic!==false'],
+            link:kind==='HANDOVER_DECLARED'?["event.linkState==='none'",'true']:["['linked','historical'].includes(event.linkState)",'true'],
+            source:["event.source==='administrative'",'true'],version:['Boolean(event.versionId)','true'],
+            conflict:["next?.consistency!=='conflict'",'true'],aggregate:['marker.userData.recordCount=records.length;','marker.userData.recordCount=0;']};
+          assert.ok(Object.hasOwn(guards,guard),'Unknown Northline marker guard');
+          const start=source.indexOf('      for(const [kind,marker] of Object.entries(northlineMarkers)) {');
+          const end=source.indexOf('      if (!reducedMotion',start);
+          assert.ok(start>=0 && end>start,'Northline marker fault block changed');
+          let block=source.slice(start,end);const [needle,replacement]=guards[guard];
+          assert.equal(block.split(needle).length-1,1,'Northline marker fault anchor changed');
+          block=block.replace(needle,guard==='aggregate'?`if(kind===${JSON.stringify(kind)}) {${replacement}} else {${needle}}`:`(kind===${JSON.stringify(kind)}?${replacement}:${needle})`);
+          source=source.slice(0,start)+block+source.slice(end);
+        }
+        if(fault==='s35-omit-wheel-dispose') {
+          const needle='for(const g of geometries) g.dispose();';
+          assert.equal(source.split(needle).length-1,1,'Wheel disposal fault anchor changed');
+          source=source.replace(needle,"for(const g of geometries) if(g.type!=='TorusGeometry') g.dispose();");
+        }
+        const needle='return { apply, resize, setSuspended(value)';
+        assert.equal(source.split(needle).length-1,1,'Northline scene observer anchor changed');
+        source=source.replace(needle,`globalThis.__s35Apply=apply; globalThis.__s35Room=()=>({
+          wheels:scene.children.filter(m=>m.geometry?.type==='TorusGeometry').reduce((n,m)=>n+m.count,0),
+          markers:typeof northlineMarkers==='undefined'?{}:Object.fromEntries(Object.entries(northlineMarkers).map(([kind,m])=>[kind,{visible:m.visible,count:m.userData.recordCount}]))}); ${needle}`);
+      }
       if(s34Mode) {
         const markerNeedle='marker.position.fromArray(anchor); marker.scale.set(.3,.16,.16); scene.add(marker);';
         assert.equal(source.split(markerNeedle).length-1,1,'Routing position observer anchor changed');
@@ -409,8 +447,8 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       source = source.replace('renderer.outputColorSpace', 'renderer.info.autoReset = false; renderer.outputColorSpace');
       source = source.replace("renderer.domElement.setAttribute('aria-hidden','true');", "globalThis.__s29Resources ??= { contexts:0, geometries:0, materials:0 }; globalThis.__s29GLs ??= []; globalThis.__s29GLs.push(renderer.getContext()); globalThis.__s29Resources.contexts++; renderer.domElement.setAttribute('aria-hidden','true');");
       source = source.replace('renderer?.forceContextLoss();', 'if(renderer) globalThis.__s29Resources.contexts--; renderer?.forceContextLoss();');
-      source = source.replace('geometries.add(cube);', "geometries.add(cube); globalThis.__s29Resources.geometries++; cube.addEventListener('dispose',()=>globalThis.__s29Resources.geometries--);");
-      for(const name of ['material','rimMaterial','handoverMaterial','laterMaterial']) source=source.replace(`materials.add(${name});`, `materials.add(${name}); globalThis.__s29Resources.materials++; ${name}.addEventListener('dispose',()=>globalThis.__s29Resources.materials--);`);
+      for(const resource of ['geometries','materials']) source=source.replace(new RegExp(`${resource}\\.add\\((\\w+)\\);`,'g'),(statement,name)=>
+        `{${statement} globalThis.__s29Resources.${resource}++; ${name}.addEventListener('dispose',()=>globalThis.__s29Resources.${resource}--);}`);
       source = source.replace('renderer.render(scene, camera);', `renderer.render(scene, camera); globalThis.__workplaceProbe = { frames: (globalThis.__workplaceProbe?.frames ?? 0)+1, triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, tier, time: performance.now(), width: renderer.domElement.width, height: renderer.domElement.height }; if(globalThis.__workplaceSamples) globalThis.__workplaceSamples.push(globalThis.__workplaceProbe);`);
       source = source.replace('renderer.render(scene, camera);', 'renderer.info.reset(); renderer.render(scene, camera);');
       source = source.replace('return { apply, resize,', 'globalThis.__workplaceApply = station => apply({...view,station}, []); globalThis.__workplaceDispose = dispose; return { apply, resize,');
@@ -584,7 +622,7 @@ export async function runPartialInitialization(base,out,fault='partial-init',slu
   const b=await openBrowser(base,out,fault);b.releaseImports();
   try {
     await b.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
-    await b.send('Page.navigate',{url:base+'/?board='+slug+'#'+(slug==='gtm'?'signals':'customers')});
+    await b.send('Page.navigate',{url:base+'/?board='+slug+'#'+(slug==='northline'?'acceptance':slug==='gtm'?'signals':'customers')});
     assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='unavailable'),'Partial initialization did not fail graphics');
     const result=await b.evaluate(()=>({...globalThis.__s29PartialAfter,labels:document.querySelectorAll('.workplace-routing-label').length}));
     await writeFile(path.join(out,'partial.json'),JSON.stringify(result,null,2)+'\n');
@@ -608,7 +646,7 @@ export async function runRetry(base,out,cachedFailure=false,slug='bookshop') {
   const b=await openBrowser(base,out,cachedFailure?'module-evaluation':'context');
   try {
     await b.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
-    await b.send('Page.navigate',{url:base+'/?board='+slug+'#'+(slug==='gtm'?'workflow':'compare')});
+    await b.send('Page.navigate',{url:base+'/?board='+slug+'#'+(slug==='northline'?'bench':slug==='gtm'?'workflow':'compare')});
     assert.ok(await b.until(()=>document.body.dataset.loadState==='ready'),'Retry workbench unavailable');
     if(!cachedFailure) assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready'));
     const before=await b.evaluate(()=>{
@@ -652,7 +690,7 @@ export async function runHostRetry(base,out,cachedFailure=false,omit=false,slug=
   const b=await openBrowser(base,out,mode);
   try {
     await b.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
-    await b.send('Page.navigate',{url:base+'/?board='+slug+'#'+(slug==='gtm'?'workflow':'compare')});
+    await b.send('Page.navigate',{url:base+'/?board='+slug+'#'+(slug==='northline'?'bench':slug==='gtm'?'workflow':'compare')});
     assert.ok(await b.until(()=>document.body?.dataset.loadState==='ready'),'Host retry workbench unavailable');
     const before=await b.evaluate(()=>{
       const e=document.getElementById('draft-source');e.value+='\n# outer host retry draft\n';e.dispatchEvent(new Event('input',{bubbles:true}));e.focus();e.setSelectionRange(6,18,'backward');
@@ -759,7 +797,7 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
     try {
       // Mobile emulation resets native page zoom; these are desktop viewport resizes.
       await b.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:zoom===1?1:0,mobile:false});
-      await b.send('Page.navigate',{url:base+`/?board=${slug}#${slug==='gtm'?'signals':'customers'}`});
+      await b.send('Page.navigate',{url:base+`/?board=${slug}#${slug==='northline'?'acceptance':slug==='gtm'?'signals':'customers'}`});
       assert.ok(await b.until(()=>document.body?.dataset.loadState==='ready'),'Exact viewport workbench unavailable');
       const metrics=await b.evaluate(()=>({innerWidth,innerHeight,dpr:devicePixelRatio,pinch:visualViewport.scale,scroll:document.documentElement.scrollWidth,bodyZoom:getComputedStyle(document.body).zoom}));
       assert.ok(Math.abs(metrics.innerWidth-width/zoom)<=2,'Viewport width was not established');
@@ -767,6 +805,8 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
       assert.ok(Math.abs(metrics.dpr-zoom)<.01 && metrics.pinch===1 && metrics.bodyZoom==='1','Native browser zoom was not established');
       await writeFile(path.join(out,name,'metrics.json'),JSON.stringify({target:{width,height,zoom},...metrics},null,2)+'\n');
       assert.ok(metrics.scroll<=metrics.innerWidth,'Exact viewport causes horizontal page scrolling');
+      const picker=await b.evaluate(()=>{const style=getComputedStyle(document.querySelector('.board-picker select'));return {overflow:style.overflow,textOverflow:style.textOverflow};});
+      if(metrics.innerWidth<=760) assert.ok(['hidden','clip'].includes(picker.overflow) && picker.textOverflow==='ellipsis','Narrow role picker does not clip and ellipsize its options');
       assert.ok(await b.evaluate(()=>[...document.querySelectorAll('.journey:not([hidden]) a')].every(link=>{
         const box=link.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(link);
         return [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
@@ -774,7 +814,7 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
       await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
       assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready',12000),'Exact viewport real 3D room did not become ready');
       assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')),'Exact viewport actual WebGL2 context missing');
-      for(const station of slug==='gtm'?['signals','rules','wall','workflow']:['customers','evaluator','owner','repair','next','compare']) {
+      for(const station of slug==='northline'?NORTHLINE_STATIONS.map(([id])=>id):slug==='gtm'?['signals','rules','wall','workflow']:['customers','evaluator','owner','repair','next','compare']) {
         const control=await b.evaluate((station,slug)=>{
           const e=document.querySelector(`#${slug}-stations [data-station="${station}"]`);e.scrollIntoView({block:'center',behavior:'instant'});e.focus();const r=e.getBoundingClientRect();return {width:r.width,height:r.height};
         },station,slug);
@@ -810,7 +850,7 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
       assert.ok(await b.evaluate(()=>{const e=document.getElementById('draft-source');return e===document.activeElement && e.selectionStart===4 && e.selectionEnd===12 && e.value.endsWith('# exact viewport draft\n');}),'Exact viewport editor Escape changed draft continuity');
       await b.evaluate(()=>document.querySelector('.incident-row')?.click());
       assert.ok(await b.until(()=>document.getElementById('selected-evidence')?.dataset.runId==='run-0001',12000),'Exact viewport failed-request inspection did not load');
-      await b.evaluate(slug=>document.querySelector(`[data-station="${slug==='gtm'?'workflow':'investigate'}"]`).click(),slug);
+      await b.evaluate(slug=>document.querySelector(`[data-station="${slug==='northline'?'bench':slug==='gtm'?'workflow':'investigate'}"]`).click(),slug);
       assert.ok(await b.until(()=>document.getElementById('failed-request')?.dataset.runId==='run-0001',8000),'Exact viewport failed request is not visible');
       const diagnosis=await b.evaluate(()=>{
         const failed=document.getElementById('failed-request'), cause=document.getElementById('cause-input');
@@ -821,7 +861,7 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
       assert.ok(diagnosis.failed,'Exact viewport failed request has no rendered content');
       assert.ok(diagnosis.height>=44,'Exact viewport cause field is below 44 CSS pixels');
       assert.ok(diagnosis.label,'Exact viewport cause field lost its label');
-      await b.evaluate(slug=>document.querySelector(`[data-station="${slug==='gtm'?'workflow':'compare'}"]`).click(),slug);
+      await b.evaluate(slug=>document.querySelector(`[data-station="${slug==='northline'?'bench':slug==='gtm'?'workflow':'compare'}"]`).click(),slug);
       const expandControl=await b.evaluate(()=>{const e=document.getElementById('expand-work');e.scrollIntoView({block:'center',behavior:'instant'});const r=e.getBoundingClientRect();return {width:r.width,height:r.height,visible:getComputedStyle(e).display!=='none'};});
       assert.ok(expandControl.visible,'Exact viewport expand control is hidden');
       assert.ok(expandControl.height>=44 && expandControl.width>=44,'Exact viewport expand control is below 44 CSS pixels');
@@ -845,7 +885,7 @@ export async function runBrowser(base,out,fault = '',empty = false,slug='booksho
       if(fault) {
         if(fault === 'context') assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready'));
         const draft=await b.evaluate(slug=>{
-          document.querySelector(`[data-station="${slug==='gtm'?'workflow':'compare'}"]`).click();
+          document.querySelector(`[data-station="${slug==='northline'?'bench':slug==='gtm'?'workflow':'compare'}"]`).click();
           const editor=document.getElementById('draft-source'); globalThis.__s29Editor=editor;
           editor.value+='\n# S29 disposable offline check\n'; editor.dispatchEvent(new Event('input',{bubbles:true}));
           editor.focus({preventScroll:true}); editor.setSelectionRange(3,11);
@@ -866,7 +906,7 @@ export async function runBrowser(base,out,fault = '',empty = false,slug='booksho
         assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state === 'ready'), 'Real WebGL2 room did not become ready');
         assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')), 'Actual WebGL2 context missing');
         assert.ok(await b.evaluate(()=>globalThis.__workplaceProbe?.triangles > 100), 'No real geometry was drawn');
-        for(const [station,title] of slug==='gtm'?[['signals','Signal intake'],['rules','Qualification rules'],['workflow','Workflow bench'],['wall','Pipeline wall']]:[['customers','Customer evidence'],['evaluator','Independent evaluator'],['owner','Requirements'],['repair','Repair review'],['next','Next shift']]) {
+        for(const [station,title] of slug==='northline'?NORTHLINE_STATIONS:slug==='gtm'?[['signals','Signal intake'],['rules','Qualification rules'],['workflow','Workflow bench'],['wall','Pipeline wall']]:[['customers','Customer evidence'],['evaluator','Independent evaluator'],['owner','Requirements'],['repair','Repair review'],['next','Next shift']]) {
           await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
           const point=await b.evaluate(station=>globalThis.__workplaceStationPoint(station),station);
           const count=b.commands.length;
@@ -880,15 +920,20 @@ export async function runBrowser(base,out,fault = '',empty = false,slug='booksho
         }
       }
       if(!empty) {
-        await b.evaluate(()=>document.querySelector('.incident-row')?.click());
-        assert.ok(await b.until(()=>document.body.dataset.loadState==='ready' && document.getElementById('selected-evidence')?.dataset.runId==='run-0001'),'Recorded failure inspection did not load');
+        const incidentRun=await b.evaluate(()=>{const row=document.querySelector('.incident-row');const run=row?.dataset.openingRun;row?.click();return run;});
+        assert.ok(incidentRun,'Recorded failure inspection needs a real incident');
+        assert.ok(await b.until(run=>document.body.dataset.loadState==='ready' && document.getElementById('selected-evidence')?.dataset.runId===run,8000,incidentRun),'Recorded failure inspection did not load');
+        if(!fault) {
+          await b.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
+          assert.ok(await b.until(run=>document.body.dataset.loadState==='ready' && document.getElementById('inspection-bar').dataset.mode==='history' && document.getElementById('selected-evidence').dataset.runId===run,8000,incidentRun),'Synthetic cache refresh left the historical incident');
+        }
         if(fault) assert.equal(await b.evaluate(()=>document.getElementById('graphics-status').dataset.state),'unavailable','History reset hid a latched graphics failure');
       } else {
         assert.equal(await b.evaluate(()=>document.body.dataset.loadState),'empty','First-shift state is not empty');
         assert.ok(await b.evaluate(()=>document.getElementById('workplace-state').textContent.includes('None selected') && document.getElementById('workplace-state').textContent.includes('No run loaded.')),'Empty scene invented a choice or run');
       }
       const before = b.commands.length;
-      await b.evaluate(slug=>document.querySelector(`[data-station="${slug==='gtm'?'signals':'customers'}"]`).click(),slug);
+      await b.evaluate(slug=>document.querySelector(`[data-station="${slug==='northline'?'acceptance':slug==='gtm'?'signals':'customers'}"]`).click(),slug);
       assert.equal(await b.evaluate(()=>document.getElementById('customer-view').hidden),false,'Intake navigation did not open captured evidence');
       assert.equal(b.commands.length,before,'Station navigation issued a command');
       const run = await b.evaluate(()=>({id:document.getElementById('selected-evidence').dataset.runId}));
@@ -957,18 +1002,13 @@ export async function runLifecycle(base,out,fault='') {
       const slug=['gtm','northline','bookshop'][n%3];
       await b.evaluate(slug=>{window.scrollTo(0,0);const s=document.getElementById('workplace-board');s.value=slug;s.dispatchEvent(new Event('change'));},slug);
       assert.ok(await b.until(()=>['ready','empty'].includes(document.body.dataset.loadState)));
-      if(slug!=='northline') assert.ok(await b.until(()=>document.getElementById('graphics-status').dataset.state==='ready'));
+      await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
+      assert.ok(await b.until(()=>document.getElementById('graphics-status').dataset.state==='ready'));
       const r=await b.evaluate(()=>globalThis.__s29Resources);assert.ok(r.contexts<=1,'Multiple active contexts');
       assert.equal(await b.evaluate(()=>document.querySelectorAll('.workplace-routing-label').length),slug==='gtm'?1:0,'A stale ownership label survived a board switch');
-      if(slug==='northline') {
-        assert.equal(r.geometries,0,'Old room geometry remains');
-        assert.equal(r.materials,0,'Old room material remains');
-        assert.ok(await b.evaluate(()=>globalThis.__s29GLs.every(gl=>gl.isContextLost())),'Old room context remains live');
-        assert.equal(r.contexts,0,'Old room context count remains');
-        assert.equal(await b.evaluate(()=>!document.getElementById('northline-stations').hidden &&
-          [...document.querySelectorAll('#northline-stations [data-station]')].length===6 &&
-          [...document.querySelectorAll('#northline-stations [data-station]')].every(node=>node.getClientRects().length>0)),true,'The preserved Northline static view became unusable after room switches');
-      }
+      assert.equal(r.contexts,1,'An actual room has no live context');
+      assert.ok(r.geometries>0 && r.materials>0,'An actual room has no tracked resources');
+      assert.equal(await b.evaluate(()=>globalThis.__s29GLs.filter(gl=>!gl.isContextLost()).length),1,'A previous room context remains live');
       resources.push(r);
     }
     for(let n=12;n<resources.length;n++) assert.deepEqual(resources[n],resources[n%3],'Warm resources grew across board switches');rows.push('thirty switches release old resources');
@@ -1016,7 +1056,7 @@ export async function runLatency(base,out,slug='bookshop') {
       for(let n=0;n<30;n++) samples.push(await b.evaluate(station=>new Promise(resolve=>{
         const button=document.querySelector(`[data-station="${station}"]`);
         button.addEventListener('click',()=>{const start=performance.now();requestAnimationFrame(()=>requestAnimationFrame(()=>resolve(performance.now()-start)));},{once:true,capture:true});button.click();
-      }),slug==='gtm'?(n%2?'signals':'rules'):(n%2?'customers':'evaluator')));
+      }),slug==='northline'?(n%2?'brief':'map'):slug==='gtm'?(n%2?'signals':'rules'):(n%2?'customers':'evaluator')));
       const sorted=[...samples].sort((a,b)=>a-b),p95=sorted[Math.ceil(samples.length*.95)-1];
       assert.ok(p95<=100,'Station activation to painted panel exceeds 100ms');rows.push({width,totalSynchronousDomStartupMs:boot,stationPaintUpperBoundMs:samples,p95});
     }

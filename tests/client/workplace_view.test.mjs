@@ -4,6 +4,128 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 
 const GTM_OUTCOMES = ['OWNER_ASSIGNED', 'SLA_CLOCK_STARTED', 'HANDOFF_ESCALATED'];
+const NORTHLINE_OUTCOMES = ['BOOKING_COMMITTED', 'ESCALATION_TO_HUMAN', 'COUNTER_FOLLOWUP_RECORDED', 'ROLLOUT_APPROVED'];
+function northlineInput(types = NORTHLINE_OUTCOMES) {
+  const i = gtmInput(types);
+  i.slug = 'northline'; i.board.engagement_slug = 'northline'; i.activeStation = 'rollout';
+  for (const event of i.events) event.payload = { private: 'PRIVATE_NORTHLINE_PAYLOAD' };
+  return i;
+}
+for (const type of NORTHLINE_OUTCOMES) {
+  test(`northline_mapping_${type}`, async () => {
+    const { projectWorkplace } = await api();
+    assert.equal(projectWorkplace(northlineInput([type])).consequences.events[0]?.linkState, 'linked', `${type} has no recorded mapping`);
+  });
+  for (const [name, change] of [
+    ['purpose', i => { i.run.purpose = 'EXPERIMENT'; }],
+    ['derivation', i => { i.events[0].derivation = null; }],
+    ['synthetic', i => { i.events[0].synthetic = false; }],
+  ]) test(`northline_${name}_${type}`, async () => {
+    const { projectWorkplace } = await api(); const i = northlineInput([type]); change(i);
+    assert.equal(projectWorkplace(i).consequences.events[0].linkState, 'conflict', `${type} ignored its ${name} guard`);
+  });
+}
+for (const [slug, makeInput, types] of [
+  ['northline', northlineInput, NORTHLINE_OUTCOMES],
+  ['gtm', gtmInput, GTM_OUTCOMES],
+]) for (const type of types) {
+  test(`${slug}_absent_run_and_derivation_${type}`, async () => {
+    const { projectWorkplace } = await api(); const i = makeInput([type]);
+    i.run = null; i.outputs = []; i.checks = []; i.selectedOutputId = null;
+    i.events[0].derivation = null;
+    let view;
+    assert.doesNotThrow(() => { view = projectWorkplace(i); }, `${type} absent run crashed ${slug} projection`);
+    assert.equal(view.consequences.events[0].linkState, 'conflict', 'An unlinked outcome was admitted');
+  });
+  test(`${slug}_historical_without_loaded_run_${type}`, async () => {
+    const { projectWorkplace, diffWorkplace } = await api(); const i = makeInput([type]);
+    const before = projectWorkplace(makeInput([]));
+    i.run = null; i.outputs = []; i.checks = []; i.selectedOutputId = null;
+    const view = projectWorkplace(i), event = view.consequences.events[0];
+    assert.equal(view.consistency, 'linked');
+    assert.equal(event.source, 'historical'); assert.equal(event.linkState, 'historical');
+    assert.equal(event.link.runId, 'run-1'); assert.equal(event.versionId, null);
+    assert.equal(diffWorkplace(before, view).some(row => row.kind === 'linked-consequence'), false);
+  });
+  for (const [name, value] of [['string', 'true'], ['number', 1], ['object', {}], ['absent', undefined]]) {
+    test(`${slug}_synthetic_${name}_${type}`, async () => {
+      const { projectWorkplace } = await api(); const i = makeInput([type]);
+      i.events[0].synthetic = value;
+      assert.equal(projectWorkplace(i).consequences.events[0].linkState, 'conflict', `${type} admitted non-boolean synthetic ${name}`);
+    });
+  }
+}
+for (const type of NORTHLINE_OUTCOMES) {
+  for (const [name, change, state] of [
+    ['output', i => { i.outputs = []; }, 'conflict'],
+    ['check', i => { i.checks = []; }, 'conflict'],
+    ['ordinal', i => { i.events[0].derivation.request_ordinal = 2; }, 'conflict'],
+    ['check_output', i => { i.checks[0].observed_ref = 'other-output'; }, 'conflict'],
+    ['verdict', i => { i.events[0].derivation.verdict = 'fail'; }, 'conflict'],
+  ]) test(`northline_link_${name}_${type}`, async () => {
+    const { projectWorkplace } = await api(); const i = northlineInput([type]); change(i);
+    assert.equal(projectWorkplace(i).consequences.events[0].linkState, state, `${type} ignored its ${name} link`);
+  });
+}
+function handoverInput() {
+  const i = northlineInput([]);
+  i.events = [{seq:1,hash:'handover-hash',event_type:'HANDOVER_DECLARED',synthetic:true,
+    cause_refs:['shift-previous','selected-2'],payload:{runbook_version_id:'selected-2',declared_limits:['PRIVATE_LIMIT']},derivation:null}];
+  i.board.ledger_event_count = 1; i.board.ledger_totals = {HANDOVER_DECLARED:1};
+  return i;
+}
+test('northline_handover_records_only_the_declared_runbook_identity', async () => {
+  const {projectWorkplace,diffWorkplace} = await api(); const i = handoverInput();
+  const view = projectWorkplace(i), event = view.consequences.events[0];
+  assert.equal(event.versionId,'selected-2','The recorded handover lost its exact runbook version');
+  assert.equal(event.source,'administrative'); assert.equal(event.link,null);
+  const before = projectWorkplace(northlineInput([]));
+  assert.equal(diffWorkplace(before,view).some(row=>row.kind==='linked-consequence'),false,'A declaration became an operation arrival');
+  for (const needle of ['PRIVATE_LIMIT','PRIVATE_NORTHLINE_PAYLOAD']) {
+    assert.equal(JSON.stringify({...view,positiveControl:needle}).includes(needle),true,'Serialized Northline scanner missed its control');
+    assert.equal(JSON.stringify(view).includes(needle),false,'Private Northline prose reached the scene');
+  }
+});
+for (const [name,change] of [
+  ['synthetic',i=>{i.events[0].synthetic=false;}],
+  ['version',i=>{i.events[0].cause_refs[1]='other-version';}],
+  ['reference',i=>{const ref={private:'PRIVATE_RUNBOOK_OBJECT'};i.events[0].payload.runbook_version_id=ref;i.events[0].cause_refs[1]=ref;}],
+  ['runbook',i=>{i.events[0].payload.runbook_version_id=null;i.events[0].cause_refs[1]=null;}],
+  ['shift',i=>{i.events[0].cause_refs[0]=null;}],
+  ['arity',i=>{i.events[0].cause_refs.push('extra');}],
+  ['derivation',i=>{i.events[0].derivation=northlineInput().events[0].derivation;}],
+]) test(`northline_handover_${name}`,async()=>{
+  const {projectWorkplace}=await api();const i=handoverInput();change(i);
+  const event=projectWorkplace(i).consequences.events[0];
+  assert.equal(event.versionId,null,`Handover ignored its ${name} guard`);
+  assert.equal(event.linkState,'conflict',`Handover ignored its ${name} guard`);
+});
+test('northline_transitions_use_its_own_stations',async()=>{
+  const {projectWorkplace,diffWorkplace}=await api();
+  const before=projectWorkplace(northlineInput([])), after=projectWorkplace(northlineInput());
+  assert.equal(diffWorkplace(before,after).find(row=>row.kind==='linked-consequence')?.stationId,'rollout','Northline outcome targeted another room');
+  const tested=structuredClone(before);tested.tests.diagnostic={id:'diagnostic-northline',state:'FINALIZED',trials:[{runId:'trial-northline',state:'COMPLETE'}]};
+  assert.equal(diffWorkplace(before,tested).find(row=>row.kind==='test-update')?.stationId,'bench','Northline test targeted another room');
+  const chosen=structuredClone(before);chosen.operating.selectionId='choice-2';
+  assert.equal(diffWorkplace(before,chosen).find(row=>row.kind==='selection-update')?.stationId,'bench','Northline selection targeted another room');
+});
+test('northline_history_and_later_tests_preserve_records',async()=>{
+  const {projectWorkplace,diffWorkplace}=await api();const i=northlineInput();const before=projectWorkplace(i);
+  i.run={...i.run,id:'later-trial',purpose:'EXPERIMENT'};i.outputs=[];i.checks=[];i.selectedOutputId=null;
+  const trial=projectWorkplace(i), records=view=>view.consequences.events.map(e=>[e.id,e.type,e.link]);
+  assert.deepEqual(records(trial),records(before));assert.deepEqual(trial.operating,before.operating);
+  assert.equal(diffWorkplace(before,trial).some(e=>e.kind==='linked-consequence'),false);
+  const history=northlineInput();history.inspection={mode:'history',historicalRunId:'run-1'};
+  assert.deepEqual(records(projectWorkplace(history)),records(before));
+});
+test('northline_room_has_workshop_silhouette_and_canonical_stations',async()=>{
+  const {roomDefinitions}=await import('../../shiftwork/client/workplace-rooms.js');const room=roomDefinitions.northline;
+  assert.ok(room,'Northline has no real workshop');
+  assert.deepEqual(Object.keys(room.stationAnchors).sort(),['acceptance','bench','brief','handover','map','rollout']);
+  assert.equal(room.materials.floor,'#87978c');
+  assert.equal(room.assemblies.filter(p=>p.shape==='wheel').length,2,'The workshop bicycle has no wheels');
+  assert.notDeepEqual(room.assemblies,roomDefinitions.bookshop.assemblies);
+});
 function gtmInput(types = GTM_OUTCOMES) {
   const i = input();
   i.slug = 'gtm'; i.board.engagement_slug = 'gtm'; i.activeStation = 'wall';
@@ -103,8 +225,10 @@ test('host_gtm_mount_switch_and_stale_pick_keep_board_ownership', async () => {
   assert.equal(f.counts.picked, 0, 'A stale Stonebridge callback navigated Bellwether');
   assert.equal(f.counts.disposals, 1, 'Stonebridge resources survived the board switch');
   f.host.publish(f.accepted(4, {...f.view, context:{...f.view.context, board:'northline'}}));
-  assert.equal(f.status.dataset.state, 'static', 'Northline lost its complete static fallback');
-  assert.equal(f.counts.disposals, 2, 'Bellwether resources survived the fallback switch');
+  await f.flush();
+  assert.equal(f.status.dataset.state, 'ready', 'Northline did not mount its actual workshop');
+  assert.match(f.status.textContent,/Northline/);
+  assert.equal(f.counts.disposals, 2, 'Bellwether resources survived the Northline switch');
   f.host.dispose();
 });
 
