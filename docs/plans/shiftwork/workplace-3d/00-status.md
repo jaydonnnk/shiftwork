@@ -1,4 +1,4 @@
-**S34 ACCEPTED on local evidence; publication in progress, 2026-10-20.**
+**S34 ACCEPTED on local evidence and published on main, 2026-10-20.**
 
 S34 was implemented on `shiftwork/slice-34` from `80f8818`. The user accepted
 it with "Okay yea i accept it please commit the changes and push to main" and
@@ -17,8 +17,10 @@ native functional viewport is not numerically recorded; no new exact 378x413,
 device, audible-AT or Safari-performance claim follows. Nine asset checks pass.
 The full non-packaging suite remains 1454 passed, the known `port_dead` failure,
 one skip and two warnings. No code-review or cleanup finding remains open.
-S34 is accepted on this bounded evidence. Publication is in progress. S35
-implementation requires its own go-ahead; a requested handoff prompt is not that
+S34 is accepted on this bounded evidence. Six focused commits `80f8818..88cf0f6`
+were fast-forwarded to main and pushed. Live `git ls-remote` and zero left/right
+divergence verified publication. This documentation receipt records that result.
+S35 implementation requires its own go-ahead; the requested prompt is not that
 authorization.
 See the [S34 checkpoint](s34-checkpoint-2026-10-20.md) for receipts and retained limits.
 

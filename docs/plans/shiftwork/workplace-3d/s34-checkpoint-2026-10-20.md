@@ -2,7 +2,7 @@
 
 Updated: 2026-10-20 Asia/Singapore.
 
-**S34 ACCEPTED on bounded local evidence, 2026-10-20. Publication in progress.**
+**S34 ACCEPTED on bounded local evidence and published on main, 2026-10-20.**
 The continuation and final sections supersede the retained original partial checkpoint.
 The user authorized slice 34 and later confirmed that the earlier Qoder session
 had ended and this session should take over. Work is on the existing
@@ -355,3 +355,18 @@ checks passed with two warnings, and the full non-packaging suite returned
 160.24s. The serialized credential-format control passes for the 25 changed and
 untracked files. Protected fixtures, backend, locked dependencies, AGENTS.md
 and the accepted S33 checkpoint have no diff. `git diff --check` passes.
+
+### Verified publication
+
+Six focused commits on `shiftwork/slice-34` contain the S34 production changes,
+tests and acceptance records: `5b54f3f`, `2522c24`, `8b42910`, `ceea6fa`,
+`81a5e60` and `88cf0f6`. Local main was fast-forwarded from `80f8818` to
+`88cf0f6962e57da95a400e8dd78e9c3fe73fbc58`. All 25 accepted file hashes were
+identical after integration and the worktree was clean. `git push origin main`
+succeeded; live `git ls-remote --heads origin main` returned that exact SHA and
+`git rev-list --left-right --count origin/main...main` returned `0 0`.
+This subsequent documentation commit records the already verified publication.
+The local S34 branch is retained; it was not separately pushed as a remote branch.
+No co-author footer was added. S35 has not started and no S35 branch was created.
+No hosted verification, installation, provider request, protected-fixture edit
+or new deployment operation was performed in this publication step.

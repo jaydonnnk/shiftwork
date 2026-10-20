@@ -72,7 +72,8 @@ tiers, exact Chromium narrow/zoom checks, native Safari rendering and 200%
 navigation, and all three complete extracted offline browser journeys pass.
 Extraction reuses installed dependencies. The known `port_dead` suite failure
 and the approved native/device/AT evidence limits remain visible. The user
-accepted S34 on 2026-10-20 and authorized publication to main. See the
+accepted S34 on 2026-10-20. Its six focused commits `80f8818..88cf0f6` are
+fast-forwarded and published on main. See the
 [S34 checkpoint](docs/plans/shiftwork/workplace-3d/s34-checkpoint-2026-10-20.md).
 
 ## Hosted practice demo
