@@ -111,7 +111,116 @@ function renderConsequenceWall(view) {
     return row;
   }));
 }
+function renderInspectionBar() {
+  const bar = $('inspection-bar'), button = $('inspect-current');
+  if (!bar || !button) return;
+  bar.dataset.mode = inspection.mode;
+  text('inspection-mode', inspection.mode === 'history'
+    ? `Historical inspection · run ${inspection.historicalRunId ?? 'unknown'}`
+    : 'Current inspection');
+  button.hidden = inspection.mode !== 'history';
+}
+async function inspectIncident(incident) {
+  if (state.pending) return;
+  const owner = { slug: state.slug, shiftId: state.loadedShiftId, intent: ++state.intent };
+  inspection = { mode: 'history', historicalRunId: incident.opening_run_id };
+  publishPresentation('history');
+  const accepted = await refresh(incident.opening_run_id);
+  if (!accepted || owner.slug !== state.slug || owner.shiftId !== state.loadedShiftId || owner.intent !== state.intent ||
+      inspection.mode !== 'history' || inspection.historicalRunId !== incident.opening_run_id ||
+      state.run?.id !== incident.opening_run_id) return;
+  state.selected = state.outputs.find(output => output.id === incident.failing_output_ref)?.id ?? null;
+  activateStation('customers');
+  const target = [...document.querySelectorAll('.customer-button')].find(node => node.dataset.outputId === state.selected);
+  if (target) target.focus(); else $('station-panel').focus();
+}
+async function returnToCurrent() {
+  if (state.pending || inspection.mode === 'current') return;
+  const intent = ++state.intent;
+  inspection = { mode: 'current', historicalRunId: null };
+  publishPresentation('history');
+  const accepted = await refresh();
+  if (!accepted || intent !== state.intent) return;
+  $('station-panel').focus({ preventScroll: true });
+}
+function incidentButton(incident) {
+  const button = element('button', null, 'incident-row');
+  const current = inspection.mode === 'current' && incident.opening_run_id === state.run?.id;
+  button.dataset.incidentId = incident.id;
+  button.dataset.incidentState = incident.state;
+  button.dataset.incidentSource = current ? 'current' : 'historical';
+  button.dataset.openedEventSeq = String(incident.opened_event_seq);
+  button.dataset.openingRun = incident.opening_run_id;
+  button.dataset.failingOutput = incident.failing_output_ref;
+  button.dataset.checkResult = incident.check_result_id;
+  if (incident.resolved_event_seq != null) button.dataset.resolvedEventSeq = String(incident.resolved_event_seq);
+  button.append(element('strong', `${incident.id} · ${humanize(incident.state)}`), element('span', incident.reason_code));
+  button.append(element('small', `${current ? 'Current operation record' : 'Historical record'} · opened by event ${incident.opened_event_seq} · run ${incident.opening_run_id}${incident.resolved_event_seq != null ? ` · resolved by event ${incident.resolved_event_seq}` : ''}`, 'evidence-meta'));
+  button.addEventListener('click', () => inspectIncident(incident));
+  return button;
+}
+function renderRepairTray() {
+  if (!state.board) {
+    text('repair-state', 'No incident loaded.');
+    empty($('repair-incidents'), 'No verified data loaded.');
+    empty($('repair-detail'), 'Select an incident to inspect its recorded run.');
+    return;
+  }
+  const incidents = state.board.incidents;
+  text('repair-state', incidents.length
+    ? `${incidents.length} unresolved incident${incidents.length === 1 ? '' : 's'} · read only · ${inspection.mode === 'history' ? `historical run ${inspection.historicalRunId}` : 'current shift'}`
+    : 'No unresolved incident. No repair authoring is available in this build.');
+  if (!incidents.length) empty($('repair-incidents'), 'The tray has no incident to review.');
+  else $('repair-incidents').replaceChildren(...incidents.map(incidentButton));
+  const detail = $('repair-detail');
+  const incident = inspection.mode === 'history'
+    ? incidents.find(item => item.opening_run_id === inspection.historicalRunId) : null;
+  if (!incident) return empty(detail, 'Select an incident to inspect its recorded run.');
+  detail.replaceChildren();
+  for (const [label, value] of [
+    ['Inspected run', incident.opening_run_id],
+    ['Recorded incident', `${incident.id} · ${humanize(incident.state)} · ${incident.reason_code}`],
+    ['Failing output', incident.failing_output_ref],
+    ['Independent check', incident.check_result_id],
+    ['Opened event', String(incident.opened_event_seq)],
+  ]) {
+    const row = element('div', null, 'contract-line');
+    row.dataset.repairField = label.toLowerCase().replaceAll(' ', '-');
+    row.append(element('span', label), element('strong', value));
+    detail.append(row);
+  }
+}
+function renderOwnerRecord() {
+  const record = $('owner-record'), target = $('owner-requirements');
+  const visible = state.station === 'owner' && state.slug === 'bookshop' && Boolean(state.board);
+  record.hidden = !visible;
+  if (!visible) return target.replaceChildren();
+  const choice = state.board.operating_selection;
+  const requirements = state.board.inherited_requirements;
+  const version = state.operatingVersion ?? state.board.latest_version;
+  target.replaceChildren();
+  for (const [label, field, value] of [
+    ['Client requirement set', 'owner-requirement-set', requirements?.requirement_set_id ?? 'No inherited set'],
+    ['Frozen requirement hash', 'owner-requirement-hash', requirements?.requirement_set_hash ?? 'none'],
+    ['Visible check set hash', 'owner-visible-check-hash', requirements?.visible_check_set_hash ?? 'none'],
+    ['Operating version', 'owner-operating-version', choice ? `${choice.selected_version_id} · ${choice.selected_content_hash}` : 'none selected'],
+    ['Committed constraint', 'owner-constraint', version?.contract?.must_never.map(humanize).join(', ') ?? 'No committed contract loaded'],
+    ['Declared limits in force', 'owner-limits', state.board.unresolved_limits.join(' · ') || 'none'],
+  ]) {
+    const row = element('div', null, 'contract-line');
+    row.dataset.ownerField = field;
+    row.append(element('span', label), element('strong', value));
+    target.append(row);
+  }
+}
+function renderHandoverIncidents() {
+  const target = $('handover-incidents');
+  if (!state.board) return empty(target, 'No verified data loaded.');
+  if (!state.board.incidents.length) return empty(target, 'No unresolved incident is inherited.');
+  target.replaceChildren(...state.board.incidents.map(incidentButton));
+}
 function publishPresentation(reason) {
+  renderInspectionBar();
   const context = { board: state.slug, shiftId: state.loadedShiftId, inspection: { ...inspection } };
   let publication;
   if (['error', 'context', 'history', 'page-lifecycle'].includes(reason)) {
@@ -421,8 +530,13 @@ function clearData(message) {
   text('next-tag', 'Not loaded');
   text('next-help', 'Loading shift actions…');
   text('next-error', '');
-  for (const id of ['next-inheritance', 'next-tests', 'next-history', 'next-experiment']) empty($(id), 'No verified data loaded.');
+  for (const id of ['next-inheritance', 'next-tests', 'next-history', 'next-experiment', 'handover-incidents']) empty($(id), 'No verified data loaded.');
   $('close-shift').disabled = true; $('open-next-shift').disabled = true;
+  text('repair-state', 'No incident loaded.');
+  empty($('repair-incidents'), 'No verified data loaded.');
+  empty($('repair-detail'), 'Select an incident to inspect its recorded run.');
+  $('owner-record').hidden = true;
+  empty($('owner-requirements'), 'No verified requirements loaded.');
   text('selection-note', 'A complete eligible comparison is required.');
   text('selection-error', '');
   empty($('candidate-list'), 'No candidates loaded.');
@@ -556,32 +670,7 @@ function renderBoard() {
     : 'Offline client. No live model or sandbox connection. The simulated role is not a credential.');
   const incidents = $('incident-list');
   if (!board.incidents.length) empty(incidents, 'No unresolved incidents. The room reflects the recorded state.');
-  else incidents.replaceChildren(...board.incidents.map(incident => {
-    const button = element('button', null, 'incident-row');
-    const current = inspection.mode === 'current' && incident.opening_run_id === state.run?.id;
-    button.dataset.incidentId = incident.id;
-    button.dataset.incidentState = incident.state;
-    button.dataset.incidentSource = current ? 'current' : 'historical';
-    button.dataset.openedEventSeq = String(incident.opened_event_seq);
-    button.dataset.openingRun = incident.opening_run_id;
-    button.dataset.failingOutput = incident.failing_output_ref;
-    button.dataset.checkResult = incident.check_result_id;
-    if (incident.resolved_event_seq != null) button.dataset.resolvedEventSeq = String(incident.resolved_event_seq);
-    button.append(element('strong', `${incident.id} · ${humanize(incident.state)}`), element('span', incident.reason_code));
-    button.append(element('small', `${current ? 'Current operation record' : 'Historical record'} · opened by event ${incident.opened_event_seq} · run ${incident.opening_run_id}${incident.resolved_event_seq != null ? ` · resolved by event ${incident.resolved_event_seq}` : ''}`, 'evidence-meta'));
-    button.addEventListener('click', async () => {
-      const intent = ++state.intent;
-      inspection = { mode: 'history', historicalRunId: incident.opening_run_id };
-      publishPresentation('history');
-      const accepted = await refresh(incident.opening_run_id);
-      if (!accepted || intent !== state.intent || state.run?.id !== incident.opening_run_id) return;
-      state.selected = state.outputs.find(output => output.id === incident.failing_output_ref)?.id ?? null;
-      activateStation('customers');
-      const target = [...document.querySelectorAll('.customer-button')].find(node => node.dataset.outputId === state.selected);
-      if (target) target.focus(); else $('station-panel').focus();
-    });
-    return button;
-  }));
+  else incidents.replaceChildren(...board.incidents.map(incidentButton));
   const limits = [...new Set([...(version?.contract.declared_limits ?? []), ...board.unresolved_limits])];
   if (!limits.length) empty($('limit-list'), 'No limits declared.');
   else {
@@ -589,8 +678,8 @@ function renderBoard() {
     list.append(...limits.map(limit => element('li', limit, 'limit-item')));
     $('limit-list').replaceChildren(list);
   }
-  $('open-shift').disabled = state.pending || shift?.state === 'open';
-  $('run-shift').disabled = state.pending || !version || !shift?.operation_allowed || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run) ||
+  $('open-shift').disabled = state.pending || inspection.mode !== 'current' || shift?.state === 'open';
+  $('run-shift').disabled = state.pending || inspection.mode !== 'current' || !version || !shift?.operation_allowed || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run) ||
     (board.latest_run?.purpose === 'OPERATION' && board.latest_run?.state === 'FINALIZED' && board.latest_run?.shift_id === shift.id);
   text('run-help', needsChoice ? 'Operation is blocked. Compare qualifying repairs and explicitly choose an eligible tested version; saving or freezing a draft does not choose it.'
     : !version ? 'No frozen version is available to operate.'
@@ -601,6 +690,9 @@ function renderBoard() {
   renderArtifact();
   renderDeployment();
   renderPipelineWall();
+  renderRepairTray();
+  renderOwnerRecord();
+  renderInspectionBar();
 }
 
 function renderArtifact() {
@@ -1140,6 +1232,12 @@ function renderNext() {
   text('next-state', shift ? `${shift.id} · ${shift.state === 'open' ? 'open' : 'closed'} · ${humanize(board.operating_status)}` : 'No shift loaded');
   text('next-tag', !shift ? 'Not loaded' : choice ? `${choice.selected_version_id} · ${humanize(board.operating_status)}` : 'No selection yet');
   const inheritance = $('next-inheritance');
+  inheritance.dataset.selectionId = choice?.id ?? '';
+  inheritance.dataset.selectedVersion = choice?.selected_version_id ?? '';
+  inheritance.dataset.selectedHash = choice?.selected_content_hash ?? '';
+  inheritance.dataset.retainedAlternative = choice?.retained_alternative_version_id ?? '';
+  inheritance.dataset.comparison = choice?.comparison_id ?? '';
+  inheritance.dataset.observedRun = later?.observed_run_id ?? '';
   if (!shift || !choice) empty(inheritance, 'No inherited selection. Make an explicit choice in a comparison first.');
   else {
     inheritance.replaceChildren();
@@ -1200,6 +1298,10 @@ function renderNext() {
   if (!shift) empty(experiment, 'No verified data loaded.');
   else if (!later) {
     delete experiment.dataset.experimentId;
+    delete experiment.dataset.observedRunId;
+    delete experiment.dataset.selectedVersion;
+    delete experiment.dataset.retainedAlternative;
+    delete experiment.dataset.replacesSelection;
     experiment.dataset.experimentState = 'none';
     empty(experiment, 'No later-condition experiment on this shift. One becomes available after an operation records an observed condition change, such as a dependency outage, and it never replaces that operation.');
   } else {
@@ -1207,6 +1309,9 @@ function renderNext() {
     experiment.dataset.experimentState = later.state;
     experiment.dataset.outcomeStatus = later.outcome?.status ?? 'INCOMPLETE';
     experiment.dataset.observedRunId = later.observed_run_id ?? '';
+    experiment.dataset.selectedVersion = choice?.selected_version_id ?? '';
+    experiment.dataset.retainedAlternative = choice?.retained_alternative_version_id ?? '';
+    experiment.dataset.replacesSelection = 'false';
     experiment.replaceChildren();
     const versions = Object.fromEntries(later.candidates.map(candidate => [candidate.label, candidate.artifact_version_id]));
     for (const [label, value] of [
@@ -1223,9 +1328,12 @@ function renderNext() {
     }
   }
   const open = shift?.state === 'open';
-  $('close-shift').disabled = state.pending || !shift || !open || hasUnsavedDraft();
-  $('open-next-shift').disabled = state.pending || !shift || open || hasUnsavedDraft();
+  const currentInspection = inspection.mode === 'current';
+  $('close-shift').disabled = state.pending || !currentInspection || !shift || !open || hasUnsavedDraft();
+  $('open-next-shift').disabled = state.pending || !currentInspection || !shift || open || hasUnsavedDraft();
+  renderHandoverIncidents();
   text('next-help', !shift ? 'No shift loaded.'
+    : !currentInspection ? 'Historical inspection. Return to the current shift before closing or opening one.'
     : open ? (choice ? `Closing writes the declared limits to the ledger and never selects a version. The next shift starts from ${choice.selected_version_id} and keeps ${choice.retained_alternative_version_id} in history.`
       : 'This shift has no explicit choice. Close it to open the next shift, but no version is inherited as operating.')
     : 'This shift is closed. Open the next shift to inherit the exact selection and continue the history.');
@@ -1471,7 +1579,8 @@ function activateStation(name, userIntent = true) {
   $('investigate-view').hidden = !['investigate', 'bench', 'workflow'].includes(name);
   $('compare-view').hidden = !['compare', 'bench', 'workflow'].includes(name);
   $('next-view').hidden = !['next', 'handover', 'wall'].includes(name);
-  $('board-view').hidden = !['service', 'owner', 'ledger', 'repair', 'brief', 'rules', 'signals'].includes(name);
+  $('board-view').hidden = !['service', 'owner', 'ledger', 'brief', 'rules', 'signals'].includes(name);
+  $('repair-view').hidden = name !== 'repair';
   $('northline-brief').hidden = name !== 'brief';
   $('gtm-rules').hidden = name !== 'rules';
   $('map-view').hidden = name !== 'map';
@@ -1490,6 +1599,11 @@ function activateStation(name, userIntent = true) {
   renderInvestigate();
   renderCompare();
   renderNext();
+  renderRepairTray();
+  renderOwnerRecord();
+  renderInspectionBar();
+  if (userIntent && name === 'owner') $('owner-record').scrollIntoView({ block: 'start' });
+  if (userIntent && name === 'repair') $('repair-view').scrollIntoView({ block: 'start' });
   const view = northline() || gtm() ? name : { owner: 'contract', investigate: 'investigate', compare: 'compare', next: 'next' }[name] ?? 'board';
   state.view = view;
   if (userIntent) history.replaceState(null, '', `#${view}`);
@@ -1513,6 +1627,7 @@ function navigate(view, userIntent = true) {
 }
 async function act(action) {
   if (state.pending) return;
+  if (inspection.mode !== 'current') { text('load-message', 'Return to the current shift before acting.'); return; }
   state.pending = true; renderBoard();
   try { await action(); inspection = { mode: 'current', historicalRunId: null }; publishPresentation('history'); await refresh(); }
   catch (error) { await refresh(); text('load-message', error.message); }
@@ -1547,12 +1662,14 @@ $('run-comparison').addEventListener('click', runComparison);
 $('treatment-input').addEventListener('input', () => renderCompare());
 async function shiftAction(path) {
   if (state.pending || !path) return;
+  if (inspection.mode !== 'current') { text('next-error', 'Return to the current shift before closing or opening one.'); return; }
   state.pending = true; renderBoard(); renderNext();
   text('next-error', '');
   try { await api(path, { method: 'POST' }); await refresh(); }
   catch (error) { await refresh(); text('next-error', error.message); }
   finally { state.pending = false; if (state.board) { renderBoard(); renderNext(); renderCompare(); } }
 }
+$('inspect-current').addEventListener('click', returnToCurrent);
 $('close-shift').addEventListener('click', () => shiftAction(state.board?.latest_shift ? `/shifts/${encodeURIComponent(state.board.latest_shift.id)}/close` : null));
 $('open-next-shift').addEventListener('click', () => shiftAction(engagementPath('shifts')));
 $('select-candidate-a').addEventListener('click', () => chooseCandidate('A'));

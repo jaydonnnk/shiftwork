@@ -170,6 +170,10 @@ body[data-evidence="finalized"] .evidence-path circle { animation: none; }
 .panel-heading { display: flex; align-items: center; justify-content: space-between; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
 .panel-heading .eyebrow { color: var(--green); font-size: 9px; letter-spacing: 1.6px; }
 .panel-symbol { font-size: 32px; font-weight: 300; color: #a5afa8; }
+.inspection-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 9px 0 0; color: var(--muted); font-size: 10px; }
+.inspection-bar[data-mode="history"] { color: #7d5b1f; }
+.inspection-return { min-height: 44px; padding: 6px 10px; border: 1px solid #ad8e55; border-radius: 3px; background: transparent; color: var(--green); font-size: 10px; }
+.inspection-return:hover { background: #edbd6814; }
 .load-message { color: var(--muted); font-size: 12px; padding: 13px 0; }
 .load-message:empty { display: none; }
 body[data-load-state="error"] .load-message { color: #903e37; border-bottom: 1px solid #b34f4540; }
@@ -183,7 +187,7 @@ body[data-load-state="empty"] .room-art { opacity: .75; }
 .owner-label { margin-left: auto; color: var(--green); font-size: 10px; white-space: nowrap; }
 .mono, pre, code { font-family: Consolas, "Courier New", monospace; }
 .hash { overflow-wrap: anywhere; color: var(--muted); font-size: 10px; margin-top: 9px; }
-.file-tabs { display: flex; border-bottom: 1px solid var(--line); margin-top: 3px; }
+.file-tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); margin-top: 3px; }
 .file-tabs button { background: transparent; color: var(--muted); font-size: 10px; padding: 10px 7px; min-height: 36px; border-bottom: 2px solid transparent; }
 .file-tabs button:first-child { padding-left: 0; }
 .file-tabs button[aria-pressed="true"] { color: var(--green); border-color: var(--green); font-weight: 650; }
@@ -199,6 +203,8 @@ body[data-load-state="empty"] .room-art { opacity: .75; }
 .incident-row { display: block; width: 100%; padding: 9px 10px; margin-top: 6px; background: #b34f4509; border-left: 2px solid var(--red); text-align: left; }
 .incident-row strong { display: block; color: #853e38; font-size: 10px; }
 .incident-row span { display: block; color: var(--muted); font-size: 10px; margin-top: 3px; overflow-wrap: anywhere; }
+#repair-incidents { max-height: 300px; overflow-y: auto; }
+#repair-state { margin-bottom: 6px; }
 ul { margin: 0; padding-left: 17px; }
 .limit-item { color: var(--muted); font-size: 11px; }
 .total-row { display: flex; justify-content: space-between; gap: 15px; margin-top: 5px; font-size: 11px; }

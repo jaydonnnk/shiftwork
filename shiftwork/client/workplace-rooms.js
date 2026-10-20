@@ -51,6 +51,23 @@ box('paper',[3.35,2.15,-2.65],[.95,.5,.03],'ledger');
 box('paper',[4.65,2.15,-2.65],[.95,.5,.03],'ledger');
 box('paper',[3.35,1.52,-2.65],[.95,.5,.03],'ledger');
 box('paper',[4.65,1.52,-2.65],[.95,.5,.03],'ledger');
+// Owner desk: the committed requirements folder stays read only.
+box('wood',[-3.7,1,-2.4],[2.0,.22,1.15],'owner');
+box('enamel',[-3.7,.48,-2.4],[1.35,.95,.75],'owner');
+box('paper',[-3.7,1.13,-2.4],[1.3,.05,.7],'owner');
+box('paper',[-3.45,1.17,-2.4],[.55,.04,.48],'owner');
+box('paper',[-2.95,1.16,-2.45],[.5,.04,.45],'owner');
+// Read-only incident review tray beside the wall.
+box('wood',[-4.2,.8,-.2],[1.4,.18,.8],'repair');
+box('enamel',[-4.2,.38,-.2],[1.05,.65,.55],'repair');
+box('paper',[-4.35,1,-.2],[.6,.06,.42],'repair');
+box('paper',[-3.9,1.02,-.15],[.5,.05,.4],'repair');
+// Handover shelf: original choice, retained alternative and inherited limits.
+box('wood',[4,.4,2.5],[1.8,2.4,.35],'next');
+for(const y of [.4,1.1,1.8]) box('wood',[4,y,2.3],[1.9,.1,.75],'next');
+box('paper',[3.62,1.2,2.45],[.5,.05,.42],'next');
+box('paper',[4.38,1.2,2.45],[.5,.05,.42],'next');
+box('paper',[4,1.9,2.45],[.65,.05,.45],'next');
 
 export const roomDefinitions = {
   bookshop: {
@@ -58,8 +75,9 @@ export const roomDefinitions = {
     materials: { floor:'#a89477', navy:'#202c40', edge:'#263443', wood:'#b99a70',
       shelf:'#6c5943', paper:'#e7deca', enamel:'#48617a', screen:'#91acb9' },
     assemblies, stationAnchors: { customers: [-4,1,2.5], service: [0,1,1.1], evaluator: [3.3,1,-.2],
-      investigate: [0,1.05,-2.5], compare: [.7,1.1,3], ledger: [4,1,-2.8] },
+      investigate: [0,1.05,-2.5], compare: [.7,1.1,3], ledger: [4,1,-2.8],
+      owner: [-3.7,1,-2.4], repair: [-4.2,.8,-.2], next: [4,1.2,2.5] },
     anchors: { candidateA: [-.15,1.02,3], candidateB: [1.55,1.02,3], plate: [0,1.2,1.25],
-      wall: [4,1.9,-2.55] },
+      wall: [4,1.9,-2.55], handover: [4,1.5,2.2], later: [2.2,1.2,3] },
   },
 };

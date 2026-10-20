@@ -119,6 +119,10 @@
     </section>
     <aside class="detail-panel" id="station-panel" tabindex="-1" aria-labelledby="panel-title">
       <div class="panel-heading"><div><p class="eyebrow" id="panel-kicker">YOUR WORKING ARTIFACT</p><h2 id="panel-title">Service workbench</h2></div><span class="panel-symbol" aria-hidden="true">⌑</span></div>
+      <div id="inspection-bar" class="inspection-bar" data-mode="current" role="status">
+        <span id="inspection-mode">Current inspection</span>
+        <button id="inspect-current" class="inspection-return" type="button" hidden>Return to current shift</button>
+      </div>
       <div id="load-message" class="load-message" role="status">Loading your shift…</div>
       <section id="northline-brief" class="panel-section" hidden>
         <h3>The counter needs speed. A confirmation needs evidence.</h3>
@@ -149,6 +153,11 @@
         <section class="panel-section"><h3>Missed-handoff incidents</h3><div id="pipeline-incidents"></div></section>
       </section>
       <section id="board-view">
+        <section id="owner-record" class="panel-section" hidden>
+          <div class="section-heading"><h3>Owner requirements folder</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p class="help-text">Read the exact operating requirements, frozen test identity and declared limits. This folder is read only and never approves a newer save.</p>
+          <div id="owner-requirements" class="artifact-detail"></div>
+        </section>
         <div class="service-card"><div class="service-card-heading"><span class="service-icon" aria-hidden="true">⌘</span><div><strong id="artifact-name">Bellwether service</strong><span id="version-state">Waiting for the board</span></div><span class="owner-label">Owned by you</span></div><p id="version-hash" class="mono hash"></p></div>
         <div id="selection-summary" class="artifact-detail" aria-live="polite"></div>
         <div class="file-tabs" role="group" aria-label="Artifact details"><button data-file="contract" aria-pressed="true">Contract</button><button data-file="checks">Visible checks</button><button data-file="files">Files</button><button data-file="history">Change log</button></div>
@@ -165,6 +174,13 @@
         </section>
         <div class="panel-actions"><button id="open-shift" class="button secondary" disabled>Open shift</button><button id="run-shift" class="button primary" disabled>Run customer shift <span aria-hidden="true">→</span></button></div>
         <p id="run-help" class="help-text">Load the board to see available actions.</p>
+      </section>
+      <section id="repair-view" hidden>
+        <div class="section-heading"><h3>Read-only incident review tray</h3><span class="synthetic">Synthetic scenario</span></div>
+        <p class="help-text">Inspect a recorded incident without editing the service or rerunning evidence. The tray shows the same public run, output, check and event identities as the wall.</p>
+        <p id="repair-state" class="mono evidence-meta">No incident loaded.</p>
+        <div id="repair-incidents"></div>
+        <div id="repair-detail" class="artifact-detail"></div>
       </section>
       <section id="customer-view" data-synthetic-region="run" hidden>
         <div class="run-topline"><span class="synthetic">Synthetic scenario</span><span id="run-state" class="mono">No run</span></div>
@@ -277,6 +293,11 @@
           <div class="section-heading"><h3>Recorded operational history</h3><span class="synthetic">Synthetic scenario</span></div>
           <p class="help-text">Real recorded state: runs, incidents, limits and ledger events caused by operating a version.</p>
           <div id="next-history" class="artifact-detail"></div>
+        </section>
+        <section class="panel-section" data-synthetic-region="next-incidents">
+          <div class="section-heading"><h3>Unresolved inherited history</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p class="help-text">Open a recorded incident to inspect its historical run and failing request. Ordinary refresh does not leave that historical inspection.</p>
+          <div id="handover-incidents" class="artifact-detail"></div>
         </section>
         <section class="panel-section" data-synthetic-region="next-experiment">
           <div class="section-heading"><h3>Later-condition experiment · hypothetical</h3><span class="synthetic">Synthetic scenario</span></div>

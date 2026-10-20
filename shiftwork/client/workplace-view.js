@@ -129,6 +129,14 @@ export function projectWorkplace(input) {
       if (alternative.length !== 1 || alternative[0].versionId !== selection.retained_alternative_version_id) conflict();
     }
   }
+  if (tests.later) {
+    const laterVersions = new Set(tests.later.candidates.map(candidate => candidate.versionId));
+    if (tests.later.id === selection?.comparison_id) conflict();
+    if (laterVersions.size !== 2 || !laterVersions.has(selection?.selected_version_id) ||
+        !laterVersions.has(selection?.retained_alternative_version_id)) conflict();
+    if (!tests.later.observedRunId) conflict();
+    if (tests.later.trials.some(trial => trial.runId === tests.later.observedRunId)) conflict();
+  }
   const diagnosticRuns = new Set((tests.diagnostic?.trials ?? []).map(trial => trial.runId).filter(Boolean));
   if (events.some(event => diagnosticRuns.has(event.derivation?.run_id))) conflict();
   const wallTypes = WALL_TYPES[slug] ?? [];

@@ -4,6 +4,7 @@ import { roomDefinitions } from './workplace-rooms.js';
 export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure }) {
   let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity, pulse = null, indicatorMaterial = null;
   let comparisonPulse = null, selectionPulse = null, plateMaterial = null, wallTrace = null, wallMaterial = null, traceMaterial = null, traceLine = null;
+  let handoverMaterial = null, laterMaterial = null;
   const candidateMaterials = {}, geometries = new Set(), materials = new Set(), targets = [];
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-8,8,6,-6,.1,100);
@@ -126,6 +127,18 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     materials.add(wallMaterial);
     const wallPanel = new THREE.Mesh(cube, wallMaterial);
     wallPanel.position.set(4,1.9,-2.69); wallPanel.scale.set(2.45,1.35,.04); scene.add(wallPanel);
+    if (room.anchors?.handover) {
+      handoverMaterial = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1});
+      materials.add(handoverMaterial);
+      const handoverCard = new THREE.Mesh(cube, handoverMaterial);
+      handoverCard.position.fromArray(room.anchors.handover); handoverCard.scale.set(.7,.05,.48); scene.add(handoverCard);
+    }
+    if (room.anchors?.later) {
+      laterMaterial = new THREE.MeshStandardMaterial({color:'#6c5943',emissive:'#000000',emissiveIntensity:0,roughness:1});
+      materials.add(laterMaterial);
+      const laterMarker = new THREE.Mesh(cube, laterMaterial);
+      laterMarker.position.fromArray(room.anchors.later); laterMarker.scale.set(.45,.05,.35); scene.add(laterMarker);
+    }
     if (room.anchors?.plate && room.anchors?.wall) {
       const traceGeometry = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(...room.anchors.plate), new THREE.Vector3(...room.anchors.wall)]);
@@ -143,12 +156,16 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
       rim.visible = !!anchor; if(anchor) rim.position.set(anchor[0],.1,anchor[2]);
       const trialState = next?.tests?.diagnostic?.trials?.[0]?.state;
       indicatorMaterial.color.set(testColors[trialState] ?? '#6c5943');
-      const comparison = next?.tests?.comparison;
+      const comparison = next?.tests?.later ?? next?.tests?.comparison;
       for (const [label, material] of Object.entries(candidateMaterials)) {
         const candidate = comparison?.candidates?.find(item => item.label === label);
         material.color.set(candidate?.eligible === true ? '#8fbf9f' : candidate?.eligible === false ? '#d98a7a' : '#6c5943');
       }
       if (plateMaterial) plateMaterial.color.set(next?.operating ? '#edbd68' : '#263443');
+      if (handoverMaterial) handoverMaterial.color.set(next?.consistency === 'conflict' ? '#263443' :
+        next?.inheritance?.selectionId && next?.operating ? '#edbd68' : '#6c5943');
+      if (laterMaterial) laterMaterial.color.set(next?.consistency === 'conflict' ? '#263443' :
+        next?.tests?.later ? '#91acb9' : '#6c5943');
       const currentWallEvents = (next?.consequences?.events ?? []).filter(event => event.source === 'current');
       const negativeWall = currentWallEvents.some(event => event.meaning === 'negative' || event.meaning === 'pending');
       if (wallMaterial) wallMaterial.color.set(next?.consistency === 'conflict' ? '#263443' :
