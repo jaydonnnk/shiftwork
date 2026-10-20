@@ -3226,3 +3226,38 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - Prevention rule: pass every value a page callback reads as an argument, scope
   publication assertions to a pre-fault index, and use the preview mode that
   matches the journey's expected failure (no assist gateway for `browser.mjs`).
+
+## 2026-10-20 S33 source fault: a redundant guard hid its own proof
+
+- What happened: the new no-selection later-experiment fault survived because the
+  version-binding guard rejected the same fixture, so the mutation did not own a
+  distinct assertion. The initial later test fixture also omitted the required
+  observed run and original candidate versions.
+- Root cause: the no-selection condition was already covered by the binding rule,
+  and the test fixture was not modeled from the real later-experiment shape.
+- Prevention rule: give every acceptance condition a fixture where only that
+  condition can fail. Remove guards that duplicate a stricter binding rather than
+  adding a fault row that cannot isolate them.
+
+## 2026-10-20 S33 browser harness: new mode fell through the generic scene gate
+
+- What happened: the first S33 `openBrowser` call used a new fault prefix. The
+  generic gate held `workplace-scene.js`, so the room stayed in loading and the
+  test timed out before exercising any S33 behavior.
+- Root cause: the harness mode allowlist recognized S30, S31 and S32 prefixes but
+  not S33.
+- Prevention rule: when adding a browser control mode, inspect every mode gate in
+  `openBrowser` first and add the new prefix to the allowlist before judging a
+  graphics timeout as a product defect.
+
+## 2026-10-20 S33 exact viewport: owner tabs overflowed at 200% zoom
+
+- What happened: the expanded owner station list surfaced a real narrow-layout
+  failure. The requirement tabs exceeded the viewport at 390px and 200% zoom, and
+  the station order left the draft editor hidden before the Escape continuity
+  check.
+- Root cause: the file-tab row did not wrap, and the new stations were appended
+  after Compare even though the editor check assumed Compare remained selected.
+- Prevention rule: run every new panel through the exact narrow and zoom matrix
+  before accepting it, and keep view-dependent test steps explicit instead of
+  relying on the previous loop iteration's station.

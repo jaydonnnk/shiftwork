@@ -1,3 +1,28 @@
+**S33 ACCEPTED on local evidence, 2026-10-20. Publication authorized.**
+
+The user answered "Start S33 now" on 2026-10-20, authorizing local
+implementation, fail-capable tests and disposable evidence on
+`shiftwork/slice-33` under `/tmp/shiftwork-s33-*`. The Bellwether room now
+includes the owner desk, read-only incident review tray and handover shelf. The
+handover shelf shows the original selection, rationale, requirement hashes,
+declared limits and unresolved incidents. Historical inspection has an explicit
+return to current, ordinary polling leaves it unchanged, and the later-condition
+experiment is bound to the original selected and retained versions and its
+observed operation. A newer save, a new shift and browser-cache return do not
+promote a newer version. The full offline inheritance walkthrough passed with
+`prior_bytes_identical: true`; the S33 later control preserved `sel-0002`,
+`ver-0003` and `ver-0004` through history, the later test and a new shift. Fresh
+evidence: 101 Node checks, 93 of 93 source faults with production unchanged, 4
+of 4 render-fault rows including the inheritance baseline, the full S33 controls,
+the full S30 diagnosis journey, the blocked-comparison baseline, composition,
+30-switch lifecycle, exact 640 and 390 viewports at 100% and 200% zoom, nine
+asset checks, both performance tiers within budget and the full non-packaging
+suite at 1454 passed with the known port_dead failure, one skip and two
+warnings. The [S33 checkpoint](s33-checkpoint-2026-10-20.md) records the receipts
+and limits. S33 is accepted on local evidence. The user authorized the
+working-tree commits, the fast-forward to main and the push. No deployment,
+credentials, provider call, protected fixture change or S34 work followed.
+
 **S32 ACCEPTED on local evidence and published on main, 2026-10-20.**
 
 The S32 handoff prompt authorized local implementation, tests and disposable
@@ -16,8 +41,9 @@ with the known port_dead failure, one skip and two warnings. The
 user accepted S32 with "Okay yea i accept it please commit the changes and push
 to main" and authorized the working-tree commits and the push to main. The work
 is committed on `shiftwork/slice-32` as `b7dff05..13c5526`, fast-forwarded to
-main and pushed as `b7dff05..13c5526`. S33 requires its own go-ahead and has not
-started. No deployment follows.
+main and pushed as `b7dff05..13c5526`. S33 subsequently received its own go-ahead
+and local implementation; see the current S33 notice above. No deployment
+follows.
 
 **S31 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
 

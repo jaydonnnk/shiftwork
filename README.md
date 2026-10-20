@@ -30,6 +30,38 @@ failure. Windows and Edge, Firefox, previous-stable Safari, physical iPhone and
 Pixel, audible VoiceOver and NVDA, and comprehension evidence are unverified
 and unclaimed by this scope.
 
+## S33 handover and later test
+
+The local Bellwether room now includes the owner desk, read-only incident review
+tray and handover shelf. The workbench shows the inherited selection, rationale,
+requirement hashes, limits and unresolved incidents. A historical incident opens
+an explicit history view with a visible "Return to current shift" control.
+Ordinary polling does not leave that view. A later-condition experiment on the
+A/B bench is bound to the original selected and retained versions and to its
+observed operation. It does not replace the selection, and a newer save or a new
+shift cannot promote a different version.
+
+The existing offline walkthrough remains the reproducible full journey:
+
+```sh
+SHIFTWORK_EXECUTOR_ADAPTER=recorded \
+  .venv/bin/python -m demos.final_pivot --stage inheritance
+```
+
+Expect `PASS_OFFLINE_POLICY`, `prior_bytes_identical: true`, six COMPLETE later
+slots and both the original selected and retained versions unchanged. The
+browser receipts use `/tmp/shiftwork-s33-*`; `workplace_s33_controls.mjs` drives
+the complete normal journey and the inherited later world:
+
+```sh
+node tests/client/workplace_s33_controls.mjs /tmp/shiftwork-s33-controls
+``` The later preview's
+outage is a staged test derivation, not reviewed product material. Local
+headless Chrome evidence does not prove physical-device, named screen-reader or
+comprehension outcomes. See the
+[S33 checkpoint](docs/plans/shiftwork/workplace-3d/s33-checkpoint-2026-10-20.md)
+for measured limits.
+
 ## Hosted practice demo
 
 Open [Shiftwork on Render](https://shiftwork.onrender.com). This is one shared
