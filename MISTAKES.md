@@ -1,5 +1,76 @@
 # Mistakes Log
 
+## 2026-10-20 S32 control servers: missing imports and middleware added after startup
+
+- **What happened:** four scratch preview servers exited before serving. Three
+  lacked `import sys`; the delayed server also registered `@app.middleware('http')`
+  after `create_preview` returned. `create_preview` starts the app through
+  `TestClient`, so Starlette rejected the late middleware. The driver reported
+  only `preview exited with 1` until its preview log was read. A copied journey
+  runner later hit the same missing `import sys`.
+- **Root cause:** copied scratch scripts without re-checking imports and app
+  lifecycle; assumed middleware could attach to an app already started by the
+  preview factory.
+- **Prevention rule:** before a scratch server batch, import-check and start each
+  variant once and read its log on failure. Do not add middleware after
+  `create_preview`; patch the run task or adapter with an explicit enable flag
+  set after the app is built, and assert the anchor exists.
+
+## 2026-10-20 S32 partial control: host discarded its consistent reference
+
+- **What happened:** the partial consequence control intermittently recorded
+  zero traces. Its publish log showed a reset followed by a conflict view
+  carrying the new events while the scene remounted. The host cleared
+  `previous` on reset and conflict and did not replay mount transitions, so the
+  first linked view baselined the events and produced no arrival. Earlier runs
+  passed only when no reset or conflict intervened.
+- **Root cause:** treating a reset or conflict as a reason to forget the last
+  consistent view instead of relying on `diffWorkplace`'s context, inspection
+  and conflict guards, and mounting without applying transitions not yet seen.
+- **Prevention rule:** retain the last consistent view across reset and conflict,
+  advance it only on a consistent accepted view, and compute and apply
+  transitions at mount. Fault each rule independently and repeat the real
+  partial control, not once.
+
+## 2026-10-20 S32 browser faults: stale anchor and non-distinguishing label
+
+- **What happened:** after the host callback was gated on the scene starting a
+  trace, the `operation-omit-arrival-callback` fault searched the old line, so
+  the injected page failed to load instead of failing the named assertion. The
+  `operation-omit-wall-label` fault survived because the idle label already said
+  "Recorded evidence added"; removing the active text assignment was invisible.
+- **Root cause:** changing an instrumented production line without updating the
+  injection anchor, and using an idle message identical to the active message.
+- **Prevention rule:** update every harness anchor with the instrumented line,
+  make idle and active text distinct, and run each new fault row alone before
+  the batch. Require the named AssertionError, not a load failure.
+
+## 2026-10-20 S32 motion control: media emulation was not awaited
+
+- **What happened:** the reduced-motion control started a trace after
+  `Emulation.setEmulatedMedia` because publish ran before the media query and
+  change listener reflected the emulation. The earlier test passed only because
+  the scene did not apply the arrival at mount. Mount replay exposed the race.
+- **Root cause:** treated a CDP command as synchronously effective for
+  `matchMedia`.
+- **Prevention rule:** after emulating reduced motion, wait until
+  `matchMedia('(prefers-reduced-motion: reduce)').matches` reflects the requested
+  value before publishing, then settle the scene before asserting.
+
+## 2026-10-20 S32 bookshop journey: changed event row dropped a contract marker
+
+- **What happened:** the new selected-evidence event row replaced
+  `result ${check_id}` with `check ${check_id}`. The existing bookshop journey
+  verifier required the `result` marker and failed. A copied journey runner also
+  used the assist-enabled preview, so the standard denial check failed for the
+  expected reason; the rerun used the plain preview.
+- **Root cause:** treated a label change as cosmetic without rerunning the
+  existing journey contract, and inherited the wrong preview mode in the
+  scratch runner.
+- **Prevention rule:** preserve every existing rendered contract marker or
+  update its verifier deliberately, and run the bookshop journey after any
+  selected-evidence change. Use the no-assist preview for the standard journey.
+
 ## 2026-10-02 S20 publication: checkout converted byte-hashed evidence endings
 
 - **What happened:** the first post-merge preservation assertion failed for

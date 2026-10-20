@@ -1,3 +1,25 @@
+**S32 ACCEPTED on local evidence, 2026-10-20. Publication in progress.**
+
+The S32 handoff prompt authorized local implementation, tests and disposable
+evidence on `shiftwork/slice-32` from main `b7dff05`, under
+`/tmp/shiftwork-s32-*`. The Bellwether consequence wall now distinguishes
+pending, failed, incomplete and linked operation states; the selected evidence
+bridge labels source and meaning; one new linked synthetic event produces at
+most one 320ms trace; and the host keeps continuity across reset, conflict and
+remount. Fresh evidence: 95 Node checks, 89 of 89 source faults with production
+unchanged, 7 of 7 S32 fresh-preview controls, 8 of 8 S32 browser fault rows with
+clean, fault and restored phases, 30 of 30 existing S30/S31 controls, nine asset
+checks, three board journeys plus plain and selection-journey bookshop variants,
+both performance tiers within budget, and the full non-packaging suite at 1454
+passed with the known port_dead failure, one skip and two warnings. The
+[S32 checkpoint](plans/shiftwork/workplace-3d/s32-checkpoint-2026-10-20.md)
+carries receipts and limits. The user accepted S32 with "Okay yea i accept it
+please commit the changes and push to main" and authorized the working-tree
+commits and the push to main. The work is being committed in focused batches on
+`shiftwork/slice-32` and published to main; the exact range is recorded after
+the fast-forward. S33 requires its own go-ahead and has not started. No
+deployment follows.
+
 **S31 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
 
 The user answered "Start S31" on 2026-10-20, authorizing local implementation,
