@@ -2,7 +2,7 @@
 
 Updated: 2026-10-20 Asia/Singapore.
 
-**Status: S32 ACCEPTED on local evidence, 2026-10-20. Publication in progress.**
+**Status: S32 ACCEPTED on local evidence and published on main, 2026-10-20.**
 The user supplied the S32 handoff prompt on 2026-10-20, authorizing local
 implementation, tests and disposable evidence on `shiftwork/slice-32` from main
 `b7dff05` under `/tmp/shiftwork-s32-*`. That authorization did not cover commits,
@@ -10,8 +10,8 @@ pushes, merges, deployment, credentials, provider calls, protected fixtures,
 CI/lint/lockfile/packaging changes, gate reopenings or S33. The user then accepted
 S32 with "Okay yea i accept it please commit the changes and push to main" and
 authorized the working-tree commits and the push to main. The branch was created
-from the main tip `b7dff05`. The publication commit range is recorded at the end
-of this checkpoint after the fast-forward.
+from the main tip `b7dff05`. The work is committed on `shiftwork/slice-32` as
+`b7dff05..13c5526`, fast-forwarded to main and pushed as `b7dff05..13c5526`.
 
 ## Scope and delivered contract
 
@@ -214,10 +214,17 @@ brief and MISTAKES.md were updated for this round. S33 has not started.
 
 The user accepted S32 with "Okay yea i accept it please commit the changes and
 push to main" and authorized the working-tree commits and the push to main. The
-work is committed on `shiftwork/slice-32` in focused commits for the projection,
-the consequence wall and trace, the unit and source fault coverage, the S32
-control and fault runners, and the acceptance records. The publication range is
-recorded at the end of this checkpoint after the fast-forward.
+work is committed on `shiftwork/slice-32` in five focused commits:
+
+- `b679ff4` production projection and linked-arrival eligibility;
+- `9c62375` consequence wall, room trace and host continuity;
+- `4e94f98` projection and host unit and source fault coverage;
+- `eea3f21` S32 control and browser fault runners plus the bookshop wall
+  assertions;
+- `13c5526` acceptance, evidence, cleanup and mistake records.
+
+The branch was fast-forwarded to main and pushed as `b7dff05..13c5526`. No
+deployment followed.
 
 ## Limits
 
@@ -237,6 +244,6 @@ recorded at the end of this checkpoint after the fast-forward.
 - No commit, push, merge, deployment, live provider call, protected fixture
   change, CI/lint/lockfile/packaging change or S33 work was performed.
 
-**Stop boundary.** S32 is accepted on the evidence above and is being published
-to main. S33 requires its own go-ahead and has not started. No deployment
-follows.
+**Stop boundary.** S32 is accepted on the evidence above and published on main
+as `b7dff05..13c5526`. S33 requires its own go-ahead and has not started. No
+deployment follows.

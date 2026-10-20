@@ -1,4 +1,4 @@
-**S32 ACCEPTED on local evidence, 2026-10-20. Publication in progress.**
+**S32 ACCEPTED on local evidence and published on main, 2026-10-20.**
 
 The S32 handoff prompt authorized local implementation, tests and disposable
 evidence on `shiftwork/slice-32` from main `b7dff05`, under
@@ -15,10 +15,9 @@ passed with the known port_dead failure, one skip and two warnings. The
 [S32 checkpoint](plans/shiftwork/workplace-3d/s32-checkpoint-2026-10-20.md)
 carries receipts and limits. The user accepted S32 with "Okay yea i accept it
 please commit the changes and push to main" and authorized the working-tree
-commits and the push to main. The work is being committed in focused batches on
-`shiftwork/slice-32` and published to main; the exact range is recorded after
-the fast-forward. S33 requires its own go-ahead and has not started. No
-deployment follows.
+commits and the push to main. The work is committed on `shiftwork/slice-32` as
+`b7dff05..13c5526`, fast-forwarded to main and pushed as `b7dff05..13c5526`.
+S33 requires its own go-ahead and has not started. No deployment follows.
 
 **S31 ACCEPTED on local evidence, 2026-10-20 Asia/Singapore.**
 
