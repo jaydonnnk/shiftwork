@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -40,6 +40,10 @@ rows.push(
  {name:'diagnostic_purpose',needle:"diagnostic: experiment(input.diagnostic ?? stationView?.latest_diagnostic, 'DIAGNOSTIC')",replacement:"diagnostic: experiment(input.diagnostic ?? stationView?.latest_diagnostic, 'QUALIFYING_COMPARISON')",test:'diagnostic_purpose_guard_rejects_other_kinds',expect:'a comparison was accepted into the diagnostic slot'},
  {name:'comparison_purpose',needle:"comparison: experiment(input.comparison ?? latest, 'QUALIFYING_COMPARISON')",replacement:"comparison: experiment(input.comparison ?? latest, 'DIAGNOSTIC')",test:'comparison_purpose_guard_rejects_other_kinds',expect:'a diagnostic was accepted into the comparison slot'},
  {name:'later_purpose',needle:"later: experiment(latest, 'LATER_CONDITION_COMPARISON')",replacement:"later: experiment(latest, 'QUALIFYING_COMPARISON')",test:'later_purpose_guard_rejects_other_kinds',expect:'a qualifying comparison was accepted into the later slot'},
+ {name:'later_same_comparison',needle:'if (tests.later.id === selection?.comparison_id) conflict();',replacement:'void 0;',test:'later_binding_same_as_comparison',expect:'a later experiment reused the original comparison identity'},
+ {name:'later_wrong_versions',needle:'if (laterVersions.size !== 2 || !laterVersions.has(selection?.selected_version_id) ||\n        !laterVersions.has(selection?.retained_alternative_version_id)) conflict();',replacement:'void 0;',test:'later_binding_wrong_versions',expect:'a later experiment did not bind the selected and retained versions'},
+ {name:'later_missing_observed',needle:'if (!tests.later.observedRunId) conflict();',replacement:'void 0;',test:'later_binding_missing_observed_run',expect:'a later experiment was accepted without an observed operation'},
+ {name:'later_observed_trial',needle:'if (tests.later.trials.some(trial => trial.runId === tests.later.observedRunId)) conflict();',replacement:'void 0;',test:'later_binding_observed_run_is_trial',expect:'a later trial run was accepted as the observed operation'},
  {name:'selection_promotion',needle:'if (selection?.comparison_id && tests.diagnostic?.id === selection.comparison_id) conflict();',replacement:'void 0;',test:'diagnostic_cannot_qualify_selection',expect:'a diagnostic was accepted as the selection comparison'},
  {name:'wall_promotion',needle:'if (events.some(event => diagnosticRuns.has(event.derivation?.run_id))) conflict();',replacement:'void 0;',test:'diagnostic_cannot_derive_ledger_event',expect:'a diagnostic trial run derived a ledger event'},
  {name:'test_update_duplicate',needle:'if (before !== after && after !== null) {',replacement:'if (after !== null) {',test:'diagnostic_test_update_is_continuous_and_duplicate_quiet',expect:'a duplicate accepted view produced a transition'},

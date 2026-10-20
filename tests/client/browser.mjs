@@ -129,6 +129,25 @@ const FAULTS = {
     replacement: "    history.replaceChildren();\n    history.append(element('p', state.stationView?.latest_experiment?.id ?? '', 'evidence-meta'));",
     expect: 'presents the hypothetical experiment as operational history',
   },
+  inheritHistoryReturn: {
+    needle: "$('inspect-current').addEventListener('click', returnToCurrent);",
+    replacement: 'void returnToCurrent;',
+    expect: 'Timed out waiting for the explicit return to current',
+  },
+  inheritLaterSelection: {
+    needle: "    experiment.dataset.selectedVersion = choice?.selected_version_id ?? '';",
+    replacement: "    experiment.dataset.selectedVersion = '';",
+    expect: 'The later-condition region does not preserve the original selection',
+  },
+  inheritStaleLater: {
+    needle: `    delete experiment.dataset.experimentId;
+    delete experiment.dataset.observedRunId;
+    delete experiment.dataset.selectedVersion;
+    delete experiment.dataset.retainedAlternative;
+    delete experiment.dataset.replacesSelection;`,
+    replacement: '    void experiment.dataset;',
+    expect: 'The previous shift later experiment identity survived the new shift',
+  },
 };
 
 const url = process.argv[2] ?? 'http://127.0.0.1:8009';
@@ -1201,6 +1220,30 @@ try {
       const stationView = await (await fetch(`/api/shifts/${encodeURIComponent(shiftId)}/investigations`)).json();
       const selected = board.operating_selection;
       if (!selected) throw new Error('The inherit preview carries no operating selection to display');
+      const inheritedBefore = {
+        selection: document.getElementById('next-inheritance').dataset.selectedVersion,
+        retained: document.getElementById('next-inheritance').dataset.retainedAlternative,
+        experiment: document.getElementById('next-experiment').dataset.experimentId,
+      };
+      if (!document.querySelector('#handover-incidents .incident-row')) throw new Error('The handover shelf has no unresolved incident to inspect');
+      document.querySelector('#handover-incidents .incident-row').click();
+      await wait('the historical incident to open', () => document.getElementById('inspection-bar').dataset.mode === 'history' &&
+        !document.getElementById('inspect-current').hidden && document.getElementById('selected-evidence').dataset.runId);
+      const historicalRun = document.getElementById('selected-evidence').dataset.runId;
+      const historyHelp = document.getElementById('next-help').textContent;
+      await new Promise(resolve => setTimeout(resolve, 1300));
+      if (document.getElementById('inspection-bar').dataset.mode !== 'history') throw new Error('Ordinary polling left the historical inspection');
+      document.getElementById('inspect-current').click();
+      await wait('the explicit return to current', () => document.getElementById('inspection-bar').dataset.mode === 'current' &&
+        document.getElementById('inspect-current').hidden && document.body.dataset.loadState === 'ready');
+      document.querySelector('[data-station="next"]').click();
+      const inheritedAfter = {
+        selection: document.getElementById('next-inheritance').dataset.selectedVersion,
+        retained: document.getElementById('next-inheritance').dataset.retainedAlternative,
+        experiment: document.getElementById('next-experiment').dataset.experimentId,
+      };
+      if (JSON.stringify(inheritedBefore) !== JSON.stringify(inheritedAfter)) throw new Error('Returning to current changed the inherited choice or later experiment');
+      if (!historyHelp.includes('Return to the current shift')) throw new Error('The historical inspection does not explain the explicit return');
       const inheritField = name => document.querySelector(`#next-inheritance [data-inherit-field="${name}"] strong`)?.textContent ?? '';
       if (!inheritField('operating-choice').includes(selected.id) || !inheritField('operating-choice').includes(selected.selected_version_id)) throw new Error('The station does not display the inherited operating choice');
       if (inheritField('rationale') !== selected.rationale) throw new Error('The station does not display the original rationale');
@@ -1218,6 +1261,8 @@ try {
       for (const limit of board.unresolved_limits) if (!history.textContent.includes(limit)) throw new Error(`The recorded-history region hides the limit in force: ${limit}`);
       const later = stationView.latest_experiment?.kind === 'LATER_CONDITION_COMPARISON' ? stationView.latest_experiment : null;
       if (!later) throw new Error('The inherit preview holds no later-condition experiment to separate');
+      const laterVersions = Object.fromEntries(later.candidates.map(candidate => [candidate.label, candidate.artifact_version_id]));
+      if (laterVersions.A !== selected.selected_version_id || laterVersions.B !== selected.retained_alternative_version_id) throw new Error('The later experiment did not re-test the original selected and retained versions');
       const laterRuns = new Set(later.trials.map(trial => trial.run_id).filter(Boolean));
       if (laterRuns.has(board.latest_run?.id)) {
         if (history.dataset.latestRun !== '' || history.textContent.includes(board.latest_run.id)) throw new Error('The recorded-history region shows the hypothetical experiment slot run as operational history');
@@ -1228,6 +1273,9 @@ try {
       const experiment = document.getElementById('next-experiment');
       if (experiment.dataset.experimentId !== later.id) throw new Error('The hypothetical region does not carry the later-condition experiment');
       if (experiment.dataset.observedRunId !== later.observed_run_id) throw new Error('The hypothetical region does not show the observed operation');
+      if (experiment.dataset.selectedVersion !== selected.selected_version_id ||
+          experiment.dataset.retainedAlternative !== selected.retained_alternative_version_id ||
+          experiment.dataset.replacesSelection !== 'false') throw new Error('The later-condition region does not preserve the original selection');
       if (experiment.dataset.outcomeStatus !== later.outcome.status) throw new Error('The hypothetical region does not show the experiment outcome');
       if (!experiment.textContent.includes(later.condition.public_label)) throw new Error('The hypothetical region does not show the observed condition label');
       if (history.textContent.includes(later.id)) throw new Error('The recorded-history region presents the hypothetical experiment as operational history');
@@ -1246,8 +1294,11 @@ try {
       if (after.operating_selection?.rationale !== selected.rationale || after.operating_selection?.retained_alternative_version_id !== selected.retained_alternative_version_id) throw new Error('The next shift did not inherit the rationale or retained alternative');
       if (inheritField('rationale') !== selected.rationale || inheritField('retained-alternative') !== selected.retained_alternative_version_id) throw new Error('The station lost the inherited rationale or alternative after the shift change');
       if (document.getElementById('next-experiment').dataset.experimentState !== 'none') throw new Error('The hypothetical region still shows the previous shift experiment as current');
+      const clearedLater = document.getElementById('next-experiment').dataset;
+      if (clearedLater.experimentId || clearedLater.observedRunId || clearedLater.selectedVersion ||
+          clearedLater.retainedAlternative || clearedLater.replacesSelection) throw new Error('The previous shift later experiment identity survived the new shift');
       if (document.getElementById('next-history').textContent.includes(shiftId)) throw new Error('The recorded-history region mixes the previous shift identity into the new shift');
-      return { shift: shiftId, nextShift: after.latest_shift.id, experiment: later.id, observedRun: later.observed_run_id, rationale: selected.rationale, retained: selected.retained_alternative_version_id, limits: board.unresolved_limits.length };
+      return { shift: shiftId, nextShift: after.latest_shift.id, experiment: later.id, observedRun: later.observed_run_id, rationale: selected.rationale, retained: selected.retained_alternative_version_id, limits: board.unresolved_limits.length, historicalRun, historicalPollingStayedHistorical: true, historyHelp };
     });
     await evaluate(() => document.getElementById('next-inheritance').scrollIntoView({ block: 'start' }));
     assert.equal(await evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth), false, '1280px next-shift panel overflows');

@@ -161,7 +161,17 @@ test('experiment_never_moves_operation_wall', async () => {
   for (const change of [
     i => { i.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []); },
     i => { i.comparison = diagnostic('QUALIFYING_COMPARISON', 'COMPLETE', []); i.stationView = { shift_id: 'shift-1', latest_experiment: i.comparison }; },
-    i => { i.stationView = { shift_id: 'shift-1', latest_experiment: diagnostic('LATER_CONDITION_COMPARISON', 'COMPLETE', []) }; },
+    i => {
+      const later = diagnostic('LATER_CONDITION_COMPARISON', 'COMPLETE', []);
+      later.observed_run_id = 'run-operation-1';
+      later.candidates = [
+        { label: 'A', artifact_version_id: 'selected-2', artifact_content_hash: 'hash-2' },
+        { label: 'B', artifact_version_id: 'alt-4', artifact_content_hash: 'hash-alt-4' },
+      ];
+      later.trials = [{ ordinal: 1, candidate_label: 'A', run_id: 'later-run-1', artifact_version_id: 'selected-2',
+        state: 'COMPLETE', evidence_mode: 'TRUSTED_LOCAL', missing_evidence: [] }];
+      i.stationView = { shift_id: 'shift-1', latest_experiment: later };
+    },
   ]) {
     const i = input(); change(i); const v = projectWorkplace(i);
     assert.deepEqual(v.operating, plain.operating, 'an experiment moved the operating selection');
@@ -169,6 +179,47 @@ test('experiment_never_moves_operation_wall', async () => {
     assert.deepEqual(v.inheritance, plain.inheritance, 'an experiment changed inheritance');
     assert.equal(v.consistency, 'linked');
   }
+});
+function laterBindingInput() {
+  const i = input();
+  const later = diagnostic('LATER_CONDITION_COMPARISON', 'COMPLETE', []);
+  later.observed_run_id = 'run-operation-1';
+  later.candidates = [
+    { label: 'A', artifact_version_id: 'selected-2', artifact_content_hash: 'hash-2' },
+    { label: 'B', artifact_version_id: 'alt-4', artifact_content_hash: 'hash-alt-4' },
+  ];
+  later.trials = [{ ordinal: 1, candidate_label: 'A', run_id: 'later-run-1', artifact_version_id: 'selected-2',
+    state: 'COMPLETE', evidence_mode: 'TRUSTED_LOCAL', missing_evidence: [] }];
+  i.stationView = { shift_id: 'shift-1', latest_experiment: later };
+  return i;
+}
+test('later_experiment_binds_the_original_selection_and_observed_operation', async () => {
+  const { projectWorkplace } = await api(); const i = laterBindingInput(); const v = projectWorkplace(i);
+  assert.equal(v.consistency, 'linked');
+  assert.equal(v.tests.later.id, 'experiment-diag-1');
+  assert.equal(v.tests.later.observedRunId, 'run-operation-1');
+  assert.deepEqual(v.operating.versionId, 'selected-2');
+  assert.deepEqual(v.inheritance.selectionId, 'choice-1');
+  assert.equal(v.tests.later.candidates.find(candidate => candidate.label === 'B').versionId, 'alt-4');
+});
+for (const [name, change, message] of [
+  ['no_selection', i => {
+    i.board.operating_selection = null; i.operatingVersion = null;
+  }, 'a later experiment was accepted without an operating choice'],
+  ['same_as_comparison', i => { i.stationView.latest_experiment.id = 'comparison-1'; },
+    'a later experiment reused the original comparison identity'],
+  ['wrong_versions', i => {
+    i.stationView.latest_experiment.candidates[0].artifact_version_id = 'saved-newest';
+    i.stationView.latest_experiment.trials[0].artifact_version_id = 'saved-newest';
+  }, 'a later experiment did not bind the selected and retained versions'],
+  ['missing_observed_run', i => { i.stationView.latest_experiment.observed_run_id = null; },
+    'a later experiment was accepted without an observed operation'],
+  ['observed_run_is_trial', i => {
+    i.stationView.latest_experiment.observed_run_id = 'later-run-1';
+  }, 'a later trial run was accepted as the observed operation'],
+]) test(`later_binding_${name}`, async () => {
+  const { projectWorkplace } = await api(); const i = laterBindingInput(); change(i);
+  assert.equal(projectWorkplace(i).consistency, 'conflict', message);
 });
 test('diagnostic_cannot_qualify_selection', async () => {
   const { projectWorkplace } = await api(); const i = input();

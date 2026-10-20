@@ -129,13 +129,13 @@ function harness(fault, args = [], key) {
   });
 }
 
-const FAULTS = ['answer', 'record', 'verdict', 'event', 'eligibility', 'stationFocus', 'incidentFocus', 'candidateFreeze', 'slotOrdinalText', 'slotOrdinalKey', 'slotProtectedCount', 'outcomeMetric', 'outcomeEligibility', 'outcomeLabelBinding', 'inheritRationale', 'inheritAlternative', 'inheritRequirementHash', 'inheritObservedRun', 'inheritSeparation'];
+const FAULTS = ['answer', 'record', 'verdict', 'event', 'eligibility', 'stationFocus', 'incidentFocus', 'candidateFreeze', 'slotOrdinalText', 'slotOrdinalKey', 'slotProtectedCount', 'outcomeMetric', 'outcomeEligibility', 'outcomeLabelBinding', 'inheritRationale', 'inheritAlternative', 'inheritRequirementHash', 'inheritObservedRun', 'inheritSeparation', 'inheritHistoryReturn', 'inheritLaterSelection', 'inheritStaleLater'];
 // The compare-path rows need the flag that exercises them, and each baseline runs
 // the same flags against its own unmutated preview so a red row cannot be vacuous.
-const FAULT_ARGS = { candidateFreeze: ['--compare-demo'], slotOrdinalText: ['--compare-demo'], slotOrdinalKey: ['--compare-demo'], slotProtectedCount: ['--compare-demo'], outcomeMetric: ['--compare-demo'], outcomeEligibility: ['--compare-demo'], outcomeLabelBinding: ['--compare-demo'], inheritRationale: ['--inherit-demo'], inheritAlternative: ['--inherit-demo'], inheritRequirementHash: ['--inherit-demo'], inheritObservedRun: ['--inherit-demo'], inheritSeparation: ['--inherit-demo'] };
+const FAULT_ARGS = { candidateFreeze: ['--compare-demo'], slotOrdinalText: ['--compare-demo'], slotOrdinalKey: ['--compare-demo'], slotProtectedCount: ['--compare-demo'], outcomeMetric: ['--compare-demo'], outcomeEligibility: ['--compare-demo'], outcomeLabelBinding: ['--compare-demo'], inheritRationale: ['--inherit-demo'], inheritAlternative: ['--inherit-demo'], inheritRequirementHash: ['--inherit-demo'], inheritObservedRun: ['--inherit-demo'], inheritSeparation: ['--inherit-demo'], inheritHistoryReturn: ['--inherit-demo'], inheritLaterSelection: ['--inherit-demo'], inheritStaleLater: ['--inherit-demo'] };
 // The next-shift rows need the preview that builds the Slice 20 inheritance and
 // staged-outage world; the baseline pair mirrors the two worlds.
-const PREVIEW_ARGS = { inheritRationale: ['--inherit'], inheritAlternative: ['--inherit'], inheritRequirementHash: ['--inherit'], inheritObservedRun: ['--inherit'], inheritSeparation: ['--inherit'] };
+const PREVIEW_ARGS = { inheritRationale: ['--inherit'], inheritAlternative: ['--inherit'], inheritRequirementHash: ['--inherit'], inheritObservedRun: ['--inherit'], inheritSeparation: ['--inherit'], inheritHistoryReturn: ['--inherit'], inheritLaterSelection: ['--inherit'], inheritStaleLater: ['--inherit'] };
 const BASELINE_ROWS = [
   { label: 'baseline (transient surfaces)', key: 'baseline-transient', args: [], preview: [] },
   { label: 'baseline (reload warning)', key: 'baseline-reload', args: ['--reload-warning-demo'], preview: [] },

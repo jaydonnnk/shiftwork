@@ -251,7 +251,9 @@ export async function runJourney(base, out, fault = '') {
   const browser = await openBrowser(base, out, fault || 's32-journey');
   try {
     await openBoard(browser, base);
+    await screenshot(browser, out, 'inspection-1280');
     const shiftId = await prepareOperatingShift(browser);
+    await screenshot(browser, out, 'selected-inherited-1280');
     const finalBoard = await operate(browser);
     const runId = finalBoard.latest_run.id;
     const run = await runRecord(browser, runId);

@@ -8,7 +8,7 @@ import { chromePath, repoRoot } from './env.mjs';
 
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -22,6 +22,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
   const s30Mode = /^(?:diagnostic-|ownership-|expand-|motion-)/.test(fault);
   const s31Mode = /^(?:comparison-|selection-)/.test(fault);
   const s32Mode = /^(?:s32|operation)-/.test(fault);
+  const s33Mode = /^s33-/.test(fault);
   const endpoint = await new Promise((resolve,reject) => {
     let stderr = ''; const timer = setTimeout(() => reject(Error('Chrome startup timed out')),15000);
     child.once('error',reject);
@@ -62,7 +63,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
     const fail = (['host-import','startup-blocking-host'].includes(fault) && name === '/workplace-host.js') ||
       (fault === 'scene-import' && name === '/workplace-scene.js') ||
       (fault === 'core-import' && name.endsWith('/three.core.js'));
-    if(fault && !s30Mode && !s31Mode && !s32Mode && fault!=='startup-blocking-host' && !fault.startsWith('omit-') && !fault.startsWith('page-cache') && fault !== 'plain' && fault !== 'context' && (fail || name === '/workplace-scene.js' || ((hostTimeout || hostEvaluation) && name==='/workplace-host.js')) && !importsReleased) await new Promise(resolve=>gates.push(resolve));
+    if(fault && !s30Mode && !s31Mode && !s32Mode && !s33Mode && fault!=='startup-blocking-host' && !fault.startsWith('omit-') && !fault.startsWith('page-cache') && fault !== 'plain' && fault !== 'context' && (fail || name === '/workplace-scene.js' || ((hostTimeout || hostEvaluation) && name==='/workplace-host.js')) && !importsReleased) await new Promise(resolve=>gates.push(resolve));
     if(s32Mode && name==='/workplace-host.js') {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
       const publishNeedle="    const transitions = view.consistency==='conflict' ? [] : diffWorkplace(previous,view);";
@@ -346,13 +347,13 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       source = source.replace("renderer.domElement.setAttribute('aria-hidden','true');", "globalThis.__s29Resources ??= { contexts:0, geometries:0, materials:0 }; globalThis.__s29GLs ??= []; globalThis.__s29GLs.push(renderer.getContext()); globalThis.__s29Resources.contexts++; renderer.domElement.setAttribute('aria-hidden','true');");
       source = source.replace('renderer?.forceContextLoss();', 'if(renderer) globalThis.__s29Resources.contexts--; renderer?.forceContextLoss();');
       source = source.replace('geometries.add(cube);', "geometries.add(cube); globalThis.__s29Resources.geometries++; cube.addEventListener('dispose',()=>globalThis.__s29Resources.geometries--);");
-      for(const name of ['material','rimMaterial']) source=source.replace(`materials.add(${name});`, `materials.add(${name}); globalThis.__s29Resources.materials++; ${name}.addEventListener('dispose',()=>globalThis.__s29Resources.materials--);`);
+      for(const name of ['material','rimMaterial','handoverMaterial','laterMaterial']) source=source.replace(`materials.add(${name});`, `materials.add(${name}); globalThis.__s29Resources.materials++; ${name}.addEventListener('dispose',()=>globalThis.__s29Resources.materials--);`);
       source = source.replace('renderer.render(scene, camera);', `renderer.render(scene, camera); globalThis.__workplaceProbe = { frames: (globalThis.__workplaceProbe?.frames ?? 0)+1, triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, tier, time: performance.now(), width: renderer.domElement.width, height: renderer.domElement.height }; if(globalThis.__workplaceSamples) globalThis.__workplaceSamples.push(globalThis.__workplaceProbe);`);
       source = source.replace('renderer.render(scene, camera);', 'renderer.info.reset(); renderer.render(scene, camera);');
       source = source.replace('return { apply, resize,', 'globalThis.__workplaceApply = station => apply({...view,station}, []); globalThis.__workplaceDispose = dispose; return { apply, resize,');
       source = source.replace('view = next;', 'view = next; globalThis.__s29Applied=structuredClone(next);');
       source = source.replace('return { apply, resize,', `globalThis.__workplaceStationPoint = station => { const p = new THREE.Vector3(...room.stationAnchors[station]); p.y=1.15; p.project(camera); const r=renderer.domElement.getBoundingClientRect(); return {x:r.left+(p.x+1)*r.width/2,y:r.top+(1-p.y)*r.height/2}; }; return { apply, resize,`);
-      source = source.replace('return { apply, resize, setSuspended(value)', `globalThis.__workplaceControls={pulse:()=>!!pulse,state:()=>({suspended,disposed,pulse:!!pulse,applied:view?.tests?.diagnostic?.trials?.[0]?.state??null,emissive:indicatorMaterial?.emissiveIntensity??0,comparisonPulse:!!comparisonPulse,comparisonDuration:comparisonPulse?.duration??null,selectionPulse:!!selectionPulse,selectionDuration:selectionPulse?.duration??null,comparisonId:view?.tests?.comparison?.id??null,comparisonState:view?.tests?.comparison?.state??null,candidates:Object.fromEntries(Object.entries(candidateMaterials).map(([label,material])=>[label,{color:material.color.getHexString(),emissive:material.emissiveIntensity,eligible:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.eligible??null,versionId:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.versionId??null,contentHash:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.contentHash??null}])),selection:{id:view?.operating?.selectionId??null,versionId:view?.operating?.versionId??null,contentHash:view?.operating?.contentHash??null,plate:plateMaterial?.color.getHexString()??null,emissive:plateMaterial?.emissiveIntensity??0},wall:{color:wallMaterial?.color.getHexString()??null,emissive:wallMaterial?.emissiveIntensity??0},wallTrace:!!wallTrace,wallTraceDuration:wallTrace?.duration??null,wallTraceCount:wallTrace?.count??null,wallTraces:globalThis.__workplaceWallTraces??0,wallDurations:globalThis.__workplaceWallDurations??[],wallCounts:globalThis.__workplaceWallCounts??[]})}; return { apply, resize, setSuspended(value)`);
+      source = source.replace('return { apply, resize, setSuspended(value)', `globalThis.__workplaceControls={pulse:()=>!!pulse,state:()=>({suspended,disposed,pulse:!!pulse,applied:view?.tests?.diagnostic?.trials?.[0]?.state??null,emissive:indicatorMaterial?.emissiveIntensity??0,comparisonPulse:!!comparisonPulse,comparisonDuration:comparisonPulse?.duration??null,selectionPulse:!!selectionPulse,selectionDuration:selectionPulse?.duration??null,comparisonId:view?.tests?.comparison?.id??null,comparisonState:view?.tests?.comparison?.state??null,candidates:Object.fromEntries(Object.entries(candidateMaterials).map(([label,material])=>[label,{color:material.color.getHexString(),emissive:material.emissiveIntensity,eligible:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.eligible??null,versionId:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.versionId??null,contentHash:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.contentHash??null}])),selection:{id:view?.operating?.selectionId??null,versionId:view?.operating?.versionId??null,contentHash:view?.operating?.contentHash??null,plate:plateMaterial?.color.getHexString()??null,emissive:plateMaterial?.emissiveIntensity??0},handover:{selectionId:view?.inheritance?.selectionId??null,color:handoverMaterial?.color.getHexString()??null},later:{id:view?.tests?.later?.id??null,state:view?.tests?.later?.state??null,observedRunId:view?.tests?.later?.observedRunId??null,color:laterMaterial?.color.getHexString()??null,versions:Object.fromEntries((view?.tests?.later?.candidates??[]).map(candidate=>[candidate.label,candidate.versionId]))},wall:{color:wallMaterial?.color.getHexString()??null,emissive:wallMaterial?.emissiveIntensity??0},wallTrace:!!wallTrace,wallTraceDuration:wallTrace?.duration??null,wallTraceCount:wallTrace?.count??null,wallTraces:globalThis.__workplaceWallTraces??0,wallDurations:globalThis.__workplaceWallDurations??[],wallCounts:globalThis.__workplaceWallCounts??[]})}; return { apply, resize, setSuspended(value)`);
       source = source.replace('comparisonPulse = { start: performance.now(), duration: 160 };', 'comparisonPulse = { start: performance.now(), duration: 160 }; globalThis.__workplaceComparisonPulses=(globalThis.__workplaceComparisonPulses??0)+1; globalThis.__workplaceComparisonDurations ??= []; globalThis.__workplaceComparisonDurations.push(160);');
       source = source.replace('selectionPulse = { start: performance.now(), duration: 180 };', 'selectionPulse = { start: performance.now(), duration: 180 }; globalThis.__workplaceSelectionPulses=(globalThis.__workplaceSelectionPulses??0)+1; globalThis.__workplaceSelectionDurations ??= []; globalThis.__workplaceSelectionDurations.push(180);');
       if(fault==='operation-omit-wall-trace') {
@@ -642,7 +643,7 @@ export async function runZoom(base,out,fault='') {
       })),'200% zoom navigation labels escape their controls');
       const top=await b.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
       await writeFile(path.join(out,String(width),'zoom-top.png'),Buffer.from(top.data,'base64'));
-      for(const station of ['customers','evaluator','compare']) {
+      for(const station of ['customers','evaluator','owner','repair','next','compare']) {
         const control=await b.evaluate(station=>{
           const e=document.querySelector(`#bookshop-stations [data-station="${station}"]`);e.scrollIntoView({block:'center',behavior:'instant'});e.focus();const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,width:r.width,height:r.height};
         },station);
@@ -709,7 +710,7 @@ export async function runExactViewports(base,out,fault='') {
       await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
       assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready',12000),'Exact viewport real 3D room did not become ready');
       assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')),'Exact viewport actual WebGL2 context missing');
-      for(const station of ['customers','evaluator','compare']) {
+      for(const station of ['customers','evaluator','owner','repair','next','compare']) {
         const control=await b.evaluate(station=>{
           const e=document.querySelector(`#bookshop-stations [data-station="${station}"]`);e.scrollIntoView({block:'center',behavior:'instant'});e.focus();const r=e.getBoundingClientRect();return {width:r.width,height:r.height};
         },station);
@@ -800,13 +801,16 @@ export async function runBrowser(base,out,fault = '',empty = false) {
         assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state === 'ready'), 'Real WebGL2 room did not become ready');
         assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')), 'Actual WebGL2 context missing');
         assert.ok(await b.evaluate(()=>globalThis.__workplaceProbe?.triangles > 100), 'No real geometry was drawn');
-        for(const [station,title] of [['customers','Customer evidence'],['evaluator','Independent evaluator']]) {
+        for(const [station,title] of [['customers','Customer evidence'],['evaluator','Independent evaluator'],['owner','Requirements'],['repair','Repair review'],['next','Next shift']]) {
           await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
           const point=await b.evaluate(station=>globalThis.__workplaceStationPoint(station),station);
           const count=b.commands.length;
           await b.send('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',clickCount:1});
           await b.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point,button:'left',clickCount:1});
           assert.equal(await b.evaluate(()=>document.getElementById('panel-title').textContent),title,'Native canvas pick opened the wrong panel');
+          if(station==='owner') assert.equal(await b.evaluate(()=>!document.getElementById('owner-record').hidden && document.querySelectorAll('#owner-requirements .contract-line').length===6),true,'The owner desk does not show its complete requirements folder');
+          if(station==='repair') assert.equal(await b.evaluate(()=>!document.getElementById('repair-view').hidden && document.querySelectorAll('#repair-incidents .incident-row').length>0 && !document.querySelector('#repair-view input, #repair-view textarea, #repair-view select')),true,'The incident review tray is missing or editable');
+          if(station==='next') assert.equal(await b.evaluate(()=>!document.getElementById('next-view').hidden && document.querySelectorAll('#next-inheritance .contract-line').length>0 && document.querySelectorAll('#handover-incidents .incident-row').length>0),true,'The handover shelf is missing its inherited record or incident history');
           assert.equal(b.commands.length,count,'Canvas pick submitted a command');
         }
       }
@@ -895,6 +899,9 @@ export async function runLifecycle(base,out,fault='') {
         assert.equal(r.materials,0,'Old room material remains');
         assert.ok(await b.evaluate(()=>globalThis.__s29GLs.every(gl=>gl.isContextLost())),'Old room context remains live');
         assert.equal(r.contexts,0,'Old room context count remains');
+        assert.equal(await b.evaluate(()=>!document.getElementById('gtm-stations').hidden &&
+          [...document.querySelectorAll('#gtm-stations [data-station]')].length===4 &&
+          [...document.querySelectorAll('#gtm-stations [data-station]')].every(node=>node.getClientRects().length>0)),true,'The preserved Stonebridge static view became unusable after Bellwether switches');
       }
       resources.push(r);
     }
