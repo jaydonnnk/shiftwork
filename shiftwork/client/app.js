@@ -32,12 +32,92 @@ function renderTestBench(view) {
   label.textContent = state === 'UNREPORTED' ? 'Diagnostic state not reported'
     : `Diagnostic ${state}${missing ? ` · ${missing} missing evidence` : ''}`;
 }
+const WALL_SOURCE_TEXT = { current: 'Current operation record', historical: 'Historical record · not loaded',
+  administrative: 'Administrative record · no derivation' };
+const WALL_MEANING_TEXT = { recorded: 'Recorded consequence', negative: 'Negative consequence · not success',
+  pending: 'Incomplete route · no arrival inferred', conflict: 'Contradictory link',
+  historical: 'Settled quietly', administrative: 'Settled quietly' };
+function showWallTrace(count) {
+  const label = $('wall-trace');
+  if (!label) return;
+  label.textContent = count > 1 ? `Recorded evidence added · ${count} events` : 'Recorded evidence added';
+  label.dataset.state = 'active';
+}
+function resetConsequenceWall(message) {
+  const status = $('wall-status');
+  status.textContent = message; status.dataset.consistency = ''; status.dataset.runState = '';
+  delete status.dataset.countMatches; delete status.dataset.histogramMatches; delete status.dataset.chain;
+  text('wall-trace', 'No recorded-evidence trace.'); $('wall-trace').dataset.state = 'idle';
+  empty($('ledger-totals'), 'No verified data loaded.');
+  empty($('wall-events'), 'No verified data loaded.');
+}
+function renderConsequenceWall(view) {
+  const consequences = view.consequences;
+  const status = $('wall-status');
+  const lines = [];
+  if (view.run?.purpose === 'OPERATION') {
+    const runLine = `Operation ${view.run.id} · ${view.run.state}${view.run.failureKind ? ` · ${humanize(view.run.failureKind)}` : ''}`;
+    lines.push(runLine);
+    if (['QUEUED', 'RUNNING'].includes(view.run.state)) lines.push('Pending. No consequence is inferred from an unfinished run.');
+    else if (view.run.state === 'FAILED') lines.push('Failed. Confirmed records stay visible; no success is implied.');
+    else if (view.run.state === 'FINALIZED' && view.run.failedCheckCount > 0) {
+      lines.push(`Finalized with ${view.run.failedCheckCount} failed mandatory check${view.run.failedCheckCount === 1 ? '' : 's'}. No success is implied.`);
+    } else if (view.run.state === 'FINALIZED' && view.run.checkCount === 0) {
+      lines.push('Finalized without independent checks. Evidence incomplete.');
+    }
+  }
+  lines.push(`Chain ${humanize(consequences.chainStatus)}${view.consistency === 'conflict' ? ' · reads disagree' : ''}`);
+  lines.push(consequences.countMatches === false
+    ? `Count disagreement: board ${consequences.eventCount}, ledger ${consequences.ledgerEventLength}`
+    : `Counts agree: ${consequences.eventCount} recorded events`);
+  lines.push(consequences.histogramMatches === false ? 'Type totals disagree' : 'Type totals agree');
+  if (consequences.otherEventCount) {
+    lines.push(`${consequences.otherEventCount} other recorded event${consequences.otherEventCount === 1 ? '' : 's'} stay text-only: ${consequences.otherTypes.map(humanize).join(', ')}`);
+  }
+  status.textContent = lines.join(' · ');
+  status.dataset.consistency = view.consistency;
+  status.dataset.runState = view.run?.state ?? '';
+  status.dataset.countMatches = String(consequences.countMatches);
+  status.dataset.histogramMatches = String(consequences.histogramMatches);
+  status.dataset.chain = consequences.chainStatus;
+  const totals = $('ledger-totals');
+  if (!consequences.totals.length) empty(totals, 'No ledger events yet.');
+  else totals.replaceChildren(...consequences.totals.map(({ name, count }) => {
+    const row = element('div', null, 'total-row');
+    row.dataset.ledgerType = name; row.dataset.ledgerCount = String(count);
+    row.append(element('span', humanize(name)), element('strong', count));
+    return row;
+  }));
+  const wall = $('wall-events');
+  if (!consequences.events.length) return empty(wall, 'No allowlisted consequence recorded. Other events stay in the text records above.');
+  wall.replaceChildren(...consequences.events.map(event => {
+    const row = element('article', null, 'wall-event');
+    row.dataset.wallEvent = event.id; row.dataset.wallSeq = String(event.seq);
+    row.dataset.wallType = event.type; row.dataset.wallSource = event.source;
+    row.dataset.wallLink = event.linkState; row.dataset.wallMeaning = event.meaning;
+    row.dataset.synthetic = String(event.synthetic);
+    if (event.incidentId) row.dataset.wallIncident = event.incidentId;
+    if (event.versionId) row.dataset.wallVersion = event.versionId;
+    if (event.link) {
+      row.dataset.wallRun = event.link.runId; row.dataset.wallCheck = event.link.checkId;
+      row.dataset.wallOutput = event.link.outputId; row.dataset.wallOrdinal = String(event.link.ordinal);
+      row.dataset.wallVerdict = event.link.verdict;
+      if (event.reasonCode) row.dataset.wallReason = event.reasonCode;
+    }
+    row.append(element('strong', `${humanize(event.type)} · event ${event.seq}`));
+    row.append(element('small', `${WALL_SOURCE_TEXT[event.source]} · ${WALL_MEANING_TEXT[event.meaning]}`, 'wall-source'));
+    if (event.link) row.append(element('small', `Run ${event.link.runId} · check ${event.link.checkId} · output ${event.link.outputId} · request ${event.link.ordinal} · verdict ${event.link.verdict}${event.reasonCode ? ` · ${event.reasonCode}` : ''}`, 'evidence-meta'));
+    if (event.incidentId) row.append(element('small', `Incident ${event.incidentId}`, 'evidence-meta'));
+    return row;
+  }));
+}
 function publishPresentation(reason) {
   const context = { board: state.slug, shiftId: state.loadedShiftId, inspection: { ...inspection } };
   let publication;
   if (['error', 'context', 'history', 'page-lifecycle'].includes(reason)) {
     publication = { kind: 'reset', context, reason };
     text('workplace-state', reason === 'error' ? 'Recorded state unavailable. Refresh to inspect verified evidence.' : 'Loading recorded context.');
+    resetConsequenceWall(reason === 'error' ? 'Recorded state unavailable.' : 'Loading recorded context.');
   } else if (reason === 'loading') publication = { kind: 'loading', context, generation: state.generation };
   else {
     if (!state.board) return;
@@ -50,6 +130,7 @@ function publishPresentation(reason) {
       selectedOutputId: state.selected, activeStation: state.station });
     publication = { kind: 'accepted', view, generation: state.generation, intent: state.intent, reason };
     renderTestBench(view);
+    renderConsequenceWall(view);
     const verdicts = view.evidence?.checks.map(check => `${check.verdict}: ${check.reasonCode ?? 'recorded check'}`).join('; ');
     text('workplace-state', view.consistency === 'conflict' ? 'Recorded reads disagree. Inspect the workbench; current labels are unavailable.' :
       `${view.context.inspection.mode === 'history' ? 'Historical inspection. ' : 'Current inspection. '}Operating choice: ${view.operating ? `${view.operating.versionId} (${view.operating.validity})` : 'None selected'}. Saved version: ${view.saved.latestVersionId ?? 'None'}. ` +
@@ -74,6 +155,7 @@ async function initializeGraphics() {
     if (epoch !== hostEpoch) return;
     clearTimeout(hostTimer); hostTimer = null;
     workplaceHost = createWorkplaceHost({ container: $('workplace-canvas'), fallback: document.querySelector('img.room-art'), status: $('graphics-status'),
+      onConsequence({ count }) { showWallTrace(count); },
       onStation({ board, shiftId, stationId }) {
         if (latestPresentation?.kind !== 'accepted' || board !== state.slug || shiftId !== state.loadedShiftId || latestPresentation.generation !== state.generation || latestPresentation.intent !== state.intent) return;
         if (!document.querySelector(`#bookshop-stations [data-station="${stationId}"]`)) return;
@@ -314,7 +396,7 @@ function clearData(message) {
   for (const id of ['metric-requests', 'metric-incidents', 'metric-attempts']) text(id, '…');
   for (const id of ['metric-chain', 'service-tag', 'queue-tag', 'repair-tag', 'attempt-detail', 'event-detail', 'investigation-tag', 'compare-tag']) text(id, 'Not loaded');
   text('incident-tag', 'Not loaded · Synthetic scenario');
-  for (const id of ['artifact-detail', 'incident-list', 'limit-list', 'ledger-totals', 'customer-list']) empty($(id), 'No verified data loaded.');
+  for (const id of ['artifact-detail', 'incident-list', 'limit-list', 'customer-list']) empty($(id), 'No verified data loaded.');
   empty($('orientation-list'), 'Orientation loads with your shift.');
   empty($('investigation-list'), 'No verified entries loaded.');
   empty($('diagnostic-result'), 'No verified diagnostic loaded.');
@@ -476,7 +558,17 @@ function renderBoard() {
   if (!board.incidents.length) empty(incidents, 'No unresolved incidents. The room reflects the recorded state.');
   else incidents.replaceChildren(...board.incidents.map(incident => {
     const button = element('button', null, 'incident-row');
+    const current = inspection.mode === 'current' && incident.opening_run_id === state.run?.id;
+    button.dataset.incidentId = incident.id;
+    button.dataset.incidentState = incident.state;
+    button.dataset.incidentSource = current ? 'current' : 'historical';
+    button.dataset.openedEventSeq = String(incident.opened_event_seq);
+    button.dataset.openingRun = incident.opening_run_id;
+    button.dataset.failingOutput = incident.failing_output_ref;
+    button.dataset.checkResult = incident.check_result_id;
+    if (incident.resolved_event_seq != null) button.dataset.resolvedEventSeq = String(incident.resolved_event_seq);
     button.append(element('strong', `${incident.id} · ${humanize(incident.state)}`), element('span', incident.reason_code));
+    button.append(element('small', `${current ? 'Current operation record' : 'Historical record'} · opened by event ${incident.opened_event_seq} · run ${incident.opening_run_id}${incident.resolved_event_seq != null ? ` · resolved by event ${incident.resolved_event_seq}` : ''}`, 'evidence-meta'));
     button.addEventListener('click', async () => {
       const intent = ++state.intent;
       inspection = { mode: 'history', historicalRunId: incident.opening_run_id };
@@ -497,13 +589,6 @@ function renderBoard() {
     list.append(...limits.map(limit => element('li', limit, 'limit-item')));
     $('limit-list').replaceChildren(list);
   }
-  const totals = Object.entries(board.ledger_totals);
-  if (!totals.length) empty($('ledger-totals'), 'No ledger events yet.');
-  else $('ledger-totals').replaceChildren(...totals.map(([name, count]) => {
-    const row = element('div', null, 'total-row');
-    row.append(element('span', humanize(name)), element('strong', count));
-    return row;
-  }));
   $('open-shift').disabled = state.pending || shift?.state === 'open';
   $('run-shift').disabled = state.pending || !version || !shift?.operation_allowed || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run) ||
     (board.latest_run?.purpose === 'OPERATION' && board.latest_run?.state === 'FINALIZED' && board.latest_run?.shift_id === shift.id);
@@ -641,7 +726,16 @@ function renderCustomers() {
   if (!linked.events.length) ledger.append(element('p', 'No linked ledger event recorded. No outcome is implied.', 'empty'));
   for (const event of linked.events) {
     const row = element('div', null, 'event-row'); row.dataset.eventSeq = event.seq;
-    row.append(element('strong', humanize(event.event_type)), element('small', `Event ${event.seq} · result ${event.derivation.check_id}`)); ledger.append(row);
+    const link = event.derivation ?? null;
+    const current = link && inspection.mode === 'current' && link.run_id === run.id;
+    const source = !link ? 'administrative' : current ? 'current' : 'historical';
+    const incident = state.board?.incidents?.find(item => item.opened_event_seq === event.seq || item.resolved_event_seq === event.seq) ?? null;
+    row.dataset.eventSource = source;
+    row.dataset.eventMeaning = !link ? 'administrative' : link.verdict === 'pass' ? 'recorded' : 'negative';
+    if (incident) row.dataset.incidentId = incident.id;
+    row.append(element('strong', humanize(event.event_type)));
+    row.append(element('small', `Event ${event.seq} · ${WALL_SOURCE_TEXT[source]}${link ? ` · result ${link.check_id} · output ${link.observed_ref} · request ${link.request_ordinal} · verdict ${link.verdict}${link.reason_code ? ` · ${link.reason_code}` : ''}` : ' · no derivation'}${incident ? ` · incident ${incident.id}` : ''}`, 'evidence-meta'));
+    ledger.append(row);
   }
   selected.append(request, answer, record, comparison, ledger);
   if (run.state === 'FINALIZED' && ['customers', 'pipeline'].includes(state.station)) document.body.dataset.evidence = 'finalized';

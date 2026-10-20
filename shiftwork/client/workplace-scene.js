@@ -3,7 +3,7 @@ import { roomDefinitions } from './workplace-rooms.js';
 
 export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure }) {
   let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity, pulse = null, indicatorMaterial = null;
-  let comparisonPulse = null, selectionPulse = null, plateMaterial = null;
+  let comparisonPulse = null, selectionPulse = null, plateMaterial = null, wallTrace = null, wallMaterial = null, traceMaterial = null, traceLine = null;
   const candidateMaterials = {}, geometries = new Set(), materials = new Set(), targets = [];
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-8,8,6,-6,.1,100);
@@ -16,7 +16,8 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   function settlePulse() { pulse = null; if (indicatorMaterial) indicatorMaterial.emissiveIntensity = 0; }
   function settleComparisonPulse() { comparisonPulse = null; for (const material of Object.values(candidateMaterials)) material.emissiveIntensity = 0; }
   function settleSelectionPulse() { selectionPulse = null; if (plateMaterial) plateMaterial.emissiveIntensity = 0; }
-  function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); }
+  function settleWallTrace() { wallTrace = null; if (traceLine) traceLine.visible = false; if (traceMaterial) traceMaterial.opacity = 0; if (wallMaterial) wallMaterial.emissiveIntensity = 0; }
+  function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); settleWallTrace(); }
   function draw(now = performance.now()) {
     raf = null;
     if (disposed || suspended) return;
@@ -37,9 +38,17 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
       if (progress >= 1) settleSelectionPulse();
       else if (plateMaterial) plateMaterial.emissiveIntensity = .8 * (1 - progress);
     }
+    if (wallTrace) {
+      const progress = (now - wallTrace.start) / wallTrace.duration;
+      if (progress >= 1) settleWallTrace();
+      else {
+        if (traceMaterial) traceMaterial.opacity = .9 * (1 - progress);
+        if (wallMaterial) wallMaterial.emissiveIntensity = .6 * (1 - progress);
+      }
+    }
     try { renderer.render(scene, camera); }
     catch { onFailure('render-failed'); }
-    if (pulse || comparisonPulse || selectionPulse) requestFrame();
+    if (pulse || comparisonPulse || selectionPulse || wallTrace) requestFrame();
   }
   function requestFrame() { if (!disposed && !suspended && raf === null) raf = requestAnimationFrame(draw); }
   function resize({width,height,pixelRatio}) {
@@ -113,9 +122,23 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
       const plate = new THREE.Mesh(cube, plateMaterial);
       plate.position.fromArray(room.anchors.plate); plate.scale.set(.8,.05,.42); scene.add(plate);
     }
+    wallMaterial = new THREE.MeshStandardMaterial({color:'#48617a',emissive:'#000000',emissiveIntensity:0,roughness:1});
+    materials.add(wallMaterial);
+    const wallPanel = new THREE.Mesh(cube, wallMaterial);
+    wallPanel.position.set(4,1.9,-2.69); wallPanel.scale.set(2.45,1.35,.04); scene.add(wallPanel);
+    if (room.anchors?.plate && room.anchors?.wall) {
+      const traceGeometry = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(...room.anchors.plate), new THREE.Vector3(...room.anchors.wall)]);
+      geometries.add(traceGeometry);
+      traceMaterial = new THREE.LineBasicMaterial({color:'#edbd68',transparent:true,opacity:0});
+      materials.add(traceMaterial);
+      traceLine = new THREE.Line(traceGeometry, traceMaterial);
+      traceLine.visible = false; scene.add(traceLine);
+    }
     const testColors = {RESERVED:'#edbd68',RUNNING:'#91acb9',COMPLETE:'#8fbf9f',FAILED:'#d98a7a'};
     function apply(next, transitions = []) {
-      if(disposed) return;
+      if(disposed) return false;
+      let startedConsequence = false;
       view = next; const anchor = next && room.stationAnchors[next.station];
       rim.visible = !!anchor; if(anchor) rim.position.set(anchor[0],.1,anchor[2]);
       const trialState = next?.tests?.diagnostic?.trials?.[0]?.state;
@@ -126,6 +149,10 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
         material.color.set(candidate?.eligible === true ? '#8fbf9f' : candidate?.eligible === false ? '#d98a7a' : '#6c5943');
       }
       if (plateMaterial) plateMaterial.color.set(next?.operating ? '#edbd68' : '#263443');
+      const currentWallEvents = (next?.consequences?.events ?? []).filter(event => event.source === 'current');
+      const negativeWall = currentWallEvents.some(event => event.meaning === 'negative' || event.meaning === 'pending');
+      if (wallMaterial) wallMaterial.color.set(next?.consistency === 'conflict' ? '#263443' :
+        negativeWall ? '#d98a7a' : currentWallEvents.some(event => event.linkState === 'linked') ? '#8fbf9f' : '#48617a');
       if (!reducedMotion && transitions.some(item => item.kind === 'test-update')) {
         pulse = { start: performance.now() };
         indicatorMaterial.emissive.set('#edbd68');
@@ -139,7 +166,16 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
         selectionPulse = { start: performance.now(), duration: 180 };
         if (plateMaterial) { plateMaterial.emissive.set('#edbd68'); plateMaterial.emissiveIntensity = .8; }
       }
+      const arrival = transitions.find(item => item.kind === 'linked-consequence');
+      if (!reducedMotion && !wallTrace && arrival && next?.consistency !== 'conflict') {
+        wallTrace = { start: performance.now(), duration: 320, count: arrival.count ?? 1 };
+        if (traceLine) traceLine.visible = true;
+        if (traceMaterial) traceMaterial.opacity = .9;
+        if (wallMaterial) { wallMaterial.emissive.set('#edbd68'); wallMaterial.emissiveIntensity = .6; }
+        startedConsequence = true;
+      }
       requestFrame();
+      return startedConsequence;
     }
     listen('pointerdown',event=>{ pointer = {x:event.clientX,y:event.clientY,id:event.pointerId,view}; });
     listen('pointercancel',()=>{ pointer=null; });

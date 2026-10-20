@@ -236,6 +236,17 @@ summary { cursor: pointer; color: var(--green); padding: 5px 0; }
 .result-row small { display: block; font-size: 10px; color: var(--muted); }
 .event-row { font-size: 11px; border-left: 2px solid var(--amber); padding: 6px 9px; margin-top: 6px; background: #edbd6810; }
 .event-row small { display: block; font-size: 10px; color: var(--muted); }
+.event-row[data-event-meaning="negative"] { border-left-color: var(--red); background: #b34f4509; }
+.event-row[data-event-source="historical"], .event-row[data-event-source="administrative"] { opacity: .85; }
+.wall-trace { font-size: 11px; color: var(--muted); margin: 6px 0 0; }
+.wall-trace[data-state="active"] { color: #7d5b1f; font-weight: 600; }
+.wall-event { border-left: 2px solid var(--amber); padding: 6px 9px; margin-top: 6px; background: #edbd6710; overflow-wrap: anywhere; }
+.wall-event strong { display: block; font-size: 11px; }
+.wall-event small { display: block; font-size: 10px; color: var(--muted); margin-top: 3px; }
+.wall-event .wall-source { font-weight: 600; }
+.wall-event[data-wall-meaning="negative"], .wall-event[data-wall-meaning="pending"], .wall-event[data-wall-meaning="conflict"] { border-left-color: var(--red); background: #b34f4509; }
+.wall-event[data-wall-source="historical"], .wall-event[data-wall-source="administrative"] { opacity: .85; }
+.incident-row[data-incident-source="historical"] { opacity: .9; }
 .deferred-symbol { margin: 25px 0 15px; color: var(--green); font-size: 40px; }
 #deferred-copy { margin: 13px 0 22px; color: var(--muted); font-size: 12px; }
 .orientation-list { margin: 0; padding-left: 17px; color: var(--muted); font-size: 11px; }

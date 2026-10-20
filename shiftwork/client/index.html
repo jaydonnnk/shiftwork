@@ -155,7 +155,14 @@
         <div id="artifact-detail" class="artifact-detail"></div>
         <section class="panel-section" data-synthetic-region="incidents"><div class="section-heading"><h3>Unresolved incidents</h3><span class="synthetic">Synthetic scenario</span></div><div id="incident-list"></div></section>
         <section class="panel-section"><h3>Known limits</h3><div id="limit-list"></div></section>
-        <section class="panel-section" data-synthetic-region="ledger"><div class="section-heading"><h3>Ledger totals</h3><span class="synthetic">Synthetic scenario</span></div><div id="ledger-totals"></div></section>
+        <section class="panel-section" data-synthetic-region="ledger">
+          <div class="section-heading"><h3>Consequence wall</h3><span class="synthetic">Synthetic scenario</span></div>
+          <p class="help-text">Only a linked operational record adds an event. One new linked event adds one 320ms recorded-evidence trace; it never means the customer succeeded.</p>
+          <p id="wall-trace" class="wall-trace" data-state="idle" role="status">No recorded-evidence trace.</p>
+          <p id="wall-status" class="mono evidence-meta">No verified ledger loaded.</p>
+          <div id="ledger-totals"></div>
+          <div id="wall-events"></div>
+        </section>
         <div class="panel-actions"><button id="open-shift" class="button secondary" disabled>Open shift</button><button id="run-shift" class="button primary" disabled>Run customer shift <span aria-hidden="true">→</span></button></div>
         <p id="run-help" class="help-text">Load the board to see available actions.</p>
       </section>

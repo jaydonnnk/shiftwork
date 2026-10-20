@@ -1,6 +1,6 @@
 import { diffWorkplace } from './workplace-view.js';
 
-export function createWorkplaceHost({container,fallback,status,onStation}) {
+export function createWorkplaceHost({container,fallback,status,onStation,onConsequence}) {
   let latest=null, previous=null, scene=null, token=0, disposed=false, expanded=false, visible=false, mounting=false, timer=null, brokenModule=false;
   let simple=false, unavailable=false, mountedTier=null, failureCode=null, generation=-1;
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
@@ -38,25 +38,35 @@ export function createWorkplaceHost({container,fallback,status,onStation}) {
         onFailure(code) { if(owner===token && !disposed) failure(code); }});
     } catch { if(owner===token && !disposed) failure('init-failed'); return; }
     if(disposed || owner!==token) { handle.dispose(); return; }
-    clearTimeout(timer); timer=null; mounting=false; scene=handle; previous=latest.view;
+    clearTimeout(timer); timer=null; mounting=false; scene=handle;
+    const transitions=diffWorkplace(previous,view);
+    previous=view.consistency==='conflict'?previous:view;
     fallback.hidden=true; container.parentElement.dataset.graphics='ready'; retryButton.hidden=true;
-    message('ready','3D Bellwether room. Select intake, the console, diagnosis or assessment.'); resize();
+    message('ready','3D Bellwether room. Select intake, the console, diagnosis or assessment.');
+    if(transitions.length) {
+      const consequence=transitions.find(item=>item.kind==='linked-consequence');
+      if(handle.apply(view,transitions) && consequence) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});
+    }
+    resize();
   }
   function publish(publication) {
     if(disposed) return;
     if(publication.generation!=null && publication.generation<generation) return;
     if(publication.generation!=null) generation=publication.generation;
     const prior=previous; latest=publication;
-    if(publication.kind==='reset') { release(); previous=null; if(!unavailable) message('waiting',publication.reason==='error'?'Recorded state unavailable. Refresh your workbench.':'Loading recorded context.'); return; }
+    if(publication.kind==='reset') { release(); if(!unavailable) message('waiting',publication.reason==='error'?'Recorded state unavailable. Refresh your workbench.':'Loading recorded context.'); return; }
     if(publication.kind==='loading') { if(!unavailable) message('loading','Refreshing recorded state'); return; }
     const view=publication.view;
     if(view.context.board!=='bookshop') { release(); previous=view; message('static','This workplace keeps its existing static overview.'); return; }
     if(unavailable) { previous=view; showFailure(); return; }
     if(prior && contextKey(prior)!==contextKey(view)) release();
     const transitions = view.consistency==='conflict' ? [] : diffWorkplace(previous,view);
-    previous=view.consistency==='conflict'?null:view;
-    if(scene) { scene.apply(view,transitions); suspend(); }
-    else mount();
+    const consequence = transitions.find(item => item.kind==='linked-consequence');
+    if(scene) {
+      if(view.consistency!=='conflict') previous=view;
+      const started=scene.apply(view,transitions); suspend();
+      if(started && consequence) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});
+    } else mount();
     if(scene) message('ready',view.consistency==='conflict'?'Recorded reads disagree. Inspect the workbench; no outcome is inferred.':'3D Bellwether room. Select intake, the console, diagnosis or assessment.');
   }
   function retry() { if(disposed || brokenModule) return; unavailable=false; release(); previous=null; mount(); }
