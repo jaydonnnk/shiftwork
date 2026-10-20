@@ -3138,3 +3138,20 @@ The pending-state repair also covers opening/operating and close/next-shift comp
   stable scroll position, assert the hit element is the intended control, blur
   competing focus before a touch reach check and dispatch at freshly computed
   coordinates.
+
+## 2026-10-20 S31 harness: page-evaluate scope, publication baseline and the wrong preview mode
+
+- What happened: the ownership control runner threw `ReferenceError: beforeAttempts
+  is not defined` because a page `evaluate` callback referenced Node-scope
+  variables. The history hold control then counted legitimate comparison
+  publications made after inspection was restored as stale. A board journey
+  failed because it used the S31 preview with the recorded assist gateway, so
+  the assist request correctly succeeded instead of producing the journey's
+  expected 409.
+- Root cause: browser `evaluate` callbacks run in isolated scope, the hold
+  control needed a publication baseline captured before the fault, and the
+  board journey's no-gateway denial requires `create_preview` without
+  `recorded_assist`.
+- Prevention rule: pass every value a page callback reads as an argument, scope
+  publication assertions to a pre-fault index, and use the preview mode that
+  matches the journey's expected failure (no assist gateway for `browser.mjs`).
