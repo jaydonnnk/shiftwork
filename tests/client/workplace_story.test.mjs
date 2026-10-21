@@ -35,6 +35,12 @@ export const FAULTS = {
   'suggestive-line': { needle: "5: 'Nothing goes live until you choose and say why.',",
     replacement: "5: 'Nothing goes live until you choose; version A looks better.',",
     check: 'owner', expect: 'owner_lines_never_suggest: line 5 suggests' },
+  'starter-open-queue': { needle: "starterOpen ? lamp('customers', 'attention', `${open} open ${open === 1 ? 'complaint' : 'complaints'}`)\n    : ", replacement: '',
+    check: 'lamps', expect: 'lamps_reflect_state_with_text: starter with open complaints (customers)' },
+  'starter-open-service': { needle: "    : starterOpen ? lamp('service', 'attention', 'Live, complaints open')\n", replacement: '',
+    check: 'lamps', expect: 'lamps_reflect_state_with_text: starter with open complaints (service)' },
+  'starter-open-owner': { needle: "return open ? OWNER_LINES.openComplaints.replace('{n}', String(open)) : null;", replacement: 'return null;',
+    check: 'owner', expect: 'owner_lines_never_suggest: open complaints under the starter' },
   'compare-pass': { needle: "lamp('compare', 'idle', 'No score, no default')", replacement: "lamp('compare', 'pass', 'No score, no default')",
     check: 'lamps', expect: 'lamps_reflect_state_with_text: compare shows pass' },
   'experiment-pass': { needle: "const ownOperation = Boolean(run && run.purpose === 'OPERATION' && operating && run.selectionId === operating.selectionId);",
@@ -142,7 +148,8 @@ export function suggests(text, words) {
 
 async function ownerCheck(api) {
   const lines = Object.entries(api.OWNER_LINES).map(([key, line]) => [key, line.replace('{n}', '3').replace('{p}', '2').replace('{m}', '5')]);
-  assert.equal(lines.length, 8, 'owner_lines_never_suggest: the catalogue changed size without a recorded review');
+  // Nine lines since the 2026-10-22 re-approval added openComplaints.
+  assert.equal(lines.length, 9, 'owner_lines_never_suggest: the catalogue changed size without a recorded review');
   // Scanner self-test: every needle is detected inside a rendered line.
   for (const needle of [...FIX_WORDS, ...CAUSE_WORDS, 'ver-0002', 'version A', ' B ']) {
     const rendered = `${lines[0][1]} ${needle} ${lines[1][1]}`;
@@ -155,7 +162,13 @@ async function ownerCheck(api) {
   // ownerLine substitutes public counts only and never invents a zero.
   const slips = v => { v.slips = { tally: tally(2, 3) }; };
   assert.equal(api.ownerLine(view(slips), { step: 1 }), '3 customers in the last recorded run did not get what they asked for.');
-  assert.equal(api.ownerLine(view(), { step: 1 }), null, 'owner_lines_never_suggest: an unknown count became a line');
+  const resolved = v => { v.consequences.incidents = []; };
+  assert.equal(api.ownerLine(view(resolved), { step: 1 }), null, 'owner_lines_never_suggest: an unknown count became a line');
+  // A passing starter run with complaints still open (S37 review F2): the open count, never the run's zero.
+  const starterPassed = v => { v.run = run('OPERATION', 'FINALIZED', { selectionId: 'sel-0001' }); v.slips = { tally: tally(1, 0) };
+    v.consequences.incidents = ['OPEN', 'OPEN', 'CLOSED_UNRESOLVED', 'RESOLVED'].map((state, i) => ({ id: `inc-${i}`, state })); };
+  assert.equal(api.ownerLine(view(starterPassed), { step: 1 }), '3 customer complaints are still open.', 'owner_lines_never_suggest: open complaints under the starter');
+  assert.equal(api.ownerLine(view(v => { starterPassed(v); chosen(v); }), { step: 1 }), null, 'owner_lines_never_suggest: open complaints credited to a learner choice');
   assert.equal(api.ownerLine(view(slips), { step: 7 }), "2 of 5 recorded requests passed the inspector's checks.");
   assert.equal(api.ownerLine(view(), { step: 7 }), null, 'owner_lines_never_suggest: an unknown count became a line');
   assert.equal(api.ownerLine(view(v => { v.shiftState = 'closed'; }), { step: 7 }), api.OWNER_LINES.closed);
@@ -165,7 +178,13 @@ async function ownerCheck(api) {
 const lampOf = (api, v) => Object.fromEntries(api.lampStates(v).map(item => [item.stationId, [item.tone, item.text]]));
 async function lampsCheck(api) {
   const rows = [
-    ['no run', view(), { customers: ['idle', 'No recorded requests'], service: ['attention', 'Live, not yet run'], ledger: ['fail', '1 open'], compare: ['idle', 'Not started'] }],
+    // S37 review F2: the starter's passing run with complaints still open (13.5, re-approved 2026-10-22).
+    ['starter with open complaints', view(v => { v.run = run('OPERATION', 'FINALIZED', { selectionId: 'sel-0001' }); v.slips = { tally: tally(1, 0) };
+      v.consequences.incidents = ['OPEN', 'OPEN', 'OPEN'].map((state, i) => ({ id: `inc-${i}`, state })); }),
+      { customers: ['attention', '3 open complaints'], service: ['attention', 'Live, complaints open'], ledger: ['fail', '3 open'] }],
+    ['no run', view(v => { v.consequences.incidents = [{ id: 'inc-1', state: 'RESOLVED' }]; }),
+      { customers: ['idle', 'No recorded requests'], service: ['attention', 'Live, not yet run'], ledger: ['idle', 'None open'], compare: ['idle', 'Not started'] }],
+    ['no run, one open', view(), { customers: ['attention', '1 open complaint'], ledger: ['fail', '1 open'] }],
     ['failing operation', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED'); v.slips = { tally: tally(1, 1, 1) }; }),
       { customers: ['attention', '2 complaints'], service: ['fail', 'Live, checks failed'], evaluator: ['idle', 'Locked'] }],
     ['passing operation', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED'); v.slips = { tally: tally(3, 0) }; }),

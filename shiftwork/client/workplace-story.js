@@ -116,16 +116,20 @@ export function lampStates(view) {
   const ownOperation = Boolean(run && run.purpose === 'OPERATION' && operating && run.selectionId === operating.selectionId);
   const complaints = tally ? tally.fail + tally.error + tally.none : 0;
   const allPassed = Boolean(ownOperation && tally && tally.total > 0 && tally.pass === tally.total);
-  const customers = !run || !run.outputCount ? lamp('customers', 'idle', 'No recorded requests')
+  // Under the starter, recorded complaints stay open whatever the loaded run shows (13.5, re-approved 2026-10-22).
+  const open = (view.consequences?.incidents ?? []).filter(incident => UNRESOLVED.has(incident.state)).length;
+  const starterOpen = operating?.kind === 'STARTER_BASELINE' && open > 0;
+  const customers = starterOpen ? lamp('customers', 'attention', `${open} open ${open === 1 ? 'complaint' : 'complaints'}`)
+    : !run || !run.outputCount ? lamp('customers', 'idle', 'No recorded requests')
     : allPassed ? lamp('customers', 'pass', 'No complaints')
     : complaints ? lamp('customers', 'attention', `${complaints} ${complaints === 1 ? 'complaint' : 'complaints'}`)
     : lamp('customers', 'idle', `${run.outputCount} recorded ${run.outputCount === 1 ? 'request' : 'requests'}`);
   const service = !operating ? lamp('service', 'idle', 'No live version')
     : operating.validity === 'INVALIDATED' ? lamp('service', 'fail', 'Invalidated')
+    : starterOpen ? lamp('service', 'attention', 'Live, complaints open')
     : ownOperation && tally && TERMINAL.has(run.state) ? (allPassed ? lamp('service', 'pass', 'Live, checks passed') : lamp('service', 'fail', 'Live, checks failed'))
     : lamp('service', 'attention', 'Live, not yet run');
   const evaluator = run && !TERMINAL.has(run.state) ? lamp('evaluator', 'idle', `Locked · ${words(run.state)}`) : lamp('evaluator', 'idle', 'Locked');
-  const open = (view.consequences?.incidents ?? []).filter(incident => UNRESOLVED.has(incident.state)).length;
   const ledger = view.consequences?.chainStatus !== 'VALID' ? lamp('ledger', 'unknown', 'Unavailable')
     : open ? lamp('ledger', 'fail', `${open} open`) : lamp('ledger', 'idle', 'None open');
   const comparison = view.tests?.comparison;
@@ -158,6 +162,7 @@ export const OWNER_LINES = {
   6: 'The version you chose is the one that runs.',
   7: '{p} of {m} recorded requests passed the inspector\'s checks.',
   closed: 'Your choice carries into the next shift.',
+  openComplaints: '{n} customer complaints are still open.',
 };
 export function ownerLine(view, guide) {
   if (!guide?.step || !view) return null;
@@ -165,7 +170,9 @@ export function ownerLine(view, guide) {
   if (view.shiftState === 'closed') return OWNER_LINES.closed;
   if (guide.step === 1) {
     const n = tally ? tally.fail + tally.error + tally.none : null;
-    return n ? OWNER_LINES[1].replace('{n}', String(n)) : null;
+    if (n) return OWNER_LINES[1].replace('{n}', String(n));
+    const open = view.operating?.kind === 'STARTER_BASELINE' ? (view.consequences?.incidents ?? []).filter(incident => UNRESOLVED.has(incident.state)).length : 0;
+    return open ? OWNER_LINES.openComplaints.replace('{n}', String(open)) : null;
   }
   if (guide.step === 7) return tally ? OWNER_LINES[7].replace('{p}', String(tally.pass)).replace('{m}', String(tally.total)) : null;
   return OWNER_LINES[guide.step];
