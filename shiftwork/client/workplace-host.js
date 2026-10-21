@@ -1,8 +1,8 @@
 import { diffWorkplace } from './workplace-view.js';
 
-export function createWorkplaceHost({container,fallback,status,onStation,onConsequence}) {
+export function createWorkplaceHost({container,fallback,status,onStation,onConsequence,onAnchors}) {
   let latest=null, previous=null, scene=null, token=0, disposed=false, expanded=false, visible=false, mounting=false, timer=null, brokenModule=false;
-  let simple=false, unavailable=false, mountedTier=null, failureCode=null, generation=-1;
+  let simple=false, unavailable=false, mountedTier=null, failureCode=null, generation=-1, inspector={open:false,widthPx:0};
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   const controls=container.parentElement.parentElement;
   const retryButton=controls.querySelector('[data-graphics-retry]');
@@ -37,10 +37,11 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
       mountedTier=tier();
       handle=createWorkplaceScene({container,view,tier:mountedTier,reducedMotion:motion.matches,
         onPick(stationId) { if(!disposed && owner===token && latest?.kind==='accepted' && latest.view.context.board===view.context.board && latest.view.context.shiftId===view.context.shiftId) onStation({board:view.context.board,shiftId:view.context.shiftId,stationId,mountToken:owner}); },
-        onFailure(code) { if(owner===token && !disposed) failure(code); }});
+        onFailure(code) { if(owner===token && !disposed) failure(code); },
+        onAnchors(positions) { if(owner===token && !disposed) onAnchors?.(positions); }});
     } catch { if(owner===token && !disposed) failure('init-failed'); return; }
     if(disposed || owner!==token) { handle.dispose(); return; }
-    clearTimeout(timer); timer=null; mounting=false; scene=handle;
+    clearTimeout(timer); timer=null; mounting=false; scene=handle; if(inspector.open) handle.setInspector(inspector);
     const transitions=diffWorkplace(previous,view);
     previous=view.consistency==='conflict'?previous:view;
     fallback.hidden=true; container.parentElement.dataset.graphics='ready'; retryButton.hidden=true;
@@ -78,7 +79,8 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
   size.observe(container); intersection.observe(container);
   document.addEventListener('visibilitychange',suspend); motion.addEventListener('change',onMotion);
   retryButton.addEventListener('click',retry); simplerButton.addEventListener('click',lowerQuality);
-  return {publish,setExpanded(value) {expanded=value;suspend();},retry,dispose() {
+  function setInspector(value) { inspector={open:!!value?.open,widthPx:value?.open?Math.max(0,Number(value.widthPx)||0):0}; scene?.setInspector(inspector); }
+  return {publish,setExpanded(value) {expanded=value;suspend();},setInspector,retry,dispose() {
     if(disposed) return; disposed=true; release(); previous=null; latest=null;
     size.disconnect(); intersection.disconnect(); document.removeEventListener('visibilitychange',suspend); motion.removeEventListener('change',onMotion);
     retryButton.removeEventListener('click',retry); simplerButton.removeEventListener('click',lowerQuality);

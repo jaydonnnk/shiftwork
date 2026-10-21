@@ -1,11 +1,12 @@
 import * as THREE from './vendor/three-r180/three.module.js';
 import { roomDefinitions } from './workplace-rooms.js';
 
-export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure }) {
+export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure, onAnchors }) {
   let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity, pulse = null, indicatorMaterial = null;
   let comparisonPulse = null, selectionPulse = null, plateMaterial = null, wallTrace = null, wallMaterial = null, traceMaterial = null, traceLine = null;
   let handoverMaterial = null, laterMaterial = null;
   let ownerMarker = null, routingLabel = null, routingTravel = null;
+  let size = null, inspector = { open: false, widthPx: 0 }, anchorsDirty = true;
   const candidateMaterials = {}, routingMaterials = {}, northlineMarkers = {}, geometries = new Set(), materials = new Set(), targets = [];
   const scene = new THREE.Scene();
   const camera = new THREE.OrthographicCamera(-8,8,6,-6,.1,100);
@@ -56,6 +57,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     }
     try { renderer.render(scene, camera); }
     catch { onFailure('render-failed'); }
+    if (anchorsDirty && !disposed) { anchorsDirty = false; onAnchors?.(anchorPositions()); }
     if (pulse || comparisonPulse || selectionPulse || wallTrace) requestFrame();
   }
   function requestFrame() { if (!disposed && !suspended && raf === null) raf = requestAnimationFrame(draw); }
@@ -63,6 +65,14 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     if(disposed || width<=0 || height<=0) return;
     renderer.setPixelRatio(Math.min(pixelRatio,tier==='compact'?1:1.5));
     renderer.setSize(width,height,false);
+    size = {width,height}; fit();
+  }
+  // The inspector covers the left of the stage, so the room is fitted to the
+  // uncovered width and the view offset centres it there. Same camera, same pose.
+  function fit() {
+    if(disposed || !size) return;
+    const {width,height} = size;
+    const inset = inspector.open ? Math.min(Math.max(0,inspector.widthPx),width*.6) : 0;
     camera.updateMatrixWorld();
     const inverse = camera.matrixWorldInverse;
     const points = [];
@@ -70,9 +80,24 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     const margin = tier==='compact'?1.08:1.12;
     const halfWidth = Math.max(...points.map(p=>Math.abs(p.x)))*margin;
     const halfHeight = Math.max(...points.map(p=>Math.abs(p.y)))*margin;
-    const h = Math.max(halfHeight,halfWidth/(width/height));
+    const h = Math.max(halfHeight,halfWidth/((width-inset)/height));
     camera.left = -h*width/height; camera.right = h*width/height; camera.top = h; camera.bottom = -h;
-    camera.updateProjectionMatrix(); requestFrame();
+    if(inset>0) camera.setViewOffset(width,height,-inset/2,0,width,height); else camera.clearViewOffset();
+    camera.updateProjectionMatrix(); anchorsDirty = true; requestFrame();
+  }
+  function setInspector(value) {
+    inspector = { open: !!value?.open, widthPx: value?.open ? Number(value.widthPx) || 0 : 0 };
+    fit();
+  }
+  function anchorPositions() {
+    const positions = {};
+    if(!size) return positions;
+    for(const [stationId,anchor] of Object.entries(room.stationAnchors)) {
+      const point = new THREE.Vector3(...anchor).project(camera);
+      const x = (point.x+1)/2*size.width, y = (1-point.y)/2*size.height;
+      positions[stationId] = { x, y, visible: point.z>=-1 && point.z<=1 && x>=0 && x<=size.width && y>=0 && y<=size.height };
+    }
+    return positions;
   }
   function dispose() {
     if(disposed) return; disposed = true;
@@ -278,7 +303,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     apply(view,[]);
     resize({width:container.clientWidth,height:container.clientHeight,pixelRatio:devicePixelRatio});
     if(raf!==null) cancelAnimationFrame(raf); raf = null; draw();
-    return { apply, resize, setSuspended(value) { suspended=value; if(value) settleAllPulses(); if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
+    return { apply, resize, setInspector, anchorPositions, setSuspended(value) { suspended=value; if(value) settleAllPulses(); if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
       setReducedMotion(value) { reducedMotion=value; if(value) settleAllPulses(); requestFrame(); }, dispose };
   } catch(error) { dispose(); throw error; }
 }
