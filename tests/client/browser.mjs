@@ -109,8 +109,8 @@ const FAULTS = {
     expect: 'does not display the original rationale',
   },
   inheritAlternative: {
-    needle: "      ['Retained alternative', 'retained-alternative', choice.retained_alternative_version_id],",
-    replacement: "      ['Retained alternative', 'retained-alternative', 'REVIEW_WRONG_ALTERNATIVE'],",
+    needle: "      ['Backup version', 'retained-alternative', choice.retained_alternative_version_id],",
+    replacement: "      ['Backup version', 'retained-alternative', 'REVIEW_WRONG_ALTERNATIVE'],",
     expect: 'does not display the retained alternative',
   },
   inheritRequirementHash: {
@@ -814,7 +814,7 @@ try {
     const latest = recorded.investigations[recorded.investigations.length - 1];
     const row = panel.querySelector(`[data-investigation-id="${latest.id}"]`);
     if (!row || row.dataset.authoredBy !== 'learner') throw new Error(`Recorded entry ${latest.id} is not rendered as the learner's`);
-    for (const [label, value] of [['Cause', latest.cause], ['Falsifier', latest.falsifier], ['Public test', latest.public_test]]) {
+    for (const [label, value] of [['Cause', latest.cause], ['What would prove you wrong', latest.falsifier], ['Public test', latest.public_test]]) {
       const line = [...row.querySelectorAll('.contract-line')].find(node => node.querySelector('span')?.textContent === label);
       if (line?.querySelector('strong')?.textContent !== value) throw new Error(`Rendered ${label} does not match entry ${latest.id}`);
     }

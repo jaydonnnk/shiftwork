@@ -29,6 +29,16 @@
   </header>
   <main>
     <div class="world" id="workplace-world" data-inspector="closed">
+    <section id="shift-picker" class="shift-picker" aria-labelledby="shift-picker-title" hidden>
+      <div class="shift-picker-sheet">
+        <h2 id="shift-picker-title">Choose a shift</h2>
+        <p class="shift-picker-lead">Every shift follows the same seven steps.</p>
+        <ol id="shift-picker-steps" class="shift-picker-steps"></ol>
+        <div id="shift-picker-cards" class="shift-picker-cards"></div>
+        <p id="shift-picker-message" class="shift-picker-message" role="status"></p>
+        <button type="button" id="close-picker" class="button secondary close-picker">Back to the room</button>
+      </div>
+    </section>
     <section class="workplace" aria-labelledby="room-title">
       <section id="status-bar" class="float-panel status-bar" data-synthetic-region="board" aria-labelledby="room-title">
         <h1 class="sr-only" id="room-title">You keep this service running.</h1>
@@ -40,6 +50,13 @@
           <div><dt>Attempts left</dt><dd id="status-attempts">Loading</dd></div>
         </dl>
         <span class="synthetic" id="status-synthetic">Synthetic scenario</span>
+        <button type="button" id="change-shift" class="change-shift">Change shift</button>
+      </section>
+      <div id="step-chip" class="float-panel step-chip" role="status"><span id="step-chip-count">Loading</span> <strong id="step-chip-name"></strong><span id="step-chip-reason" class="step-chip-reason" hidden></span></div>
+      <section id="next-action" class="float-panel next-action" aria-label="Next action">
+        <p class="next-action-kicker">Next</p>
+        <p id="next-action-task" class="next-action-task" hidden></p>
+        <button type="button" id="next-action-go" class="button primary">Loading</button>
       </section>
       <div class="float-panel graphics-controls">
         <p id="graphics-status" role="status" data-state="loading">Loading recorded context. Your workbench is ready.</p>
@@ -97,19 +114,23 @@
         </svg>
         <svg class="evidence-path" viewBox="0 0 1000 720" aria-hidden="true"><path d="M225 443 340 503 489 422 660 332 791 407"/><circle cx="225" cy="443" r="6"/><circle cx="489" cy="422" r="6"/><circle cx="660" cy="332" r="6"/><circle cx="791" cy="407" r="6"/></svg>
         <div id="station-tags" class="station-tags">
+          <div id="story-layer" class="story-layer">
+            <p id="customer-bubble" class="bubble customer-bubble" hidden><span id="customer-bubble-label" class="bubble-label"></span><span id="customer-bubble-text" class="bubble-text"></span></p>
+            <p id="owner-bubble" class="bubble owner-bubble" hidden><span class="bubble-label">Owner</span><span id="owner-bubble-text" class="bubble-text"></span></p>
+          </div>
           <div id="northline-stations" class="room-hotspots" hidden></div>
           <div id="gtm-stations" class="room-hotspots" hidden></div>
           <div id="bookshop-stations" class="room-hotspots" aria-label="Room stations">
-            <button class="station station-customers" data-station="customers"><span class="station-marker">03</span><span>Customer queue<small id="queue-tag">Not loaded</small></span></button>
-            <button class="station station-service" data-station="service" aria-pressed="true"><span class="station-marker">01</span><span>Your service<small id="service-tag">Not loaded</small></span></button>
-            <button class="station station-evaluator" data-station="evaluator"><span class="station-marker lock-mark" aria-hidden="true">▣</span><span>Independent evaluator<small>Locked · not editable</small></span></button>
-            <button class="station station-ledger" data-station="ledger"><span class="station-marker">≡</span><span>Incident &amp; ledger wall<small id="incident-tag">Not loaded · Synthetic scenario</small></span></button>
-            <button class="station station-compare" data-station="compare"><span class="station-marker" aria-hidden="true">⇄</span><span>Compare<small id="compare-tag">Not loaded</small><small id="test-tag">No diagnostic reported</small></span></button>
-            <button class="station station-owner" data-station="owner"><span class="station-marker">02</span><span>Owner desk<small>Contract · read only</small></span></button>
-            <button class="station station-pipeline" data-station="pipeline"><span class="station-marker">→</span><span>Evidence path<small>Follow the record</small></span></button>
-            <button class="station station-repair" data-station="repair"><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small></span></button>
-            <button class="station station-investigate" data-station="investigate"><span class="station-marker" aria-hidden="true">◎</span><span>Investigate<small id="investigation-tag">Not loaded</small></span></button>
-            <button class="station station-next" data-station="next"><span class="station-marker" aria-hidden="true">▷</span><span>Next shift<small id="next-tag">Not loaded</small></span></button>
+            <button class="station station-customers" data-station="customers"><span class="lamp" aria-hidden="true"></span><span class="station-marker">03</span><span>Customer queue<small id="queue-tag">Not loaded</small><small class="lamp-text"></small></span></button>
+            <button class="station station-service" data-station="service" aria-pressed="true"><span class="lamp" aria-hidden="true"></span><span class="station-marker">01</span><span>Your service<small id="service-tag">Not loaded</small><small class="lamp-text"></small></span></button>
+            <button class="station station-evaluator" data-station="evaluator"><span class="lamp" aria-hidden="true"></span><span class="station-marker lock-mark" aria-hidden="true">▣</span><span>Independent evaluator<small>Locked · not editable</small><small class="lamp-text"></small></span></button>
+            <button class="station station-ledger" data-station="ledger"><span class="lamp" aria-hidden="true"></span><span class="station-marker">≡</span><span>Incident &amp; ledger wall<small id="incident-tag">Not loaded · Synthetic scenario</small><small class="lamp-text"></small></span></button>
+            <button class="station station-compare" data-station="compare"><span class="lamp" aria-hidden="true"></span><span class="station-marker" aria-hidden="true">⇄</span><span>Compare<small id="compare-tag">Not loaded</small><small id="test-tag">No diagnostic reported</small><small class="lamp-text"></small></span></button>
+            <button class="station station-owner" data-station="owner"><span class="lamp" aria-hidden="true"></span><span class="station-marker">02</span><span>Owner desk<small>Contract · read only</small><small class="lamp-text"></small></span></button>
+            <button class="station station-pipeline" data-station="pipeline"><span class="lamp" aria-hidden="true"></span><span class="station-marker">→</span><span>Evidence path<small>Follow the record</small><small class="lamp-text"></small></span></button>
+            <button class="station station-repair" data-station="repair"><span class="lamp" aria-hidden="true"></span><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small><small class="lamp-text"></small></span></button>
+            <button class="station station-investigate" data-station="investigate"><span class="lamp" aria-hidden="true"></span><span class="station-marker" aria-hidden="true">◎</span><span>Investigate<small id="investigation-tag">Not loaded</small><small class="lamp-text"></small></span></button>
+            <button class="station station-next" data-station="next"><span class="lamp" aria-hidden="true"></span><span class="station-marker" aria-hidden="true">▷</span><span>Next shift<small id="next-tag">Not loaded</small><small class="lamp-text"></small></span></button>
           </div>
         </div>
         <div class="room-caption"><span class="tiny-square"></span>A real output. An independent check. A recorded consequence.</div>
@@ -126,7 +147,7 @@
       <section id="northline-brief" class="panel-section" hidden>
         <h3>The counter needs speed. A confirmation needs evidence.</h3>
         <p>Check current parts and mechanic availability before a final booking. Repeated deliveries must retain one commitment. Uninspected safety questions go to a human mechanic. Read availability and schedules; write repair slots only.</p>
-        <p class="help-text">Start with the blank integration, inspect its failure, then record a cause and falsifier at the Integration bench. Compare two repairs and explicitly choose one. Close and open the next shift before running the selected pilot.</p>
+        <p class="help-text">Start with the blank integration, inspect its failure, then record a cause and what would prove you wrong at the Integration bench. Compare two repairs and explicitly choose one. Close and open the next shift before running the selected pilot.</p>
       </section>
       <section id="map-view" hidden><p class="help-text">Your discovery and permission worksheets belong to this integration. Edit them at the Integration bench. The selected version and current draft are shown separately. This declared map cannot grant, expand or prove permissions.</p><div id="map-records"></div></section>
       <section id="rollout-view" data-synthetic-region="pilot" hidden>
@@ -198,9 +219,9 @@
         <section class="panel-section"><h3>Before you write</h3><ol id="orientation-list" class="orientation-list"></ol></section>
         <section class="panel-section"><h3>Your investigation entries</h3><div id="investigation-list"></div></section>
         <section class="panel-section">
-          <h3>Record your prediction: cause and falsifier</h3>
+          <h3>Record your prediction: cause and what would prove you wrong</h3>
           <div class="field"><label for="cause-input">Cause you believe explains the gap</label><textarea id="cause-input" rows="2"></textarea></div>
-          <div class="field"><label for="falsifier-input">Falsifier: an observation that would prove your cause wrong</label><textarea id="falsifier-input" rows="2"></textarea></div>
+          <div class="field"><label for="falsifier-input">What would prove you wrong: an observation that would disprove your cause</label><textarea id="falsifier-input" rows="2"></textarea></div>
           <div class="field"><label for="public-test-input">Public test that distinguishes your cause</label><textarea id="public-test-input" rows="2"></textarea></div>
           <div class="field" data-synthetic-region="source">
             <div class="section-heading"><label for="source-ordinal">Source request</label><span class="synthetic">Synthetic scenario</span></div>

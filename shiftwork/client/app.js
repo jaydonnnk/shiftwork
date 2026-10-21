@@ -1,6 +1,6 @@
 import { bodyBytes, selectEvidence } from './evidence.js';
 import { projectWorkplace } from './workplace-view.js';
-import { statusBarValues, logEntries } from './workplace-story.js';
+import { statusBarValues, logEntries, guideStep, ownerLine, customerBubble, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
 
 const $ = id => document.getElementById(id);
 const state = { board: null, loadedShiftId: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
@@ -246,7 +246,7 @@ function publishPresentation(reason) {
     renderStory(view);
     const verdicts = view.evidence?.checks.map(check => `${check.verdict}: ${check.reasonCode ?? 'recorded check'}`).join('; ');
     text('workplace-state', view.consistency === 'conflict' ? 'Recorded reads disagree. Inspect the workbench; current labels are unavailable.' :
-      `${view.context.inspection.mode === 'history' ? 'Historical inspection. ' : 'Current inspection. '}Operating choice: ${view.operating ? `${view.operating.versionId} (${view.operating.validity})` : 'None selected'}. Saved version: ${view.saved.latestVersionId ?? 'None'}. ` +
+      `${view.context.inspection.mode === 'history' ? 'Historical inspection. ' : 'Current inspection. '}Live version: ${view.operating ? `${view.operating.versionId} (${view.operating.validity})` : 'None selected'}. Saved version: ${view.saved.latestVersionId ?? 'None'}. ` +
       (view.run ? `Inspected run: ${view.run.id}. Executed version: ${view.run.versionId}. ${view.run.purpose} / ${view.run.evidenceMode ?? 'unknown mode'}. ${verdicts || 'Independent evidence incomplete.'}` : 'No run loaded.'));
   }
   latestPresentation = publication;
@@ -279,8 +279,47 @@ function renderStory(view) {
   for (const key of ['client', 'shift', 'live', 'incidents', 'attempts']) text(`status-${key}`, values[key]);
   storyEntries = logEntries(view, state.run, state.checks, state.events, state.stationView?.investigations ?? [], state.board?.operating_selection ?? null);
   renderShiftLog(storyEntries);
+  renderGuide(view);
   syncInspector();
   placeStationTags();
+}
+// The step guide, owner line, customer bubble and lamps are Bellwether's story
+// layer (Gate 3 section 13.5). The guide only navigates: the next action opens a
+// station and never sends a request or decides whether a command is allowed. The
+// cause draft steers only the chip; it is never sent or credited.
+let storyGuide = null;
+function renderGuide(view = latestPresentation?.kind === 'accepted' ? latestPresentation.view : null) {
+  const bookshop = state.slug === 'bookshop' && Boolean(view);
+  $('step-chip').hidden = !bookshop;
+  $('next-action-go').hidden = !bookshop;
+  $('next-action-task').hidden = bookshop;
+  if (!bookshop) {
+    storyGuide = null;
+    text('next-action-task', (stations[state.station] ?? stations.service)[0]);
+    for (const id of ['customer-bubble', 'owner-bubble']) $(id).hidden = true;
+    return;
+  }
+  storyGuide = guideStep(view, { activeStation: state.station, causeDraft: $('cause-input').value.trim() !== '',
+    falsifierDraft: $('falsifier-input').value.trim() !== '' });
+  text('step-chip-count', storyGuide.step ? `Step ${storyGuide.step} of 7` : 'Step unknown');
+  text('step-chip-name', storyGuide.step ? storyGuide.name : '');
+  $('step-chip-reason').hidden = !storyGuide.blockedReason;
+  text('step-chip-reason', storyGuide.blockedReason ?? '');
+  $('step-chip').dataset.status = storyGuide.status;
+  text('next-action-go', storyGuide.step ? storyGuide.name : 'Open the current station');
+  const owner = ownerLine(view, storyGuide);
+  $('owner-bubble').hidden = !owner;
+  text('owner-bubble-text', owner ?? '');
+  const bubble = customerBubble(view, state.outputs.find(output => output.id === state.selected) ?? null);
+  $('customer-bubble').hidden = !bubble;
+  text('customer-bubble-label', bubble?.label ?? ''); text('customer-bubble-text', bubble?.text ?? '');
+  for (const item of view.lamps ?? []) {
+    const button = document.querySelector(`#bookshop-stations [data-station="${item.stationId}"]`);
+    if (!button) continue;
+    button.dataset.lamp = item.tone;
+    button.querySelector('.lamp-text').textContent = item.text;
+    if (item.stationId === view.attention) button.dataset.attention = 'true'; else delete button.dataset.attention;
+  }
 }
 const narrowLayout = () => window.matchMedia('(max-width: 760px)').matches;
 // The inspector is the existing #station-panel. Opening it never sends a request;
@@ -289,6 +328,7 @@ function syncInspector() {
   const world = $('workplace-world');
   world.dataset.inspector = inspectorOpen || expandedWork ? 'open' : 'closed';
   world.style.setProperty('--status-h', `${$('status-bar').offsetHeight}px`);
+  world.style.setProperty('--chip-h', $('step-chip').hidden ? '0px' : `${$('step-chip').offsetHeight + 12}px`);
   const covered = inspectorOpen && !expandedWork && !narrowLayout()
     ? $('station-panel').getBoundingClientRect().right - $('workplace-canvas').getBoundingClientRect().left : 0;
   inspectorCover = Math.max(0, covered);
@@ -301,16 +341,16 @@ function closeInspector(returnFocus = true) {
   if (returnFocus) document.querySelector(`.room-hotspots:not([hidden]) [data-station="${state.station}"]`)?.focus({ preventScroll: true });
 }
 // Tags sit just above their projected anchor. A tag that would cover another tag,
-// the status bar, the graphics notice or the shift log tries nearby rows and at
-// most 0.6 of its own width sideways. When no spot is free, it takes the spot it
-// overlaps least. The inspector is not avoided here: only the scene's view offset
-// keeps tags clear of it.
+// the status bar, step chip, next action, graphics notice or shift log tries nearby
+// rows and at most 0.6 of its own width sideways, in steps of 0.3. When no spot is
+// free, it takes the spot it overlaps least. The inspector is not avoided here:
+// only the scene's view offset keeps tags clear of it.
 let tagAnchors = {};
 function placeStationTags(positions = tagAnchors) {
   tagAnchors = positions;
   const stage = document.querySelector('.room').getBoundingClientRect();
   const local = rect => ({ left: rect.left - stage.left, top: rect.top - stage.top, right: rect.right - stage.left, bottom: rect.bottom - stage.top });
-  const taken = [$('status-bar'), $('shift-log'), document.querySelector('.graphics-controls')]
+  const taken = [$('status-bar'), $('shift-log'), document.querySelector('.graphics-controls'), $('step-chip'), $('next-action')]
     .map(node => node.getBoundingClientRect()).filter(rect => rect.width && rect.height).map(local);
   const overlap = box => taken.reduce((sum, rect) => sum
     + Math.max(0, Math.min(box.right, rect.right) - Math.max(box.left, rect.left)) * Math.max(0, Math.min(box.bottom, rect.bottom) - Math.max(box.top, rect.top)), 0);
@@ -332,7 +372,7 @@ function placeStationTags(positions = tagAnchors) {
     const minLeft = inspectorCover && point.x >= inspectorCover ? inspectorCover + 8 : 8;
     const clampLeft = x => Math.min(Math.max(minLeft, x), Math.max(minLeft, stage.width - width - 8));
     const box = ([left, top]) => ({ left, top, right: left + width, bottom: top + height });
-    const candidates = [0, -1, 1, -2, 2, -3, 3].flatMap(row => [0, .6, -.6].map(shift =>
+    const candidates = [0, -1, 1, -2, 2, -3, 3, -4, 4].flatMap(row => [0, .3, -.3, .6, -.6].map(shift =>
       [clampLeft(point.x - width / 2 + shift * width), point.y - height - 6 + row * step]));
     const inside = candidates.filter(([, y]) => y >= 8 && y + height <= stage.height - 8);
     const [left, top] = inside.find(spot => overlap(box(spot)) === 0)
@@ -342,6 +382,40 @@ function placeStationTags(positions = tagAnchors) {
     button.style.setProperty('--tag-y', `${Math.round(top)}px`);
     button.dataset.anchored = 'true';
     button.dataset.anchorX = String(Math.round(point.x));
+  }
+  placeBubbles();
+}
+// Each bubble sits next to its station's tag, wherever the tag ended up, so the
+// static fallback and the drawn room place it the same way. It tries above, then
+// below, then further out, and takes the first spot clear of every tag, panel and
+// the other bubble, or the least covering one. Narrow layouts stack it instead.
+function placeBubbles() {
+  const layer = $('station-tags').getBoundingClientRect();
+  const local = r => ({ left: r.left - layer.left, top: r.top - layer.top, right: r.right - layer.left, bottom: r.bottom - layer.top });
+  const room = local(document.querySelector('.room').getBoundingClientRect());
+  // An open inspector covers the left of the room; bubbles stay to its right.
+  room.left += inspectorCover;
+  const taken = [...document.querySelectorAll('.room-hotspots:not([hidden]) [data-station]'), $('status-bar'), $('step-chip'),
+    $('next-action'), $('shift-log'), document.querySelector('.graphics-controls')]
+    .map(node => node.getBoundingClientRect()).filter(r => r.width && r.height).map(local);
+  const overlap = box => taken.reduce((sum, r) => sum
+    + Math.max(0, Math.min(box.right, r.right) - Math.max(box.left, r.left)) * Math.max(0, Math.min(box.bottom, r.bottom) - Math.max(box.top, r.top)), 0);
+  for (const [id, station] of [['customer-bubble', 'customers'], ['owner-bubble', 'owner']]) {
+    const bubble = $(id), tag = document.querySelector(`#bookshop-stations [data-station="${station}"]`);
+    if (bubble.hidden || !tag || narrowLayout()) { bubble.style.removeProperty('--bubble-x'); bubble.style.removeProperty('--bubble-y'); continue; }
+    const t = local(tag.getBoundingClientRect()), width = bubble.offsetWidth, height = bubble.offsetHeight;
+    // The static room's tag layer is narrower than the stage, so bubbles may use the whole room.
+    const clampX = x => Math.min(Math.max(room.left + 8, x), Math.max(room.left + 8, room.right - width - 8));
+    const clampY = y => Math.min(Math.max(room.top + 8, y), Math.max(room.top + 8, room.bottom - height - 8));
+    // Nearest first: directly above or below the tag, then beside it, then one or two rows further out.
+    const rows = [0, 1, 2].flatMap(row => [[t.top - height - 6 - row * 24], [t.bottom + 6 + row * 24]]).flat();
+    const spots = [...rows.flatMap(y => [t.left, t.right - width, t.left - width / 2, t.left - width, t.right].map(x => [x, y])),
+      [t.right + 6, t.top], [t.left - width - 6, t.top]].map(([x, y]) => [clampX(x), clampY(y)]);
+    const box = ([x, y]) => ({ left: x, top: y, right: x + width, bottom: y + height });
+    const [x, y] = spots.find(spot => overlap(box(spot)) === 0) ?? spots.reduce((best, spot) => overlap(box(spot)) < overlap(box(best)) ? spot : best);
+    taken.push(box([x, y]));
+    bubble.style.setProperty('--bubble-x', `${Math.round(x)}px`);
+    bubble.style.setProperty('--bubble-y', `${Math.round(y)}px`);
   }
 }
 async function initializeGraphics() {
@@ -606,7 +680,7 @@ function clearData(message) {
   text('shift-number', 'No shift loaded');
   text('version-state', 'No verified version loaded');
   text('version-hash', '');
-  empty($('selection-summary'), 'No operating choice loaded.');
+  empty($('selection-summary'), 'No live version loaded.');
   text('run-state', 'No run loaded');
   text('evidence-attempts', 'Attempts not loaded.');
   document.querySelector('[data-station="repair"]').setAttribute('aria-disabled', 'true');
@@ -752,16 +826,17 @@ function renderBoard() {
   const choice = board.operating_selection;
   const summary = $('selection-summary');
   summary.replaceChildren();
-  for (const [label, value] of [
-    ['Latest saved', board.latest_saved_version_id ?? 'none'],
-    ['Operating choice', choice ? `${choice.selected_version_id} · ${choice.selected_content_hash} · ${humanize(choice.state)}` : 'none'],
-    ['Retained alternative', choice?.retained_alternative_version_id ?? 'none'],
-    ['Comparison', choice?.comparison_id ?? 'none'],
-    ['Original requirement hash', choice?.requirement_set_hash ?? 'none'],
-    ['Executed version', state.run ? `${state.run.artifact_version_id} · ${state.run.id}` : 'none'],
+  // Field keys stay stable when a label is reworded in plain words.
+  for (const [field, label, value] of [
+    ['latest-saved', 'Latest saved', board.latest_saved_version_id ?? 'none'],
+    ['operating-choice', 'Live version', choice ? `${choice.selected_version_id} · ${choice.selected_content_hash} · ${humanize(choice.state)}` : 'none'],
+    ['retained-alternative', 'Backup version', choice?.retained_alternative_version_id ?? 'none'],
+    ['comparison', 'Comparison', choice?.comparison_id ?? 'none'],
+    ['original-requirement-hash', 'Original requirement hash', choice?.requirement_set_hash ?? 'none'],
+    ['executed-version', 'Executed version', state.run ? `${state.run.artifact_version_id} · ${state.run.id}` : 'none'],
   ]) {
     const row = element('div', null, 'contract-line');
-    row.dataset.selectionField = label.toLowerCase().replaceAll(' ', '-');
+    row.dataset.selectionField = field;
     row.append(element('span', label), element('strong', value));
     summary.append(row);
   }
@@ -953,7 +1028,7 @@ function renderInvestigations(station) {
     if (entry.revision_of_id) row.dataset.revisionOf = entry.revision_of_id;
     row.append(element('strong', `${entry.id} · ${entry.authored_by === 'learner' ? 'your entry' : entry.authored_by}${entry.revision_of_id ? ` · revises ${entry.revision_of_id}` : ''}`));
     row.append(element('p', `Source ${entry.source_run_id} · request ${entry.source_request_ordinal}`, 'evidence-meta'));
-    for (const [label, value] of [['Cause', entry.cause], ['Falsifier', entry.falsifier], ['Public test', entry.public_test]]) {
+    for (const [label, value] of [['Cause', entry.cause], ['What would prove you wrong', entry.falsifier], ['Public test', entry.public_test]]) {
       const line = element('div', null, 'contract-line');
       line.append(element('span', label), element('strong', value));
       row.append(line);
@@ -1027,7 +1102,7 @@ function renderDiagnostic(station) {
       ? 'Freeze your inherited draft to own an exact version, then run the one public source diagnostic. It cannot qualify a version or change business history.'
       : station.latest_investigation_id
         ? 'Ready. The diagnostic runs your frozen version against the reviewed public request and state, then checks each requested task.'
-        : 'Record your cause, falsifier and public test first. The diagnostic cites your entry and cannot run before it exists.');
+        : 'Record your cause, what would prove you wrong and a public test first. The diagnostic cites your entry and cannot run before it exists.');
     return empty(result, 'No public diagnostic has run in this shift, and none can qualify a version.');
   }
   text('diagnostic-note', experiment.declared_treatment);
@@ -1187,7 +1262,7 @@ function renderCompare() {
     : !editable ? 'This shift is closed. Its recorded comparison evidence stays available.'
     : !candidates.A || !candidates.B ? 'Freeze two distinct candidate versions to reserve a comparison. Freezing never selects one.'
     : candidates.A.id === candidates.B.id ? 'The two candidates are the same frozen version. Freeze a second, different version.'
-    : !state.stationView?.latest_investigation_id ? 'Record your cause, falsifier and public test first. A comparison cites your investigation entry and cannot run before it exists.'
+    : !state.stationView?.latest_investigation_id ? 'Record your cause, what would prove you wrong and a public test first. A comparison cites your investigation entry and cannot run before it exists.'
     : !treatment ? 'Name the one declared treatment that differs between the two candidates.'
     : 'The controller requires operator-sealed workloads and protected variants before reservation. Draft material is refused. This station derives no winner.');
   const slots = $('comparison-slots');
@@ -1352,10 +1427,10 @@ function renderNext() {
   else {
     inheritance.replaceChildren();
     for (const [label, field, value] of [
-      ['Operating choice', 'operating-choice', `${choice.id} · ${choice.selected_version_id} · ${humanize(choice.state)}`],
+      ['Live version', 'operating-choice', `${choice.id} · ${choice.selected_version_id} · ${humanize(choice.state)}`],
       ['Recorded rationale', 'rationale', choice.rationale],
       ['Selected content hash', 'selected-hash', choice.selected_content_hash],
-      ['Retained alternative', 'retained-alternative', choice.retained_alternative_version_id],
+      ['Backup version', 'retained-alternative', choice.retained_alternative_version_id],
       ['Prior choice', 'prior-choice', choice.prior_selection_id ?? 'none'],
       ['Comparison', 'comparison', choice.comparison_id],
       ['Draft descends from', 'draft-base', board.draft_base_version_id ?? 'none'],
@@ -1428,7 +1503,7 @@ function renderNext() {
       ['Experiment', `${later.id} · ${humanize(later.state)}`],
       ['Observed operation', later.observed_run_id ?? 'none'],
       ['Observed condition', later.condition ? `${later.condition.public_label} (${later.condition.kind})` : 'not recorded'],
-      ['Re-tested versions', `A ${versions.A ?? 'none'} (selected) · B ${versions.B ?? 'none'} (retained alternative)`],
+      ['Re-tested versions', `A ${versions.A ?? 'none'} (selected) · B ${versions.B ?? 'none'} (backup version)`],
       ['Outcome', later.outcome?.status ?? 'INCOMPLETE'],
       ['Slots', `${later.trials.filter(trial => trial.state === 'COMPLETE').length} of ${later.trials.length} complete`],
     ]) {
@@ -1642,13 +1717,13 @@ async function runDiagnostic() {
 const stations = {
   brief: ['Deployment brief', 'NORTHLINE / CUSTOMER REQUIREMENTS', 'The blank starter is labelled. Saving and comparing never select your operating version.'],
   map: ['System map', 'DISCOVERY AND PERMISSIONS', 'Inspect your integration worksheets and the exact selected version. Availability reads and repair-slot writes are the permitted boundary.'],
-  bench: ['Integration bench', 'INVESTIGATE, REPAIR, COMPARE AND CHOOSE', 'State a cause and falsifier before help. One hint per shift. Compare two exact versions; no winner is chosen automatically.'],
+  bench: ['Integration bench', 'INVESTIGATE, REPAIR, COMPARE AND CHOOSE', 'State a cause and what would prove you wrong before help. One hint per shift. Compare two exact versions; no winner is chosen automatically.'],
   acceptance: ['Acceptance', 'INDEPENDENT TASK RESULTS', 'Inspect the actual request, captured reply, independent checks and their recorded consequences.'],
   rollout: ['Rollout', 'PILOT OPERATIONS', 'Synthetic pilot state. Only a fully accepted operation records rollout approval. Experiments write no pilot state.'],
   handover: ['Handover', 'WHAT THE CO-OP INHERITS', 'Close records the selected runbook, declared limits and unresolved incidents. Newer saves cannot replace this handover.'],
   signals: ['Signal intake', 'FOLLOW ONE EXECUTED SIGNAL', 'Select a captured signal. The request, the exact output, the independent checks and the recorded consequence below all belong to that one request.'],
   rules: ['Qualification rules', 'STONEBRIDGE / VISIBLE CONTRACT', 'The mandatory ownership rules are fixed and the selections are yours. This workflow prepares work for a person; it never sends a customer message.'],
-  workflow: ['Workflow bench', 'INVESTIGATE, COMPARE AND CHOOSE', 'State a cause and falsifier before help. Two help calls per shift and no patch proposals. Compare two exact workflows; no winner is chosen automatically.'],
+  workflow: ['Workflow bench', 'INVESTIGATE, COMPARE AND CHOOSE', 'State a cause and what would prove you wrong before help. Two help calls per shift and no patch proposals. Compare two exact workflows; no winner is chosen automatically.'],
   wall: ['Pipeline wall', 'SYNTHETIC PIPELINE STATE', 'Owners, SLA clocks, escalations and missed-handoff incidents, derived only from operational captures. An experiment never moves an owner or starts a clock.'],
   service: ['Service workbench', 'YOUR WORKING ARTIFACT', 'Your version, contract and files belong to you. Independent scoring stays separate.'],
   owner: ['Requirements', 'OWNER DESK', 'Inspect the operating version\'s committed requirements and frozen requirement hash. Saved candidates keep their own contracts.'],
@@ -1657,7 +1732,7 @@ const stations = {
   ledger: ['Incident & ledger wall', 'RECORDED CONSEQUENCES', 'Synthetic scenario. Select an incident to inspect the output and result that opened it.'],
   repair: ['Repair review', 'REPAIR BENCH · READ ONLY', 'Inspect an actual incident below. Repair authoring and rerunning a new version are not available in this build.'],
   evaluator: ['Independent evaluator', 'LOCKED · NOT EDITABLE', 'Neither the learner nor an assistant can edit the scoring rules or see sealed expected values.'],
-  investigate: ['Investigate a failure', 'REVIEW THE EXECUTED REQUEST', 'Read the exact request and output, then write your cause, falsifier and public test. A diagnostic cannot qualify a version.'],
+  investigate: ['Investigate a failure', 'REVIEW THE EXECUTED REQUEST', 'Read the exact request and output, then write your cause, what would prove you wrong and a public test. A diagnostic cannot qualify a version.'],
   compare: ['Compare and choose', 'PAIRED CANDIDATE EXECUTION', 'Both candidates run the same frozen workloads under shared requirements and ceilings. Experiments leave operational history unchanged. Choose an eligible exact version and record your rationale.'],
   next: ['Next shift', 'INHERITED EXACTLY, TESTED LATER', 'Close this shift and open the next one from the exact selection. Recorded operational history and a later-condition experiment are shown as two separate things: the experiment is hypothetical and never rewrites the history.'],
 };
@@ -1677,6 +1752,8 @@ function bringStationPanelIntoReach() {
 }
 function activateStation(name, userIntent = true) {
   if (userIntent) state.intent += 1;
+  // Choosing a station keeps the current shift, so the picker steps aside.
+  if (userIntent) $('shift-picker').hidden = true;
   if (name === 'repair' && !state.board?.incidents.length) {
     text('station-context', 'No unresolved incident is loaded. The repair bench becomes available for an actual incident.');
     return;
@@ -1788,6 +1865,10 @@ $('open-next-shift').addEventListener('click', () => shiftAction(engagementPath(
 $('select-candidate-a').addEventListener('click', () => chooseCandidate('A'));
 $('select-candidate-b').addEventListener('click', () => chooseCandidate('B'));
 $('selection-rationale').addEventListener('input', () => renderCompare());
+// The next action only opens the guide's station; it sends no request.
+$('next-action-go').addEventListener('click', () => activateStation(storyGuide?.stationId ?? state.station));
+// A cause draft moves the chip between steps 2 and 3 only; nothing is sent or credited.
+for (const id of ['cause-input', 'falsifier-input']) $(id).addEventListener('input', () => renderGuide());
 $('back-board').addEventListener('click', () => { location.hash = 'board'; navigate('board'); });
 document.querySelectorAll('[data-station]').forEach(button => button.addEventListener('click', () => activateStation(button.dataset.station)));
 document.querySelectorAll('[data-view]').forEach(link => link.addEventListener('click', event => {
@@ -1831,11 +1912,48 @@ document.addEventListener('keydown', event => {
   $('expand-work').focus({ preventScroll: true });
 });
 $('workplace-board').addEventListener('change', switchWorkplace);
+// The shift picker shows authored copy only. "Start shift" goes through the same
+// switchWorkplace() guard as the board selector, so a dirty draft still blocks it.
+function showPicker(open) {
+  $('shift-picker').hidden = !open;
+  if (open) { text('shift-picker-message', ''); $('shift-picker').querySelector('button').focus({ preventScroll: true }); }
+  else $('change-shift').focus({ preventScroll: true });
+}
+async function startShift(slug) {
+  const generation = state.generation;
+  $('workplace-board').value = slug;
+  await switchWorkplace();
+  // The guard returns before the generation moves, so an unchanged generation means it blocked the switch.
+  if (state.generation !== generation) return showPicker(false);
+  text('shift-picker-message', state.workplaces.some(board => board.engagement_slug === slug && board.availability === 'AVAILABLE')
+    ? $('workplace-message').textContent : 'This shift is not available in this preview.');
+}
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape' || $('shift-picker').hidden) return;
+  event.preventDefault();
+  showPicker(false);
+});
+$('shift-picker-steps').replaceChildren(...STEP_NAMES.map(name => element('li', name)));
+$('shift-picker-cards').replaceChildren(...SHIFT_CARDS.map(card => {
+  const item = element('article', null, 'shift-card');
+  item.dataset.slug = card.slug;
+  const start = element('button', 'Start shift', 'button primary');
+  start.type = 'button'; start.setAttribute('aria-label', `Start shift: ${card.client}`);
+  start.addEventListener('click', () => startShift(card.slug));
+  item.append(element('p', card.badge, 'shift-card-badge'), element('h3', card.client), element('p', card.role, 'shift-card-role'),
+    element('p', card.question, 'shift-card-question'), element('p', `What it teaches: ${card.teaches}`, 'shift-card-teaches'), start);
+  return item;
+}));
+$('change-shift').addEventListener('click', () => showPicker(true));
+$('close-picker').addEventListener('click', () => showPicker(false));
 const requestedSlug = new URL(location.href).searchParams.get('board');
 if (requestedSlug) state.slug = requestedSlug;
 const deepLink = location.hash.slice(1);
 navigate(deepLink || 'board');
 if (!deepLink || deepLink === 'board') closeInspector(false);
+// A first-time visitor (no board parameter and no station link) starts at the picker.
+// It opens after the start-up navigation, which would otherwise close it.
+if (!requestedSlug && !deepLink) showPicker(true);
 $('close-inspector').addEventListener('click', () => closeInspector());
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape' || !inspectorOpen || expandedWork || event.defaultPrevented) return;
