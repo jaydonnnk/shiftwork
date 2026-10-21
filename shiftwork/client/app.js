@@ -301,10 +301,12 @@ function renderGuide(view = latestPresentation?.kind === 'accepted' ? latestPres
   }
   storyGuide = guideStep(view, { activeStation: state.station, causeDraft: $('cause-input').value.trim() !== '',
     falsifierDraft: $('falsifier-input').value.trim() !== '' });
-  text('step-chip-count', storyGuide.step ? `Step ${storyGuide.step} of 7` : 'Step unknown');
-  text('step-chip-name', storyGuide.step ? storyGuide.name : '');
+  // The chip is a live region: write it only when its words change, so typing a draft is not announced.
+  const announce = (id, value) => { if ($(id).textContent !== value) text(id, value); };
+  announce('step-chip-count', storyGuide.step ? `Step ${storyGuide.step} of 7` : 'Step unknown');
+  announce('step-chip-name', storyGuide.step ? storyGuide.name : '');
   $('step-chip-reason').hidden = !storyGuide.blockedReason;
-  text('step-chip-reason', storyGuide.blockedReason ?? '');
+  announce('step-chip-reason', storyGuide.blockedReason ?? '');
   $('step-chip').dataset.status = storyGuide.status;
   text('next-action-go', storyGuide.step ? storyGuide.name : 'Open the current station');
   const owner = ownerLine(view, storyGuide);

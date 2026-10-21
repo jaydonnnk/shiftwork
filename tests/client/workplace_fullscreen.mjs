@@ -33,6 +33,10 @@ export const FAULTS = {
     needle: "'No attempt remains in this shift, so the controller will not accept another run. Close the shift at Next shift to continue.'",
     replacement: "'Attempt budget exhausted. The controller will not accept another run.'",
     expect: 'run_help_matches_disabled_run: learner choice in a shift that already ran' },
+  'chip-rewrites': { file: '/app.js',
+    needle: "const announce = (id, value) => { if ($(id).textContent !== value) text(id, value); };",
+    replacement: 'const announce = (id, value) => text(id, value);',
+    expect: 'step_chip_announces_only_changes: typing' },
   'leak-selection': { file: '/workplace-story.js',
     needle: '    live,\n', replacement: '    live: operating ? `${live} · ${operating.selectionId}` : live,\n',
     expect: 'main_view_has_no_internal_identifiers: the main view shows' },
@@ -198,7 +202,7 @@ const FIRST_STATION = { bookshop: 'customers', gtm: 'signals', northline: 'accep
 
 const CHECK_OF = { inspector_keeps_stations_readable: 'inspector', main_view_has_no_internal_identifiers: 'identifiers', narrow_stack_reach: 'narrow',
   next_action_navigates_only: 'story', main_view_shows_one_of_each: 'story', guide_never_credits_unsent_text: 'story', picker_uses_switch_guard: 'picker',
-  run_help_matches_disabled_run: 'story' };
+  run_help_matches_disabled_run: 'story', step_chip_announces_only_changes: 'story' };
 
 export async function inspectorKeepsStationsReadable(browser, base, slug) {
   await load(browser, base, slug, 1280, 720);
@@ -386,6 +390,21 @@ export async function storyJourney(browser, base) {
   const controls = () => ({ count: document.querySelectorAll('#investigation-list [data-investigation-id]').length,
     tag: document.getElementById('investigation-tag').textContent,
     disabled: [...document.querySelectorAll('button, input, select, textarea')].filter(node => node.id !== 'cause-input').map(node => `${node.id || node.dataset.station || node.textContent.trim().slice(0, 24)}:${node.disabled}`) });
+  // step_chip_announces_only_changes (S37 review F6): ten keystrokes move the chip from step 2 to 3 once,
+  // which rewrites its count and name; every other keystroke leaves the live region untouched.
+  const chipWrites = await act(async () => {
+    const records = [];
+    const observer = new MutationObserver(list => records.push(...list));
+    observer.observe(document.getElementById('step-chip'), { childList: true, subtree: true, characterData: true });
+    const input = document.getElementById('cause-input');
+    for (const ch of 'abcdefghij') { input.value += ch; input.dispatchEvent(new Event('input')); await new Promise(r => setTimeout(r, 50)); }
+    await new Promise(r => setTimeout(r, 200));
+    observer.disconnect();
+    input.value = ''; input.dispatchEvent(new Event('input'));
+    return records.length;
+  });
+  assert.ok(chipWrites <= 2, `step_chip_announces_only_changes: typing ten characters wrote the step chip ${chipWrites} times`);
+  await expectStep(STORY_STEPS[1], 'investigating after clearing a draft');
   const clean = await act(controls);
   await act(() => { const input = document.getElementById('cause-input'); input.value = 'A draft cause that is never sent'; input.dispatchEvent(new Event('input')); });
   await sleep(200);
