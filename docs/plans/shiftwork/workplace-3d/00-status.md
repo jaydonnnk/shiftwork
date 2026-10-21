@@ -1,3 +1,17 @@
+**S36 ACCEPTED by the user, 2026-10-21.**
+
+Asked "Is S36 accepted, or what should change?", the user answered "U make the call. Then publish the branch and merge to main and then start s37".
+The dead `.panel-symbol` rule was deleted under that call.
+The user authorized publishing `shiftwork/slice-36`, merging it to main and starting S37 on `shiftwork/slice-37`.
+No co-author trailer; no install, download, deployment, credential or live call.
+
+**Earlier, same day: S36 implemented locally.**
+
+The user gave S36 its go-ahead on branch `shiftwork/slice-36` from main `d43dad1`.
+The full-screen room, status bar, navy inspector and collapsed shift log are in place on all three boards.
+Evidence, the user's six test-change decisions with old assertion text, the repaired defects and the pre-existing failures are in the [S36 checkpoint](s36-checkpoint-2026-10-21.md).
+No install, download, deployment, credential or live call occurred.
+
 **Gates 2 to 4 APPROVED by the user, 2026-10-21, in one batch.**
 
 The user answered "Yes i approve gates 2 to four. Commit and push them to main and then let me see the build plan for the remaining slices again then we can start".
