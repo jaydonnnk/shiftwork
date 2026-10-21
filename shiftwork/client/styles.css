@@ -432,6 +432,15 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
   .room:not([data-graphics="ready"]) :is(.room-art, .station-tags, .evidence-path) { inset: 0; margin: auto; width: min(100cqw, 100cqh * 1000 / 720); height: auto; aspect-ratio: 1000 / 720; }
   .room:not([data-graphics="ready"]) .station { max-width: 26%; }
   .room:not([data-graphics="ready"]) .station > span:last-child { min-width: 0; }
+  /* S37 review F4: Bellwether's static tags stack name over status so no status is clipped,
+     and sit clear of each other and of the floating panels at 1280x720. */
+  .room:not([data-graphics="ready"]) #bookshop-stations .station { max-width: none; border-radius: 14px; padding: 4px 12px 4px 10px; }
+  .room:not([data-graphics="ready"]) #bookshop-stations .station > span:last-child { flex-direction: column; align-items: flex-start; gap: 0; max-width: none; overflow: visible; }
+  .room:not([data-graphics="ready"]) #bookshop-stations .station small { overflow: visible; text-overflow: clip; line-height: 16px; }
+  .room:not([data-graphics="ready"]) #bookshop-stations .station-evaluator { left: 69%; top: 26%; }
+  .room:not([data-graphics="ready"]) #bookshop-stations .station-ledger { top: 38%; }
+  .room:not([data-graphics="ready"]) #bookshop-stations .station-compare { left: 35%; top: 66%; }
+  .room:not([data-graphics="ready"]) #northline-stations .northline-handover { top: 76%; }
   .world[data-inspector="open"] .room:not([data-graphics="ready"]) :is(.room-art, .station-tags, .evidence-path) { left: calc(var(--inspector-w) + 32px); width: min(100cqw - var(--inspector-w) - 32px, 100cqh * 1000 / 720); }
   .status-bar { position: absolute; top: 16px; left: 16px; z-index: 5; max-width: calc(100% - 408px); gap: 8px 12px; }
   .status-bar .status-fields { gap: 8px 16px; }

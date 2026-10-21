@@ -37,6 +37,16 @@ export const FAULTS = {
     needle: "const announce = (id, value) => { if ($(id).textContent !== value) text(id, value); };",
     replacement: 'const announce = (id, value) => text(id, value);',
     expect: 'step_chip_announces_only_changes: typing' },
+  'fallback-clip': { file: '/styles.css',
+    needle: '#bookshop-stations .station > span:last-child { flex-direction: column; align-items: flex-start; gap: 0; max-width: none; overflow: visible; }',
+    replacement: '#bookshop-stations .station > span:last-child { flex-direction: column; align-items: flex-start; gap: 0; max-width: 80px; overflow: hidden; }',
+    expect: 'fallback_tag_text_is_not_clipped: bookshop' },
+  'fallback-overlap': { file: '/styles.css',
+    needle: '#bookshop-stations .station-compare { left: 35%; top: 66%; }', replacement: '#bookshop-stations .station-compare { left: 22%; top: 62%; }',
+    expect: 'fallback_tags_do_not_overlap: bookshop' },
+  'fallback-under-chip': { file: '/styles.css',
+    needle: '#bookshop-stations .station-evaluator { left: 69%; top: 26%; }', replacement: '#bookshop-stations .station-evaluator { left: 52%; top: 21%; }',
+    expect: 'fallback_tags_clear_of_panels: bookshop' },
   'leak-selection': { file: '/workplace-story.js',
     needle: '    live,\n', replacement: '    live: operating ? `${live} · ${operating.selectionId}` : live,\n',
     expect: 'main_view_has_no_internal_identifiers: the main view shows' },
@@ -108,7 +118,7 @@ export const FORBIDDEN = [
 export const scan = text => FORBIDDEN.filter(rule => rule.pattern.test(text)).map(rule => rule.name);
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function openBrowser(base, out, fault = '', { zoom = 1 } = {}) {
+export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
   assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s3[67]-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 and S37 receipts must use /tmp/shiftwork-s36-* or /tmp/shiftwork-s37-*');
   const patch = fault ? FAULTS[fault] : null;
@@ -120,7 +130,7 @@ export async function openBrowser(base, out, fault = '', { zoom = 1 } = {}) {
     await writeFile(path.join(profile, 'Default/Preferences'), JSON.stringify({ partition: { default_zoom_level: { x: Math.log(zoom) / Math.log(1.2) } } }));
   }
   const child = spawn(chromePath, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--remote-debugging-port=0',
-    '--window-size=1280,900', `--user-data-dir=${profile}`, 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
+    '--window-size=1280,900', `--user-data-dir=${profile}`, ...(webgl ? [] : ['--disable-webgl']), 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe'] });
   const endpoint = await new Promise((resolve, reject) => {
     let stderr = ''; const timer = setTimeout(() => reject(Error('Chrome startup timed out')), 15000);
     child.once('error', reject);
@@ -202,7 +212,35 @@ const FIRST_STATION = { bookshop: 'customers', gtm: 'signals', northline: 'accep
 
 const CHECK_OF = { inspector_keeps_stations_readable: 'inspector', main_view_has_no_internal_identifiers: 'identifiers', narrow_stack_reach: 'narrow',
   next_action_navigates_only: 'story', main_view_shows_one_of_each: 'story', guide_never_credits_unsent_text: 'story', picker_uses_switch_guard: 'picker',
-  run_help_matches_disabled_run: 'story', step_chip_announces_only_changes: 'story' };
+  run_help_matches_disabled_run: 'story', step_chip_announces_only_changes: 'story',
+  fallback_tag_text_is_not_clipped: 'fallback', fallback_tags_do_not_overlap: 'fallback', fallback_tags_clear_of_panels: 'fallback' };
+
+// S37 review F4: the static room a browser without WebGL gets, at the required 1280x720 cell.
+// Clipped text is checked first, then tag pairs, then panels, so each fault fails its own assertion.
+export async function fallbackKeepsTagsReadable(browser, base, slug) {
+  await load(browser, base, slug, 1280, 720);
+  assert.equal(await browser.evaluate(() => document.getElementById('graphics-status').dataset.state), 'unavailable', `${slug} did not fall back to the static room`);
+  await browser.evaluate(() => document.getElementById('close-inspector')?.click());
+  await settle(browser);
+  const seen = await browser.evaluate(() => {
+    const visible = node => node && !node.closest('[hidden]') && node.getClientRects().length > 0;
+    const hit = (a, b) => a.left < b.right - 1 && a.right > b.left + 1 && a.top < b.bottom - 1 && a.bottom > b.top + 1;
+    const tags = [...document.querySelectorAll('.room-hotspots:not([hidden]) [data-station]')].filter(visible)
+      .map(node => ({ station: node.dataset.station, node, rect: node.getBoundingClientRect() }));
+    const clipped = tags.flatMap(({ station, node }) => [node, ...node.querySelectorAll('*')].filter(visible)
+      .filter(part => part.scrollWidth > part.clientWidth + 1 || part.scrollHeight > part.clientHeight + 1).map(part => `${station}: ${part.textContent.trim()}`));
+    const pairs = tags.flatMap((a, i) => tags.slice(i + 1).filter(b => hit(a.rect, b.rect)).map(b => `${a.station}/${b.station}`));
+    const panels = [document.getElementById('status-bar'), document.getElementById('step-chip'), document.getElementById('next-action'), document.getElementById('shift-log'),
+      document.querySelector('.graphics-controls'), document.getElementById('customer-bubble'), document.getElementById('owner-bubble')].filter(visible);
+    const covered = panels.flatMap(panel => tags.filter(tag => hit(panel.getBoundingClientRect(), tag.rect)).map(tag => `${panel.id || panel.className}/${tag.station}`));
+    return { tags: tags.length, clipped, pairs, covered };
+  });
+  assert.ok(seen.tags >= 4, `${slug} static room shows only ${seen.tags} station tags`);
+  assert.deepEqual(seen.clipped, [], `fallback_tag_text_is_not_clipped: ${slug} clips ${seen.clipped.join('; ')}`);
+  assert.deepEqual(seen.pairs, [], `fallback_tags_do_not_overlap: ${slug} tags overlap ${seen.pairs.join(', ')}`);
+  assert.deepEqual(seen.covered, [], `fallback_tags_clear_of_panels: ${slug} panels cover ${seen.covered.join(', ')}`);
+  return { slug, fallback: { tags: seen.tags } };
+}
 
 export async function inspectorKeepsStationsReadable(browser, base, slug) {
   await load(browser, base, slug, 1280, 720);
@@ -490,9 +528,9 @@ export async function pickerUsesSwitchGuard(browser, base) {
 
 export async function runAll(base, out, slug, fault = '', only = '') {
   const results = [];
-  const run = async (name, zoom, fn) => {
+  const run = async (name, zoom, fn, options = {}) => {
     if (only && only !== name) return;
-    const browser = await openBrowser(base, path.join(out, `${name}-${zoom}x`), fault, { zoom });
+    const browser = await openBrowser(base, path.join(out, `${name}-${zoom}x`), fault, { zoom, ...options });
     try {
       results.push(await fn(browser));
       assert.deepEqual(browser.exceptions, [], 'Uncaught client exceptions');
@@ -502,6 +540,7 @@ export async function runAll(base, out, slug, fault = '', only = '') {
   };
   await run('inspector', 1, browser => inspectorKeepsStationsReadable(browser, base, slug));
   await run('identifiers', 1, browser => mainViewHasNoInternalIdentifiers(browser, base, slug));
+  await run('fallback', 1, browser => fallbackKeepsTagsReadable(browser, base, slug), { webgl: false });
   for (const zoom of [1, 2]) await run('narrow', zoom, async browser => [
     // 1280x720 at 200% zoom lays out at 640 CSS pixels, so it stacks too.
     ...(zoom === 2 ? [await narrowStackReach(browser, base, slug, 1280, 720, zoom)] : []),
