@@ -407,12 +407,13 @@ export async function storyJourney(browser, base) {
   await act(() => document.getElementById('select-candidate-a').click());
   await expectStep(STORY_STEPS[5], 'learner choice');
   // The demo's first shift already ran the starter, so a new choice operates in the
-  // next shift: close (step 7 at Next shift), open shift 2 (step 1), then run (step 7).
+  // next shift: close (step 7 at Next shift), open shift 2 (step 6, rule 3a re-approved
+  // 2026-10-22), then run (step 7).
   await act(() => { document.querySelector('[data-view="next"]').click(); document.getElementById('close-shift').click(); });
   await expectStep(STORY_STEPS[7], 'closed shift');
   await wait('the next shift to be openable', () => !document.getElementById('open-next-shift').disabled);
   await act(() => document.getElementById('open-next-shift').click());
-  await expectStep(STORY_STEPS[0], 'next shift with the inherited choice');
+  await expectStep(STORY_STEPS[5], 'next shift with the inherited choice');
   await act(() => document.querySelector('#bookshop-stations [data-station="service"]').click());
   await wait('the run to be allowed', () => !document.getElementById('run-shift').disabled);
   await act(() => document.getElementById('run-shift').click());

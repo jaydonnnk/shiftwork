@@ -28,6 +28,8 @@ export const FAULTS = {
     check: 'guide', expect: 'guide_step_follows_recorded_state: operation run of an earlier shift' },
   'starter-ends-shift': { needle: "operating?.kind === 'LEARNER_CHOICE' && run && ", replacement: 'run && ',
     check: 'guide', expect: 'guide_step_follows_recorded_state: starter operation run' },
+  'no-inherited-choice': { needle: "  if (operating?.kind === 'LEARNER_CHOICE' && view.shiftState === 'open') return guide(6, 'service');\n", replacement: '',
+    check: 'guide', expect: 'guide_step_follows_recorded_state: inherited choice in a later shift' },
   'draft-advances': { needle: 'if ((view.investigation?.count ?? 0) >= 1)', replacement: 'if ((view.investigation?.count ?? 0) >= 1 || local.causeDraft)',
     check: 'drafts', expect: 'guide_never_credits_unsent_text: a draft moved the guide' },
   'suggestive-line': { needle: "5: 'Nothing goes live until you choose and say why.',",
@@ -80,6 +82,8 @@ const GUIDE_CASES = [
   ['operation finalized', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED'); }), {}, 7, 'ledger', 'ready'],
   ['operation failed', view(v => { chosen(v); v.run = run('OPERATION', 'FAILED'); }), {}, 7, 'ledger', 'ready'],
   ['learner choice', view(v => { chosen(v); v.tests.comparison = comparison([true, true]); }), {}, 6, 'service', 'ready'],
+  // Rule 3a (re-approved 2026-10-22): the choice came from an earlier shift's comparison and has not run in this one.
+  ['inherited choice in a later shift', view(v => { chosen(v); v.operating.comparisonId = 'experiment-shift-1-c1'; }), {}, 6, 'service', 'ready'],
   ['complete, one eligible', view(v => { v.tests.comparison = comparison([false, true]); v.investigation.count = 1; }), {}, 5, 'compare', 'ready'],
   ['complete, none eligible', view(v => { v.tests.comparison = comparison([false, false]); v.investigation.count = 1; }), {}, 4, 'compare', 'blocked'],
   ['investigation recorded', view(v => { v.investigation.count = 1; }), {}, 4, 'compare', 'ready'],
@@ -87,9 +91,9 @@ const GUIDE_CASES = [
   ['investigating', view(), { activeStation: 'investigate' }, 2, 'investigate', 'ready'],
   ['fresh shift', view(), {}, 1, 'customers', 'ready'],
   // Recorded state that a careless guide would misread.
-  ['experiment run', view(v => { chosen(v); v.run = run('EXPERIMENT', 'FINALIZED'); }), {}, 1, 'customers', 'ready'],
+  ['experiment run', view(v => { chosen(v); v.run = run('EXPERIMENT', 'FINALIZED'); }), {}, 6, 'service', 'ready'],
   ['saved version is not chosen', view(v => { v.saved.latestVersionId = 'ver-0004'; }), {}, 1, 'customers', 'ready'],
-  ['operation run of an earlier shift', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED', { shiftId: 'shift-1' }); }), {}, 1, 'customers', 'ready'],
+  ['operation run of an earlier shift', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED', { shiftId: 'shift-1' }); }), {}, 6, 'service', 'ready'],
   // A fresh shift: the starter version's own operation run is already finalized (Gate 3 section 13.5 rule 2, re-approved 2026-10-21).
   ['starter operation run', view(v => { v.run = run('OPERATION', 'FINALIZED', { selectionId: 'sel-0001' }); }), {}, 1, 'customers', 'ready'],
   ['comparison of an earlier shift', view(v => { v.tests.comparison = comparison([true, true], { shiftId: 'shift-1' }); }), {}, 1, 'customers', 'ready'],
@@ -101,7 +105,7 @@ async function guideCheck(api) {
     assert.deepEqual([got.step, got.stationId, got.status], [step, station, status], `guide_step_follows_recorded_state: ${name}`);
     assert.equal(got.name, api.STEP_NAMES[step - 1], `guide_step_follows_recorded_state: ${name} step name`);
   }
-  const blocked = api.guideStep(GUIDE_CASES[7][1], {});
+  const blocked = api.guideStep(GUIDE_CASES.find(([name]) => name === 'complete, none eligible')[1], {});
   assert.equal(blocked.blockedReason, 'Neither version can be chosen: mandatory check failed', 'guide_step_follows_recorded_state: blocked reason in words');
   for (const unknown of [null, view(v => { v.consistency = 'conflict'; }), view(v => { v.context.shiftId = null; })]) {
     const got = api.guideStep(unknown, { activeStation: 'owner' });

@@ -78,6 +78,8 @@ export function guideStep(view, local = {}) {
   if (operating?.kind === 'LEARNER_CHOICE' && run && run.purpose === 'OPERATION' && run.shiftId === shiftId && run.selectionId === operating.selectionId)
     return TERMINAL.has(run.state) ? guide(7, 'ledger') : guide(6, 'service', 'running');
   if (operating?.kind === 'LEARNER_CHOICE' && comparison && operating.comparisonId === comparison.id) return guide(6, 'service');
+  // Rule 3a: a choice inherited into a later open shift has not yet run there.
+  if (operating?.kind === 'LEARNER_CHOICE' && view.shiftState === 'open') return guide(6, 'service');
   if (comparison?.outcomeStatus === 'COMPLETE') {
     if (comparison.candidates.some(candidate => candidate.eligible === true)) return guide(5, 'compare');
     const code = comparison.candidates.flatMap(candidate => candidate.blockingReasonCodes)[0];
