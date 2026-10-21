@@ -111,7 +111,8 @@ async function comparisonToTerminal(browser) {
   await browser.until(() => (globalThis.__s31Accepts ?? []).some(item => ['FINALIZED', 'FAILED', 'INVALIDATED'].includes(item.state)), 60000);
   assert.ok(await browser.until(() => document.body.dataset.loadState === 'ready' && document.querySelectorAll('#comparison-slots .comparison-slot').length === 6, 180000), 'The comparison panel did not settle');
   const [attempts, accepts] = await browser.evaluate(() => [globalThis.__s31Attempts ?? [], globalThis.__s31Accepts ?? []]);
-  return { id: payload.id, payload, initial, attempts, accepts };
+  const initialAttempt = await browser.evaluate(() => globalThis.__s31InitialAttempt);
+  return { id: payload.id, payload, initial, initialAttempt, attempts, accepts };
 }
 function expectedMissing(payload) {
   return payload.trials.filter(trial => !trial.run_id || (trial.missing_evidence?.length ?? 0)).length;
@@ -268,10 +269,10 @@ export async function runJourney(base, out, mode = 'complete', choice = 'A', fau
     assert.equal(sceneBefore.selection.plate, prior ? PLATE : PLATE_NEUTRAL, 'The operating plate did not reflect the public prior selection');
     assert.deepEqual(Object.values(sceneBefore.candidates).map(candidate => candidate.eligible), [null, null], 'A stand inferred eligibility before the public outcome');
     assert.deepEqual(Object.values(sceneBefore.candidates).map(candidate => candidate.color), [NEUTRAL, NEUTRAL], 'A stand was coloured before the public outcome');
-    const { id, payload, initial, attempts, accepts } = await comparisonToTerminal(browser);
+    const { id, payload, initial, initialAttempt, accepts } = await comparisonToTerminal(browser);
+    assert.equal(initialAttempt?.state, initial.state, 'The initial comparison assignment was not published');
+    assert.equal(initialAttempt?.allowed, true, 'The initial comparison assignment was suppressed');
     assert.ok(accepts.length >= 2, 'The comparison published no polled assignment');
-    assert.equal(attempts[0]?.state, initial.state, 'The initial comparison assignment was not published');
-    assert.equal(attempts[0]?.allowed, true, 'The initial comparison assignment was suppressed');
     assert.equal(accepts.at(-1).state, payload.state, 'The final comparison assignment was not published');
     assert.equal(accepts.at(-1).outcome, payload.outcome?.status ?? null, 'The final comparison publication hid the public outcome');
     assert.equal(accepts.at(-1).missing, expectedMissing(payload), 'The final comparison publication hid missing slots');
