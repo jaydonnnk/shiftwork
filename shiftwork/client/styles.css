@@ -442,9 +442,9 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
   .room:not([data-graphics="ready"]) #bookshop-stations .station-compare { left: 35%; top: 66%; }
   .room:not([data-graphics="ready"]) #northline-stations .northline-handover { top: 76%; }
   .world[data-inspector="open"] .room:not([data-graphics="ready"]) :is(.room-art, .station-tags, .evidence-path) { left: calc(var(--inspector-w) + 32px); width: min(100cqw - var(--inspector-w) - 32px, 100cqh * 1000 / 720); }
-  .status-bar { position: absolute; top: 16px; left: 16px; z-index: 5; max-width: calc(100% - 408px); gap: 8px 12px; }
-  .status-bar .status-fields { gap: 8px 16px; }
-  .graphics-controls { position: absolute; top: 16px; right: 16px; z-index: 5; width: 360px; max-width: calc(100% - 32px); }
+  .status-bar { position: absolute; top: 16px; left: 16px; z-index: 5; max-width: calc(100% - 368px); gap: 8px 12px; }
+  .status-bar .status-fields { gap: 8px 14px; }
+  .graphics-controls { position: absolute; top: 16px; right: 16px; z-index: 5; width: 320px; max-width: calc(100% - 32px); }
   .graphics-controls p { font-size: 13px; line-height: 18px; }
   #station-panel { position: absolute; z-index: 6; left: 16px; top: calc(16px + var(--status-h, 64px) + 12px + var(--chip-h, 0px)); bottom: 16px; width: var(--inspector-w); margin: 0; overflow-y: auto; box-shadow: 0 12px 32px #0b122799; }
   .shift-log > summary { display: inline-block; }

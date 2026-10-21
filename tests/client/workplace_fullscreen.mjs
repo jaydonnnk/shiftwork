@@ -37,6 +37,10 @@ export const FAULTS = {
     needle: "const announce = (id, value) => { if ($(id).textContent !== value) text(id, value); };",
     replacement: 'const announce = (id, value) => text(id, value);',
     expect: 'step_chip_announces_only_changes: typing' },
+  'status-wraps': { file: '/styles.css',
+    needle: '.graphics-controls { position: absolute; top: 16px; right: 16px; z-index: 5; width: 320px;',
+    replacement: '.graphics-controls { position: absolute; top: 16px; right: 16px; z-index: 5; width: 320px; } .status-bar { max-width: calc(100% - 520px); } .x {',
+    expect: 'status_bar_stays_one_row: bookshop' },
   'fallback-clip': { file: '/styles.css',
     needle: '#bookshop-stations .station > span:last-child { flex-direction: column; align-items: flex-start; gap: 0; max-width: none; overflow: visible; }',
     replacement: '#bookshop-stations .station > span:last-child { flex-direction: column; align-items: flex-start; gap: 0; max-width: 80px; overflow: hidden; }',
@@ -212,7 +216,7 @@ const FIRST_STATION = { bookshop: 'customers', gtm: 'signals', northline: 'accep
 
 const CHECK_OF = { inspector_keeps_stations_readable: 'inspector', main_view_has_no_internal_identifiers: 'identifiers', narrow_stack_reach: 'narrow',
   next_action_navigates_only: 'story', main_view_shows_one_of_each: 'story', guide_never_credits_unsent_text: 'story', picker_uses_switch_guard: 'picker',
-  run_help_matches_disabled_run: 'story', step_chip_announces_only_changes: 'story',
+  run_help_matches_disabled_run: 'story', step_chip_announces_only_changes: 'story', status_bar_stays_one_row: 'inspector',
   fallback_tag_text_is_not_clipped: 'fallback', fallback_tags_do_not_overlap: 'fallback', fallback_tags_clear_of_panels: 'fallback' };
 
 // S37 review F4: the static room a browser without WebGL gets, at the required 1280x720 cell.
@@ -244,6 +248,10 @@ export async function fallbackKeepsTagsReadable(browser, base, slug) {
 
 export async function inspectorKeepsStationsReadable(browser, base, slug) {
   await load(browser, base, slug, 1280, 720);
+  // status_bar_stays_one_row (S37 review F5): at 1280px every board's status bar, Change shift included, is one row.
+  const bar = await browser.evaluate(() => { const bar = document.getElementById('status-bar').getBoundingClientRect(), change = document.getElementById('change-shift').getBoundingClientRect();
+    return { height: Math.round(bar.height), changeTop: Math.round(change.top - bar.top) }; });
+  assert.ok(bar.height <= 80 && bar.changeTop <= 24, `status_bar_stays_one_row: ${slug} status bar is ${bar.height}px tall with Change shift ${bar.changeTop}px down`);
   assert.equal(await browser.evaluate(() => document.querySelector('.room').dataset.graphics), 'ready', `${slug} 3D room is not ready`);
   await browser.evaluate(station => document.querySelector(`.room-hotspots:not([hidden]) [data-station="${station}"]`).click(), FIRST_STATION[slug]);
   assert.ok(await browser.until(() => document.getElementById('workplace-world').dataset.inspector === 'open'), `${slug} inspector did not open`);
