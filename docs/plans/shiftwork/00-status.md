@@ -1,4 +1,4 @@
-**Workplace-3d S36 ACCEPTED, 2026-10-21.** The user answered "U make the call. Then publish the branch and merge to main and then start s37". Evidence and limits are in the [S36 checkpoint](workplace-3d/s36-checkpoint-2026-10-21.md). S37 started on `shiftwork/slice-37`.
+**Workplace-3d S36 ACCEPTED, 2026-10-21.** The user answered "U make the call. Then publish the branch and merge to main and then start s37". Evidence and limits are in the [S36 checkpoint](workplace-3d/s36-checkpoint-2026-10-21.md). Merged to main as `d43dad1..4727c82` and pushed. S37 was ACCEPTED on 2026-10-21 and merged to main with the zoom-runner fix, after a scoped Gate 3 section 13.5 rule 2 backtrack that the user re-approved on 2026-10-21; see the [S37 checkpoint](workplace-3d/s37-checkpoint-2026-10-21.md).
 
 **Workplace-3d Gates 2 to 4 APPROVED, 2026-10-21, in one batch after the Gate 1 re-approval.** The user answered "Yes i approve gates 2 to four". S36 to S42 are planned in [workplace-3d Gate 4 section 8](workplace-3d/04-slices.md#8-full-screen-workplace-slices-s36-to-s42); each needs its own go-ahead.
 

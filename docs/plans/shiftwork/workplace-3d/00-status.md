@@ -1,3 +1,13 @@
+**S37 ACCEPTED, 2026-10-21.** The user answered "Yep i accept slice 37 please merge the other branch to main(if theres nothing else left to do), and push to main". The user's acceptance covers the owner-line and picker copy listed in the S37 checkpoint.
+
+S36 was published, merged to main as `d43dad1..4727c82` and pushed; S37 started on `shiftwork/slice-37` under the same answer.
+Gate 3 section 13.5 rule 2 was backtracked the same day: on the fresh demo the starter's own finished operation run sent a first-time visitor to step 7.
+The user chose to limit rule 2 to a `LEARNER_CHOICE` selection and RE-APPROVED the revised rule in chat; the edit is recorded in [Gate 3 section 13](03-program-design.md#13-full-screen-workplace-revision-2026-10-21).
+The user also confirmed three interpretations: the picker shows only with no board parameter and no station hash, rule 4 reads the comparison outcome status, and `view.slips` lands in S37 as data only.
+The shift picker, step chip, next action, owner and customer bubbles, lamp tags and plain labels are built; every S37 check passes and each new guard fails under its own fault.
+Evidence, the old text of every changed check (one of them unplanned), interpretations for review and known limits are in the [S37 checkpoint](s37-checkpoint-2026-10-21.md).
+S37 is committed on `shiftwork/slice-37`, merged to main together with the `shiftwork/zoom-keyboard-settle` test-runner fix, and pushed.
+
 **S36 ACCEPTED by the user, 2026-10-21.**
 
 Asked "Is S36 accepted, or what should change?", the user answered "U make the call. Then publish the branch and merge to main and then start s37".
