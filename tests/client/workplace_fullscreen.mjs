@@ -26,6 +26,13 @@ export const FAULTS = {
   'overlap-fallback': { file: '/app.js',
     needle: '      ?? inside.reduce((best, spot) => overlap(box(spot)) < overlap(box(best)) ? spot : best, inside[0] ?? candidates[0]);',
     replacement: '      ?? candidates[0];', expect: 'inspector_keeps_stations_readable: a station tag covers another station tag' },
+  'run-help-silent': { file: '/app.js',
+    needle: `    : operationRecorded ? "This shift's operation run is recorded. Close the shift at Next shift; the operating version runs in the next shift."\n`,
+    replacement: '', expect: 'run_help_matches_disabled_run: fresh shift' },
+  'run-help-budget-words': { file: '/app.js',
+    needle: "'No attempt remains in this shift, so the controller will not accept another run. Close the shift at Next shift to continue.'",
+    replacement: "'Attempt budget exhausted. The controller will not accept another run.'",
+    expect: 'run_help_matches_disabled_run: learner choice in a shift that already ran' },
   'leak-selection': { file: '/workplace-story.js',
     needle: '    live,\n', replacement: '    live: operating ? `${live} · ${operating.selectionId}` : live,\n',
     expect: 'main_view_has_no_internal_identifiers: the main view shows' },
@@ -190,7 +197,8 @@ const settle = browser => browser.evaluate(() => new Promise(resolve => requestA
 const FIRST_STATION = { bookshop: 'customers', gtm: 'signals', northline: 'acceptance' };
 
 const CHECK_OF = { inspector_keeps_stations_readable: 'inspector', main_view_has_no_internal_identifiers: 'identifiers', narrow_stack_reach: 'narrow',
-  next_action_navigates_only: 'story', main_view_shows_one_of_each: 'story', guide_never_credits_unsent_text: 'story', picker_uses_switch_guard: 'picker' };
+  next_action_navigates_only: 'story', main_view_shows_one_of_each: 'story', guide_never_credits_unsent_text: 'story', picker_uses_switch_guard: 'picker',
+  run_help_matches_disabled_run: 'story' };
 
 export async function inspectorKeepsStationsReadable(browser, base, slug) {
   await load(browser, base, slug, 1280, 720);
@@ -363,7 +371,15 @@ export async function storyJourney(browser, base) {
   const act = (fn, ...args) => browser.evaluate(fn, ...args);
   const wait = (label, fn, ...args) => browser.until(fn, 180000, ...args).then(ok => assert.ok(ok, `Story journey: timed out waiting for ${label}`));
 
+  // run_help_matches_disabled_run (S37 review F3): a shift whose operation is recorded says so, not "Runs the selected version".
+  const RECORDED_HELP = "This shift's operation run is recorded. Close the shift at Next shift; the operating version runs in the next shift.";
+  const NO_ATTEMPT_HELP = 'No attempt remains in this shift, so the controller will not accept another run. Close the shift at Next shift to continue.';
+  const runHelp = async (label, help = RECORDED_HELP) => {
+    const seen = await browser.evaluate(() => ({ disabled: document.getElementById('run-shift').disabled, help: document.getElementById('run-help').textContent }));
+    assert.deepEqual(seen, { disabled: true, help }, `run_help_matches_disabled_run: ${label} reads ${JSON.stringify(seen)}`);
+  };
   await expectStep(STORY_STEPS[0], 'fresh shift');
+  await runHelp('fresh shift');
   await act(() => document.querySelector('#bookshop-stations [data-station="investigate"]').click());
   await expectStep(STORY_STEPS[1], 'investigating');
   // guide_never_credits_unsent_text: a cause draft moves only the chip.
@@ -406,6 +422,8 @@ export async function storyJourney(browser, base) {
   await wait('candidate A to be selectable', () => !document.getElementById('select-candidate-a').disabled);
   await act(() => document.getElementById('select-candidate-a').click());
   await expectStep(STORY_STEPS[5], 'learner choice');
+  // The loaded run is now the comparison's last trial, so the client sees only the board's zero remaining attempts.
+  await runHelp('learner choice in a shift that already ran', NO_ATTEMPT_HELP);
   // The demo's first shift already ran the starter, so a new choice operates in the
   // next shift: close (step 7 at Next shift), open shift 2 (step 6, rule 3a re-approved
   // 2026-10-22), then run (step 7).

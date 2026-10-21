@@ -863,13 +863,15 @@ function renderBoard() {
     $('limit-list').replaceChildren(list);
   }
   $('open-shift').disabled = state.pending || inspection.mode !== 'current' || shift?.state === 'open';
+  const operationRecorded = board.latest_run?.purpose === 'OPERATION' && board.latest_run?.state === 'FINALIZED' && board.latest_run?.shift_id === shift?.id;
   $('run-shift').disabled = state.pending || inspection.mode !== 'current' || !version || !shift?.operation_allowed || shift?.state !== 'open' || board.attempts_remaining === 0 || !terminal(board.latest_run) ||
-    (board.latest_run?.purpose === 'OPERATION' && board.latest_run?.state === 'FINALIZED' && board.latest_run?.shift_id === shift.id);
+    operationRecorded;
   text('run-help', needsChoice ? 'Operation is blocked. Compare qualifying repairs and explicitly choose an eligible tested version; saving or freezing a draft does not choose it.'
     : !version ? 'No frozen version is available to operate.'
     : !terminal(board.latest_run) ? 'Your run is in progress. Results appear only after the controller records them.'
     : shift?.state !== 'open' ? 'This shift is closed. Its recorded evidence stays available.'
-    : board.attempts_remaining === 0 ? 'Attempt budget exhausted. The controller will not accept another run.'
+    : operationRecorded ? "This shift's operation run is recorded. Close the shift at Next shift; the operating version runs in the next shift."
+    : board.attempts_remaining === 0 ? 'No attempt remains in this shift, so the controller will not accept another run. Close the shift at Next shift to continue.'
     : 'Runs the selected version. A started attempt consumes one reservation, even if it fails.');
   renderArtifact();
   renderDeployment();
