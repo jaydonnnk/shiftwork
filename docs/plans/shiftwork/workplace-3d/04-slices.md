@@ -1,3 +1,10 @@
+**Gate 4 revision APPROVED, 2026-10-21, in one batch with Gates 2 and 3.** The user answered "Yes i approve gates 2 to four" on 2026-10-21.
+
+Gate 1 was re-approved on 2026-10-21 with a full-screen workplace.
+[Section 8](#8-full-screen-workplace-slices-s36-to-s42) adds S36 to S42 and states what cannot land before the 2026-10-30 deadline.
+Sentences below marked "Revised for S36 onward" keep their meaning for accepted S29 to S35 and are replaced for new slices.
+Gates 2 to 4 are approved; each slice in section 8 still needs its own go-ahead.
+
 **S29 local continuation verified, 2026-10-19 Asia/Singapore.**
 
 Local Bellwether 200% zoom, focus/retry and partial-initialization controls now
@@ -142,6 +149,8 @@ Gate 3 sections 4 to 10 define the exact interfaces, publications and tests.
 
 ### Visible work, access and failure isolation
 
+(Revised for S36 onward: layout A is replaced by Gate 3 section 13.6; the same
+workbench node becomes the inspector.)
 Use layout A and the existing workbench node. The hosting disclosure spans its
 own full-width row. Every essential action remains a labelled HTML control with
 visible focus and text status. Canvas is `aria-hidden`, outside the tab order.
@@ -163,6 +172,10 @@ reload, API command, provider call or automatic recreation loop. Cached module
 evaluation failure may keep retry unavailable with an explanation.
 
 ### Original 3D result and lifecycle
+
+(Revised for S36 onward: from S38 the camera is perspective, and from S40 and S41
+ambient drawing and recorded replay follow Gate 3 sections 13.5 and 13.7.
+The single scene RAF, disposal and reduced-motion rules stay.)
 
 Review real rendered geometry against the approved visual specification.
 The r180 engine, stable orthographic camera, materials, light and room-specific
@@ -535,6 +548,8 @@ relaxed targets or claims that they have been met. Use its matrix in full:
 Default compact rendering below 761 CSS pixels or by explicit selection.
 A visible "Simpler 3D" control lowers quality without changing evidence.
 Layout stacks below 1100px independently of the compact-render threshold.
+(Revised for S36 onward: dimensions follow visual-spec section 11.2, and from S38
+the budget table follows Gate 3 section 13.8.)
 Use visual-spec dimensions: 58% room and 42% workbench at 1280px, workbench
 minimum 480px, maximum main width 1600px, 24px desktop gutter, 16px internal
 spacing; room heights 240px at 640px and 200px at 390px. Expanded work is at most
@@ -671,3 +686,151 @@ remain carried. Planning neither repairs them nor changes S28 acceptance.
 Gate 4 remains awaiting approval. Stop after presenting this plan. No acquisition,
 install, branch, implementation, protected-fixture authoring, provider call,
 credential use, Git publication, deployment or S29 start is authorized.
+
+## 8. Full-screen workplace slices S36 to S42
+
+Status: APPROVED 2026-10-21 in the user's batch approval of Gates 2 to 4.
+These slices implement re-approved [Gate 1](01-product.md), [Gate 2 section 11](02-architecture.md#11-revision-for-the-full-screen-workplace-2026-10-21), [Gate 3 section 13](03-program-design.md#13-full-screen-workplace-revision-2026-10-21) and [visual-spec section 11](visual-spec.md#11-full-screen-workplace-revision-2026-10-21).
+S29 to S35 stay accepted and are not renumbered or reopened.
+Sections 3, 5 and 6 above still travel with every slice, as revised by the notes at their headings.
+
+### 8.1 Deadline and what cannot land
+
+The submission period closes 2026-10-30 at 10:00 AM Pacific Time, which is 2026-10-31 at 01:00 Asia/Singapore ([HACKATHON_REQUIREMENTS.md](../../../../HACKATHON_REQUIREMENTS.md) "Dates").
+The hosted demo is still S28. Deployment, hosting credentials, the demo video and the Devpost submission are the user's separate decisions and need time after the last accepted slice.
+
+- **Planning cutoff.** Only slices accepted by the end of 2026-10-28, Asia/Singapore, are planned into the submitted build. That leaves about two days for an authorized deployment, a check of the hosted page and the submission.
+- **Committed for the submission: S36, S37 and S38.** Together they are the smallest version worth deploying: the full-screen room, the story layer that targets the stated intuitiveness problem, and the light rendered room.
+- **Stretch, in this order: S39, S40, S41.** Each is shippable alone. Drop from the end.
+- **Not expected before the deadline: S42.** Stonebridge and Northline will ship with the full-screen shell from S36 and the shared renderer from S38, but without the step guide, owner lines, light palettes or replay. Say so on the submission if it is still true.
+- **Cannot land in time under current authority:** any measured comprehension result (the 4-of-5, five-question target needs separately authorized outreach and sessions), native Safari or physical-device evidence beyond the recorded narrowed scope, and any learning-gain claim.
+- If S36 is not accepted by the cutoff, the submission keeps the accepted S35 client, and the hosted demo stays S28 unless a deployment is separately authorized.
+
+No effort estimate or delivery date is promised for any single slice.
+
+### 8.2 Order and why
+
+| Slice | Visible learner outcome | Depends on |
+|---|---|---|
+| S36 | The room fills the screen; stations open their work in a slide-in inspector; a status bar and a shift log float over the room; identifiers move to the log. All three boards. | Gate 4 approval, S36 go-ahead. |
+| S37 | Bellwether: pick a shift, see "Step N of 7", one next action, one owner line and the customer's recorded request, in plain words. | Accepted S36. |
+| S38 | Bellwether is a light, rendered bookshop: perspective camera, soft lighting, rounded objects and status lamps. | Accepted S37. |
+| S39 | Choosing the live version is a focused dialog with no default, and a synthetic shift report follows each operation. | Accepted S38. |
+| S40 | The room shows quiet life: an attention ring, slow lamp movement and a camera that keeps the chosen station in view. | Accepted S39. |
+| S41 | After an operation, labelled recorded slips travel and are stamped with their actual verdicts. | Accepted S40. |
+| S42 | Stonebridge and Northline get the story layer, light palettes, lamps and replay. | Accepted S41. |
+
+The proposal ordered the render recipe before the story layer.
+This plan swaps them because the user's stated problem is intuitiveness, and Gate 1's success questions (role, task, next action, live version, evidence mode) are answered by the story layer, not by tone mapping.
+Replay is last before the other rooms because it carries the most honesty risk and the least access value.
+
+### 8.3 Shared rules for S36 to S42
+
+- Each slice starts on its own branch `shiftwork/slice-N` from current main, after `git branch --show-current`, with the user's go-ahead for that slice. No work on main.
+- Each slice follows section 3's proof discipline: fail-capable checks with one mutation per guard, the three existing board journeys, relevant offline regressions with the known `port_dead` failure kept visible, 1280x720, 640x900 and 390x844 at 100% and 200% zoom, the graphics-failure fallback, disposal, and the asset-closure check.
+- Planned changes to existing checks are exactly those listed in Gate 3 section 13.9, made in the slice that changes the behaviour, with the old assertion text recorded in that slice's checkpoint. Any other existing check that fails is a defect to fix or a gate question, never a check to weaken.
+- Budgets: S36 and S37 are measured against the existing Gate 3 section 9 budgets because the renderer is unchanged; S38 onward against Gate 3 section 13.8.
+- At every stop: show the local URL and port, record evidence and limits in this folder's status and the root status, run `architect-reviewer` in post-slice cleanup mode, and ask for acceptance. Commits, merges, pushes and deployment are separate decisions.
+- No slice needs credentials, provider calls, protected-fixture edits, new sealed cases, installs or new vendor files. A clean locked install, if wanted for packaging proof, is separately authorized as before.
+
+### S36: full-screen room with inspector, status bar and shift log
+
+**Learner outcome.** On any of the three boards, the room fills the screen under the hosting row. Choosing a station tag opens its existing work in an inspector on the left while the room stays visible. A status bar shows the client, shift, live version label, open incidents, attempts left and "Synthetic scenario". A shift log holds the run, check, event and selection identifiers. On narrow screens everything stacks with no horizontal scroll.
+
+**Scope and files.** `index.html`, `styles.css`, `app.js`, new `workplace-story.js` (only `logEntries` and status-bar values in this slice), `workplace-host.js` and `workplace-scene.js` (`setInspector`, view offset on the existing orthographic camera, `anchorPositions`, `onAnchors`). Station tags reuse the existing `[data-station]` buttons. The layout A grid is removed. Expanded work keeps `#expand-work` and `main[data-expanded]`. New `tests/client/workplace_fullscreen.mjs`; planned edits to `workplace_s31.mjs` `assertLayout` and the anchor hardening in `workplace_browser.mjs`; closure inventory gains `workplace-story.js`.
+
+**Acceptance and proof.** `inspector_keeps_stations_readable` at 1280x720; `main_view_has_no_internal_identifiers` for the status bar and tags; the narrow-stack order and reach part of `narrow_stack_reach_and_still_camera` without the step chip; every existing check passing, including all three board journeys with Northline's carried narrow case; fallback with the static room under the floating panels; disposal and existing perf budgets at both tiers.
+
+**Stop.** Full-screen shell on three boards with receipts. No step guide, owner line, render change, dialog or replay yet.
+
+**Authorizations needed.** S36 go-ahead; branch `shiftwork/slice-36`; disposable local previews and receipts under `/tmp/shiftwork-s36-*`.
+
+### S37: Bellwether story layer
+
+**Learner outcome.** A first-time visitor sees the shift picker with each client's question, what the shift teaches and the seven steps. In Bellwether, the step chip shows "Step N of 7" from recorded state, one next-action button opens the right station, the owner says one line that never hints at a cause or fix, and the customer's recorded request appears in a bubble at the queue. On-screen names are plain: live version, backup version, what would prove you wrong. Station tags show status words and a lamp dot.
+
+**Scope and files.** `workplace-story.js` (`guideStep`, `lampStates`, `ownerLine`, `customerBubble`), `workplace-view.js` (`attention`, `lamps`), `app.js` (`renderStory`, picker, next action), `index.html` (picker, chip, next action, bubbles, plain labels), `styles.css`. New `tests/client/workplace_story.test.mjs`. Any existing test that reads a renamed label text is updated to the new text in the same commit as the rename, with the old text recorded.
+
+**Acceptance and proof.** `guide_step_follows_recorded_state`, `guide_never_credits_unsent_text`, `next_action_navigates_only`, `owner_lines_never_suggest` with a recorded human read of the catalogue and picker copy, `main_view_has_no_internal_identifiers` and `main_view_shows_one_of_each` across the seven steps, `picker_uses_switch_guard`; three journeys; narrow and zoom reach including the chip and next action. Stonebridge and Northline show their existing current-task header in the next-action panel and no chip.
+
+**Stop.** The Bellwether loop is guided in plain words. The five-question target remains unmeasured.
+
+**Authorizations needed.** S37 go-ahead; branch `shiftwork/slice-37`; disposable local writes.
+
+### S38: render recipe and the light Bellwether room
+
+**Learner outcome.** The Bellwether room reads as a warm, light bookshop with depth: perspective camera, soft environment light, rounded furniture, fog and glowing status lamps that match the tag text.
+
+**Scope and files.** `workplace-scene.js` (camera, tone mapping, `roundedBox`, `buildStudioEnvironment`, fog, DPR and backing-store cap, static lamp meshes), `workplace-rooms.js` (Bellwether palette, lamp anchors, camera pose), `workplace-assets.json`. Stonebridge and Northline get the shared renderer settings with their existing palettes.
+
+**Acceptance and proof.** First, before any art work, measure the new renderer settings on the current room with `workplace_perf.mjs` at both tiers; the Gate 3 section 13.8 budgets are provisional by the user's 2026-10-21 decision. Then `renderer_matches_tier_recipe`; `lamps_reflect_state_with_text`; `disposal_has_one_owner` with the environment target and geometry cache; `performance_receipt_meets_named_tier` against Gate 3 section 13.8 at both tiers; the closure inventory still exactly two engine modules; art review of all three rooms against visual-spec sections 7, 8 and 11 with labels hidden and with the inspector open; contrast measured over the light room; the planned `workplace_s34.mjs` baseline re-recording.
+
+**Stop.** If the compact tier misses a budget, drop the compact environment map first; if it still misses, stop and record the miss for a design decision. If the first-party geometry fails the art review, stop and raise the addon route as a Gate 2 and Gate 3 change.
+
+**Authorizations needed.** S38 go-ahead; branch `shiftwork/slice-38`; disposable local writes. No download.
+
+### S39: choose dialog and shift report
+
+**Learner outcome.** Choosing the live version opens a dialog that names the exact version, says why it asks and says the other version stays as the backup; nothing is preselected and closing chooses nothing. After an operation finishes, a shift report shows the synthetic before and after, incidents opened and resolved, and the learner's decision.
+
+**Scope and files.** `index.html` (`#choose-dialog`, `#shift-report`, moved rationale and select nodes, `#open-choose-a`, `#open-choose-b`), `app.js`, `styles.css`, `workplace-story.js` (`reduceShiftReport`). Planned journey edits in `browser.mjs`, `gtm_browser.mjs` and `northline_browser.mjs` to open the dialog first.
+
+**Acceptance and proof.** `choose_dialog_has_no_default`; `shift_report_matches_ledger` including a failed operation and a missing link; the existing selection, operation and inheritance assertions on all three boards; keyboard trap and focus return for both dialogs at all three widths.
+
+**Stop.** Decisions and consequences have their own focused surfaces. The report opens after the run without a replay.
+
+**Authorizations needed.** S39 go-ahead; branch `shiftwork/slice-39`; disposable local writes.
+
+### S40: living room
+
+**Learner outcome.** An amber ring marks the station holding the next action, attention and failure lamps move slowly, and on desktop the camera keeps the chosen station in view beside the inspector. Nothing moves when motion is reduced, on narrow screens, or after 20 seconds without input.
+
+**Scope and files.** `workplace-scene.js` (ring, ambient scheduling, focus ease), `workplace-host.js` (`noteInput`, `setAmbient` wiring).
+
+**Acceptance and proof.** `ambient_stops_where_required` with one fault per stop condition; the still-camera part of `narrow_stack_reach_and_still_camera`; `reduced_motion_and_visibility_settle` extended; perf receipts with ambient samples; a reviewer check that ambient never appears on a station whose state does not justify it.
+
+**Stop.** The room has quiet, truthful life.
+
+**Authorizations needed.** S40 go-ahead; branch `shiftwork/slice-40`; disposable local writes.
+
+### S41: recorded replay
+
+**Learner outcome.** When an operation's recorded results arrive, slips travel from the queue to the service, to the locked inspector's desk where each is stamped with its actual verdict, and to the wall, under a "Recorded replay" label. "Show settled result" skips it. An explicit button replays history with its own label. The shift report then opens.
+
+**Scope and files.** `workplace-story.js` (`planSlips`), `workplace-view.js` (`slips`), `workplace-scene.js` (`playReplay`, `settleReplay`, slips and stamps), `workplace-host.js` (eligibility and per-run played set), `app.js` (report after replay, explicit button). New `tests/client/workplace_replay.mjs`.
+
+**Acceptance and proof.** `slip_verdicts_match_checks`, `replay_waits_for_recorded_results`, `replay_auto_only_on_continuous_operation`, `explicit_replay_is_labelled_history`; the existing 320ms trace and `only_linked_operational_event_animates` unchanged; a recorded review of a failed-operation replay against visual-spec 11.6; perf receipts with replay samples.
+
+**Stop.** If any reviewer reading of a failed replay suggests the customer was helped, stop and revise before acceptance.
+
+**Authorizations needed.** S41 go-ahead; branch `shiftwork/slice-41`; disposable local writes.
+
+### S42: Stonebridge and Northline treatment
+
+**Learner outcome.** Both away rooms get the step guide with their own station maps, owner lines, light palettes, lamps and, where their runs have outputs and checks, replay.
+
+**Scope and files.** `workplace-story.js` board station maps and catalogues, `workplace-rooms.js` palettes and anchors, matching tests. Board-specific event meanings from section 5 of Gate 3 stay; for example, a Northline slip never implies rollout approval.
+
+**Acceptance and proof.** Every S37 to S41 check extended to both boards; the complete three-board extracted build with external hosts blocked; Northline's carried narrow case; 30-switch disposal across all rooms.
+
+**Stop.** All three rooms share the full treatment. Not expected before the deadline.
+
+**Authorizations needed.** S42 go-ahead; branch `shiftwork/slice-42`; disposable local writes.
+
+### 8.4 Traceability for S36 to S42
+
+| Gate 1 requirement | Owning slice and Gate 3 section 13.9 check |
+|---|---|
+| Room fills the screen; inspector keeps the room in view | S36: `inspector_keeps_stations_readable` |
+| No hash or internal identifier on the main view; log holds them | S36 and S37: `main_view_has_no_internal_identifiers` |
+| Shift picker, seven steps, step chip, one next action | S37: `guide_step_follows_recorded_state`, `next_action_navigates_only`, `picker_uses_switch_guard` |
+| One question, one next action, one narrator line; voices never hint | S37: `main_view_shows_one_of_each`, `owner_lines_never_suggest` |
+| Station lamps with text | S37 (tags) and S38 (3D): `lamps_reflect_state_with_text` |
+| Warm, light rooms with navy trim and amber attention | S38 for Bellwether, S42 for the others: art review and `renderer_matches_tier_recipe` |
+| Focused decision dialog, no default winner | S39: `choose_dialog_has_no_default` |
+| Synthetic shift report | S39: `shift_report_matches_ledger` |
+| Quiet life that reflects real state; reduced motion | S40: `ambient_stops_where_required` |
+| Labelled recorded replay with actual verdicts | S41: the four replay checks |
+| Narrow screens stack, no camera motion, no drag | S36 onward: `narrow_stack_reach_and_still_camera` |
+| Bellwether first, then the other rooms | S37 to S41 Bellwether; S42 the others |
+| Comprehension target | Unmeasured; needs separately authorized sessions |
