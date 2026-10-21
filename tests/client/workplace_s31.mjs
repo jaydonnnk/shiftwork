@@ -110,9 +110,8 @@ async function comparisonToTerminal(browser) {
   assert.ok(payload, 'The comparison did not reach a terminal state');
   await browser.until(() => (globalThis.__s31Accepts ?? []).some(item => ['FINALIZED', 'FAILED', 'INVALIDATED'].includes(item.state)), 60000);
   assert.ok(await browser.until(() => document.body.dataset.loadState === 'ready' && document.querySelectorAll('#comparison-slots .comparison-slot').length === 6, 180000), 'The comparison panel did not settle');
-  const [attempts, accepts] = await browser.evaluate(() => [globalThis.__s31Attempts ?? [], globalThis.__s31Accepts ?? []]);
-  const initialAttempt = await browser.evaluate(() => globalThis.__s31InitialAttempt);
-  return { id: payload.id, payload, initial, initialAttempt, attempts, accepts };
+  const [initialAttempt, accepts] = await browser.evaluate(() => [globalThis.__s31InitialAttempt, globalThis.__s31Accepts ?? []]);
+  return { id: payload.id, payload, initial, initialAttempt, accepts };
 }
 function expectedMissing(payload) {
   return payload.trials.filter(trial => !trial.run_id || (trial.missing_evidence?.length ?? 0)).length;
