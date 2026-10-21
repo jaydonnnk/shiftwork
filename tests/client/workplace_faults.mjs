@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -133,7 +133,8 @@ for (const type of ['OWNER_ASSIGNED', 'SLA_CLOCK_STARTED', 'HANDOFF_ESCALATED'])
   );
 }
 function run(row,bytes) {
-  const inline=row.host?bytes:bytes.replace("'./evidence.js'",JSON.stringify(new URL('../../shiftwork/client/evidence.js',import.meta.url).href));
+  const inline=row.host?bytes:bytes.replace("'./evidence.js'",JSON.stringify(new URL('../../shiftwork/client/evidence.js',import.meta.url).href))
+    .replace("'./workplace-story.js'",JSON.stringify(new URL('../../shiftwork/client/workplace-story.js',import.meta.url).href));
   return spawnSync(process.execPath,['--test',`--test-name-pattern=^${row.test}$`,path.join(repoRoot,'tests/client/workplace_view.test.mjs')],{encoding:'utf8',env:{...process.env,[row.host?'WORKPLACE_HOST_SOURCE':'WORKPLACE_VIEW_SOURCE']:Buffer.from(inline).toString('base64')}});
 }
 for (const [slug, types] of [['northline', ['BOOKING_COMMITTED','ESCALATION_TO_HUMAN','COUNTER_FOLLOWUP_RECORDED','ROLLOUT_APPROVED']], ['gtm', ['OWNER_ASSIGNED','SLA_CLOCK_STARTED','HANDOFF_ESCALATED']]]) {

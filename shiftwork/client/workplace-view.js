@@ -1,4 +1,5 @@
 import { selectEvidence } from './evidence.js';
+import { guideStep, lampStates, planSlips } from './workplace-story.js';
 
 const WALL_TYPES = {
   bookshop: ['SALE_COMPLETED', 'REFUND_REQUIRED', 'ESCALATION_TO_HUMAN', 'BACKLOG_RECORDED', 'INCIDENT_OPENED', 'INCIDENT_RESOLVED', 'LIMIT_DECLARED'],
@@ -214,7 +215,7 @@ export function projectWorkplace(input) {
         ordinal: link.request_ordinal, verdict: link.verdict } : null,
     };
   }
-  return {
+  const view = {
     schemaVersion: 1, context: { board: slug, shiftId, inspection }, station: input.activeStation,
     shiftState: board?.latest_shift?.state?.toLowerCase() ?? null,
     operating: selection ? { selectionId: selection.id, kind: selection.kind,
@@ -260,6 +261,13 @@ export function projectWorkplace(input) {
       visibleCheckSetHash: board?.inherited_requirements?.visible_check_set_hash ?? null },
     consistency,
   };
+  // Story fields (Gate 3 section 13.4) are reductions of the fields above. The
+  // guide's draft booleans never reach the scene, so attention uses none.
+  view.slips = planSlips(run, outputs, checks, events);
+  const guide = guideStep(view, { activeStation: input.activeStation });
+  view.attention = guide.step ? guide.stationId : null;
+  view.lamps = lampStates(view);
+  return view;
 }
 
 function diagnosticKey(summary) {

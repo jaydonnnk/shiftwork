@@ -1,0 +1,227 @@
+// S37 story-layer checks (Gate 3 section 13.9), GPU-free.
+// Each check runs clean against the production module, then once per fault
+// against an in-memory mutation written to a scratch copy. A fault passes only
+// when its own named assertion fails. The repository file is never modified.
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
+import { copyFile, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+const client = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../shiftwork/client');
+const storyPath = path.join(client, 'workplace-story.js');
+const pristine = await readFile(storyPath, 'utf8');
+const digest = text => createHash('sha256').update(text).digest('hex');
+
+// One mutation per guard. `needle` must occur exactly once in the served source.
+export const FAULTS = {
+  'latest-run': { needle: "run && run.purpose === 'OPERATION' && run.shiftId", replacement: 'run && run.shiftId',
+    check: 'guide', expect: 'guide_step_follows_recorded_state: experiment run' },
+  'saved-as-chosen': { needle: "if (operating?.kind === 'LEARNER_CHOICE' && comparison && operating.comparisonId === comparison.id)",
+    replacement: "if (view.saved?.latestVersionId || (operating?.kind === 'LEARNER_CHOICE' && comparison && operating.comparisonId === comparison.id))",
+    check: 'guide', expect: 'guide_step_follows_recorded_state: saved version is not chosen' },
+  'eligible-any': { needle: 'comparison.candidates.some(candidate => candidate.eligible === true)', replacement: 'true',
+    check: 'guide', expect: 'guide_step_follows_recorded_state: complete, none eligible' },
+  'no-shift-match': { needle: 'run.shiftId === shiftId && ', replacement: '',
+    check: 'guide', expect: 'guide_step_follows_recorded_state: operation run of an earlier shift' },
+  'starter-ends-shift': { needle: "operating?.kind === 'LEARNER_CHOICE' && run && ", replacement: 'run && ',
+    check: 'guide', expect: 'guide_step_follows_recorded_state: starter operation run' },
+  'draft-advances': { needle: 'if ((view.investigation?.count ?? 0) >= 1)', replacement: 'if ((view.investigation?.count ?? 0) >= 1 || local.causeDraft)',
+    check: 'drafts', expect: 'guide_never_credits_unsent_text: a draft moved the guide' },
+  'suggestive-line': { needle: "5: 'Nothing goes live until you choose and say why.',",
+    replacement: "5: 'Nothing goes live until you choose; version A looks better.',",
+    check: 'owner', expect: 'owner_lines_never_suggest: line 5 suggests' },
+  'compare-pass': { needle: "lamp('compare', 'idle', 'No score, no default')", replacement: "lamp('compare', 'pass', 'No score, no default')",
+    check: 'lamps', expect: 'lamps_reflect_state_with_text: compare shows pass' },
+  'experiment-pass': { needle: "const ownOperation = Boolean(run && run.purpose === 'OPERATION' && operating && run.selectionId === operating.selectionId);",
+    replacement: 'const ownOperation = Boolean(run && operating);', check: 'lamps', expect: 'lamps_reflect_state_with_text: passing experiment' },
+  'lamp-no-text': { needle: "lamp('ledger', 'idle', 'None open')", replacement: "lamp('ledger', 'idle', '')",
+    check: 'lamps', expect: 'lamps_reflect_state_with_text: a lamp has no text' },
+};
+
+async function load(fault) {
+  if (!fault) return import(pathToFileURL(storyPath).href);
+  const { needle, replacement } = FAULTS[fault];
+  assert.equal(pristine.split(needle).length - 1, 1, `Fault ${fault} needle must occur exactly once`);
+  const dir = await mkdtemp(path.join(tmpdir(), 'shiftwork-s37-story-'));
+  await copyFile(path.join(client, 'evidence.js'), path.join(dir, 'evidence.js'));
+  await writeFile(path.join(dir, 'workplace-story.js'), pristine.replace(needle, replacement));
+  try { return await import(pathToFileURL(path.join(dir, 'workplace-story.js')).href); }
+  finally { await rm(dir, { recursive: true, force: true }); }
+}
+
+// A literal public view with the fields the story module reads.
+function view(change = () => {}) {
+  const v = { context: { board: 'bookshop', shiftId: 'shift-2', inspection: { mode: 'current', historicalRunId: null } },
+    station: 'service', shiftState: 'open', consistency: 'linked',
+    operating: { selectionId: 'sel-0001', kind: 'STARTER_BASELINE', versionId: 'ver-0001', comparisonId: null, validity: 'VALID' },
+    saved: { latestVersionId: null, draftBaseVersionId: null },
+    run: null, slips: null, investigation: { latestEntryId: null, count: 0 },
+    tests: { diagnostic: null, comparison: null, later: null },
+    consequences: { chainStatus: 'VALID', incidents: [{ id: 'inc-1', state: 'OPEN' }] } };
+  change(v);
+  return v;
+}
+const run = (purpose, state, extra = {}) => ({ id: 'run-0009', shiftId: 'shift-2', versionId: 'ver-0003', selectionId: 'sel-0002',
+  state, purpose, outputCount: 3, ...extra });
+const comparison = (eligible, extra = {}) => ({ id: 'experiment-shift-2-c1', shiftId: 'shift-2', state: 'FINALIZED', outcomeStatus: 'COMPLETE',
+  trials: [], candidates: [{ label: 'A', versionId: 'ver-0002', eligible: eligible[0], blockingReasonCodes: eligible[0] ? [] : ['MANDATORY_CHECK_FAILED'] },
+    { label: 'B', versionId: 'ver-0003', eligible: eligible[1], blockingReasonCodes: eligible[1] ? [] : ['MISSING_EVIDENCE'] }], ...extra });
+const chosen = v => { v.operating = { selectionId: 'sel-0002', kind: 'LEARNER_CHOICE', versionId: 'ver-0003', comparisonId: 'experiment-shift-2-c1', validity: 'VALID' }; };
+const tally = (pass, fail, error = 0, none = 0) => ({ total: pass + fail + error + none, pass, fail, error, none });
+
+// [case name, view, local guidance, expected step, station, status]
+const GUIDE_CASES = [
+  ['closed shift', view(v => { v.shiftState = 'closed'; }), {}, 7, 'next', 'ready'],
+  ['operation running', view(v => { chosen(v); v.run = run('OPERATION', 'RUNNING'); }), {}, 6, 'service', 'running'],
+  ['operation captured', view(v => { chosen(v); v.run = run('OPERATION', 'CAPTURED'); }), {}, 6, 'service', 'running'],
+  ['operation finalized', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED'); }), {}, 7, 'ledger', 'ready'],
+  ['operation failed', view(v => { chosen(v); v.run = run('OPERATION', 'FAILED'); }), {}, 7, 'ledger', 'ready'],
+  ['learner choice', view(v => { chosen(v); v.tests.comparison = comparison([true, true]); }), {}, 6, 'service', 'ready'],
+  ['complete, one eligible', view(v => { v.tests.comparison = comparison([false, true]); v.investigation.count = 1; }), {}, 5, 'compare', 'ready'],
+  ['complete, none eligible', view(v => { v.tests.comparison = comparison([false, false]); v.investigation.count = 1; }), {}, 4, 'compare', 'blocked'],
+  ['investigation recorded', view(v => { v.investigation.count = 1; }), {}, 4, 'compare', 'ready'],
+  ['investigating with a cause draft', view(), { activeStation: 'investigate', causeDraft: true }, 3, 'investigate', 'ready'],
+  ['investigating', view(), { activeStation: 'investigate' }, 2, 'investigate', 'ready'],
+  ['fresh shift', view(), {}, 1, 'customers', 'ready'],
+  // Recorded state that a careless guide would misread.
+  ['experiment run', view(v => { chosen(v); v.run = run('EXPERIMENT', 'FINALIZED'); }), {}, 1, 'customers', 'ready'],
+  ['saved version is not chosen', view(v => { v.saved.latestVersionId = 'ver-0004'; }), {}, 1, 'customers', 'ready'],
+  ['operation run of an earlier shift', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED', { shiftId: 'shift-1' }); }), {}, 1, 'customers', 'ready'],
+  // A fresh shift: the starter version's own operation run is already finalized (Gate 3 section 13.5 rule 2, re-approved 2026-10-21).
+  ['starter operation run', view(v => { v.run = run('OPERATION', 'FINALIZED', { selectionId: 'sel-0001' }); }), {}, 1, 'customers', 'ready'],
+  ['comparison of an earlier shift', view(v => { v.tests.comparison = comparison([true, true], { shiftId: 'shift-1' }); }), {}, 1, 'customers', 'ready'],
+];
+
+async function guideCheck(api) {
+  for (const [name, v, local, step, station, status] of GUIDE_CASES) {
+    const got = api.guideStep(v, local);
+    assert.deepEqual([got.step, got.stationId, got.status], [step, station, status], `guide_step_follows_recorded_state: ${name}`);
+    assert.equal(got.name, api.STEP_NAMES[step - 1], `guide_step_follows_recorded_state: ${name} step name`);
+  }
+  const blocked = api.guideStep(GUIDE_CASES[7][1], {});
+  assert.equal(blocked.blockedReason, 'Neither version can be chosen: mandatory check failed', 'guide_step_follows_recorded_state: blocked reason in words');
+  for (const unknown of [null, view(v => { v.consistency = 'conflict'; }), view(v => { v.context.shiftId = null; })]) {
+    const got = api.guideStep(unknown, { activeStation: 'owner' });
+    assert.deepEqual([got.step, got.stationId, got.blockedReason], [null, 'owner', 'Step unknown: recorded state unavailable'],
+      'guide_step_follows_recorded_state: unknown state');
+  }
+}
+
+async function draftsCheck(api) {
+  const drafts = { causeDraft: true, falsifierDraft: true };
+  for (const [name, v] of GUIDE_CASES) for (const activeStation of ['customers', 'investigate', 'compare']) {
+    const before = JSON.stringify(v);
+    const plain = api.guideStep(v, { activeStation }), drafted = api.guideStep(v, { activeStation, ...drafts });
+    assert.equal(JSON.stringify(v), before, `guide_never_credits_unsent_text: the guide changed the view (${name})`);
+    if (plain.step <= 3) assert.ok(drafted.step >= 1 && drafted.step <= 3, `guide_never_credits_unsent_text: a draft moved the guide past step 3 (${name})`);
+    else assert.deepEqual(drafted, plain, `guide_never_credits_unsent_text: a draft moved the guide (${name}, ${activeStation})`);
+    if (plain.step === 1 || plain.step === 2) assert.equal(drafted.stationId, plain.stationId, `guide_never_credits_unsent_text: a draft moved the guide to another station (${name})`);
+  }
+  // A cause draft alone, outside the investigate station, credits nothing.
+  assert.equal(api.guideStep(view(), { activeStation: 'customers', causeDraft: true }).step, 1, 'guide_never_credits_unsent_text: a draft moved the guide away from step 1');
+}
+
+// Words that name a cause, a fix, a preference or a choice. Owner lines also
+// must not name what failed for this client (CAUSE_WORDS); picker questions
+// state the symptom, so they are scanned for fix and preference words only.
+export const FIX_WORDS = ['because', 'caused by', 'the cause is', 'fix', 'repair', 'patch', 'bug', 'broken', 'should', 'better', 'best',
+  'prefer', 'recommend', 'pick ', 'instead', 'try changing', 'change the', 'add a', 'remove the', 'candidate'];
+export const CAUSE_WORDS = ['price', 'stock', 'collect', 'retriev', 'missing', 'tool', 'prompt', 'model', 'route', 'routing', 'permission', 'owner field'];
+const LABELS = [/\bver-\d+/i, /\b(?:version|candidate|option|fix) [AB]\b/i, /\b[AB]\b/];
+export function suggests(text, words) {
+  const lower = text.toLowerCase();
+  return [...words.filter(word => lower.includes(word)), ...LABELS.filter(rule => rule.test(text)).map(String)];
+}
+
+async function ownerCheck(api) {
+  const lines = Object.entries(api.OWNER_LINES).map(([key, line]) => [key, line.replace('{n}', '3').replace('{p}', '2').replace('{m}', '5')]);
+  assert.equal(lines.length, 8, 'owner_lines_never_suggest: the catalogue changed size without a recorded review');
+  // Scanner self-test: every needle is detected inside a rendered line.
+  for (const needle of [...FIX_WORDS, ...CAUSE_WORDS, 'ver-0002', 'version A', ' B ']) {
+    const rendered = `${lines[0][1]} ${needle} ${lines[1][1]}`;
+    assert.ok(suggests(rendered, [...FIX_WORDS, ...CAUSE_WORDS]).length > 0, `Scanner self-test missed ${JSON.stringify(needle)}`);
+  }
+  for (const [key, line] of lines) assert.deepEqual(suggests(line, [...FIX_WORDS, ...CAUSE_WORDS]), [], `owner_lines_never_suggest: line ${key} suggests`);
+  for (const card of api.SHIFT_CARDS) for (const field of ['question', 'teaches']) {
+    assert.deepEqual(suggests(card[field], FIX_WORDS), [], `owner_lines_never_suggest: ${card.slug} ${field} suggests`);
+  }
+  // ownerLine substitutes public counts only and never invents a zero.
+  const slips = v => { v.slips = { tally: tally(2, 3) }; };
+  assert.equal(api.ownerLine(view(slips), { step: 1 }), '3 customers in the last recorded run did not get what they asked for.');
+  assert.equal(api.ownerLine(view(), { step: 1 }), null, 'owner_lines_never_suggest: an unknown count became a line');
+  assert.equal(api.ownerLine(view(slips), { step: 7 }), "2 of 5 recorded requests passed the inspector's checks.");
+  assert.equal(api.ownerLine(view(), { step: 7 }), null, 'owner_lines_never_suggest: an unknown count became a line');
+  assert.equal(api.ownerLine(view(v => { v.shiftState = 'closed'; }), { step: 7 }), api.OWNER_LINES.closed);
+  assert.equal(api.ownerLine(view(), { step: null }), null);
+}
+
+const lampOf = (api, v) => Object.fromEntries(api.lampStates(v).map(item => [item.stationId, [item.tone, item.text]]));
+async function lampsCheck(api) {
+  const rows = [
+    ['no run', view(), { customers: ['idle', 'No recorded requests'], service: ['attention', 'Live, not yet run'], ledger: ['fail', '1 open'], compare: ['idle', 'Not started'] }],
+    ['failing operation', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED'); v.slips = { tally: tally(1, 1, 1) }; }),
+      { customers: ['attention', '2 complaints'], service: ['fail', 'Live, checks failed'], evaluator: ['idle', 'Locked'] }],
+    ['passing operation', view(v => { chosen(v); v.run = run('OPERATION', 'FINALIZED'); v.slips = { tally: tally(3, 0) }; }),
+      { customers: ['pass', 'No complaints'], service: ['pass', 'Live, checks passed'] }],
+    ['passing experiment', view(v => { chosen(v); v.run = run('EXPERIMENT', 'FINALIZED'); v.slips = { tally: tally(3, 0) }; }),
+      { customers: ['idle', '3 recorded requests'], service: ['attention', 'Live, not yet run'] }],
+    ['running', view(v => { v.run = run('EXPERIMENT', 'RUNNING'); }), { evaluator: ['idle', 'Locked · running'] }],
+    ['no live version', view(v => { v.operating = null; }), { service: ['idle', 'No live version'] }],
+    ['invalidated', view(v => { v.operating.validity = 'INVALIDATED'; }), { service: ['fail', 'Invalidated'] }],
+    ['no open incident', view(v => { v.consequences.incidents = []; }), { ledger: ['idle', 'None open'] }],
+    ['broken chain', view(v => { v.consequences.chainStatus = 'unknown'; }), { ledger: ['unknown', 'Unavailable'] }],
+    ['comparison running', view(v => { v.tests.comparison = comparison([null, null], { state: 'RUNNING', outcomeStatus: null }); }), { compare: ['attention', 'Running'] }],
+    ['complete comparison', view(v => { v.tests.comparison = comparison([true, true]); }), { compare: ['idle', 'No score, no default'] }],
+    ['attention on a quiet station', view(v => { v.attention = 'investigate'; }), { investigate: ['attention', 'Nothing recorded'], owner: ['idle', 'Read only'] }],
+  ];
+  for (const [name, v, expected] of rows) {
+    const lamps = lampOf(api, v);
+    // Text presence and the compare rule run first, so their own faults cannot hide behind a row value.
+    assert.ok(Object.values(lamps).every(([, text]) => typeof text === 'string' && text.length > 0), `lamps_reflect_state_with_text: a lamp has no text (${name})`);
+    assert.ok(lamps.compare[0] !== 'pass', `lamps_reflect_state_with_text: compare shows pass (${name})`);
+    for (const [station, value] of Object.entries(expected)) assert.deepEqual(lamps[station], value, `lamps_reflect_state_with_text: ${name} (${station})`);
+  }
+  assert.ok(Object.values(lampOf(api, view(v => { v.consistency = 'conflict'; }))).every(([tone]) => tone === 'unknown'), 'lamps_reflect_state_with_text: conflict');
+}
+
+async function bubbleCheck(api) {
+  const v = view(v => { v.run = run('OPERATION', 'FINALIZED'); });
+  const output = { id: 'out-1', run_id: 'run-0009', request_text: `  Can I collect it today? ${'x'.repeat(200)}` };
+  const bubble = api.customerBubble(v, output);
+  assert.equal(bubble.label, 'Recorded request · operation');
+  assert.equal(bubble.text.length, 140, 'customer bubble is not truncated to 140 characters');
+  assert.ok(bubble.text.startsWith('Can I collect it today?') && bubble.text.endsWith('…'));
+  assert.equal(api.customerBubble(v, null), null, 'a bubble appeared with no output');
+  assert.equal(api.customerBubble(v, { ...output, run_id: 'run-0001' }), null, 'a bubble showed another run');
+  assert.equal(api.customerBubble(view(w => { w.run = run('EXPERIMENT', 'FINALIZED'); }), output).label, 'Recorded request · test');
+  assert.equal(api.customerBubble(view(w => { w.run = run('OPERATION', 'FINALIZED'); w.context.inspection.mode = 'history'; }), output).label, 'Recorded request · history');
+}
+
+async function slipsCheck(api) {
+  const r = { id: 'run-0009', state: 'FINALIZED', purpose: 'OPERATION' };
+  const outputs = [3, 1, 2, 4].map(n => ({ id: `out-${n}`, run_id: 'run-0009', request_ordinal: n }));
+  const checks = [['out-1', 'pass'], ['out-1', 'fail'], ['out-2', 'error'], ['out-3', 'pass']]
+    .map(([ref, verdict], i) => ({ id: `chk-${i}`, run_id: 'run-0009', observed_ref: ref, verdict }));
+  const plan = api.planSlips(r, outputs, checks, []);
+  assert.deepEqual(plan.slips.map(slip => [slip.ordinal, slip.verdict]), [[1, 'fail'], [2, 'error'], [3, 'pass'], [4, 'none']], 'slip verdicts');
+  assert.deepEqual(plan.tally, tally(1, 1, 1, 1));
+  assert.equal(api.planSlips({ ...r, state: 'RUNNING' }, outputs, checks, []), null, 'a running run produced slips');
+  assert.equal(api.planSlips(r, outputs, null, []), null, 'slips before the checks read');
+}
+
+const CHECKS = { guide: guideCheck, drafts: draftsCheck, owner: ownerCheck, lamps: lampsCheck, bubble: bubbleCheck, slips: slipsCheck };
+const NAMES = { guide: 'guide_step_follows_recorded_state', drafts: 'guide_never_credits_unsent_text', owner: 'owner_lines_never_suggest',
+  lamps: 'lamps_reflect_state_with_text', bubble: 'customer_bubble_shows_recorded_request', slips: 'slip_verdicts_follow_linked_checks' };
+
+for (const [key, check] of Object.entries(CHECKS)) test(NAMES[key], async () => check(await load()));
+for (const [fault, row] of Object.entries(FAULTS)) test(`fault_${fault}_fails_${NAMES[row.check]}`, async () => {
+  const api = await load(fault);
+  await assert.rejects(() => CHECKS[row.check](api), error => {
+    assert.ok(String(error.message).includes(row.expect), `Fault ${fault} failed elsewhere: ${error.message}`);
+    return true;
+  }, `Fault ${fault} was not caught`);
+});
+test('story_source_is_unchanged', async () => assert.equal(digest(await readFile(storyPath, 'utf8')), digest(pristine)));

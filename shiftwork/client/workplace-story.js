@@ -1,5 +1,6 @@
 // Pure presentation of the main view's words. No DOM, engine, network or command
 // access: every value is a reduction of an accepted SceneView or loaded public records.
+import { selectEvidence } from './evidence.js';
 
 const words = value => String(value).toLowerCase().replaceAll('_', ' ');
 
@@ -56,3 +57,137 @@ export function logEntries(view, run, checks, events, investigations, selection)
     text: 'Recorded reads disagree; no outcome is inferred', tone: 'fail', recordedAt: null });
   return entries;
 }
+
+// The seven steps of a shift, in the learner's words (Gate 3 section 13.4).
+export const STEP_NAMES = ['Read the complaints', 'Explain the cause', 'Say what would prove you wrong', 'Try two fixes',
+  'Choose one', 'Run the shift', 'See what happened'];
+const TERMINAL = new Set(['FINALIZED', 'FAILED']);
+const guide = (step, stationId, status = 'ready', blockedReason = null) =>
+  ({ step, name: STEP_NAMES[step - 1], stationId, status, blockedReason });
+
+// The step guide only navigates. It reads recorded state in the order of Gate 3
+// section 13.5 and never decides whether a command is allowed. The local draft
+// booleans steer only the chip between steps 1 and 3; they are never sent or credited.
+export function guideStep(view, local = {}) {
+  if (!view || view.consistency === 'conflict' || !view.context?.shiftId) return { step: null, name: null,
+    stationId: local.activeStation ?? view?.station ?? 'customers', status: 'blocked', blockedReason: 'Step unknown: recorded state unavailable' };
+  const shiftId = view.context.shiftId, operating = view.operating, run = view.run;
+  const comparison = view.tests?.comparison?.shiftId === shiftId ? view.tests.comparison : null;
+  if (view.shiftState === 'closed') return guide(7, 'next');
+  // Only the learner's own choice ends the loop; the starter's run is what step 1 reads.
+  if (operating?.kind === 'LEARNER_CHOICE' && run && run.purpose === 'OPERATION' && run.shiftId === shiftId && run.selectionId === operating.selectionId)
+    return TERMINAL.has(run.state) ? guide(7, 'ledger') : guide(6, 'service', 'running');
+  if (operating?.kind === 'LEARNER_CHOICE' && comparison && operating.comparisonId === comparison.id) return guide(6, 'service');
+  if (comparison?.outcomeStatus === 'COMPLETE') {
+    if (comparison.candidates.some(candidate => candidate.eligible === true)) return guide(5, 'compare');
+    const code = comparison.candidates.flatMap(candidate => candidate.blockingReasonCodes)[0];
+    return guide(4, 'compare', 'blocked', code ? `Neither version can be chosen: ${words(code)}` : 'Neither version can be chosen');
+  }
+  if ((view.investigation?.count ?? 0) >= 1) return guide(4, 'compare');
+  if (local.activeStation === 'investigate') return local.causeDraft ? guide(3, 'investigate') : guide(2, 'investigate');
+  return guide(1, 'customers');
+}
+
+// One slip per loaded output in ordinal order, with the verdict its linked checks
+// give. Null until the run is terminal and its checks read has been accepted.
+export function planSlips(run, outputs, checks, events = []) {
+  if (!run || !TERMINAL.has(run.state) || !Array.isArray(checks)) return null;
+  const slips = [...(outputs ?? [])].filter(output => output.run_id === run.id)
+    .sort((a, b) => a.request_ordinal - b.request_ordinal).map(output => {
+      const linked = selectEvidence(output, checks, events).checks;
+      const verdict = linked.some(check => check.verdict === 'fail') ? 'fail'
+        : linked.some(check => check.verdict === 'error') ? 'error'
+        : linked.length ? 'pass' : 'none';
+      return { ordinal: output.request_ordinal, outputId: output.id, verdict, checkCount: linked.length };
+    });
+  return { runId: run.id, purpose: run.purpose, state: run.state, slips: slips.slice(0, 12), overflow: Math.max(0, slips.length - 12),
+    tally: { total: slips.length, ...Object.fromEntries(['pass', 'fail', 'error', 'none'].map(v => [v, slips.filter(slip => slip.verdict === v).length])) } };
+}
+
+// Station lamps for Bellwether (Gate 3 section 13.5). Text is always present, so
+// the tone is never the only signal.
+const lamp = (stationId, tone, text) => ({ stationId, tone, text });
+export function lampStates(view) {
+  if (!view || view.consistency === 'conflict') return ['customers', 'service', 'evaluator', 'ledger', 'compare', 'investigate', 'owner', 'next', 'repair', 'pipeline']
+    .map(id => lamp(id, 'unknown', 'Unavailable'));
+  const operating = view.operating, run = view.run, tally = view.slips?.tally ?? null;
+  const ownOperation = Boolean(run && run.purpose === 'OPERATION' && operating && run.selectionId === operating.selectionId);
+  const complaints = tally ? tally.fail + tally.error + tally.none : 0;
+  const allPassed = Boolean(ownOperation && tally && tally.total > 0 && tally.pass === tally.total);
+  const customers = !run || !run.outputCount ? lamp('customers', 'idle', 'No recorded requests')
+    : allPassed ? lamp('customers', 'pass', 'No complaints')
+    : complaints ? lamp('customers', 'attention', `${complaints} ${complaints === 1 ? 'complaint' : 'complaints'}`)
+    : lamp('customers', 'idle', `${run.outputCount} recorded ${run.outputCount === 1 ? 'request' : 'requests'}`);
+  const service = !operating ? lamp('service', 'idle', 'No live version')
+    : operating.validity === 'INVALIDATED' ? lamp('service', 'fail', 'Invalidated')
+    : ownOperation && tally && TERMINAL.has(run.state) ? (allPassed ? lamp('service', 'pass', 'Live, checks passed') : lamp('service', 'fail', 'Live, checks failed'))
+    : lamp('service', 'attention', 'Live, not yet run');
+  const evaluator = run && !TERMINAL.has(run.state) ? lamp('evaluator', 'idle', `Locked · ${words(run.state)}`) : lamp('evaluator', 'idle', 'Locked');
+  const open = (view.consequences?.incidents ?? []).filter(incident => UNRESOLVED.has(incident.state)).length;
+  const ledger = view.consequences?.chainStatus !== 'VALID' ? lamp('ledger', 'unknown', 'Unavailable')
+    : open ? lamp('ledger', 'fail', `${open} open`) : lamp('ledger', 'idle', 'None open');
+  const comparison = view.tests?.comparison;
+  const running = comparison && (['PLANNED', 'RUNNING'].includes(comparison.state) || comparison.trials.some(trial => ['RESERVED', 'RUNNING'].includes(trial.state)));
+  const compare = running ? lamp('compare', 'attention', 'Running')
+    : !comparison ? lamp('compare', 'idle', 'Not started')
+    : comparison.outcomeStatus === 'COMPLETE' ? lamp('compare', 'idle', 'No score, no default')
+    : lamp('compare', 'idle', 'Incomplete');
+  const count = view.investigation?.count ?? 0;
+  const lamps = [customers, service, evaluator, ledger, compare,
+    lamp('investigate', 'idle', count ? `${count} recorded` : 'Nothing recorded'),
+    lamp('owner', 'idle', 'Read only'),
+    lamp('next', 'idle', view.shiftState === 'closed' ? 'Shift closed' : 'Shift open'),
+    lamp('repair', 'idle', 'Read only'),
+    lamp('pipeline', 'idle', 'Follow the record')];
+  // Only these quiet stations take the guide's attention; the others keep their recorded tone.
+  for (const item of lamps) if (item.stationId === view.attention && ['investigate', 'owner', 'next', 'repair', 'pipeline'].includes(item.stationId)) item.tone = 'attention';
+  return lamps;
+}
+
+// The owner's one line per step, from a frozen catalogue reviewed by a person.
+// Only public counts are substituted; no line names a cause, a fix, a candidate,
+// a version or a choice (owner_lines_never_suggest).
+export const OWNER_LINES = {
+  1: '{n} customers in the last recorded run did not get what they asked for.',
+  2: 'Write down your own explanation first; I will not guess for you.',
+  3: 'Write down your own explanation first; I will not guess for you.',
+  4: 'Both versions get the same requests, so the comparison is fair.',
+  5: 'Nothing goes live until you choose and say why.',
+  6: 'The version you chose is the one that runs.',
+  7: '{p} of {m} recorded requests passed the inspector\'s checks.',
+  closed: 'Your choice carries into the next shift.',
+};
+export function ownerLine(view, guide) {
+  if (!guide?.step || !view) return null;
+  const tally = view.slips?.tally ?? null;
+  if (view.shiftState === 'closed') return OWNER_LINES.closed;
+  if (guide.step === 1) {
+    const n = tally ? tally.fail + tally.error + tally.none : null;
+    return n ? OWNER_LINES[1].replace('{n}', String(n)) : null;
+  }
+  if (guide.step === 7) return tally ? OWNER_LINES[7].replace('{p}', String(tally.pass)).replace('{m}', String(tally.total)) : null;
+  return OWNER_LINES[guide.step];
+}
+
+// The customer's recorded request, shown in a bubble at the queue.
+const PURPOSE_WORDS = { OPERATION: 'operation', EXPERIMENT: 'test', LEGACY_OPERATION: 'history' };
+export function customerBubble(view, output) {
+  if (!view?.run || !output || output.run_id !== view.run.id || typeof output.request_text !== 'string') return null;
+  const purpose = view.context?.inspection?.mode === 'history' ? 'history' : PURPOSE_WORDS[view.run.purpose] ?? 'history';
+  const raw = output.request_text.trim();
+  return { label: `Recorded request · ${purpose}`, text: raw.length > 140 ? `${raw.slice(0, 139).trimEnd()}…` : raw };
+}
+
+// Shift picker copy (Gate 1 mockup screen 10, Gate 3 section 13.10 item 6).
+// Authored text only: no live counts, and no question names a cause or a fix.
+export const SHIFT_CARDS = [
+  { slug: 'bookshop', client: 'Bellwether Books', badge: 'Start here', role: "Junior Applied AI Engineer · a bookshop's customer service",
+    question: 'Customers ask to collect a book and for similar titles. The service answers with a price only. Why?',
+    teaches: 'Say what would prove you wrong before you change any code.' },
+  { slug: 'northline', client: 'Northline Bike Co-op', badge: 'Away shift', role: "Forward Deployed Engineer · a repair workshop's bookings",
+    question: 'The co-op wants online bookings. Can you roll out without crossing the permissions they set?',
+    teaches: "Acceptance comes before rollout, and the client's boundaries come first." },
+  { slug: 'gtm', client: 'Stonebridge Software', badge: 'Revenue team', role: 'Go-To-Market Engineer · lead routing for a sales team',
+    question: 'Promising leads sit unassigned past their response deadline. What is going wrong?',
+    teaches: 'Owners and deadlines are the consequence you can check.' },
+];

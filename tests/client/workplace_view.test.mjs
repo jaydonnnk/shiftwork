@@ -342,7 +342,7 @@ for(const relation of ['run','output','check']) test(`incident_${relation}_must_
 });
 test('projection_whitelists_scene_fields_and_detaches_arrays', async () => {
   const { projectWorkplace } = await api(); const i = input(); i.diagnostic = diagnostic('DIAGNOSTIC', 'COMPLETE', []); const v = projectWorkplace(i);
-  assert.deepEqual(Object.keys(v).sort(), ['schemaVersion','context','station','shiftState','operating','saved','run','evidence','investigation','tests','consequences','inheritance','consistency'].sort());
+  assert.deepEqual(Object.keys(v).sort(), ['schemaVersion','context','station','shiftState','operating','saved','run','evidence','investigation','tests','consequences','inheritance','consistency','slips','attention','lamps'].sort());
   const needles = ['PRIVATE_RATIONALE','PRIVATE_SOURCE','PRIVATE_BODY','PRIVATE_REQUEST','PRIVATE_EXPECTED','PRIVATE_TREATMENT','PRIVATE_CUSTOMER_TEXT','PRIVATE_REASON', '/Users/private/secret', '\\Users\\private\\secret'];
   const scan = text => needles.filter(n => text.includes(n) || text.includes(JSON.stringify(n).slice(1,-1)) || text.includes(n.replaceAll('\\','/')));
   for (const needle of needles) assert.ok(scan(JSON.stringify({ value: needle })).includes(needle), 'serialized scanner cannot match its needle');
