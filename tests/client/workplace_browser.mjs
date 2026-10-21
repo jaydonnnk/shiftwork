@@ -304,12 +304,14 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       const focusGuard=fault.match(/^focus-guard-(generation|intent|current-focus|node|enabled)(-omit)?$/);
       if(focusGuard) {
         const [,guard,omit]=focusGuard;
-        const conditions={generation:'generation === state.generation',intent:'focus.intent === state.intent',
-          'current-focus':'[document.body, editor].includes(document.activeElement)',node:"editor === $('draft-source')",enabled:'!editor.disabled'};
+        // Each needle keeps enough context to stay unique: owner.generation === state.generation
+        // elsewhere in app.js also contains the bare generation comparison.
+        const conditions={generation:['focus && generation === state.generation','focus && true'],intent:['focus.intent === state.intent','true'],
+          'current-focus':['[document.body, editor].includes(document.activeElement)','true'],node:["editor === $('draft-source')",'true'],enabled:['!editor.disabled','true']};
         if(omit) {
-          const needle=conditions[guard];
+          const [needle,replacement]=conditions[guard];
           assert.equal(source.split(needle).length-1,1,'Focus guard fault anchor changed');
-          source=replaceOnce(source,needle,'true');
+          source=replaceOnce(source,needle,replacement);
         }
         const needle='  await refreshed;';
         assert.equal(source.split(needle).length-1,1,'Focus race hook anchor changed');
@@ -765,8 +767,12 @@ export async function runZoom(base,out,fault='') {
       const top=await b.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
       await writeFile(path.join(out,String(width),'zoom-top.png'),Buffer.from(top.data,'base64'));
       for(const station of ['customers','evaluator','owner','repair','next','compare']) {
-        const control=await b.evaluate(station=>{
-          const e=document.querySelector(`#bookshop-stations [data-station="${station}"]`);e.scrollIntoView({block:'center',behavior:'instant'});e.focus();const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,width:r.width,height:r.height};
+        // Settle two frames before Enter. Chrome drops a smooth scroll that starts
+        // while this instant scroll is still uncommitted, which no person can trigger.
+        const control=await b.evaluate(async station=>{
+          const e=document.querySelector(`#bookshop-stations [data-station="${station}"]`);e.scrollIntoView({block:'center',behavior:'instant'});e.focus();
+          await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+          const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2,width:r.width,height:r.height};
         },station);
         assert.ok(control.width>=44 && control.height>=44,'Zoomed station control is below 44 CSS pixels');
         await b.send('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,text:'\r',unmodifiedText:'\r'});
