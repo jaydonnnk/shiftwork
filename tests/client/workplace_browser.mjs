@@ -242,6 +242,12 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
           assert.equal(source.split(needle).length-1,1,'Polled comparison publication anchor changed');
           source=replaceOnce(source,needle,'    }\n    await refresh();');
         }
+        {
+          // Freeze the initial attempt before a poll can have the same state.
+          const needle='    const deadline = Date.now() + 180000;';
+          assert.equal(source.split(needle).length-1,1,'Initial comparison boundary anchor changed');
+          source=replaceOnce(source,needle,'    globalThis.__s31InitialAttempt = globalThis.__s31Attempts?.at(-1) ?? null;\n'+needle);
+        }
         if(fault==='comparison-ownership-generation') {
           const needle='    owner.generation === state.generation &&\n';
           assert.equal(source.split(needle).length-1,1,'Comparison generation ownership anchor changed');
