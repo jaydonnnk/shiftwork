@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -202,7 +202,8 @@ if(browserFlag!==-1) {
       ['omit-shadow','Partial shadow target remains undisposed'],['omit-dispose-raf','Partial frame remains scheduled'],
       ['omit-geometry','Partial geometry remains allocated'],['omit-material','Partial material remains allocated'],['omit-context','Partial context remains live'],
     ].map(([fault,expected])=>({name:`partial-${fault}`,expected,partial:true})),
-    ...['picker','station-column'].map(owner=>({name:`zoom-omit-${owner}`,expected:'200% zoom causes horizontal page scrolling',zoom:true})),
+    {name:'zoom-omit-picker',expected:'200% zoom causes horizontal page scrolling',zoom:true},
+    {name:'zoom-omit-station-column',expected:'200% zoom station tag text escapes its control',zoom:true},
     {name:'zoom-omit-navigation',expected:'200% zoom navigation labels escape their controls',zoom:true},
     {name:'host-retry-omit-epoch',expected:'Host retry attached an obsolete import',outer:true},
     {name:'host-evaluation-omit-disable',expected:'Cached outer module retry remained enabled',outer:true,cachedHost:true},

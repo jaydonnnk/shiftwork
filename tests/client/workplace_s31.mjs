@@ -204,15 +204,20 @@ async function choose(browser, base, shiftId, label, payload, beforeChoice) {
   return selection;
 }
 async function assertLayout(browser) {
-  await browser.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
-  await new Promise(resolve => setTimeout(resolve, 120));
+  // S36 planned change (Gate 3 section 13.9): layout A's `sideBySide: workplace.right <= panel.left + 2`
+  // is replaced by inspector_keeps_stations_readable at 1280x720.
+  await browser.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 720, deviceScaleFactor: 1, mobile: false });
+  await browser.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 200)))));
   const desktop = await browser.evaluate(() => {
-    const workplace = document.querySelector('.workplace').getBoundingClientRect();
     const panel = document.getElementById('station-panel').getBoundingClientRect();
-    return { sideBySide: workplace.right <= panel.left + 2, overflow: document.documentElement.scrollWidth <= innerWidth,
+    const tags = [...document.querySelectorAll('.room-hotspots:not([hidden]) [data-station]')].map(node => node.getBoundingClientRect());
+    return { inspectorOpen: document.getElementById('workplace-world').dataset.inspector === 'open' && panel.width > 0,
+      stationsReadable: tags.length >= 4 && tags.every(r => r.left >= 0 && r.top >= 0 && r.right <= innerWidth && r.bottom <= innerHeight
+        && !(r.left < panel.right && r.right > panel.left && r.top < panel.bottom && r.bottom > panel.top)),
+      overflow: document.documentElement.scrollWidth <= innerWidth,
       cards: document.querySelectorAll('#comparison-outcome .comparison-outcome-card').length };
   });
-  assert.deepEqual(desktop, { sideBySide: true, overflow: true, cards: 2 }, 'The 1280px comparison layout is not readable side by side');
+  assert.deepEqual(desktop, { inspectorOpen: true, stationsReadable: true, overflow: true, cards: 2 }, 'The 1280px comparison inspector hides a station or the room');
   for (const [width, height] of [[640, 900], [390, 844]]) {
     await browser.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
     await new Promise(resolve => setTimeout(resolve, 120));

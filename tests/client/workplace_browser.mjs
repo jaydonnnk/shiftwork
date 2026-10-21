@@ -8,9 +8,18 @@ import { chromePath, repoRoot } from './env.mjs';
 
 const NORTHLINE_STATIONS = [['brief','Deployment brief'],['map','System map'],['acceptance','Acceptance'],['rollout','Rollout'],['handover','Handover'],['bench','Integration bench']];
 
-export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900}={}) {
+// Every served-source or anchor edit must match exactly once, so a changed
+// production statement fails loudly instead of silently skipping its fault.
+// A global RegExp must match at least once.
+export function replaceOnce(text, needle, replacement) {
+  const count = needle instanceof RegExp ? (text.match(needle) ?? []).length : text.split(needle).length - 1;
+  if (needle instanceof RegExp ? count < 1 : count !== 1) throw Error(`Served-source anchor matched ${count} times: ${String(needle).slice(0, 120)}`);
+  return text.replace(needle, replacement);
+}
+
+export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900,layoutFault=''}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -62,7 +71,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       let source=await readFile(path.join(repoRoot,'shiftwork/client/index.html'),'utf8');
       const needle=fault==='s35-label-map'?'This declared map cannot grant, expand or prove permissions.':'It does not prove a person received, read or accepted the handover.';
       assert.equal(source.split(needle).length-1,1,'Northline label fault anchor changed');
-      source=source.replace(needle,'');
+      source=replaceOnce(source,needle,'');
       return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/html'}],body:Buffer.from(source).toString('base64')});
     }
     const holdPost = ['diagnostic-hold-post','ownership-generation','ownership-intent','ownership-history','ownership-board','comparison-hold-post','comparison-ownership-generation','comparison-ownership-intent','comparison-ownership-history'].includes(fault) && request.method === 'POST' && /^\/api\/shifts\/[^/]+\/experiments$/.test(name);
@@ -80,57 +89,62 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       let source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
       const publishNeedle="    const transitions = view.consistency==='conflict' ? [] : diffWorkplace(previous,view);";
       assert.equal(source.split(publishNeedle).length-1,1,'Publish observation anchor changed');
-      source=source.replace(publishNeedle,publishNeedle+" globalThis.__s32Publishes ??= []; globalThis.__s32Publishes.push({state:view.run?.state ?? null,consistency:view.consistency,current:(view.consequences?.events ?? []).filter(event=>event.source==='current').map(event=>event.seq),scene:!!scene,previous:!!previous,kinds:transitions.map(item=>item.kind)});");
+      source=replaceOnce(source,publishNeedle,publishNeedle+" globalThis.__s32Publishes ??= []; globalThis.__s32Publishes.push({state:view.run?.state ?? null,consistency:view.consistency,current:(view.consequences?.events ?? []).filter(event=>event.source==='current').map(event=>event.seq),scene:!!scene,previous:!!previous,kinds:transitions.map(item=>item.kind)});");
       if(fault==='operation-omit-arrival-callback') {
         const needle='      if(started && consequence) onConsequence?.({count: consequence.count ?? 1, eventIds: [...consequence.publicRefs]});';
         assert.equal(source.split(needle).length-1,1,'Consequence callback fault anchor changed');
-        source=source.replace(needle,'      void 0;');
+        source=replaceOnce(source,needle,'      void 0;');
       }
       if(fault==='operation-conflict-reference') {
         const needle="if(view.consistency!=='conflict') previous=view;";
         assert.equal(source.split(needle).length-1,1,'Conflict reference fault anchor changed');
-        source=source.replace(needle,"previous=view.consistency==='conflict'?null:view;");
+        source=replaceOnce(source,needle,"previous=view.consistency==='conflict'?null:view;");
       }
       if(fault==='operation-reset-reference') {
         const needle="if(publication.kind==='reset') { release(); if(!unavailable)";
         assert.equal(source.split(needle).length-1,1,'Reset reference fault anchor changed');
-        source=source.replace(needle,"if(publication.kind==='reset') { release(); previous=null; if(!unavailable)");
+        source=replaceOnce(source,needle,"if(publication.kind==='reset') { release(); previous=null; if(!unavailable)");
       }
       if(fault==='operation-omit-mount-replay') {
         const needle='if(handle.apply(view,transitions) && consequence)';
         assert.equal(source.split(needle).length-1,1,'Mount replay fault anchor changed');
-        source=source.replace(needle,'if(false)');
+        source=replaceOnce(source,needle,'if(false)');
       }
       return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/javascript'}],body:Buffer.from(source).toString('base64')});
     }
     if((hostTimeout || hostEvaluation) && name==='/workplace-host.js') {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
-      const needle='export function createWorkplaceHost({container,fallback,status,onStation,onConsequence}) {';
+      const needle='export function createWorkplaceHost({container,fallback,status,onStation,onConsequence,onAnchors}) {';
       assert.equal(source.split(needle).length-1,1,'Host construction observation anchor changed');
-      source=source.replace(needle,needle+' globalThis.__s29HostConstructions=(globalThis.__s29HostConstructions??0)+1;');
+      source=replaceOnce(source,needle,needle+' globalThis.__s29HostConstructions=(globalThis.__s29HostConstructions??0)+1;');
       if(hostEvaluation) source='globalThis.__s29HostEvaluations=(globalThis.__s29HostEvaluations??0)+1;throw Error("injected host evaluation");\n'+source;
       if(hostTimeout) await new Promise(resolve=>setTimeout(resolve,9000));
       return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/javascript'}],body:Buffer.from(source).toString('base64')});
     }
     if(fail) return send('Fetch.fulfillRequest',{requestId,responseCode:404,body:''});
+    if(name==='/styles.css' && layoutFault==='status-not-first') {
+      const source=replaceOnce(await readFile(path.join(repoRoot,'shiftwork/client/styles.css'),'utf8'),'.status-bar { order: 0;','.status-bar { order: 3;');
+      return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/css'}],body:Buffer.from(source).toString('base64')});
+    }
     if(name==='/styles.css' && fault.startsWith('zoom-omit-')) {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/styles.css'),'utf8');
       const needles={'zoom-omit-picker':'.board-picker { display: grid; grid-template-columns: minmax(0,1fr); min-width: 0; gap: 5px; padding: 8px 0; }\n  .board-picker select { width: 100%; overflow: hidden; text-overflow: ellipsis; }',
         'zoom-omit-navigation':'.journey { grid-template-columns: minmax(0,1fr); }',
-        'zoom-omit-station-column':'body[data-board="bookshop"] .room-hotspots { grid-template-columns: minmax(0,1fr); }'};
+        'zoom-omit-station-column':'.room-hotspots { grid-template-columns: minmax(0,1fr); }'};
       assert.ok(Object.hasOwn(needles,fault),'Unknown zoom layout fault');
       const needle=needles[fault];
       assert.equal(source.split(needle).length-1,1,'Zoom layout fault anchor changed');
-      source=source.replace(needle,fault==='zoom-omit-picker'?'.board-picker { flex-wrap: wrap; gap: 5px; padding: 8px 0; }\n  .board-picker select { flex: 1; width: 250px; }':'');
+      source=replaceOnce(source,needle,fault==='zoom-omit-picker'?'.board-picker { flex-wrap: wrap; gap: 5px; padding: 8px 0; }\n  .board-picker select { flex: 1; width: 250px; }':'');
       return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/css'}],body:Buffer.from(source).toString('base64')});
     }
     if(name === '/app.js') {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/app.js'),'utf8');
+      if(fault==='comparison-tag-no-clamp') source=replaceOnce(source,'const minLeft = inspectorCover && point.x >= inspectorCover ? inspectorCover + 8 : 8;','const minLeft = 8;');
       if(s34Mode) {
         if(fault==='s34-failed-refresh-omit-reset') {
           const needle="  $('operate-pipeline').disabled = true;\n  text('pipeline-ownership-status', 'No verified ownership records loaded.');";
           assert.equal(source.split(needle).length-1,1,'Ownership reset fault anchor changed');
-          source=source.replace(needle,"  $('operate-pipeline').disabled = true;");
+          source=replaceOnce(source,needle,"  $('operate-pipeline').disabled = true;");
         }
         source += "\nglobalThis.__s34Pipeline=events=>{const previous=state.events;try{state.events=events;renderPipelineWall();return $('pipeline-ownership-status').textContent;}finally{state.events=previous;renderPipelineWall();}};";
         const pipelineFaults = {
@@ -141,70 +155,70 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
         if(Object.hasOwn(pipelineFaults,fault)) {
           const [needle,replacement]=pipelineFaults[fault];
           assert.equal(source.split(needle).length-1,1,'Stonebridge ownership fault anchor changed');
-          source=source.replace(needle,replacement);
+          source=replaceOnce(source,needle,replacement);
         }
       }
       if(s30Mode) {
         const publicationNeedle='  latestPresentation = publication;';
         assert.equal(source.split(publicationNeedle).length-1,1,'Publication observation anchor changed');
-        source=source.replace(publicationNeedle,publicationNeedle+"\n  globalThis.__s30Publications ??= []; globalThis.__s30Publications.push({reason, kind:publication.kind, generation:publication.generation ?? null, intent:publication.intent ?? null, inspection:publication.context?.inspection ?? null, diagnostic:publication.view?.tests?.diagnostic?.trials?.[0]?.state ?? null});");
+        source=replaceOnce(source,publicationNeedle,publicationNeedle+"\n  globalThis.__s30Publications ??= []; globalThis.__s30Publications.push({reason, kind:publication.kind, generation:publication.generation ?? null, intent:publication.intent ?? null, inspection:publication.context?.inspection ?? null, diagnostic:publication.view?.tests?.diagnostic?.trials?.[0]?.state ?? null});");
         const acceptNeedle="  if (diagnosticPublicationAllowed(owner)) publishPresentation('diagnostic');\n}";
         assert.equal(source.split(acceptNeedle).length-1,1,'Diagnostic accept observation anchor changed');
-        source=source.replace(acceptNeedle,"  if (diagnosticPublicationAllowed(owner)) publishPresentation('diagnostic');\n  globalThis.__s30Accepts ??= []; globalThis.__s30Accepts.push({state:experiment?.trials?.[0]?.state ?? null, missing:experiment?.trials?.[0]?.missing_evidence?.length ?? null, tag:$('test-tag').textContent, tagState:$('test-tag').dataset.state, tagMissing:$('test-tag').dataset.missingEvidence ?? null, latestReason:latestPresentation?.reason ?? null, latestDiagnostic:latestPresentation?.view?.tests?.diagnostic?.trials?.[0]?.state ?? null});\n}");
+        source=replaceOnce(source,acceptNeedle,"  if (diagnosticPublicationAllowed(owner)) publishPresentation('diagnostic');\n  globalThis.__s30Accepts ??= []; globalThis.__s30Accepts.push({state:experiment?.trials?.[0]?.state ?? null, missing:experiment?.trials?.[0]?.missing_evidence?.length ?? null, tag:$('test-tag').textContent, tagState:$('test-tag').dataset.state, tagMissing:$('test-tag').dataset.missingEvidence ?? null, latestReason:latestPresentation?.reason ?? null, latestDiagnostic:latestPresentation?.view?.tests?.diagnostic?.trials?.[0]?.state ?? null});\n}");
         source += "\nglobalThis.__s30State=()=>({generation:state.generation,intent:state.intent,slug:state.slug,shiftId:state.loadedShiftId,inspection:{...inspection}});\nglobalThis.__s30SetInspection=(mode,runId)=>{inspection={mode,historicalRunId:runId};};\nglobalThis.__s30Accept=acceptDiagnostic;\nglobalThis.__s30Diagnostic=()=>state.diagnostic;\nglobalThis.__s30Expand=setExpandedWork;\nglobalThis.__s30Expanded=()=>expandedWork;";
         if(fault==='diagnostic-omit-initial') {
           const needle="    }) });\n    acceptDiagnostic(owner, experiment);\n    const deadline";
           assert.equal(source.split(needle).length-1,1,'Initial diagnostic publication anchor changed');
-          source=source.replace(needle,"    }) });\n    const deadline");
+          source=replaceOnce(source,needle,"    }) });\n    const deadline");
         }
         if(fault==='diagnostic-omit-polled') {
           const needle="      acceptDiagnostic(owner, experiment);\n    }\n    await refresh();";
           assert.equal(source.split(needle).length-1,1,'Polled diagnostic publication anchor changed');
-          source=source.replace(needle,"    }\n    await refresh();");
+          source=replaceOnce(source,needle,"    }\n    await refresh();");
         }
         if(fault==='ownership-generation') {
           const needle='return owner.generation === state.generation && owner.intent === state.intent &&';
           assert.equal(source.split(needle).length-1,1,'Generation ownership anchor changed');
-          source=source.replace(needle,'return owner.intent === state.intent &&');
+          source=replaceOnce(source,needle,'return owner.intent === state.intent &&');
         }
         if(fault==='ownership-intent') {
           const needle='return owner.generation === state.generation && owner.intent === state.intent &&\n    owner.inspection.mode';
           assert.equal(source.split(needle).length-1,1,'Intent ownership anchor changed');
-          source=source.replace(needle,'return owner.generation === state.generation &&\n    owner.inspection.mode');
+          source=replaceOnce(source,needle,'return owner.generation === state.generation &&\n    owner.inspection.mode');
         }
         if(fault==='ownership-inspection') {
           const needle='    owner.inspection.mode === inspection.mode &&\n    owner.inspection.historicalRunId === inspection.historicalRunId;';
           assert.equal(source.split(needle).length-1,1,'Inspection ownership anchor changed');
-          source=source.replace(needle,'    true;');
+          source=replaceOnce(source,needle,'    true;');
         }
         if(fault==='ownership-context') {
           const needle='  if (owner.slug !== state.slug || owner.shiftId !== state.loadedShiftId ||\n      owner.shiftId !== experiment?.shift_id) return;';
           assert.equal(source.split(needle).length-1,1,'Context ownership anchor changed');
-          source=source.replace(needle,'  if (false) return;');
+          source=replaceOnce(source,needle,'  if (false) return;');
         }
         if(fault==='expand-omit-suspend') {
           const needle='  workplaceHost?.setExpanded(value);';
           assert.equal(source.split(needle).length-1,1,'Expanded suspension anchor changed');
-          source=source.replace(needle,'  void 0;');
+          source=replaceOnce(source,needle,'  void 0;');
         }
         if(fault==='expand-escape-omit') {
           const needle="  event.preventDefault();\n  setExpandedWork(false);\n  $('expand-work').focus({ preventScroll: true });";
           assert.equal(source.split(needle).length-1,1,'Expanded Escape anchor changed');
-          source=source.replace(needle,"  event.preventDefault();\n  $('expand-work').focus({ preventScroll: true });");
+          source=replaceOnce(source,needle,"  event.preventDefault();\n  $('expand-work').focus({ preventScroll: true });");
         }
         if(fault==='expand-omit-pointer-focus') {
           const needle="  if (document.activeElement === $('draft-source')) event.preventDefault();";
           assert.equal(source.split(needle).length-1,1,'Expanded pointer focus anchor changed');
-          source=source.replace(needle,'  void 0;');
+          source=replaceOnce(source,needle,'  void 0;');
         }
       }
       if(s31Mode || s32Mode) {
         const publicationNeedle='  latestPresentation = publication;';
         assert.equal(source.split(publicationNeedle).length-1,1,'Publication observation anchor changed');
-        source=source.replace(publicationNeedle,publicationNeedle+"\n  globalThis.__s31Publications ??= []; globalThis.__s31Publications.push({reason, kind:publication.kind, generation:publication.generation ?? null, intent:publication.intent ?? null, inspection:publication.context?.inspection ?? null, comparison:publication.view?.tests?.comparison?.state ?? null, operating:publication.view?.operating?.versionId ?? null});");
+        source=replaceOnce(source,publicationNeedle,publicationNeedle+"\n  globalThis.__s31Publications ??= []; globalThis.__s31Publications.push({reason, kind:publication.kind, generation:publication.generation ?? null, intent:publication.intent ?? null, inspection:publication.context?.inspection ?? null, comparison:publication.view?.tests?.comparison?.state ?? null, operating:publication.view?.operating?.versionId ?? null});");
         const acceptNeedle="function acceptComparison(owner, experiment) {\n  if (!comparisonPublicationAllowed(owner, experiment)) return;\n  state.comparison = experiment;\n  renderCompare();\n  publishPresentation('comparison');\n}";
         assert.equal(source.split(acceptNeedle).length-1,1,'Comparison accept observation anchor changed');
-        source=source.replace(acceptNeedle,`function acceptComparison(owner, experiment) {
+        source=replaceOnce(source,acceptNeedle,`function acceptComparison(owner, experiment) {
   globalThis.__s31Attempts ??= []; globalThis.__s31Attempts.push({id:experiment?.id ?? null, state:experiment?.state ?? null, allowed:comparisonPublicationAllowed(owner, experiment), slug:owner.slug, shiftId:owner.shiftId, experimentShift:experiment?.shift_id ?? null, generation:owner.generation, intent:owner.intent, inspection:owner.inspection});
   if (!comparisonPublicationAllowed(owner, experiment)) { return; }
   state.comparison = experiment;
@@ -216,75 +230,75 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
         {
           const needle='    }) });\n    acceptComparison(owner, experiment);';
           assert.equal(source.split(needle).length-1,1,'Initial comparison observation anchor changed');
-          source=source.replace(needle,'    }) });\n    globalThis.__s31Initial = experiment;\n    acceptComparison(owner, experiment);');
+          source=replaceOnce(source,needle,'    }) });\n    globalThis.__s31Initial = experiment;\n    acceptComparison(owner, experiment);');
         }
         if(fault==='comparison-omit-initial') {
           const needle='    acceptComparison(owner, experiment);\n    const deadline';
           assert.equal(source.split(needle).length-1,1,'Initial comparison publication anchor changed');
-          source=source.replace(needle,'    const deadline');
+          source=replaceOnce(source,needle,'    const deadline');
         }
         if(fault==='comparison-omit-polled') {
           const needle='      acceptComparison(owner, experiment);\n    }\n    await refresh();';
           assert.equal(source.split(needle).length-1,1,'Polled comparison publication anchor changed');
-          source=source.replace(needle,'    }\n    await refresh();');
+          source=replaceOnce(source,needle,'    }\n    await refresh();');
         }
         if(fault==='comparison-ownership-generation') {
           const needle='    owner.generation === state.generation &&\n';
           assert.equal(source.split(needle).length-1,1,'Comparison generation ownership anchor changed');
-          source=source.replace(needle,'');
+          source=replaceOnce(source,needle,'');
         }
         if(fault==='comparison-ownership-intent') {
           const needle='    owner.intent === state.intent &&\n';
           assert.equal(source.split(needle).length-1,1,'Comparison intent ownership anchor changed');
-          source=source.replace(needle,'');
+          source=replaceOnce(source,needle,'');
         }
         for(const name of ['comparison-ownership-inspection','comparison-ownership-history']) if(fault===name) {
           const needle='    owner.inspection.mode === inspection.mode &&\n    owner.inspection.historicalRunId === inspection.historicalRunId &&\n';
           assert.equal(source.split(needle).length-1,1,'Comparison inspection ownership anchor changed');
-          source=source.replace(needle,'    true &&\n');
+          source=replaceOnce(source,needle,'    true &&\n');
         }
         if(fault==='comparison-ownership-context') {
           const needle='  return owner.slug === state.slug &&\n';
           assert.equal(source.split(needle).length-1,1,'Comparison context ownership anchor changed');
-          source=source.replace(needle,'  return true &&\n');
+          source=replaceOnce(source,needle,'  return true &&\n');
         }
         if(fault==='comparison-ownership-shift') {
           const needle='    owner.shiftId === state.loadedShiftId &&\n';
           assert.equal(source.split(needle).length-1,1,'Comparison shift ownership anchor changed');
-          source=source.replace(needle,'');
+          source=replaceOnce(source,needle,'');
         }
         if(fault==='comparison-ownership-experiment') {
           const needle='    owner.shiftId === experiment?.shift_id &&\n';
           assert.equal(source.split(needle).length-1,1,'Comparison experiment ownership anchor changed');
-          source=source.replace(needle,'');
+          source=replaceOnce(source,needle,'');
         }
         if(fault==='comparison-ownership-loading') {
           const needle="    document.body.dataset.loadState !== 'loading';";
           assert.equal(source.split(needle).length-1,1,'Comparison loading ownership anchor changed');
-          source=source.replace(needle,'    true;');
+          source=replaceOnce(source,needle,'    true;');
         }
       }
       if(s32Mode) {
         const consequenceNeedle='      onConsequence({ count }) { showWallTrace(count); },';
         assert.equal(source.split(consequenceNeedle).length-1,1,'Consequence callback observation anchor changed');
-        source=source.replace(consequenceNeedle,'      onConsequence({ count }) { globalThis.__s32Arrivals ??= []; globalThis.__s32Arrivals.push({ count }); showWallTrace(count); },');
+        source=replaceOnce(source,consequenceNeedle,'      onConsequence({ count }) { globalThis.__s32Arrivals ??= []; globalThis.__s32Arrivals.push({ count }); showWallTrace(count); },');
         if(fault==='operation-omit-wall-label') {
           const needle="  label.textContent = count > 1 ? `Recorded evidence added · ${count} events` : 'Recorded evidence added';";
           assert.equal(source.split(needle).length-1,1,'Wall trace label fault anchor changed');
-          source=source.replace(needle,'  void 0;');
+          source=replaceOnce(source,needle,'  void 0;');
         }
       }
       if(hostTimeout || hostEvaluation) {
-        source=source.replace('async function initializeGraphics() {','async function initializeGraphics() { globalThis.__s29InitializeAttempts=(globalThis.__s29InitializeAttempts??0)+1;');
+        source=replaceOnce(source,'async function initializeGraphics() {','async function initializeGraphics() { globalThis.__s29InitializeAttempts=(globalThis.__s29InitializeAttempts??0)+1;');
         if(fault==='host-retry-omit-epoch') {
           const needle='    if (epoch !== hostEpoch) return;\n    clearTimeout(hostTimer); hostTimer = null;\n    workplaceHost = createWorkplaceHost';
           assert.equal(source.split(needle).length-1,1,'Host retry epoch anchor changed');
-          source=source.replace(needle,needle.replace('    if (epoch !== hostEpoch) return;\n',''));
+          source=replaceOnce(source,needle,replaceOnce(needle,'    if (epoch !== hostEpoch) return;\n',''));
         }
         if(fault==='host-evaluation-omit-disable') {
           const needle="document.querySelector('[data-graphics-retry]').disabled = true;";
           assert.equal(source.split(needle).length-1,1,'Host module retry guard anchor changed');
-          source=source.replace(needle,"document.querySelector('[data-graphics-retry]').disabled = false;");
+          source=replaceOnce(source,needle,"document.querySelector('[data-graphics-retry]').disabled = false;");
         }
       }
       const focusGuard=fault.match(/^focus-guard-(generation|intent|current-focus|node|enabled)(-omit)?$/);
@@ -295,11 +309,11 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
         if(omit) {
           const needle=conditions[guard];
           assert.equal(source.split(needle).length-1,1,'Focus guard fault anchor changed');
-          source=source.replace(needle,'true');
+          source=replaceOnce(source,needle,'true');
         }
         const needle='  await refreshed;';
         assert.equal(source.split(needle).length-1,1,'Focus race hook anchor changed');
-        source=source.replace(needle,`${needle}
+        source=replaceOnce(source,needle,`${needle}
           if(globalThis.__s29FocusArmed) {
             if(${JSON.stringify(guard)}==='generation') state.generation++;
             if(${JSON.stringify(guard)}==='intent') state.intent++;
@@ -316,12 +330,12 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
           }`);
         const end='    editor.setSelectionRange(focus.start, focus.end, focus.direction);\n  }\n});';
         assert.equal(source.split(end).length-1,1,'Focus completion hook anchor changed');
-        source=source.replace(end,end.replace('\n});','\n  globalThis.__s29FocusDone=true;\n});'));
+        source=replaceOnce(source,end,replaceOnce(end,'\n});','\n  globalThis.__s29FocusDone=true;\n});'));
       }
       if(fault==='page-cache-omit-focus') {
         const needle='editor.focus({ preventScroll: true });';
         assert.equal(source.split(needle).length-1,1,'Page-cache focus fault anchor changed');
-        source=source.replace(needle,'void 0;');
+        source=replaceOnce(source,needle,'void 0;');
       }
       if(fault==='startup-blocking-host') source="import './workplace-host.js';\n"+source;
       return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/javascript'}],body:Buffer.from('const __s29Boot=performance.now();\n'+source+'\nglobalThis.__s29BootMs=performance.now()-__s29Boot; globalThis.__s29Refresh=refresh; globalThis.__s29Host=()=>workplaceHost; globalThis.__s29Latest=()=>latestPresentation; globalThis.__s30SyntheticTest=(state="COMPLETE")=>{const latest=globalThis.__s29Latest();if(latest?.kind!=="accepted")return false;const view=JSON.parse(JSON.stringify(latest.view));view.tests.diagnostic={id:"s30-lifecycle",shiftId:view.context.shiftId,kind:"DIAGNOSTIC",state:"RUNNING",evidenceClass:"TRUSTED_LOCAL",contextHash:"synthetic",outcomeStatus:null,candidates:[],observedRunId:null,trials:[{ordinal:1,candidateLabel:"A",runId:"synthetic-run",versionId:"synthetic-version",state,evidenceMode:"TRUSTED_LOCAL",missingEvidenceCount:0}]};globalThis.__s29Host().publish({kind:"accepted",view,generation:latest.generation,intent:latest.intent,reason:"synthetic-test"});return true;};\n').toString('base64')});
@@ -342,27 +356,27 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
           assert.ok(start>=0 && end>start,'Northline marker fault block changed');
           let block=source.slice(start,end);const [needle,replacement]=guards[guard];
           assert.equal(block.split(needle).length-1,1,'Northline marker fault anchor changed');
-          block=block.replace(needle,guard==='aggregate'?`if(kind===${JSON.stringify(kind)}) {${replacement}} else {${needle}}`:`(kind===${JSON.stringify(kind)}?${replacement}:${needle})`);
+          block=replaceOnce(block,needle,guard==='aggregate'?`if(kind===${JSON.stringify(kind)}) {${replacement}} else {${needle}}`:`(kind===${JSON.stringify(kind)}?${replacement}:${needle})`);
           source=source.slice(0,start)+block+source.slice(end);
         }
         if(fault==='s35-omit-wheel-dispose') {
           const needle='for(const g of geometries) g.dispose();';
           assert.equal(source.split(needle).length-1,1,'Wheel disposal fault anchor changed');
-          source=source.replace(needle,"for(const g of geometries) if(g.type!=='TorusGeometry') g.dispose();");
+          source=replaceOnce(source,needle,"for(const g of geometries) if(g.type!=='TorusGeometry') g.dispose();");
         }
-        const needle='return { apply, resize, setSuspended(value)';
+        const needle='return { apply, resize, setInspector, anchorPositions, setSuspended(value)';
         assert.equal(source.split(needle).length-1,1,'Northline scene observer anchor changed');
-        source=source.replace(needle,`globalThis.__s35Apply=apply; globalThis.__s35Room=()=>({
+        source=replaceOnce(source,needle,`globalThis.__s35Apply=apply; globalThis.__s35Room=()=>({
           wheels:scene.children.filter(m=>m.geometry?.type==='TorusGeometry').reduce((n,m)=>n+m.count,0),
           markers:typeof northlineMarkers==='undefined'?{}:Object.fromEntries(Object.entries(northlineMarkers).map(([kind,m])=>[kind,{visible:m.visible,count:m.userData.recordCount}]))}); ${needle}`);
       }
       if(s34Mode) {
         const markerNeedle='marker.position.fromArray(anchor); marker.scale.set(.3,.16,.16); scene.add(marker);';
         assert.equal(source.split(markerNeedle).length-1,1,'Routing position observer anchor changed');
-        source=source.replace(markerNeedle,markerNeedle+" if(kind==='OWNER_ASSIGNED') {globalThis.__s34Marker=()=>marker.position.toArray();globalThis.__s34MarkerScreen=()=>{const p=marker.position.clone().project(camera),r=container.getBoundingClientRect();return {x:r.left+(p.x+1)*r.width/2,y:r.top+(1-p.y)*r.height/2};};}");
-        const applyNeedle='return { apply, resize, setSuspended(value)';
+        source=replaceOnce(source,markerNeedle,markerNeedle+" if(kind==='OWNER_ASSIGNED') {globalThis.__s34Marker=()=>marker.position.toArray();globalThis.__s34MarkerScreen=()=>{const p=marker.position.clone().project(camera),r=container.getBoundingClientRect();return {x:r.left+(p.x+1)*r.width/2,y:r.top+(1-p.y)*r.height/2};};}");
+        const applyNeedle='return { apply, resize, setInspector, anchorPositions, setSuspended(value)';
         assert.equal(source.split(applyNeedle).length-1,1,'Routing apply observer anchor changed');
-        source=source.replace(applyNeedle,'globalThis.__s34SceneApply=apply; '+applyNeedle);
+        source=replaceOnce(source,applyNeedle,'globalThis.__s34SceneApply=apply; '+applyNeedle);
         const markerFaults={
           's34-marker-omit-travel':['ownerMarker.position.lerpVectors(routingTravel.from, routingTravel.to, Math.min(1, progress))','ownerMarker.position.copy(routingTravel.from)'],
           's34-marker-omit-label':['${labelled.signalRef} · ${labelled.owner} · Synthetic recorded assignment','Synthetic recorded assignment'],
@@ -381,10 +395,10 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
         if(Object.hasOwn(markerFaults,fault)) {
           const [needle,replacement]=markerFaults[fault];
           assert.equal(source.split(needle).length-1,1,'Owner travel fault anchor changed');
-          source=source.replace(needle,replacement);
+          source=replaceOnce(source,needle,replacement);
         }
       }
-      if(s34Mode) source=source.replace('const hits=raycaster.intersectObjects(targets,false);', 'const hits=raycaster.intersectObjects(targets,false); globalThis.__s34Picks=hits.map(hit=>({distance:hit.distance,station:hit.object.userData.stations[hit.instanceId]}));');
+      if(s34Mode) source=replaceOnce(source,'const hits=raycaster.intersectObjects(targets,false);', 'const hits=raycaster.intersectObjects(targets,false); globalThis.__s34Picks=hits.map(hit=>({distance:hit.distance,station:hit.object.userData.stations[hit.instanceId]}));');
       const routingFaults = {
         's34-omit-type': ['event.type === kind && ', ''],
         's34-omit-signal': ['event.type === kind && event.signalRef && ', 'event.type === kind && '],
@@ -396,12 +410,12 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       if(Object.hasOwn(routingFaults,fault)) {
         const [needle,replacement]=routingFaults[fault];
         assert.equal(source.split(needle).length-1,1,'Stonebridge marker fault anchor changed');
-        source=source.replace(needle,replacement);
+        source=replaceOnce(source,needle,replacement);
       }
       const sceneFault=fault.startsWith('partial-')?fault.slice('partial-'.length):fault;
-      if(sceneFault==='omit-geometry') source=source.replace('for(const g of geometries) g.dispose();','void 0;');
-      if(sceneFault==='omit-material') source=source.replace('for(const m of materials) m.dispose();','void 0;');
-      if(sceneFault==='omit-context') source=source.replace('renderer?.forceContextLoss();','if(!globalThis.__s29ResourceFaultActive) { renderer?.forceContextLoss(); }');
+      if(sceneFault==='omit-geometry') source=replaceOnce(source,'for(const g of geometries) g.dispose();','void 0;');
+      if(sceneFault==='omit-material') source=replaceOnce(source,'for(const m of materials) m.dispose();','void 0;');
+      if(sceneFault==='omit-context') source=replaceOnce(source,'renderer?.forceContextLoss();','if(!globalThis.__s29ResourceFaultActive) { renderer?.forceContextLoss(); }');
       const omissions={
         'omit-shadow':['for(const light of sceneLights) light.shadow?.dispose();','void 0;'],
         'omit-routing-label':['routingLabel?.remove();','void 0;'],
@@ -412,74 +426,74 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       if(Object.hasOwn(omissions,sceneFault)) {
         const [needle,replacement]=omissions[sceneFault];
         assert.equal(source.split(needle).length-1,1,`Missing or nonunique ${fault} anchor`);
-        source=source.replace(needle,replacement);
+        source=replaceOnce(source,needle,replacement);
       }
       if(fault.startsWith('partial-')) {
         const needle='if(raf!==null) cancelAnimationFrame(raf); raf = null; draw();';
         assert.equal(source.split(needle).length-1,1,'Partial initialization fault anchor changed');
-        source=source.replace(needle,`${needle}
+        source=replaceOnce(source,needle,`${needle}
           apply(view,[]);
           globalThis.__s29ResourceFaultActive=true;
           globalThis.__s29PartialBefore={pending:owned.frames.size,shadows:owned.shadows.length,listeners:[...owned.canvases.at(-1).listeners].map(([type,set])=>[type,set.size]),resources:{...globalThis.__s29Resources}};
           throw Error('injected failure before returning the scene handle');`);
         const cleanup='catch(error) { dispose(); throw error; }';
         assert.equal(source.split(cleanup).length-1,1,'Partial cleanup observation anchor changed');
-        source=source.replace(cleanup,`catch(error) { dispose();
+        source=replaceOnce(source,cleanup,`catch(error) { dispose();
           globalThis.__s29PartialAfter={before:globalThis.__s29PartialBefore,resources:{...globalThis.__s29Resources},
             pending:owned.frames.size,listeners:Object.fromEntries([...owned.canvases.at(-1).listeners].map(([type,set])=>[type,set.size])),
             shadows:owned.shadows.map(r=>r.disposed),lost:globalThis.__s29GLs.every(gl=>gl.isContextLost()),canvases:container.querySelectorAll('canvas').length};
           throw error; }`);
       }
-      source=source.replace('const sceneLights = [];',`const sceneLights = [];
+      source=replaceOnce(source,'const sceneLights = [];',`const sceneLights = [];
         const owned=globalThis.__s29Owned ??= {canvases:[],shadows:[],frames:new Set()};
         const requestAnimationFrame=callback=>{const id=window.requestAnimationFrame(time=>{owned.frames.delete(id);callback(time);});owned.frames.add(id);return id;};
         const cancelAnimationFrame=id=>{window.cancelAnimationFrame(id);owned.frames.delete(id);};`);
-      source=source.replace("renderer.domElement.setAttribute('aria-hidden','true');",`
+      source=replaceOnce(source,"renderer.domElement.setAttribute('aria-hidden','true');",`
         const record={node:renderer.domElement,listeners:new Map()};owned.canvases.push(record);
         const add=record.node.addEventListener.bind(record.node),remove=record.node.removeEventListener.bind(record.node);
         record.node.addEventListener=(type,fn,...args)=>{if(!record.listeners.has(type)) record.listeners.set(type,new Set());record.listeners.get(type).add(fn);add(type,fn,...args);};
         record.node.removeEventListener=(type,fn,...args)=>{record.listeners.get(type)?.delete(fn);remove(type,fn,...args);};
         renderer.domElement.setAttribute('aria-hidden','true');`);
-      source=source.replace('renderer.render(scene, camera);',`renderer.render(scene, camera);
+      source=replaceOnce(source,'renderer.render(scene, camera);',`renderer.render(scene, camera);
         for(const light of sceneLights) if(light.shadow?.map && !owned.shadows.some(r=>r.target===light.shadow.map)) {
           const r={target:light.shadow.map,disposed:false};owned.shadows.push(r);r.target.addEventListener('dispose',()=>{r.disposed=true;});
         }`);
-      source = source.replace('renderer.outputColorSpace', 'renderer.info.autoReset = false; renderer.outputColorSpace');
-      source = source.replace("renderer.domElement.setAttribute('aria-hidden','true');", "globalThis.__s29Resources ??= { contexts:0, geometries:0, materials:0 }; globalThis.__s29GLs ??= []; globalThis.__s29GLs.push(renderer.getContext()); globalThis.__s29Resources.contexts++; renderer.domElement.setAttribute('aria-hidden','true');");
-      source = source.replace('renderer?.forceContextLoss();', 'if(renderer) globalThis.__s29Resources.contexts--; renderer?.forceContextLoss();');
-      for(const resource of ['geometries','materials']) source=source.replace(new RegExp(`${resource}\\.add\\((\\w+)\\);`,'g'),(statement,name)=>
+      source=replaceOnce(source,'renderer.outputColorSpace', 'renderer.info.autoReset = false; renderer.outputColorSpace');
+      source=replaceOnce(source,"renderer.domElement.setAttribute('aria-hidden','true');", "globalThis.__s29Resources ??= { contexts:0, geometries:0, materials:0 }; globalThis.__s29GLs ??= []; globalThis.__s29GLs.push(renderer.getContext()); globalThis.__s29Resources.contexts++; renderer.domElement.setAttribute('aria-hidden','true');");
+      source=replaceOnce(source,'renderer?.forceContextLoss();', 'if(renderer) globalThis.__s29Resources.contexts--; renderer?.forceContextLoss();');
+      for(const resource of ['geometries','materials']) source=replaceOnce(source,new RegExp(`${resource}\\.add\\((\\w+)\\);`,'g'),(statement,name)=>
         `{${statement} globalThis.__s29Resources.${resource}++; ${name}.addEventListener('dispose',()=>globalThis.__s29Resources.${resource}--);}`);
-      source = source.replace('renderer.render(scene, camera);', `renderer.render(scene, camera); globalThis.__workplaceProbe = { frames: (globalThis.__workplaceProbe?.frames ?? 0)+1, triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, tier, time: performance.now(), width: renderer.domElement.width, height: renderer.domElement.height }; if(globalThis.__workplaceSamples) globalThis.__workplaceSamples.push(globalThis.__workplaceProbe);`);
-      source = source.replace('renderer.render(scene, camera);', 'renderer.info.reset(); renderer.render(scene, camera);');
-      source = source.replace('return { apply, resize,', 'globalThis.__workplaceApply = station => apply({...view,station}, []); globalThis.__workplaceDispose = dispose; return { apply, resize,');
-      source = source.replace('view = next;', 'view = next; globalThis.__s29Applied=structuredClone(next);');
-      source = source.replace('return { apply, resize,', `globalThis.__workplaceStationPoint = station => { const p = new THREE.Vector3(...room.stationAnchors[station]); if(view.context.board==='bookshop') p.y=1.15; p.project(camera); const r=renderer.domElement.getBoundingClientRect(); return {x:r.left+(p.x+1)*r.width/2,y:r.top+(1-p.y)*r.height/2}; }; return { apply, resize,`);
-      source = source.replace('return { apply, resize, setSuspended(value)', `globalThis.__workplaceControls={pulse:()=>!!pulse,state:()=>({suspended,disposed,pulse:!!pulse,applied:view?.tests?.diagnostic?.trials?.[0]?.state??null,emissive:indicatorMaterial?.emissiveIntensity??0,comparisonPulse:!!comparisonPulse,comparisonDuration:comparisonPulse?.duration??null,selectionPulse:!!selectionPulse,selectionDuration:selectionPulse?.duration??null,comparisonId:view?.tests?.comparison?.id??null,comparisonState:view?.tests?.comparison?.state??null,candidates:Object.fromEntries(Object.entries(candidateMaterials).map(([label,material])=>[label,{color:material.color.getHexString(),emissive:material.emissiveIntensity,eligible:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.eligible??null,versionId:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.versionId??null,contentHash:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.contentHash??null}])),selection:{id:view?.operating?.selectionId??null,versionId:view?.operating?.versionId??null,contentHash:view?.operating?.contentHash??null,plate:plateMaterial?.color.getHexString()??null,emissive:plateMaterial?.emissiveIntensity??0},handover:{selectionId:view?.inheritance?.selectionId??null,color:handoverMaterial?.color.getHexString()??null},later:{id:view?.tests?.later?.id??null,state:view?.tests?.later?.state??null,observedRunId:view?.tests?.later?.observedRunId??null,color:laterMaterial?.color.getHexString()??null,versions:Object.fromEntries((view?.tests?.later?.candidates??[]).map(candidate=>[candidate.label,candidate.versionId]))},routing:Object.fromEntries(Object.entries(routingMaterials).map(([kind,material])=>[kind,material.color.getHexString()])),wall:{color:wallMaterial?.color.getHexString()??null,emissive:wallMaterial?.emissiveIntensity??0},wallTrace:!!wallTrace,wallTraceDuration:wallTrace?.duration??null,wallTraceCount:wallTrace?.count??null,wallTraces:globalThis.__workplaceWallTraces??0,wallDurations:globalThis.__workplaceWallDurations??[],wallCounts:globalThis.__workplaceWallCounts??[]})}; return { apply, resize, setSuspended(value)`);
-      source = source.replace('comparisonPulse = { start: performance.now(), duration: 160 };', 'comparisonPulse = { start: performance.now(), duration: 160 }; globalThis.__workplaceComparisonPulses=(globalThis.__workplaceComparisonPulses??0)+1; globalThis.__workplaceComparisonDurations ??= []; globalThis.__workplaceComparisonDurations.push(160);');
-      source = source.replace('selectionPulse = { start: performance.now(), duration: 180 };', 'selectionPulse = { start: performance.now(), duration: 180 }; globalThis.__workplaceSelectionPulses=(globalThis.__workplaceSelectionPulses??0)+1; globalThis.__workplaceSelectionDurations ??= []; globalThis.__workplaceSelectionDurations.push(180);');
+      source=replaceOnce(source,'renderer.render(scene, camera);', `renderer.render(scene, camera); globalThis.__workplaceProbe = { frames: (globalThis.__workplaceProbe?.frames ?? 0)+1, triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, tier, time: performance.now(), width: renderer.domElement.width, height: renderer.domElement.height }; if(globalThis.__workplaceSamples) globalThis.__workplaceSamples.push(globalThis.__workplaceProbe);`);
+      source=replaceOnce(source,'renderer.render(scene, camera);', 'renderer.info.reset(); renderer.render(scene, camera);');
+      source=replaceOnce(source,'return { apply, resize,', 'globalThis.__workplaceApply = station => apply({...view,station}, []); globalThis.__workplaceDispose = dispose; return { apply, resize,');
+      source=replaceOnce(source,'view = next;', 'view = next; globalThis.__s29Applied=structuredClone(next);');
+      source=replaceOnce(source,'return { apply, resize,', `globalThis.__workplaceStationPoint = station => { const p = new THREE.Vector3(...room.stationAnchors[station]); if(view.context.board==='bookshop') p.y=1.15; p.project(camera); const r=renderer.domElement.getBoundingClientRect(); return {x:r.left+(p.x+1)*r.width/2,y:r.top+(1-p.y)*r.height/2}; }; return { apply, resize,`);
+      source=replaceOnce(source,'return { apply, resize, setInspector, anchorPositions, setSuspended(value)', `globalThis.__workplaceControls={pulse:()=>!!pulse,state:()=>({suspended,disposed,pulse:!!pulse,applied:view?.tests?.diagnostic?.trials?.[0]?.state??null,emissive:indicatorMaterial?.emissiveIntensity??0,comparisonPulse:!!comparisonPulse,comparisonDuration:comparisonPulse?.duration??null,selectionPulse:!!selectionPulse,selectionDuration:selectionPulse?.duration??null,comparisonId:view?.tests?.comparison?.id??null,comparisonState:view?.tests?.comparison?.state??null,candidates:Object.fromEntries(Object.entries(candidateMaterials).map(([label,material])=>[label,{color:material.color.getHexString(),emissive:material.emissiveIntensity,eligible:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.eligible??null,versionId:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.versionId??null,contentHash:view?.tests?.comparison?.candidates?.find(candidate=>candidate.label===label)?.contentHash??null}])),selection:{id:view?.operating?.selectionId??null,versionId:view?.operating?.versionId??null,contentHash:view?.operating?.contentHash??null,plate:plateMaterial?.color.getHexString()??null,emissive:plateMaterial?.emissiveIntensity??0},handover:{selectionId:view?.inheritance?.selectionId??null,color:handoverMaterial?.color.getHexString()??null},later:{id:view?.tests?.later?.id??null,state:view?.tests?.later?.state??null,observedRunId:view?.tests?.later?.observedRunId??null,color:laterMaterial?.color.getHexString()??null,versions:Object.fromEntries((view?.tests?.later?.candidates??[]).map(candidate=>[candidate.label,candidate.versionId]))},routing:Object.fromEntries(Object.entries(routingMaterials).map(([kind,material])=>[kind,material.color.getHexString()])),wall:{color:wallMaterial?.color.getHexString()??null,emissive:wallMaterial?.emissiveIntensity??0},wallTrace:!!wallTrace,wallTraceDuration:wallTrace?.duration??null,wallTraceCount:wallTrace?.count??null,wallTraces:globalThis.__workplaceWallTraces??0,wallDurations:globalThis.__workplaceWallDurations??[],wallCounts:globalThis.__workplaceWallCounts??[]})}; return { apply, resize, setInspector, anchorPositions, setSuspended(value)`);
+      source=replaceOnce(source,'comparisonPulse = { start: performance.now(), duration: 160 };', 'comparisonPulse = { start: performance.now(), duration: 160 }; globalThis.__workplaceComparisonPulses=(globalThis.__workplaceComparisonPulses??0)+1; globalThis.__workplaceComparisonDurations ??= []; globalThis.__workplaceComparisonDurations.push(160);');
+      source=replaceOnce(source,'selectionPulse = { start: performance.now(), duration: 180 };', 'selectionPulse = { start: performance.now(), duration: 180 }; globalThis.__workplaceSelectionPulses=(globalThis.__workplaceSelectionPulses??0)+1; globalThis.__workplaceSelectionDurations ??= []; globalThis.__workplaceSelectionDurations.push(180);');
       if(fault==='operation-omit-wall-trace') {
         const needle='        wallTrace = { start: performance.now(), duration: 320, count: arrival.count ?? 1 };';
         assert.equal(source.split(needle).length-1,1,'Wall trace fault anchor changed');
-        source=source.replace(needle,'        wallTrace = null;');
+        source=replaceOnce(source,needle,'        wallTrace = null;');
       } else {
         const needle='        wallTrace = { start: performance.now(), duration: 320, count: arrival.count ?? 1 };';
         assert.equal(source.split(needle).length-1,1,'Wall trace observation anchor changed');
-        source=source.replace(needle, needle+' globalThis.__workplaceWallTraces=(globalThis.__workplaceWallTraces??0)+1; globalThis.__workplaceWallDurations ??= []; globalThis.__workplaceWallDurations.push(wallTrace.duration); globalThis.__workplaceWallCounts ??= []; globalThis.__workplaceWallCounts.push(wallTrace.count);');
-        if(fault==='operation-short-wall-trace') source=source.replace('wallTrace = { start: performance.now(), duration: 320, count: arrival.count ?? 1 };','wallTrace = { start: performance.now(), duration: 160, count: arrival.count ?? 1 };');
+        source=replaceOnce(source,needle, needle+' globalThis.__workplaceWallTraces=(globalThis.__workplaceWallTraces??0)+1; globalThis.__workplaceWallDurations ??= []; globalThis.__workplaceWallDurations.push(wallTrace.duration); globalThis.__workplaceWallCounts ??= []; globalThis.__workplaceWallCounts.push(wallTrace.count);');
+        if(fault==='operation-short-wall-trace') source=replaceOnce(source,'wallTrace = { start: performance.now(), duration: 320, count: arrival.count ?? 1 };','wallTrace = { start: performance.now(), duration: 160, count: arrival.count ?? 1 };');
       }
       if(fault==='operation-omit-wall-settle') {
         const needle='function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); settleWallTrace(); }';
         assert.equal(source.split(needle).length-1,1,'Wall settle fault anchor changed');
-        source=source.replace(needle,'function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); }');
+        source=replaceOnce(source,needle,'function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); }');
       }
       if(fault==='motion-omit-settle') {
         const needle='setReducedMotion(value) { reducedMotion=value; if(value) settleAllPulses(); requestFrame(); }';
         assert.equal(source.split(needle).length-1,1,'Reduced motion settlement anchor changed');
-        source=source.replace(needle,'setReducedMotion(value) { reducedMotion=value; requestFrame(); }');
+        source=replaceOnce(source,needle,'setReducedMotion(value) { reducedMotion=value; requestFrame(); }');
       }
-      if(fault === 'constructor') source = source.replace('renderer = new THREE.WebGLRenderer(', 'throw new Error("injected constructor"); renderer = new THREE.WebGLRenderer(');
-      if(fault === 'render') source = source.replace('renderer.render(scene, camera);','throw new Error("injected render");');
-      if(fault === 'shader') source = source.replace('renderer.render(scene, camera);','renderer.debug.onShaderError();');
+      if(fault === 'constructor') source=replaceOnce(source,'renderer = new THREE.WebGLRenderer(', 'throw new Error("injected constructor"); renderer = new THREE.WebGLRenderer(');
+      if(fault === 'render') source=replaceOnce(source,'renderer.render(scene, camera);','throw new Error("injected render");');
+      if(fault === 'shader') source=replaceOnce(source,'renderer.render(scene, camera);','renderer.debug.onShaderError();');
       if(fault === 'timeout') source = 'await new Promise(() => {});\n' + source;
       if(fault === 'module-evaluation') source='globalThis.__s29ModuleEvaluations=(globalThis.__s29ModuleEvaluations??0)+1;throw Error("injected module evaluation");\n'+source;
       return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/javascript'}],body:Buffer.from(source).toString('base64')});
@@ -743,6 +757,10 @@ export async function runZoom(base,out,fault='') {
         const box=link.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(link);
         return [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
       })),'200% zoom navigation labels escape their controls');
+      assert.ok(await b.evaluate(()=>[...document.querySelectorAll('.room-hotspots .station')].filter(tag=>tag.offsetParent).every(tag=>{
+        const box=tag.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(tag);
+        return tag.scrollWidth<=tag.clientWidth+1 && [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
+      })),'200% zoom station tag text escapes its control');
       const top=await b.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
       await writeFile(path.join(out,String(width),'zoom-top.png'),Buffer.from(top.data,'base64'));
       for(const station of ['customers','evaluator','owner','repair','next','compare']) {
@@ -811,6 +829,10 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
         const box=link.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(link);
         return [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
       })),'Exact viewport navigation labels escape their controls');
+      assert.ok(await b.evaluate(()=>[...document.querySelectorAll('.room-hotspots .station')].filter(tag=>tag.offsetParent).every(tag=>{
+        const box=tag.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(tag);
+        return tag.scrollWidth<=tag.clientWidth+1 && [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
+      })),'Exact viewport station tag text escapes its control');
       await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
       assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready',12000),'Exact viewport real 3D room did not become ready');
       assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')),'Exact viewport actual WebGL2 context missing');
@@ -875,14 +897,17 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
 }
 
 export async function runBrowser(base,out,fault = '',empty = false,slug='bookshop') {
-  const b = await openBrowser(base,out,fault);
+  // A layout fault mutates only the served stylesheet and runs the clean path; every other fault is a graphics failure.
+  const layoutFault = fault === 'status-not-first' ? fault : '';
+  const b = await openBrowser(base,out,layoutFault ? '' : fault,{layoutFault});
   const report = {fault,views:[]};
+  const graphicsFault = fault && !layoutFault;
   try {
-    for(const width of fault ? [390] : [1280,640,390]) {
+    for(const width of graphicsFault ? [390] : [1280,640,390]) {
       await b.send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:width<761});
       await b.send('Page.navigate',{url:base+`/?board=${slug}#board`});
       assert.ok(await b.until(()=>['ready','empty'].includes(document.body?.dataset.loadState)), 'Complete workbench did not start');
-      if(fault) {
+      if(graphicsFault) {
         if(fault === 'context') assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready'));
         const draft=await b.evaluate(slug=>{
           document.querySelector(`[data-station="${slug==='northline'?'bench':slug==='gtm'?'workflow':'compare'}"]`).click();
@@ -923,11 +948,11 @@ export async function runBrowser(base,out,fault = '',empty = false,slug='booksho
         const incidentRun=await b.evaluate(()=>{const row=document.querySelector('.incident-row');const run=row?.dataset.openingRun;row?.click();return run;});
         assert.ok(incidentRun,'Recorded failure inspection needs a real incident');
         assert.ok(await b.until(run=>document.body.dataset.loadState==='ready' && document.getElementById('selected-evidence')?.dataset.runId===run,8000,incidentRun),'Recorded failure inspection did not load');
-        if(!fault) {
+        if(!graphicsFault) {
           await b.evaluate(()=>window.dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));
           assert.ok(await b.until(run=>document.body.dataset.loadState==='ready' && document.getElementById('inspection-bar').dataset.mode==='history' && document.getElementById('selected-evidence').dataset.runId===run,8000,incidentRun),'Synthetic cache refresh left the historical incident');
         }
-        if(fault) assert.equal(await b.evaluate(()=>document.getElementById('graphics-status').dataset.state),'unavailable','History reset hid a latched graphics failure');
+        if(graphicsFault) assert.equal(await b.evaluate(()=>document.getElementById('graphics-status').dataset.state),'unavailable','History reset hid a latched graphics failure');
       } else {
         assert.equal(await b.evaluate(()=>document.body.dataset.loadState),'empty','First-shift state is not empty');
         assert.ok(await b.evaluate(()=>document.getElementById('workplace-state').textContent.includes('None selected') && document.getElementById('workplace-state').textContent.includes('No run loaded.')),'Empty scene invented a choice or run');
@@ -949,7 +974,15 @@ export async function runBrowser(base,out,fault = '',empty = false,slug='booksho
       const geometry=await b.evaluate(()=>({width:innerWidth,document:document.documentElement.scrollWidth,notice:document.getElementById('runtime-notice').getBoundingClientRect().width,main:document.querySelector('main').getBoundingClientRect().width}));
       assert.ok(geometry.document<=width,'Page overflows horizontally');
       assert.equal(geometry.notice,geometry.main,'Hosting notice does not span both columns');
-      assert.ok(await b.evaluate(()=>document.getElementById('workplace-state').getBoundingClientRect().top < document.getElementById('workplace-canvas').getBoundingClientRect().top),'Operating identity is below the optional room');
+      // S36 planned change (user decision 2026-10-21): the old check put #workplace-state above the canvas,
+      // which encoded layout A. The full-screen stage puts the status bar with the live version first instead.
+      const statusFirst=await b.evaluate(()=>{
+        const top=e=>e.getBoundingClientRect().top;
+        const status=document.getElementById('status-bar'), live=document.getElementById('status-live').textContent.trim();
+        const others=['station-panel','shift-log'].map(id=>document.getElementById(id)).concat([document.querySelector('.graphics-controls')]).filter(e=>e&&e.getClientRects().length);
+        return {live, offset:top(status)-top(document.getElementById('workplace-world')), first:others.every(e=>top(status)<=top(e)+0.5)};
+      });
+      assert.ok(statusFirst.live && statusFirst.live!=='Loading' && statusFirst.offset>=0 && statusFirst.offset<=24 && statusFirst.first,`Status bar with the live version is not the first panel at the stage top: ${JSON.stringify(statusFirst)}`);
       const {data}=await b.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:true});
       await writeFile(path.join(out,`${width}.png`),Buffer.from(data,'base64'));
       report.views.push({width,geometry,graphics:await b.evaluate(()=>globalThis.__workplaceProbe ?? null)});
@@ -988,6 +1021,9 @@ export async function runLifecycle(base,out,fault='') {
       return {frames,settle:globalThis.__workplaceProbe.frames-m,pulse:globalThis.__workplaceControls.pulse(),applied:globalThis.__workplaceControls.state().applied};
     });assert.equal(hidden.frames,0,'Synthetic hidden event allowed graphics frames');assert.ok(hidden.settle<=2,'Hidden return replayed suspended work');assert.equal(hidden.pulse,false,'Hidden return replayed an emphasis');assert.equal(hidden.applied,'FAILED','Hidden return did not settle at the newest view');rows.push('synthetic hidden event stops drawing and settles quietly');
     await b.send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});
+    // S36 user decision 2026-10-21: the narrow inspector is closed until a station opens, so open one to place its content below the room.
+    await b.evaluate(()=>document.querySelector('[data-station="customers"]').click());
+    assert.ok(await b.until(()=>!document.getElementById('station-panel').hidden && document.getElementById('station-panel').getBoundingClientRect().height>0),'Narrow inspector did not open before the offscreen check');
     const offscreen=await b.evaluate(async()=>{
       window.scrollTo(0,document.documentElement.scrollHeight);await new Promise(r=>setTimeout(r,200));const n=globalThis.__workplaceProbe.frames;
       const rect=document.getElementById('workplace-canvas').getBoundingClientRect();
