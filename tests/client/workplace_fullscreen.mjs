@@ -78,8 +78,8 @@ export const FAULTS = {
   'both-actions': { file: '/styles.css', needle: '  .world[data-inspector="open"] .next-action { display: none; }\n', replacement: '',
     expect: 'main_view_shows_one_of_each: fresh shift shows 2 next actions or inspector footers' },
   'two-owner-lines': { file: '/app.js', needle: "  text('owner-bubble-text', owner ?? '');\n",
-    replacement: "  text('owner-bubble-text', owner ?? '');\n  if (owner) document.getElementById('story-layer').append(Object.assign(document.getElementById('owner-bubble').cloneNode(true), { id: '' }));\n",
-    expect: 'main_view_shows_one_of_each: investigating shows 2 owner' },
+    replacement: "  text('owner-bubble-text', owner ?? '');\n  if (owner && !document.getElementById('duplicate-owner')) document.getElementById('story-layer').append(Object.assign(document.getElementById('owner-bubble').cloneNode(true), { id: 'duplicate-owner' }));\n",
+    expect: 'main_view_shows_one_of_each: fresh shift shows 2 owner' },
   'draft-enables': { file: '/app.js',
     needle: "for (const id of ['cause-input', 'falsifier-input']) $(id).addEventListener('input', () => renderGuide());",
     replacement: "for (const id of ['cause-input', 'falsifier-input']) $(id).addEventListener('input', () => { renderGuide(); document.getElementById('run-comparison').disabled = false; });",
@@ -88,8 +88,8 @@ export const FAULTS = {
     needle: "for (const id of ['cause-input', 'falsifier-input']) $(id).addEventListener('input', () => renderGuide());",
     replacement: "for (const id of ['cause-input', 'falsifier-input']) $(id).addEventListener('input', () => { renderGuide(); document.getElementById('investigation-tag').textContent = '1 recorded'; });",
     expect: 'guide_never_credits_unsent_text: a cause draft changed the investigation count' },
-  'chip-leak': { file: '/app.js', needle: "  text('step-chip-name', storyGuide.step ? storyGuide.name : '');",
-    replacement: "  text('step-chip-name', storyGuide.step ? `${storyGuide.name} ${view.run?.id ?? ''}` : '');",
+  'chip-leak': { file: '/app.js', needle: "  announce('step-chip-name', storyGuide.step ? storyGuide.name : '');",
+    replacement: "  announce('step-chip-name', storyGuide.step ? `${storyGuide.name} ${view.run?.id ?? ''}` : '');",
     expect: 'main_view_has_no_internal_identifiers: the main view shows' },
   'picker-skips-guard': { file: '/app.js', needle: "  $('workplace-board').value = slug;\n  await switchWorkplace();",
     replacement: "  state.slug = slug; state.generation += 1;\n  await refresh();",
@@ -436,6 +436,7 @@ export async function storyJourney(browser, base) {
   const controls = () => ({ count: document.querySelectorAll('#investigation-list [data-investigation-id]').length,
     tag: document.getElementById('investigation-tag').textContent,
     disabled: [...document.querySelectorAll('button, input, select, textarea')].filter(node => node.id !== 'cause-input').map(node => `${node.id || node.dataset.station || node.textContent.trim().slice(0, 24)}:${node.disabled}`) });
+  const clean = await act(controls);
   // step_chip_announces_only_changes (S37 review F6): ten keystrokes move the chip from step 2 to 3 once,
   // which rewrites its count and name; every other keystroke leaves the live region untouched.
   const chipWrites = await act(async () => {
@@ -451,7 +452,6 @@ export async function storyJourney(browser, base) {
   });
   assert.ok(chipWrites <= 2, `step_chip_announces_only_changes: typing ten characters wrote the step chip ${chipWrites} times`);
   await expectStep(STORY_STEPS[1], 'investigating after clearing a draft');
-  const clean = await act(controls);
   await act(() => { const input = document.getElementById('cause-input'); input.value = 'A draft cause that is never sent'; input.dispatchEvent(new Event('input')); });
   await sleep(200);
   const drafted = await act(controls);
