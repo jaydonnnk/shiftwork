@@ -757,6 +757,9 @@ An unknown or conflicting view gives step `null` behaviour: the chip says "Step 
 | `compare` | `attention` for `RESERVED` or `RUNNING`; `idle` otherwise; text "No score, no default" when complete. Never `pass`. |
 | `investigate`, `owner`, `next`, `repair`, `pipeline` | `idle` with existing status words; `attention` only when the guide points there. |
 
+When the operating selection is of kind `STARTER_BASELINE` and unresolved incidents exist: the customers lamp is `attention` with "N open complaints", N being the unresolved incident count; the service lamp is `attention` "Live, complaints open" and never `pass`; and the step 1 owner line, when the loaded run has no complaint, is the new catalogue entry "{n} customer complaints are still open." with the same N.
+Re-approved 2026-10-22 after the S37 review: on a fresh demo the starter's passing second run had hidden three open complaints from the first.
+
 **Customer bubble.** Shows `request_text` of the selected output of the loaded run, truncated to 140 characters with an ellipsis, labelled "Recorded request" plus the purpose in words ("operation", "test", "history").
 No output loaded means no customer bubble.
 
