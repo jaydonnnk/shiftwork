@@ -3460,3 +3460,33 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: a temporary layout probe imported the private `load` helper from the fullscreen runner and failed before opening a browser.
 - Root cause: the call shape was read, but the export declaration was not checked.
 - Prevention rule: verify exports as well as signatures before importing repository helpers. Reuse the exported fallback check for the diagnostic load.
+
+## 2026-10-22 S37 archive verification: interpreter API mismatch
+
+- What happened: the temporary archive driver called `tarfile.extractall(filter=...)` with macOS system Python, which does not support that keyword. No source was extracted before the error.
+- Root cause: the helper used `python3` instead of the verified project interpreter for a version-dependent standard-library API.
+- Prevention rule: use `.venv/bin/python` for verification helpers on macOS and inspect API compatibility before relying on a newer keyword. The extraction was rerun with Python 3.13.
+
+## 2026-10-22 S37 review regression: fault controls drifted with the story fixes
+
+- What happened: the full 27-fault fullscreen matrix found three controls that no longer reached their named assertion. The owner-line fault cloned repeatedly and fired in the newly populated fresh-shift state; the draft-count baseline was sampled after F6 typing had already applied the fault; the chip-leak needle still targeted `text` after F6 switched to `announce`.
+- Root cause: the focused F1 to F6 proofs did not exercise the existing story fault controls after changing their shared state and text writer.
+- Prevention rule: rerun every story fault after changing story setup or rendering. Snapshot command/count invariants before any synthetic typing, make duplicate faults bounded, and update unique fault needles with their call sites. Retain the rejected full-matrix receipt.
+
+## 2026-10-22 S37 receipt comparison: an empty message extractor
+
+- What happened: the first renderer receipt comparison looked for `AssertionError` text, but the stored messages use `FAULT_WRONG_FAILURE`; all eleven extracted message lists were empty.
+- Root cause: equality was accepted without proving the extractor matched the serialized receipt.
+- Prevention rule: require a nonempty extraction per failure, or compare the entire stored failure text. The corrected comparison matches all eleven complete failure strings exactly.
+
+## 2026-10-22 S37 extracted import check: temporary-path aliases
+
+- What happened: the archive import-origin preflight rejected the extracted package before any browser ran.
+- Root cause: it resolved the imported module path to `/private/tmp` but compared it with an unresolved `/tmp` root.
+- Prevention rule: resolve both paths before containment checks on macOS. Preserve the rejected preflight and rerun with the canonical-root comparison.
+
+## 2026-10-22 S37 final audit: guessed suite total
+
+- What happened: a temporary final audit expected thirteen suite receipts, but the driver runs twelve. All twelve receipts were present.
+- Root cause: the expected total was typed instead of derived from the driver.
+- Prevention rule: compare the exact suite-name set derived from the driver, then audit each exit status. Do not guess receipt counts.
