@@ -19,7 +19,7 @@ export function replaceOnce(text, needle, replacement) {
 
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900,layoutFault=''}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -752,15 +752,16 @@ export async function runZoom(base,out,fault='') {
       const metrics=await b.evaluate(()=>({inner:innerWidth,outer:outerWidth,dpr:devicePixelRatio,pinch:visualViewport.scale,scroll:document.documentElement.scrollWidth,bodyZoom:getComputedStyle(document.body).zoom}));
       assert.ok(Math.abs(metrics.dpr-2)<.01 && Math.abs(metrics.inner-width/2)<=2 && metrics.pinch===1 && metrics.bodyZoom==='1','Native 200% browser zoom was not established');
       await writeFile(path.join(out,String(width),'metrics.json'),JSON.stringify(metrics,null,2)+'\n');
+      // Specific before broad: escaping tag text can also widen the page.
+      assert.ok(await b.evaluate(()=>[...document.querySelectorAll('.room-hotspots .station')].filter(tag=>tag.offsetParent).every(tag=>{
+        const box=tag.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(tag);
+        return tag.scrollWidth<=tag.clientWidth+1 && [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
+      })),'200% zoom station tag text escapes its control');
       assert.ok(metrics.scroll<=metrics.inner,'200% zoom causes horizontal page scrolling');
       assert.ok(await b.evaluate(()=>[...document.querySelectorAll('.journey:not([hidden]) a')].every(link=>{
         const box=link.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(link);
         return [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
       })),'200% zoom navigation labels escape their controls');
-      assert.ok(await b.evaluate(()=>[...document.querySelectorAll('.room-hotspots .station')].filter(tag=>tag.offsetParent).every(tag=>{
-        const box=tag.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(tag);
-        return tag.scrollWidth<=tag.clientWidth+1 && [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
-      })),'200% zoom station tag text escapes its control');
       const top=await b.send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
       await writeFile(path.join(out,String(width),'zoom-top.png'),Buffer.from(top.data,'base64'));
       for(const station of ['customers','evaluator','owner','repair','next','compare']) {
@@ -822,6 +823,11 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
       assert.ok(Math.abs(metrics.innerHeight-height/zoom)<=2,'Viewport height was not established');
       assert.ok(Math.abs(metrics.dpr-zoom)<.01 && metrics.pinch===1 && metrics.bodyZoom==='1','Native browser zoom was not established');
       await writeFile(path.join(out,name,'metrics.json'),JSON.stringify({target:{width,height,zoom},...metrics},null,2)+'\n');
+      // Specific before broad: escaping tag text can also widen the page.
+      assert.ok(await b.evaluate(()=>[...document.querySelectorAll('.room-hotspots .station')].filter(tag=>tag.offsetParent).every(tag=>{
+        const box=tag.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(tag);
+        return tag.scrollWidth<=tag.clientWidth+1 && [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
+      })),'Exact viewport station tag text escapes its control');
       assert.ok(metrics.scroll<=metrics.innerWidth,'Exact viewport causes horizontal page scrolling');
       const picker=await b.evaluate(()=>{const style=getComputedStyle(document.querySelector('.board-picker select'));return {overflow:style.overflow,textOverflow:style.textOverflow};});
       if(metrics.innerWidth<=760) assert.ok(['hidden','clip'].includes(picker.overflow) && picker.textOverflow==='ellipsis','Narrow role picker does not clip and ellipsize its options');
@@ -829,10 +835,6 @@ export async function runExactViewports(base,out,fault='',slug='bookshop') {
         const box=link.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(link);
         return [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
       })),'Exact viewport navigation labels escape their controls');
-      assert.ok(await b.evaluate(()=>[...document.querySelectorAll('.room-hotspots .station')].filter(tag=>tag.offsetParent).every(tag=>{
-        const box=tag.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(tag);
-        return tag.scrollWidth<=tag.clientWidth+1 && [...range.getClientRects()].every(r=>!r.width || r.left>=box.left-.5 && r.right<=box.right+.5);
-      })),'Exact viewport station tag text escapes its control');
       await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
       assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='ready',12000),'Exact viewport real 3D room did not become ready');
       assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')),'Exact viewport actual WebGL2 context missing');
