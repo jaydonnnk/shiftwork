@@ -1,5 +1,6 @@
 import { bodyBytes, selectEvidence } from './evidence.js';
 import { projectWorkplace } from './workplace-view.js';
+import { statusBarValues, logEntries } from './workplace-story.js';
 
 const $ = id => document.getElementById(id);
 const state = { board: null, loadedShiftId: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
@@ -13,6 +14,7 @@ let pollTimer = null;
 let workplaceHost = null, latestPresentation = null, hostEpoch = 0, hostLoading = false, hostTimer = null;
 let inspection = { mode: 'current', historicalRunId: null };
 let expandedWork = false;
+let inspectorOpen = false, inspectorCover = 0, logFilter = 'all';
 const REPORTED_TEST_STATES = new Set(['RESERVED', 'RUNNING', 'COMPLETE', 'FAILED']);
 function renderTestBench(view) {
   const label = $('test-tag');
@@ -30,7 +32,7 @@ function renderTestBench(view) {
   if (missing == null) delete label.dataset.missingEvidence;
   else label.dataset.missingEvidence = String(missing);
   label.textContent = state === 'UNREPORTED' ? 'Diagnostic state not reported'
-    : `Diagnostic ${state}${missing ? ` · ${missing} missing evidence` : ''}`;
+    : `Diagnostic ${humanize(state)}${missing ? ` · ${missing} missing evidence` : ''}`;
 }
 const WALL_SOURCE_TEXT = { current: 'Current operation record', historical: 'Historical record · not loaded',
   administrative: 'Administrative record · no derivation' };
@@ -227,6 +229,7 @@ function publishPresentation(reason) {
     publication = { kind: 'reset', context, reason };
     text('workplace-state', reason === 'error' ? 'Recorded state unavailable. Refresh to inspect verified evidence.' : 'Loading recorded context.');
     resetConsequenceWall(reason === 'error' ? 'Recorded state unavailable.' : 'Loading recorded context.');
+    resetStory(reason === 'error' ? 'Unavailable' : 'Loading');
   } else if (reason === 'loading') publication = { kind: 'loading', context, generation: state.generation };
   else {
     if (!state.board) return;
@@ -240,6 +243,7 @@ function publishPresentation(reason) {
     publication = { kind: 'accepted', view, generation: state.generation, intent: state.intent, reason };
     renderTestBench(view);
     renderConsequenceWall(view);
+    renderStory(view);
     const verdicts = view.evidence?.checks.map(check => `${check.verdict}: ${check.reasonCode ?? 'recorded check'}`).join('; ');
     text('workplace-state', view.consistency === 'conflict' ? 'Recorded reads disagree. Inspect the workbench; current labels are unavailable.' :
       `${view.context.inspection.mode === 'history' ? 'Historical inspection. ' : 'Current inspection. '}Operating choice: ${view.operating ? `${view.operating.versionId} (${view.operating.validity})` : 'None selected'}. Saved version: ${view.saved.latestVersionId ?? 'None'}. ` +
@@ -247,6 +251,98 @@ function publishPresentation(reason) {
   }
   latestPresentation = publication;
   workplaceHost?.publish(publication);
+}
+const LOG_TONES = { fail: 'Fail', pass: 'Pass', info: 'Record', you: 'You' };
+function renderShiftLog(entries) {
+  const list = $('shift-log-list');
+  text('shift-log-count', `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`);
+  const shown = entries.filter(entry => logFilter === 'all' || (logFilter === 'check' ? entry.kind === 'check' : entry.tone === 'you'));
+  if (!shown.length) { list.replaceChildren(element('li', entries.length ? 'No entries match this filter.' : 'No recorded entries loaded.', 'log-empty')); return; }
+  list.replaceChildren(...shown.map(entry => {
+    const item = element('li', null, 'log-entry');
+    item.dataset.kind = entry.kind; item.dataset.tone = entry.tone;
+    const time = element('span', entry.recordedAt ? new Date(entry.recordedAt).toTimeString().slice(0, 5) : '--:--', 'log-time');
+    item.append(time, element('span', LOG_TONES[entry.tone], 'log-tone'), element('span', entry.text, 'log-text'));
+    if (entry.ids.length) item.append(element('code', entry.ids.join(' · '), 'log-ids'));
+    return item;
+  }));
+}
+let storyEntries = [];
+function resetStory(word) {
+  for (const id of ['status-client', 'status-shift', 'status-live', 'status-incidents', 'status-attempts']) text(id, word);
+  storyEntries = []; renderShiftLog(storyEntries);
+}
+function renderStory(view) {
+  const display = state.workplaces.find(board => board.engagement_slug === state.slug);
+  const values = statusBarValues(view, { client: display ? display.client ?? display.employer : null,
+    shiftSeq: state.board?.latest_shift?.seq ?? null, attemptsRemaining: state.board?.attempts_remaining ?? null });
+  for (const key of ['client', 'shift', 'live', 'incidents', 'attempts']) text(`status-${key}`, values[key]);
+  storyEntries = logEntries(view, state.run, state.checks, state.events, state.stationView?.investigations ?? [], state.board?.operating_selection ?? null);
+  renderShiftLog(storyEntries);
+  syncInspector();
+  placeStationTags();
+}
+const narrowLayout = () => window.matchMedia('(max-width: 760px)').matches;
+// The inspector is the existing #station-panel. Opening it never sends a request;
+// the scene only learns how much of the stage it covers.
+function syncInspector() {
+  const world = $('workplace-world');
+  world.dataset.inspector = inspectorOpen || expandedWork ? 'open' : 'closed';
+  world.style.setProperty('--status-h', `${$('status-bar').offsetHeight}px`);
+  const covered = inspectorOpen && !expandedWork && !narrowLayout()
+    ? $('station-panel').getBoundingClientRect().right - $('workplace-canvas').getBoundingClientRect().left : 0;
+  inspectorCover = Math.max(0, covered);
+  workplaceHost?.setInspector({ open: covered > 0, widthPx: inspectorCover });
+}
+function openInspector() { inspectorOpen = true; syncInspector(); }
+function closeInspector(returnFocus = true) {
+  if (expandedWork) setExpandedWork(false);
+  inspectorOpen = false; syncInspector();
+  if (returnFocus) document.querySelector(`.room-hotspots:not([hidden]) [data-station="${state.station}"]`)?.focus({ preventScroll: true });
+}
+// Tags sit just above their projected anchor. A tag that would cover another tag,
+// the status bar, the graphics notice or the shift log tries nearby rows and at
+// most 0.6 of its own width sideways. When no spot is free, it takes the spot it
+// overlaps least. The inspector is not avoided here: only the scene's view offset
+// keeps tags clear of it.
+let tagAnchors = {};
+function placeStationTags(positions = tagAnchors) {
+  tagAnchors = positions;
+  const stage = document.querySelector('.room').getBoundingClientRect();
+  const local = rect => ({ left: rect.left - stage.left, top: rect.top - stage.top, right: rect.right - stage.left, bottom: rect.bottom - stage.top });
+  const taken = [$('status-bar'), $('shift-log'), document.querySelector('.graphics-controls')]
+    .map(node => node.getBoundingClientRect()).filter(rect => rect.width && rect.height).map(local);
+  const overlap = box => taken.reduce((sum, rect) => sum
+    + Math.max(0, Math.min(box.right, rect.right) - Math.max(box.left, rect.left)) * Math.max(0, Math.min(box.bottom, rect.bottom) - Math.max(box.top, rect.top)), 0);
+  // The evidence path has no object of its own; it sits between the queue and your service.
+  const midpoint = (a, b) => a?.visible && b?.visible ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, visible: true } : null;
+  const anchors = { ...positions, pipeline: positions.pipeline ?? midpoint(positions.customers, positions.service) };
+  const tags = [...document.querySelectorAll('#station-tags [data-station]')].map(button => ({ button, point: anchors[button.dataset.station] }));
+  // Keep each station's own object pickable: no tag covers a projected anchor.
+  for (const point of Object.values(positions)) if (point?.visible) taken.push({ left: point.x - 12, top: point.y - 12, right: point.x + 12, bottom: point.y + 12 });
+  for (const { button, point } of tags.sort((a, b) => (a.point?.y ?? 0) - (b.point?.y ?? 0))) {
+    if (!point?.visible || button.closest('[hidden]')) {
+      button.style.removeProperty('--tag-x'); button.style.removeProperty('--tag-y');
+      delete button.dataset.anchored; delete button.dataset.anchorX;
+      continue;
+    }
+    const width = button.offsetWidth, height = button.offsetHeight, step = height + 4;
+    // A tag whose anchor is clear of the inspector stays clear of it; an anchor
+    // under the inspector is left where it is so the fault stays visible.
+    const minLeft = inspectorCover && point.x >= inspectorCover ? inspectorCover + 8 : 8;
+    const clampLeft = x => Math.min(Math.max(minLeft, x), Math.max(minLeft, stage.width - width - 8));
+    const box = ([left, top]) => ({ left, top, right: left + width, bottom: top + height });
+    const candidates = [0, -1, 1, -2, 2, -3, 3].flatMap(row => [0, .6, -.6].map(shift =>
+      [clampLeft(point.x - width / 2 + shift * width), point.y - height - 6 + row * step]));
+    const inside = candidates.filter(([, y]) => y >= 8 && y + height <= stage.height - 8);
+    const [left, top] = inside.find(spot => overlap(box(spot)) === 0)
+      ?? inside.reduce((best, spot) => overlap(box(spot)) < overlap(box(best)) ? spot : best, inside[0] ?? candidates[0]);
+    taken.push(box([left, top]));
+    button.style.setProperty('--tag-x', `${Math.round(left)}px`);
+    button.style.setProperty('--tag-y', `${Math.round(top)}px`);
+    button.dataset.anchored = 'true';
+    button.dataset.anchorX = String(Math.round(point.x));
+  }
 }
 async function initializeGraphics() {
   if (workplaceHost || hostLoading) return;
@@ -265,12 +361,14 @@ async function initializeGraphics() {
     clearTimeout(hostTimer); hostTimer = null;
     workplaceHost = createWorkplaceHost({ container: $('workplace-canvas'), fallback: document.querySelector('img.room-art'), status: $('graphics-status'),
       onConsequence({ count }) { showWallTrace(count); },
+      onAnchors: placeStationTags,
       onStation({ board, shiftId, stationId }) {
         if (latestPresentation?.kind !== 'accepted' || board !== state.slug || shiftId !== state.loadedShiftId || latestPresentation.generation !== state.generation || latestPresentation.intent !== state.intent) return;
         if (!document.querySelector(`#${board}-stations [data-station="${stationId}"]`)) return;
         activateStation(stationId);
       } });
     if (expandedWork) workplaceHost.setExpanded(true);
+    syncInspector();
     if (latestPresentation) workplaceHost.publish(latestPresentation);
   } catch {
     if (epoch !== hostEpoch) return;
@@ -648,7 +746,7 @@ function renderBoard() {
   text('incident-tag', `${board.incidents.length} unresolved · Synthetic scenario`);
   text('repair-tag', board.incidents.length ? 'Incident available · read only' : 'No unresolved incident');
   const entries = state.stationView?.investigations ?? [];
-  text('investigation-tag', !state.stationView ? 'Not loaded' : entries.length ? `${entries.length} recorded · ${state.stationView.latest_investigation_id ?? 'identity unknown'}` : 'Orientation only');
+  text('investigation-tag', !state.stationView ? 'Not loaded' : entries.length ? `${entries.length} recorded` : 'Orientation only');
   text('version-state', version ? `${version.id} · latest saved${board.operating_selection?.selected_version_id === version.id ? ' and selected' : ''}` : 'Draft · no frozen version');
   text('version-hash', version ? `Content hash ${version.content_hash}` : '');
   const choice = board.operating_selection;
@@ -1186,6 +1284,7 @@ function setExpandedWork(value) {
   $('expand-work').setAttribute('aria-expanded', String(value));
   $('expand-work').textContent = value ? 'Restore the room' : 'Expand the workbench';
   workplaceHost?.setExpanded(value);
+  syncInspector();
   if (hadFocus) { editor.focus({ preventScroll: true }); editor.setSelectionRange(range.start, range.end, range.direction); }
 }
 function renderDraftEditor() {
@@ -1566,7 +1665,7 @@ function bringStationPanelIntoReach() {
   // Northline's evidence can sit below a tall header at native 200% zoom.
   // Skipped before the first load paints, so a page open still starts at the room.
   if (!state.board) return;
-  if (!window.matchMedia('(max-width: 1099px)').matches) return;
+  if (!narrowLayout()) return;
   const panel = $('station-panel');
   panel.focus({ preventScroll: true });
   const content = northline() ? {
@@ -1624,7 +1723,7 @@ function activateStation(name, userIntent = true) {
   document.querySelectorAll('[data-view]').forEach(link => {
     if (link.dataset.view === view) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
   });
-  if (userIntent) bringStationPanelIntoReach();
+  if (userIntent) { openInspector(); bringStationPanelIntoReach(); }
   publishPresentation('station');
 }
 function selectFile(name) {
@@ -1734,7 +1833,24 @@ document.addEventListener('keydown', event => {
 $('workplace-board').addEventListener('change', switchWorkplace);
 const requestedSlug = new URL(location.href).searchParams.get('board');
 if (requestedSlug) state.slug = requestedSlug;
-navigate(location.hash.slice(1) || 'board');
+const deepLink = location.hash.slice(1);
+navigate(deepLink || 'board');
+if (!deepLink || deepLink === 'board') closeInspector(false);
+$('close-inspector').addEventListener('click', () => closeInspector());
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Escape' || !inspectorOpen || expandedWork || event.defaultPrevented) return;
+  if (event.target.closest?.('textarea, input, select, [contenteditable="true"]')) return;
+  event.preventDefault();
+  closeInspector();
+});
+document.querySelectorAll('[data-log-filter]').forEach(button => button.addEventListener('click', () => {
+  logFilter = button.dataset.logFilter;
+  document.querySelectorAll('[data-log-filter]').forEach(other => other.setAttribute('aria-pressed', String(other === button)));
+  renderShiftLog(storyEntries);
+}));
+window.addEventListener('resize', syncInspector);
+$('shift-log').addEventListener('toggle', () => placeStationTags());
+$('shift-details').addEventListener('toggle', () => placeStationTags());
 refresh();
 document.querySelector('[data-graphics-retry]').addEventListener('click', () => { if (!workplaceHost && !hostLoading) initializeGraphics(); });
 initializeGraphics();

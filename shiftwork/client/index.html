@@ -11,6 +11,7 @@
 </head>
 <body data-load-state="loading">
   <a class="skip-link" href="#station-panel">Skip to selected station</a>
+  <p id="runtime-notice" class="evidence-meta" role="status"></p>
   <header class="topbar">
     <a class="brand" href="#board" aria-label="Shiftwork shift board"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="m16 3 12 7v13l-12 7-12-7V10Zm0 13L4 10m12 6 12-6M16 16v14"/></svg>Shiftwork<span class="brand-divider"></span><span class="workspace-label">THE WORKPLACE</span></a>
     <div class="board-picker"><label for="workplace-board">Role board</label><select id="workplace-board" disabled><option>Loading workplace…</option></select><p id="workplace-message" role="status"></p></div>
@@ -27,14 +28,24 @@
     <button class="icon-button" id="refresh" aria-label="Refresh shift and evidence" title="Refresh shift and evidence">↻</button>
   </header>
   <main>
-    <p id="runtime-notice" class="evidence-meta" role="status"></p>
+    <div class="world" id="workplace-world" data-inspector="closed">
     <section class="workplace" aria-labelledby="room-title">
-      <div class="room-heading">
-        <div><p class="eyebrow" id="client-name">YOUR CLIENT / BELLWETHER BOOKS</p><h1 id="room-title">You keep this service running.</h1><p id="role-description" class="room-subtitle">Your role: junior applied AI engineer. Your service. Your decisions.</p></div>
-        <div class="shift-stamp"><span>ON THE BOARD</span><strong id="shift-number">No shift loaded</strong><span>Fictional client · simulated role</span></div>
+      <section id="status-bar" class="float-panel status-bar" data-synthetic-region="board" aria-labelledby="room-title">
+        <h1 class="sr-only" id="room-title">You keep this service running.</h1>
+        <dl class="status-fields">
+          <div><dt>Client</dt><dd id="status-client">Loading</dd></div>
+          <div><dt>Shift</dt><dd id="status-shift">Loading</dd></div>
+          <div><dt>Live version</dt><dd id="status-live">Loading</dd></div>
+          <div><dt>Open incidents</dt><dd id="status-incidents">Loading</dd></div>
+          <div><dt>Attempts left</dt><dd id="status-attempts">Loading</dd></div>
+        </dl>
+        <span class="synthetic" id="status-synthetic">Synthetic scenario</span>
+      </section>
+      <div class="float-panel graphics-controls">
+        <p id="graphics-status" role="status" data-state="loading">Loading recorded context. Your workbench is ready.</p>
+        <button type="button" data-graphics-retry hidden>Retry 3D view</button>
+        <button type="button" data-graphics-simple aria-pressed="false">Simpler 3D</button>
       </div>
-      <p id="workplace-state" class="workplace-state">No verified operating identity loaded.</p>
-      <div class="station-context" id="station-context" role="status">Select a station to inspect your work.</div>
       <div class="room" aria-label="Bellwether operational room">
         <div id="workplace-canvas" aria-hidden="true"></div>
         <div class="room-bookplate" aria-hidden="true">Bellwether <em>Books</em><span>THE SERVICE ROOM</span></div>
@@ -55,7 +66,6 @@
           <path fill="#7e6650" d="m226 527 63 38v66l-63-39Z"/>
           <path fill="#d1c5a0" d="m577 597 102-55 58 35-101 55Z"/>
         </svg>
-        <div id="northline-stations" class="room-hotspots" hidden></div>
         <svg id="gtm-art" class="room-art" viewBox="0 0 1000 720" aria-hidden="true" hidden>
           <path fill="#241f31" stroke="#5b5175" d="M110 430V200L500 60 890 210V440L500 690Z"/>
           <path fill="#3a3350" d="M110 200 500 60 500 210 110 430Z"/>
@@ -85,40 +95,29 @@
           <path fill="#9fb4c9" d="m478 464 58 31v38l-58-31Z"/>
           <path fill="#d8c7a4" d="m577 597 102-55 58 35-101 55Z"/>
         </svg>
-        <div id="gtm-stations" class="room-hotspots" hidden></div>
         <svg class="evidence-path" viewBox="0 0 1000 720" aria-hidden="true"><path d="M225 443 340 503 489 422 660 332 791 407"/><circle cx="225" cy="443" r="6"/><circle cx="489" cy="422" r="6"/><circle cx="660" cy="332" r="6"/><circle cx="791" cy="407" r="6"/></svg>
-        <div id="bookshop-stations" class="room-hotspots" aria-label="Room stations">
-          <button class="station station-customers" data-station="customers"><span class="station-marker">03</span><span>Customer queue<small id="queue-tag">Not loaded</small></span></button>
-          <button class="station station-owner" data-station="owner"><span class="station-marker">02</span><span>Owner desk<small>Contract · read only</small></span></button>
-          <button class="station station-service" data-station="service" aria-pressed="true"><span class="station-marker">01</span><span>Your service<small id="service-tag">Not loaded</small></span></button>
-          <button class="station station-pipeline" data-station="pipeline"><span class="station-marker">→</span><span>Evidence path<small>Follow the record</small></span></button>
-          <button class="station station-evaluator" data-station="evaluator"><span class="station-marker lock-mark" aria-hidden="true">▣</span><span>Independent evaluator<small>Locked · not editable</small></span></button>
-          <button class="station station-ledger" data-station="ledger"><span class="station-marker">≡</span><span>Incident &amp; ledger wall<small id="incident-tag">Not loaded · Synthetic scenario</small></span></button>
-          <button class="station station-repair" data-station="repair"><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small></span></button>
-          <button class="station station-investigate" data-station="investigate"><span class="station-marker" aria-hidden="true">◎</span><span>Investigate<small id="investigation-tag">Not loaded</small></span></button>
-          <button class="station station-compare" data-station="compare"><span class="station-marker" aria-hidden="true">⇄</span><span>Compare<small id="compare-tag">Not loaded</small><small id="test-tag">No diagnostic reported</small></span></button>
-          <button class="station station-next" data-station="next"><span class="station-marker" aria-hidden="true">▷</span><span>Next shift<small id="next-tag">Not loaded</small></span></button>
+        <div id="station-tags" class="station-tags">
+          <div id="northline-stations" class="room-hotspots" hidden></div>
+          <div id="gtm-stations" class="room-hotspots" hidden></div>
+          <div id="bookshop-stations" class="room-hotspots" aria-label="Room stations">
+            <button class="station station-customers" data-station="customers"><span class="station-marker">03</span><span>Customer queue<small id="queue-tag">Not loaded</small></span></button>
+            <button class="station station-service" data-station="service" aria-pressed="true"><span class="station-marker">01</span><span>Your service<small id="service-tag">Not loaded</small></span></button>
+            <button class="station station-evaluator" data-station="evaluator"><span class="station-marker lock-mark" aria-hidden="true">▣</span><span>Independent evaluator<small>Locked · not editable</small></span></button>
+            <button class="station station-ledger" data-station="ledger"><span class="station-marker">≡</span><span>Incident &amp; ledger wall<small id="incident-tag">Not loaded · Synthetic scenario</small></span></button>
+            <button class="station station-compare" data-station="compare"><span class="station-marker" aria-hidden="true">⇄</span><span>Compare<small id="compare-tag">Not loaded</small><small id="test-tag">No diagnostic reported</small></span></button>
+            <button class="station station-owner" data-station="owner"><span class="station-marker">02</span><span>Owner desk<small>Contract · read only</small></span></button>
+            <button class="station station-pipeline" data-station="pipeline"><span class="station-marker">→</span><span>Evidence path<small>Follow the record</small></span></button>
+            <button class="station station-repair" data-station="repair"><span class="station-marker">04</span><span>Repair bench<small id="repair-tag">Not loaded</small></span></button>
+            <button class="station station-investigate" data-station="investigate"><span class="station-marker" aria-hidden="true">◎</span><span>Investigate<small id="investigation-tag">Not loaded</small></span></button>
+            <button class="station station-next" data-station="next"><span class="station-marker" aria-hidden="true">▷</span><span>Next shift<small id="next-tag">Not loaded</small></span></button>
+          </div>
         </div>
         <div class="room-caption"><span class="tiny-square"></span>A real output. An independent check. A recorded consequence.</div>
       </div>
-      <div class="graphics-controls">
-        <p id="graphics-status" role="status" data-state="loading">Loading recorded context. Your workbench is ready.</p>
-        <button type="button" data-graphics-retry hidden>Retry 3D view</button>
-        <button type="button" data-graphics-simple aria-pressed="false">Simpler 3D</button>
-      </div>
-      <section class="board-strip" data-synthetic-region="board" aria-label="Shift board summary">
-        <div class="strip-heading"><h2>Your shift, at a glance</h2><span class="synthetic">Synthetic scenario</span></div>
-        <div class="board-metrics">
-          <div><span>Requests run</span><strong id="metric-requests">…</strong><small>Latest attempt</small></div>
-          <div><span>Unresolved incidents</span><strong id="metric-incidents">…</strong><small>Carried until resolved</small></div>
-          <div><span>Attempts remaining</span><strong id="metric-attempts">…</strong><small id="attempt-detail">Not loaded</small></div>
-          <div><span>Ledger</span><strong id="metric-chain">Not loaded</strong><small id="event-detail">Verified on every read</small></div>
-        </div>
-      </section>
-      <p class="evidence-boundary" id="execution-note">Offline client. No live model or sandbox connection. The simulated role is not a credential.</p>
     </section>
     <aside class="detail-panel" id="station-panel" tabindex="-1" aria-labelledby="panel-title">
-      <div class="panel-heading"><div><p class="eyebrow" id="panel-kicker">YOUR WORKING ARTIFACT</p><h2 id="panel-title">Service workbench</h2></div><span class="panel-symbol" aria-hidden="true">⌑</span></div>
+      <div class="panel-heading"><div><p class="eyebrow" id="panel-kicker">YOUR WORKING ARTIFACT</p><h2 id="panel-title">Service workbench</h2></div><button type="button" id="close-inspector" class="close-inspector" aria-label="Close the inspector">Close</button></div>
+      <div class="inspector-sheet">
       <div id="inspection-bar" class="inspection-bar" data-mode="current" role="status">
         <span id="inspection-mode">Current inspection</span>
         <button id="inspect-current" class="inspection-return" type="button" hidden>Return to current shift</button>
@@ -315,7 +314,33 @@
       </section>
       <section id="deferred-view" hidden><div class="deferred-symbol" aria-hidden="true">◇</div><h3 id="deferred-title"></h3><p id="deferred-copy"></p><button id="back-board" class="button secondary">Back to your service</button></section>
       <footer class="panel-footer"><span class="tiny-square"></span>Evidence, not a narrated outcome.</footer>
+      </div>
     </aside>
+    <details id="shift-log" class="float-panel shift-log">
+      <summary>shift.log <span id="shift-log-count" class="log-count">Loading</span></summary>
+      <div class="log-filters" role="group" aria-label="Show log entries"><button type="button" data-log-filter="all" aria-pressed="true">All</button><button type="button" data-log-filter="check" aria-pressed="false">Checks</button><button type="button" data-log-filter="you" aria-pressed="false">You</button></div>
+      <ol id="shift-log-list" class="shift-log-list"><li class="log-empty">Loading recorded entries.</li></ol>
+      <details id="shift-details" class="shift-details">
+        <summary>Shift details</summary>
+        <div class="room-heading">
+          <div><p class="eyebrow" id="client-name">YOUR CLIENT / BELLWETHER BOOKS</p><p id="role-description" class="room-subtitle">Your role: junior applied AI engineer. Your service. Your decisions.</p></div>
+          <div class="shift-stamp"><span>ON THE BOARD</span><strong id="shift-number">No shift loaded</strong><span>Fictional client · simulated role</span></div>
+        </div>
+        <p id="workplace-state" class="workplace-state">No verified operating identity loaded.</p>
+        <div class="station-context" id="station-context" role="status">Select a station to inspect your work.</div>
+        <section class="board-strip" aria-label="Shift board summary">
+          <div class="strip-heading"><h2>Your shift, at a glance</h2><span class="synthetic">Synthetic scenario</span></div>
+          <div class="board-metrics">
+            <div><span>Requests run</span><strong id="metric-requests">…</strong><small>Latest attempt</small></div>
+            <div><span>Unresolved incidents</span><strong id="metric-incidents">…</strong><small>Carried until resolved</small></div>
+            <div><span>Attempts remaining</span><strong id="metric-attempts">…</strong><small id="attempt-detail">Not loaded</small></div>
+            <div><span>Ledger</span><strong id="metric-chain">Not loaded</strong><small id="event-detail">Verified on every read</small></div>
+          </div>
+        </section>
+        <p class="evidence-boundary" id="execution-note">Offline client. No live model or sandbox connection. The simulated role is not a credential.</p>
+      </details>
+    </details>
+    </div>
   </main>
   <noscript><p class="noscript">JavaScript is required to load your shift. No scenario values are shown without the API.</p></noscript>
 </body>
