@@ -1,3 +1,11 @@
+**Workplace-3d Gates 2 to 4 APPROVED, 2026-10-21, in one batch after the Gate 1 re-approval.** The user answered "Yes i approve gates 2 to four". S36 to S42 are planned in [workplace-3d Gate 4 section 8](workplace-3d/04-slices.md#8-full-screen-workplace-slices-s36-to-s42); each needs its own go-ahead.
+
+**Earlier: workplace-3d Gate 1 RE-APPROVED, 2026-10-21, after a same-day backtrack.**
+
+The user approved backtracking the 3D workplace Gate 1 presentation direction after the [visual overhaul proposal](workplace-3d/visual-overhaul-proposal-2026-10-21.md).
+Authority, scope and stop boundary are recorded at the top of the [workplace-3d status](workplace-3d/00-status.md).
+That limit ended with the Gates 2 to 4 approval above; implementation still needs a per-slice go-ahead.
+
 **S35 ACCEPTED by the user, 2026-10-21, with one recorded evidence gap.**
 
 The user approved S35 after their own manual testing and directed closure. The

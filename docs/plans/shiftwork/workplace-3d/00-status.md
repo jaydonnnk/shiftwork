@@ -1,3 +1,55 @@
+**Gates 2 to 4 APPROVED by the user, 2026-10-21, in one batch.**
+
+The user answered "Yes i approve gates 2 to four. Commit and push them to main and then let me see the build plan for the remaining slices again then we can start".
+All four workplace-3d gates are now approved for the full-screen direction.
+The user authorized committing these planning documents and pushing main, without a co-author trailer.
+No slice has a go-ahead yet: S36 needs its own explicit start on branch `shiftwork/slice-36`.
+No implementation, download, deployment, credential or live call is authorized by this approval.
+
+**Earlier, same day: Gates 2 to 4 revision drafted.**
+
+Drafted against the re-approved Gate 1, as the user asked:
+
+- [Gate 2 section 11](02-architecture.md#11-revision-for-the-full-screen-workplace-2026-10-21): decisions R1 to R6 (full-screen room and inspector, perspective camera, three bounded motion classes, HTML narration and guidance, first-party rounded geometry and environment instead of new vendor files, focused dialogs). Everything else in Gate 2 is unchanged.
+- [Gate 3 section 13](03-program-design.md#13-full-screen-workplace-revision-2026-10-21) and [visual-spec section 11](visual-spec.md#11-full-screen-workplace-revision-2026-10-21): files, signatures, call stacks, step-guide and lamp rules, replay eligibility, timings, revised budgets, 18 new and 2 extended fail-capable checks and the planned edits to existing S30 to S35 browser checks.
+- [Gate 4 section 8](04-slices.md#8-full-screen-workplace-slices-s36-to-s42): S36 to S42. S36 to S38 are committed for the 2026-10-30 10:00 PT deadline (01:00 on 2026-10-31, Asia/Singapore) with a planning cutoff at the end of 2026-10-28, Asia/Singapore; S39 to S41 are stretch; S42 is not expected in time.
+
+User decisions on the open questions, 2026-10-21, by questionnaire: all three boards get the full-screen shell in S36; the seven owner lines are OK as drafted; the budgets are provisional and S38 measures them first; the Stonebridge picker question is reworded to "What is going wrong?" (mockup screen 10 updated).
+
+Verification: document review and source inspection only; `git diff --check` passes; no em dash or section sign was added.
+Nothing was run, rendered or measured for the new direction; performance fit, existing-check breakage and art quality remain [unknown].
+The engine-export claim in Gate 3 section 13.3 rests on a text search of the vendored modules, not execution.
+No implementation, slice branch, test change, commit, push, download, deployment, credential or live call occurred.
+
+**Gate 1 RE-APPROVED by the user, 2026-10-21. Gates 2 to 4 reconciliation in progress.**
+
+After reviewing the revised [Gate 1 product](01-product.md) and [mockups/v2](mockups/v2/index.html), the user answered "Yep i approve, lets move on to gate 3 and gate 4. Then il approve all ar once".
+Gate 1 is RE-APPROVED with the full-screen workplace direction.
+The user asked for Gate 3 and Gate 4 to be revised next and intends to approve them together.
+Gate 2 must also be checked against the revised Gate 1; any affected Gate 2 decision is presented in the same batch, never assumed approved.
+Until that batch approval, the 2026-10-19 Gate 3 visual specification and Gate 4 plan are superseded drafts, not authority for new work.
+No implementation, slice branch, commit, push, deployment, credential or live call is authorized.
+
+**Earlier, same day: Gate 1 BACKTRACKED by the user, 2026-10-21; revision then in progress.**
+
+Gate 1 Product is set back to IN PROGRESS.
+The user reviewed the [visual overhaul proposal](visual-overhaul-proposal-2026-10-21.md) and answered "Yes i approve the backtrack".
+That authorizes revising this folder's Gate 1 product document and its HTML mockups only.
+The backtrack targets the presentation direction: the persistent-workbench layout A, the ban on recorded request-flow replays, ambient room life and narrated client voices, and the plain-language naming of the learner's steps.
+The learning loop, evidence boundaries, learner authorship, explicit selection, operation and inheritance contracts are unchanged.
+Gates 2 and 3 remain approved as historical decisions, but the visual specification and motion limits owned by Gate 3, and any Gate 2 asset or layout boundary the revised Gate 1 affects, must be reconciled and re-approved after Gate 1 re-approval.
+No new slice is planned or authorized.
+S36 and later need Gate 4 approval and their own go-ahead.
+No implementation, commit, push, deployment, credential, live call or protected-fixture edit is authorized by this backtrack.
+S29 to S35 remain accepted as implemented under the earlier direction.
+
+Revised deliverables, 2026-10-21: the rewritten [Gate 1 product](01-product.md) and seven new screens plus a hub in [mockups/v2](mockups/v2/index.html).
+The screens use the existing original `shiftwork/client/room.svg` as a stand-in for the 3D room; no third-party art or code was imported.
+Verification, local Chromium in the Claude browser pane served from a loopback static server: all eight pages at forced iframe widths of 390, 640, 1280 and 1440 px (32 cells) had `scrollWidth` equal to `clientWidth`, no floating, modal, picker or hub element past the right edge, and a loaded room picture.
+That check detected an injected 600px element at 390 px, so it can fail.
+Desktop views at 1440x900 and narrow views at 390x844 were inspected by screenshot; defects found and fixed during review were mispositioned station tags, cause-suggesting placeholder text, a primary-styled default candidate, a ring disagreeing with the next action, a clipped tag, overlapping narrow tags, an art gap and modal text bleed-through.
+Not checked: native Safari, physical devices, assistive technology and any reviewer comprehension.
+
 **S35 ACCEPTED by the user, 2026-10-21, with one recorded evidence gap.**
 
 The user approved S35 after their own manual testing and directed closure. The
@@ -313,6 +365,7 @@ contracts or historical evidence. S28 acceptance and all carried limits remain.
 Updated: 2026-10-19, Asia/Singapore.
 
 - Gate 1 Product: APPROVED 2026-10-19. Persistent-workbench layout A.
+  BACKTRACKED 2026-10-21, then RE-APPROVED 2026-10-21 with the full-screen workplace direction.
 - Gate 2 Architecture: APPROVED 2026-10-19. Self-hosted Three.js presentation.
 - Gate 3 Program Design: APPROVED 2026-10-19, including the visual specification.
 - Gate 4 Vertical Slice Plan: DRAFT 2026-10-19, awaiting approval. Proposed S29 to S35.
