@@ -1,3 +1,5 @@
+**S37 review fixes verified locally, 2026-10-22.** The user approved the two Gate 3 section 13.5 corrections, F3 to F6, F7 instrumentation, F8's runner reorder, the separate guard repairs, commits and merging both branches into main. All requested guards now fail on their own named assertions and pass restored checks. Node 228, fullscreen faults 27/27, S31 34/34, complete browser controls 27/27 and separate browser controls 26/26 pass. Full regression retains the same eleven renderer failure strings and the known `port_dead` failure. See the [review-fix record](s37-review-fixes-2026-10-22.md) for all receipts, old check text and limits. Manual fallback/status visual sign-off remains open. Push and S38 have no go-ahead.
+
 **S37 ACCEPTED, 2026-10-21.** The user answered "Yep i accept slice 37 please merge the other branch to main(if theres nothing else left to do), and push to main". The user's acceptance covers the owner-line and picker copy listed in the S37 checkpoint.
 
 S36 was published, merged to main as `d43dad1..4727c82` and pushed; S37 started on `shiftwork/slice-37` under the same answer.

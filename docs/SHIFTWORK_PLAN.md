@@ -1,3 +1,5 @@
+**S37 review corrections verified locally, 2026-10-22.** Gate 3 section 13.5 now guides an inherited learner choice without this shift's operation to step 6, and keeps unresolved starter complaints visible even when its loaded run passed. Both corrections are explicitly re-approved. The other review fixes and guard repairs are verified, with the existing baseline failures retained. See the [review-fix record](plans/shiftwork/workplace-3d/s37-review-fixes-2026-10-22.md). The local merge is authorized; push and S38 still need a go-ahead.
+
 **S35 ACCEPTED by the user, 2026-10-21, with one recorded evidence gap.**
 
 The user approved S35 after their own manual testing and directed closure. The
