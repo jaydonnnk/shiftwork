@@ -735,6 +735,9 @@ Rules are evaluated in this order, Bellwether first; S42 adds board station maps
 1. Shift state `closed`: step 7, station `next`.
 2. Operating selection of kind `LEARNER_CHOICE` and a loaded run with purpose `OPERATION`, the current shift ID and that selection's ID: `QUEUED`, `RUNNING` or `CAPTURED` gives step 6 `running` at `service`; `FINALIZED` or `FAILED` gives step 7 at `ledger`. A run of a `STARTER_BASELINE` selection never matches this rule; it is the recorded run that step 1 reads.
 3. Operating selection of kind `LEARNER_CHOICE` whose `comparisonId` equals the current qualifying comparison ID: step 6 at `service`.
+
+3a. Operating selection of kind `LEARNER_CHOICE`, shift state `open`, and no loaded run with purpose `OPERATION`, the current shift ID and that selection's ID: step 6 at `service`. Re-approved 2026-10-22 after the S37 review: an inherited choice in a later shift had fallen through to step 1.
+
 4. Current qualifying comparison `COMPLETE` with at least one candidate `eligible === true`: step 5 at `compare`. With none eligible: step 4 `blocked`, with the first recorded blocking reason code shown in words.
 5. `investigation.count >= 1` for the current shift: step 4 at `compare`.
 6. Otherwise: step 3 at `investigate` when the investigate station is active and `causeDraft` is true; step 2 at `investigate` when it is active; step 1 at `customers`.
