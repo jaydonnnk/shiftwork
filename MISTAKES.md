@@ -3412,3 +3412,21 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: native 200% Safari reported a 410px page at a 378px viewport. Element/text bounds alone missed the overflow owner. Native background suspension and Page Menu/AX/user-interruption failures also prevented the final 200% keyboard cases from finishing before handoff.
 - Root cause: the role picker propagated the select's internal scroll overflow; native UI focus could change independently of retained pixels.
 - Prevention rule: measure per-element scrollWidth/clientWidth as well as rendered bounds, constrain the select itself, and require visible-page telemetry and settled content/focus observations. Preserve all attempts. The production narrow select repair has 100% native proof; final 200% and archive revalidation remain open at user-requested stop.
+
+## 2026-10-21 S36: context limit overrun and unsplit shell arguments
+
+- What happened: the S36 session passed the 175k-token working limit in AGENTS.md section 6 before it stopped to hand off. Separately, a zsh loop passed `${f:+--fault $f}` as one argument, so three "fault" runs were clean runs; their output was not mistaken for proof only because the result line was read.
+- Root cause: large full-file reads (index.html, styles.css, scene, gate section 13) and many browser round-trips were not tracked against the budget. zsh does not word-split unquoted parameter expansions.
+- Prevention rule: read source by function or line range and check usage after each phase; hand off at the first clean boundary near 150k. In zsh loops pass flags as separate quoted words (`--fault "$f"`), and require each fault run to print its `caught` line before counting it.
+
+## 2026-10-21 S36 continuation: context limit overrun again, and fault suites misread
+
+- What happened: the S36 continuation session passed the 175k-token working limit (about 218k) before stopping, the second S36 overrun the same day. Separately, a driver treated `workplace_fullscreen.mjs` fault runs as passing on a non-zero exit, but that runner exits 0 when the fault is caught, so the first matrix read inverted. A new `workplace_browser.mjs` layout fault was also passed as the browser fault string, which `openBrowser` and `runBrowser` treat as a graphics failure.
+- Root cause: background test runs and their log reads were not counted against the budget. The fault-runner exit contract and the fault-string routing were assumed instead of read.
+- Prevention rule: check usage after every background run and hand off at the first clean boundary past 150k. Before writing a driver, read the runner's CLI tail for its exit contract. In `workplace_browser.mjs`, pass a CSS-only layout fault through the `layoutFault` option, never as the `fault` string.
+
+## 2026-10-21 S36 continuation: dropped narrow CSS rule and an invisible zoom escape
+
+- What happened: an earlier S36 session removed the narrow `.journey a { white-space: normal; }` rule while rewriting the shell CSS. At narrow widths and 200% zoom the station and journey tag text then escaped its control, but the existing zoom checks only compared page `scrollWidth` with the viewport, so they still passed. The escape surfaced only when the zoom-omit fault was confirmed on both main and the branch.
+- Root cause: shell rewrites were reviewed as added rules, not as rules removed relative to main. A page-level overflow check cannot see text that overflows its own control while the page itself stays within the viewport.
+- Prevention rule: before calling a CSS rewrite done, diff the removed selectors and declarations against main and justify each removal. For every zoom or layout fault, confirm it fails on main and on the branch, and pair a page overflow check with a per-control text escape check ("station tag text escapes its control").
