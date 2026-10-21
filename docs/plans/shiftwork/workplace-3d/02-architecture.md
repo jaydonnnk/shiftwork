@@ -1,5 +1,11 @@
 # Architecture: Shiftwork 3D workplace
 
+**Revision APPROVED, 2026-10-21, in one batch with Gates 3 and 4.** The user answered "Yes i approve gates 2 to four" on 2026-10-21.
+Gate 1 was re-approved on 2026-10-21 with a full-screen workplace.
+[Section 11](#11-revision-for-the-full-screen-workplace-2026-10-21) states each Gate 2 decision that changes, against the Gate 1 sentence that requires it.
+Sentences marked "Superseded by section 11" below are history, not authority for new work.
+Everything else in this document is unchanged and remains approved.
+
 Gate 2 APPROVED, 2026-10-19, Asia/Singapore.
 
 The user said "Sure i approve" after the architecture was presented and requested
@@ -22,6 +28,8 @@ and short state-driven transitions. Start with a complete Bellwether journey,
 then provide distinct Stonebridge and Northline room definitions through the same
 presentation boundary. Layout A is the default. Essential labels and actions
 remain HTML controls, including an expanded workbench for sustained editing.
+(Superseded by section 11, decisions R1 and R2: the room fills the screen, the
+camera is perspective and the workbench becomes a slide-in inspector.)
 
 ### Alternatives considered
 
@@ -167,6 +175,8 @@ view. Revisit Gate 2 if later requirements demand transactional scene snapshots.
   continuity is a new baseline. A refresh generation increments on every poll;
   it fences stale responses but is not the scene's continuity identity.
   No motion queue, replay log or persistent animation cursor is stored.
+  (Section 11, decision R3, adds a labelled recorded replay that is derived
+  from loaded public records on demand and is still never stored.)
 - **No invented fine-grained progress.** Polling may miss intermediate steps.
   Show the actual queued/running state and final public result. Do not manufacture
   a live tool trace, exact completion percentage, missing request or model thought.
@@ -189,7 +199,8 @@ integration scope, not a second state machine.
 Use core Three.js primitives and original procedural models for the initial
 rooms. Keep a stable three-quarter orthographic camera for legibility. Bounded
 focus changes respond to a station choice; free orbit, a walking avatar, physics,
-audio and post-processing are excluded. Reusable geometry/material helpers may
+audio and post-processing are excluded. (Camera, idle drawing and motion
+classes superseded by section 11, decisions R2 and R3.) Reusable geometry/material helpers may
 serve distinct client-authored rooms without turning them into relabelled copies.
 
 Labels remain ordinary HTML. If selected objects get screen-space labels, their
@@ -204,7 +215,8 @@ within one room but explicitly dispose geometry, materials, textures and rendere
 resources when their owner is replaced. Three.js requires application-managed
 [resource disposal][dispose]; removing scene objects alone is insufficient.
 
-Render on demand when idle and during brief transitions when visible. Pause
+Render on demand when idle and during brief transitions when visible.
+(Section 11, decision R3, adds bounded ambient drawing with its own stop rules.) Pause
 unnecessary drawing while hidden/offscreen, clamp animation deltas after resuming,
 and respond to container size rather than only window size. Bound pixel ratio
 and graphics complexity. Gate 3 fixes the quality tiers, sample rules, target
@@ -310,7 +322,8 @@ No install, credential use, product startup or provider call was performed.
 
 Gate 2 approval selects Three.js, locally served browser modules, the scene-only
 presentation boundary, unchanged backend/data contracts, the approved workbench
-layout and the fallback/delivery obligations. It does not authorize acquisition,
+layout and the fallback/delivery obligations. (Workbench layout superseded by
+section 11, decision R1.) It does not authorize acquisition,
 implementation, tests that install dependencies, Git publication or deployment.
 
 Gate 3 must specify the exact module/asset map, release pin and license manifest,
@@ -327,6 +340,79 @@ baseline is extended by this approval. Historical S28 evidence and carried
 limitations remain unchanged. Gate 3 still owns the exact program design.
 
 Gate 3 is available for planning under its own approval boundary.
+
+## 11. Revision for the full-screen workplace, 2026-10-21
+
+Status: APPROVED 2026-10-21 in the user's batch approval of Gates 2 to 4.
+Gate 1 was re-approved on 2026-10-21 with the user's words "Yep i approve, lets move on to gate 3 and gate 4. Then il approve all ar once".
+This section was written by checking every Gate 2 decision against the re-approved [Gate 1](01-product.md).
+It is a design decision record, not evidence: no rendering, compatibility, performance or comprehension result exists for the new direction.
+
+### Unchanged after the check
+
+- Section 3 ownership: one browser controller owns state, commands, drafts and navigation. The renderer owns no domain facts and emits only a station identifier.
+- Section 4 data: no new endpoint, table, migration, durable record or schema change. Every new visible element reads the same public projections the workbench already reads.
+- Section 5 truth rules: latest run is not latest operation, selection is independent, experiments stay on the test bench, first load and history are quiet, and only linked records may cause consequence motion.
+- Section 7 failure isolation: the HTML work stays usable when graphics fail, and the hosting notice keeps its own full-width row.
+- Section 8 delivery: one FastAPI process, locally served modules, no CDN, no remote font, no build step, no new environment variable. The engine closure stays the two pinned r180 modules plus LICENSE (decision R5).
+- No domain ADR changes.
+
+### Decisions that change
+
+**R1. The room fills the screen; the workbench becomes a slide-in inspector.**
+Required by Gate 1: "The workplace then fills the screen. Small panels float over the room" and "Choosing a station opens its work in an inspector panel beside the room, keeping the room in view."
+Replaces "Layout A is the default" in section 1 and "the approved workbench layout" in section 10.
+The existing workbench node, its sections, control identifiers and handlers move into the inspector unchanged; nothing is copied.
+Status bar, step chip, next-action panel, shift log, station tags and speech bubbles are ordinary HTML layered over the canvas.
+Narrow screens stack them in document order with no camera motion and no drag, as Gate 1 states.
+There is still one application shell; the earlier two-column layout is removed, not kept as an alternate shell.
+
+**R2. A stable perspective camera replaces the orthographic camera.**
+Not required by any single Gate 1 sentence.
+It serves Gate 1's "living workplace" and "fills the screen" intent: a full-viewport orthographic view reads as a diagram, while a fixed three-quarter perspective view gives depth.
+Azimuth and elevation stay fixed; there is still no free orbit, walking or learner-driven camera.
+On a station choice at desktop widths, a bounded focus ease keeps the station and the stations beside it visible next to the open inspector.
+Narrow screens have no camera motion.
+
+**R3. Three bounded motion classes join the short state transitions.**
+Required by Gate 1: "The room has quiet life that reflects real state: lamps, the attention ring and small ambient movement" and "When a run's recorded results arrive, request slips travel from the queue to the service, then to the locked inspector's desk, which stamps each one with its actual verdict, then to the incident wall."
+
+1. Ambient motion: slow, non-flashing lamp and attention-ring movement that reflects the current accepted state only. It never shows progress, success or a result. It stops while hidden, offscreen, expanded, in reduced motion, on the compact tier and after a period without learner input. This replaces "render on demand when idle" for these effects only; Gate 3 fixes the limits.
+2. Recorded replay: a sequence derived on demand from the loaded run's public outputs and check results, in ordinal order. It plays only after those results are accepted, carries a visible "Recorded replay" label, and each stamp shows the actual recorded verdict or "No verdict recorded". It is never stored, queued across sessions or used as a cursor, so section 5's "no replay log" rule still holds for persistence. It plays automatically only under section 5's existing continuity rules for an operation run; any other time it plays only when the learner presses an explicit replay control, and then it is labelled as a replay of history.
+3. Camera focus ease from R2.
+
+Reduced motion removes all three and shows the settled stamps, lamps and ring.
+No motion class can gate a command or delay a verdict.
+
+**R4. Narration and guidance are HTML, outside the scene.**
+Required by Gate 1: "Customers' recorded requests appear as speech bubbles at the customer queue", "The client owner comments at the owner desk on what the recorded evidence already shows", "a step chip showing 'Step N of 7' and the current step's name" and "one next-action panel with a single labelled action".
+Customer bubbles show `request_text` that the workbench already shows for a loaded public output.
+Owner lines come from a fixed, reviewed catalogue whose only variables are public counts.
+The step chip and next action come from a pure guidance function over the same accepted public view.
+The next action only navigates to a station through the existing guarded navigation path; it never sends a command and never decides whether a command is allowed.
+None of this text enters the scene. The scene reports only on-screen station anchor positions so HTML can be placed beside the right object.
+This adds one pure client module for guidance, narration and the shift report reduction, alongside the existing projection; it fetches nothing and imports no engine or command code.
+
+**R5. Rounded geometry and environment lighting are first-party code, not new vendor files.**
+The visual proposal suggested vendoring r180 `RoundedBoxGeometry.js` and `RoomEnvironment.js`.
+Those upstream example files import the bare specifier `three`, which would need an import map and a separately authorized acquisition.
+Rounded shapes can be built with core `ExtrudeGeometry` or an original chamfered box, and environment lighting can come from core `PMREMGenerator` applied to an original procedural scene.
+So section 1's "without loaders, post-processing or control addons" and Gate 3's two-module closure stay true, and no download is needed.
+If later evidence shows the first-party route cannot meet the art review, adding the addons returns here as an explicit Gate 2 and Gate 3 change with its own acquisition authority.
+
+**R6. Decisions use focused HTML dialogs.**
+Required by Gate 1: "Deliberate decisions, such as choosing the live version, open as a focused dialog that states what is being chosen, why it is being asked, and what happens to the alternative."
+The existing selection rationale and choice controls move into a native dialog. The existing handler and server guard are unchanged.
+The dialog has no preselected option, and closing it chooses nothing.
+
+### New verification obligations for Gate 3
+
+- A replay never starts before its run's outputs and check results are accepted, and a stamp never shows a verdict other than the recorded one.
+- Ambient motion never runs where R3 says it stops, and never appears on a station whose state did not change to justify it.
+- No owner line, step label or next action names a cause, a fix, a candidate preference or a choice.
+- The main view shows no hash or internal identifier; the shift log and inspector still show complete identities.
+- The next action and every station pick send zero command requests.
+- The full-screen layout keeps the hosting row, every station and the next action reachable by keyboard and touch at 1280, 640 and 390 px.
 
 [install]: https://threejs.org/manual/pages/installation.html
 [webgl]: https://threejs.org/docs/pages/WebGLRenderer.html
