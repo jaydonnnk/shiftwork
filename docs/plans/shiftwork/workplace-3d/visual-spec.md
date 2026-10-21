@@ -1,5 +1,9 @@
 # Visual specification: the work and its consequences
 
+**Revision APPROVED, 2026-10-21, in one batch with Gates 2 and 4.** The user answered "Yes i approve gates 2 to four" on 2026-10-21.
+[Section 11](#11-full-screen-workplace-revision-2026-10-21) specifies the re-approved full-screen Gate 1.
+Where a section below carries a "Revised by section 11" note, section 11 wins for new work; the older text is history.
+
 Part of Gate 3 APPROVED, 2026-10-19, Asia/Singapore, with
 [03-program-design.md](03-program-design.md). This specifies original art to be
 made later. The [static colour study](mockups/08-visual-spec.html) illustrates
@@ -7,6 +11,8 @@ composition, identity and hierarchy. It is not a Three.js render or execution
 receipt. The eight approved grayscale studies remain unchanged.
 
 ## 1. Visual idea
+
+Revised by section 11.1: the exclusion list changes.
 
 Show a working place where a learner's decision acquires consequences. The room
 has recognizable objects, useful empty space and a fixed orientation. The
@@ -22,6 +28,8 @@ No conveyor, robot workforce, avatar, floating score, victory flash or automated
 repair choreography. The learner remains the person who explains, tests and chooses.
 
 ## 2. Screen composition and evidence hierarchy
+
+Revised by section 11.2: layout A is replaced; the four-level evidence hierarchy stays for the inspector.
 
 Use layout A. At 1280px, reserve a full-width hosting row above a 58% room and
 42% workbench composition. The workbench is at least 480px wide, both columns
@@ -64,6 +72,8 @@ text and tables wrap or reflow. Workbench text never uses 3D perspective.
 
 ## 3. Palette, type and materials
 
+Revised by section 11.3: light room, navy panels, emissive lamps.
+
 Preserve Shiftwork's navy and amber identity. The light workbench is cool white,
 distinct from the warm materials inside Bellwether. No remote fonts.
 
@@ -99,6 +109,8 @@ or imported model. No emissive status glow; labels carry the meaning.
 
 ## 4. Shared spatial grammar, camera and lighting
 
+Revised by sections 11.2 and 11.4: perspective camera, ACES, environment and fog; station tags over the room replace the caption below it. The room grid and anchors stay.
+
 World units are design units, not metres. Use a 12-unit wide by 9-unit deep
 floor, y-up, front at z=+4.5 and back at z=-4.5. Back and left walls are 3.2
 units high; front and right remain open. The room's object groups have clear
@@ -128,6 +140,8 @@ has a stable amber base/rim, not a pulse. Status text outside the canvas remains
 readable when the 3D projection is small or unavailable.
 
 ## 5. Bellwether Books: service room
+
+Revised by section 11.3: Bellwether's colours turn light. Its anchors, objects and meanings stay.
 
 Warm ash shelves and paper sit inside navy painted walls. Use floor `#a89477`,
 wood `#b99a70`, shelf shadow `#6c5943`, paper `#e7deca`, blue workstation enamel
@@ -225,6 +239,8 @@ into reach at 390px using labelled buttons, not only object picks.
 
 ## 9. Motion, loading and failure states
 
+Revised by section 11.5: replay and ambient motion added; the 160, 180 and 320ms rules stay.
+
 Timings are design limits. They are not claims about execution latency.
 
 | Trigger | Treatment |
@@ -246,6 +262,8 @@ discard animation rather than playing catch-up when shown again.
 
 ## 10. Visual review obligations
 
+Extended by section 11.6.
+
 Compare real desktop and physical mobile renders to this specification after
 implementation. Inspect silhouettes with labels hidden, then inspect the actual
 labels and workbench at normal size and 200% zoom. Check that each room is
@@ -261,3 +279,94 @@ budgets and access targets; screenshots alone cannot pass them.
 User approval of this design does not prove art quality, frame rate, browser
 compatibility, comprehension or learning. Final scene art and performance evidence
 remain future work under separately approved implementation authority.
+
+## 11. Full-screen workplace revision, 2026-10-21
+
+Status: APPROVED 2026-10-21 in the user's batch approval of Gates 2 to 4.
+This section specifies the look and motion of the re-approved [Gate 1](01-product.md) and its [v2 mockups](mockups/v2/index.html).
+The mockups use the existing `room.svg` as a stand-in; they are not renders.
+Every value below is a starting authoring value, not a measured result.
+Sections 5 to 8 (room contents, Bellwether's story beats and the other two rooms) stay in force except where this section changes them.
+
+### 11.1 Visual idea (replaces section 1's exclusion list)
+
+The room is the whole screen, and the learner's work floats over it as small panels.
+Paper is the signature: requests are slips, verdicts are stamps, incidents are pinned cards, the live version is a framed plate on the service console.
+
+Still excluded: a robot, mascot, avatar, AI worker or any character standing in for the learner; a floating score; a victory flash; automated repair choreography; the reference's artwork, geometry, source, factory, conveyor, procurement or payments.
+Now allowed: labelled recorded slip replays, station lamps, an attention ring and slow ambient movement, all bound by the rules in Gate 3 section 13.5.
+
+### 11.2 Composition (replaces section 2's layout A)
+
+- **Hosting row.** Full width, first, never overlapped. Unchanged text.
+- **Stage.** Fills the remaining viewport height, minimum 560px at 761px and wider. The canvas fills the stage.
+- **Floating panels, 16px inset, 12px radius, navy surface.** Status bar top-left; step chip top-centre; next-action panel bottom-left; shift log bottom-right, 410px wide, list at most 168px tall before it scrolls inside itself; inspector left, `clamp(360px, 32vw, 480px)` wide, from below the step chip to the stage bottom.
+- **Station tags.** Pill buttons at each station's projected anchor: name, status words and a small lamp dot. At least 44 by 44 CSS pixels including padding. The tag of the attention station gets an amber outline.
+- **Bubbles.** At most one customer bubble above the queue and one owner bubble above the owner desk, 270px maximum width, a speaker label above the text.
+- **Dialogs.** Centred, 520px maximum width, over a 55% navy scrim. The choose dialog and the shift report follow screens 13 and 15.
+- **Shift picker.** Full stage overlay with the seven steps and one card per board, as screen 10.
+- **Evidence hierarchy.** Section 2's four levels still order the inspector's content. The main view carries only level 1: role and client, current step, next action, live version label and one narrator line.
+- **760px and below.** Panels become a single column in this order: hosting row, status bar, step chip, room (240px tall at 640px, 200px at 390px), station tags as a two-column list, next action, inspector content, shift log. No overlap, no horizontal scroll, no camera motion.
+- **Expanded work.** Unchanged from section 2 except that it spans the stage instead of the main grid.
+
+### 11.3 Palette and materials (replaces section 3's light workbench and "no emissive glow")
+
+The room turns light; the interface stays navy; amber marks attention.
+
+| Token | Value and use |
+|---|---|
+| Panel surface | `#121b27` with 1px `#2a3a4f` border; text `#eef2f6`, muted `#a9b6c4` |
+| Navy trim | `#202c40`, room cut edges, skirting and console bodies |
+| Amber | `#edbd68`, attention ring, attention tag outline, current step name |
+| Fail | `#e86b74` on navy panels; `#a43832` on light surfaces |
+| Pass | `#84c787` on navy panels; `#32684d` on light surfaces |
+| Info | `#8fb8e0` on navy panels |
+| Focus | `#7cc4ff` 3px outline on navy panels; `#176799` on light surfaces |
+| Bellwether floor | warm light wood `#d6c3a0` |
+| Bellwether walls | cream `#efe6d4` |
+| Bellwether wood and shelves | `#c7a77a` and `#8a7052` |
+| Paper and slips | `#f6f0e2` |
+| Lamps | fail `#ff5a4e`, attention `#ffb648`, pass `#4fd17a`, idle `#9aa6b2`, unbloomed `MeshBasicMaterial`, `toneMapped: false` |
+
+System sans stack and the existing monospace stack, as section 3; monospace only inside the shift log and code. No remote font.
+Text contrast is measured on the rendered page: at least 4.5:1 for normal text and 3:1 for large text and control or focus boundaries. Lamp colour never carries meaning alone; the tag text does.
+
+Materials: wood roughness 0.7, painted wall 0.85, paper 0.9, metal 0.42 with metalness 0.3, console enamel 0.55.
+Rounded edges on furniture and props with a 0.04 to 0.06 unit bevel on the standard tier; plain boxes on compact.
+
+### 11.4 Camera and lighting (replaces section 4's camera and lighting paragraphs)
+
+The room grid, anchors and object separation in section 4 stay.
+
+- `PerspectiveCamera`, vertical field of view 30 degrees, looking at `(0, 0.8, 0)` from azimuth 45 degrees and elevation 39 degrees. Distance is fitted so the room bounds sit inside an 8% screen margin. Azimuth and elevation never change.
+- Inspector open at 761px and wider: shift the view offset so the room centre sits in the uncovered part of the stage, eased in at most 480ms. A station choice may move the target at most 0.6 units, within the same ease.
+- 760px and below: the same fixed pose fitted to the compact room, with no view offset and no motion.
+- `ACESFilmicToneMapping`, exposure 1.0, sRGB output.
+- Hemisphere fill sky `#f3efe6`, ground `#8a7b66`, intensity 1.2. Directional key at `(-6, 10, 6)`, `#fff1d8`, intensity 2.2, with the single 1024 shadow map on standard.
+- Environment: the first-party PMREM studio environment from Gate 3 section 13.3, intensity 0.45, standard only.
+- Fog: linear, colour equal to the wall tone, near at 1.4 and far at 2.6 times the camera distance.
+- Still no HDR image, bloom, ambient-occlusion pass, post-processing or point-light collection.
+
+### 11.5 Motion (replaces section 9's table and its no-idle-motion paragraph)
+
+Timings are design limits, not execution latency.
+
+| Trigger | Treatment |
+|---|---|
+| Station chosen | Immediate HTML focus and content; inspector slides in over 200ms; camera ease at most 480ms at 761px and wider; 180ms rim change on the tag. |
+| Accepted experiment update | Unchanged: 160ms test-stand emphasis, observed slot states only. |
+| Accepted live-version choice | Unchanged: 180ms plate change. No slip, no wall change. |
+| Linked consequence arrival | Unchanged: one 320ms trace, annotated as recorded arrival. |
+| Recorded replay | Slips leave the queue in ordinal order, 250ms apart; each leg (queue to service, service to inspector's desk, desk to wall) takes 400ms; the stamp shows the actual verdict for 240ms before the last leg. At most 12 slips move; the rest settle with a count. Whole replay at most 6 seconds. The "Recorded replay" chip shows throughout and "Show settled result" skips. A slip with no linked event settles at the desk instead of reaching the wall. |
+| Ambient | The attention ring scales between 1.00 and 1.05 and attention or fail lamps vary brightness by 15%, both on a 2.5-second cycle. No blinking, no hue change, nothing faster than 0.5 cycles per second. Stops by the Gate 3 section 13.5 rules. |
+| Polling, error, reduced motion, graphics failure | Unchanged from section 9. Reduced motion shows settled stamps, lamps and ring with no travel, ambient or camera motion. |
+
+Animation never gates a command or delays a verdict. Hidden, expanded or offscreen scenes settle rather than catch up.
+
+### 11.6 Review obligations (adds to section 10)
+
+- Review the main view of the entry, mid-loop decision and later consequence states against Gate 1's limit of one question, one next action and one narrator line, with no hash or internal identifier.
+- Watch a failed operation replay and check that nothing in it could make a reviewer believe the customer was helped.
+- Read every owner line and picker question for hints at a cause, a fix or a choice.
+- Inspect the light room with labels hidden and with the inspector open at 1280px, and compare against screens 11 to 16. Screenshots of the stand-in picture do not pass art review.
+- Measure contrast of tags, bubbles and panels over the light room, and over the static fallback.

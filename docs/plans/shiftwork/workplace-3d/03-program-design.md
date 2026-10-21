@@ -1,5 +1,11 @@
 # Program design: Shiftwork 3D workplace
 
+**Revision APPROVED, 2026-10-21, in one batch with Gates 2 and 4.** The user answered "Yes i approve gates 2 to four" on 2026-10-21.
+Gate 1 was re-approved on 2026-10-21 with a full-screen workplace, and [Gate 2 section 11](02-architecture.md#11-revision-for-the-full-screen-workplace-2026-10-21) proposes decisions R1 to R6.
+[Section 13](#13-full-screen-workplace-revision-2026-10-21) of this document and [section 11 of the visual specification](visual-spec.md#11-full-screen-workplace-revision-2026-10-21) specify them.
+Where a section below carries a "Revised by section 13" note, section 13 wins for new work; the older text is history.
+Sections 3, 4, 6 and 8 stay in force except where section 13 adds to them.
+
 Gate 3 APPROVED, 2026-10-19, Asia/Singapore.
 
 Jaydon said "seems good. I approve." and separately authorized committing Gates
@@ -27,6 +33,8 @@ implementation, dependency acquisition or Gate 4 slice assignment.
   This is an acceptance dependency, not a slice plan.
 
 ## 2. Files and dependency direction
+
+Revised by section 13.2: one new pure module, new test files and changed file roles.
 
 All paths in this section are repository-relative. These are future file
 contracts. Only planning documents and the static study are written at this gate.
@@ -228,6 +236,8 @@ always exposes the complete value. Labels use text nodes, never HTML injection.
 
 ## 5. Field ownership, consistency and motion
 
+Revised by sections 13.4 and 13.5: new view fields and three new motion classes. The truth and continuity rules below stay in force.
+
 | View field | Current source and rule |
 |---|---|
 | Context and shift | `state.slug`, `board.engagement_slug`, `board.latest_shift`, `loadedShiftId`. Reject board/shift disagreement; a missing shift is a legitimate empty state. |
@@ -370,6 +380,8 @@ Graphics failure -> host cancels/disposes -> static overview and status/retry
 
 ## 7. Stations and interactions
 
+Revised by section 13.6: station tags over the room, the inspector, the next action and dialogs. The station IDs and guarded navigation below stay in force.
+
 Keep the current `activateStation()` aliases and guards as the navigation owner.
 The scene emits canonical IDs, never endpoint names or commands.
 
@@ -450,6 +462,8 @@ Only the code and tier go to diagnostics, never raw exceptions, payloads or path
 
 ## 9. Compatibility and numeric budgets
 
+Revised by section 13.8: the evidence matrix stays; the budget table and idle-frame rule change.
+
 These are acceptance budgets and the program's narrowed evidence scope, not
 claims about untested targets. No device or browser passes until a later receipt
 names its exact OS, browser build, GPU, viewport, DPR, tier and power state. Do
@@ -526,6 +540,8 @@ miss and stop board expansion pending a design decision.
 
 ## 10. Test plan and fail-capable controls
 
+Extended by section 13.9: new checks and planned, reviewed changes to existing browser checks. Every check below stays.
+
 These tests are designed here, not implemented or run. Reuse literal public
 examples from existing disposable/recorded test inputs; do not author new sealed
 cases or consume live calls for graphics proof. Keep current baseline failures
@@ -564,6 +580,8 @@ remain separate because they install dependencies. No test is weakened to fit ar
 
 ## 11. Least confident decisions
 
+Extended by section 13.10.
+
 1. **Two-module r180 delivery.** It keeps the approved architecture simple, but
    full acquired import closure, advisories and extracted execution are unproved.
    A failed closure check blocks use; it does not authorize a bundler migration.
@@ -596,6 +614,281 @@ Gate 4 remains unwritten. S28 and all carried limits remain unchanged.
 Jaydon approved this design on 2026-10-19. The separate Git authorization covers
 this planning packet only. Stop after publication; do not draft Gate 4 or begin
 implementation under that instruction.
+
+## 13. Full-screen workplace revision, 2026-10-21
+
+Status: APPROVED 2026-10-21 in the user's batch approval of Gates 2 to 4.
+This section turns [Gate 2 section 11](02-architecture.md#11-revision-for-the-full-screen-workplace-2026-10-21) decisions R1 to R6 into files, types, signatures, call stacks, timings, budgets and fail-capable checks.
+It was written from source inspection of `main` at `94e651b` and the re-approved Gate 1 mockups in [mockups/v2](mockups/v2/index.html).
+Nothing here was run, rendered or measured.
+Line references are anchors only; copy the current complete statement before any edit.
+
+### 13.1 What stays fixed
+
+- The five accepted modules keep their roles: `app.js` owns state, requests, commands, drafts and navigation; `workplace-view.js` is the pure projection; `workplace-host.js` owns lifecycle; `workplace-scene.js` owns rendering; `workplace-rooms.js` is plain room data.
+- The engine closure stays `three.module.js`, `three.core.js` and `LICENSE` under `vendor/three-r180/`, with the existing manifest. No import map, bare specifier, addon or new vendor file (decision R5).
+- `SceneView` keeps every field in section 4. Section 5's truth, consistency and continuity rules, section 6's publication sites and section 8's lifecycle and failure contract stay in force.
+- The existing 160ms comparison emphasis, 180ms selection acknowledgement and 320ms evidence trace keep their durations and trigger rules. Their test anchors therefore stay valid.
+- Every existing control ID, section and handler in `index.html` and `app.js` is preserved. Nodes move; they are not copied or recreated.
+
+### 13.2 Files
+
+| File | Change |
+|---|---|
+| `shiftwork/client/index.html` | Keep `#runtime-notice` as the first full-width row. Wrap the room in `<div class="world" id="workplace-world">` that fills the remaining viewport height (minimum 560px at 761px and wider). Inside it: the existing `.workplace` canvas container `#workplace-canvas` and static fallback; a `#station-tags` layer holding the existing `[data-station]` buttons for each board; a `#story-layer` with at most one customer bubble and one owner bubble; floating `#status-bar`, `#step-chip`, `#next-action` (one button `#next-action-go`) and `#shift-log` (a native disclosure holding `<ol id="shift-log-list">`). The existing `#station-panel` becomes the inspector (`<aside>`), gaining `#close-inspector`. Add `<dialog id="choose-dialog">`, `<dialog id="shift-report">` and `<section id="shift-picker">`. Move the existing `#selection-rationale`, `#select-candidate-a` and `#select-candidate-b` nodes into `#choose-dialog`; the compare section gains `#open-choose-a` and `#open-choose-b`. |
+| `shiftwork/client/styles.css` | Remove the layout A grid rules (the `main` 58fr/42fr template and its 1099px stack). Add the full-screen stage, floating panels, inspector, dialogs, picker, narrow stacking at 760px and below, expanded inspector, lamp text and reduced-motion rules from visual-spec section 11. |
+| `shiftwork/client/app.js` | Publish as today, then call `renderStory()` with the accepted view. Own inspector open and close, the picker, both dialogs, the shift log, report triggering and the next-action click. All new handlers navigate or open HTML only, except the existing `chooseCandidate()` reached from the dialog. |
+| `shiftwork/client/workplace-story.js` | New pure module. Exports `guideStep`, `lampStates`, `ownerLine`, `customerBubble`, `planSlips`, `reduceShiftReport` and `logEntries`. Imports only `selectEvidence` from `evidence.js`. No DOM, engine, network or command imports. |
+| `shiftwork/client/workplace-view.js` | `projectWorkplace` adds `attention`, `lamps` and `slips` to `SceneView` by calling `guideStep`, `lampStates` and `planSlips`. Imports `workplace-story.js`; the story module never imports the view module. |
+| `shiftwork/client/workplace-host.js` | Forward inspector state, input activity and anchor positions; start an explicit or eligible replay. No API access. |
+| `shiftwork/client/workplace-scene.js` | Perspective camera, view offset and focus ease, ACES tone mapping, fog, first-party rounded geometry and environment, emissive lamps, attention ring, slips and stamps, ambient scheduling and anchor projection. Still the only RAF owner. |
+| `shiftwork/client/workplace-rooms.js` | Bellwether light palette, lamp and ring anchors per station, slip path points (queue, service, inspector desk, wall) and camera pose. Plain data. |
+| `shiftwork/client/workplace-assets.json` | New provenance rows for the rounded geometry builder, the environment scene and the slip and stamp assemblies, all `shiftwork-original`. |
+| `tests/client/workplace_story.test.mjs` | New GPU-free checks for the story module (section 13.9). |
+| `tests/client/workplace_fullscreen.mjs` | New browser checks for layout, inspector, next action, dialogs, picker, main-view text and narrow stacking. |
+| `tests/client/workplace_replay.mjs` | New browser checks for slips, stamps, ambient stop rules and camera rules. |
+| Existing `tests/client/*.mjs` | Planned, reviewed edits listed in section 13.9. No assertion is deleted, skipped or weakened. |
+| `tests/packaging/test_client_asset_closure.py` | Add `workplace-story.js` to the expected inventory. The engine inventory assertion stays at two modules. |
+| `README.md`, notices | Describe the full-screen layout and fallback after implementation. `THIRD_PARTY_NOTICES.md` is unchanged because no third-party file is added. |
+
+Import graph: `app.js` statically imports `workplace-view.js` and `workplace-story.js`.
+`workplace-view.js` imports `evidence.js` and `workplace-story.js`.
+`workplace-story.js` imports `evidence.js` only.
+The host and scene import graph is unchanged.
+
+### 13.3 Engine and first-party recipe
+
+All of these exist in the vendored `three.module.js` or `three.core.js` (verified by text search at this gate, not by execution): `PerspectiveCamera`, `ACESFilmicToneMapping`, `Fog`, `PMREMGenerator`, `ExtrudeGeometry`, `Shape`, `InstancedMesh`.
+
+- `roundedBox(width, height, depth, radius, tier)` in `workplace-scene.js` returns a core `ExtrudeGeometry` built from a rounded-rectangle `Shape` with one bevel segment, cached per size key and registered once for disposal. On the compact tier it returns the shared `BoxGeometry`.
+- `buildStudioEnvironment(renderer)` builds an original procedural scene (a light box with three emissive panels), converts it once with core `PMREMGenerator.fromScene` at the smallest size that passes the art review (start at 128), disposes the generator and the source scene, and returns the render target for `scene.environment`. Standard tier only.
+- Lamps and the ring use `MeshBasicMaterial` with `toneMapped: false`, shared per colour.
+
+### 13.4 Types and signatures
+
+Additions only; everything in section 4 stays.
+
+```text
+GuideStep = { step: 1 | 2 | 3 | 4 | 5 | 6 | 7, name: StepName,
+	stationId: StationId, status: "ready" | "running" | "blocked",
+	blockedReason: string | null }
+StepName = "Read the complaints" | "Explain the cause" |
+	"Say what would prove you wrong" | "Try two fixes" | "Choose one" |
+	"Run the shift" | "See what happened"
+LocalGuidance = { activeStation: StationId | null, causeDraft: boolean,
+	falsifierDraft: boolean }
+// UI-only booleans. They steer the chip between steps 1 and 3 and are never
+// sent, stored or credited.
+
+Lamp = { stationId, tone: "fail" | "attention" | "pass" | "idle" | "unknown",
+	text: string }
+Slip = { ordinal: number, outputId: string,
+	verdict: "pass" | "fail" | "error" | "none", checkCount: number }
+SlipPlan = { runId, purpose, state, slips: Slip[], overflow: number }
+// At most 12 slips animate; overflow counts the rest, which settle together.
+
+SceneView additions = {
+	attention: StationId | null,
+	lamps: Lamp[],
+	slips: SlipPlan | null
+}
+
+guideStep(view: SceneView, local: LocalGuidance): GuideStep
+lampStates(view: SceneView): Lamp[]
+planSlips(run, outputs, checks): SlipPlan | null
+ownerLine(view: SceneView, guide: GuideStep): string | null
+customerBubble(view: SceneView, output): { label, text } | null
+reduceShiftReport(view: SceneView, run, checks, events, selection): ShiftReport
+logEntries(view: SceneView, run, checks, events, investigations,
+	selection): LogEntry[]
+ShiftReport = { runId, versionLabel, backupLabel, requests: { pass, fail,
+	error, none }, incidentsOpened, incidentsResolved, openBefore, openAfter,
+	complete: boolean }
+// Every count is a reduction of loaded public records. A missing link makes
+// the count null and the report says "unknown", never zero.
+LogEntry = { kind: "run" | "check" | "event" | "selection" | "note",
+	ids: string[], text: string, tone: "fail" | "pass" | "info" | "you",
+	recordedAt: string | null }
+
+SceneHandle.setInspector({ open: boolean, widthPx: number }): void
+SceneHandle.setAmbient(active: boolean): void
+SceneHandle.playReplay(plan: SlipPlan, label: "recorded" | "history"): boolean
+SceneHandle.settleReplay(): void
+SceneHandle.anchorPositions(): Record<StationId, { x, y, visible }>
+WorkplaceHost.setInspector({ open, widthPx }): void
+WorkplaceHost.noteInput(): void
+WorkplaceHost.replay(kind: "explicit"): void
+createWorkplaceHost({ ..., onAnchors }) // onAnchors(positions) after a
+	// drawn frame that changed camera or size; never per idle frame.
+```
+
+`slips` carries ordinals, output IDs and verdicts only.
+`request_text`, rationale, owner lines, cause and falsifier prose never enter `SceneView`.
+They are rendered by `app.js` into HTML from the controller's accepted state.
+
+### 13.5 Field ownership and motion eligibility
+
+**Step guide (`guideStep`).**
+Rules are evaluated in this order, Bellwether first; S42 adds board station maps.
+
+1. Shift state `closed`: step 7, station `next`.
+2. Loaded run with purpose `OPERATION`, the current shift ID and the operating selection ID: `QUEUED`, `RUNNING` or `CAPTURED` gives step 6 `running` at `service`; `FINALIZED` or `FAILED` gives step 7 at `ledger`.
+3. Operating selection of kind `LEARNER_CHOICE` whose `comparisonId` equals the current qualifying comparison ID: step 6 at `service`.
+4. Current qualifying comparison `COMPLETE` with at least one candidate `eligible === true`: step 5 at `compare`. With none eligible: step 4 `blocked`, with the first recorded blocking reason code shown in words.
+5. `investigation.count >= 1` for the current shift: step 4 at `compare`.
+6. Otherwise: step 3 at `investigate` when the investigate station is active and `causeDraft` is true; step 2 at `investigate` when it is active; step 1 at `customers`.
+
+The guide never reads `latest_run` as an operation, never treats a saved or frozen version as chosen, and never enables, disables or explains a command.
+Command availability stays with the existing handlers and their help text.
+An unknown or conflicting view gives step `null` behaviour: the chip says "Step unknown: recorded state unavailable" and the next action opens the current station.
+
+**Lamps (`lampStates`).** Text is always present; tone is never the only signal.
+
+| Station | Tone and text |
+|---|---|
+| `customers` | `attention` with "N complaints" when the loaded run has a `fail`, `error` or `none` slip; `idle` with "No recorded requests" when no output is loaded; `pass` only when the loaded run is the current selection's operation and every slip is `pass`. |
+| `service` | `idle` "No live version"; `attention` "Live, not yet run"; `pass` "Live, checks passed" only under the `customers` pass rule; `fail` "Live, checks failed"; `fail` "Invalidated" for an invalidated selection. |
+| `evaluator` | `idle` "Locked" always; the run's reported state in words while it is not terminal. |
+| `ledger` | `fail` "N open" when unresolved incidents exist; `idle` "None open"; `unknown` "Unavailable" when chain status is not VALID. |
+| `compare` | `attention` for `RESERVED` or `RUNNING`; `idle` otherwise; text "No score, no default" when complete. Never `pass`. |
+| `investigate`, `owner`, `next`, `repair`, `pipeline` | `idle` with existing status words; `attention` only when the guide points there. |
+
+**Customer bubble.** Shows `request_text` of the selected output of the loaded run, truncated to 140 characters with an ellipsis, labelled "Recorded request" plus the purpose in words ("operation", "test", "history").
+No output loaded means no customer bubble.
+
+**Owner line.** One entry from a frozen catalogue keyed by step, with only public counts substituted.
+Draft catalogue for review: step 1 "{n} customers in the last recorded run did not get what they asked for."; step 2 and 3 "Write down your own explanation first; I will not guess for you."; step 4 "Both versions get the same requests, so the comparison is fair."; step 5 "Nothing goes live until you choose and say why."; step 6 "The version you chose is the one that runs."; step 7 "{p} of {m} recorded requests passed the inspector's checks."; closed shift "Your choice carries into the next shift."
+The catalogue may not name a cause, a fix, a candidate, a version preference or a choice; section 13.9 checks this.
+
+**Slips (`planSlips`).** One slip per loaded output in ordinal order.
+The verdict joins checks through `selectEvidence`: any linked `fail` gives `fail`; otherwise any `error` gives `error`; otherwise at least one linked check, all `pass`, gives `pass`; no linked check gives `none`.
+`planSlips` returns null unless the run is terminal (`FINALIZED` or `FAILED`) and the checks read has been accepted for that run.
+
+**Motion eligibility.**
+
+- *Automatic replay* uses the existing `linked-consequence` continuity facts 1, 2 and 4 from section 5, applied to the run instead of a single event: same context, accepted after loading, purpose `OPERATION`, current shift and exact selection, terminal state, and the run ID absent from the previous accepted view's `slips`. It plays at most once per run ID per page session. Experiments, legacy evidence, first load, history, retry and page-cache return never auto-play.
+- *Explicit replay* is the "Replay recorded run" button in the inspector for the service station. It plays any loaded terminal operation run, labelled "Recorded replay of history", and changes no lamp, wall count or report.
+- The existing 320ms wall trace remains the final leg when a linked consequence arrives; a slip that reaches the wall without a linked event settles without a trace.
+- *Ambient* runs only when all hold: standard tier, visible, on screen, not expanded, not reduced motion, a replay is not running, and learner input was seen in the last 20 seconds. It animates only the ring under `attention` and lamps whose tone is `attention` or `fail`.
+- *Camera focus* runs only at 761px and wider, only on a station activation or inspector open or close, never on load, refresh or history.
+
+### 13.6 Layout, stations and interaction
+
+- **Stage.** `#workplace-world` fills the viewport below the hosting row. At 761px and wider the canvas fills the stage and every floating panel is inset 16px. The page never scrolls horizontally.
+- **Station tags.** The existing `[data-station]` buttons are positioned at `anchorPositions()`, are real buttons in a logical tab order (queue, service, inspector, wall, test bench, owner, then the rest), carry the lamp text, and are at least 44 by 44 CSS pixels including padding. When graphics are unavailable they sit at fixed fallback positions over `room.svg`. The canvas stays `aria-hidden` and outside the tab order.
+- **Inspector.** Opening a station opens `#station-panel` as a left-side panel, width `clamp(360px, 32vw, 480px)`, from below the step chip to the stage bottom. The scene receives `setInspector({open, widthPx})` and shifts its view offset so the room centre sits in the uncovered area. `#close-inspector` and Escape (outside text fields and editors) close it and return focus to the station's tag. While open, the inspector footer replaces the next-action panel.
+- **Expanded work.** `#expand-work` keeps its role: the inspector spans the stage with a 1120px reading column and the room suspends. `main[data-expanded]` and `aria-expanded` keep their values and meaning.
+- **Next action.** `#next-action-go` is labelled with the guide's step name and calls `activateStation(guide.stationId)`. It sends no request.
+- **Choose dialog.** `#open-choose-a` and `#open-choose-b` are enabled exactly when the existing select buttons would be. They call `showModal()` on `#choose-dialog`, which states the exact version, "Why we ask: only the version you choose goes live", and "The other version stays as your backup". Focus moves to `#selection-rationale`. No option is preselected. Cancel and Escape close without a request. The existing `chooseCandidate()` handler and server guard are unchanged.
+- **Shift report.** `#shift-report` opens once after an automatic replay ends or is skipped, and from a "Shift report" button at any time, labelled "Recorded history" when not fresh. It shows `reduceShiftReport` values and the permanent "Synthetic scenario: not real customers or revenue" line. Closing it changes nothing.
+- **Shift picker.** `#shift-picker` shows when the URL has no board parameter and from a "Change shift" button in the status bar. Each card's "Start shift" goes through the existing `switchWorkplace()` guard, so a dirty draft still blocks a switch. Cards show authored text only, with no live counts.
+- **Shift log.** `logEntries` from loaded public records, newest last, with full IDs, check reason codes and ledger sequence numbers. Filters: All, Checks, You. Collapsed by default below 761px.
+- **Main view text.** The status bar, chip, next action, tags and bubbles may show version labels such as `ver-0002` because they name what the learner chooses. They may not show content or requirement hashes, run, selection, check, investigation or output IDs, ledger sequence numbers, or API enum spellings. Those stay in the log and inspector.
+- **Narrow, 760px and below.** Order: hosting row, status bar, step chip, compact room (240px tall at 640px, 200px at 390px) with its tags as a two-column list below it, next action, inspector content, shift log. No camera motion, no drag, no pointer capture. Station activation scrolls and focuses the inspector through the existing helper.
+
+Call stacks added:
+
+```text
+Accepted publication -> projectWorkplace (+ guideStep, lampStates, planSlips)
+  -> host.publish -> scene.apply (lamps, ring, slip settle)
+  -> app.renderStory(view, guide) -> chip, next action, bubbles, tags, log
+
+Next-action click -> activateStation(guide.stationId) -> existing panel, focus,
+  URL -> publication. No request.
+
+Scene frame that moved camera or resized -> scene.anchorPositions
+  -> host onAnchors -> app positions tags and bubbles
+
+Eligible accepted terminal operation run -> host checks continuity and the
+  per-run played set -> scene.playReplay(plan, "recorded") -> slips travel and
+  stamp actual verdicts -> settle -> app opens #shift-report
+
+Open choose button -> dialog.showModal -> learner writes reason -> existing
+  select button -> chooseCandidate -> existing API guard -> accepted refresh
+```
+
+### 13.7 Lifecycle additions
+
+- The scene's single RAF also serves ambient and replay frames. `setAmbient(false)`, `setSuspended(true)`, reduced motion and `dispose()` cancel ambient and settle any replay at its final stamps.
+- The host calls `noteInput()` from pointer, key and touch listeners it owns on `#workplace-world`; ambient stops 20 seconds after the last input and resumes on the next one.
+- The environment render target, rounded geometry cache, lamp, ring, slip and stamp resources are registered once and disposed once. Partial initialization failure releases them.
+- A board switch, history navigation, reset or conflict settles any replay immediately and clears the per-run played set for that context.
+
+### 13.8 Budgets
+
+Section 9's evidence matrix, deferred targets and measurement recipe stay.
+This table replaces section 9's budget table.
+The values are proposed and unmeasured; whether the recipe fits them is [unknown] until S38 measures it.
+
+| Budget | Standard | Compact |
+|---|---|---|
+| Maximum DPR | 2.0, lowered so the canvas backing store stays at or below 4,200,000 pixels | 1.0 |
+| Triangles per settled frame | 120,000 | 40,000 |
+| Draw calls, including shadows | 120 | 60 |
+| Lighting | Hemisphere, one directional key, first-party PMREM environment | Hemisphere and key, no environment map |
+| Shadow maps | One 1024x1024 map, fixed room bounds | None; contact geometry |
+| Tone mapping and fog | ACES filmic, linear fog | Same |
+| Authored textures and post-processing | None | None |
+| Active-motion frame intervals, median / p95 | <=16.7ms / <=33.4ms | <=33.4ms / <=50ms, cap drawing at 30Hz |
+| Ambient drawing | <=30 frames per second while eligible; zero otherwise | Zero |
+| Estimated owned GPU allocation | <=96MiB | <=24MiB |
+
+Common budgets change as follows; the rest of section 9's list stays:
+
+- Additional engine bytes: zero for this revision. First-party scene, view, host, rooms and story JavaScript together <=180KiB uncompressed (60,695 bytes for the four scene modules at `94e651b`).
+- Idle frames: replace "zero scheduled idle graphics frames across 10 seconds after settling" with zero frames across 10 seconds when ambient is ineligible, and at most 30 frames per second when it is eligible.
+- Station activation to painted inspector content p95 <=100ms. The inspector's 200ms slide is CSS and never delays content paint or focus.
+- Camera focus ease <=480ms. Replay: each leg 400ms, stamp 240ms, slips staggered 250ms, whole replay <=6 seconds, skip at any time with "Show settled result".
+- Cold graphics-ready <=3 seconds desktop and <=4 seconds mobile, now including environment generation.
+
+### 13.9 Test plan additions and planned changes
+
+Each new check follows section 10's rule: pass clean, apply one in-memory fault, require the named assertion to fail, restore exactly, pass again.
+
+| Planned check | Observable assertion and the deliberate fault that must fail it |
+|---|---|
+| `guide_step_follows_recorded_state` | Ten literal public views give the exact step and station for every rule in 13.5. Separately: read `latest_run` instead of the operation run; treat the newest saved version as chosen; give step 5 when no candidate is eligible; drop the shift-ID match. Each fails its own case. |
+| `guide_never_credits_unsent_text` | Draft booleans change only the chip between steps 1 and 3; `investigation.count` and every control's `disabled` state are identical with and without drafts. Fault: let a cause draft advance to step 4. |
+| `next_action_navigates_only` | In each of the seven states, clicking `#next-action-go` opens the guide's station and records zero non-GET requests. Fault: wire the button to `#run-shift`. |
+| `owner_lines_never_suggest` | Every catalogue line, rendered with sample counts, contains no denylisted cause, fix or preference word and no candidate or version label. Scanner self-test: inject each needle into a rendered line and require detection. A reviewer also reads the catalogue; the word list alone is not proof. |
+| `main_view_has_no_internal_identifiers` | Serialized text of status bar, chip, next action, tags and bubbles matches none of the forbidden patterns in 13.6, enumerated from `schemas.py` Literal values and ID formats before writing the scanner. Self-test: inject each pattern into that serialized surface and require detection. |
+| `main_view_shows_one_of_each` | In each of the seven states: at most one customer bubble, at most one owner bubble, exactly one visible next action or inspector footer. Fault: render two owner lines. |
+| `slip_verdicts_match_checks` | Literal outputs and checks give the exact verdict per slip. Separately: missing checks become `pass`; `error` becomes `pass`; a `fail` is ignored when another check passes. Each fails. |
+| `replay_waits_for_recorded_results` | With checks delayed, a `FINALIZED` run starts no slip; `RUNNING` starts none. Fault: drop the terminal or checks-accepted guard, each separately. |
+| `replay_auto_only_on_continuous_operation` | First load, history, retry, page-cache return, a diagnostic and a comparison never auto-play; a continuous new operation plays once; a repeated poll does not replay. Remove each guard separately. |
+| `explicit_replay_is_labelled_history` | The button plays with the "Recorded replay of history" label and leaves lamps, wall counts and report unchanged. Faults: remove the label; let explicit replay open the report as fresh. |
+| `ambient_stops_where_required` | Five-second frame counts are zero for compact, hidden, offscreen, expanded, reduced motion, running replay and 20 seconds without input; eligible ambient stays <=30 frames per second. Remove each stop condition separately. |
+| `lamps_reflect_state_with_text` | Every row of the lamp table, with text present. Faults: `compare` shows `pass`; `service` shows `pass` for an experiment run; text omitted. |
+| `inspector_keeps_stations_readable` | At 1280x720 with the inspector open, every station tag's rectangle is inside the viewport and outside the inspector. Fault: skip the view offset. |
+| `choose_dialog_has_no_default` | Dialog opens with focus on the rationale, no option preselected; Cancel and Escape send zero requests; the existing guard still blocks an empty rationale. Faults: autofocus the confirm button; close-as-choose. |
+| `shift_report_matches_ledger` | Literal ledger and checks give the exact report counts; a missing link shows "unknown"; the synthetic line is present. Faults: count all events instead of linked ones; turn null into zero. |
+| `picker_uses_switch_guard` | A dirty draft blocks a picker switch exactly as the existing switch control does. Fault: call the slug change directly. |
+| `narrow_stack_reach_and_still_camera` | At 640x900 and 390x844, at 100% and 200% zoom: the stated order, no page overflow, 44px targets, next action reachable by tap and keyboard, Northline Acceptance, Rollout and Handover in reach, and the camera matrix unchanged across station picks. Fault: allow camera ease at compact width. |
+| `renderer_matches_tier_recipe` | Standard and compact report the camera type, tone mapping, environment presence, DPR cap and backing-store cap of 13.8. Faults: environment on compact; DPR above the cap. |
+| `local_asset_graph_is_closed` (extended) | Inventory includes `workplace-story.js`; the engine inventory remains exactly two modules. Fault: add an import from an examples path. |
+| `performance_receipt_meets_named_tier` (extended) | Adds ambient and replay samples to the recipe at both tiers. |
+
+Planned, reviewed changes to existing checks. Each change is recorded with the old assertion text in that slice's checkpoint:
+
+- `workplace_s31.mjs` `assertLayout`: the 1280px `sideBySide: workplace.right <= panel.left + 2` encodes layout A. Replace it with the `inspector_keeps_stations_readable` assertion. The 640px and 390px `stacked` assertion and the two-card and overflow assertions stay.
+- `workplace_s30.mjs` expanded editing: IDs and `main.dataset.expanded` are kept, so the same-node, value, focus, caret and `aria-expanded` assertions stay unchanged. Only the expected panel width context changes, and that value is not asserted today.
+- `workplace_s33.mjs` owner folder inside `#station-panel`: unchanged, because the inspector is the same node.
+- `workplace_s31.mjs`, `workplace_s32.mjs` and `workplace_browser.mjs` duration assertions (160, 180, 320) and their source anchors: unchanged, because those durations are kept.
+- `workplace_browser.mjs` has 79 served-source `replace` calls. Any anchor whose production statement changes (for example the scene's `return { apply, resize,` handle and `renderer.render(scene, camera);`) is updated to the new exact statement and its fault re-proven. Every `replace` gains an exactly-once assertion where it lacks one, so a changed anchor fails loudly instead of silently skipping its fault.
+- `workplace_s34.mjs` marker projection and canvas clip: the projection uses the scene camera, so it stays valid with a perspective camera; the clip size changes with the full-screen canvas and its baseline image is re-recorded with the old one retained.
+- `workplace_s35.mjs` narrow Northline reach: rerun under the new stack order; any new failure is recorded, never overwritten by a later pass.
+- `browser.mjs`, `gtm_browser.mjs`, `northline_browser.mjs` selection steps: open `#open-choose-a` or `#open-choose-b` before writing the rationale and pressing the existing select button. The selection, operation and inheritance assertions stay.
+
+How many existing checks break under the new layout is [unknown] until S36 runs them; the list above is from source reading.
+
+### 13.10 Least confident decisions
+
+1. **One shell for all three boards in S36.** User decision, 2026-10-21: all three boards. A shared layout cannot serve two shells without a permanent alternate shell, which Gate 2 forbids. So Stonebridge and Northline get the full-screen layout in S36 while the story layer stays Bellwether-only until S42. If S42 misses the deadline, those boards ship full-screen without step guidance. The alternative, keeping layout A for them, needs a temporary second layout and doubles the narrow-screen proof.
+2. **First-party rounded geometry and environment.** Avoids an import map and an acquisition, but the art may look less polished than the upstream addons. The S38 art review decides; the fallback is a recorded Gate 2 and 3 change.
+3. **The step guide is a planner.** Section 7 forbade a global workflow planner. The guide is allowed only because it navigates and never decides command eligibility. If a guide rule ever needs to know whether a command is allowed, stop and revisit.
+4. **Owner lines.** User decision, 2026-10-21: the seven drafted lines are OK as drafted; the S37 human read still applies. A word list cannot prove a line does not hint. The catalogue is short and reviewed by a person; any new line needs the same review.
+5. **Budgets.** User decision, 2026-10-21: approve as provisional; S38 measures the recipe before any art work. DPR 2 with an environment map on a full-viewport canvas may exceed 96MiB or the frame budget on the compact tier or lower hardware. The adaptive backing-store cap is the first lever; the second is dropping the environment map. Neither is measured.
+6. **Picker question copy.** User decision, 2026-10-21: reword. The Stonebridge card now reads "Promising leads sit unassigned past their response deadline. What is going wrong?", replacing "Is it the rules or the routing?", which named two places to look. Screen 10 of the v2 mockups is updated to match; no other Gate 1 text changes.
 
 [module]: https://raw.githubusercontent.com/mrdoob/three.js/0af9729d0c143a86a1d725d6e2c3ad83301f3f34/build/three.module.js
 [core]: https://raw.githubusercontent.com/mrdoob/three.js/0af9729d0c143a86a1d725d6e2c3ad83301f3f34/build/three.core.js
