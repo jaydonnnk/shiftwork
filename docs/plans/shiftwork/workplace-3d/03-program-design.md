@@ -618,6 +618,7 @@ implementation under that instruction.
 ## 13. Full-screen workplace revision, 2026-10-21
 
 Status: APPROVED 2026-10-21 in the user's batch approval of Gates 2 to 4.
+Scoped backtrack, 2026-10-21: S37's browser smoke showed rule 2 of section 13.5 sending a first-time Bellwether visitor to step 7, because the starter version's own operation run is already `FINALIZED` on a fresh shift. The user chose to limit rule 2 to a `LEARNER_CHOICE` selection and RE-APPROVED the revised rule 2 in chat the same day.
 This section turns [Gate 2 section 11](02-architecture.md#11-revision-for-the-full-screen-workplace-2026-10-21) decisions R1 to R6 into files, types, signatures, call stacks, timings, budgets and fail-capable checks.
 It was written from source inspection of `main` at `94e651b` and the re-approved Gate 1 mockups in [mockups/v2](mockups/v2/index.html).
 Nothing here was run, rendered or measured.
@@ -732,7 +733,7 @@ They are rendered by `app.js` into HTML from the controller's accepted state.
 Rules are evaluated in this order, Bellwether first; S42 adds board station maps.
 
 1. Shift state `closed`: step 7, station `next`.
-2. Loaded run with purpose `OPERATION`, the current shift ID and the operating selection ID: `QUEUED`, `RUNNING` or `CAPTURED` gives step 6 `running` at `service`; `FINALIZED` or `FAILED` gives step 7 at `ledger`.
+2. Operating selection of kind `LEARNER_CHOICE` and a loaded run with purpose `OPERATION`, the current shift ID and that selection's ID: `QUEUED`, `RUNNING` or `CAPTURED` gives step 6 `running` at `service`; `FINALIZED` or `FAILED` gives step 7 at `ledger`. A run of a `STARTER_BASELINE` selection never matches this rule; it is the recorded run that step 1 reads.
 3. Operating selection of kind `LEARNER_CHOICE` whose `comparisonId` equals the current qualifying comparison ID: step 6 at `service`.
 4. Current qualifying comparison `COMPLETE` with at least one candidate `eligible === true`: step 5 at `compare`. With none eligible: step 4 `blocked`, with the first recorded blocking reason code shown in words.
 5. `investigation.count >= 1` for the current shift: step 4 at `compare`.
