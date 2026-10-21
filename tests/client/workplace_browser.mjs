@@ -341,9 +341,9 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
         source=replaceOnce(source,end,replaceOnce(end,'\n});','\n  globalThis.__s29FocusDone=true;\n});'));
       }
       if(fault==='page-cache-omit-focus') {
-        const needle='editor.focus({ preventScroll: true });';
+        const needle='    editor.focus({ preventScroll: true });\n    editor.setSelectionRange(focus.start, focus.end, focus.direction);';
         assert.equal(source.split(needle).length-1,1,'Page-cache focus fault anchor changed');
-        source=replaceOnce(source,needle,'void 0;');
+        source=replaceOnce(source,needle,'    editor.setSelectionRange(focus.start, focus.end, focus.direction);');
       }
       if(fault==='startup-blocking-host') source="import './workplace-host.js';\n"+source;
       return send('Fetch.fulfillRequest',{requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/javascript'}],body:Buffer.from('const __s29Boot=performance.now();\n'+source+'\nglobalThis.__s29BootMs=performance.now()-__s29Boot; globalThis.__s29Refresh=refresh; globalThis.__s29Host=()=>workplaceHost; globalThis.__s29Latest=()=>latestPresentation; globalThis.__s30SyntheticTest=(state="COMPLETE")=>{const latest=globalThis.__s29Latest();if(latest?.kind!=="accepted")return false;const view=JSON.parse(JSON.stringify(latest.view));view.tests.diagnostic={id:"s30-lifecycle",shiftId:view.context.shiftId,kind:"DIAGNOSTIC",state:"RUNNING",evidenceClass:"TRUSTED_LOCAL",contextHash:"synthetic",outcomeStatus:null,candidates:[],observedRunId:null,trials:[{ordinal:1,candidateLabel:"A",runId:"synthetic-run",versionId:"synthetic-version",state,evidenceMode:"TRUSTED_LOCAL",missingEvidenceCount:0}]};globalThis.__s29Host().publish({kind:"accepted",view,generation:latest.generation,intent:latest.intent,reason:"synthetic-test"});return true;};\n').toString('base64')});
