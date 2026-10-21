@@ -3449,3 +3449,14 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - Root cause (zoom): the runner scrolled the station control with an instant `scrollIntoView` and sent Enter in the same frame. The product's smooth `scrollIntoView` then started while Chrome had not yet committed the instant offset, and Chrome dropped the smooth animation: the scroll log showed one `scroll` event at the instant position and no animation. With two frames between the instant scroll and Enter, 90 of 90 activations reached the panel, owner and repair included, so the product's own instant-then-smooth pair is not the cause. No person can focus a control and press Enter inside one frame.
 - Root cause (focus guard): `dc73a5b` added `owner.generation === state.generation`, which contains the fault needle `generation === state.generation`. The anchor count became 3, the assertion threw inside the request interceptor, `app.js` stayed paused and the page never reached ready.
 - Prevention rule: in browser runners, settle two animation frames after any programmatic scroll before dispatching input that starts a smooth scroll. Give every served-source fault needle enough surrounding context to stay unique, and rerun each omit row after adding code near an anchor.
+
+## 2026-10-22 S37 review fixes: positional test lookup, an unread latest_run and a guessed tag count
+- What happened: (1) adding a guide case shifted `GUIDE_CASES[7]`, so the blocked-reason assertion read the wrong case and failed; (2) the first F3 help branch keyed on `board.latest_run`, but after a comparison the latest run is the last EXPERIMENT trial, so the story journey still read the budget text; (3) the new fallback check required at least 6 station tags, and gtm has 4.
+- Root cause: index-based fixtures, an assumed board field meaning, and a threshold written from one board.
+- Prevention rule: look fixture cases up by name, not index. Before keying client text on `latest_run`, confirm which run the board returns in that state (`repo.get_latest_run` includes experiments). Derive per-board counts from each board's markup before asserting a floor.
+
+## 2026-10-22 S37 review continuation: diagnostic helper export
+
+- What happened: a temporary layout probe imported the private `load` helper from the fullscreen runner and failed before opening a browser.
+- Root cause: the call shape was read, but the export declaration was not checked.
+- Prevention rule: verify exports as well as signatures before importing repository helpers. Reuse the exported fallback check for the diagnostic load.
