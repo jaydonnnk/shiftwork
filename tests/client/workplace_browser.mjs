@@ -936,8 +936,11 @@ export async function runBrowser(base,out,fault = '',empty = false,slug='booksho
       }
       else {
         await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
-        assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state === 'ready'), 'Real WebGL2 room did not become ready');
-        assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')), 'Actual WebGL2 context missing');
+        // S37 review F7: a load flake under parallel workers has an unknown cause, so both messages carry the graphics state.
+        const graphicsState=()=>b.evaluate(()=>JSON.stringify({status:document.getElementById('graphics-status')?.dataset.state??null,text:document.getElementById('graphics-status')?.textContent.trim().slice(0,160)??null,
+          room:document.querySelector('.room')?.dataset.graphics??null,canvas:Boolean(document.querySelector('#workplace-canvas canvas'))}));
+        assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state === 'ready'), `Real WebGL2 room did not become ready at ${width}px: ${await graphicsState()}`);
+        assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')), `Actual WebGL2 context missing at ${width}px: ${await graphicsState()}`);
         assert.ok(await b.evaluate(()=>globalThis.__workplaceProbe?.triangles > 100), 'No real geometry was drawn');
         for(const [station,title] of slug==='northline'?NORTHLINE_STATIONS:slug==='gtm'?[['signals','Signal intake'],['rules','Qualification rules'],['workflow','Workflow bench'],['wall','Pipeline wall']]:[['customers','Customer evidence'],['evaluator','Independent evaluator'],['owner','Requirements'],['repair','Repair review'],['next','Next shift']]) {
           await b.evaluate(()=>document.getElementById('workplace-canvas').scrollIntoView({block:'center',behavior:'instant'}));
