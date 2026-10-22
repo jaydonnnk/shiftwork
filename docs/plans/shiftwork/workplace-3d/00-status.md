@@ -1,3 +1,7 @@
+**S41 ACCEPTED by the user, 2026-10-23.** The user answered "I accept and commit pls push to main." S41 is committed in focused batches on `shiftwork/slice-41` without a co-author trailer, fast-forwarded into main and main is pushed. S42 has no go-ahead.
+
+**Earlier: S41 verified locally, 2026-10-23.** On `shiftwork/slice-41` (nothing committed), Bellwether rests calm at 1280x720: one station tag and one narrator bubble, down from ten tags and two bubbles. Other tags appear on hover or keyboard focus and stay in the tab order; the narrow list and fallback still show every tag. Node 266, six browser faults and four Node faults each fail their own assertion, 152 source and 35 browser controls, three fullscreen boards, three journeys, perf with no misses, closure 9, and Python with only the known `port_dead`. Renderer 39/50 with the same 11 inherited records and messages as S40. Post-slice cleanup scan found nothing stale. Evidence, old anchor text and limits: [S41 checkpoint](s41-checkpoint-2026-10-23.md).
+
 **Gates 1 to 4 RE-APPROVED by the user, 2026-10-23, for the robot crew and declutter.** The user answered "I re-approve Gates 1 to 4 for the robot crew and declutter. Commit the docs, then start S41 on shiftwork/slice-41." The docs are committed on main without a co-author trailer and without a push. S41 started on `shiftwork/slice-41` under the same answer. S42 needs its own go-ahead.
 
 **Gate 1 BACKTRACKED by the user, 2026-10-23; Gates 1 to 4 revision drafted for batch re-approval.**

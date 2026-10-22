@@ -3649,3 +3649,31 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: the overflow comparison reached a later assist-denial assertion with a successful recorded-help response.
 - Root cause: its preview copied the workplace-control recorded_assist=True setup, while renderer baseline-transient uses the unassisted default. The comparison therefore did not reproduce the complete renderer configuration.
 - Prevention rule: copy the exact owning baseline's preview arguments, not a different suite's helper. The three distinct diagnostic setup failures are retained and this investigation is stopped incomplete. A corrected unassisted diagnostic driver is prepared in diagnosis-next but has not run. No failed comparison is counted as clean evidence.
+
+
+## 2026-10-23 S41: a story fixture expectation contradicted the rule it tested
+
+- What happened: `resting_tags_show_next_and_one_failure` failed clean on the "two failures" row: it expected only `service`, but the guide station was `service`, so the rule correctly added the next failing station, `ledger`.
+- Root cause: the expected value was written from intent, not by walking the guide and lamp functions for that fixture.
+- Prevention rule: before writing an expected row for a derived value, trace each input function on the literal fixture. Pick fault rows from a case where the mutation actually changes the output, and confirm the fault fails that row.
+
+
+## 2026-10-23 S41: a browser check reused a database another suite had advanced
+
+- What happened: the new calm-room check failed clean with the owner bubble instead of the customer bubble.
+- Root cause: it ran against the preview database that an earlier full `workplace_fullscreen.mjs` run had already moved to step 7 through its story journey.
+- Prevention rule: start every browser proof from a fresh preview database (`run.sh`/`fresh.sh` in the S41 receipts root). Never run a state-sensitive check on a server another suite has used.
+
+
+## 2026-10-23 S41: journey invocations without their required environment
+
+- What happened: `browser.mjs` stopped on EEXIST at `artifacts/slice21`, and `gtm_browser.mjs` and `northline_browser.mjs` stopped on ERR_INVALID_ARG_TYPE.
+- Root cause: the journeys need `SHIFTWORK_ARTIFACT_DIR` (a not-yet-created directory) and, for the away boards, `SHIFTWORK_TEST_INPUTS` pointing at the preview's `candidate-files.json`. This repeats the S40 artifact-root ownership entry.
+- Prevention rule: read a journey's first 20 lines for `process.env` and `process.argv` before invoking it, and pass a fresh `SHIFTWORK_ARTIFACT_DIR` child every time.
+
+
+## 2026-10-23 S41: a test observation anchor copied a signature the slice changed
+
+- What happened: the `host-retry-omit-epoch` clean control failed with "Timed-out host retry did not recover".
+- Root cause: `workplace_browser.mjs` instruments `createWorkplaceHost` by matching its full parameter list; adding `onHover` broke the anchor, the intercept threw, and the host module was never served.
+- Prevention rule: before changing a production signature, search `tests/client` for the old line text and update observation anchors in the same change, recording the old anchor in the checkpoint.
