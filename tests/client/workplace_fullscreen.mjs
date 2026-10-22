@@ -1,4 +1,4 @@
-// S36 to S38 full-screen workplace checks (Gate 3 section 13.9).
+// S36 to S39 full-screen workplace checks (Gate 3 section 13.9).
 // Each check passes clean; with --fault NAME the harness serves one in-memory
 // mutation of a production file and the run must fail at that check's named
 // assertion. Repository files are never modified.
@@ -14,6 +14,26 @@ import { chromePath } from './env.mjs';
 // A fault run executes only the check its expected assertion names, so one fault
 // cannot be masked by an earlier check that it also happens to break.
 export const FAULTS = {
+  'choose-confirm-focus': { file: '/app.js', needle: "  $('selection-rationale').focus();",
+    replacement: "  document.getElementById('select-candidate-a').disabled = false; document.getElementById('select-candidate-a').focus();",
+    expect: 'choose_dialog_has_no_default: rationale must receive focus' },
+  'choose-close-selects': { file: '/app.js', needle: "$('cancel-choose').addEventListener('click', () => $('choose-dialog').close());",
+    replacement: "document.getElementById('cancel-choose').addEventListener('click', () => { chooseCandidate('A'); document.getElementById('choose-dialog').close(); });",
+    expect: 'choose_dialog_has_no_default: Cancel sent a request' },
+  'report-null-zero': { file: '/workplace-story.js',
+    needle: "const count = type => countable ? runEvents.filter(event => event.event_type === type).length : null;",
+    replacement: "const count = type => countable ? runEvents.filter(event => event.event_type === type).length : 0;",
+    expect: 'shift_report_matches_ledger: missing link must display unknown' },
+  'dialog-tab-escapes': { file: '/app.js', needle: "    if (event.key !== 'Tab' || !dialog.open) return;",
+    replacement: '    return;', expect: 'dialog_keyboard: shift-report did not trap' },
+  'dialog-escape-inspector': { file: '/app.js', needle: "    if (event.key === 'Escape') event.stopPropagation();",
+    replacement: '', expect: 'dialog_keyboard: Escape changed the workbench' },
+  'report-loses-continuity': { file: '/app.js', needle: "  if (view.consistency !== 'conflict') reportPrevious = view;",
+    replacement: "  reportPrevious = view.consistency === 'conflict' ? null : view;",
+    expect: 'shift_report_matches_ledger: operation did not open its report' },
+  'choose-stale-close': { file: '/app.js', needle: "$('choose-dialog').addEventListener('close', () => {\n  if ($('choose-dialog').open) return;",
+    replacement: "$('choose-dialog').addEventListener('close', () => {",
+    expect: 'choose_dialog_has_no_default: stale close hid the reopened confirmation' },
   'skip-offset': { file: '/workplace-scene.js',
     needle: 'if(inset>0) camera.setViewOffset(width,height,-inset/2,0,width,height); else camera.clearViewOffset();',
     replacement: 'camera.clearViewOffset();', expect: 'inspector_keeps_stations_readable: the room is not centred in the uncovered stage' },
@@ -173,9 +193,16 @@ export const FORBIDDEN = [
 export const scan = text => FORBIDDEN.filter(rule => rule.pattern.test(text)).map(rule => rule.name);
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-// S38: read-only scene probes, served on every run after any fault patch. They
-// report renderer settings and lamp materials; they never change what is drawn.
-const INSTRUMENT = [{ file: '/workplace-scene.js', needle: 'return { apply, resize,',
+// Served controls follow fault patches. The S39 control inserts one conflicting
+// publication before accepted terminal checks, without racing the preview server.
+const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftReport(view) {',
+  replacement: `function updateShiftReport(view) {
+    if (globalThis.__s39ConflictArmed && view.run?.purpose === 'OPERATION' &&
+        ['FINALIZED', 'FAILED'].includes(view.run.state) && view.slips?.runId === view.run.id) {
+      globalThis.__s39ConflictArmed = false;
+      globalThis.__s39ConflictInserted = (globalThis.__s39ConflictInserted ?? 0) + 1;
+      updateShiftReport({ ...view, consistency: 'conflict' });
+    }` }, { file: '/workplace-scene.js', needle: 'return { apply, resize,',
   replacement: `globalThis.__s38Scene = {
     recipe: () => ({ tier, camera: camera.type, fov: camera.fov, toneMapping: renderer.toneMapping === THREE.ACESFilmicToneMapping ? 'ACESFilmic' : String(renderer.toneMapping),
       exposure: renderer.toneMappingExposure, environment: scene.environment ? { width: scene.environment.image.width, height: scene.environment.image.height } : null,
@@ -190,7 +217,7 @@ const INSTRUMENT = [{ file: '/workplace-scene.js', needle: 'return { apply, resi
 
 export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s3[678]-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S38 receipts must use /tmp/shiftwork-s36-*, /tmp/shiftwork-s37-* or /tmp/shiftwork-s38-*');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s3[6789]-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S39 receipts must use /tmp/shiftwork-s36-*, /tmp/shiftwork-s37-*, /tmp/shiftwork-s38-* or /tmp/shiftwork-s39-*');
   const patch = fault ? FAULTS[fault] : null;
   if (fault) assert.ok(patch, `Unknown S36 fault ${fault}`);
   await mkdir(out, { recursive: true });
@@ -273,7 +300,7 @@ export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = tru
     assert.deepEqual(harness, [], 'Fault harness error');
     if (patch) assert.ok(patched >= 1, `Fault ${fault} was never served`);
   }
-  return { send, evaluate, until, close, exceptions, commands, assertFaultServed };
+  return { send, evaluate, until, close, exceptions, commands, assertFaultServed, out };
 }
 
 async function load(browser, base, slug, width, height, hash = '') {
@@ -290,6 +317,8 @@ const settle = browser => browser.evaluate(() => new Promise(resolve => requestA
 const FIRST_STATION = { bookshop: 'customers', gtm: 'signals', northline: 'acceptance' };
 
 const CHECK_OF = { inspector_keeps_stations_readable: 'inspector', main_view_has_no_internal_identifiers: 'identifiers', narrow_stack_reach: 'narrow',
+  choose_dialog_has_no_default: 'dialogs', shift_report_matches_ledger: 'dialogs',
+  dialog_keyboard: 'dialogs',
   next_action_navigates_only: 'story', main_view_shows_one_of_each: 'story', guide_never_credits_unsent_text: 'story', picker_uses_switch_guard: 'picker',
   run_help_matches_disabled_run: 'story', step_chip_announces_only_changes: 'story', status_bar_stays_one_row: 'inspector',
   renderer_matches_tier_recipe: 'recipe', lamps_reflect_state_with_text: 'lamps',
@@ -483,7 +512,7 @@ const STORY_STEPS = [
   [1, 'Read the complaints', 'customers'], [2, 'Explain the cause', 'investigate'], [3, 'Say what would prove you wrong', 'investigate'],
   [4, 'Try two fixes', 'compare'], [5, 'Choose one', 'compare'], [6, 'Run the shift', 'service'], [7, 'See what happened', 'ledger'],
   [7, 'See what happened', 'next']];
-export async function storyJourney(browser, base) {
+export async function storyJourney(browser, base, { beforeChoose, beforeRun, afterRun } = {}) {
   await load(browser, base, 'bookshop', 1280, 720);
   const files = await Promise.all(['a', 'b'].map(label => readFile(`shiftwork/fixtures/artifacts/bookshop/compare_repair_${label}_service.py`, 'utf8')));
   const results = [];
@@ -579,6 +608,8 @@ export async function storyJourney(browser, base) {
     document.getElementById('run-comparison').click();
   }, ...files);
   await expectStep(STORY_STEPS[4], 'comparison complete');
+  if (beforeChoose) await beforeChoose();
+  await act(() => document.getElementById('open-choose-a').click());
   await act(() => { const node = document.getElementById('selection-rationale'); node.value = 'A answered the required tasks in the shared trial.'; node.dispatchEvent(new Event('input')); });
   await wait('candidate A to be selectable', () => !document.getElementById('select-candidate-a').disabled);
   await act(() => document.getElementById('select-candidate-a').click());
@@ -595,9 +626,152 @@ export async function storyJourney(browser, base) {
   await expectStep(STORY_STEPS[5], 'next shift with the inherited choice');
   await act(() => document.querySelector('#bookshop-stations [data-station="service"]').click());
   await wait('the run to be allowed', () => !document.getElementById('run-shift').disabled);
+  if (beforeRun) await beforeRun();
   await act(() => document.getElementById('run-shift').click());
   await expectStep(STORY_STEPS[6], 'operation finished');
+  if (afterRun) await afterRun();
   return { slug: 'bookshop', steps: results };
+}
+
+export async function dialogJourney(browser, base) {
+  await load(browser, base, 'bookshop', 1280, 720);
+  assert.equal(await browser.evaluate(() => document.querySelectorAll('dialog#choose-dialog, dialog#shift-report').length), 2,
+    'choose_dialog_has_no_default: both native dialogs must exist');
+  const key = async (key, modifiers = 0) => {
+    const code = { Tab: 9, Escape: 27 }[key];
+    await browser.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code: key, windowsVirtualKeyCode: code, modifiers });
+    await browser.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key, windowsVirtualKeyCode: code, modifiers });
+  };
+  const trap = async id => {
+    const tabs = await browser.evaluate(id => [...document.getElementById(id).querySelectorAll('button,textarea')]
+      .filter(node => !node.disabled && !node.hidden && node.getClientRects().length).map(node => node.id), id);
+    for (const reverse of [false, true]) {
+      await browser.evaluate((id, reverse) => { const nodes = [...document.getElementById(id).querySelectorAll('button,textarea')]
+        .filter(node => !node.disabled && !node.hidden && node.getClientRects().length); nodes[reverse ? 0 : nodes.length - 1].focus(); }, id, reverse);
+      await key('Tab', reverse ? 8 : 0);
+      assert.equal(await browser.evaluate(() => document.activeElement.id), tabs[reverse ? tabs.length - 1 : 0], `dialog_keyboard: ${id} did not trap ${reverse ? 'reverse ' : ''}Tab`);
+    }
+  };
+  const geometry = async id => {
+    const r = await browser.evaluate(id => { const d = document.getElementById(id), r = d.getBoundingClientRect();
+      return { x: r.x, y: r.y, right: r.right, bottom: r.bottom, width: r.width, viewport: [innerWidth, innerHeight],
+        overflow: d.scrollWidth > d.clientWidth + 1, scrim: getComputedStyle(d, '::backdrop').backgroundColor,
+        small: [...d.querySelectorAll('button')].filter(n => !n.hidden && !n.disabled && n.getClientRects().length).some(n => n.offsetWidth < 44 || n.offsetHeight < 44) }; }, id);
+    assert.ok(r.x >= 0 && r.y >= 0 && r.right <= r.viewport[0] + 1 && r.bottom <= r.viewport[1] + 1 && r.width <= 520 && !r.overflow && !r.small,
+      `dialog_keyboard: ${id} is clipped or has a small target: ${JSON.stringify(r)}`);
+    assert.equal(r.scrim, 'rgba(11, 18, 39, 0.55)', `dialog_keyboard: ${id} scrim`);
+    return r;
+  };
+  const receipts = [];
+  let imageNumber = 0;
+  const screenshot = async id => {
+    await browser.evaluate(id => { document.getElementById(id).scrollTop = 0; }, id);
+    const { data } = await browser.send('Page.captureScreenshot', { format: 'png' });
+    await writeFile(path.join(browser.out, `${id}-${imageNumber++}.png`), Buffer.from(data, 'base64'));
+  };
+  const workbench = () => ({ inspector: document.getElementById('workplace-world').dataset.inspector,
+    station: document.querySelector('[data-station][aria-pressed="true"]')?.dataset.station,
+    selection: document.getElementById('selection-note').textContent, ledger: document.getElementById('event-detail').textContent });
+  // Leave the controller untouched. This response-boundary control removes checks
+  // from a loaded run, so the rendered report must expose the missing causal link.
+  const noChecks = await browser.send('Page.addScriptToEvaluateOnNewDocument', { source: `const originalFetch = window.fetch; window.fetch = async (...args) => { const response = await originalFetch(...args); return String(args[0]).endsWith('/checks') ? new Response('[]', {status:200,headers:{'content-type':'application/json'}}) : response; };` });
+  await load(browser, base, 'bookshop', 1280, 720);
+  await browser.evaluate(() => document.querySelector('#incident-list button').click());
+  assert.ok(await browser.until(() => document.body.dataset.loadState === 'ready' && document.getElementById('inspection-bar').dataset.mode === 'history'), 'shift_report_matches_ledger: missing-link historical record did not load');
+  await browser.evaluate(() => { const b = document.getElementById('open-shift-report'); b.focus(); b.click(); });
+  assert.ok(await browser.until(() => document.getElementById('shift-report').open), 'shift_report_matches_ledger: manual report did not open');
+  assert.equal(await browser.evaluate(() => { const rows = [...document.querySelectorAll('#report-counts dt')]; return rows.find(n => n.textContent === 'Incidents opened by this run').nextElementSibling.textContent; }),
+    'unknown', 'shift_report_matches_ledger: missing link must display unknown');
+  await browser.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: noChecks.identifier });
+  await load(browser, base, 'bookshop', 1280, 720);
+  const checkReport = async fresh => {
+    const before = browser.commands.length;
+    const unchanged = await browser.evaluate(workbench);
+    if (!fresh) await browser.evaluate(() => { const b = document.getElementById('open-shift-report'); b.focus(); b.click(); });
+    assert.ok(await browser.until(() => document.getElementById('shift-report').open), 'shift_report_matches_ledger: operation did not open its report');
+    assert.equal(await browser.evaluate(() => document.getElementById('report-freshness').textContent), fresh ? 'New operation report' : 'Recorded history', 'shift_report_matches_ledger: freshness');
+    assert.equal(await browser.evaluate(() => document.getElementById('report-synthetic').textContent), 'Synthetic scenario: not real customers or revenue', 'shift_report_matches_ledger: synthetic line');
+    await trap('shift-report');
+    receipts.push({ report: await geometry('shift-report') });
+    await screenshot('shift-report');
+    await key('Escape');
+    assert.deepEqual(await browser.evaluate(workbench), unchanged, 'dialog_keyboard: Escape changed the workbench');
+    assert.ok(await browser.until(() => !document.getElementById('shift-report').open), 'dialog_keyboard: Escape did not close report');
+    assert.ok(await browser.until(() => document.activeElement.id === 'open-shift-report', 3000), 'dialog_keyboard: report focus did not return');
+    assert.equal(browser.commands.length, before, 'shift_report_matches_ledger: closing report sent a request');
+  };
+  await checkReport(false);
+  const result = await storyJourney(browser, base, { beforeChoose: async () => {
+    const beforeRapid = browser.commands.length;
+    await browser.evaluate(() => {
+      document.getElementById('open-choose-a').click();
+      globalThis.__s39RapidClosed = false;
+      document.getElementById('choose-dialog').addEventListener('close', () => { globalThis.__s39RapidClosed = true; }, { once: true });
+      document.getElementById('choose-dialog').close();
+      document.getElementById('open-choose-b').click();
+      const input = document.getElementById('selection-rationale'); input.value = 'A new reason after reopening'; input.dispatchEvent(new Event('input'));
+    });
+    assert.ok(await browser.until(() => globalThis.__s39RapidClosed), 'choose_dialog_has_no_default: rapid close event did not arrive');
+    assert.deepEqual(await browser.evaluate(() => { const b = document.getElementById('select-candidate-b'); return { open: document.getElementById('choose-dialog').open, hidden: b.hidden, disabled: b.disabled, shown: b.getClientRects().length > 0 }; }),
+      { open: true, hidden: false, disabled: false, shown: true }, 'choose_dialog_has_no_default: stale close hid the reopened confirmation');
+    await browser.evaluate(() => { globalThis.__s39RapidClosed = false; const d = document.getElementById('choose-dialog'); d.addEventListener('close', () => { globalThis.__s39RapidClosed = true; }, { once: true }); d.close(); });
+    assert.ok(await browser.until(() => globalThis.__s39RapidClosed && !document.getElementById('choose-dialog').open), 'choose_dialog_has_no_default: rapid reopened dialog did not close');
+    assert.equal(browser.commands.length, beforeRapid, 'choose_dialog_has_no_default: rapid cancellation sent a request');
+    for (const [width, height] of [[1280,720], [640,900], [390,844]]) {
+      await browser.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
+      for (const label of ['a', 'b']) {
+        const before = browser.commands.length;
+        await browser.evaluate(label => { const b = document.getElementById(`open-choose-${label}`); b.focus(); b.click(); }, label);
+        assert.equal(await browser.evaluate(() => document.activeElement.id), 'selection-rationale', 'choose_dialog_has_no_default: rationale must receive focus');
+        const read = await browser.evaluate(() => ({ title: document.getElementById('choose-title').textContent,
+          checked: document.querySelectorAll('#choose-dialog input:checked, #choose-dialog [aria-selected="true"]').length,
+          empty: document.getElementById('selection-rationale').value,
+          blocked: [...document.querySelectorAll('#choose-dialog [id^="select-candidate-"]')].every(b => b.disabled),
+          why: document.getElementById('choose-why').textContent, backup: document.getElementById('choose-backup').textContent }));
+        assert.equal(read.checked, 0, 'choose_dialog_has_no_default: an option is preselected');
+        assert.ok(read.blocked && read.empty === '', 'choose_dialog_has_no_default: empty rationale is not guarded');
+        assert.match(read.title, /^Make ver-\d+ the live version\?$/, 'choose_dialog_has_no_default: exact version missing');
+        assert.equal(read.why, 'Why we ask: only the version you choose goes live');
+        assert.equal(read.backup, 'The other version stays as your backup');
+        await browser.evaluate(() => { const f = document.getElementById('selection-rationale'); f.value = 'A reason that is cancelled'; f.dispatchEvent(new Event('input')); });
+        assert.deepEqual(await browser.evaluate(label => { const b = document.getElementById(`select-candidate-${label}`); return { hidden: b.hidden, disabled: b.disabled, shown: b.getClientRects().length > 0 }; }, label),
+          { hidden: false, disabled: false, shown: true }, 'choose_dialog_has_no_default: a reason must enable a visible confirmation');
+        await trap('choose-dialog');
+        receipts.push({ choose: await geometry('choose-dialog') });
+        await screenshot('choose-dialog');
+        await browser.evaluate(() => document.getElementById('cancel-choose').click());
+        await sleep(100);
+        assert.equal(browser.commands.length, before, 'choose_dialog_has_no_default: Cancel sent a request');
+        assert.equal(await browser.evaluate(() => document.activeElement.id), `open-choose-${label}`, 'dialog_keyboard: choose focus did not return');
+        await browser.evaluate(label => document.getElementById(`open-choose-${label}`).click(), label);
+        await browser.evaluate(() => { globalThis.__s39ChooseClosed = false; document.getElementById('choose-dialog').addEventListener('close', () => { globalThis.__s39ChooseClosed = true; }, { once: true }); });
+        await key('Escape');
+        assert.equal(browser.commands.length, before, 'choose_dialog_has_no_default: Escape sent a request');
+        assert.equal(await browser.evaluate(() => document.getElementById('choose-dialog').open), false, 'choose_dialog_has_no_default: Escape did not close');
+        assert.ok(await browser.until(label => globalThis.__s39ChooseClosed && document.activeElement.id === `open-choose-${label}`, 3000, label), 'dialog_keyboard: Escape did not return choose focus');
+      }
+      await checkReport(false);
+    }
+    await browser.send('Emulation.setDeviceMetricsOverride', { width:1280, height:720, deviceScaleFactor:1, mobile:false });
+  }, beforeRun: async () => {
+    await browser.evaluate(() => document.querySelector('#incident-list button').click());
+    assert.ok(await browser.until(() => document.body.dataset.loadState === 'ready' && document.getElementById('inspection-bar').dataset.mode === 'history'), 'shift_report_matches_ledger: prior-shift inspection did not load');
+    await checkReport(false);
+    assert.equal(await browser.evaluate(() => document.getElementById('report-title').textContent), 'Recorded operation report', 'shift_report_matches_ledger: a historical run was labelled as the current shift');
+    await browser.evaluate(() => document.getElementById('inspect-current').click());
+    assert.ok(await browser.until(() => document.body.dataset.loadState === 'ready' && document.getElementById('inspection-bar').dataset.mode === 'current'), 'shift_report_matches_ledger: current inspection did not return');
+    await browser.evaluate(() => { globalThis.__s39ConflictArmed = true; });
+  }, afterRun: async () => {
+    assert.equal(await browser.evaluate(() => globalThis.__s39ConflictInserted), 1, 'shift_report_matches_ledger: conflicting publication control did not run exactly once');
+    await checkReport(true);
+    await sleep(1200);
+    assert.equal(await browser.evaluate(() => document.getElementById('shift-report').open), false, 'shift_report_matches_ledger: duplicate publication reopened the report');
+    await browser.evaluate(() => document.getElementById('refresh').click());
+    await browser.until(() => document.body.dataset.loadState === 'ready');
+    assert.equal(await browser.evaluate(() => document.getElementById('shift-report').open), false, 'shift_report_matches_ledger: manual refresh opened a fresh report');
+    await checkReport(false);
+  } });
+  return { ...result, dialogs: receipts };
 }
 
 // S37: a picker start goes through the same switch guard as the board selector.
@@ -706,7 +880,7 @@ export async function lampsReflectStateWithText(browser, base) {
   return { check: 'lamps_reflect_state_with_text', tags: shown.tags };
 }
 
-export async function runAll(base, out, slug, fault = '', only = '') {
+export async function runAll(base, out, slug, fault = '', only = '', dialogZoom = 1) {
   const results = [];
   const run = async (name, zoom, fn, options = {}) => {
     if (only && only !== name) return;
@@ -729,6 +903,7 @@ export async function runAll(base, out, slug, fault = '', only = '') {
     await narrowStackReach(browser, base, slug, 640, 900, zoom), await narrowStackReach(browser, base, slug, 390, 844, zoom)]);
   if (slug === 'bookshop') {
     await run('picker', 1, browser => pickerUsesSwitchGuard(browser, base));
+    if (only === 'dialogs') await run('dialogs', dialogZoom, browser => dialogJourney(browser, base));
     // Last: the story journey records an investigation, a comparison, a choice and a run.
     await run('story', 1, browser => storyJourney(browser, base));
   }
@@ -740,7 +915,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const [base, out, slug = 'bookshop'] = process.argv.slice(2);
   const flag = name => { const index = process.argv.indexOf(name); return index === -1 ? '' : process.argv[index + 1]; };
   const fault = flag('--fault'), only = flag('--only') || (fault && CHECK_OF[FAULTS[fault]?.expect.split(':')[0]]) || '';
-  if (!fault) { console.log(JSON.stringify(await runAll(base, out, slug, '', only))); }
+  if (!fault) { console.log(JSON.stringify(await runAll(base, out, slug, '', only, Number(flag('--zoom') || 1)))); }
   else {
     // A fault run passes only when the named assertion fails.
     try { await runAll(base, out, slug, fault, only); console.error(`FAULT ${fault} NOT CAUGHT`); process.exit(1); }

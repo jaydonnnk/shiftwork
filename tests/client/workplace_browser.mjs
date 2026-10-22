@@ -19,7 +19,7 @@ export function replaceOnce(text, needle, replacement) {
 
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900,layoutFault=''}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
