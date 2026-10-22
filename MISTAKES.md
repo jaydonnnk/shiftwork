@@ -3605,3 +3605,47 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: the auxiliary summary assertion read pytest progress at 79 percent before the owned test process had completed. No commit was made; the eventual run reproduced only the known port_dead failure.
 - Root cause: a running write_stdin result was followed by a final-summary reader, and a later shell check masked the helper's exit status.
 - Prevention rule: require the owned process's exit code before reading final results. Make precommit verification one checked Python process so a trailing shell command cannot replace a failed check's exit status.
+
+
+## 2026-10-22 S40: bounded implementation errors
+
+- The first browser test had a nested-quote SyntaxError. Use template literals for served JavaScript and run node --check before launching the browser. The rejected log is red.log.
+- A replacement anchor matched two camera statements and refused before writing production. Copy a unique owning context; the corrected anchor includes scene.fog.
+- Host input wiring exposed 23 failing Node fixtures because their fake container lacked closest and their fake scene lacked the newly used methods. Extend the fixture to the actual DOM/scene contracts; preserve every existing assertion. Node260 then passes.
+- A 480ms ease failed the unchanged inspector centering check at its existing observation time. Keep the readability assertion and choose an allowed 180ms ease. The first failure and inspector-180 restored receipt are retained.
+- Review and a failing intermediate-frame test found destination near/far planes clipping the starting room at 761px. Enclose both camera endpoints during the ease, then settle the destination planes; prove both opening and closing frames, not only final layout.
+
+
+## 2026-10-22 S40: stale served-fault disposal anchor
+
+- What happened: omit-dispose-raf could not mount its faulted room after ambient/camera settlement extended dispose.
+- Root cause: the fault still matched the old two-line disposal prefix.
+- Prevention rule: enumerate every source anchor for a changed production statement, update the exact prefix, preserve the named assertion and fault semantics, and require caught/restored proof. The rejected log is retained; no check was skipped.
+
+
+## 2026-10-23 S40: 200-percent supplemental readiness
+
+- What happened: the new narrow-camera supplement waited for graphics at native200% while its room was below the viewport, so the wrong-failure guard stopped it.
+- Root cause: the new helper lacked the existing fullscreen helper's scroll-into-view readiness precondition.
+- Prevention rule: wait for the workbench, scroll the room onscreen, then wait for graphics before camera assertions. Preserve the rejected narrow-2 receipt; do not accept its readiness failure as the camera mutant being caught.
+
+
+## 2026-10-23 S40: old-source diagnostic wrapper
+
+- What happened: the old-client comparison preview could not start.
+- Root cause: create_preview seeds through TestClient, so adding FastAPI middleware afterwards raises Cannot add middleware after an application has started. The first reader also inspected the completed new-client case rather than the failed old-client case.
+- Prevention rule: wrap the seeded app with an outer ASGI callable for disposable source overrides; include the case name and exit code in startup errors. Preserve both rejected diagnostic roots and never treat their incomplete comparisons as evidence.
+
+
+## 2026-10-23 S40: diagnostic artifact-root ownership
+
+- What happened: the generic browser diagnostic refused its output directory with EEXIST.
+- Root cause: the wrapper created a case directory for preview logs, then passed that same existing directory to browser.mjs, which owns creation of its artifact root.
+- Prevention rule: separate the existing case/log parent from a not-yet-created browser artifact child. Inspect this helper contract before invocation, retain rejected roots, and require actual browser assertions rather than an exit code from failed setup.
+
+
+## 2026-10-23 S40: renderer diagnostic assist configuration
+
+- What happened: the overflow comparison reached a later assist-denial assertion with a successful recorded-help response.
+- Root cause: its preview copied the workplace-control recorded_assist=True setup, while renderer baseline-transient uses the unassisted default. The comparison therefore did not reproduce the complete renderer configuration.
+- Prevention rule: copy the exact owning baseline's preview arguments, not a different suite's helper. The three distinct diagnostic setup failures are retained and this investigation is stopped incomplete. A corrected unassisted diagnostic driver is prepared in diagnosis-next but has not run. No failed comparison is counted as clean evidence.
