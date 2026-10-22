@@ -290,10 +290,8 @@
         </section>
         <section class="panel-section">
           <h3>Choose the version to operate</h3>
-          <p id="selection-note" class="help-text">A complete eligible comparison is required.</p>
-          <div class="field"><label for="selection-rationale">Why this exact version?</label><textarea id="selection-rationale" rows="2" maxlength="2000"></textarea></div>
-          <div class="panel-actions"><button id="select-candidate-a" class="button secondary" disabled>Choose A</button><button id="select-candidate-b" class="button secondary" disabled>Choose B</button></div>
-          <p id="selection-error" class="denial" role="status"></p>
+          <p id="selection-note" class="help-text" tabindex="-1">A complete eligible comparison is required.</p>
+          <div class="panel-actions"><button id="open-choose-a" class="button secondary" disabled>Choose A…</button><button id="open-choose-b" class="button secondary" disabled>Choose B…</button></div>
         </section>
       </section>
       <section id="next-view" hidden>
@@ -338,7 +336,7 @@
       </div>
     </aside>
     <details id="shift-log" class="float-panel shift-log">
-      <summary>shift.log <span id="shift-log-count" class="log-count">Loading</span></summary>
+      <summary>shift.log <span id="shift-log-count" class="log-count">Loading</span><button type="button" id="open-shift-report" class="change-shift">Shift report</button></summary>
       <div class="log-filters" role="group" aria-label="Show log entries"><button type="button" data-log-filter="all" aria-pressed="true">All</button><button type="button" data-log-filter="check" aria-pressed="false">Checks</button><button type="button" data-log-filter="you" aria-pressed="false">You</button></div>
       <ol id="shift-log-list" class="shift-log-list"><li class="log-empty">Loading recorded entries.</li></ol>
       <details id="shift-details" class="shift-details">
@@ -363,6 +361,30 @@
     </details>
     </div>
   </main>
+  <dialog id="choose-dialog" class="decision-dialog" aria-labelledby="choose-title" aria-describedby="choose-why choose-backup">
+    <p class="dialog-kicker">Your decision</p>
+    <h2 id="choose-title">Choose a live version</h2>
+    <p id="choose-why">Why we ask: only the version you choose goes live</p>
+    <p>Earlier runs and their consequences stay recorded as they happened.</p>
+    <div class="field"><label for="selection-rationale">Why this exact version?</label><p id="rationale-help">Required. Your reason stays with this choice.</p><textarea id="selection-rationale" rows="3" maxlength="2000" aria-describedby="rationale-help"></textarea></div>
+    <h3>What happens to the other version</h3>
+    <p id="choose-backup">The other version stays as your backup</p>
+    <p id="choose-backup-version"></p>
+    <div class="panel-actions"><button id="select-candidate-a" class="button primary" disabled hidden>Choose A</button><button id="select-candidate-b" class="button primary" disabled hidden>Choose B</button><button type="button" id="cancel-choose" class="button secondary">Cancel</button></div>
+    <p id="selection-error" class="denial" role="status"></p>
+  </dialog>
+  <dialog id="shift-report" class="decision-dialog" aria-labelledby="report-title" aria-describedby="report-synthetic">
+    <p id="report-freshness" class="dialog-kicker">Recorded history</p>
+    <h2 id="report-title">Shift report</h2>
+    <p id="report-state"></p>
+    <dl id="report-counts" class="report-counts"></dl>
+    <h3>Your decision</h3>
+    <p id="report-decision"></p>
+    <p id="report-rationale"></p>
+    <p id="report-completeness"></p>
+    <p id="report-synthetic">Synthetic scenario: not real customers or revenue</p>
+    <button type="button" id="close-shift-report" class="button secondary">Back to the room</button>
+  </dialog>
   <noscript><p class="noscript">JavaScript is required to load your shift. No scenario values are shown without the API.</p></noscript>
 </body>
 </html>

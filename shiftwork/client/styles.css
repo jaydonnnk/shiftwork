@@ -501,14 +501,35 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
 @media (min-width: 761px) {
   .step-chip { position: absolute; top: calc(16px + var(--status-h, 64px) + 12px); left: 50%; transform: translateX(-50%); z-index: 5; width: max-content; max-width: min(420px, calc(100% - 32px)); }
   .next-action { position: absolute; left: 16px; bottom: 16px; z-index: 5; max-width: 360px; }
-  .world[data-inspector="open"] .next-action { display: none; }
   .bubble { position: absolute; z-index: 4; left: var(--bubble-x, 8px); top: var(--bubble-y, 8px); }
 }
+  .world[data-inspector="open"] .next-action { display: none; }
 @media (min-width: 761px) {
   main[data-expanded="true"] .step-chip { position: static; transform: none; margin: 0 auto; }
 }
 /* S37 shift picker (visual-spec 11.2): a full-stage overlay with authored copy only. */
 .change-shift { min-height: 44px; padding: 6px 10px; border: 1px solid #a9b6c4; border-radius: 8px; background: transparent; color: #eef2f6; font-size: 13px; }
+.decision-dialog { box-sizing: border-box; width: calc(100% - 32px); max-width: 520px; max-height: calc(100dvh - 32px); margin: auto; padding: 24px; overflow: auto; overflow-wrap: anywhere; background: #121b27; color: #eef2f6; border: 1px solid #2a3a4f; border-radius: 12px; box-shadow: 0 16px 56px #07111c66; }
+.decision-dialog::backdrop { background: rgb(11 18 39 / 55%); }
+.decision-dialog h2 { margin: 8px 0 16px; font-size: 24px; line-height: 1.25; }
+.decision-dialog h3 { margin: 20px 0 8px; font-size: 16px; }
+.decision-dialog p { margin: 8px 0 16px; line-height: 1.5; }
+.decision-dialog .dialog-kicker { color: #edbd68; font-size: 13px; font-weight: 650; margin: 0; }
+.decision-dialog .field { margin: 20px 0; }
+.decision-dialog label { color: #eef2f6; }
+.decision-dialog #rationale-help, #report-completeness { color: #a9b6c4; font-size: 14px; }
+.decision-dialog textarea { width: 100%; max-width: 100%; min-height: 90px; background: #0b1420; color: #eef2f6; border-color: #a9b6c4; }
+.decision-dialog .button { min-height: 44px; min-width: 44px; white-space: normal; }
+.decision-dialog .button.secondary { background: transparent; color: #eef2f6; border-color: #a9b6c4; }
+.decision-dialog .panel-actions { flex-wrap: wrap; }
+.decision-dialog :focus-visible { outline: 3px solid #edbd68; outline-offset: 3px; }
+.report-counts { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 16px; margin: 20px 0; }
+.report-counts dt { color: #a9b6c4; }
+.report-counts dd { margin: 0; font-weight: 650; }
+#report-synthetic { color: #edbd68; border-top: 1px solid #2a3a4f; padding-top: 12px; font-size: 14px; }
+#open-shift-report { margin-left: 12px; font-family: system-ui, sans-serif; }
+@media (max-width: 480px) { .decision-dialog { padding: 16px; } .decision-dialog h2 { font-size: 21px; } }
+@media (max-width: 320px) { .report-counts { grid-template-columns: 1fr; gap: 4px; } .report-counts dd { margin-bottom: 10px; } }
 .shift-picker { position: absolute; inset: 0; z-index: 8; overflow-y: auto; padding: 16px; background: #0b1227f2; color: #eef2f6; }
 .shift-picker-sheet { max-width: 1120px; margin: 0 auto; }
 .shift-picker h2 { margin: 8px 0 4px; font-size: 24px; color: #eef2f6; }

@@ -1,6 +1,6 @@
 import { bodyBytes, selectEvidence } from './evidence.js';
 import { projectWorkplace } from './workplace-view.js';
-import { statusBarValues, logEntries, guideStep, ownerLine, customerBubble, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
+import { statusBarValues, logEntries, guideStep, ownerLine, customerBubble, reduceShiftReport, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
 
 const $ = id => document.getElementById(id);
 const state = { board: null, loadedShiftId: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
@@ -15,6 +15,8 @@ let workplaceHost = null, latestPresentation = null, hostEpoch = 0, hostLoading 
 let inspection = { mode: 'current', historicalRunId: null };
 let expandedWork = false;
 let inspectorOpen = false, inspectorCover = 0, logFilter = 'all';
+let reportPrevious = null, chooseOpener = null, reportOpener = null;
+const reportedRuns = new Set();
 const REPORTED_TEST_STATES = new Set(['RESERVED', 'RUNNING', 'COMPLETE', 'FAILED']);
 function renderTestBench(view) {
   const label = $('test-tag');
@@ -226,6 +228,9 @@ function publishPresentation(reason) {
   const context = { board: state.slug, shiftId: state.loadedShiftId, inspection: { ...inspection } };
   let publication;
   if (['error', 'context', 'history', 'page-lifecycle'].includes(reason)) {
+    reportPrevious = null;
+    if ($('choose-dialog').open) $('choose-dialog').close();
+    if ($('shift-report').open) $('shift-report').close();
     publication = { kind: 'reset', context, reason };
     text('workplace-state', reason === 'error' ? 'Recorded state unavailable. Refresh to inspect verified evidence.' : 'Loading recorded context.');
     resetConsequenceWall(reason === 'error' ? 'Recorded state unavailable.' : 'Loading recorded context.');
@@ -244,6 +249,7 @@ function publishPresentation(reason) {
     renderTestBench(view);
     renderConsequenceWall(view);
     renderStory(view);
+    updateShiftReport(view);
     const verdicts = view.evidence?.checks.map(check => `${check.verdict}: ${check.reasonCode ?? 'recorded check'}`).join('; ');
     text('workplace-state', view.consistency === 'conflict' ? 'Recorded reads disagree. Inspect the workbench; current labels are unavailable.' :
       `${view.context.inspection.mode === 'history' ? 'Historical inspection. ' : 'Current inspection. '}Live version: ${view.operating ? `${view.operating.versionId} (${view.operating.validity})` : 'None selected'}. Saved version: ${view.saved.latestVersionId ?? 'None'}. ` +
@@ -253,6 +259,68 @@ function publishPresentation(reason) {
   workplaceHost?.publish(publication);
 }
 const LOG_TONES = { fail: 'Fail', pass: 'Pass', info: 'Record', you: 'You' };
+const reportContext = view => JSON.stringify([view.context.board, view.context.shiftId, view.context.inspection, view.operating?.selectionId]);
+function updateShiftReport(view) {
+  const previous = reportPrevious;
+  if (view.consistency !== 'conflict') reportPrevious = view;
+  const run = view.run;
+  const key = `${view.context.board}:${run?.id}`;
+  if (!previous || view.consistency === 'conflict' || reportContext(previous) !== reportContext(view) ||
+      view.context.inspection.mode !== 'current' || run?.purpose !== 'OPERATION' || run.shiftId !== view.context.shiftId ||
+      run.selectionId !== view.operating?.selectionId || !['FINALIZED', 'FAILED'].includes(run.state) ||
+      view.slips?.runId !== run.id || previous.slips?.runId === run.id || reportedRuns.has(key)) return;
+  reportedRuns.add(key);
+  showShiftReport(view, true);
+}
+function showShiftReport(view, fresh = false) {
+  const report = reduceShiftReport(view, state.run, state.checks, state.events, state.board?.operating_selection);
+  const count = value => value == null ? 'unknown' : String(value);
+  const list = $('report-counts');
+  list.replaceChildren();
+  for (const [label, value] of [
+    ['Requests passed', report.requests.pass], ['Requests failed', report.requests.fail],
+    ['Requests errored', report.requests.error], ['Requests without checks', report.requests.none],
+    ['Open incidents before', report.openBefore], ['Open incidents after', report.openAfter],
+    ['Incidents opened by this run', report.incidentsOpened], ['Incidents resolved by this run', report.incidentsResolved],
+  ]) list.append(element('dt', label), element('dd', count(value)));
+  text('report-freshness', fresh ? 'New operation report' : 'Recorded history');
+  text('report-title', view?.run?.shiftId && view.run.shiftId !== view.context.shiftId ? 'Recorded operation report'
+    : state.board?.latest_shift ? `Shift ${state.board.latest_shift.seq} report` : 'Shift report');
+  text('report-state', !view?.run ? 'No accepted operation record is loaded.' :
+    view.run.purpose !== 'OPERATION' ? 'This inspection is a test, not an operation.' :
+    view.run.state === 'FAILED' ? 'The operation failed. These are its recorded results; no success is implied.' :
+    ['FINALIZED', 'FAILED'].includes(view.run.state) ? 'Results from the recorded operation.' : 'The operation is unfinished. Results are unknown.');
+  text('report-decision', `Run version: ${report.versionLabel ?? 'unknown'}. Backup: ${report.backupLabel ?? 'unknown'}.`);
+  const choice = state.board?.operating_selection;
+  text('report-rationale', choice?.id === state.run?.selection_id && choice.kind === 'LEARNER_CHOICE'
+    ? `Your reason: ${choice.rationale}` : 'No learner decision is linked to this inspected run.');
+  text('report-completeness', report.complete ? 'Loaded records are linked. These results do not measure learning.' : 'Evidence is incomplete. Unknown counts are not zero.');
+  const dialog = $('shift-report');
+  if (!dialog.open) {
+    reportOpener = fresh ? $('open-shift-report') : document.activeElement;
+    dialog.showModal();
+    $('close-shift-report').focus();
+  }
+}
+function openChoose(label) {
+  if ($(`open-choose-${label.toLowerCase()}`).disabled) return;
+  const candidate = state.comparison?.candidates.find(item => item.label === label);
+  if (!candidate) return;
+  chooseOpener = $(`open-choose-${label.toLowerCase()}`);
+  $('selection-rationale').value = '';
+  text('selection-error', '');
+  text('choose-title', `Make ${candidate.artifact_version_id} the live version?`);
+  const backup = state.comparison.candidates.find(item => item.label !== label);
+  text('choose-backup-version', `${backup?.artifact_version_id ?? 'The other tested version'} stays saved. You can test it again later; that test never changes history.`);
+  for (const key of ['A', 'B']) {
+    const button = $(`select-candidate-${key.toLowerCase()}`);
+    button.hidden = key !== label;
+    button.textContent = `Make ${candidate.artifact_version_id} live`;
+  }
+  renderCompare();
+  $('choose-dialog').showModal();
+  $('selection-rationale').focus();
+}
 function renderShiftLog(entries) {
   const list = $('shift-log-list');
   text('shift-log-count', `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`);
@@ -1245,8 +1313,14 @@ function renderCompare() {
   const rationale = $('selection-rationale').value.trim();
   const eligible = label => compare?.outcome?.status === 'COMPLETE' &&
     compare.outcome.eligibility.some(item => item.candidate_label === label && item.eligible);
-  for (const label of ['A', 'B']) $('select-candidate-' + label.toLowerCase()).disabled =
-    state.pending || !shift || shift.state !== 'open' || selectedHere || !eligible(label) || !rationale;
+  for (const label of ['A', 'B']) {
+    const blocked = state.pending || !shift || shift.state !== 'open' || selectedHere || !eligible(label);
+    $('open-choose-' + label.toLowerCase()).disabled = blocked;
+    $('select-candidate-' + label.toLowerCase()).disabled = blocked || !rationale;
+    const candidate = compare?.candidates.find(item => item.label === label);
+    text('open-choose-' + label.toLowerCase(), candidate ? `Choose ${candidate.artifact_version_id}…` : `Choose ${label}…`);
+  }
+  if (selectedHere && $('choose-dialog').open) $('choose-dialog').close();
   text('selection-note', selectedHere ? `Choice ${board.operating_selection.id} is recorded. Selected ${board.operating_selection.selected_version_id} · ${board.operating_selection.selected_content_hash}; retained ${board.operating_selection.retained_alternative_version_id}. Saving or testing does not change it.`
     : !compare ? 'Run a qualifying comparison first.'
     : compare.outcome?.status !== 'COMPLETE' ? 'The comparison must finish complete and comparable before a choice.'
@@ -1823,11 +1897,11 @@ function navigate(view, userIntent = true) {
   activateStation({ board: 'service', contract: 'owner', investigate: 'investigate', compare: 'compare', next: 'next', return: 'next', customers: 'customers', repair: 'repair' }[view] ?? 'service', userIntent);
   if (userIntent && state.board) $('station-panel').focus({ preventScroll: true });
 }
-async function act(action) {
+async function act(action, operation = false) {
   if (state.pending) return;
   if (inspection.mode !== 'current') { text('load-message', 'Return to the current shift before acting.'); return; }
   state.pending = true; renderBoard();
-  try { await action(); inspection = { mode: 'current', historicalRunId: null }; publishPresentation('history'); await refresh(); }
+  try { await action(); inspection = { mode: 'current', historicalRunId: null }; publishPresentation(operation ? 'operation' : 'history'); await refresh(); }
   catch (error) { await refresh(); text('load-message', error.message); }
   finally { state.pending = false; if (state.board) { renderBoard(); renderCompare(); } }
 }
@@ -1837,7 +1911,7 @@ $('run-shift').addEventListener('click', () => {
   if (!shiftId) return;
   activateStation('customers');
   act(() => api(`/shifts/${encodeURIComponent(shiftId)}/runs`, { method: 'POST',
-    body: JSON.stringify({ client_request_id: requestId('operation') }) }));
+    body: JSON.stringify({ client_request_id: requestId('operation') }) }), true);
 });
 $('refresh').addEventListener('click', () => { inspection = { mode: 'current', historicalRunId: null }; publishPresentation('history'); refresh(); });
 $('append-investigation').addEventListener('click', appendInvestigation);
@@ -1857,6 +1931,35 @@ $('discard-draft-edit').addEventListener('click', () => {
 $('freeze-candidate-a').addEventListener('click', () => freezeCandidate('A'));
 $('freeze-candidate-b').addEventListener('click', () => freezeCandidate('B'));
 $('run-comparison').addEventListener('click', runComparison);
+$('open-choose-a').addEventListener('click', () => openChoose('A'));
+$('open-choose-b').addEventListener('click', () => openChoose('B'));
+$('cancel-choose').addEventListener('click', () => $('choose-dialog').close());
+$('choose-dialog').addEventListener('cancel', event => { event.preventDefault(); $('choose-dialog').close(); });
+$('choose-dialog').addEventListener('close', () => {
+  if ($('choose-dialog').open) return;
+  $('selection-rationale').value = '';
+  for (const key of ['a', 'b']) $(`select-candidate-${key}`).hidden = true;
+  if (state.board) renderCompare();
+  (chooseOpener?.isConnected && !chooseOpener.disabled ? chooseOpener : $('selection-note')).focus({ preventScroll: true });
+});
+$('open-shift-report').addEventListener('click', event => {
+  event.preventDefault(); event.stopPropagation();
+  showShiftReport(latestPresentation?.kind === 'accepted' ? latestPresentation.view : null);
+});
+$('close-shift-report').addEventListener('click', () => $('shift-report').close());
+$('shift-report').addEventListener('cancel', event => { event.preventDefault(); $('shift-report').close(); });
+$('shift-report').addEventListener('close', () => (reportOpener?.isConnected ? reportOpener : $('open-shift-report')).focus({ preventScroll: true }));
+for (const id of ['choose-dialog', 'shift-report']) {
+  const dialog = $(id);
+  dialog.addEventListener('keydown', event => {
+    if (event.key === 'Escape') event.stopPropagation();
+    if (event.key !== 'Tab' || !dialog.open) return;
+    const controls = [...dialog.querySelectorAll('button, textarea')].filter(node => !node.disabled && !node.hidden);
+    const first = controls[0], last = controls.at(-1);
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  });
+}
 $('treatment-input').addEventListener('input', () => renderCompare());
 async function shiftAction(path) {
   if (state.pending || !path) return;
