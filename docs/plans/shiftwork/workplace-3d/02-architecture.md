@@ -418,3 +418,26 @@ The dialog has no preselected option, and closing it chooses nothing.
 [webgl]: https://threejs.org/docs/pages/WebGLRenderer.html
 [dispose]: https://threejs.org/manual/pages/how-to-dispose-of-objects.html
 [license]: https://github.com/mrdoob/three.js/blob/master/LICENSE
+
+## 12. Revision for the robot crew and declutter, 2026-10-23
+
+Status: APPROVED 2026-10-23 in the user's batch re-approval of Gates 1 to 4: "I re-approve Gates 1 to 4 for the robot crew and declutter. Commit the docs, then start S41 on shiftwork/slice-41."
+Gate 1 was backtracked on 2026-10-23 to add an original robot crew and a calmer resting room.
+Sections 6 and 11 stay in force except where this section changes them.
+
+**R7. A fourth bounded motion class: crew movement.**
+Section 6's exclusion of "a walking avatar" is narrowed: the learner's bot walks, but only in response to the learner's own station choice, along a fixed authored floor route, and never under free or player-steered control.
+Staff bots stay at fixed spots and narrate through the existing HTML bubble.
+Crew idle motion (bob, blink, head turn) is ambient under R3 and stops by the same rules.
+A walk, once started by a station choice, finishes or snaps to its end on suspend, reduced motion or disposal.
+The compact tier and reduced motion show bots at their settled spots with no travel.
+
+**R8. Crew geometry is first-party.**
+Bots are built from core Three.js primitives in a new client module, consistent with R5.
+No model file, texture, addon or vendor file is added, and nothing is taken from the agentic-factory repository, which publishes no licence.
+
+**R9. Resting tags are a presentation filter only.**
+Which tags show at rest is derived in the client from the existing guide step and lamp states.
+It never changes a station's availability, tab order, accessible name or the command rules.
+
+Unchanged: the scene still renders only from the accepted projection; no bot reads protected data, issues a request or decides anything.

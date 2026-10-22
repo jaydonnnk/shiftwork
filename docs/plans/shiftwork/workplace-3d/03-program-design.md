@@ -913,3 +913,58 @@ How many existing checks break under the new layout is [unknown] until S36 runs 
 [core]: https://raw.githubusercontent.com/mrdoob/three.js/0af9729d0c143a86a1d725d6e2c3ad83301f3f34/build/three.core.js
 [package]: https://raw.githubusercontent.com/mrdoob/three.js/0af9729d0c143a86a1d725d6e2c3ad83301f3f34/package.json
 [license]: https://raw.githubusercontent.com/mrdoob/three.js/0af9729d0c143a86a1d725d6e2c3ad83301f3f34/LICENSE
+
+## 14. Robot crew and declutter revision, 2026-10-23
+
+Status: APPROVED 2026-10-23 in the user's batch re-approval of Gates 1 to 4: "I re-approve Gates 1 to 4 for the robot crew and declutter. Commit the docs, then start S41 on shiftwork/slice-41."
+This section turns [Gate 2 section 12](02-architecture.md#12-revision-for-the-robot-crew-and-declutter-2026-10-23) into files, signatures, rules and fail-capable checks.
+It was written from source inspection of `main` at `70cb2f7` and the [crew mockup](mockups/v2/17-robot-crew.html), which runs the real Bellwether geometry with a prototype crew.
+The mockup was rendered in a local browser at 1280x800; nothing in the product was changed, measured or tested.
+
+### 14.1 Files
+
+| File | Change |
+|---|---|
+| `workplace-crew.js` (new) | `createCrew({ THREE, room, tier, reducedMotion, register })` builds the bots and returns `{ group, walkTo(stationId \| null), tick(dt, t, ambient), settle(), speakerAnchor(role), youAnchor(), dispose() }`. Pure route planner `routeBetween(graph, from, to)` is exported for tests. |
+| `workplace-rooms.js` | Each room gains `crew: { home, nodes, edges, stands, staff }`: the learner bot's home node, floor nodes, hand-checked clear edges, one stand node per station and fixed staff spots with roles (`owner`, `customer`). |
+| `workplace-scene.js` | Adds the crew group, calls `tick` from the single RAF, exposes `setOpenStation(stationId \| null)` and `crewAnchors()`, adds the crew to suspend, reduced-motion and dispose paths, and adds `onHover(stationId \| null)` from the existing pointer raycast. |
+| `workplace-host.js` | Forwards `setOpenStation` and `onHover`; adds `crew` positions to the `onAnchors` payload. |
+| `workplace-story.js` | New pure `restingTags(view, guide, lamps)` and `narrator(view, guide, output)`. |
+| `app.js`, `index.html`, `styles.css` | Tags carry `data-resting`; the single bubble is placed at the speaker bot; a "You" chip follows the learner bot; the 3D hint card is removed at 761px and wider. |
+| `workplace-assets.json` | Closure inventory gains `workplace-crew.js`. |
+
+### 14.2 Rules
+
+1. **Resting tags (R9).** At 761px and wider, `restingTags` returns the guide's `stationId` plus at most one other station: the first lamp with tone `fail` in tag order. Every other tag has `data-resting="false"` and is visually hidden until pointer hover (via `onHover` or the tag itself), keyboard focus, or its station being the open one. Hidden tags stay in the tab order with the same accessible name. At 760px and below, the two-column tag list is unchanged and shows every station. The fallback over `room.svg` shows every tag.
+2. **One narrator bubble.** `narrator` returns one `{ role, text, stationId }`: the customer's recorded request (the existing `customerBubble`) at step 1, otherwise the existing `ownerLine`. A null line shows no bubble. The bubble carries the speaker station's name and lamp text, and that station's separate tag is suppressed while the bubble shows. The owner line catalogue is unchanged, so `owner_lines_never_suggest` still covers every line.
+3. **Learner bot.** `walkTo(stationId)` is called only from `setOpenStation`, which the app calls only from `activateStation` and inspector close. The route is the shortest path on the room graph from the bot's current node. Speed 2.6 room units per second, so a walk takes at most about 3 seconds. On arrival the bot faces the station and plays a small typing gesture while the inspector stays open. On close it walks home. A new choice mid-walk replans from the nearest node.
+4. **Staff bots.** Fixed spots per room: Bellwether has the owner beside the owner desk and up to three customers at the queue; Stonebridge has a revenue owner at the pipeline wall and one requester at signal intake; Northline has the co-op owner at the brief counter and one rider at booking intake. Staff bots never walk. Customer count shows at most three and is decoration, never a count of records.
+5. **Motion limits.** Walk bob at most 0.09 units; idle bob at most 0.02 units on a cycle no faster than 0.35 Hz; blink 120ms every 2 to 5 seconds; antenna lamp brightness varies by at most 40%. Idle motion runs only when `ambientEligible()` is true. Compact tier, reduced motion and suspend place every bot at its settled spot with no travel and no idle motion.
+6. **Honesty.** No bot carries a verdict, slip, score, version label or result. No bot has an "AI" label. The "You" chip is the only text on the learner bot.
+7. **Resources.** Crew geometries and materials are registered once through the scene's existing `register` sets and disposed once. Partial initialization releases them.
+
+### 14.3 Budgets
+
+Section 13.8 budgets stay. The crew adds at most 5 bots of about 30 meshes each at the standard tier. If a receipt misses a budget, merge each bot's static meshes into one geometry per material before dropping anything visible.
+
+### 14.4 New fail-capable checks
+
+| Check | Fails when |
+|---|---|
+| `resting_tags_show_next_and_one_failure` | more than two tags rest-visible, or the guide station or the first failing station is hidden, across the seven steps |
+| `hidden_tags_stay_reachable` | a resting-hidden tag leaves the tab order, loses its name, or is not visible on focus |
+| `one_narrator_bubble` | two bubbles show, or the speaker station's tag shows beside its bubble |
+| `bot_walks_only_on_learner_choice` | any publication, poll, replay or ambient tick moves the learner bot off its node without `setOpenStation` |
+| `crew_routes_stay_clear` | a route segment between graph nodes intersects any station furniture footprint, for every room |
+| `crew_settles_without_motion` | reduced motion, compact tier or suspend leaves a bot mid-route or bobbing |
+| `crew_disposed_once` | a crew geometry or material survives dispose, or is disposed twice, over 30 board switches |
+| `crew_carries_no_result_text` | the "You" chip or any bot label contains a verdict, version, score or "AI" |
+
+Each check gets one mutation that makes it fail, recorded in the slice checkpoint.
+Existing checks change only where listed here: the S37 bubble assertions move from two bubbles to one, and the S38 tag-overlap cells measure rest-visible tags plus the hovered tag; the old assertion text is recorded in the checkpoint.
+
+### 14.5 Least confident decisions
+
+1. **Freezing idle crew after 20 seconds.** Reusing the ambient stop rule keeps the frame budget and honesty rule simple, but the room goes still where the reference keeps moving. The alternative, a crew-only always-on idle, needs its own budget.
+2. **Hidden tags.** Fewer tags may slow discovery for a first-time visitor; the hover reveal and the 3D lamps carry that load. The five-question comprehension target remains unmeasured.
+3. **Robots as the client's people.** Toy robots standing in for bookshop customers is a style choice; the bubble still names them as customers.

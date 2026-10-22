@@ -370,3 +370,25 @@ Animation never gates a command or delays a verdict. Hidden, expanded or offscre
 - Read every owner line and picker question for hints at a cause, a fix or a choice.
 - Inspect the light room with labels hidden and with the inspector open at 1280px, and compare against screens 11 to 16. Screenshots of the stand-in picture do not pass art review.
 - Measure contrast of tags, bubbles and panels over the light room, and over the static fallback.
+
+## 12. Robot crew and declutter, 2026-10-23
+
+Status: APPROVED 2026-10-23 in the user's batch re-approval of Gates 1 to 4: "I re-approve Gates 1 to 4 for the robot crew and declutter. Commit the docs, then start S41 on shiftwork/slice-41."
+Reference: [crew mockup](mockups/v2/17-robot-crew.html).
+This section replaces section 11.1's exclusion of a robot or character; the rest of section 11.1's exclusion list stands.
+
+**Look.** Voxel-like, friendly and small: a box body, a cream head with a dark screen face and two glowing eyes, short legs, swinging arms and an antenna lamp. About 1.1 metres tall in room units after scale, so a bot reads at a glance at 1280px.
+
+| Bot | Body | Trim | Lamp | Extra |
+|---|---|---|---|---|
+| You | amber `#edbd68` | navy `#202c40` | amber | "YOU" chip above |
+| Owner | navy `#202c40` | room wood | paper | flat cap |
+| Customers | muted teal, clay, lavender | slate `#3b4656` | paper | slightly smaller |
+
+Away rooms reuse the same bot with their room palette for trim.
+
+**Calm room at rest.** At 1280px, the room shows the next-action tag, at most one failure tag, one bubble and the "You" chip. The 3D hint card is removed; the room label stays available to assistive technology. Tags fade in over 180ms on hover or focus.
+
+**Camera.** The fit uses the floor footprint, not the wall tops, so the room fills more of the screen; wall tops may crop under the status bar, as in the reference.
+
+Motion values are in Gate 3 section 14.2 rule 5.
