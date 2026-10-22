@@ -2,8 +2,13 @@
 const assemblies = [];
 const box = (material, position, size, station = null) => assemblies.push({ material, position, size, station });
 box('floor', [0,-.15,0], [12,.3,9]);
-box('navy', [0,1.6,-4.5], [12,3.2,.18]);
-box('navy', [-6,1.6,0], [.18,3.2,9]);
+box('wall', [0,1.6,-4.5], [12,3.2,.18]);
+box('wall', [-6,1.6,0], [.18,3.2,9]);
+// Navy trim (visual spec 11.3): cap rails on the cut wall edges and skirting at the floor.
+box('edge', [0,3.24,-4.5], [12.04,.08,.24]);
+box('edge', [-6,3.24,0], [.24,.08,9.04]);
+box('edge', [0,.08,-4.38], [11.8,.16,.06]);
+box('edge', [-5.88,.08,0], [.06,.16,8.8]);
 box('edge', [0,-.3,4.5], [12,.2,.2]);
 box('edge', [6,-.3,0], [.2,.2,9]);
 // A back-wall bookcase has open shelves and irregular muted book groups.
@@ -162,19 +167,27 @@ for(const x of [-.6,0,.6]) workshopPart('paper',[x,1.45,-3],[.16,.55,.5],'handov
 workshopPart('steel',[4.7,.6,.35],[1.1,.12,.85],'acceptance');
 workshopPart('paper',[4.7,.71,.35],[.7,.06,.5],'acceptance');
 
+// Visual spec section 11.4: one fixed perspective pose shared by the three rooms.
+const studioPose = { fov: 30, azimuth: 45, elevation: 39, margin: .08 };
+
 export const roomDefinitions = {
   bookshop: {
-    bounds: { min: [-6,-.5,-4.6], max: [6,3.3,4.6] }, cameraTarget: [0,.8,0],
-    materials: { floor:'#a89477', navy:'#202c40', edge:'#263443', wood:'#b99a70',
-      shelf:'#6c5943', paper:'#e7deca', enamel:'#48617a', screen:'#91acb9' },
+    bounds: { min: [-6,-.5,-4.6], max: [6,3.3,4.6] }, cameraTarget: [0,.8,0], camera: studioPose, fog: '#efe6d4',
+    // Visual spec section 11.3: warm light wood, cream walls, navy trim and console bodies.
+    materials: { floor:'#d6c3a0', wall:'#efe6d4', navy:'#202c40', edge:'#202c40', wood:'#c7a77a',
+      shelf:'#8a7052', paper:'#f6f0e2', enamel:'#202c40', screen:'#91acb9' },
     assemblies, stationAnchors: { customers: [-4,1,2.5], service: [0,1,1.1], evaluator: [3.3,1,-.2],
       investigate: [0,1.05,-2.5], compare: [.7,1.1,3], ledger: [4,1,-2.8],
       owner: [-3.7,1,-2.4], repair: [-4.2,.8,-.2], next: [4,1.2,2.5] },
+    // One status lamp per station, on the front corner of its furniture.
+    lampAnchors: { customers: [-3.15,1.25,3], service: [.85,1.25,1.6], evaluator: [4.15,1.25,.3],
+      investigate: [.95,1.25,-2], compare: [1.85,1.2,3.5], ledger: [5.3,2.75,-2.65],
+      owner: [-2.85,1.25,-1.95], repair: [-3.6,1.03,.1], next: [4.8,1.75,2.6] },
     anchors: { candidateA: [-.15,1.02,3], candidateB: [1.55,1.02,3], plate: [0,1.2,1.25],
       wall: [4,1.9,-2.55], handover: [4,1.5,2.2], later: [2.2,1.2,3] },
   },
   gtm: {
-    bounds: { min: [-6,-.5,-4.6], max: [6,3.6,4.6] }, cameraTarget: [0,.8,0],
+    bounds: { min: [-6,-.5,-4.6], max: [6,3.6,4.6] }, cameraTarget: [0,.8,0], camera: studioPose, fog: '#202c40',
     materials: {floor:'#8b959f', navy:'#202c40', edge:'#263443', metal:'#61758a',
       pin:'#d7bb75', lane:'#35495e', paper:'#e7deca', screen:'#91acb9'},
     assemblies: routing,
@@ -184,7 +197,7 @@ export const roomDefinitions = {
       owner:[2.65,1.45,-1.82], clock:[3.7,2,-1.82], handoff:[4.5,.7,.2]},
   },
   northline: {
-    bounds:{min:[-6,-.5,-4.6],max:[6,3.3,4.6]},cameraTarget:[0,.8,0],
+    bounds:{min:[-6,-.5,-4.6],max:[6,3.3,4.6]},cameraTarget:[0,.8,0],camera:studioPose,fog:'#28494a',
     materials:{floor:'#87978c',wall:'#28494a',edge:'#263443',steel:'#657b7c',wood:'#b4a17e',tool:'#d3d9cf',paper:'#e7deca',screen:'#91acb9'},
     assemblies:workshop,
     stationAnchors:{brief:[-4,1.4,2.5],map:[-3.7,1.6,-2.2],bench:[0,1,.6],acceptance:[3.5,1.6,-1.5],rollout:[3.8,1.2,2.2],handover:[0,1.4,-3]},
