@@ -1,6 +1,6 @@
 # S40 checkpoint, 2026-10-22
 
-S40 local implementation on `shiftwork/slice-40` from verified published main `cb39217f06a5eade46c16ca99fa083eef91dfe31`. Accepted by the user on 2026-10-23; publication is authorized and pending verification. The final 2026-10-23 section is authoritative; earlier blockers and pending-approval entries are historical. Local implementation, the slice branch and disposable previews/receipts were explicitly authorized. No S41/S42, install, download, credential, provider, deployment, protected-fixture edit or Git publication is authorized.
+S40 local implementation on `shiftwork/slice-40` from verified published main `cb39217f06a5eade46c16ca99fa083eef91dfe31`. Accepted by the user on 2026-10-23; publication verification is recorded below. The final 2026-10-23 section is authoritative; earlier blockers and pending-approval entries are historical. Local implementation, the slice branch and disposable previews/receipts were explicitly authorized. No S41/S42, install, download, credential, provider, deployment, protected-fixture edit or Git publication is authorized.
 
 ## Implementation and decisions
 
@@ -103,7 +103,7 @@ All 96 protected fixture-path files, including the two archived copies, are unch
 
 Review URL: http://127.0.0.1:8366/?board=bookshop#board. Its fresh disposable database is /tmp/shiftwork-s40-20261022/review.db. Owned process metadata is in previews.json. The initial owned 8365 preview was stopped; S39 review previews were untouched. At widths at least 761 CSS pixels, recent pointer, key or touch input enables standard-tier quiet motion. The normal compact layout stays still.
 
-The next boundary is the exact acceptance question: "Is S40 accepted, or what should change?" Publication needs separate authorization.
+At that local-verification stop, the next boundary was the S40 acceptance question. The later acceptance and publication sections supersede that stop.
 
 ## Acceptance and publication authority, 2026-10-23
 
@@ -117,3 +117,11 @@ The accepted renderer result stays 38/50; the additional 778px fallback overflow
 Before publication, the branch and local/remote main were reverified at cb39217f06a5eade46c16ca99fa083eef91dfe31, with no existing remote slice-40 ref and an empty index. Node 260, closure nine and the accepted audit passed again. The scoped Python recheck is recorded under /tmp/shiftwork-s40-ship-20261023/. No installer is invoked.
 
 The fresh shipping Python process completed before commits: 1454 passed, one skipped, two warnings and only the known port_dead failure in163.89s. Node260, closure9 and the accepted audit pass. Client hashes and all96 protected paths remain unchanged. Receipts: /tmp/shiftwork-s40-ship-20261023/.
+
+## Verified S40 publication, 2026-10-23
+
+Six focused commits, 961fe065 through 76264973, were created on shiftwork/slice-40 with no co-author trailers. The slice branch was published and main fast-forwarded from cb39217f to 762649732d8b9481972b867fa0289e60a2007cd7. Main was pushed. git ls-remote then confirmed both remote refs at that implementation and acceptance tip; main and origin/main had left/right counts 0/0, with a clean working tree and index.
+
+Node260 and closure9 passed on the merged main, with exact client hash equality to the accepted source. The precommit scoped Python run completed with 1454 passed, one skipped, two warnings and only the known port_dead failure. All96 protected fixture-path files remain unchanged. No installer or excluded provider, credential, deployment, protected edit or next-slice action occurred.
+
+This documentation-only publication receipt follows the verified implementation tip without changing the tested client. Resolve the latest tip live; final exact refs, commit inventory and preservation proof are recorded outside the repository under /tmp/shiftwork-s40-ship-20261023/final-publication.json. The slice branch is retained and published. S41 and S42 remain unauthorized.
