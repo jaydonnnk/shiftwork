@@ -3508,3 +3508,100 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: a full `pytest` run included `tests/packaging/test_clean_env_install_and_run.py`, which builds a temporary venv and runs `pip`/`uv pip sync` from the lockfile, although S38 had no install authority. It then failed on the browser receipt-root guard because pytest's temporary directory is not an approved `/tmp/shiftwork-s*` root.
 - Root cause: the S37 baseline command (`pytest --ignore=tests/packaging`, plus the closure file alone) was not copied; a broader command was typed instead.
 - Prevention rule: copy the previous checkpoint's exact pytest command. Run `tests/packaging/test_client_asset_closure.py` alone, and run the clean-install test only under an explicit install authorization.
+
+## 2026-10-22 S39: missing-link setup and a rejected patch
+
+- What happened: the missing-checks browser control expected an unknown incident count on the starter's latest run, but that run had no ledger events, so zero was correct. Separately, an accidental placeholder anchor for this log caused a multi-file patch to be rejected before any file changed.
+- Root cause: the control assumed the latest run owned the starter's open incidents; the log patch was assembled without its real tail anchor.
+- Prevention rule: inspect actual event-to-run links before constructing an absence control. Load an incident's historical run to exercise its missing-check branch. Copy the exact log tail before appending a patch. Preserve the failed receipts.
+
+## 2026-10-22 S39: native dialog focus and a repeated purpose anchor
+
+- What happened: the clean browser control found Tab leaving a native dialog, so native showModal alone did not meet the required keyboard trap. A new report-purpose mutation also matched three source statements and was rejected by the exactly-once guard.
+- Root cause: focus wrapping was left to the browser; the mutation reused a short purpose predicate shared with the guide and lamp logic.
+- Prevention rule: prove forward and reverse Tab using real keyboard input and stop dialog Escape from reaching inspector handlers. Anchor a mutation with its owning declaration, not a shared predicate. Keep both rejected receipts.
+
+## 2026-10-22 S39: an intermediate conflicting read erased report continuity
+
+- What happened: the completed operation did not automatically open its report. A served-only trace showed an intermediate RUNNING publication with conflicting board/ledger reads, followed by a linked FINALIZED publication; the report had discarded its prior accepted baseline.
+- Root cause: the new controller set its previous view to null on a conflict, unlike the existing host, which retains the last consistent reference while refusing to animate the conflicting view.
+- Prevention rule: preserve the last consistent report baseline across an intermediate conflicting read; never act on the conflicting publication. Context, history, error and page lifecycle resets still clear continuity. Prove the terminal report on the real operation journey.
+
+## 2026-10-22 S39: absent-run optional chaining
+
+- What happened: the added absent-run test threw instead of returning unknown counts. `view?.slips?.runId === run?.id` compared two undefined values and then read `view.slips`; the event filter had the same undefined-equality pattern.
+- Root cause: identity comparisons used optional chaining without first establishing that the run existed.
+- Prevention rule: require the run object before comparing run identities or reducing its events. Keep a literal absent-run case with an administrative event as well as the normal linked-run cases.
+
+## 2026-10-22 S39: context budget checked too late
+
+- What happened: the live session usage was checked only after it reached 233,293 input tokens, beyond the repository's 175k limit. The run was stopped with an undiagnosed 200% failure and unfinished regression; the owned previews and verification process tree were terminated.
+- Root cause: a rough overhead estimate was trusted instead of checking the available token-count record at the first phase boundary, and tool reads repeatedly exceeded their useful output range.
+- Prevention rule: consult the live token-count indicator before broad reads and each phase, hand off near 150k, and keep each tool result bounded. AGENTS.md section 6 already contains the permanent context rule; this incident does not authorize extending the session. Preserve the failed receipt and unfinished checklist.
+
+## 2026-10-22 S39 continuation: 200% exposed duplicate action areas
+
+- What happened: the unchanged story assertion found both the next-action panel and inspector footer at 200% zoom, before the dialog checks began. A geometry probe reproduced it with current and S38 CSS at a 640x360 CSS viewport.
+- Root cause: the existing inspector replacement rule was scoped to desktop widths, although Gate 3 sections 13.6 and 13.9 require exactly one visible action area while the inspector is open.
+- Prevention rule: apply that replacement rule at every width. Retain the unchanged assertion and prove it at 200%, along with narrow reach and the existing both-actions fault.
+
+## 2026-10-22 S39 continuation: report focus checked before the native close event
+
+- What happened: the new 200% dialog check observed the inspector immediately after Escape and failed its report-focus assertion.
+- Root cause: native dialog closure restores native focus synchronously but queues its close event. A focus trace showed the existing handler then restoring open-shift-report. The check awaited only the open flag, not that event's result.
+- Prevention rule: await the expected focus with a bounded deadline. Keep the exact target and zero-request assertions; do not add a product workaround for event timing.
+
+
+## 2026-10-22 S39 continuity fault depended on preview timing
+
+- What happened: the report-loses-continuity served fault was not caught, although the actual operation journey passed. The earlier conflicting multi-read publication did not occur on this run.
+- Root cause: the new check depended on server scheduling to enter the conflicting-read branch.
+- Prevention rule: use the same deterministic conflicting-publication control in clean and fault runs. Insert it once immediately before accepted terminal checks, assert that the control ran once, and retain the unchanged report-opening assertion. The rejected receipt is preserved in /tmp/shiftwork-s39-resume-2/fullscreen/report-loses-continuity/.
+
+
+## 2026-10-22 S39 historical report used the current shift heading
+
+- What happened: the actual shift-2 journey inspected run-0001 from shift 1, and the dialog titled its records "Shift 2 report". The new historical-report check failed on that exact heading before the repair.
+- Root cause: the title always used board.latest_shift.seq, even during an older run inspection.
+- Prevention rule: check the inspected run's shift identity before using the current shift number. Use "Recorded operation report" for older-shift records, and retain the real cross-shift history control. The diagnostic and rejected test are preserved under /tmp/shiftwork-s39-resume-2/historical-diagnose/ and historical-red/.
+
+
+## 2026-10-22 S39 complete GTM journey left the automatic report open
+
+- What happened: the complete GTM journey passed its operation and inheritance checks, then the keyboard reach assertion remained on Pipeline wall instead of Signal intake. The failure PNG shows report focus after Enter dismissed the still-open native modal.
+- Root cause: the pre-S39 journey continued by scripted clicks without taking the new report's close action, so the later keyboard check still interacted with that modal.
+- Prevention rule: after independently verifying the operation, wait for its authorized automatic report, close it through its button and wait for both closure and focus return before continuing. Apply the same setup to Northline. All existing selection, operation, inheritance and keyboard assertions remain unchanged. Preserve the failed /tmp/shiftwork-s39-resume-2/journeys/ receipts.
+
+
+## 2026-10-22 S39 progress readers consumed incomplete receipts
+
+- What happened: an auxiliary performance reader raised KeyError on budgetMisses while a tier was still in progress. The consolidated audit was then called before Python finished and raised FileNotFoundError for python.log. Neither error came from a product check.
+- Root cause: progress files and expected elapsed time were treated as completion signals.
+- Prevention rule: require the driver's completion marker before the consolidated audit. Read partial performance fields only as progress, and use the finished suite receipt for verdicts. The audit now refuses to run before remaining-done.json exists.
+
+
+## 2026-10-22 S39 screenshot review found stale choose cleanup after rapid reopen
+
+- What happened: the rapid Cancel/reopen sequence left the B dialog open with its confirmation hidden. A new visibility assertion failed, and waiting only for focus still failed because native focus can return before the close event. An explicit same-task Cancel/open-B check reproduced the defect on the unmodified app in rapid-red/.
+- Root cause: the queued close handler cleared controls belonging to a newly opened dialog. The existing checks did not require the typed rationale to enable a visible confirmation.
+- Prevention rule: ignore stale close cleanup while the dialog is open again. Keep both the rapid sequence and the visible, enabled confirmation assertion. Await the actual close event between ordinary keyboard cases. The choose-stale-close served fault removes only this guard and must fail its named rapid-reopen assertion.
+
+## 2026-10-22 S39 auxiliary screenshot driver used a temporary-path alias
+
+- What happened: a copied screenshot driver exited without running its CLI and produced no PNG receipts, because argv used /tmp while import.meta.url resolved to /private/tmp.
+- Root cause: the inherited CLI entry comparison used the two path aliases as different strings.
+- Prevention rule: invoke copied drivers through their canonical paths, and require the complete receipt inventory as well as exit 0. The rejected setup folder is preserved; the corrected bottom-view run produced all thirteen PNGs.
+
+
+## 2026-10-22 S39 rapid control initially masked the Cancel fault
+
+- What happened: choose-close-selects first failed the new rapid-reopen assertion instead of its original Cancel-request assertion. The rapid setup itself pressed the faulted Cancel button.
+- Root cause: two independent faults shared the rapid setup action, allowing the earlier new assertion to mask the named Cancel guard.
+- Prevention rule: trigger the rapid close-event control through native dialog.close(), leaving Cancel-button behavior to the existing filled-rationale Cancel check. Preserve the rejected named-failure receipt in fullscreen-rapid-final/choose-close-selects/.
+
+
+## 2026-10-22 S39 publication reader ran before pytest exited
+
+- What happened: the auxiliary summary assertion read pytest progress at 79 percent before the owned test process had completed. No commit was made; the eventual run reproduced only the known port_dead failure.
+- Root cause: a running write_stdin result was followed by a final-summary reader, and a later shell check masked the helper's exit status.
+- Prevention rule: require the owned process's exit code before reading final results. Make precommit verification one checked Python process so a trailing shell command cannot replace a failed check's exit status.
