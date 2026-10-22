@@ -6,20 +6,36 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { openBrowser } from './workplace_browser.mjs';
 
+// Gate 3 section 13.8 budgets (S38 onward), by named tier. Provisional by the
+// user's 2026-10-21 decision; a miss is recorded, never absorbed.
+export const BUDGETS={
+  standard:{coldMs:3000,median:16.7,p95:33.4,triangles:120000,calls:120,bytes:96*1024**2},
+  compact:{coldMs:4000,median:33.4,p95:50,triangles:40000,calls:60,bytes:24*1024**2},
+};
+export const tierName=tier=>tier.width<761?'compact':'standard';
+export function budgetMisses(tier) {
+  const budget=BUDGETS[tierName(tier)], misses=[];
+  if(tier.cold.some(r=>r.ms>budget.coldMs)) misses.push('cold graphics-ready');
+  if(tier.samples.some(r=>r.median>budget.median||r.p95>budget.p95)) misses.push('motion intervals');
+  if(tier.samples.some(r=>r.maxTriangles>budget.triangles)) misses.push('triangles');
+  if(tier.samples.some(r=>r.maxCalls>budget.calls)) misses.push('draw calls');
+  if(tier.estimatedBytes>budget.bytes) misses.push('estimated GPU allocation');
+  return misses;
+}
 export function verifyPerformance(tier) {
-  const compact=tier.width<761;
+  const budget=BUDGETS[tierName(tier)];
   assert.equal(tier.cold.length,5,'Performance receipt needs five cold starts');
   assert.equal(new Set(tier.cold.map(r=>r.timeOrigin)).size,5,'Cold starts reused an earlier document');
   assert.equal(tier.samples.length,3,'Performance receipt needs three motion samples');
-  assert.ok(tier.cold.every(r=>r.ms<=(compact?4000:3000)),'Cold graphics-ready budget missed');
+  assert.ok(tier.cold.every(r=>r.ms<=budget.coldMs),'Cold graphics-ready budget missed');
   for(const sample of tier.samples) {
     assert.ok(sample.intervals.length>0,'No real frame work was sampled');
-    assert.ok(sample.median<=(compact?33.4:16.7) && sample.p95<=(compact?50:33.4),'Motion interval budget missed');
-    assert.ok(sample.maxTriangles<=(compact?20000:45000),'Triangle budget missed');
-    assert.ok(sample.maxCalls<=(compact?45:90),'Draw-call budget missed');
+    assert.ok(sample.median<=budget.median && sample.p95<=budget.p95,'Motion interval budget missed');
+    assert.ok(sample.maxTriangles<=budget.triangles,'Triangle budget missed');
+    assert.ok(sample.maxCalls<=budget.calls,'Draw-call budget missed');
   }
   assert.equal(tier.idle,0,'Idle frame budget missed');
-  assert.ok(tier.estimatedBytes<=(compact?24:48)*1024**2,'Estimated allocation budget missed');
+  assert.ok(tier.estimatedBytes<=budget.bytes,'Estimated allocation budget missed');
 }
 
 async function main() {
@@ -35,12 +51,14 @@ if(process.platform==='darwin') {
 }
 const nearest=(values,p)=>[...values].sort((a,b)=>a-b)[Math.max(0,Math.ceil(values.length*p)-1)];
 const capCheck=process.argv.includes('--cap-check');
-for(const width of capCheck?[390]:process.argv.includes('--desktop-only')?[1280]:[1280,390]) {
-  const b=await openBrowser(base,path.join(out,String(width)),capCheck?'':'plain');
+// Standard is measured at DPR 1 and at its 13.8 maximum of 2; compact at a phone's DPR 3, which its 1.0 cap must absorb.
+const cells=capCheck?[[390,3]]:process.argv.includes('--desktop-only')?[[1280,1],[1280,2]]:[[1280,1],[1280,2],[390,3]];
+for(const [width,dpr] of cells) {
+  const b=await openBrowser(base,path.join(out,`${width}-dpr${dpr}`),capCheck?'':'plain');
   const height=width===1280?720:844;
-  const tier={width,height,dpr:1,cold:[],samples:[],idle:null};
+  const tier={width,height,dpr,tierName:width<761?'compact':'standard',cold:[],samples:[],idle:null};
   try {
-    await b.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:width===390});
+    await b.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:dpr,mobile:width===390});
     await b.send('Network.setCacheDisabled',{cacheDisabled:true});
     await b.send('Network.emulateNetworkConditions',{offline:false,latency:150,downloadThroughput:10000000/8,uploadThroughput:10000000/8});
     for(let n=0;n<(capCheck?1:5);n++) {
@@ -86,16 +104,16 @@ for(const width of capCheck?[390]:process.argv.includes('--desktop-only')?[1280]
     }
     tier.idle=await b.evaluate(async()=>{await new Promise(r=>setTimeout(r,100));const before=globalThis.__workplaceProbe.frames;await new Promise(r=>setTimeout(r,10000));return globalThis.__workplaceProbe.frames-before;});
     assert.equal(tier.idle,0,'Idle scene keeps scheduling frames');
-    tier.estimatedBytes=await b.evaluate(()=>{const p=globalThis.__workplaceProbe;return p.width*p.height*(p.tier==='compact'?12:48)+(p.tier==='compact'?0:1024*1024*8)+1024*1024;});
-    tier.budgetMisses=[];
-    if(tier.cold.some(r=>r.ms>(width===390?4000:3000))) tier.budgetMisses.push('cold graphics-ready');
-    if(tier.samples.some(r=>r.median>(width===390?33.4:16.7)||r.p95>(width===390?50:33.4))) tier.budgetMisses.push('motion intervals');
-    if(tier.samples.some(r=>r.maxTriangles>(width===390?20000:45000)||r.maxCalls>(width===390?45:90))) tier.budgetMisses.push('geometry/draw calls');
-    if(tier.estimatedBytes>(width===390?24:48)*1024**2) tier.budgetMisses.push('estimated GPU allocation');
+    // Backing store at 48 bytes per pixel (multisampled colour and depth plus resolve) standard, 12 compact;
+    // one 1024x1024 shadow map; the PMREM target at 8 bytes per texel (half-float RGBA); 1MiB for buffers.
+    tier.backing=await b.evaluate(()=>({width:globalThis.__workplaceProbe.width,height:globalThis.__workplaceProbe.height,environmentTexels:globalThis.__workplaceProbe.environmentTexels}));
+    tier.estimatedBytes=await b.evaluate(()=>{const p=globalThis.__workplaceProbe;return p.width*p.height*(p.tier==='compact'?12:48)+(p.tier==='compact'?0:1024*1024*8)+p.environmentTexels*8+1024*1024;});
+    tier.budgetMisses=budgetMisses(tier);
     await writeFile(path.join(out,'performance.json'),JSON.stringify(report,null,2)+'\n');
-    console.log(JSON.stringify({width,cold:tier.cold.map(r=>r.ms),idle:tier.idle,misses:tier.budgetMisses}));
-    verifyPerformance(tier);
+    console.log(JSON.stringify({width,dpr,backing:tier.backing,bytes:tier.estimatedBytes,triangles:Math.max(...tier.samples.map(r=>r.maxTriangles)),calls:Math.max(...tier.samples.map(r=>r.maxCalls)),median:tier.samples.map(r=>r.median),p95:tier.samples.map(r=>r.p95),cold:tier.cold.map(r=>r.ms),idle:tier.idle,misses:tier.budgetMisses}));
   } finally {await b.close();}
 }
+// Every cell is measured before any verdict, so one miss cannot hide another tier's numbers.
+for(const tier of report.tiers) verifyPerformance(tier);
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)) await main();

@@ -19,7 +19,7 @@ export function replaceOnce(text, needle, replacement) {
 
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900,layoutFault=''}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -426,6 +426,8 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
       if(sceneFault==='omit-context') source=replaceOnce(source,'renderer?.forceContextLoss();','if(!globalThis.__s29ResourceFaultActive) { renderer?.forceContextLoss(); }');
       const omissions={
         'omit-shadow':['for(const light of sceneLights) light.shadow?.dispose();','void 0;'],
+        'omit-environment':['environment?.dispose(); environment = null;','environment = null;'],
+        'omit-rounded-cache':['geometries.add(geometry); roundedCache.set(key,geometry);','roundedCache.set(key,geometry);'],
         'omit-routing-label':['routingLabel?.remove();','void 0;'],
         ...Object.fromEntries(['pointerdown','pointerup','pointercancel','webglcontextlost'].map(type=>[`omit-${type}`,['renderer?.domElement.removeEventListener(type,fn);',`if(type!==${JSON.stringify(type)}) renderer?.domElement.removeEventListener(type,fn);`]])),
         'omit-dispose-raf':['if(disposed) return; disposed = true;\n    settleAllPulses();\n    if(raf!==null) cancelAnimationFrame(raf);','if(disposed) return; disposed = true;\n    settleAllPulses();'],
@@ -467,11 +469,15 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
           const r={target:light.shadow.map,disposed:false};owned.shadows.push(r);r.target.addEventListener('dispose',()=>{r.disposed=true;});
         }`);
       source=replaceOnce(source,'renderer.outputColorSpace', 'renderer.info.autoReset = false; renderer.outputColorSpace');
-      source=replaceOnce(source,"renderer.domElement.setAttribute('aria-hidden','true');", "globalThis.__s29Resources ??= { contexts:0, geometries:0, materials:0 }; globalThis.__s29GLs ??= []; globalThis.__s29GLs.push(renderer.getContext()); globalThis.__s29Resources.contexts++; renderer.domElement.setAttribute('aria-hidden','true');");
+      // S38: the environment target and the rounded-geometry cache are counted where they are created,
+      // so a resource that is never registered for disposal still shows as allocated.
+      source=replaceOnce(source,'environment = buildStudioEnvironment(renderer);',"environment = buildStudioEnvironment(renderer); globalThis.__s38Resources.createdTargets++; globalThis.__s38Resources.targets++; environment.addEventListener('dispose',()=>globalThis.__s38Resources.targets--);");
+      source=replaceOnce(source,'geometry.translate(0,0,-flat[2]/2);',"geometry.translate(0,0,-flat[2]/2); globalThis.__s38Resources.createdRounded++; globalThis.__s38Resources.rounded++; geometry.addEventListener('dispose',()=>globalThis.__s38Resources.rounded--);");
+      source=replaceOnce(source,"renderer.domElement.setAttribute('aria-hidden','true');", "globalThis.__s38Resources ??= { targets:0, rounded:0, createdTargets:0, createdRounded:0 }; globalThis.__s29Resources ??= { contexts:0, geometries:0, materials:0 }; globalThis.__s29GLs ??= []; globalThis.__s29GLs.push(renderer.getContext()); globalThis.__s29Resources.contexts++; renderer.domElement.setAttribute('aria-hidden','true');");
       source=replaceOnce(source,'renderer?.forceContextLoss();', 'if(renderer) globalThis.__s29Resources.contexts--; renderer?.forceContextLoss();');
       for(const resource of ['geometries','materials']) source=replaceOnce(source,new RegExp(`${resource}\\.add\\((\\w+)\\);`,'g'),(statement,name)=>
         `{${statement} globalThis.__s29Resources.${resource}++; ${name}.addEventListener('dispose',()=>globalThis.__s29Resources.${resource}--);}`);
-      source=replaceOnce(source,'renderer.render(scene, camera);', `renderer.render(scene, camera); globalThis.__workplaceProbe = { frames: (globalThis.__workplaceProbe?.frames ?? 0)+1, triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, tier, time: performance.now(), width: renderer.domElement.width, height: renderer.domElement.height }; if(globalThis.__workplaceSamples) globalThis.__workplaceSamples.push(globalThis.__workplaceProbe);`);
+      source=replaceOnce(source,'renderer.render(scene, camera);', `renderer.render(scene, camera); globalThis.__workplaceProbe = { frames: (globalThis.__workplaceProbe?.frames ?? 0)+1, triangles: renderer.info.render.triangles, calls: renderer.info.render.calls, geometries: renderer.info.memory.geometries, textures: renderer.info.memory.textures, tier, time: performance.now(), width: renderer.domElement.width, height: renderer.domElement.height, environmentTexels: scene.environment ? scene.environment.image.width*scene.environment.image.height : 0 }; if(globalThis.__workplaceSamples) globalThis.__workplaceSamples.push(globalThis.__workplaceProbe);`);
       source=replaceOnce(source,'renderer.render(scene, camera);', 'renderer.info.reset(); renderer.render(scene, camera);');
       source=replaceOnce(source,'return { apply, resize,', 'globalThis.__workplaceApply = station => apply({...view,station}, []); globalThis.__workplaceDispose = dispose; return { apply, resize,');
       source=replaceOnce(source,'view = next;', 'view = next; globalThis.__s29Applied=structuredClone(next);');
@@ -596,7 +602,7 @@ export async function runResourceControl(base,out,fault='',suspend=false,slug='b
       const pendingBefore=owned.frames.size;
       if(suspend) globalThis.__s29Host().setExpanded(true);
       else {globalThis.__s29Host().dispose();globalThis.__s29Host().dispose();}
-      return {before,pendingBefore,pendingAfter:owned.frames.size,listeners:Object.fromEntries([...canvas.listeners].map(([type,set])=>[type,set.size])),shadows:owned.shadows.map(r=>r.disposed),resources:globalThis.__s29Resources};
+      return {before,pendingBefore,pendingAfter:owned.frames.size,listeners:Object.fromEntries([...canvas.listeners].map(([type,set])=>[type,set.size])),shadows:owned.shadows.map(r=>r.disposed),resources:globalThis.__s29Resources,s38:globalThis.__s38Resources};
     },suspend);
     await writeFile(path.join(out,'resources.json'),JSON.stringify(result,null,2)+'\n');
     assert.ok(result.pendingBefore>0,'Pending frame precondition missing');
@@ -608,6 +614,10 @@ export async function runResourceControl(base,out,fault='',suspend=false,slug='b
       }
       assert.ok(result.shadows.length>0,'Actual shadow target precondition missing');
       assert.ok(result.shadows.every(Boolean),'Owned shadow target remains undisposed');
+      // disposal_has_one_owner (S38): one environment target and the rounded cache, each released exactly once.
+      assert.ok(result.s38.createdTargets===1 && result.s38.createdRounded>0,'Environment target or rounded geometry precondition missing');
+      assert.equal(result.s38.targets,0,'Owned environment target remains undisposed');
+      assert.equal(result.s38.rounded,0,'Owned rounded geometry remains allocated');
       assert.deepEqual(result.resources,{contexts:0,geometries:0,materials:0},'Resource control leaked scene resources');
     }
     assert.deepEqual(b.exceptions,[]);return {result:'PASS',suspend};
@@ -646,7 +656,7 @@ export async function runPartialInitialization(base,out,fault='partial-init',slu
     await b.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
     await b.send('Page.navigate',{url:base+'/?board='+slug+'#'+(slug==='northline'?'acceptance':slug==='gtm'?'signals':'customers')});
     assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state==='unavailable'),'Partial initialization did not fail graphics');
-    const result=await b.evaluate(()=>({...globalThis.__s29PartialAfter,labels:document.querySelectorAll('.workplace-routing-label').length}));
+    const result=await b.evaluate(()=>({...globalThis.__s29PartialAfter,labels:document.querySelectorAll('.workplace-routing-label').length,s38:globalThis.__s38Resources}));
     await writeFile(path.join(out,'partial.json'),JSON.stringify(result,null,2)+'\n');
     assert.ok(result.before?.pending>0 && result.before.shadows>0 && result.before.resources.contexts===1 && result.before.resources.geometries>0 && result.before.resources.materials>0,'Partial allocation preconditions missing');
     assert.ok(result.lost,'Partial context remains live');assert.equal(result.canvases,0,'Partial canvas remains connected');
@@ -659,6 +669,10 @@ export async function runPartialInitialization(base,out,fault='partial-init',slu
     assert.equal(result.resources.geometries,0,'Partial geometry remains allocated');
     assert.equal(result.resources.materials,0,'Partial material remains allocated');
     assert.equal(result.resources.contexts,0,'Partial context count remains allocated');
+    // S38 after the existing counts, so omit-geometry still fails its own assertion first.
+    assert.ok(result.s38.createdTargets===1 && result.s38.createdRounded>0,'Partial environment or rounded precondition missing');
+    assert.equal(result.s38.targets,0,'Partial environment target remains undisposed');
+    assert.equal(result.s38.rounded,0,'Partial rounded geometry remains allocated');
     assert.equal(result.labels,0,'Partial ownership label remains connected');
     assert.deepEqual(b.commands,[]);assert.deepEqual(b.exceptions,[]);return {result:'PASS',partial:true};
   }finally{await b.close();}

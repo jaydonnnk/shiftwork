@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -194,6 +194,8 @@ if(browserFlag!==-1) {
   const resourceRows=[
     ...['pointerdown','pointerup','pointercancel','webglcontextlost'].map(type=>({name:`omit-${type}`,expected:`Owned ${type} listener remains attached`})),
     {name:'omit-shadow',expected:'Owned shadow target remains undisposed'},
+    {name:'omit-environment',expected:'Owned environment target remains undisposed'},
+    {name:'omit-rounded-cache',expected:'Owned rounded geometry remains allocated'},
     {name:'omit-dispose-raf',expected:'Owned disposal frame remains scheduled'},
     {name:'omit-suspend-raf',expected:'Owned suspension frame remains scheduled',suspend:true},
     {name:'page-cache-omit-focus',expected:'Page-cache return changed editor continuity or graphics ownership',cache:true},
@@ -201,6 +203,7 @@ if(browserFlag!==-1) {
     ...[
       ...['pointerdown','pointerup','pointercancel','webglcontextlost'].map(type=>[`omit-${type}`,`Partial ${type} listener remains attached`]),
       ['omit-shadow','Partial shadow target remains undisposed'],['omit-dispose-raf','Partial frame remains scheduled'],
+      ['omit-environment','Partial environment target remains undisposed'],['omit-rounded-cache','Partial rounded geometry remains allocated'],
       ['omit-geometry','Partial geometry remains allocated'],['omit-material','Partial material remains allocated'],['omit-context','Partial context remains live'],
     ].map(([fault,expected])=>({name:`partial-${fault}`,expected,partial:true})),
     {name:'zoom-omit-picker',expected:'200% zoom causes horizontal page scrolling',zoom:true},

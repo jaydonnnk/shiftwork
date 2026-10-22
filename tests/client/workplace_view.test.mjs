@@ -920,11 +920,23 @@ test('performance_receipt_guards_reject_separate_synthetic_faults',async()=>{
     [r=>{r.cold[0].timeOrigin=2;},'Cold starts reused an earlier document'],
     [r=>{r.samples[0].intervals=[];},'No real frame work was sampled'],
     [r=>{r.samples[0].p95=1000;},'Motion interval budget missed'],
-    [r=>{r.samples[0].maxTriangles=45001;},'Triangle budget missed'],
-    [r=>{r.samples[0].maxCalls=91;},'Draw-call budget missed'],
+    [r=>{r.samples[0].maxTriangles=120001;},'Triangle budget missed'],
+    [r=>{r.samples[0].maxCalls=121;},'Draw-call budget missed'],
     [r=>{r.idle=1;},'Idle frame budget missed'],
-    [r=>{r.estimatedBytes=49*1024**2;},'Estimated allocation budget missed'],
+    [r=>{r.estimatedBytes=96*1024**2+1;},'Estimated allocation budget missed'],
   ]) {const r=valid();change(r);assert.throws(()=>verifyPerformance(r),error=>error.message.includes(message));assert.doesNotThrow(()=>verifyPerformance(valid()));}
+  // Gate 3 section 13.8: the values at the standard limit pass, and compact has its own lower limits.
+  const atLimit=valid();atLimit.samples[0].maxTriangles=120000;atLimit.samples[0].maxCalls=120;atLimit.estimatedBytes=96*1024**2;
+  assert.doesNotThrow(()=>verifyPerformance(atLimit));
+  const compact=()=>({...valid(),width:390,cold:[1,2,3,4,5].map(timeOrigin=>({timeOrigin,ms:3900})),samples:[1,2,3].map(()=>({intervals:[33,34],median:33.4,p95:50,maxTriangles:40000,maxCalls:60})),estimatedBytes:24*1024**2});
+  assert.doesNotThrow(()=>verifyPerformance(compact()));
+  for(const [change,message] of [
+    [r=>{r.cold[0].ms=4001;},'Cold graphics-ready budget missed'],
+    [r=>{r.samples[0].median=33.5;},'Motion interval budget missed'],
+    [r=>{r.samples[0].maxTriangles=40001;},'Triangle budget missed'],
+    [r=>{r.samples[0].maxCalls=61;},'Draw-call budget missed'],
+    [r=>{r.estimatedBytes=24*1024**2+1;},'Estimated allocation budget missed'],
+  ]) {const r=compact();change(r);assert.throws(()=>verifyPerformance(r),error=>error.message.includes(message));}
 });
 
 export function wallInput() {
