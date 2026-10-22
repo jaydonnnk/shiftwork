@@ -459,6 +459,11 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
   main[data-expanded="true"] #station-panel { position: static; width: auto; max-width: 1120px; margin: 0 auto; overflow: visible; box-shadow: none; }
   main[data-expanded="true"] .shift-log { position: static; width: auto; max-width: 1120px; margin: 0 auto; max-height: none; }
 }
+/* Below 961px the uncovered stage is too narrow for one-line tags side by side
+   (Gate 3 section 13.6): status words stack under the name, same 44px height. */
+@media (min-width: 761px) and (max-width: 960px) {
+  .station > span:last-child { flex-direction: column; align-items: flex-start; gap: 0; }
+}
 @media (max-width: 760px) {
   main[data-expanded="true"] .room { display: none; }
 }

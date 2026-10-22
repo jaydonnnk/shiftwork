@@ -343,10 +343,12 @@ function closeInspector(returnFocus = true) {
   if (returnFocus) document.querySelector(`.room-hotspots:not([hidden]) [data-station="${state.station}"]`)?.focus({ preventScroll: true });
 }
 // Tags sit just above their projected anchor. A tag that would cover another tag,
-// the status bar, step chip, next action, graphics notice or shift log tries nearby
-// rows and at most 0.6 of its own width sideways, in steps of 0.3. When no spot is
-// free, it takes the spot it overlaps least. The inspector is not avoided here:
-// only the scene's view offset keeps tags clear of it.
+// the status bar, step chip, next action, graphics notice or shift log tries up to
+// six rows up or down and at most 1.2 of its own width sideways, in steps of 0.3,
+// nearest rows first. When no spot is
+// free, it takes the spot that covers the least of the tags already placed, then
+// the least of everything else (Gate 3 section 13.6). The inspector is not avoided
+// here: only the scene's view offset keeps tags clear of it.
 let tagAnchors = {};
 function placeStationTags(positions = tagAnchors) {
   tagAnchors = positions;
@@ -354,8 +356,10 @@ function placeStationTags(positions = tagAnchors) {
   const local = rect => ({ left: rect.left - stage.left, top: rect.top - stage.top, right: rect.right - stage.left, bottom: rect.bottom - stage.top });
   const taken = [$('status-bar'), $('shift-log'), document.querySelector('.graphics-controls'), $('step-chip'), $('next-action')]
     .map(node => node.getBoundingClientRect()).filter(rect => rect.width && rect.height).map(local);
-  const overlap = box => taken.reduce((sum, rect) => sum
+  const covers = (box, rects) => rects.reduce((sum, rect) => sum
     + Math.max(0, Math.min(box.right, rect.right) - Math.max(box.left, rect.left)) * Math.max(0, Math.min(box.bottom, rect.bottom) - Math.max(box.top, rect.top)), 0);
+  const placed = [];
+  const less = (a, b) => covers(a, placed) - covers(b, placed) || covers(a, taken) - covers(b, taken);
   // The evidence path has no object of its own; it sits between the queue and your service.
   const midpoint = (a, b) => a?.visible && b?.visible ? { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2, visible: true } : null;
   const anchors = { ...positions, pipeline: positions.pipeline ?? midpoint(positions.customers, positions.service) };
@@ -374,12 +378,12 @@ function placeStationTags(positions = tagAnchors) {
     const minLeft = inspectorCover && point.x >= inspectorCover ? inspectorCover + 8 : 8;
     const clampLeft = x => Math.min(Math.max(minLeft, x), Math.max(minLeft, stage.width - width - 8));
     const box = ([left, top]) => ({ left, top, right: left + width, bottom: top + height });
-    const candidates = [0, -1, 1, -2, 2, -3, 3, -4, 4].flatMap(row => [0, .3, -.3, .6, -.6].map(shift =>
+    const candidates = [0, -1, 1, -2, 2, -3, 3, -4, 4, -5, 5, -6, 6].flatMap(row => [0, .3, -.3, .6, -.6, .9, -.9, 1.2, -1.2].map(shift =>
       [clampLeft(point.x - width / 2 + shift * width), point.y - height - 6 + row * step]));
     const inside = candidates.filter(([, y]) => y >= 8 && y + height <= stage.height - 8);
-    const [left, top] = inside.find(spot => overlap(box(spot)) === 0)
-      ?? inside.reduce((best, spot) => overlap(box(spot)) < overlap(box(best)) ? spot : best, inside[0] ?? candidates[0]);
-    taken.push(box([left, top]));
+    const [left, top] = inside.find(spot => covers(box(spot), placed) + covers(box(spot), taken) === 0)
+      ?? inside.reduce((best, spot) => less(box(spot), box(best)) < 0 ? spot : best, inside[0] ?? candidates[0]);
+    placed.push(box([left, top]));
     button.style.setProperty('--tag-x', `${Math.round(left)}px`);
     button.style.setProperty('--tag-y', `${Math.round(top)}px`);
     button.dataset.anchored = 'true';

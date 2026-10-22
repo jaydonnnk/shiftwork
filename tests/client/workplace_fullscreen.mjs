@@ -1,4 +1,4 @@
-// S36 and S37 full-screen workplace checks (Gate 3 section 13.9).
+// S36 to S38 full-screen workplace checks (Gate 3 section 13.9).
 // Each check passes clean; with --fault NAME the harness serves one in-memory
 // mutation of a production file and the run must fail at that check's named
 // assertion. Repository files are never modified.
@@ -24,8 +24,10 @@ export const FAULTS = {
     replacement: "button.style.setProperty('--tag-x', `${Math.round(left) + 2000}px`);",
     expect: 'inspector_keeps_stations_readable: a station tag is outside the viewport' },
   'overlap-fallback': { file: '/app.js',
-    needle: '      ?? inside.reduce((best, spot) => overlap(box(spot)) < overlap(box(best)) ? spot : best, inside[0] ?? candidates[0]);',
+    needle: '      ?? inside.reduce((best, spot) => less(box(spot), box(best)) < 0 ? spot : best, inside[0] ?? candidates[0]);',
     replacement: '      ?? candidates[0];', expect: 'inspector_keeps_stations_readable: a station tag covers another station tag' },
+  'tags-not-taken': { file: '/app.js', needle: '    placed.push(box([left, top]));',
+    replacement: '', expect: 'inspector_keeps_stations_readable: a station tag covers another station tag' },
   'run-help-silent': { file: '/app.js',
     needle: `    : operationRecorded ? "This shift's operation run is recorded. Close the shift at Next shift; the operating version runs in the next shift."\n`,
     replacement: '', expect: 'run_help_matches_disabled_run: fresh shift' },
@@ -96,6 +98,55 @@ export const FAULTS = {
     expect: 'picker_uses_switch_guard: a dirty draft did not block the picker start' },
   'picker-stays': { file: '/app.js', needle: "  if (userIntent) $('shift-picker').hidden = true;\n", replacement: '',
     expect: 'picker_uses_switch_guard: choosing a station leaves the picker over the room' },
+  // S38 renderer recipe (Gate 3 sections 13.3 and 13.8).
+  'recipe-env-compact': { file: '/workplace-scene.js', needle: "if(tier !== 'compact') { environment = buildStudioEnvironment(renderer);",
+    replacement: 'if(true) { environment = buildStudioEnvironment(renderer);', expect: 'renderer_matches_tier_recipe: compact has an environment map' },
+  'recipe-env-missing': { file: '/workplace-scene.js', needle: 'scene.environmentIntensity = .45;', replacement: 'scene.environmentIntensity = 1;',
+    expect: 'renderer_matches_tier_recipe: standard lacks the PMREM environment' },
+  'recipe-dpr-over-two': { file: '/workplace-scene.js', needle: 'return Math.min(requested,2,Math.sqrt(1850000/(width*height)));',
+    replacement: 'return Math.min(requested,Math.sqrt(1850000/(width*height)));', expect: 'renderer_matches_tier_recipe: standard DPR above 2' },
+  'recipe-backing-uncapped': { file: '/workplace-scene.js', needle: 'return Math.min(requested,2,Math.sqrt(1850000/(width*height)));',
+    replacement: 'return Math.min(requested,2);', expect: 'renderer_matches_tier_recipe: the backing store exceeds 1,850,000 pixels' },
+  'recipe-cap-too-low': { file: '/workplace-scene.js', needle: 'return Math.min(requested,2,Math.sqrt(1850000/(width*height)));',
+    replacement: 'return Math.min(requested,2,Math.sqrt(1000000/(width*height)));', expect: 'renderer_matches_tier_recipe: the backing-store cap lowered DPR too far' },
+  'recipe-compact-dpr': { file: '/workplace-scene.js', needle: "if(tier==='compact') return Math.min(requested,1);",
+    replacement: "if(tier==='compact') return requested;", expect: 'renderer_matches_tier_recipe: compact DPR above 1' },
+  'recipe-compact-low': { file: '/workplace-scene.js', needle: "if(tier==='compact') return Math.min(requested,1);",
+    replacement: "if(tier==='compact') return Math.min(requested,.5);", expect: 'renderer_matches_tier_recipe: DPR 0.5 where 1 was expected' },
+  'recipe-compact-shadow': { file: '/workplace-scene.js', needle: "renderer.shadowMap.enabled = tier !== 'compact';",
+    replacement: 'renderer.shadowMap.enabled = true;', expect: 'renderer_matches_tier_recipe: compact draws shadow maps' },
+  'recipe-texture': { file: '/workplace-scene.js', needle: 'renderer.setClearColor(room.fog);',
+    replacement: 'renderer.setClearColor(room.fog); scene.background = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1); scene.background.needsUpdate = true;',
+    expect: 'renderer_matches_tier_recipe: unexpected texture' },
+  'recipe-orthographic': { file: '/workplace-scene.js', needle: 'const camera = new THREE.PerspectiveCamera(pose.fov,1,.1,100);',
+    replacement: 'const camera = new THREE.OrthographicCamera(-8,8,6,-6,.1,100); camera.fov = pose.fov;', expect: 'renderer_matches_tier_recipe: camera is OrthographicCamera' },
+  'recipe-fov': { file: '/workplace-scene.js', needle: 'const camera = new THREE.PerspectiveCamera(pose.fov,1,.1,100);',
+    replacement: 'const camera = new THREE.PerspectiveCamera(45,1,.1,100);', expect: 'renderer_matches_tier_recipe: field of view is 45' },
+  'recipe-tone': { file: '/workplace-scene.js', needle: 'renderer.toneMapping = THREE.ACESFilmicToneMapping;',
+    replacement: 'renderer.toneMapping = THREE.NeutralToneMapping;', expect: 'renderer_matches_tier_recipe: tone mapping is' },
+  'recipe-exposure': { file: '/workplace-scene.js', needle: 'renderer.toneMappingExposure = 1;', replacement: 'renderer.toneMappingExposure = 1.2;',
+    expect: 'renderer_matches_tier_recipe: exposure is 1.2' },
+  'recipe-fog': { file: '/workplace-scene.js', needle: 'scene.fog = new THREE.Fog(room.fog,1,2);', replacement: 'scene.fog = new THREE.FogExp2(room.fog,.01);',
+    expect: 'renderer_matches_tier_recipe: fog is exp2' },
+  'recipe-lights': { file: '/workplace-scene.js', needle: 'scene.add(fill,key); sceneLights.push(fill,key);', replacement: 'scene.add(key); sceneLights.push(key);',
+    expect: 'renderer_matches_tier_recipe: lights are' },
+  // S38 lamps (Gate 3 sections 13.3 and 13.5).
+  'lamp-ignores-state': { file: '/workplace-scene.js',
+    needle: '      for(const [stationId,lampMesh] of Object.entries(lampMeshes)) lampMesh.material = lampMaterials[next?.lamps?.find(lamp=>lamp.stationId===stationId)?.tone] ?? lampMaterials.idle;\n',
+    replacement: '', expect: 'lamps_reflect_state_with_text: the customers room lamp disagrees with its attention tag' },
+  'lamp-pass-colour': { file: '/workplace-scene.js', needle: "pass:'#4fd17a'", replacement: "pass:'#ffb648'",
+    expect: 'lamps_reflect_state_with_text: the evaluator room lamp does not follow tone pass' },
+  'lamp-tone-mapped': { file: '/workplace-scene.js', needle: 'new THREE.MeshBasicMaterial({color,toneMapped:false})', replacement: 'new THREE.MeshBasicMaterial({color})',
+    expect: 'lamps_reflect_state_with_text: a lamp is lit or tone mapped' },
+  'lamp-unshared': { file: '/workplace-scene.js', needle: 'lampMesh.material = lampMaterials[next?.lamps?.find(lamp=>lamp.stationId===stationId)?.tone] ?? lampMaterials.idle;',
+    replacement: 'lampMesh.material = (lampMaterials[next?.lamps?.find(lamp=>lamp.stationId===stationId)?.tone] ?? lampMaterials.idle).clone();',
+    expect: 'lamps_reflect_state_with_text: lamp materials are not shared per colour' },
+  'lamp-missing': { file: '/workplace-rooms.js', needle: ' ledger: [5.3,2.75,-2.65],', replacement: '',
+    expect: 'lamps_reflect_state_with_text: a station lamp is missing from the room' },
+  'lamp-tag-tone': { file: '/app.js', needle: '    button.dataset.lamp = item.tone;', replacement: "    button.dataset.lamp = 'idle';",
+    expect: 'lamps_reflect_state_with_text: the customers room lamp disagrees with its idle tag' },
+  'lamp-no-text': { file: '/app.js', needle: "    button.querySelector('.lamp-text').textContent = item.text;", replacement: "    button.querySelector('.lamp-text').textContent = '';",
+    expect: 'lamps_reflect_state_with_text: the customers tag has no lamp text' },
 };
 
 // Forbidden on the main view (Gate 3 section 13.6): identities from the API's ID
@@ -122,9 +173,24 @@ export const FORBIDDEN = [
 export const scan = text => FORBIDDEN.filter(rule => rule.pattern.test(text)).map(rule => rule.name);
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
+// S38: read-only scene probes, served on every run after any fault patch. They
+// report renderer settings and lamp materials; they never change what is drawn.
+const INSTRUMENT = [{ file: '/workplace-scene.js', needle: 'return { apply, resize,',
+  replacement: `globalThis.__s38Scene = {
+    recipe: () => ({ tier, camera: camera.type, fov: camera.fov, toneMapping: renderer.toneMapping === THREE.ACESFilmicToneMapping ? 'ACESFilmic' : String(renderer.toneMapping),
+      exposure: renderer.toneMappingExposure, environment: scene.environment ? { width: scene.environment.image.width, height: scene.environment.image.height } : null,
+      environmentIntensity: scene.environmentIntensity, fog: scene.fog?.isFog ? 'linear' : scene.fog?.isFogExp2 ? 'exp2' : null,
+      pixelRatio: renderer.getPixelRatio(), backing: [renderer.domElement.width, renderer.domElement.height],
+      shadows: renderer.shadowMap.enabled, shadowSizes: sceneLights.filter(light => light.castShadow).map(light => [light.shadow.mapSize.x, light.shadow.mapSize.y]),
+      lights: sceneLights.map(light => light.type).sort(), textures: renderer.info.memory.textures }),
+    lamps: () => Object.fromEntries(Object.entries(lampMeshes).map(([id, mesh]) => [id, { color: '#' + mesh.material.color.getHexString(),
+      visible: mesh.visible, basic: mesh.material.isMeshBasicMaterial === true, toneMapped: mesh.material.toneMapped, material: mesh.material.uuid }])),
+    applyLamps: lamps => { apply({ ...view, lamps }, []); } };
+  return { apply, resize,` }];
+
 export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s3[67]-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 and S37 receipts must use /tmp/shiftwork-s36-* or /tmp/shiftwork-s37-*');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s3[678]-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S38 receipts must use /tmp/shiftwork-s36-*, /tmp/shiftwork-s37-* or /tmp/shiftwork-s38-*');
   const patch = fault ? FAULTS[fault] : null;
   if (fault) assert.ok(patch, `Unknown S36 fault ${fault}`);
   await mkdir(out, { recursive: true });
@@ -153,13 +219,22 @@ export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = tru
   async function intercept({ requestId, request }) {
     const url = new URL(request.url);
     if (url.origin !== new URL(base).origin) return send('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' });
-    if (!patch || url.pathname !== patch.file) return send('Fetch.continueRequest', { requestId });
+    const faulted = patch && url.pathname === patch.file, probes = INSTRUMENT.filter(item => item.file === url.pathname);
+    if (!faulted && !probes.length) return send('Fetch.continueRequest', { requestId });
     const response = await fetch(request.url);
-    const source = await response.text();
-    const count = source.split(patch.needle).length - 1;
-    if (count !== 1) harness.push(`Fault ${fault} anchor matched ${count} times in ${patch.file}`);
-    patched += 1;
-    const body = Buffer.from(source.replace(patch.needle, patch.replacement)).toString('base64');
+    let source = await response.text();
+    if (faulted) {
+      const count = source.split(patch.needle).length - 1;
+      if (count !== 1) harness.push(`Fault ${fault} anchor matched ${count} times in ${patch.file}`);
+      patched += 1;
+      source = source.replace(patch.needle, () => patch.replacement);
+    }
+    for (const probe of probes) {
+      const count = source.split(probe.needle).length - 1;
+      if (count !== 1) harness.push(`Probe anchor matched ${count} times in ${probe.file}`);
+      source = source.replace(probe.needle, () => probe.replacement);
+    }
+    const body = Buffer.from(source).toString('base64');
     return send('Fetch.fulfillRequest', { requestId, responseCode: 200, body,
       responseHeaders: [{ name: 'Content-Type', value: response.headers.get('content-type') }, { name: 'Cache-Control', value: 'no-store' }] });
   }
@@ -217,6 +292,7 @@ const FIRST_STATION = { bookshop: 'customers', gtm: 'signals', northline: 'accep
 const CHECK_OF = { inspector_keeps_stations_readable: 'inspector', main_view_has_no_internal_identifiers: 'identifiers', narrow_stack_reach: 'narrow',
   next_action_navigates_only: 'story', main_view_shows_one_of_each: 'story', guide_never_credits_unsent_text: 'story', picker_uses_switch_guard: 'picker',
   run_help_matches_disabled_run: 'story', step_chip_announces_only_changes: 'story', status_bar_stays_one_row: 'inspector',
+  renderer_matches_tier_recipe: 'recipe', lamps_reflect_state_with_text: 'lamps',
   fallback_tag_text_is_not_clipped: 'fallback', fallback_tags_do_not_overlap: 'fallback', fallback_tags_clear_of_panels: 'fallback' };
 
 // S37 review F4: the static room a browser without WebGL gets, at the required 1280x720 cell.
@@ -246,41 +322,61 @@ export async function fallbackKeepsTagsReadable(browser, base, slug) {
   return { slug, fallback: { tags: seen.tags } };
 }
 
-export async function inspectorKeepsStationsReadable(browser, base, slug) {
-  await load(browser, base, slug, 1280, 720);
-  // status_bar_stays_one_row (S37 review F5): at 1280px every board's status bar, Change shift included, is one row.
-  const bar = await browser.evaluate(() => { const bar = document.getElementById('status-bar').getBoundingClientRect(), change = document.getElementById('change-shift').getBoundingClientRect();
-    return { height: Math.round(bar.height), changeTop: Math.round(change.top - bar.top) }; });
-  assert.ok(bar.height <= 80 && bar.changeTop <= 24, `status_bar_stays_one_row: ${slug} status bar is ${bar.height}px tall with Change shift ${bar.changeTop}px down`);
-  assert.equal(await browser.evaluate(() => document.querySelector('.room').dataset.graphics), 'ready', `${slug} 3D room is not ready`);
-  await browser.evaluate(station => document.querySelector(`.room-hotspots:not([hidden]) [data-station="${station}"]`).click(), FIRST_STATION[slug]);
-  assert.ok(await browser.until(() => document.getElementById('workplace-world').dataset.inspector === 'open'), `${slug} inspector did not open`);
-  await settle(browser);
-  const layout = await browser.evaluate(() => {
-    const panel = document.getElementById('station-panel').getBoundingClientRect();
-    return { panel: { left: panel.left, right: panel.right, top: panel.top, bottom: panel.bottom }, width: innerWidth, height: innerHeight,
-      tags: [...document.querySelectorAll('.room-hotspots:not([hidden]) [data-station]')].map(button => {
-        const r = button.getBoundingClientRect();
-        return { station: button.dataset.station, left: r.left, right: r.right, top: r.top, bottom: r.bottom, anchored: button.dataset.anchored === 'true',
-          anchorX: Number(button.dataset.anchorX) + document.querySelector('.room').getBoundingClientRect().left };
-      }) };
-  });
-  assert.ok(layout.panel.right > layout.panel.left, `${slug} inspector has no area`);
-  const outside = layout.tags.filter(tag => tag.left < 0 || tag.top < 0 || tag.right > layout.width || tag.bottom > layout.height);
-  assert.deepEqual(outside, [], 'inspector_keeps_stations_readable: a station tag is outside the viewport');
-  const under = layout.tags.filter(tag => tag.left < layout.panel.right && tag.right > layout.panel.left && tag.top < layout.panel.bottom && tag.bottom > layout.panel.top);
-  assert.deepEqual(under, [], 'inspector_keeps_stations_readable: a station tag is under the inspector');
-  assert.ok(layout.tags.length >= 4 && layout.tags.every(tag => tag.anchored), `${slug} tags are not placed at projected anchors`);
-  // The view offset centres the room in the stage the inspector leaves uncovered:
-  // the anchors' mean sits within 10% of that area's centre.
-  const uncovered = { left: layout.panel.right, right: layout.width };
-  const centre = (uncovered.left + uncovered.right) / 2, mean = layout.tags.reduce((sum, tag) => sum + tag.anchorX, 0) / layout.tags.length;
-  assert.ok(Math.abs(mean - centre) <= (uncovered.right - uncovered.left) * .1,
-    `inspector_keeps_stations_readable: the room is not centred in the uncovered stage (anchor mean ${Math.round(mean)}, centre ${Math.round(centre)})`);
+// Tag rectangles, the inspector and the anchor x positions in viewport pixels.
+const measureTags = browser => browser.evaluate(() => {
+  const panel = document.getElementById('station-panel').getBoundingClientRect();
+  return { panel: { left: panel.left, right: panel.right, top: panel.top, bottom: panel.bottom }, width: innerWidth, height: innerHeight,
+    tags: [...document.querySelectorAll('.room-hotspots:not([hidden]) [data-station]')].map(button => {
+      const r = button.getBoundingClientRect();
+      return { station: button.dataset.station, left: r.left, right: r.right, top: r.top, bottom: r.bottom, anchored: button.dataset.anchored === 'true',
+        anchorX: Number(button.dataset.anchorX) + document.querySelector('.room').getBoundingClientRect().left };
+    }) };
+});
+// Gate 3 section 13.6 (backtracked 2026-10-22): no tag covers another tag from 761px to 1280px.
+function assertTagsApart(layout, cell) {
   const covered = layout.tags.flatMap((a, i) => layout.tags.slice(i + 1)
     .filter(b => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top).map(b => `${a.station}/${b.station}`));
-  assert.deepEqual(covered, [], 'inspector_keeps_stations_readable: a station tag covers another station tag');
-  return { slug, inspector: layout.panel, tags: layout.tags.length, anchorMean: Math.round(mean), uncoveredCentre: Math.round(centre) };
+  assert.deepEqual(covered, [], `inspector_keeps_stations_readable: a station tag covers another station tag at ${cell}`);
+}
+
+// 1280x720 and 1024x720, each with the inspector closed and then open
+// (Gate 3 section 13.9, backtracked 2026-10-22). The room is centred in the
+// uncovered stage at 1280x720 only.
+export async function inspectorKeepsStationsReadable(browser, base, slug) {
+  const cells = [];
+  for (const [width, height] of [[1280, 720], [1024, 720]]) {
+    await load(browser, base, slug, width, height);
+    if (width === 1280) {
+      // status_bar_stays_one_row (S37 review F5): at 1280px every board's status bar, Change shift included, is one row.
+      const bar = await browser.evaluate(() => { const bar = document.getElementById('status-bar').getBoundingClientRect(), change = document.getElementById('change-shift').getBoundingClientRect();
+        return { height: Math.round(bar.height), changeTop: Math.round(change.top - bar.top) }; });
+      assert.ok(bar.height <= 80 && bar.changeTop <= 24, `status_bar_stays_one_row: ${slug} status bar is ${bar.height}px tall with Change shift ${bar.changeTop}px down`);
+    }
+    assert.equal(await browser.evaluate(() => document.querySelector('.room').dataset.graphics), 'ready', `${slug} 3D room is not ready`);
+    assert.equal(await browser.evaluate(() => document.getElementById('workplace-world').dataset.inspector), 'closed', `${slug} inspector is not closed after load`);
+    const closed = await measureTags(browser);
+    assert.ok(closed.tags.length >= 4 && closed.tags.every(tag => tag.anchored), `${slug} tags are not placed at projected anchors (${width}x${height} closed)`);
+    assertTagsApart(closed, `${width}x${height} closed`);
+    await browser.evaluate(station => document.querySelector(`.room-hotspots:not([hidden]) [data-station="${station}"]`).click(), FIRST_STATION[slug]);
+    assert.ok(await browser.until(() => document.getElementById('workplace-world').dataset.inspector === 'open'), `${slug} inspector did not open`);
+    await settle(browser);
+    const layout = await measureTags(browser), cell = `${width}x${height} open`;
+    assert.ok(layout.panel.right > layout.panel.left, `${slug} inspector has no area`);
+    const outside = layout.tags.filter(tag => tag.left < 0 || tag.top < 0 || tag.right > layout.width || tag.bottom > layout.height);
+    assert.deepEqual(outside, [], 'inspector_keeps_stations_readable: a station tag is outside the viewport');
+    const under = layout.tags.filter(tag => tag.left < layout.panel.right && tag.right > layout.panel.left && tag.top < layout.panel.bottom && tag.bottom > layout.panel.top);
+    assert.deepEqual(under, [], 'inspector_keeps_stations_readable: a station tag is under the inspector');
+    assert.ok(layout.tags.length >= 4 && layout.tags.every(tag => tag.anchored), `${slug} tags are not placed at projected anchors (${cell})`);
+    // The view offset centres the room in the stage the inspector leaves uncovered:
+    // the anchors' mean sits within 10% of that area's centre.
+    const uncovered = { left: layout.panel.right, right: layout.width };
+    const centre = (uncovered.left + uncovered.right) / 2, mean = layout.tags.reduce((sum, tag) => sum + tag.anchorX, 0) / layout.tags.length;
+    if (width === 1280) assert.ok(Math.abs(mean - centre) <= (uncovered.right - uncovered.left) * .1,
+      `inspector_keeps_stations_readable: the room is not centred in the uncovered stage (anchor mean ${Math.round(mean)}, centre ${Math.round(centre)})`);
+    assertTagsApart(layout, cell);
+    cells.push({ cell: `${width}x${height}`, inspector: layout.panel, tags: layout.tags.length, anchorMean: Math.round(mean), uncoveredCentre: Math.round(centre) });
+  }
+  return { slug, cells };
 }
 
 // The main view: status bar, step chip, next action, station tags and bubbles (Gate 3 section 13.6).
@@ -534,6 +630,82 @@ export async function pickerUsesSwitchGuard(browser, base) {
   return { blocked };
 }
 
+// renderer_matches_tier_recipe (Gate 3 section 13.8 and 13.9). The cells test each
+// cap: a small 780x600 standard stage at DPR 3 must stop at 2; 1280x720 and 1920x1080
+// at DPR 2 must lower DPR so the backing store stays within 1,850,000 pixels (13.8 as
+// backtracked 2026-10-22); a 390px phone at DPR 3 must draw at 1.
+const RECIPE_CELLS = [{ width: 780, height: 600, dpr: 3, tier: 'standard', ratio: 2 }, { width: 1280, height: 720, dpr: 2, tier: 'standard' },
+  { width: 1920, height: 1080, dpr: 2, tier: 'standard' },
+  { width: 390, height: 844, dpr: 3, tier: 'compact', ratio: 1 }];
+export async function rendererMatchesTierRecipe(browser, base, slug) {
+  const receipts = [];
+  for (const cell of RECIPE_CELLS) {
+    await browser.send('Emulation.setDeviceMetricsOverride', { width: cell.width, height: cell.height, deviceScaleFactor: cell.dpr, mobile: cell.width < 761 });
+    await browser.send('Page.navigate', { url: `${base}/?board=${slug}` });
+    assert.ok(await browser.until(() => ['ready', 'empty'].includes(document.body?.dataset.loadState), 60000), `${slug} did not load at ${cell.width}px`);
+    await browser.evaluate(() => document.getElementById('workplace-canvas').scrollIntoView({ block: 'center', behavior: 'instant' }));
+    assert.ok(await browser.until(() => document.getElementById('graphics-status')?.dataset.state === 'ready' && globalThis.__s38Scene, 60000), `${slug} graphics not ready at ${cell.width}px`);
+    await settle(browser);
+    const r = await browser.evaluate(() => globalThis.__s38Scene.recipe());
+    const at = `${slug} ${cell.width}x${cell.height} DPR ${cell.dpr}`;
+    receipts.push({ cell: at, ...r });
+    assert.equal(r.tier, cell.tier, `${at} mounted the ${r.tier} tier`);
+    if (cell.tier === 'compact') {
+      assert.equal(r.environment, null, `renderer_matches_tier_recipe: compact has an environment map (${at})`);
+      assert.ok(r.pixelRatio <= 1, `renderer_matches_tier_recipe: compact DPR above 1 (${at}: ${r.pixelRatio})`);
+      assert.equal(r.shadows, false, `renderer_matches_tier_recipe: compact draws shadow maps (${at})`);
+      assert.equal(r.textures, 0, `renderer_matches_tier_recipe: unexpected texture (${at}: ${r.textures})`);
+    } else {
+      assert.ok(r.environment && r.environment.width > 0 && Math.abs(r.environmentIntensity - .45) < 1e-9, `renderer_matches_tier_recipe: standard lacks the PMREM environment (${at})`);
+      assert.ok(r.pixelRatio <= 2, `renderer_matches_tier_recipe: standard DPR above 2 (${at}: ${r.pixelRatio})`);
+      assert.ok(r.backing[0] * r.backing[1] <= 1850000, `renderer_matches_tier_recipe: the backing store exceeds 1,850,000 pixels (${at}: ${r.backing.join('x')})`);
+      assert.ok(r.shadows && r.shadowSizes.length === 1 && r.shadowSizes[0].join('x') === '1024x1024', `renderer_matches_tier_recipe: standard shadow is not one 1024 map (${at})`);
+      // The PMREM target and the shadow map; no authored texture.
+      assert.equal(r.textures, 2, `renderer_matches_tier_recipe: unexpected texture (${at}: ${r.textures})`);
+    }
+    // A DPR lowered below the device's (at most 2) must still use most of the 1,850,000-pixel allowance.
+    if (cell.tier === 'standard' && r.pixelRatio < Math.min(cell.dpr, 2)) assert.ok(r.backing[0] * r.backing[1] > 1650000, `renderer_matches_tier_recipe: the backing-store cap lowered DPR too far (${at}: ${r.pixelRatio})`);
+    if (cell.ratio) assert.equal(r.pixelRatio, cell.ratio, `renderer_matches_tier_recipe: DPR ${r.pixelRatio} where ${cell.ratio} was expected (${at})`);
+    assert.equal(r.camera, 'PerspectiveCamera', `renderer_matches_tier_recipe: camera is ${r.camera} (${at})`);
+    assert.equal(r.fov, 30, `renderer_matches_tier_recipe: field of view is ${r.fov} (${at})`);
+    assert.equal(r.toneMapping, 'ACESFilmic', `renderer_matches_tier_recipe: tone mapping is ${r.toneMapping} (${at})`);
+    assert.equal(r.exposure, 1, `renderer_matches_tier_recipe: exposure is ${r.exposure} (${at})`);
+    assert.equal(r.fog, 'linear', `renderer_matches_tier_recipe: fog is ${r.fog} (${at})`);
+    assert.deepEqual(r.lights, ['DirectionalLight', 'HemisphereLight'], `renderer_matches_tier_recipe: lights are ${r.lights} (${at})`);
+  }
+  return { check: 'renderer_matches_tier_recipe', slug, receipts };
+}
+
+// lamps_reflect_state_with_text (Gate 3 section 13.5 lamp table, visual-spec 11.3). Literal
+// spec colours; unknown uses the idle grey, as the tag dot does.
+const LAMP_COLOURS = { fail: '#ff5a4e', attention: '#ffb648', pass: '#4fd17a', idle: '#9aa6b2', unknown: '#9aa6b2' };
+const BELLWETHER_LAMPS = ['customers', 'service', 'evaluator', 'investigate', 'compare', 'ledger', 'owner', 'repair', 'next'];
+export async function lampsReflectStateWithText(browser, base) {
+  await load(browser, base, 'bookshop', 1280, 720);
+  assert.ok(await browser.until(() => Boolean(globalThis.__s38Scene)), 'Scene probe unavailable');
+  const shown = await browser.evaluate(() => ({ scene: globalThis.__s38Scene.lamps(),
+    tags: Object.fromEntries([...document.querySelectorAll('#bookshop-stations [data-station][data-lamp]')].map(button =>
+      [button.dataset.station, { tone: button.dataset.lamp, text: button.querySelector('.lamp-text')?.textContent.trim() ?? '' }])) }));
+  for (const [station, tag] of Object.entries(shown.tags)) assert.ok(tag.text.length > 0, `lamps_reflect_state_with_text: the ${station} tag has no lamp text`);
+  assert.deepEqual(Object.keys(shown.scene).sort(), [...BELLWETHER_LAMPS].sort(), 'lamps_reflect_state_with_text: a station lamp is missing from the room');
+  for (const station of BELLWETHER_LAMPS) {
+    const lamp = shown.scene[station], tag = shown.tags[station];
+    assert.ok(tag, `lamps_reflect_state_with_text: the ${station} tag carries no lamp`);
+    assert.equal(lamp.color, LAMP_COLOURS[tag.tone], `lamps_reflect_state_with_text: the ${station} room lamp disagrees with its ${tag.tone} tag`);
+  }
+  const lampMaterials = Object.values(shown.scene);
+  assert.ok(lampMaterials.every(lamp => lamp.basic && lamp.toneMapped === false), 'lamps_reflect_state_with_text: a lamp is lit or tone mapped');
+  assert.ok(new Set(lampMaterials.map(lamp => lamp.material)).size <= new Set(lampMaterials.map(lamp => lamp.color)).size, 'lamps_reflect_state_with_text: lamp materials are not shared per colour');
+  // Every tone, applied to every station in turn, lands in the room as its literal colour.
+  const tones = Object.keys(LAMP_COLOURS);
+  for (let shift = 0; shift < tones.length; shift++) {
+    const lamps = BELLWETHER_LAMPS.map((stationId, index) => ({ stationId, tone: tones[(index + shift) % tones.length], text: 'probe' }));
+    const scene = await browser.evaluate(lamps => { globalThis.__s38Scene.applyLamps(lamps); return globalThis.__s38Scene.lamps(); }, lamps);
+    for (const lamp of lamps) assert.equal(scene[lamp.stationId].color, LAMP_COLOURS[lamp.tone], `lamps_reflect_state_with_text: the ${lamp.stationId} room lamp does not follow tone ${lamp.tone}`);
+  }
+  return { check: 'lamps_reflect_state_with_text', tags: shown.tags };
+}
+
 export async function runAll(base, out, slug, fault = '', only = '') {
   const results = [];
   const run = async (name, zoom, fn, options = {}) => {
@@ -549,6 +721,8 @@ export async function runAll(base, out, slug, fault = '', only = '') {
   await run('inspector', 1, browser => inspectorKeepsStationsReadable(browser, base, slug));
   await run('identifiers', 1, browser => mainViewHasNoInternalIdentifiers(browser, base, slug));
   await run('fallback', 1, browser => fallbackKeepsTagsReadable(browser, base, slug), { webgl: false });
+  await run('recipe', 1, browser => rendererMatchesTierRecipe(browser, base, slug));
+  if (slug === 'bookshop') await run('lamps', 1, browser => lampsReflectStateWithText(browser, base));
   for (const zoom of [1, 2]) await run('narrow', zoom, async browser => [
     // 1280x720 at 200% zoom lays out at 640 CSS pixels, so it stacks too.
     ...(zoom === 2 ? [await narrowStackReach(browser, base, slug, 1280, 720, zoom)] : []),
@@ -572,7 +746,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     try { await runAll(base, out, slug, fault, only); console.error(`FAULT ${fault} NOT CAUGHT`); process.exit(1); }
     catch (error) {
       if (!String(error.message).includes(FAULTS[fault].expect)) { console.error(`FAULT ${fault} failed elsewhere: ${error.message}`); process.exit(1); }
-      console.log(JSON.stringify({ fault, caught: FAULTS[fault].expect }));
+      console.log(JSON.stringify({ fault, caught: FAULTS[fault].expect, message: String(error.message).split('\n')[0] }));
     }
   }
 }
