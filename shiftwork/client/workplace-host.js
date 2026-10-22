@@ -1,6 +1,6 @@
 import { diffWorkplace } from './workplace-view.js';
 
-export function createWorkplaceHost({container,fallback,status,onStation,onConsequence,onAnchors}) {
+export function createWorkplaceHost({container,fallback,status,onStation,onConsequence,onAnchors,onHover}) {
   let latest=null, previous=null, scene=null, token=0, disposed=false, expanded=false, visible=false, mounting=false, timer=null, brokenModule=false;
   let simple=false, unavailable=false, mountedTier=null, failureCode=null, generation=-1, inspector={open:false,widthPx:0};
   let lastInput=-Infinity, inputTimer=null;
@@ -47,7 +47,8 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
       handle=createWorkplaceScene({container,view,tier:mountedTier,reducedMotion:motion.matches,
         onPick(stationId) { if(!disposed && owner===token && latest?.kind==='accepted' && latest.view.context.board===view.context.board && latest.view.context.shiftId===view.context.shiftId) onStation({board:view.context.board,shiftId:view.context.shiftId,stationId,mountToken:owner}); },
         onFailure(code) { if(owner===token && !disposed) failure(code); },
-        onAnchors(positions) { if(owner===token && !disposed) onAnchors?.(positions); }});
+        onAnchors(positions) { if(owner===token && !disposed) onAnchors?.(positions); },
+        onHover(stationId) { if(owner===token && !disposed) onHover?.(stationId); }});
     } catch { if(owner===token && !disposed) failure('init-failed'); return; }
     if(disposed || owner!==token) { handle.dispose(); return; }
     clearTimeout(timer); timer=null; mounting=false; scene=handle; handle.setInspector(inspector);

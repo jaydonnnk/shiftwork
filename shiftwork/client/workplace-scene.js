@@ -1,7 +1,7 @@
 import * as THREE from './vendor/three-r180/three.module.js';
 import { roomDefinitions } from './workplace-rooms.js';
 
-export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure, onAnchors }) {
+export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure, onAnchors, onHover = () => {} }) {
   let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity, pulse = null, indicatorMaterial = null;
   let comparisonPulse = null, selectionPulse = null, plateMaterial = null, wallTrace = null, wallMaterial = null, traceMaterial = null, traceLine = null;
   let handoverMaterial = null, laterMaterial = null;
@@ -131,7 +131,8 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     for(const x of [room.bounds.min[0],room.bounds.max[0]]) for(const y of [room.bounds.min[1],room.bounds.max[1]]) for(const z of [room.bounds.min[2],room.bounds.max[2]]) {
       const p = new THREE.Vector3(x,y,z).applyMatrix4(inverse);
       // At distance d the corner's depth is d-1-p.z; it must cover |p.x| and |p.y| inside the margin.
-      distance = Math.max(distance, 1+p.z+Math.abs(p.x)/(tanH*keep), 1+p.z+Math.abs(p.y)/(tanV*keep));
+      // Gate 3 section 14 (S41): only the floor footprint is fitted, so wall tops may crop and the room fills the stage.
+      if(y===room.bounds.min[1]) distance = Math.max(distance, 1+p.z+Math.abs(p.x)/(tanH*keep), 1+p.z+Math.abs(p.y)/(tanV*keep));
       reach = Math.max(reach, Math.hypot(x-target.x,y-target.y,z-target.z));
     }
     camera.position.copy(target).addScaledVector(direction,distance); camera.lookAt(target);
@@ -414,6 +415,17 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     }
     listen('pointerdown',event=>{ pointer = {x:event.clientX,y:event.clientY,id:event.pointerId,view}; });
     listen('pointercancel',()=>{ pointer=null; });
+    // Gate 3 section 14.2 rule 1: hovering a station reveals its resting-hidden tag. Reports changes only.
+    let hovered=null;
+    const hover=station=>{ if(station===hovered) return; hovered=station; renderer.domElement.style.cursor=station?'pointer':''; onHover(station); };
+    listen('pointermove',event=>{
+      if(event.pointerType==='touch') return;
+      const r=renderer.domElement.getBoundingClientRect(); cursor.set((event.clientX-r.left)/r.width*2-1,-(event.clientY-r.top)/r.height*2+1);
+      raycaster.setFromCamera(cursor,camera);
+      const hit=raycaster.intersectObjects(targets,false)[0];
+      hover(hit?.object.userData.stations[hit.instanceId] ?? null);
+    });
+    listen('pointerleave',()=>hover(null));
     listen('pointerup',event=>{
       const start=pointer; pointer=null;
       if(!start || start.id!==event.pointerId || start.view!==view || Math.hypot(start.x-event.clientX,start.y-event.clientY)>6) return;
