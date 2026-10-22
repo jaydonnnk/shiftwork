@@ -62,6 +62,43 @@ export function logEntries(view, run, checks, events, investigations, selection)
 export const STEP_NAMES = ['Read the complaints', 'Explain the cause', 'Say what would prove you wrong', 'Try two fixes',
   'Choose one', 'Run the shift', 'See what happened'];
 const TERMINAL = new Set(['FINALIZED', 'FAILED']);
+// Counts describe loaded evidence, including a failed run. They never imply
+// successful operation. A broken causal route leaves incident counts unknown.
+export function reduceShiftReport(view, run, checks, events, selection) {
+  const tally = run && view?.slips?.runId === run.id ? view.slips.tally : null;
+  const bound = Boolean(run && run.purpose === 'OPERATION' && TERMINAL.has(run.state) &&
+    view?.run?.id === run.id && selection?.id === run.selection_id && selection.selected_version_id === run.artifact_version_id);
+  const accepted = bound && Array.isArray(checks) && tally?.total === view.run.outputCount;
+  const requests = Object.fromEntries(['pass', 'fail', 'error', 'none'].map(key => [key, accepted ? tally[key] : null]));
+  const ledger = bound && Array.isArray(events) && view.consistency !== 'conflict' &&
+    view.consequences?.chainStatus === 'VALID' && view.consequences.countMatches === true && view.consequences.histogramMatches === true;
+  const runEvents = (events ?? []).filter(event => run && (event.derivation?.run_id === run.id || event.cause_refs?.[0] === run.id));
+  const linked = runEvents.every(event => {
+    const link = event.derivation;
+    return event.synthetic === true && link?.run_id === run.id &&
+      checks?.some(check => check.id === link.check_id && check.run_id === run.id &&
+        check.observed_ref === link.observed_ref && check.verdict === link.verdict) &&
+      view?.consequences?.events.some(row => row.seq === event.seq && row.hash === event.hash && row.linkState === 'linked');
+  });
+  const incidentTypes = new Set(['INCIDENT_OPENED', 'INCIDENT_RESOLVED']);
+  const incidentEvents = (events ?? []).filter(event => incidentTypes.has(event.event_type));
+  const incidentLinks = incidentEvents.every(event => event.synthetic === true && event.derivation);
+  const end = runEvents.length ? Math.max(...runEvents.map(event => event.seq))
+    : view?.context?.inspection.mode === 'current' ? Infinity : null;
+  const start = runEvents.length ? Math.min(...runEvents.map(event => event.seq)) : end;
+  const countable = ledger && linked && incidentLinks;
+  const count = type => countable ? runEvents.filter(event => event.event_type === type).length : null;
+  const balance = predicate => {
+    if (!countable || end == null) return null;
+    const value = incidentEvents.filter(predicate).reduce((n, event) => n + (event.event_type === 'INCIDENT_OPENED' ? 1 : -1), 0);
+    return value < 0 ? null : value;
+  };
+  const openBefore = balance(event => event.seq < start), openAfter = balance(event => event.seq <= end);
+  return { runId: run?.id ?? null, versionLabel: run?.artifact_version_id ?? null,
+    backupLabel: bound ? selection.retained_alternative_version_id ?? null : null, requests,
+    incidentsOpened: count('INCIDENT_OPENED'), incidentsResolved: count('INCIDENT_RESOLVED'), openBefore, openAfter,
+    complete: Boolean(accepted && tally.none === 0 && countable && openBefore != null && openAfter != null) };
+}
 const guide = (step, stationId, status = 'ready', blockedReason = null) =>
   ({ step, name: STEP_NAMES[step - 1], stationId, status, blockedReason });
 

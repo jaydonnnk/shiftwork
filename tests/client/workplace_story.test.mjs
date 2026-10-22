@@ -248,3 +248,113 @@ for (const [fault, row] of Object.entries(FAULTS)) test(`fault_${fault}_fails_${
   }, `Fault ${fault} was not caught`);
 });
 test('story_source_is_unchanged', async () => assert.equal(digest(await readFile(storyPath, 'utf8')), digest(pristine)));
+
+function reportFixture() {
+  const operation = { id: 'run-report', shift_id: 'shift-2', purpose: 'OPERATION', state: 'FINALIZED',
+    artifact_version_id: 'ver-0002', selection_id: 'sel-report' };
+  const selection = { id: 'sel-report', selected_version_id: 'ver-0002', retained_alternative_version_id: 'ver-0003' };
+  const checks = [{ id: 'check-report', run_id: operation.id, observed_ref: 'out-report', verdict: 'fail' }];
+  const historical = { seq: 1, hash: 'old', event_type: 'INCIDENT_OPENED', synthetic: true,
+    cause_refs: ['old-run', 'old-check', 'old-output'],
+    derivation: { run_id: 'old-run', check_id: 'old-check', observed_ref: 'old-output', request_ordinal: 1, verdict: 'fail' } };
+  const linked = (seq, type) => ({ seq, hash: `hash-${seq}`, event_type: type, synthetic: true,
+    cause_refs: [operation.id, 'check-report', 'out-report'],
+    derivation: { run_id: operation.id, check_id: 'check-report', observed_ref: 'out-report', request_ordinal: 1, verdict: 'fail' } });
+  const events = [historical, linked(2, 'INCIDENT_OPENED'), linked(3, 'INCIDENT_RESOLVED'),
+    { ...historical, seq: 4, hash: 'future', cause_refs: ['future-run'], derivation: { ...historical.derivation, run_id: 'future-run' } }];
+  const v = view();
+  v.run = { id: operation.id, outputCount: 2 };
+  v.slips = { runId: operation.id, tally: { total: 2, pass: 1, fail: 1, error: 0, none: 0 } };
+  v.consequences = { chainStatus: 'VALID', countMatches: true, histogramMatches: true,
+    events: events.map(event => ({ seq: event.seq, hash: event.hash, linkState: 'linked' })) };
+  return { v, operation, checks, events, selection };
+}
+async function reportCheck(api) {
+  assert.equal(typeof api.reduceShiftReport, 'function', 'shift_report_matches_ledger: reducer is missing');
+  const f = reportFixture();
+  const reduce = () => api.reduceShiftReport(f.v, f.operation, f.checks, f.events, f.selection);
+  const got = reduce();
+  assert.deepEqual([got.incidentsOpened, got.incidentsResolved], [1, 1], 'shift_report_matches_ledger: count only this run linked events');
+  assert.deepEqual(got, { runId: 'run-report', versionLabel: 'ver-0002', backupLabel: 'ver-0003',
+    requests: { pass: 1, fail: 1, error: 0, none: 0 }, incidentsOpened: 1, incidentsResolved: 1,
+    openBefore: 1, openAfter: 1, complete: true }, 'shift_report_matches_ledger: literal report');
+  f.events[1].derivation.check_id = 'missing-check';
+  const missing = reduce();
+  assert.equal(missing.incidentsOpened, null, 'shift_report_matches_ledger: missing link stays null');
+  assert.equal(missing.openAfter, null, 'shift_report_matches_ledger: missing link makes the after count unknown');
+  assert.equal(missing.complete, false, 'shift_report_matches_ledger: missing link is incomplete');
+  const failed = reportFixture();
+  failed.operation.state = 'FAILED'; failed.events = [];
+  failed.v.slips.tally = { total: 0, pass: 0, fail: 0, error: 0, none: 0 }; failed.v.run.outputCount = 0;
+  assert.deepEqual(api.reduceShiftReport(failed.v, failed.operation, [], [], failed.selection), {
+    runId: 'run-report', versionLabel: 'ver-0002', backupLabel: 'ver-0003', requests: { pass: 0, fail: 0, error: 0, none: 0 },
+    incidentsOpened: 0, incidentsResolved: 0, openBefore: 0, openAfter: 0, complete: true,
+  }, 'shift_report_matches_ledger: failed operation has no invented requests or success');
+}
+test('shift_report_matches_ledger', async () => reportCheck(await load()));
+test('shift_report_absent_run_is_unknown', async () => {
+  const api = await load();
+  let report;
+  assert.doesNotThrow(() => { report = api.reduceShiftReport(null, null, [], [{ synthetic: true, event_type: 'LIMIT_DECLARED', cause_refs: [] }], null); },
+    'shift_report_matches_ledger: absent run must stay unknown without throwing');
+  assert.equal(report.incidentsOpened, null);
+});
+
+const REPORT_GUARDS = [
+  ['purpose', f => { f.operation.purpose = 'EXPERIMENT'; }, "const bound = Boolean(run && run.purpose === 'OPERATION' && TERMINAL.has(run.state) &&", 'const bound = Boolean(run && TERMINAL.has(run.state) &&', 'requests.pass'],
+  ['terminal', f => { f.operation.state = 'RUNNING'; }, 'TERMINAL.has(run.state) &&\n    view?.run', 'true &&\n    view?.run', 'requests.pass'],
+  ['run-identity', f => { f.v.run.id = 'other-run'; }, 'view?.run?.id === run.id && ', '', 'requests.pass'],
+  ['selection-identity', f => { f.selection.id = 'other-choice'; }, 'selection?.id === run.selection_id && ', '', 'requests.pass'],
+  ['selected-version', f => { f.selection.selected_version_id = 'other-version'; }, 'selection.selected_version_id === run.artifact_version_id', 'true', 'requests.pass'],
+  ['checks-accepted', f => { f.checks = null; }, 'bound && Array.isArray(checks) && tally', 'bound && tally', 'requests.pass'],
+  ['slips-identity', f => { f.v.slips.runId = 'other-run'; }, 'view?.slips?.runId === run.id ? view.slips.tally', 'true ? view.slips.tally', 'requests.pass'],
+  ['capture-count', f => { f.v.run.outputCount = 3; }, 'tally?.total === view.run.outputCount', 'true', 'requests.pass'],
+  ['conflict', f => { f.v.consistency = 'conflict'; }, "view.consistency !== 'conflict' &&\n", '', 'incidentsOpened'],
+  ['chain', f => { f.v.consequences.chainStatus = 'unknown'; }, "view.consequences?.chainStatus === 'VALID' && ", '', 'incidentsOpened'],
+  ['ledger-count', f => { f.v.consequences.countMatches = false; }, 'view.consequences.countMatches === true && ', '', 'incidentsOpened'],
+  ['ledger-histogram', f => { f.v.consequences.histogramMatches = false; }, 'view.consequences.histogramMatches === true', 'true', 'incidentsOpened'],
+  ['synthetic', f => { f.events[1].synthetic = false; f.events[1].event_type = 'SALE_COMPLETED'; }, 'event.synthetic === true && link?.run_id', 'true && link?.run_id', 'incidentsOpened'],
+  ['link-run', f => { f.events[1].derivation.run_id = 'other-run'; }, 'link?.run_id === run.id &&\n', 'true &&\n', 'incidentsOpened'],
+  ['check-identity', f => { f.events[1].derivation.check_id = 'missing-check'; }, 'check.id === link.check_id && ', '', 'incidentsOpened'],
+  ['check-run', f => { f.checks[0].run_id = 'other-run'; }, 'check.run_id === run.id &&\n', '', 'incidentsOpened'],
+  ['check-output', f => { f.checks[0].observed_ref = 'other-output'; }, 'check.observed_ref === link.observed_ref && ', '', 'incidentsOpened'],
+  ['check-verdict', f => { f.checks[0].verdict = 'pass'; }, 'check.verdict === link.verdict', 'true', 'incidentsOpened'],
+  ['projected-sequence', f => { f.v.consequences.events[1].seq = 99; }, 'row.seq === event.seq && ', '', 'incidentsOpened'],
+  ['projected-hash', f => { f.v.consequences.events[1].hash = 'other-hash'; }, 'row.hash === event.hash && ', '', 'incidentsOpened'],
+  ['projected-link', f => { f.v.consequences.events[1].linkState = 'incomplete'; }, "row.linkState === 'linked'", 'true', 'incidentsOpened'],
+  ['historical-link', f => { f.events[0].derivation = null; }, 'event.synthetic === true && event.derivation);', 'true);', 'incidentsOpened'],
+  ['historical-synthetic', f => { f.events[0].synthetic = false; }, 'event.synthetic === true && event.derivation);', 'event.derivation);', 'incidentsOpened'],
+  ['history-boundary', f => { f.events = []; f.v.context.inspection.mode = 'history'; }, "view?.context?.inspection.mode === 'current' ? Infinity : null", 'Infinity', 'openBefore'],
+  ['negative-balance', f => { f.events = [f.events[2]]; }, 'return value < 0 ? null : value;', 'return value;', 'openAfter'],
+];
+for (const [name, modify, needle, replacement, field] of REPORT_GUARDS) test(`report_guard_${name}`, async () => {
+  const f = reportFixture(); modify(f);
+  const check = api => {
+    const got = api.reduceShiftReport(f.v, f.operation, f.checks, f.events, f.selection);
+    assert.equal(field.includes('.') ? got.requests.pass : got[field], null, `shift_report_matches_ledger: ${name} must stay unknown`);
+  };
+  check(await load());
+  FAULTS[name] = { needle, replacement };
+  try {
+    const broken = await load(name);
+    assert.throws(() => check(broken), error => error.message.includes(`shift_report_matches_ledger: ${name} must stay unknown`));
+    check(await load());
+    assert.equal(digest(await readFile(storyPath, 'utf8')), digest(pristine));
+  } finally { delete FAULTS[name]; }
+});
+
+for (const [name, needle, replacement, expected] of [
+  ['report-all-events', 'const runEvents = (events ?? []).filter(event => run && (event.derivation?.run_id === run.id || event.cause_refs?.[0] === run.id));',
+    'const runEvents = events ?? [];', 'count only this run linked events'],
+  ['report-null-zero', "const count = type => countable ? runEvents.filter(event => event.event_type === type).length : null;",
+    "const count = type => countable ? runEvents.filter(event => event.event_type === type).length : 0;", 'missing link stays null'],
+]) test(`fault_${name}_fails_shift_report_matches_ledger`, async () => {
+  const row = { needle, replacement }; FAULTS[name] = row;
+  try {
+    const api = await load(name);
+    await assert.rejects(() => reportCheck(api), error => String(error.message).includes(expected));
+    await reportCheck(await load());
+    assert.equal(digest(await readFile(storyPath, 'utf8')), digest(pristine));
+  }
+  finally { delete FAULTS[name]; }
+});
