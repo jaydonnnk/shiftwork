@@ -3490,3 +3490,21 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: a temporary final audit expected thirteen suite receipts, but the driver runs twelve. All twelve receipts were present.
 - Root cause: the expected total was typed instead of derived from the driver.
 - Prevention rule: compare the exact suite-name set derived from the driver, then audit each exit status. Do not guess receipt counts.
+
+## 2026-10-22 S38 recipe fault: assertion order hid the named failure
+
+- What happened: in the first S38 fault pass, `recipe-cap-too-low` failed on the exact DPR ratio assertion instead of its own "lowered DPR too far" assertion.
+- Root cause: a broader assertion that the fault also breaks ran before the guard's specific assertion.
+- Prevention rule: put each guard's specific assertion before any broader assertion its fault also breaks, then rerun every fault row in that family, not only the one that failed.
+
+## 2026-10-22 S38 camera change: an old fault became unreachable
+
+- What happened: after the perspective camera landed, the S37 fault `overlap-fallback` was no longer caught, because every Bellwether tag found a free spot at 1280x720 and the least-overlap branch never ran there.
+- Root cause: the fault matrix was rerun only for the new recipe and lamp rows after a camera and layout change.
+- Prevention rule: after any camera, layout or geometry change, rerun every existing fault row, and treat a fault that is no longer caught as a coverage gap to raise, not a pass.
+
+## 2026-10-22 S38 full pytest ran the clean-install packaging test
+
+- What happened: a full `pytest` run included `tests/packaging/test_clean_env_install_and_run.py`, which builds a temporary venv and runs `pip`/`uv pip sync` from the lockfile, although S38 had no install authority. It then failed on the browser receipt-root guard because pytest's temporary directory is not an approved `/tmp/shiftwork-s*` root.
+- Root cause: the S37 baseline command (`pytest --ignore=tests/packaging`, plus the closure file alone) was not copied; a broader command was typed instead.
+- Prevention rule: copy the previous checkpoint's exact pytest command. Run `tests/packaging/test_client_asset_closure.py` alone, and run the clean-install test only under an explicit install authorization.
