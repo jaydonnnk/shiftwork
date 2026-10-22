@@ -783,6 +783,13 @@ The verdict joins checks through `selectEvidence`: any linked `fail` gives `fail
 
 - **Stage.** `#workplace-world` fills the viewport below the hosting row. At 761px and wider the canvas fills the stage and every floating panel is inset 16px. The page never scrolls horizontally.
 - **Station tags.** The existing `[data-station]` buttons are positioned at `anchorPositions()`, are real buttons in a logical tab order (queue, service, inspector, wall, test bench, owner, then the rest), carry the lamp text, and are at least 44 by 44 CSS pixels including padding. When graphics are unavailable they sit at fixed fallback positions over `room.svg`. The canvas stays `aria-hidden` and outside the tab order.
+- **Tags never cover tags.** From 761px to 1280px wide, with the inspector open or closed, no station tag's rectangle intersects another station tag's rectangle.
+When no nearby spot is clear of everything, a tag takes the spot that avoids other tags first and covers the least of the panels second.
+
+Backtracked 2026-10-22 during S38: the perspective camera moved the anchors, and at 1024x720 the Bellwether evaluator and pipeline tags overlapped with the inspector open and closed (at S37 only closed); at 900x640 and 800x600 overlaps grew in both versions.
+1280x720, 1366x768, 1440x900 and 1920x1080 were clean in both.
+At 1280x720 every tag now finds a free spot, so the existing least-overlap fault could no longer fail any check.
+The user chose to fix the placement in S38 and to add the 1024x720 cells in section 13.9.
 - **Inspector.** Opening a station opens `#station-panel` as a left-side panel, width `clamp(360px, 32vw, 480px)`, from below the step chip to the stage bottom. The scene receives `setInspector({open, widthPx})` and shifts its view offset so the room centre sits in the uncovered area. `#close-inspector` and Escape (outside text fields and editors) close it and return focus to the station's tag. While open, the inspector footer replaces the next-action panel.
 - **Expanded work.** `#expand-work` keeps its role: the inspector spans the stage with a 1120px reading column and the room suspends. `main[data-expanded]` and `aria-expanded` keep their values and meaning.
 - **Next action.** `#next-action-go` is labelled with the guide's step name and calls `activateStation(guide.stationId)`. It sends no request.
@@ -825,11 +832,16 @@ Open choose button -> dialog.showModal -> learner writes reason -> existing
 
 Section 9's evidence matrix, deferred targets and measurement recipe stay.
 This table replaces section 9's budget table.
-The values are proposed and unmeasured; whether the recipe fits them is [unknown] until S38 measures it.
+S38 measured the recipe against these values on one Mac's headless Chrome (Chrome/155, ANGLE Metal, M4 Pro) on 2026-10-22: no budget missed at 1280x720 DPR 1, 1280x720 DPR 2 and 390px DPR 3, with tight margins recorded in the S38 checkpoint. Real-device fit is [unknown].
+
+Backtracked 2026-10-22 during S38, after the first measurement and before any art work: on this Mac's headless Chrome the recipe at 1280x720 and DPR 2 drew a 2560x1140 backing store, estimated at 144.1MiB against the 96MiB standard budget (48 bytes per backing pixel for multisampled colour and depth plus resolve, one shadow map, the PMREM target).
+The original 4,200,000-pixel cap would allow about 200MiB, so the cap and the budget could not both hold, and dropping the environment map (1.5MiB) could not close the gap.
+The user chose to lower the backing-store cap to 1,850,000 pixels and keep antialiasing; the other budgets are unchanged.
+The bytes-per-pixel figure is an estimate, not a GPU reading.
 
 | Budget | Standard | Compact |
 |---|---|---|
-| Maximum DPR | 2.0, lowered so the canvas backing store stays at or below 4,200,000 pixels | 1.0 |
+| Maximum DPR | 2.0, lowered so the canvas backing store stays at or below 1,850,000 pixels | 1.0 |
 | Triangles per settled frame | 120,000 | 40,000 |
 | Draw calls, including shadows | 120 | 60 |
 | Lighting | Hemisphere, one directional key, first-party PMREM environment | Hemisphere and key, no environment map |
@@ -866,7 +878,7 @@ Each new check follows section 10's rule: pass clean, apply one in-memory fault,
 | `explicit_replay_is_labelled_history` | The button plays with the "Recorded replay of history" label and leaves lamps, wall counts and report unchanged. Faults: remove the label; let explicit replay open the report as fresh. |
 | `ambient_stops_where_required` | Five-second frame counts are zero for compact, hidden, offscreen, expanded, reduced motion, running replay and 20 seconds without input; eligible ambient stays <=30 frames per second. Remove each stop condition separately. |
 | `lamps_reflect_state_with_text` | Every row of the lamp table, with text present. Faults: `compare` shows `pass`; `service` shows `pass` for an experiment run; text omitted. |
-| `inspector_keeps_stations_readable` | At 1280x720 with the inspector open, every station tag's rectangle is inside the viewport and outside the inspector. Fault: skip the view offset. |
+| `inspector_keeps_stations_readable` | At 1280x720 and 1024x720 with the inspector open, every station tag's rectangle is inside the viewport and outside the inspector, and at 1280x720 and 1024x720 with the inspector open and closed no station tag covers another (13.6, backtracked 2026-10-22). Faults: skip the view offset; let an unplaceable tag take its first candidate instead of the least covering spot; stop counting already placed tags as taken. Each fails its own assertion at a named cell. |
 | `choose_dialog_has_no_default` | Dialog opens with focus on the rationale, no option preselected; Cancel and Escape send zero requests; the existing guard still blocks an empty rationale. Faults: autofocus the confirm button; close-as-choose. |
 | `shift_report_matches_ledger` | Literal ledger and checks give the exact report counts; a missing link shows "unknown"; the synthetic line is present. Faults: count all events instead of linked ones; turn null into zero. |
 | `picker_uses_switch_guard` | A dirty draft blocks a picker switch exactly as the existing switch control does. Fault: call the slug change directly. |
