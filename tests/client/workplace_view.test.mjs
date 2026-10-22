@@ -729,7 +729,8 @@ async function hostFixture({ hidden=false, offscreen=false, delayed=false, failD
       removeEventListener(type,fn,...args) {listeners.get(type)?.delete(fn);remove(type,fn,...args);}});
   };
   const retry=node(), simpler=node(), status=node(), fallback=node(), controls={querySelector:s=>s.includes('retry')?retry:simpler};
-  const container={clientWidth:680,clientHeight:380,parentElement:{dataset:{},parentElement:controls}};
+  const world=node();
+  const container={closest:()=>world,clientWidth:680,clientHeight:380,parentElement:{dataset:{},parentElement:controls}};
   const document=Object.assign(node(),{hidden}); globalThis.document=document;
   globalThis.devicePixelRatio=1;
   const motion=Object.assign(node(),{matches:false}); globalThis.matchMedia=()=>motion;
@@ -738,7 +739,7 @@ async function hostFixture({ hidden=false, offscreen=false, delayed=false, failD
   globalThis.IntersectionObserver=class {constructor(fn){this.fn=fn;observers.push(this);}observe(){this.fn([{isIntersecting:!offscreen}]);}disconnect(){this.closed=true;}};
   const releases=[]; let allocations=0, disposals=0, picked=0, imports=0, suspension=[];
   const handles=[], consequences=[];
-  const module={createWorkplaceScene(options){if(throwDuringCreate) throw Error('injected construction failure');allocations++;const h={options,applied:[],transitions:[],apply(view,transitions=[]){h.applied.push(view);h.transitions.push(transitions);return startsConsequence;},resize(){},setSuspended(v){suspension.push(v);},setReducedMotion(){},dispose(){disposals++;}};handles.push(h);if(failDuringCreate) options.onFailure('shader-failed');return h;}};
+  const module={createWorkplaceScene(options){if(throwDuringCreate) throw Error('injected construction failure');allocations++;const h={options,applied:[],transitions:[],apply(view,transitions=[]){h.applied.push(view);h.transitions.push(transitions);return startsConsequence;},resize(){},setInspector(){},setAmbient(){},setSuspended(v){suspension.push(v);},setReducedMotion(){},dispose(){disposals++;}};handles.push(h);if(failDuringCreate) options.onFailure('shader-failed');return h;}};
   globalThis.__s29LoadScene=()=>{imports++;return moduleFailure?Promise.reject(Error('injected module failure')):delayed?new Promise(r=>releases.push(()=>r(module))):Promise.resolve(module);};
   let source=process.env.WORKPLACE_HOST_SOURCE ? Buffer.from(process.env.WORKPLACE_HOST_SOURCE,'base64').toString() : await readFile(new URL('../../shiftwork/client/workplace-host.js',import.meta.url),'utf8');
   source=source.replace("'./workplace-view.js'",JSON.stringify(url.href)).replace("await import('./workplace-scene.js')",'await globalThis.__s29LoadScene()');
@@ -747,7 +748,7 @@ async function hostFixture({ hidden=false, offscreen=false, delayed=false, failD
   const {projectWorkplace}=await api();const view=projectWorkplace(input());
   const accepted=(generation=2,v=view)=>({kind:'accepted',view:v,generation,intent:3,reason:'test'});
   const flush=async()=>{await new Promise(r=>setImmediate(r));};
-  return {host,status,fallback,observers,document,view,accepted,flush,handles,consequences,
+  return {host,status,fallback,observers,document,world,view,accepted,flush,handles,consequences,
     listenerCount(owner) {return [...({visibility:document,motion,retry,simpler}[owner]).listeners.values()].reduce((n,set)=>n+set.size,0);},
     release(index=0){releases[index]?.();},visible(value){observers[1].fn([{isIntersecting:value}]);},
     get counts(){return {allocations,disposals,picked};},get importCount(){return imports;},get suspension(){return suspension;}};
@@ -1175,4 +1176,19 @@ test('wall_projection_whitelists_record_payloads_and_bodies', async () => {
   const scan = text => needles.filter(needle => text.includes(needle));
   for (const needle of needles) assert.ok(scan(JSON.stringify({ value: needle })).includes(needle));
   assert.deepEqual(scan(JSON.stringify(v)), [], 'private record material reached the scene projection');
+});
+
+for(const type of ['pointerdown','keydown','touchstart']) test(`s40_owned_${type}_listener_clean_fault_restored`,async()=>{
+  const original=await readFile(new URL('../../shiftwork/client/workplace-host.js',import.meta.url),'utf8');
+  const verify=async()=>{const f=await hostFixture();try{
+    assert.equal(f.world.listeners.get(type)?.size,1,`${type} listener precondition missing`);
+    f.host.dispose();f.host.dispose();
+    assert.equal(f.world.listeners.get(type)?.size,0,`Owned ${type} input listener remains attached`);
+  } finally {f.host.dispose();}};
+  await verify();
+  const needle='world.removeEventListener(type,noteInput);';assert.equal(original.split(needle).length-1,1);
+  process.env.WORKPLACE_HOST_SOURCE=Buffer.from(original.replace(needle,`if(type!==${JSON.stringify(type)}) ${needle}`)).toString('base64');
+  try{await assert.rejects(verify,new RegExp(`Owned ${type} input listener remains attached`));}
+  finally{delete process.env.WORKPLACE_HOST_SOURCE;}
+  await verify();
 });

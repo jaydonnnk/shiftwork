@@ -3,6 +3,8 @@ import { diffWorkplace } from './workplace-view.js';
 export function createWorkplaceHost({container,fallback,status,onStation,onConsequence,onAnchors}) {
   let latest=null, previous=null, scene=null, token=0, disposed=false, expanded=false, visible=false, mounting=false, timer=null, brokenModule=false;
   let simple=false, unavailable=false, mountedTier=null, failureCode=null, generation=-1, inspector={open:false,widthPx:0};
+  let lastInput=-Infinity, inputTimer=null;
+  const world=container.closest('#workplace-world');
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   const controls=container.parentElement.parentElement;
   const retryButton=controls.querySelector('[data-graphics-retry]');
@@ -11,15 +13,22 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
   const hasRoom=board=>board==='bookshop' || board==='gtm' || board==='northline';
   const roomLabel=board=>board==='northline' ? '3D Northline workshop. Select the brief, permission map, bench, acceptance, rollout or handover.' : board==='gtm' ? '3D Stonebridge room. Select signal intake, qualification, routing or ownership.' : '3D Bellwether room. Select intake, the console, diagnosis or assessment.';
   function message(state,text) { status.dataset.state=state; status.textContent=text; }
-  function release() { clearTimeout(timer); timer=null; token+=1; mounting=false; scene?.dispose(); scene=null; container.parentElement.dataset.graphics='fallback'; fallback.hidden=(latest?.view?.context.board ?? latest?.context?.board)!=='bookshop'; }
+  function release() { clearTimeout(inputTimer); inputTimer=null; clearTimeout(timer); timer=null; token+=1; mounting=false; scene?.dispose(); scene=null; container.parentElement.dataset.graphics='fallback'; fallback.hidden=(latest?.view?.context.board ?? latest?.context?.board)!=='bookshop'; }
   function showFailure() { message('unavailable',`3D view unavailable. Your workbench is ready. (${failureCode})${brokenModule?' Graphics installation needs repair.':''}`); retryButton.hidden=false; retryButton.disabled=brokenModule; }
   function failure(code) { unavailable=true; failureCode=code; release(); previous=null; showFailure(); }
   const suspended = () => document.hidden || !visible || expanded;
   function suspend() {
-    const paused=suspended(); scene?.setSuspended(paused);
+    const paused=suspended(); scene?.setSuspended(paused); updateAmbient();
     if(paused && mounting) { release(); previous=null; }
     else if(!paused && !scene) mount();
   }
+  function updateAmbient() {
+    clearTimeout(inputTimer); inputTimer=null;
+    const recent=performance.now()-lastInput<20000;
+    scene?.setAmbient(!suspended() && recent);
+    if(scene && recent && !disposed) inputTimer=setTimeout(updateAmbient,Math.max(1,20000-(performance.now()-lastInput)));
+  }
+  function noteInput() { if(disposed) return; lastInput=performance.now(); updateAmbient(); }
   const tier = () => simple || matchMedia('(max-width: 760px)').matches ? 'compact' : 'standard';
   function resize() { if(scene && mountedTier!==tier()) { release(); previous=null; mount(); return; } scene?.resize({width:container.clientWidth,height:container.clientHeight,pixelRatio:devicePixelRatio}); suspend(); }
   async function mount() {
@@ -41,7 +50,7 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
         onAnchors(positions) { if(owner===token && !disposed) onAnchors?.(positions); }});
     } catch { if(owner===token && !disposed) failure('init-failed'); return; }
     if(disposed || owner!==token) { handle.dispose(); return; }
-    clearTimeout(timer); timer=null; mounting=false; scene=handle; if(inspector.open) handle.setInspector(inspector);
+    clearTimeout(timer); timer=null; mounting=false; scene=handle; handle.setInspector(inspector);
     const transitions=diffWorkplace(previous,view);
     previous=view.consistency==='conflict'?previous:view;
     fallback.hidden=true; container.parentElement.dataset.graphics='ready'; retryButton.hidden=true;
@@ -73,15 +82,17 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
     if(scene) message('ready',view.consistency==='conflict'?'Recorded reads disagree. Inspect the workbench; no outcome is inferred.':roomLabel(view.context.board));
   }
   function retry() { if(disposed || brokenModule) return; unavailable=false; release(); previous=null; mount(); }
-  function onMotion() { scene?.setReducedMotion(motion.matches); }
+  function onMotion() { scene?.setReducedMotion(motion.matches); updateAmbient(); }
   function lowerQuality() { simple=true; simplerButton.setAttribute('aria-pressed','true'); retry(); }
   const size=new ResizeObserver(resize), intersection=new IntersectionObserver(entries=>{ visible=entries[0]?.isIntersecting ?? false; suspend(); });
   size.observe(container); intersection.observe(container);
   document.addEventListener('visibilitychange',suspend); motion.addEventListener('change',onMotion);
+  for(const type of ['pointerdown','keydown','touchstart']) world.addEventListener(type,noteInput,{passive:true});
   retryButton.addEventListener('click',retry); simplerButton.addEventListener('click',lowerQuality);
   function setInspector(value) { inspector={open:!!value?.open,widthPx:value?.open?Math.max(0,Number(value.widthPx)||0):0}; scene?.setInspector(inspector); }
-  return {publish,setExpanded(value) {expanded=value;suspend();},setInspector,retry,dispose() {
+  return {publish,setExpanded(value) {expanded=value;suspend();},setInspector,noteInput,retry,dispose() {
     if(disposed) return; disposed=true; release(); previous=null; latest=null;
+    for(const type of ['pointerdown','keydown','touchstart']) world.removeEventListener(type,noteInput);
     size.disconnect(); intersection.disconnect(); document.removeEventListener('visibilitychange',suspend); motion.removeEventListener('change',onMotion);
     retryButton.removeEventListener('click',retry); simplerButton.removeEventListener('click',lowerQuality);
   }};

@@ -7,7 +7,9 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   let handoverMaterial = null, laterMaterial = null;
   let ownerMarker = null, routingLabel = null, routingTravel = null;
   let size = null, inspector = { open: false, widthPx: 0 }, anchorsDirty = true;
-  let environment = null;
+  let environment = null, attentionRing = null, ambientActive = false, replayRunning = false;
+  let cameraEase = null, inspectorReady = false, drawInset = 0;
+  const drawTarget = new THREE.Vector3();
   const lampMeshes = {}, lampMaterials = {};
   const candidateMaterials = {}, routingMaterials = {}, northlineMarkers = {}, geometries = new Set(), materials = new Set(), targets = [];
   const roundedCache = new Map();
@@ -20,7 +22,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   const camera = new THREE.PerspectiveCamera(pose.fov,1,.1,100);
   const azimuth = THREE.MathUtils.degToRad(pose.azimuth), elevation = THREE.MathUtils.degToRad(pose.elevation);
   const direction = new THREE.Vector3(Math.sin(azimuth)*Math.cos(elevation),Math.sin(elevation),Math.cos(azimuth)*Math.cos(elevation));
-  camera.position.copy(target).add(direction); camera.lookAt(target);
+  camera.position.copy(target).add(direction); camera.lookAt(target); drawTarget.copy(target);
   scene.fog = new THREE.Fog(room.fog,1,2);
   const listeners = [];
   const listen = (type,fn) => { renderer.domElement.addEventListener(type,fn); listeners.push([type,fn]); };
@@ -29,11 +31,41 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   function settleSelectionPulse() { selectionPulse = null; if (plateMaterial) plateMaterial.emissiveIntensity = 0; }
   function settleWallTrace() { wallTrace = null; if (routingTravel) ownerMarker.position.copy(routingTravel.to); routingTravel = null; if (traceLine) traceLine.visible = false; if (traceMaterial) traceMaterial.opacity = 0; if (wallMaterial) wallMaterial.emissiveIntensity = 0; }
   function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); settleWallTrace(); }
+  function ambientEligible() { return ambientActive && tier !== 'compact' && !reducedMotion && !suspended && !replayRunning; }
+  function settleAmbient() {
+    attentionRing?.scale.setScalar(1);
+    for(const tone of ['attention','fail']) lampMaterials[tone]?.color.set(tone==='attention'?'#ffb648':'#ff5a4e');
+  }
+  function setAmbient(active) {
+    if(disposed || ambientActive===active) return;
+    ambientActive=active;
+    if(!ambientEligible()) settleAmbient();
+    requestFrame();
+  }
+  function cameraFrame(now) {
+    if(!cameraEase) return;
+    const progress=Math.min(1,(now-cameraEase.start)/180), eased=progress*progress*(3-2*progress);
+    camera.position.lerpVectors(cameraEase.fromPosition,cameraEase.toPosition,eased);
+    drawTarget.lerpVectors(cameraEase.fromTarget,cameraEase.toTarget,eased);
+    drawInset=THREE.MathUtils.lerp(cameraEase.fromInset,cameraEase.toInset,eased);
+    camera.lookAt(drawTarget);
+    camera.near=progress===1?cameraEase.toNear:cameraEase.near; camera.far=progress===1?cameraEase.toFar:cameraEase.far;
+    viewOffset(drawInset,size.width,size.height);
+    camera.updateProjectionMatrix(); camera.updateMatrixWorld(); anchorsDirty=true;
+    if(progress===1) cameraEase=null;
+  }
+  function settleCamera() { if(cameraEase) cameraFrame(cameraEase.start+180); }
   function draw(now = performance.now()) {
     raf = null;
     if (disposed || suspended) return;
-    if (tier === 'compact' && now - lastDraw < 1000 / 30 - .2) { raf = requestAnimationFrame(draw); return; }
+    if ((tier === 'compact' || (ambientEligible() && !pulse && !comparisonPulse && !selectionPulse && !wallTrace && !cameraEase)) && now - lastDraw < 1000 / 30 - .2) { raf = requestAnimationFrame(draw); return; }
     lastDraw = now;
+    cameraFrame(now);
+    if(ambientEligible()) {
+      const wave=(1-Math.cos(now*2*Math.PI/2500))/2;
+      attentionRing?.scale.setScalar(1+.05*wave);
+      for(const tone of ['attention','fail']) lampMaterials[tone]?.color.set(tone==='attention'?'#ffb648':'#ff5a4e').multiplyScalar(1-.15*wave);
+    }
     if (pulse) {
       const progress = (now - pulse.start) / 160;
       if (progress >= 1) settlePulse();
@@ -66,7 +98,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     try { renderer.render(scene, camera); }
     catch { onFailure('render-failed'); }
     if (anchorsDirty && !disposed) { anchorsDirty = false; onAnchors?.(anchorPositions()); }
-    if (pulse || comparisonPulse || selectionPulse || wallTrace) requestFrame();
+    if (pulse || comparisonPulse || selectionPulse || wallTrace || cameraEase || ambientEligible()) requestFrame();
   }
   function requestFrame() { if (!disposed && !suspended && raf === null) raf = requestAnimationFrame(draw); }
   function resize({width,height,pixelRatio}) {
@@ -84,10 +116,14 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   // The inspector covers the left of the stage, so the room is fitted to the
   // uncovered width and the view offset centres it there. Same pose; the camera
   // only moves along its fixed direction so every bound corner keeps the margin.
-  function fit() {
+  function viewOffset(inset,width,height) {
+    if(inset>0) camera.setViewOffset(width,height,-inset/2,0,width,height); else camera.clearViewOffset();
+  }
+  function fit(animate = false) {
+    const fromPosition=camera.position.clone(), fromTarget=drawTarget.clone(), fromInset=drawInset, fromNear=camera.near, fromFar=camera.far;
     if(disposed || !size) return;
     const {width,height} = size;
-    const inset = inspector.open ? Math.min(Math.max(0,inspector.widthPx),width*.6) : 0;
+    const inset = inspector.open && size.width>=761 ? Math.min(Math.max(0,inspector.widthPx),width*.6) : 0;
     camera.position.copy(target).add(direction); camera.lookAt(target); camera.updateMatrixWorld();
     const inverse = camera.matrixWorldInverse, keep = 1-pose.margin;
     const tanV = Math.tan(THREE.MathUtils.degToRad(pose.fov)/2), tanH = tanV*(width-inset)/height;
@@ -101,8 +137,14 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     camera.position.copy(target).addScaledVector(direction,distance); camera.lookAt(target);
     camera.near = Math.max(.1,distance-reach-1); camera.far = distance+reach+1; camera.aspect = width/height;
     scene.fog.near = distance*1.4; scene.fog.far = distance*2.6;
-    if(inset>0) camera.setViewOffset(width,height,-inset/2,0,width,height); else camera.clearViewOffset();
-    camera.updateProjectionMatrix(); anchorsDirty = true; requestFrame();
+    viewOffset(inset,width,height);
+    camera.updateProjectionMatrix();
+    cameraEase=null;
+    if(animate && size.width>=761 && !reducedMotion && !suspended) {
+      cameraEase={start:performance.now(),fromPosition,fromTarget,fromInset,toPosition:camera.position.clone(),toTarget:target.clone(),toInset:inset,near:Math.min(fromNear,camera.near),far:Math.max(fromFar,camera.far),toNear:camera.near,toFar:camera.far};
+      cameraFrame(cameraEase.start);
+    } else { drawTarget.copy(target); drawInset=inset; }
+    anchorsDirty = true; requestFrame();
   }
   // Gate 3 section 13.3: a cached first-party rounded box, one bevel segment.
   // Too-small parts and the compact tier use the shared unit box.
@@ -136,8 +178,11 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     finally { generator.dispose(); unit.dispose(); shell.dispose(); glow.dispose(); studio.clear(); }
   }
   function setInspector(value) {
-    inspector = { open: !!value?.open, widthPx: value?.open ? Number(value.widthPx) || 0 : 0 };
-    fit();
+    const next = { open: !!value?.open, widthPx: value?.open ? Number(value.widthPx) || 0 : 0 };
+    const changed=next.open!==inspector.open || next.widthPx!==inspector.widthPx;
+    inspector=next;
+    if(changed) fit(inspectorReady);
+    inspectorReady=true;
   }
   function anchorPositions() {
     const positions = {};
@@ -151,7 +196,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   }
   function dispose() {
     if(disposed) return; disposed = true;
-    settleAllPulses();
+    settleAllPulses(); settleAmbient(); cameraEase=null; ambientActive=false;
     if(raf!==null) cancelAnimationFrame(raf); raf = null;
     for(const [type,fn] of listeners) renderer?.domElement.removeEventListener(type,fn);
     listeners.length = 0; targets.length = 0;
@@ -278,11 +323,21 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
         const lampMesh = new THREE.Mesh(bulb,lampMaterials.idle); lampMesh.position.fromArray(anchor); scene.add(lampMesh); lampMeshes[stationId] = lampMesh;
       }
     }
+    const ringGeometry=new THREE.TorusGeometry(.82,.035,6,48); geometries.add(ringGeometry);
+    const ringMaterial=new THREE.MeshBasicMaterial({color:'#ffb648',toneMapped:false}); materials.add(ringMaterial);
+    attentionRing=new THREE.Mesh(ringGeometry,ringMaterial); attentionRing.rotation.x=-Math.PI/2; scene.add(attentionRing);
     const testColors = {RESERVED:'#edbd68',RUNNING:'#91acb9',COMPLETE:'#8fbf9f',FAILED:'#d98a7a'};
     function apply(next, transitions = []) {
       if(disposed) return false;
       let startedConsequence = false;
       view = next; const anchor = next && room.stationAnchors[next.station];
+      const attention=next?.consistency!=='conflict' && room.stationAnchors[next?.attention];
+      attentionRing.visible=!!attention; attentionRing.userData.stationId=attention?next.attention:null;
+      if(attention) attentionRing.position.set(attention[0],.12,attention[2]);
+      if(transitions.some(item=>item.kind==='station-focus') && size?.width>=761) {
+        const offset=new THREE.Vector3(...(anchor ?? room.cameraTarget)).sub(new THREE.Vector3(...room.cameraTarget)).clampLength(0,.3);
+        target.fromArray(room.cameraTarget).add(offset); fit(true);
+      }
       for(const [stationId,lampMesh] of Object.entries(lampMeshes)) lampMesh.material = lampMaterials[next?.lamps?.find(lamp=>lamp.stationId===stationId)?.tone] ?? lampMaterials.idle;
       rim.visible = !!anchor; if(anchor) rim.position.set(anchor[0],.1,anchor[2]);
       const trialState = next?.tests?.diagnostic?.trials?.[0]?.state;
@@ -373,7 +428,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     apply(view,[]);
     resize({width:container.clientWidth,height:container.clientHeight,pixelRatio:devicePixelRatio});
     if(raf!==null) cancelAnimationFrame(raf); raf = null; draw();
-    return { apply, resize, setInspector, anchorPositions, setSuspended(value) { suspended=value; if(value) settleAllPulses(); if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
-      setReducedMotion(value) { reducedMotion=value; if(value) settleAllPulses(); requestFrame(); }, dispose };
+    return { apply, resize, setInspector, anchorPositions, setSuspended(value) { suspended=value; if(value) { settleAllPulses(); settleAmbient(); settleCamera(); } if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
+      setReducedMotion(value) { reducedMotion=value; if(value) { settleAllPulses(); settleAmbient(); settleCamera(); } requestFrame(); }, setAmbient, dispose };
   } catch(error) { dispose(); throw error; }
 }
