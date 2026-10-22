@@ -443,6 +443,7 @@ try {
     assert.equal(comparison.trials.length, 6);
     assert.ok(comparison.outcome.eligibility.every(row => row.eligible));
     await evaluate(async () => { const r = await fetch('/__test__/checkpoint/comparison', { method: 'POST' }); if (!r.ok) throw new Error('Comparison checkpoint failed'); });
+    await click('open-choose-a');
     await evaluate(() => { const input = document.getElementById('selection-rationale'); input.value = 'Choose the independently eligible rules-first repair.'; input.dispatchEvent(new Event('input')); });
     await click('select-candidate-a');
     await waitFor(() => document.getElementById('selection-note').textContent.startsWith('Choice '), 'Explicit choice was not retained');
@@ -457,6 +458,9 @@ try {
     await station('wall'); await click('operate-pipeline');
     await waitFor(() => document.getElementById('run-state').textContent.includes('FINALIZED') && document.querySelector('[data-selection-field="executed-version"] strong').textContent.split(' · ')[0] === document.querySelector('[data-selection-field="operating-choice"] strong').textContent.split(' · ')[0], 'Selected operation did not finalize', 60000);
     const operated = await verifyOutput();
+    await waitFor(() => document.getElementById('shift-report').open, 'The completed operation did not open its report');
+    await click('close-shift-report');
+    await waitFor(() => !document.getElementById('shift-report').open && document.activeElement.id === 'open-shift-report', 'The report did not close and return focus');
     assert.equal(operated.board.latest_run.artifact_version_id, chosen.selected_version_id);
     assert.ok(operated.checks.every(row => row.verdict === 'pass'), 'Selected operation failed qualification');
     const operatedEvents = (await api('/api/engagements/gtm/ledger')).events.filter(row => row.cause_refs[0] === operated.board.latest_run.id);

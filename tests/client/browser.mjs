@@ -1048,6 +1048,7 @@ try {
     let selection = null;
     if (choose) {
       const before = await (await fetch('/api/engagements/bookshop/board')).json();
+      document.getElementById('open-choose-a').click();
       document.getElementById('selection-rationale').value = 'A answered the required tasks in the shared trial.';
       document.getElementById('selection-rationale').dispatchEvent(new Event('input'));
       await wait('eligible A to become selectable', () => !document.getElementById('select-candidate-a').disabled);

@@ -441,6 +441,7 @@ try {
     assert.equal(comparison.trials.length, 6);
     assert.ok(comparison.outcome.eligibility.every(row => row.eligible));
     await evaluate(async () => { const r = await fetch('/__test__/checkpoint/comparison', { method: 'POST' }); if (!r.ok) throw new Error('Comparison checkpoint failed'); });
+    await click('open-choose-a');
     await evaluate(() => { const input = document.getElementById('selection-rationale'); input.value = 'Keep candidate A with its exact verified commitments and worksheets.'; input.dispatchEvent(new Event('input')); });
     await click('select-candidate-a');
     await waitFor(() => document.getElementById('selection-note').textContent.startsWith('Choice '), 'Explicit choice was not retained');
@@ -455,6 +456,9 @@ try {
     await station('rollout'); await click('operate-pilot');
     await waitFor(() => document.getElementById('run-state').textContent.includes('FINALIZED') && document.querySelector('[data-selection-field="executed-version"] strong').textContent.split(' · ')[0] === document.querySelector('[data-selection-field="operating-choice"] strong').textContent.split(' · ')[0], 'Selected pilot did not finalize', 60000);
     const pilot = await verifyOutput();
+    await waitFor(() => document.getElementById('shift-report').open, 'The completed pilot did not open its report');
+    await click('close-shift-report');
+    await waitFor(() => !document.getElementById('shift-report').open && document.activeElement.id === 'open-shift-report', 'The report did not close and return focus');
     assert.equal(pilot.board.latest_run.artifact_version_id, chosen.selected_version_id);
     assert.ok(pilot.checks.every(row => row.verdict === 'pass'), 'Selected pilot failed acceptance');
     const pilotEvents = (await api('/api/engagements/northline/ledger')).events.filter(row => row.cause_refs[0] === pilot.board.latest_run.id);
