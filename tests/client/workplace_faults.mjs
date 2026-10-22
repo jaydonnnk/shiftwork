@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39|40)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39|40|41)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
@@ -192,7 +192,7 @@ const browserFlag=process.argv.indexOf('--browser');
 if(browserFlag!==-1) {
   const base=process.argv[browserFlag+1];
   const resourceRows=[
-    ...['pointerdown','pointerup','pointercancel','webglcontextlost'].map(type=>({name:`omit-${type}`,expected:`Owned ${type} listener remains attached`})),
+    ...['pointerdown','pointerup','pointercancel','pointermove','pointerleave','webglcontextlost'].map(type=>({name:`omit-${type}`,expected:`Owned ${type} listener remains attached`})),
     {name:'omit-shadow',expected:'Owned shadow target remains undisposed'},
     {name:'omit-environment',expected:'Owned environment target remains undisposed'},
     {name:'omit-rounded-cache',expected:'Owned rounded geometry remains allocated'},
@@ -201,7 +201,7 @@ if(browserFlag!==-1) {
     {name:'page-cache-omit-focus',expected:'Page-cache return changed editor continuity or graphics ownership',cache:true},
     ...['generation','intent','current-focus','node','enabled'].map(focus=>({name:`focus-guard-${focus}`,expected:`Focus ${focus} guard restored a stale editor`,focus})),
     ...[
-      ...['pointerdown','pointerup','pointercancel','webglcontextlost'].map(type=>[`omit-${type}`,`Partial ${type} listener remains attached`]),
+      ...['pointerdown','pointerup','pointercancel','pointermove','pointerleave','webglcontextlost'].map(type=>[`omit-${type}`,`Partial ${type} listener remains attached`]),
       ['omit-shadow','Partial shadow target remains undisposed'],['omit-dispose-raf','Partial frame remains scheduled'],
       ['omit-environment','Partial environment target remains undisposed'],['omit-rounded-cache','Partial rounded geometry remains allocated'],
       ['omit-geometry','Partial geometry remains allocated'],['omit-material','Partial material remains allocated'],['omit-context','Partial context remains live'],

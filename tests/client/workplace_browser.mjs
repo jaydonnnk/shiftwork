@@ -19,7 +19,7 @@ export function replaceOnce(text, needle, replacement) {
 
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900,layoutFault=''}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39|40)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39|40|41)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -120,7 +120,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
     }
     if((hostTimeout || hostEvaluation) && name==='/workplace-host.js') {
       let source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
-      const needle='export function createWorkplaceHost({container,fallback,status,onStation,onConsequence,onAnchors}) {';
+      const needle='export function createWorkplaceHost({container,fallback,status,onStation,onConsequence,onAnchors,onHover}) {';
       assert.equal(source.split(needle).length-1,1,'Host construction observation anchor changed');
       source=replaceOnce(source,needle,needle+' globalThis.__s29HostConstructions=(globalThis.__s29HostConstructions??0)+1;');
       if(hostEvaluation) source='globalThis.__s29HostEvaluations=(globalThis.__s29HostEvaluations??0)+1;throw Error("injected host evaluation");\n'+source;
@@ -436,7 +436,7 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
         'omit-environment':['environment?.dispose(); environment = null;','environment = null;'],
         'omit-rounded-cache':['geometries.add(geometry); roundedCache.set(key,geometry);','roundedCache.set(key,geometry);'],
         'omit-routing-label':['routingLabel?.remove();','void 0;'],
-        ...Object.fromEntries(['pointerdown','pointerup','pointercancel','webglcontextlost'].map(type=>[`omit-${type}`,['renderer?.domElement.removeEventListener(type,fn);',`if(type!==${JSON.stringify(type)}) renderer?.domElement.removeEventListener(type,fn);`]])),
+        ...Object.fromEntries(['pointerdown','pointerup','pointercancel','pointermove','pointerleave','webglcontextlost'].map(type=>[`omit-${type}`,['renderer?.domElement.removeEventListener(type,fn);',`if(type!==${JSON.stringify(type)}) renderer?.domElement.removeEventListener(type,fn);`]])),
         'omit-dispose-raf':['if(disposed) return; disposed = true;\n    settleAllPulses(); settleAmbient(); cameraEase=null; ambientActive=false;\n    if(raf!==null) cancelAnimationFrame(raf);','if(disposed) return; disposed = true;\n    settleAllPulses(); settleAmbient(); cameraEase=null; ambientActive=false;'],
         'omit-suspend-raf':['cancelAnimationFrame(raf); raf=null;','raf=null;'],
       };
@@ -615,7 +615,7 @@ export async function runResourceControl(base,out,fault='',suspend=false,slug='b
     assert.ok(result.pendingBefore>0,'Pending frame precondition missing');
     assert.equal(result.pendingAfter,0,`Owned ${suspend?'suspension':'disposal'} frame remains scheduled`);
     if(!suspend) {
-      for(const type of ['pointerdown','pointerup','pointercancel','webglcontextlost']) {
+      for(const type of ['pointerdown','pointerup','pointercancel','pointermove','pointerleave','webglcontextlost']) {
         assert.equal(result.before[type],1,`${type} listener precondition missing`);
         assert.equal(result.listeners[type],0,`Owned ${type} listener remains attached`);
       }
@@ -668,7 +668,7 @@ export async function runPartialInitialization(base,out,fault='partial-init',slu
     assert.ok(result.before?.pending>0 && result.before.shadows>0 && result.before.resources.contexts===1 && result.before.resources.geometries>0 && result.before.resources.materials>0,'Partial allocation preconditions missing');
     assert.ok(result.lost,'Partial context remains live');assert.equal(result.canvases,0,'Partial canvas remains connected');
     assert.equal(result.pending,0,'Partial frame remains scheduled');
-    for(const type of ['pointerdown','pointerup','pointercancel','webglcontextlost']) {
+    for(const type of ['pointerdown','pointerup','pointercancel','pointermove','pointerleave','webglcontextlost']) {
       assert.equal(Object.fromEntries(result.before.listeners)[type],1,'Partial listener precondition missing');
       assert.equal(result.listeners[type],0,`Partial ${type} listener remains attached`);
     }

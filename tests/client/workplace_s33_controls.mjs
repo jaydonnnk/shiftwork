@@ -10,7 +10,7 @@ import { runJourney } from './workplace_s32.mjs';
 import { runLater } from './workplace_s33.mjs';
 
 const out = process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:33|40)-/.test(out ?? ''), 'Pass a disposable /tmp/shiftwork-s33-* or /tmp/shiftwork-s40-* output directory');
+assert.ok(/^\/tmp\/shiftwork-s(?:33|40|41)-/.test(out ?? ''), 'Pass a disposable /tmp/shiftwork-s33-* or /tmp/shiftwork-s40-* output directory');
 await mkdir(out, { recursive: true });
 function freePort() {
   return new Promise((resolve, reject) => {
