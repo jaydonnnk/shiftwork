@@ -95,13 +95,14 @@ for(const [width,dpr] of cells) {
       const result=await b.evaluate(async compact=>{
         globalThis.__workplaceSamples=[]; const end=performance.now()+30000;
         let n=0;
-        while(performance.now()<end) { globalThis.__workplaceApply(n++%2?(document.body.dataset.board==='northline'?'brief':document.body.dataset.board==='gtm'?'signals':'customers'):(document.body.dataset.board==='northline'?'map':document.body.dataset.board==='gtm'?'rules':'evaluator')); await new Promise(requestAnimationFrame); }
+        while(performance.now()<end) { globalThis.__workplaceApply(n++%2?(document.body.dataset.board==='northline'?'brief':document.body.dataset.board==='gtm'?'signals':'customers'):(document.body.dataset.board==='northline'?'map':document.body.dataset.board==='gtm'?'rules':'evaluator'),[{kind:'station-focus'}]); await new Promise(requestAnimationFrame); }
         const samples=globalThis.__workplaceSamples; globalThis.__workplaceSamples=null; return samples;
       },width===390);
       const intervals=result.slice(1).map((r,i)=>r.time-result[i].time);
       assert.ok(result.length>1,'No real frame work was sampled');
       tier.samples.push({intervals,median:nearest(intervals,.5),p95:nearest(intervals,.95),maxTriangles:Math.max(...result.map(r=>r.triangles)),maxCalls:Math.max(...result.map(r=>r.calls))});
     }
+    assert.ok(await b.until(()=>globalThis.__workplaceControls?.state().cameraEase===false,500),'Camera ease did not settle before the idle measurement');
     tier.idle=await b.evaluate(async()=>{await new Promise(r=>setTimeout(r,100));const before=globalThis.__workplaceProbe.frames;await new Promise(r=>setTimeout(r,10000));return globalThis.__workplaceProbe.frames-before;});
     assert.equal(tier.idle,0,'Idle scene keeps scheduling frames');
     // Backing store at 48 bytes per pixel (multisampled colour and depth plus resolve) standard, 12 compact;
@@ -109,6 +110,19 @@ for(const [width,dpr] of cells) {
     tier.backing=await b.evaluate(()=>({width:globalThis.__workplaceProbe.width,height:globalThis.__workplaceProbe.height,environmentTexels:globalThis.__workplaceProbe.environmentTexels}));
     tier.estimatedBytes=await b.evaluate(()=>{const p=globalThis.__workplaceProbe;return p.width*p.height*(p.tier==='compact'?12:48)+(p.tier==='compact'?0:1024*1024*8)+p.environmentTexels*8+1024*1024;});
     tier.budgetMisses=budgetMisses(tier);
+    tier.ambient=[];
+    for(let sample=0;sample<3;sample++) {
+      const row=await b.evaluate(async()=>{
+        document.getElementById('workplace-world').dispatchEvent(new PointerEvent('pointerdown',{bubbles:true}));
+        await new Promise(r=>setTimeout(r,600));
+        globalThis.__workplaceSamples=[];await new Promise(r=>setTimeout(r,5000));
+        const frames=globalThis.__workplaceSamples;globalThis.__workplaceSamples=null;
+        return {frames:frames.length,seconds:5,maxTriangles:Math.max(0,...frames.map(r=>r.triangles)),maxCalls:Math.max(0,...frames.map(r=>r.calls))};
+      });
+      assert.ok(width<761?row.frames===0:row.frames>0&&row.frames<=150,'Ambient drawing cap missed');
+      assert.ok(row.maxTriangles<=BUDGETS[tierName(tier)].triangles && row.maxCalls<=BUDGETS[tierName(tier)].calls,'Ambient geometry budget missed');
+      tier.ambient.push(row);
+    }
     await writeFile(path.join(out,'performance.json'),JSON.stringify(report,null,2)+'\n');
     console.log(JSON.stringify({width,dpr,backing:tier.backing,bytes:tier.estimatedBytes,triangles:Math.max(...tier.samples.map(r=>r.maxTriangles)),calls:Math.max(...tier.samples.map(r=>r.maxCalls)),median:tier.samples.map(r=>r.median),p95:tier.samples.map(r=>r.p95),cold:tier.cold.map(r=>r.ms),idle:tier.idle,misses:tier.budgetMisses}));
   } finally {await b.close();}
