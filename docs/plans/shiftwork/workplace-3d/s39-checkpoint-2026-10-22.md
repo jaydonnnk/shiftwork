@@ -1,10 +1,10 @@
 # S39 checkpoint, 2026-10-22
 
-S39 is ACCEPTED by the user on 2026-10-22 within the evidence and carried
-limits below. The same message authorizes focused commits, merge and push to
-main, followed by a copy-paste prompt to start S40 in a new chat. Publication
-verification is pending. No S40 implementation occurs in this publication turn.
-Earlier continuation stops and pending statements below are historical.
+S39 is ACCEPTED and its eight focused implementation, test and acceptance
+commits are published to main. The verified implementation packet ends at
+4a1e26fabc6c38c64e70802fd6099ad65a80865e; later publication-record commits do
+not change tested client bytes. S40 is not implemented in this chat. The
+publication receipt at the end is current; earlier pending states are historical.
 
 ## Authority and decisions
 
@@ -366,3 +366,31 @@ matched the final S39 fault/restored source hashes exactly. Receipts are
 /tmp/shiftwork-s39-ship-20261022/python.log. The index was
 empty, the branch was shiftwork/slice-39, and HEAD, local main and remote main
 were 2d59fec856ad1a0db23e2f57e2e44c9321ad53ee before committing.
+
+
+## Verified S39 publication, 2026-10-22
+
+Eight focused commits, 680624a5 through 4a1e26fa, were created on
+shiftwork/slice-39 without co-author trailers. Main fast-forwarded from 2d59fec
+and was pushed. git ls-remote origin refs/heads/main then returned
+4a1e26fabc6c38c64e70802fd6099ad65a80865e, equal to local main and slice-39.
+The working tree and index were clean at that verification. This receipt can
+be followed by a documentation-only publication-record commit; resolve the
+latest main tip live rather than treating this captured SHA as permanent HEAD.
+
+On main, Node 257 and closure 9 passed again. The fresh precommit Python run
+reported 1454 passed, one skipped, two warnings and only the known port_dead
+failure. All 96 tracked fixture-path files are unchanged. No installer or
+excluded provider, credential, fixture or deployment action occurred.
+The retained renderer and performance receipt boundaries above still apply.
+
+Publication receipts, source inventory and commit packet are under
+/tmp/shiftwork-s39-ship-20261022/: commits.json, precommit-verification.json,
+implementation-publication.json, main-node.log, main-closure.log and python.log.
+The local slice-39 branch is retained; only main was pushed. No S40 branch or
+implementation was created here. A copy-paste action prompt for S40 is delivered
+outside the repository with the final post-receipt main SHA. S40 commits, merge,
+push, installations, downloads, providers, credentials, protected fixtures and
+deployment still need separate authority. The two owned S39 review previews
+remain available as recorded in /tmp/shiftwork-s39-resume-2/previews.json;
+their databases are review worlds, not fresh S40 baselines.
