@@ -14,6 +14,21 @@ import { chromePath } from './env.mjs';
 // A fault run executes only the check its expected assertion names, so one fault
 // cannot be masked by an earlier check that it also happens to break.
 export const FAULTS = {
+  // S41 calm room (Gate 3 section 14.4).
+  'resting-all-visible': { file: '/app.js',
+    needle: "button.dataset.resting = button.dataset.station === speaker?.stationId ? 'speaker' : String(resting.has(button.dataset.station));",
+    replacement: "button.dataset.resting = 'true';", expect: 'resting_tags_show_next_and_one_failure: rest-visible tags' },
+  'speaker-tag-shows': { file: '/app.js',
+    needle: "button.dataset.resting = button.dataset.station === speaker?.stationId ? 'speaker' : String(resting.has(button.dataset.station));",
+    replacement: 'button.dataset.resting = String(resting.has(button.dataset.station));', expect: 'one_narrator_bubble: speaker tag beside its bubble' },
+  'two-bubbles': { file: '/app.js', needle: "$('owner-bubble').hidden = !said('owner');", replacement: "$('owner-bubble').hidden = false;",
+    expect: 'one_narrator_bubble: bubbles shown' },
+  'open-tag-hidden': { file: '/styles.css', needle: '.world[data-inspector="open"] .room[data-graphics="ready"] .station[data-resting="false"][aria-pressed="true"] { opacity: 1; pointer-events: auto; }',
+    replacement: '', expect: 'resting_tags_show_next_and_one_failure: the open station hides its tag' },
+  'focus-stays-hidden': { file: '/styles.css', needle: '.station:is([data-resting="false"], [data-resting="speaker"]):not(:focus-visible):not([data-hover])',
+    replacement: '.station:is([data-resting="false"], [data-resting="speaker"]):not([data-hover])', expect: 'hidden_tags_stay_reachable: a focused tag stays hidden' },
+  'hidden-leaves-tab-order': { file: '/styles.css', needle: ':not([data-hover]) { opacity: 0; pointer-events: none; }',
+    replacement: ':not([data-hover]) { opacity: 0; pointer-events: none; display: none; }', expect: 'hidden_tags_stay_reachable: a hidden tag cannot take focus' },
   'choose-confirm-focus': { file: '/app.js', needle: "  $('selection-rationale').focus();",
     replacement: "  document.getElementById('select-candidate-a').disabled = false; document.getElementById('select-candidate-a').focus();",
     expect: 'choose_dialog_has_no_default: rationale must receive focus' },
@@ -217,7 +232,7 @@ export const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftRepor
 
 export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S40 receipts must use a disposable /tmp/shiftwork-s36-*, s37-*, s38-*, s39-* or s40-* root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S40 receipts must use a disposable /tmp/shiftwork-s36-*, s37-*, s38-*, s39-* or s40-* root');
   const patch = fault ? FAULTS[fault] : null;
   if (fault) assert.ok(patch, `Unknown S36 fault ${fault}`);
   await mkdir(out, { recursive: true });
@@ -322,6 +337,7 @@ const CHECK_OF = { inspector_keeps_stations_readable: 'inspector', main_view_has
   next_action_navigates_only: 'story', main_view_shows_one_of_each: 'story', guide_never_credits_unsent_text: 'story', picker_uses_switch_guard: 'picker',
   run_help_matches_disabled_run: 'story', step_chip_announces_only_changes: 'story', status_bar_stays_one_row: 'inspector',
   renderer_matches_tier_recipe: 'recipe', lamps_reflect_state_with_text: 'lamps',
+  resting_tags_show_next_and_one_failure: 'calm', one_narrator_bubble: 'calm', hidden_tags_stay_reachable: 'calm',
   fallback_tag_text_is_not_clipped: 'fallback', fallback_tags_do_not_overlap: 'fallback', fallback_tags_clear_of_panels: 'fallback' };
 
 // S37 review F4: the static room a browser without WebGL gets, at the required 1280x720 cell.
@@ -880,6 +896,54 @@ export async function lampsReflectStateWithText(browser, base) {
   return { check: 'lamps_reflect_state_with_text', tags: shown.tags };
 }
 
+// S41: at rest over the drawn Bellwether room, the next-action station (spoken for by
+// the bubble) and at most one failing station show; every other tag stays a focusable
+// button that becomes visible on keyboard focus. Counting runs first, then the bubble,
+// then reachability, so each fault fails its own assertion.
+export async function calmRoom(browser, base) {
+  await load(browser, base, 'bookshop', 1280, 720);
+  const shown = () => browser.evaluate(() => new Promise(resolve => setTimeout(() => {
+    const seen = node => { const r = node.getBoundingClientRect(); return !node.closest('[hidden]') && Number(getComputedStyle(node).opacity) > .5
+      && r.width > 0 && r.right > 0 && r.bottom > 0 && r.left < innerWidth && r.top < innerHeight; };
+    resolve({ tags: [...document.querySelectorAll('#bookshop-stations [data-station]')].filter(seen).map(node => node.dataset.station),
+      bubbles: [...document.querySelectorAll('.bubble')].filter(seen).map(node => node.id),
+      stations: [...document.querySelectorAll('#bookshop-stations [data-station]')].map(node => node.dataset.station),
+      step: document.getElementById('step-chip-count').textContent });
+  }, 400)));
+  const rest = await shown();
+  assert.ok(rest.tags.length <= 2, `resting_tags_show_next_and_one_failure: rest-visible tags ${rest.tags.join(', ')}`);
+  assert.deepEqual(rest.bubbles, ['customer-bubble'], `one_narrator_bubble: bubbles shown ${rest.bubbles.join(', ')}`);
+  assert.ok(!rest.tags.includes('customers'), 'one_narrator_bubble: speaker tag beside its bubble');
+  assert.deepEqual(rest.tags, ['ledger'], 'resting_tags_show_next_and_one_failure: the failing ledger rests visible');
+  const reach = [];
+  for (const station of rest.stations.filter(id => !rest.tags.includes(id))) {
+    const got = await browser.evaluate(station => new Promise(resolve => {
+      const node = document.querySelector(`#bookshop-stations [data-station="${station}"]`);
+      node.focus({ focusVisible: true, preventScroll: true });
+      setTimeout(() => resolve({ focused: document.activeElement === node, opacity: getComputedStyle(node).opacity,
+        name: node.textContent.trim(), tab: node.tabIndex }), 300);
+    }), station);
+    assert.ok(got.focused && got.tab >= 0, `hidden_tags_stay_reachable: a hidden tag cannot take focus (${station})`);
+    assert.ok(got.name.length > 0, `hidden_tags_stay_reachable: ${station} lost its name`);
+    assert.equal(got.opacity, '1', `hidden_tags_stay_reachable: a focused tag stays hidden (${station})`);
+    reach.push(station);
+  }
+  await browser.evaluate(() => document.activeElement?.blur());
+  // An open station shows its tag beside the inspector; the speaking station stays named by its bubble.
+  const opened = {};
+  for (const station of ['compare', 'customers']) {
+    opened[station] = await browser.evaluate(station => new Promise(resolve => {
+      document.querySelector(`#bookshop-stations [data-station="${station}"]`).click(); document.activeElement?.blur();
+      setTimeout(() => resolve({ inspector: document.getElementById('workplace-world').dataset.inspector,
+        opacity: getComputedStyle(document.querySelector(`#bookshop-stations [data-station="${station}"]`)).opacity }), 400);
+    }), station);
+  }
+  assert.equal(opened.compare.inspector, 'open', 'resting_tags_show_next_and_one_failure: compare did not open');
+  assert.equal(opened.compare.opacity, '1', 'resting_tags_show_next_and_one_failure: the open station hides its tag');
+  assert.equal(opened.customers.opacity, '0', 'one_narrator_bubble: speaker tag beside its bubble while open');
+  return { check: 'calm_room', rest, reach, opened };
+}
+
 export async function runAll(base, out, slug, fault = '', only = '', dialogZoom = 1) {
   const results = [];
   const run = async (name, zoom, fn, options = {}) => {
@@ -897,6 +961,7 @@ export async function runAll(base, out, slug, fault = '', only = '', dialogZoom 
   await run('fallback', 1, browser => fallbackKeepsTagsReadable(browser, base, slug), { webgl: false });
   await run('recipe', 1, browser => rendererMatchesTierRecipe(browser, base, slug));
   if (slug === 'bookshop') await run('lamps', 1, browser => lampsReflectStateWithText(browser, base));
+  if (slug === 'bookshop') await run('calm', 1, browser => calmRoom(browser, base));
   for (const zoom of [1, 2]) await run('narrow', zoom, async browser => [
     // 1280x720 at 200% zoom lays out at 640 CSS pixels, so it stacks too.
     ...(zoom === 2 ? [await narrowStackReach(browser, base, slug, 1280, 720, zoom)] : []),

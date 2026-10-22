@@ -35,6 +35,16 @@ export const FAULTS = {
   'suggestive-line': { needle: "5: 'Nothing goes live until you choose and say why.',",
     replacement: "5: 'Nothing goes live until you choose; version A looks better.',",
     check: 'owner', expect: 'owner_lines_never_suggest: line 5 suggests' },
+  'resting-every-failure': { needle: "const failing = (lamps ?? []).find(item => item.tone === 'fail' && !resting.has(item.stationId));\n  if (failing) resting.add(failing.stationId);",
+    replacement: "for (const item of lamps ?? []) if (item.tone === 'fail') resting.add(item.stationId);",
+    check: 'resting', expect: 'resting_tags_show_next_and_one_failure: two failures, guide elsewhere rests 3' },
+  'resting-drops-guide': { needle: 'const resting = new Set(guide?.stationId ? [guide.stationId] : []);', replacement: 'const resting = new Set();',
+    check: 'resting', expect: 'resting_tags_show_next_and_one_failure: fresh shift' },
+  'narrator-request-every-step': { needle: 'const request = guide?.step === 1 ? customerBubble(view, output) : null;',
+    replacement: 'const request = customerBubble(view, output);',
+    check: 'narrator', expect: 'one_narrator_bubble: step 5 speaker' },
+  'narrator-owner-at-queue': { needle: "  if (request) return { role: 'customer', stationId: 'customers', ...request };\n", replacement: '',
+    check: 'narrator', expect: 'one_narrator_bubble: step 1 speaker' },
   'starter-open-queue': { needle: "starterOpen ? lamp('customers', 'attention', `${open} open ${open === 1 ? 'complaint' : 'complaints'}`)\n    : ", replacement: '',
     check: 'lamps', expect: 'lamps_reflect_state_with_text: starter with open complaints (customers)' },
   'starter-open-service': { needle: "    : starterOpen ? lamp('service', 'attention', 'Live, complaints open')\n", replacement: '',
@@ -235,9 +245,42 @@ async function slipsCheck(api) {
   assert.equal(api.planSlips(r, outputs, null, []), null, 'slips before the checks read');
 }
 
-const CHECKS = { guide: guideCheck, drafts: draftsCheck, owner: ownerCheck, lamps: lampsCheck, bubble: bubbleCheck, slips: slipsCheck };
+// Gate 3 section 14.4: at rest, the guide's station plus at most the first failing station.
+async function restingCheck(api) {
+  const rest = (name, v, local = {}) => [...api.restingTags(v, api.guideStep(v, local), api.lampStates(v))].sort();
+  const failing = v => { chosen(v); v.operating.validity = 'INVALIDATED'; v.tests.comparison = comparison([true, true]); };
+  const rows = [
+    ['fresh shift', view(), ['customers', 'ledger']],
+    ['no failure', view(v => { v.consequences.incidents = []; }), ['customers']],
+    ['two failures, guide on one', view(failing), ['ledger', 'service']],
+    ['two failures, guide elsewhere', view(v => { failing(v); v.operating.comparisonId = 'other'; v.tests.comparison = comparison([true, true]); v.operating.kind = 'STARTER_BASELINE'; v.investigation.count = 1; }), ['compare', 'service']],
+  ];
+  for (const [name, v, expected] of rows) {
+    const got = rest(name, v);
+    assert.ok(got.length <= 2, `resting_tags_show_next_and_one_failure: ${name} rests ${got.length}`);
+    assert.deepEqual(got, expected, `resting_tags_show_next_and_one_failure: ${name}`);
+  }
+  assert.deepEqual([...api.restingTags(view(), null, [])], [], 'resting_tags_show_next_and_one_failure: no guide, no failure');
+}
+
+// Gate 3 section 14.4: one speaker, chosen by step, never two bubbles at once.
+async function narratorCheck(api) {
+  const v = view(w => { w.run = run('OPERATION', 'FINALIZED'); w.slips = { tally: tally(1, 2) }; });
+  const output = { id: 'out-1', run_id: 'run-0009', request_text: 'Can I collect it today?' };
+  const say = (step, out = output) => api.narrator(v, step == null ? null : { step, stationId: 'customers' }, out);
+  assert.deepEqual(say(1), { role: 'customer', stationId: 'customers', label: 'Recorded request · operation', text: 'Can I collect it today?' },
+    'one_narrator_bubble: step 1 speaker');
+  assert.deepEqual(say(1, null), { role: 'owner', stationId: 'owner', label: 'Owner', text: api.OWNER_LINES[1].replace('{n}', '2') },
+    'one_narrator_bubble: step 1 without a request');
+  assert.deepEqual(say(5), { role: 'owner', stationId: 'owner', label: 'Owner', text: api.OWNER_LINES[5] }, 'one_narrator_bubble: step 5 speaker');
+  assert.equal(say(null), null, 'one_narrator_bubble: no guide, no speaker');
+}
+
+const CHECKS = { guide: guideCheck, drafts: draftsCheck, owner: ownerCheck, lamps: lampsCheck, bubble: bubbleCheck, slips: slipsCheck,
+  resting: restingCheck, narrator: narratorCheck };
 const NAMES = { guide: 'guide_step_follows_recorded_state', drafts: 'guide_never_credits_unsent_text', owner: 'owner_lines_never_suggest',
-  lamps: 'lamps_reflect_state_with_text', bubble: 'customer_bubble_shows_recorded_request', slips: 'slip_verdicts_follow_linked_checks' };
+  lamps: 'lamps_reflect_state_with_text', bubble: 'customer_bubble_shows_recorded_request', slips: 'slip_verdicts_follow_linked_checks',
+  resting: 'resting_tags_show_next_and_one_failure', narrator: 'one_narrator_bubble' };
 
 for (const [key, check] of Object.entries(CHECKS)) test(NAMES[key], async () => check(await load()));
 for (const [fault, row] of Object.entries(FAULTS)) test(`fault_${fault}_fails_${NAMES[row.check]}`, async () => {
