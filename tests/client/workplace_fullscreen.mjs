@@ -1,4 +1,4 @@
-// S36 to S39 full-screen workplace checks (Gate 3 section 13.9).
+// S36 to S40 full-screen workplace checks (Gate 3 section 13.9).
 // Each check passes clean; with --fault NAME the harness serves one in-memory
 // mutation of a production file and the run must fail at that check's named
 // assertion. Repository files are never modified.
@@ -195,7 +195,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 // Served controls follow fault patches. The S39 control inserts one conflicting
 // publication before accepted terminal checks, without racing the preview server.
-const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftReport(view) {',
+export const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftReport(view) {',
   replacement: `function updateShiftReport(view) {
     if (globalThis.__s39ConflictArmed && view.run?.purpose === 'OPERATION' &&
         ['FINALIZED', 'FAILED'].includes(view.run.state) && view.slips?.runId === view.run.id) {
@@ -217,7 +217,7 @@ const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftReport(view)
 
 export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s3[6789]-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S39 receipts must use /tmp/shiftwork-s36-*, /tmp/shiftwork-s37-*, /tmp/shiftwork-s38-* or /tmp/shiftwork-s39-*');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S40 receipts must use a disposable /tmp/shiftwork-s36-*, s37-*, s38-*, s39-* or s40-* root');
   const patch = fault ? FAULTS[fault] : null;
   if (fault) assert.ok(patch, `Unknown S36 fault ${fault}`);
   await mkdir(out, { recursive: true });
