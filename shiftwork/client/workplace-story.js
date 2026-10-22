@@ -224,6 +224,25 @@ export function customerBubble(view, output) {
   return { label: `Recorded request · ${purpose}`, text: raw.length > 140 ? `${raw.slice(0, 139).trimEnd()}…` : raw };
 }
 
+// Gate 3 section 14.2 rule 1: at 761px and wider only the guide's station and the
+// first failing station rest visible over the room. A presentation filter only;
+// every other tag stays a reachable button and shows on hover or focus.
+export function restingTags(view, guide, lamps = view?.lamps) {
+  const resting = new Set(guide?.stationId ? [guide.stationId] : []);
+  const failing = (lamps ?? []).find(item => item.tone === 'fail' && !resting.has(item.stationId));
+  if (failing) resting.add(failing.stationId);
+  return resting;
+}
+
+// Gate 3 section 14.2 rule 2: one narrator bubble. The customer's recorded request
+// speaks at step 1; otherwise the owner's catalogued line, or nobody.
+export function narrator(view, guide, output) {
+  const request = guide?.step === 1 ? customerBubble(view, output) : null;
+  if (request) return { role: 'customer', stationId: 'customers', ...request };
+  const line = ownerLine(view, guide);
+  return line ? { role: 'owner', stationId: 'owner', label: 'Owner', text: line } : null;
+}
+
 // Shift picker copy (Gate 1 mockup screen 10, Gate 3 section 13.10 item 6).
 // Authored text only: no live counts, and no question names a cause or a fix.
 export const SHIFT_CARDS = [

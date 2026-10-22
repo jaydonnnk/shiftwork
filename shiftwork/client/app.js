@@ -1,6 +1,6 @@
 import { bodyBytes, selectEvidence } from './evidence.js';
 import { projectWorkplace } from './workplace-view.js';
-import { statusBarValues, logEntries, guideStep, ownerLine, customerBubble, reduceShiftReport, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
+import { statusBarValues, logEntries, guideStep, narrator, restingTags, reduceShiftReport, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
 
 const $ = id => document.getElementById(id);
 const state = { board: null, loadedShiftId: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
@@ -365,6 +365,7 @@ function renderGuide(view = latestPresentation?.kind === 'accepted' ? latestPres
     storyGuide = null;
     text('next-action-task', (stations[state.station] ?? stations.service)[0]);
     for (const id of ['customer-bubble', 'owner-bubble']) $(id).hidden = true;
+    for (const button of document.querySelectorAll('#bookshop-stations [data-station]')) delete button.dataset.resting;
     return;
   }
   storyGuide = guideStep(view, { activeStation: state.station, causeDraft: $('cause-input').value.trim() !== '',
@@ -377,12 +378,20 @@ function renderGuide(view = latestPresentation?.kind === 'accepted' ? latestPres
   announce('step-chip-reason', storyGuide.blockedReason ?? '');
   $('step-chip').dataset.status = storyGuide.status;
   text('next-action-go', storyGuide.step ? storyGuide.name : 'Open the current station');
-  const owner = ownerLine(view, storyGuide);
-  $('owner-bubble').hidden = !owner;
-  text('owner-bubble-text', owner ?? '');
-  const bubble = customerBubble(view, state.outputs.find(output => output.id === state.selected) ?? null);
-  $('customer-bubble').hidden = !bubble;
-  text('customer-bubble-label', bubble?.label ?? ''); text('customer-bubble-text', bubble?.text ?? '');
+  // One narrator bubble (Gate 3 section 14.2 rule 2). It names its station, so that
+  // station's own tag rests hidden while it speaks.
+  const speaker = narrator(view, storyGuide, state.outputs.find(output => output.id === state.selected) ?? null);
+  const said = role => speaker?.role === role ? speaker : null;
+  $('owner-bubble').hidden = !said('owner');
+  text('owner-bubble-text', said('owner')?.text ?? '');
+  $('customer-bubble').hidden = !said('customer');
+  text('customer-bubble-label', said('customer')?.label ?? ''); text('customer-bubble-text', said('customer')?.text ?? '');
+  const lampText = id => (view.lamps ?? []).find(item => item.stationId === id)?.text;
+  for (const [id, station] of [['customer-bubble-station', 'customers'], ['owner-bubble-station', 'owner']])
+    text(id, [document.querySelector(`#bookshop-stations [data-station="${station}"] > span:last-child`)?.firstChild?.textContent, lampText(station)].filter(Boolean).join(' · '));
+  const resting = restingTags(view, storyGuide);
+  for (const button of document.querySelectorAll('#bookshop-stations [data-station]'))
+    button.dataset.resting = button.dataset.station === speaker?.stationId ? 'speaker' : String(resting.has(button.dataset.station));
   for (const item of view.lamps ?? []) {
     const button = document.querySelector(`#bookshop-stations [data-station="${item.stationId}"]`);
     if (!button) continue;
@@ -510,6 +519,10 @@ async function initializeGraphics() {
     workplaceHost = createWorkplaceHost({ container: $('workplace-canvas'), fallback: document.querySelector('img.room-art'), status: $('graphics-status'),
       onConsequence({ count }) { showWallTrace(count); },
       onAnchors: placeStationTags,
+      onHover(stationId) {
+        for (const button of document.querySelectorAll('.room-hotspots [data-hover]')) delete button.dataset.hover;
+        if (stationId) document.querySelector(`.room-hotspots:not([hidden]) [data-station="${stationId}"]`)?.setAttribute('data-hover', '');
+      },
       onStation({ board, shiftId, stationId }) {
         if (latestPresentation?.kind !== 'accepted' || board !== state.slug || shiftId !== state.loadedShiftId || latestPresentation.generation !== state.generation || latestPresentation.intent !== state.intent) return;
         if (!document.querySelector(`#${board}-stations [data-station="${stationId}"]`)) return;

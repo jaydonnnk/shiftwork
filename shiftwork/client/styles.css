@@ -484,6 +484,8 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
 .story-layer { display: contents; }
 .bubble { margin: 0; max-width: 270px; padding: 8px 12px; border-radius: 12px; background: #f6f0e2; color: #1b2430; font-size: 13px; line-height: 18px; box-shadow: 0 4px 12px #0b122740; overflow-wrap: anywhere; }
 .bubble-label { display: block; color: #4a5562; font-size: 12px; font-weight: 600; }
+.bubble-station { display: block; margin-top: 4px; color: #6a5426; font-size: 12px; }
+.bubble-station:empty { display: none; }
 .lamp { display: inline-block; flex: none; width: 8px; height: 8px; border-radius: 50%; background: #9aa6b2; }
 .station[data-lamp="fail"] .lamp { background: #ff5a4e; }
 .station[data-lamp="attention"] .lamp { background: #ffb648; }
@@ -507,6 +509,19 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
 @media (min-width: 761px) {
   main[data-expanded="true"] .step-chip { position: static; transform: none; margin: 0 auto; }
 }
+/* S41 calm room (Gate 3 section 14.2 rule 1). Over the drawn room, a tag that is not
+   resting fades out until its station is hovered, the tag is focused, or its station
+   is the open one. The speaking station is named in its bubble instead, even when open.
+   It stays a focusable button; the fallback and narrow list show all. */
+@media (min-width: 761px) {
+  .room[data-graphics="ready"] .station { transition: opacity 180ms ease; }
+  .room[data-graphics="ready"] .station:is([data-resting="false"], [data-resting="speaker"]):not(:focus-visible):not([data-hover]) { opacity: 0; pointer-events: none; }
+  .world[data-inspector="open"] .room[data-graphics="ready"] .station[data-resting="false"][aria-pressed="true"] { opacity: 1; pointer-events: auto; }
+  /* The ready room's description stays for assistive technology; the card keeps only its controls. */
+  .graphics-controls:has(#graphics-status[data-state="ready"]) { width: auto; padding: 6px; }
+  .graphics-controls #graphics-status[data-state="ready"] { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (prefers-reduced-motion: reduce) { .room[data-graphics="ready"] .station { transition: none; } }
 /* S37 shift picker (visual-spec 11.2): a full-stage overlay with authored copy only. */
 .change-shift { min-height: 44px; padding: 6px 10px; border: 1px solid #a9b6c4; border-radius: 8px; background: transparent; color: #eef2f6; font-size: 13px; }
 .decision-dialog { box-sizing: border-box; width: calc(100% - 32px); max-width: 520px; max-height: calc(100dvh - 32px); margin: auto; padding: 24px; overflow: auto; overflow-wrap: anywhere; background: #121b27; color: #eef2f6; border: 1px solid #2a3a4f; border-radius: 12px; box-shadow: 0 16px 56px #07111c66; }
