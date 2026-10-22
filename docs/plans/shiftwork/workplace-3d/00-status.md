@@ -1,3 +1,15 @@
+**Gates 1 to 4 RE-APPROVED by the user, 2026-10-23, for the robot crew and declutter.** The user answered "I re-approve Gates 1 to 4 for the robot crew and declutter. Commit the docs, then start S41 on shiftwork/slice-41." The docs are committed on main without a co-author trailer and without a push. S41 started on `shiftwork/slice-41` under the same answer. S42 needs its own go-ahead.
+
+**Gate 1 BACKTRACKED by the user, 2026-10-23; Gates 1 to 4 revision drafted for batch re-approval.**
+The user compared the S40 Bellwether room at 100% zoom with the agentic-factory reference, said the Junior Applied AI Engineer room is "too cluttered", and asked for "little robots and nice animation".
+Approved Gate 1 excluded any robot, and Gate 2 section 6 excluded a walking avatar, so both needed a backtrack.
+By questionnaire the user chose "Staff bots + your bot", "Approve backtrack + plan" and "All three boards".
+Drafted: [Gate 1](01-product.md) robot crew and resting-tag rules, [Gate 2 section 12](02-architecture.md#12-revision-for-the-robot-crew-and-declutter-2026-10-23) R7 to R9, [Gate 3 section 14](03-program-design.md#14-robot-crew-and-declutter-revision-2026-10-23), [visual-spec section 12](visual-spec.md#12-robot-crew-and-declutter-2026-10-23) and [Gate 4 section 9](04-slices.md#9-robot-crew-and-declutter-slices-2026-10-23), which replaces the old S41 replay and S42 away-room story layer with S41 declutter and S42 robot crew.
+New mockup: [17-robot-crew.html](mockups/v2/17-robot-crew.html), a live prototype over the real Bellwether geometry, rendered locally at 1280x800 over `python3 -m http.server`.
+The agentic-factory repository publishes no licence; nothing was copied from it, and the robots are original primitives.
+No product code, test, commit, push, deployment, credential or live call occurred.
+S41 and S42 each still need their own go-ahead after re-approval.
+
 **S40 ACCEPTED and published to main and `shiftwork/slice-40`, 2026-10-23.** Six focused implementation, test and acceptance commits, `961fe06..7626497`, were published without co-author trailers. Both remote refs and local main were verified equal after the fast-forward; publication-receipt commits retain the same tested client. Node 260 and closure nine pass on main, and the fresh scoped Python run retains only `port_dead` with 1454 passes, one skip and two warnings. The renderer result remains 38/50, including the reproduced S39 fallback gap and its unknown transient-frequency effect. All protected fixtures are unchanged. See the [S40 checkpoint](s40-checkpoint-2026-10-22.md) for accepted evidence and limits. S41/S42 have no go-ahead. Installation, downloads, credentials, provider calls, protected edits and deployment remain unauthorized.
 
 **Earlier: S39 ACCEPTED and published to main, 2026-10-22.** The user accepted S39 and authorized focused commits, merge and push. Eight implementation, test and acceptance-record commits end at `4a1e26fa`; local and remote main were verified equal after the fast-forward and push. Publication-record commits may follow without changing the tested client. At that publication boundary, S40 had not started.

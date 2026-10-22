@@ -817,6 +817,8 @@ Replay is last before the other rooms because it carries the most honesty risk a
 
 **Authorizations needed.** S42 go-ahead; branch `shiftwork/slice-42`; disposable local writes.
 
+**Superseded 2026-10-23, re-approved by the user the same day:** the S41 and S42 above are replaced by section 9. Recorded replay and the away-room story layer are not expected before the deadline. Until replay exists, the S39 shift-report trigger stays as approved.
+
 ### 8.4 Traceability for S36 to S42
 
 | Gate 1 requirement | Owning slice and Gate 3 section 13.9 check |
@@ -834,3 +836,43 @@ Replay is last before the other rooms because it carries the most honesty risk a
 | Narrow screens stack, no camera motion, no drag | S36 onward: `narrow_stack_reach_and_still_camera` |
 | Bellwether first, then the other rooms | S37 to S41 Bellwether; S42 the others |
 | Comprehension target | Unmeasured; needs separately authorized sessions |
+
+## 9. Robot crew and declutter slices, 2026-10-23
+
+Status: APPROVED 2026-10-23 in the user's batch re-approval of Gates 1 to 4: "I re-approve Gates 1 to 4 for the robot crew and declutter. Commit the docs, then start S41 on shiftwork/slice-41."
+The user approved the Gate 1 backtrack and this plan's shape on 2026-10-23: "Staff bots + your bot", all three boards, replace the old S41 and S42 and drop replay.
+Section 8.3's shared rules apply unchanged.
+The planning cutoff in section 8.1 still holds: only slices accepted by the end of 2026-10-28, Asia/Singapore, go into the submitted build.
+
+| Slice | Visible learner outcome | Depends on |
+|---|---|---|
+| S41 | Bellwether is calm at rest: the next-action tag, at most one failure tag, one narrator bubble, no hint card; every other tag appears on hover or focus. | Re-approval, S41 go-ahead. |
+| S42 | All three rooms have the robot crew: your bot walks to the station you open and back, staff bots idle and speak the one bubble. | Accepted S41. |
+
+Deferred, not expected before the deadline: recorded replay (was S41) and the Stonebridge and Northline story layer (was S42).
+
+### S41: calm Bellwether room
+
+**Scope and files.** `workplace-story.js` (`restingTags`, `narrator`), `app.js` (tag `data-resting`, one bubble, hint card removal), `styles.css`, `index.html`, `workplace-scene.js` (`onHover`, floor-footprint camera fit), `workplace-host.js` (`onHover`).
+
+**Acceptance and proof.** `resting_tags_show_next_and_one_failure`, `hidden_tags_stay_reachable`, `one_narrator_bubble`; the planned S37 and S38 check edits in Gate 3 section 14.4; three journeys; 1280x720, 640x900 and 390x844 at 100% and 200%; fallback; perf receipts.
+
+**Stop.** Bellwether at rest matches the mockup's tag and bubble count.
+
+### S42: robot crew on three boards
+
+**Scope and files.** New `workplace-crew.js`, `workplace-rooms.js` (`crew` for all three rooms), `workplace-scene.js` (`setOpenStation`, `crewAnchors`, tick, settle, dispose), `workplace-host.js`, `app.js` ("You" chip, bubble at the speaker bot), `workplace-assets.json`.
+
+**Acceptance and proof.** `bot_walks_only_on_learner_choice`, `crew_routes_stay_clear`, `crew_settles_without_motion`, `crew_disposed_once`, `crew_carries_no_result_text`; perf receipts against Gate 3 section 13.8 at both tiers with the crew; art review of all three rooms with the crew at rest and mid-walk; three journeys.
+
+**Stop.** If the compact tier misses a budget after the mesh merge in Gate 3 section 14.3, ship the crew on the standard tier only and record it.
+
+### 9.1 Traceability
+
+| Gate 1 requirement | Owning slice and check |
+|---|---|
+| At rest, at most two tags and one bubble at 1280px | S41: `resting_tags_show_next_and_one_failure`, `one_narrator_bubble` |
+| Hidden tags reachable by keyboard and fallback | S41: `hidden_tags_stay_reachable` |
+| Your bot moves only on your station choice | S42: `bot_walks_only_on_learner_choice` |
+| Bots never imply a result or an AI worker | S42: `crew_carries_no_result_text` and the art review |
+| Reduced motion and narrow screens keep bots still | S42: `crew_settles_without_motion` |
