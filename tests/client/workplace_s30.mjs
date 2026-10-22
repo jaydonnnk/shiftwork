@@ -189,6 +189,7 @@ export async function runExpanded(base, out, fault = '') {
   const browser = await openBrowser(base, out, fault || 'expand-observe');
   try {
     await openBoard(browser, base, '#compare');
+    assert.equal(await browser.evaluate(()=>globalThis.__s40LegacyAmbientIneligible),true,'Legacy expanded control did not make ambient ineligible');
     const before = await browser.evaluate(() => {
       const editor = document.getElementById('draft-source');
       editor.value += '\n# s30 expand draft'; editor.dispatchEvent(new Event('input', { bubbles: true }));
