@@ -1,6 +1,10 @@
 # Product: Shiftwork 3D workplace
 
-Gate 1 RE-APPROVED 2026-10-21 after the same-day backtrack. The user answered "Yep i approve, lets move on to gate 3 and gate 4. Then il approve all ar once".
+Gate 1 RE-APPROVED 2026-10-23 after the same-day backtrack for the robot crew and room declutter. The user answered "I re-approve Gates 1 to 4 for the robot crew and declutter. Commit the docs, then start S41 on shiftwork/slice-41."
+The user compared the S40 Bellwether room at 100% zoom with the agentic-factory reference, called it "too cluttered", asked for "little robots and nice animation", and approved the backtrack with the role choice "Staff bots + your bot" for all three boards.
+The [crew and declutter mockup](mockups/v2/17-robot-crew.html) is the reference for this revision.
+
+Earlier: Gate 1 RE-APPROVED 2026-10-21 after the same-day backtrack. The user answered "Yep i approve, lets move on to gate 3 and gate 4. Then il approve all ar once".
 
 History: Gate 1 was approved on 2026-10-19 when the user directed "Srue lets move to gate 2 now", with layout A, the room beside a persistent workbench, as the default.
 On 2026-10-21 the user compared the built result with the agentic-factory reference and approved a backtrack with "Yes i approve the backtrack".
@@ -43,15 +47,27 @@ Small panels float over the room:
 - a shift log holding the detailed record, including identifiers.
 
 Each station in the room is a labelled control with its status in words and a coloured lamp.
+At rest the room shows no station tags except the one station that holds the next valid action, and any station that needs attention.
+Every other tag appears on hover or keyboard focus, and the full labelled station list stays reachable from the keyboard and in the fallback.
 A ring marks the station that holds the next valid action.
 Choosing a station opens its work in an inspector panel beside the room, keeping the room in view.
 Deliberate decisions, such as choosing the live version, open as a focused dialog that states what is being chosen, why it is being asked, and what happens to the alternative.
 
-The client's people give the room a voice.
-Customers' recorded requests appear as speech bubbles at the customer queue.
-The client owner comments at the owner desk on what the recorded evidence already shows.
-Voices narrate; they never suggest a cause, a fix or a choice.
-There is no robot, mascot, avatar or AI worker; the learner remains the engineer.
+The room has a small crew of original, toy-like robots, in the spirit of the agentic-factory reference.
+
+- **Your bot**, tagged "You", stands for the learner.
+  It walks to a station only when the learner opens that station, and returns to its home spot when the inspector closes.
+  It never moves, types, decides or speaks on its own; every choice, cause, test and repair still comes from the learner's own controls.
+- **Staff bots** are the client's people: the owner at the owner desk and customers at the queue.
+  The client's people give the room a voice through them.
+  Customers' recorded requests appear as speech bubbles above a customer bot.
+  The owner bot comments on what the recorded evidence already shows.
+  Voices narrate; they never suggest a cause, a fix or a choice.
+
+No bot is presented as an AI system, an assistant or a worker that diagnoses, repairs or chooses; the learner remains the engineer.
+Bots idle with a small bob and blink.
+Their movement never implies progress, success or a result.
+With reduced motion or in the fallback, bots stand still and the same words appear in text.
 
 The room has quiet life that reflects real state: lamps, the attention ring and small ambient movement.
 When a run's recorded results arrive, request slips travel from the queue to the service, then to the locked inspector's desk, which stamps each one with its actual verdict, then to the incident wall.
@@ -97,7 +113,9 @@ Reopening an old record shows it as history and must not look like a new run.
 Retain Shiftwork's client identities and the navy and amber direction: warm, light rooms with navy trim and interface, and amber for attention.
 Use original room art and objects suited to these jobs.
 From the agentic-factory reference, borrow the full-screen world, floating panels, the lesson card, the step guide, narrated speech bubbles, physical status lamps, the detailed log and focused decision dialogs.
-Do not borrow its robot, factory, conveyor, procurement or payment loop, artwork or source.
+Also borrow the feel of its robot: a small, friendly figure that walks to where the work is, bobs and blinks, and anchors one speech bubble.
+Build the robots as original geometry; the reference repository publishes no licence, so do not copy its robot code, model, artwork or any other source.
+Do not borrow its factory, conveyor, procurement or payment loop.
 
 ## Success metric and acceptance targets
 
@@ -121,6 +139,8 @@ Outreach and sessions require separate authorization.
 Additional acceptance targets:
 
 - The main view of any state shows at most one question, one next action and one narrator line, and no hash or internal identifier.
+- At rest, at 1280px and at 100% browser zoom, at most two station tags and one speech bubble are visible over the room, and no floating panel other than the status bar, the next action and the collapsed shift log covers it.
+- Every bot movement is caused by the learner's own station choice or by a recorded state change; no bot moves to a station the learner did not open.
 - At **1280px**, the room fills the area under the hosting row, and an open inspector leaves the room's stations readable.
 - At **640px and 390px**, there is no horizontal page scrolling, mandatory drag interaction or obscured next action. Selected content is reachable by tap and keyboard, including Northline's carried narrow-screen case.
 - Every essential action is available through a labelled keyboard control with visible focus. Status has text, not colour alone. A scene failure leaves the current task and complete work controls usable. Reduced motion shows the same evidence and outcomes without travel, ambient movement or camera animation.
@@ -132,12 +152,12 @@ Visual polish, reviewer preference and task completion do not establish learning
 
 ## Scope and exclusions
 
-In scope: the existing three boards, the shift picker, the full-screen room, floating status, step guidance, station interaction and status, the inspector panel, decision dialogs, narrated voices, recorded replays, the shift report, plain-language naming, responsive access, fallback states and hosting-notice placement.
+In scope: the existing three boards, the shift picker, the full-screen room, floating status, step guidance, station interaction and status, the inspector panel, decision dialogs, narrated voices, the robot crew, room declutter, recorded replays, the shift report, plain-language naming, responsive access, fallback states and hosting-notice placement.
 
 Preserve the existing contracts for learner authorship, independent assessment, protected information, comparable trials, explicit selection, operation, inheritance, assistant limits, execution modes and budgets.
 Keep the current public demo and downloadable build usable throughout an eventual rollout.
 
-Out of scope: new roles or curriculum, an open-world town, avatar progression, mandatory walking, a mascot, robot or AI worker character, autonomous diagnosis or repair selection, new model providers, payments, procurement, participant recruitment, production claims and submission changes.
+Out of scope: new roles or curriculum, an open-world town, avatar progression or customisation, mandatory walking, free player-controlled movement, a mascot that rewards or scores, any bot presented as an AI worker, autonomous diagnosis or repair selection, new model providers, payments, procurement, participant recruitment, production claims and submission changes.
 S28's other known limitations are not silently included as repairs.
 Any prerequisite outside this presentation scope must return for a specific scope decision.
 
@@ -164,6 +184,7 @@ Each screen reflows for narrow widths.
 - [Run the shift](mockups/v2/14-run-replay.html): labelled recorded replay with stamps from actual verdicts.
 - [Shift report](mockups/v2/15-shift-report.html): synthetic before and after, incidents and the learner's decision.
 - [Next shift](mockups/v2/16-next-shift.html): inherited state, read-only history and a separate optional experiment.
+- [Robot crew and declutter](mockups/v2/17-robot-crew.html), added 2026-10-23: the room at rest with one tag, your bot walking to an opened station, the owner and customer bots speaking, and the before-and-after tag count.
 
 The 2026-10-19 [structure mockups](mockups/00-review.html) remain as history.
 Their Stonebridge and Northline room contents still describe those rooms until the Bellwether journey is complete.
@@ -184,6 +205,8 @@ The clients are fictional and the role is simulated; your decisions stay yours.
 - Do the shift card, seven-step guide, plain naming and narrated voices make the next action obvious without hiding evidence?
 - Are labelled recorded replays, station lamps and ambient room life acceptable within the honesty rules above?
 - Are the three room identities, the Bellwether-first order and the proposed success targets still right?
+- Does the robot crew, with your bot moving only on your own station choice and staff bots narrating only, add life without implying that a bot does the engineering?
+- Does hiding resting tags make the room calmer without hiding a station from keyboard or fallback users?
 
 Rendering engine, dependencies, state interfaces, motion timings, performance budgets and implementation slices are decisions for later gates.
 After re-approval, Gate 2 and Gate 3 are checked against this revision and any affected decision returns for approval before Gate 4 planning.

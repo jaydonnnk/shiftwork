@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Robot crew</title>
+<style>
+/* Gate 1 mockup, 2026-10-23. Plain HTML and the vendored three.js module, no build step.
+   It reuses the real Bellwether room geometry; values are illustrative. Serve the repository root over http. */
+:root {
+  --ink: #0e1621; --panel: rgba(17,25,36,.94); --line: #2d3c50; --text: #eef2f6; --muted: #9eabbb;
+  --amber: #edbd68; --bad: #e86b74; --paper: #fbf6ea; --paper-ink: #2c2416;
+  --font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font: 15px/1.45 var(--font); color: var(--text); background: #efe6d4; overflow: hidden; }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.notice { position: relative; z-index: 30; margin: 0; padding: 7px 16px; font-size: 13px; color: var(--muted); background: #0a1018; border-bottom: 1px solid var(--line); }
+.notice b { color: var(--text); }
+.world { position: relative; height: calc(100vh - 34px); }
+canvas { display: block; width: 100%; height: 100%; }
+.float { position: absolute; z-index: 10; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(14,22,33,.25); }
+.hud { left: 16px; top: 16px; display: flex; gap: 18px; padding: 10px 14px; align-items: center; }
+.hud .k { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hud .v { font-weight: 600; }
+.hud .bad { color: var(--bad); }
+.syn { font-size: 12px; color: var(--amber); border: 1px solid rgba(237,189,104,.5); border-radius: 6px; padding: 2px 6px; }
+.next { left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 12px; align-items: center; padding: 8px 8px 8px 14px; }
+.next .step { color: var(--muted); font-size: 13px; }
+.next button { background: var(--amber); color: #2b1d05; border: 0; border-radius: 8px; padding: 7px 12px; font-weight: 600; }
+.log { right: 16px; bottom: 16px; display: flex; gap: 12px; align-items: center; padding: 8px 8px 8px 14px; font-size: 13px; }
+.log b { font-family: var(--mono); }
+.log button { background: none; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+.compare { right: 16px; top: 16px; padding: 10px 12px; font-size: 13px; max-width: 260px; }
+.compare label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
+.compare p { margin: 6px 0 0; color: var(--muted); }
+.tags { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
+.tag, .bubble, .you { position: absolute; transform: translate(-50%, -100%); white-space: nowrap; }
+.tag { pointer-events: auto; display: flex; gap: 6px; align-items: center; padding: 6px 11px; border-radius: 999px; background: var(--panel); color: var(--text); border: 1px solid var(--line); font-size: 13px; opacity: 0; transition: opacity .18s; }
+.tag small { color: var(--muted); }
+.tag .dot { width: 8px; height: 8px; border-radius: 50%; background: #8fb8e0; }
+.tag.amber { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(237,189,104,.35); }
+.tag.amber .dot { background: var(--amber); }
+.tag.bad .dot { background: var(--bad); }
+.tag.show { opacity: 1; }
+.bubble { max-width: 260px; white-space: normal; background: var(--paper); color: var(--paper-ink); padding: 8px 12px; border-radius: 12px; font-size: 13.5px; box-shadow: 0 8px 22px rgba(14,22,33,.22); margin-top: -10px; }
+.bubble::after { content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px; border: 7px solid transparent; border-bottom: 0; border-top-color: var(--paper); }
+.bubble { pointer-events: auto; cursor: pointer; }
+.bubble .at { display: block; margin-top: 4px; font-size: 12px; color: #8a6a2b; }
+.bubble .who { display: block; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #8a6a2b; font-weight: 600; }
+.you { font-size: 11px; font-weight: 700; letter-spacing: .06em; background: var(--amber); color: #2b1d05; border-radius: 6px; padding: 1px 6px; margin-top: -6px; }
+.inspector { left: 16px; top: 84px; bottom: 16px; width: min(420px, calc(100vw - 32px)); padding: 18px; transform: translateX(-110%); transition: transform .25s ease; }
+.inspector.open { transform: none; }
+.inspector h2 { margin: 0 0 6px; font-size: 20px; }
+.inspector p { color: var(--muted); }
+.inspector button { background: none; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (max-width: 760px) { .hud { gap: 10px; flex-wrap: wrap; right: 16px; } .next { bottom: 70px; } .compare { display: none; } }
+@media (prefers-reduced-motion: reduce) { .tag, .inspector { transition: none; } }
+</style>
+</head>
+<body>
+<p class="notice"><b>Gate 1 mockup, 2026-10-23.</b> Robot crew and declutter. Real Bellwether room geometry; illustrative values; synthetic scenario.</p>
+<main class="world" id="world" aria-label="Bellwether Books service room">
+  <canvas id="room" aria-hidden="true"></canvas>
+  <div class="tags" id="tags"></div>
+  <div class="float hud" role="status" aria-label="Shift status">
+    <div><div class="k">Bellwether Books</div><div class="v">Shift 1</div></div>
+    <div><div class="k">Live version</div><div class="v">ver-0001</div></div>
+    <div><div class="k">Open incidents</div><div class="v bad">3</div></div>
+    <span class="syn">Synthetic scenario</span>
+  </div>
+  <div class="float next"><span class="step">Step 1 of 7 · Read the complaints</span><button id="go">Open the customer queue</button></div>
+  <div class="float compare">
+    <label><input type="checkbox" id="before"> Show the S40 tag layout</label>
+    <p id="count"></p>
+    <p>Click a station or use Tab. Your bot walks there; it never acts on its own.</p>
+  </div>
+  <aside class="float inspector" id="inspector" aria-label="Station inspector">
+    <h2 id="ititle">Station</h2>
+    <p>Mockup stand-in for the station's real work. The room stays in view.</p>
+    <button id="close">Close</button>
+  </aside>
+  <div class="float log"><b>shift.log</b><span>11 entries</span><button>Shift report</button></div>
+  <nav class="sr" aria-label="Stations" id="stationList"></nav>
+</main>
+<script type="module">
+import * as THREE from '../../../../../../shiftwork/client/vendor/three-r180/three.module.js';
+import { roomDefinitions } from '../../../../../../shiftwork/client/workplace-rooms.js';
+
+const room = roomDefinitions.bookshop;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STATIONS = {
+  customers: ['Customer queue', '3 open complaints', 'amber'], service: ['Your service', 'live, complaints open', ''],
+  evaluator: ['Independent evaluator', 'locked', ''], investigate: ['Investigate', 'nothing recorded', ''],
+  compare: ['Compare', 'not started', ''], ledger: ['Incident & ledger wall', '3 open', 'bad'],
+  owner: ['Owner desk', 'read only', ''], repair: ['Repair bench', 'read only', ''], next: ['Next shift', 'shift open', ''],
+};
+// At rest only the next-action station and stations needing attention keep a tag.
+const RESTING = new Set(['customers', 'ledger']);
+
+// Floor graph: hand-checked clear lanes between the furniture footprints.
+const NODES = { h1: [-1.9,.6], h4: [-1.5,2.1], h5: [-1.1,4], h3: [2.4,2.05], h2a: [1.4,-1.4], h2b: [1.75,-2],
+  customers: [-2.6,2.7], repair: [-2.9,-.2], owner: [-2.5,-1.5], investigate: [0,-1.4], service: [0,2.05],
+  compare: [.7,4], next: [2.9,2.5], evaluator: [3.3,.85], ledger: [4,-2.05] };
+const EDGES = [['h1','h4'],['h4','h5'],['h2a','h2b'],['h3','h2a'],['customers','h1'],['customers','h4'],['repair','h1'],
+  ['owner','h1'],['investigate','h1'],['investigate','h2a'],['service','h4'],['service','h3'],['compare','h5'],
+  ['next','h3'],['evaluator','h3'],['ledger','h2b']];
+const adj = {}; for (const [a,b] of EDGES) { (adj[a] ||= []).push(b); (adj[b] ||= []).push(a); }
+const dist = (a,b) => Math.hypot(NODES[a][0]-NODES[b][0], NODES[a][1]-NODES[b][1]);
+function route(from, to) {
+  const d = { [from]: 0 }, prev = {}, open = new Set(Object.keys(NODES));
+  while (open.size) {
+    let u = null; for (const n of open) if (d[n] !== undefined && (u === null || d[n] < d[u])) u = n;
+    if (u === null || u === to) break; open.delete(u);
+    for (const v of adj[u] || []) { const nd = d[u] + dist(u,v); if (d[v] === undefined || nd < d[v]) { d[v] = nd; prev[v] = u; } }
+  }
+  const path = [to]; while (path[0] !== from) path.unshift(prev[path[0]]);
+  return path;
+}
+
+const canvas = document.getElementById('room');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.outputColorSpace = THREE.SRGBColorSpace;
+const scene = new THREE.Scene(); scene.background = new THREE.Color(room.fog);
+scene.add(new THREE.HemisphereLight('#fff7ea', '#8f7f66', 1.6));
+const sun = new THREE.DirectionalLight('#fff3dc', 2.2); sun.position.set(5,10,6); sun.castShadow = true;
+sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera, { left: -8, right: 8, top: 8, bottom: -8 }); scene.add(sun);
+
+const mats = {}; const mat = c => (mats[c] ||= new THREE.MeshStandardMaterial({ color: c, roughness: .75 }));
+const pickables = [];
+for (const a of room.assemblies) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(...a.size), mat(room.materials[a.material] || '#ccc'));
+  m.position.set(...a.position); m.castShadow = a.material !== 'floor'; m.receiveShadow = true;
+  if (a.station) { m.userData.station = a.station; pickables.push(m); }
+  scene.add(m);
+}
+
+// Original robot: voxel body, screen face, blinking eyes, antenna lamp, swinging limbs.
+function makeBot({ body, trim, face = '#1b2433', eye = '#8ff0ff', lamp = '#edbd68', hat = null, scale = 1 }) {
+  const g = new THREE.Group(), rig = new THREE.Group(); g.add(rig);
+  const add = (parent, geo, color, pos, opts = {}) => {
+    const m = new THREE.Mesh(geo, opts.emissive ? new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 1.2 }) : mat(color));
+    m.position.set(...pos); m.castShadow = true; parent.add(m); return m;
+  };
+  const legs = [-.11,.11].map(x => { const p = new THREE.Group(); p.position.set(x,.28,0); rig.add(p); add(p, new THREE.BoxGeometry(.13,.26,.15), trim, [0,-.13,0]); add(p, new THREE.BoxGeometry(.16,.07,.22), trim, [0,-.26,.03]); return p; });
+  add(rig, new THREE.BoxGeometry(.46,.4,.34), body, [0,.48,0]);
+  add(rig, new THREE.BoxGeometry(.3,.18,.02), trim, [0,.46,.18]);
+  add(rig, new THREE.BoxGeometry(.06,.04,.02), '#7ad48a', [.08,.52,.195], { emissive: true });
+  const arms = [-.29,.29].map(x => { const p = new THREE.Group(); p.position.set(x,.64,0); rig.add(p); add(p, new THREE.BoxGeometry(.1,.3,.12), body, [0,-.15,0]); add(p, new THREE.BoxGeometry(.12,.08,.14), trim, [0,-.32,0]); return p; });
+  const head = new THREE.Group(); head.position.set(0,.71,0); rig.add(head);
+  add(head, new THREE.BoxGeometry(.5,.36,.4), '#f3eee3', [0,.18,0]);
+  add(head, new THREE.BoxGeometry(.4,.24,.02), face, [0,.18,.205]);
+  const eyes = [-.08,.08].map(x => add(head, new THREE.BoxGeometry(.07,.09,.02), eye, [x,.19,.22], { emissive: true }));
+  add(head, new THREE.BoxGeometry(.06,.1,.06), trim, [.27,.18,0]); add(head, new THREE.BoxGeometry(.06,.1,.06), trim, [-.27,.18,0]);
+  add(head, new THREE.CylinderGeometry(.015,.015,.16), trim, [0,.44,0]);
+  const bulb = add(head, new THREE.SphereGeometry(.045,12,10), lamp, [0,.54,0], { emissive: true });
+  if (hat) add(head, new THREE.BoxGeometry(.54,.06,.44), hat, [0,.39,0]);
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(.32,24), new THREE.MeshBasicMaterial({ color: '#000', transparent: true, opacity: .16, depthWrite: false }));
+  shadow.rotation.x = -Math.PI/2; shadow.position.y = .005; g.add(shadow);
+  g.scale.setScalar(scale);
+  return { g, rig, legs, arms, head, eyes, bulb, shadow, yaw: 0, phase: Math.random()*6, blinkAt: 1+Math.random()*3, path: [], speed: 2.6, busy: false };
+}
+const you = makeBot({ body: '#edbd68', trim: '#202c40', lamp: '#edbd68', scale: 1.6 });
+const ownerBot = makeBot({ body: '#202c40', trim: '#8a7052', lamp: '#f6f0e2', hat: '#8a7052', scale: 1.45 });
+const customerBots = [['#7fa7a0',-4.85,3.8],['#c98f7a',-3.95,3.85],['#9a9cc4',-3.05,3.9]].map(([c,x,z]) => {
+  const b = makeBot({ body: c, trim: '#3b4656', lamp: '#f6f0e2', scale: 1.3 }); b.g.position.set(x,0,z); b.yaw = Math.PI; return b; });
+ownerBot.g.position.set(-2.3,0,-2.75); ownerBot.yaw = .5;
+let at = 'h1'; you.g.position.set(NODES.h1[0],0,NODES.h1[1]); you.yaw = .6;
+for (const b of [you, ownerBot, ...customerBots]) scene.add(b.g);
+
+// Fixed studio pose from the room definition, distance fitted to the viewport.
+const pose = room.camera, target = new THREE.Vector3(...room.cameraTarget);
+const camera = new THREE.PerspectiveCamera(pose.fov, 1, .1, 100);
+const az = THREE.MathUtils.degToRad(pose.azimuth), el = THREE.MathUtils.degToRad(pose.elevation);
+const dir = new THREE.Vector3(Math.sin(az)*Math.cos(el), Math.sin(el), Math.cos(az)*Math.cos(el));
+function fit() {
+  const w = canvas.clientWidth, h = canvas.clientHeight; renderer.setSize(w,h,false); camera.aspect = w/h;
+  // Fit the floor, not the wall tops, so the room fills the screen like the reference; wall tops may crop.
+  const corners = []; const [a,b] = [room.bounds.min, room.bounds.max];
+  for (const x of [a[0],b[0]]) for (const z of [a[2],b[2]]) corners.push(new THREE.Vector3(x,0,z));
+  let d = 8; for (; d < 60; d += .25) {
+    camera.position.copy(target).addScaledVector(dir, d); camera.lookAt(target); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
+    if (corners.every(c => { const p = c.clone().project(camera); return Math.abs(p.x) < .97 && Math.abs(p.y) < .86; })) break;
+  }
+}
+addEventListener('resize', fit); fit();
+
+// HTML overlay: tags, the single narrator bubble and the "You" chip.
+const layer = document.getElementById('tags'), tags = {}, list = document.getElementById('stationList');
+for (const [id,[name,status,tone]] of Object.entries(STATIONS)) {
+  const t = document.createElement('button'); t.className = `tag ${tone}`; t.innerHTML = `<span class="dot"></span>${name} <small>${status}</small>`;
+  t.addEventListener('click', () => open(id)); layer.append(t); tags[id] = t;
+  const s = document.createElement('button'); s.textContent = `${name}, ${status}`;
+  s.addEventListener('focus', () => { hover = id; }); s.addEventListener('blur', () => { hover = null; }); s.addEventListener('click', () => open(id)); list.append(s);
+}
+const bubble = document.createElement('div'); bubble.className = 'bubble'; layer.append(bubble);
+const chip = document.createElement('div'); chip.className = 'you'; chip.textContent = 'YOU'; layer.append(chip);
+let hover = null, opened = null, before = false;
+const LINES = {
+  null: ['Customer', 'Do you still have the hardback of Dune on the shelf?', customerBots[2], 'customers'],
+  customers: ['Shop owner', 'Three customers left yesterday without the answer they asked for.', ownerBot, 'owner'],
+};
+const project = v => { const p = v.clone().project(camera); return [(p.x+1)/2*canvas.clientWidth, (1-p.y)/2*canvas.clientHeight]; };
+const place = (el, v) => { const [x,y] = project(v); el.style.left = `${x}px`; el.style.top = `${y}px`; };
+
+function open(id) {
+  opened = id; document.getElementById('ititle').textContent = STATIONS[id][0];
+  document.getElementById('inspector').classList.add('open'); walk(id);
+}
+function close() { opened = null; document.getElementById('inspector').classList.remove('open'); walk('h1'); }
+document.getElementById('close').onclick = close;
+document.getElementById('go').onclick = () => open('customers');
+document.getElementById('before').onchange = e => { before = e.target.checked; };
+function walk(to) {
+  const nodes = route(at, to); at = to; you.busy = to !== 'h1';
+  you.path = nodes.slice(1).map(n => new THREE.Vector3(NODES[n][0],0,NODES[n][1]));
+  if (reduced) { const end = you.path.at(-1); if (end) you.g.position.copy(end); you.path = []; faceStation(); }
+}
+function faceStation() {
+  if (!opened) return; const a = room.stationAnchors[opened];
+  you.yawTarget = Math.atan2(a[0]-you.g.position.x, a[2]-you.g.position.z);
+}
+
+const ray = new THREE.Raycaster(), cursor = new THREE.Vector2();
+canvas.addEventListener('pointermove', e => {
+  cursor.set(e.offsetX/canvas.clientWidth*2-1, -(e.offsetY/canvas.clientHeight)*2+1); ray.setFromCamera(cursor, camera);
+  const hit = ray.intersectObjects(pickables)[0]; hover = hit ? hit.object.userData.station : null; canvas.style.cursor = hover ? 'pointer' : '';
+});
+canvas.addEventListener('click', () => { if (hover) open(hover); });
+
+const turn = (b, target, dt) => { let d = target - b.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); b.yaw += d * Math.min(1, dt*10); };
+function animate(b, t, dt) {
+  const moving = b.path.length > 0;
+  if (moving) {
+    const goal = b.path[0], d = goal.clone().sub(b.g.position); d.y = 0; const len = d.length(), step = b.speed*dt;
+    turn(b, Math.atan2(d.x, d.z), dt);
+    if (len <= step) { b.g.position.copy(goal); b.path.shift(); if (!b.path.length) faceStation(); } else b.g.position.addScaledVector(d.normalize(), step);
+    b.phase += dt*13;
+  } else if (b.yawTarget !== undefined) turn(b, b.yawTarget, dt);
+  b.g.rotation.y = b.yaw;
+  if (reduced) return;
+  const s = Math.sin(b.phase);
+  b.rig.position.y = moving ? Math.abs(s)*.09 : Math.sin(t*2.2 + b.phase)*.018;
+  b.legs[0].rotation.x = moving ? s*.7 : 0; b.legs[1].rotation.x = moving ? -s*.7 : 0;
+  const typing = !moving && b === you && b.busy;
+  b.arms[0].rotation.x = moving ? -s*.8 : typing ? -1.1 + Math.sin(t*18)*.15 : Math.sin(t*1.3+b.phase)*.06;
+  b.arms[1].rotation.x = moving ? s*.8 : typing ? -1.1 + Math.cos(t*18)*.15 : -Math.sin(t*1.3+b.phase)*.06;
+  b.rig.rotation.z = moving ? s*.05 : 0;
+  b.head.rotation.y = moving ? 0 : Math.sin(t*.5 + b.phase*2)*.18;
+  b.bulb.material.emissiveIntensity = 1 + Math.sin(t*3 + b.phase)*.4;
+  if (t > b.blinkAt) { for (const e of b.eyes) e.scale.y = .12; if (t > b.blinkAt + .12) { for (const e of b.eyes) e.scale.y = 1; b.blinkAt = t + 2 + Math.random()*3; } }
+}
+
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
+  for (const b of [you, ownerBot, ...customerBots]) animate(b, t, dt);
+  renderer.render(scene, camera);
+  let shown = 0;
+  const [who, text, speaker, at] = LINES[opened] || LINES.null;
+  // The speaking bot's station rides in the bubble instead of a second floating tag.
+  bubble.innerHTML = `<span class="who">${who}</span>${text}<span class="at">${STATIONS[at][0]} · ${STATIONS[at][1]}</span>`;
+  bubble.onclick = () => open(at);
+  place(bubble, speaker.g.position.clone().add(new THREE.Vector3(0, 1.4*speaker.g.scale.y, 0)));
+  for (const [id,t2] of Object.entries(tags)) {
+    const show = before || ((RESTING.has(id) || hover === id) && id !== at && id !== opened);
+    t2.classList.toggle('show', show); shown += show;
+    const a = room.stationAnchors[id]; place(t2, new THREE.Vector3(a[0], a[1]+.35, a[2]));
+  }
+  place(chip, you.g.position.clone().add(new THREE.Vector3(0, 1.45*you.g.scale.y, 0)));
+  document.getElementById('count').textContent = `${shown} station tag${shown === 1 ? '' : 's'} and 1 speech bubble visible (S40 rests at 9 tags and 2 bubbles).`;
+});
+</script>
+</body>
+</html>
