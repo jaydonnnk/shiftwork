@@ -3698,3 +3698,10 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: the `two-owner-lines` fault in `workplace_fullscreen.mjs` reported "anchor matched 0 times in /app.js" instead of being caught.
 - Root cause: S41 changed `text('owner-bubble-text', owner ?? '')` to read `said('owner')?.text`, and S41 ran only its own new faults, not the whole fullscreen fault list.
 - Prevention rule: after editing any production line, run every existing fault whose needle sits in that file, not only the slice's new faults.
+
+
+## 2026-10-23 S43: the first mission resolver broke three existing guards
+
+- What happened: the first S43 resolver broke 13 tests and 8 errors in the full suite. The failing areas were seeding, the hosted Bellwether flows, a TOCTOU mission test and GTM historical-capture tests.
+- Root cause: three separate shortcuts. The starter map stored absolute paths, but tests repoint `config.PACKAGE_DIR`. The resolver read the mission bytes itself, which moved the read out of the frame that `test_changed_mission_between_selection_check_and_freeze_blocks_run` hooks. It also rejected a re-pinned mission update that the existing hash checks already govern. A pack-copy fixture also did not know the new `mission_versions` field.
+- Prevention rule: when replacing a call site's file read with a helper, return the path and keep each caller's own read. Store pack material as pack-relative paths. Grep tests for code that copies or renames every model field before adding a field.
