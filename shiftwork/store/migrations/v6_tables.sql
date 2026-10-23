@@ -386,3 +386,25 @@ BEFORE DELETE ON experiment_observed_contexts
 BEGIN
     SELECT RAISE(ABORT, 'an observed-context reference is never deleted');
 END;
+
+-- Slice 43: the public mission version a shift bound when it opened. A shift
+-- with no row predates S43 and keeps its pack's first mission version. Created
+-- here so an already-v6 database gains it on reopen (Gate 3 S2 clarification).
+CREATE TABLE IF NOT EXISTS shift_mission_bindings (
+    shift_id TEXT PRIMARY KEY REFERENCES shifts(id),
+    mission_path TEXT NOT NULL,
+    mission_sha256 TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+
+CREATE TRIGGER IF NOT EXISTS shift_mission_bindings_no_update
+BEFORE UPDATE ON shift_mission_bindings
+BEGIN
+    SELECT RAISE(ABORT, 'a shift mission binding is never rewritten');
+END;
+
+CREATE TRIGGER IF NOT EXISTS shift_mission_bindings_no_delete
+BEFORE DELETE ON shift_mission_bindings
+BEGIN
+    SELECT RAISE(ABORT, 'a shift mission binding is never deleted');
+END;

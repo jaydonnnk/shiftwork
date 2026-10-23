@@ -183,6 +183,24 @@ def insert_shift(conn: sqlite3.Connection, shift: Shift) -> None:
     )
 
 
+def insert_shift_mission_binding(conn: sqlite3.Connection, shift_id: str, mission_path: str,
+                                 mission_sha256: str, created_at: datetime) -> None:
+    conn.execute(
+        "INSERT INTO shift_mission_bindings (shift_id, mission_path, mission_sha256, created_at) "
+        "VALUES (?, ?, ?, ?)",
+        (shift_id, mission_path, mission_sha256, created_at.isoformat()),
+    )
+
+
+def get_shift_mission_binding(conn: sqlite3.Connection, shift_id: str) -> tuple[str, str] | None:
+    """The (mission_path, mission_sha256) a shift bound at open, or None before S43."""
+    row = conn.execute(
+        "SELECT mission_path, mission_sha256 FROM shift_mission_bindings WHERE shift_id = ?",
+        (shift_id,),
+    ).fetchone()
+    return None if row is None else (row["mission_path"], row["mission_sha256"])
+
+
 def get_shift(conn: sqlite3.Connection, shift_id: str) -> Shift | None:
     row = conn.execute("SELECT * FROM shifts WHERE id = ?", (shift_id,)).fetchone()
     return _shift(conn, row) if row else None
