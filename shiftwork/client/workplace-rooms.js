@@ -185,6 +185,21 @@ export const roomDefinitions = {
       owner: [-2.85,1.25,-1.95], repair: [-3.6,1.03,.1], next: [4.8,1.75,2.6] },
     anchors: { candidateA: [-.15,1.02,3], candidateB: [1.55,1.02,3], plate: [0,1.2,1.25],
       wall: [4,1.9,-2.55], handover: [4,1.5,2.2], later: [2.2,1.2,3] },
+    // Gate 3 section 14.1: floor graph for the learner's bot (x, z), one stand node per
+    // station, and fixed staff spots. Lanes are checked against every furniture
+    // footprint by crew_routes_stay_clear.
+    crew: { home: 'h1', facing: { home: [0,2.5] },
+      nodes: { h1: [-1.9,.6], h4: [-1.5,2.1], h5: [-1.1,4], h3: [2.4,2.05], h3m: [1.75,1], h2a: [1.4,-1.4], h2b: [1.75,-2],
+        customers: [-2.6,2.7], repair: [-2.9,-.2], owner: [-2.5,-1.5], investigate: [0,-1.4], service: [0,2.05],
+        compare: [.7,4], next: [2.8,2.5], evaluator: [3.3,.85], ledger: [4,-2.05] },
+      edges: [['h1','h4'],['h4','h5'],['h2a','h2b'],['h3','h3m'],['h3m','h2a'],['customers','h1'],['customers','h4'],['repair','h1'],
+        ['owner','h1'],['investigate','h1'],['investigate','h2a'],['service','h4'],['service','h3'],['compare','h5'],
+        ['next','h3'],['evaluator','h3'],['ledger','h2b']],
+      stands: { customers: 'customers', service: 'service', evaluator: 'evaluator', investigate: 'investigate', compare: 'compare',
+        ledger: 'ledger', owner: 'owner', repair: 'repair', next: 'next', pipeline: 'h4' },
+      staff: [{ role: 'owner', at: [-2.3,-2.75], face: [-1,-1] },
+        { role: 'customer', at: [-3.05,3.9], face: [-3.05,2.5] }, { role: 'customer', at: [-3.95,3.85], face: [-3.95,2.5] },
+        { role: 'customer', at: [-4.85,3.8], face: [-4.85,2.5] }] },
   },
   gtm: {
     bounds: { min: [-6,-.5,-4.6], max: [6,3.6,4.6] }, cameraTarget: [0,.8,0], camera: studioPose, fog: '#202c40',
@@ -195,6 +210,12 @@ export const roomDefinitions = {
     anchors: {candidateA:[-.85,1.25,1.1], candidateB:[.85,1.25,1.1], plate:[0,1.2,.6],
       indicator:[0,1.6,.01], wall:[3.7,1.65,-1.76], wallPanel:[3.7,1.65,-1.76], wallSize:[.65,.9,.035],
       owner:[2.65,1.45,-1.82], clock:[3.7,2,-1.82], handoff:[4.5,.7,.2]},
+    crew: { home: 'home', facing: { home: [1.5,5] },
+      nodes: { home: [0,3.4], workflow: [0,2.3], signals: [-2.45,2.3], left: [-2.45,-1.6], rules: [-3.5,-1.6],
+        front: [2.7,2.3], right: [2.7,-.9], wall: [3.2,-.9] },
+      edges: [['home','workflow'],['workflow','signals'],['signals','left'],['left','rules'],['workflow','front'],['front','right'],['right','wall']],
+      stands: { signals: 'signals', rules: 'rules', workflow: 'workflow', wall: 'wall' },
+      staff: [{ role: 'owner', at: [4.4,-.9], face: [3,0] }, { role: 'customer', at: [-4.2,3.3], face: [-4.2,2] }] },
   },
   northline: {
     bounds:{min:[-6,-.5,-4.6],max:[6,3.3,4.6]},cameraTarget:[0,.8,0],camera:studioPose,fog:'#28494a',
@@ -204,5 +225,12 @@ export const roomDefinitions = {
     anchors:{candidateA:[-.7,1.21,.9],candidateB:[.7,1.21,.9],plate:[0,1.2,.5],indicator:[0,1.65,.15],
       wall:[3.8,1.25,2.3],wallPanel:[3.5,2.1,-1.79],wallSize:[.8,.35,.04],
       booking:[3.15,1.2,2.3],approval:[4.45,1.2,2.3],declaration:[0,1.97,-2.9],escalation:[4.7,.82,.35],followup:[4.7,.82,.8],later:[1.1,1.2,.8]},
+    crew:{home:'home',facing:{home:[1,5]},
+      nodes:{home:[-.8,3.3],bench:[0,2.1],brief:[-2.1,2.5],middle:[-1.85,-1],map:[-3.55,-1],handover:[0,-1.9],
+        acceptance:[2.2,-.4],rail:[2.1,2.85],rollout:[3.8,2.85]},
+      edges:[['home','bench'],['home','brief'],['brief','middle'],['middle','map'],['middle','handover'],['handover','acceptance'],
+        ['acceptance','rail'],['rail','rollout'],['rail','bench']],
+      stands:{brief:'brief',map:'map',bench:'bench',acceptance:'acceptance',rollout:'rollout',handover:'handover'},
+      staff:[{role:'owner',at:[-5.3,3.7],face:[-3,5]},{role:'customer',at:[5.3,2.95],face:[3.8,2.3]}]},
   },
 };
