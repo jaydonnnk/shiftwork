@@ -202,6 +202,28 @@ def offline_fixture_keys(slug: str) -> tuple[str, str, str]:
 PIVOT_STARTER_ARTIFACT_PATHS = {
     "service.py": FIXTURE_DIR / "artifacts" / "bookshop" / "pivot_starter_failure_service.py",
 }
+# S43: the reviewed starter each Bellwether mission version opens with. The
+# task-plan starter needs the controller gateway, so mission v2 and this starter
+# bind only under the tokenfactory executor (Gate 3 S2 clarification, 2026-10-23).
+# Values are pack-relative paths, each needing a reviewed pin before it binds.
+BELLWETHER_STARTER_PATHS = {
+    "fixtures/mission/bookshop_pivot_v1.json": {
+        "service.py": "fixtures/artifacts/bookshop/pivot_starter_failure_service.py",
+    },
+    "fixtures/mission/bookshop_pivot_v2.json": {
+        "service.py": "fixtures/artifacts/bookshop/task_plan_starter_service.py",
+    },
+}
+
+
+def bellwether_starter_files(mission_path: str) -> dict[str, Path]:
+    """The starter files a Bellwether mission version opens with.
+
+    Version 1 keeps reading PIVOT_STARTER_ARTIFACT_PATHS, as it did before S43.
+    """
+    if mission_path == "fixtures/mission/bookshop_pivot_v1.json":
+        return dict(PIVOT_STARTER_ARTIFACT_PATHS)
+    return {name: PACKAGE_DIR / path for name, path in BELLWETHER_STARTER_PATHS[mission_path].items()}
 PIVOT_STARTER_CONTRACT_JSON = {
     "catalog_version": 3,
     "must_never": ["NEVER_INVENT_PRICE_STOCK_POLICY"],

@@ -147,6 +147,14 @@ def _verify_pack_material(pack: pack_registry.EngagementPack) -> frozenset[str]:
             or json.loads(row.body).get("entity_ref") not in spec.requested_entities
             for row, spec in zip(incident_rows, mission.request_specs, strict=True)):
         raise pack_registry.PackUnavailable("incident request disagrees with its owning mission")
+    for later_path in pack.mission_paths()[1:]:
+        if later_path not in pins:
+            continue  # awaits operator review; bind_new_shift_mission refuses it
+        later = task_contract.load_mission(config.PACKAGE_DIR / later_path)
+        if (later.engagement_slug != pack.slug
+                or later.contract_catalog_hash != mission.contract_catalog_hash
+                or later.request_specs != mission.request_specs):
+            raise pack_registry.PackUnavailable("a later mission version disagrees with its pack")
     manifest = json.loads((config.PACKAGE_DIR / pack.manifest_path).read_bytes())
     payload = manifest.get("workloads")
     sealed_digest = hashlib.sha256(json.dumps(
@@ -180,6 +188,48 @@ def _verify_pack_material(pack: pack_registry.EngagementPack) -> frozenset[str]:
             raise pack_registry.PackUnavailable("declared families share variant refs")
         refs.update(family_refs)
     return frozenset(refs)
+
+
+def shift_mission_path(conn: sqlite3.Connection, shift: Shift,
+                       pack: pack_registry.EngagementPack) -> str:
+    """The pack path of the public mission version a shift is assessed under.
+
+    It comes from the binding recorded when the shift opened, never from the
+    current executor configuration, so a restart cannot change an open shift.
+    A shift opened before S43 has no binding and keeps the pack's first version.
+    Callers read the bytes themselves; the existing requirement hash checks
+    still compare those bytes with what a selection or context captured.
+    """
+    binding = repo.get_shift_mission_binding(conn, shift.id)
+    path = pack.mission_path if binding is None else binding[0]
+    if path not in pack.mission_paths():
+        raise LifecycleError("conflict", "the shift's bound mission is not a version of its pack")
+    return path
+
+
+def bind_new_shift_mission(conn: sqlite3.Connection, pack: pack_registry.EngagementPack,
+                           shift: Shift, previous: Shift | None, executor_name: str | None) -> str:
+    """Record the mission version a new shift binds (Gate 3 S2, clarified 2026-10-23).
+
+    A later shift inherits its predecessor's mission, so an artifact built under
+    one version is never assessed under another. An engagement's first shift binds
+    the pack's latest version only under the tokenfactory executor, because that
+    version's starter needs the controller gateway; otherwise the first version.
+    The bound mission and its starter must carry reviewed pins.
+    """
+    if previous is not None:
+        path = shift_mission_path(conn, previous, pack)
+    elif executor_name == TokenFactoryAdapter.name:
+        path = pack.mission_paths()[-1]
+    else:
+        path = pack.mission_path
+    pins = {pin.path: pin.sha256 for pin in pack.reviewed_pins}
+    starter_paths = (list(config.BELLWETHER_STARTER_PATHS[path].values())
+                     if previous is None and pack.slug == config.BOOKSHOP_SLUG else [])
+    if path not in pins or any(name not in pins for name in starter_paths):
+        raise LifecycleError("conflict", "the bound mission version awaits operator review")
+    repo.insert_shift_mission_binding(conn, shift.id, path, pins[path], shift.opened_at)
+    return path
 
 
 def admit_pack(slug: str) -> pack_registry.EngagementPack:
@@ -379,7 +429,7 @@ def append_selection(
                 or version.content_hash != candidate.artifact_content_hash):
             raise LifecycleError("conflict", "selected version changed after the comparison")
         pack = admit_pack(shift.engagement_slug)
-        if _hash_bytes((config.PACKAGE_DIR / pack.mission_path).read_bytes()) != context.requirement_set_hash:
+        if _hash_bytes((config.PACKAGE_DIR / shift_mission_path(conn, shift, pack)).read_bytes()) != context.requirement_set_hash:
             raise LifecycleError("conflict", "requirements changed after the comparison")
         alternative = next(
             (item for item in experiment.candidates if item.label != candidate.label), None
@@ -471,7 +521,8 @@ def _adapter_for(run: Run, snapshot_bytes: bytes) -> executor.ExecutorAdapter | 
     return RecordedAdapter(transcript)
 
 
-def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) -> Shift:
+def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG,
+                    executor_name: str | None = None) -> Shift:
     """Open a selected shift or a non-operational first-choice shift atomically."""
     conn.execute("BEGIN IMMEDIATE")
     try:
@@ -506,6 +557,8 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
             ),
         )
         repo.insert_shift(conn, shift)
+        pack = admit_pack(slug)
+        mission_path = bind_new_shift_mission(conn, pack, shift, current, executor_name)
 
         if is_first_shift:
             if slug not in (config.BOOKSHOP_SLUG, "northline", "gtm"):
@@ -516,15 +569,13 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
             # config.TRUSTED_LOCAL_FIXTURES are what makes it executable offline.
             files = {
                 name: path.read_text(encoding="utf-8")
-                for name, path in sorted(config.PIVOT_STARTER_ARTIFACT_PATHS.items())
+                for name, path in sorted(config.bellwether_starter_files(mission_path).items())
             } if slug == config.BOOKSHOP_SLUG else {}
             contract = ContractParams.model_validate(config.PIVOT_STARTER_CONTRACT_JSON)
             if slug == "gtm":
-                pack = admit_pack(slug)
                 files = {"service.py": (config.PACKAGE_DIR / "fixtures/artifacts/gtm/pipeline_starter_failure.py").read_text(encoding="utf-8")}
                 contract = ContractParams.model_validate(config.GTM_STARTER_CONTRACT_JSON)
             if slug == "northline":
-                pack = admit_pack(slug)
                 files = {"service.py": (config.PACKAGE_DIR / "templates/artifact/northline_blank_service.py").read_text(encoding="utf-8"),
                          **{name: (config.PACKAGE_DIR / "templates/artifact/northline" / name).read_text(encoding="utf-8")
                             for name in ("discovery.md", "permissions.json", "acceptance_tests.py", "runbook.md")}}
@@ -566,7 +617,7 @@ def open_next_shift(conn: sqlite3.Connection, slug: str = config.BOOKSHOP_SLUG) 
                     rationale=("Reviewed blank Northline starter; required tasks are deliberately missing."
                                if slug == "northline" else "Reviewed failing Stonebridge starter; wrong owner, not an eligible repair."
                                if slug == "gtm" else "Reviewed failing Bellwether starter; executable offline, not a qualified repair or live service."),
-                    requirement_set_hash=(_hash_bytes((config.PACKAGE_DIR / pack.mission_path).read_bytes())
+                    requirement_set_hash=(_hash_bytes((config.PACKAGE_DIR / mission_path).read_bytes())
                         if slug in ("northline", "gtm") else canonical.content_hash(
                         {
                             "catalog_hash": catalog.content_hash,
@@ -754,6 +805,12 @@ def start_run(
         shift = _require_open_shift(conn, shift_id)
         selection, version = _selected_operating_version(conn, shift)
         adapter = executor or config.EXECUTOR_ADAPTER
+        # S43: the saved inspection below belongs to mission v1's starter. A shift
+        # bound to a later mission must never replay it as its own starter's output.
+        if shift.engagement_slug == "bookshop" and selection.kind == "STARTER_BASELINE":
+            pack = admit_pack(shift.engagement_slug)
+            if shift_mission_path(conn, shift, pack) != pack.mission_path:
+                raise LifecycleError("conflict", "this starter has no reviewed capture to replay yet")
         # Bellwether's legacy baseline is a saved inspection with its original
         # contract hash. Live diagnostics and later choices use frozen contexts.
         if (adapter == TokenFactoryAdapter.name and shift.engagement_slug == "bookshop"
@@ -856,7 +913,7 @@ def _reserve_selected_operation(
         if reservation is None or reservation.state != "ACTIVE":
             raise LifecycleError("conflict", "selected comparison exposure was invalidated")
     pack = admit_pack(shift.engagement_slug)
-    mission_bytes = (config.PACKAGE_DIR / pack.mission_path).read_bytes()
+    mission_bytes = (config.PACKAGE_DIR / shift_mission_path(conn, shift, pack)).read_bytes()
     if _hash_bytes(mission_bytes) != selection.requirement_set_hash:
         raise LifecycleError("conflict", "selected requirements changed before operation")
     prior_operations = [run for run in repo.list_runs_for_shift(conn, shift.id)
@@ -1041,14 +1098,7 @@ def execute_selected_operation(conn: sqlite3.Connection, run_id: str,
             request = request.model_copy(update={"shop_snapshot_ref": str(state_path)})
             request = bind_deployment_request(request, run, context, version, mission, state_bytes)
             if run.adapter == TokenFactoryAdapter.name:
-                adapter = TokenFactoryAdapter(
-                    run_id=run.id,
-                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),
-                    token=os.environ.get("NEBIUS_API_KEY", ""),
-                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),
-                    model=context.service_model or config.SERVICE_MODEL,
-                    live_budget=live_budget,
-                )
+                adapter = service_adapter(run, mission, context, live_budget)
             elif run.adapter == LocalProcessAdapter.name:
                 adapter = LocalProcessAdapter()
             else:
@@ -1714,7 +1764,7 @@ def close_shift(conn: sqlite3.Connection, shift_id: str) -> Shift:
                 committed_contract=version.contract,
                 handover_runbook_version_id=version.id if handover_required else None,
             )
-            close_mission = (task_contract.load_mission_bytes((config.PACKAGE_DIR / pack.mission_path).read_bytes())
+            close_mission = (task_contract.load_mission_bytes((config.PACKAGE_DIR / shift_mission_path(conn, shift, pack)).read_bytes())
                              if handover_required else reducer.load_mission(config.BOOKSHOP_MISSION))
             drafts = reducer.reduce_close(close_mission, facts, handover_record_required=handover_required)
         existing = repo.list_ledger_events(conn, shift.engagement_slug)
@@ -2607,7 +2657,7 @@ def freeze_diagnostic_context(
     run material the learner can already read (Gate 3 S3.1, test 21).
     """
     pack = admit_pack(shift.engagement_slug)
-    mission_path = config.PACKAGE_DIR / pack.mission_path
+    mission_path = config.PACKAGE_DIR / shift_mission_path(conn, shift, pack)
     state_path = config.PACKAGE_DIR / pack.public_state_path
     mission_bytes = mission_path.read_bytes()
     mission = task_contract.load_mission_bytes(mission_bytes, label=mission_path.name)
@@ -2724,6 +2774,21 @@ def freeze_diagnostic_context(
 
 # The comparison deadline, shared with the comparison flow's frozen contexts.
 COMPARE_DEADLINE_S = 10
+
+
+def service_adapter(run: Run, mission: task_contract.MissionSpec, context: ExecutionContext,
+                    live_budget: Any = None) -> TokenFactoryAdapter:
+    """The isolated executor for one run. Its tool allowlist and task vocabulary
+    come only from the run's frozen mission (Gate 3 S3.5, obligation 63)."""
+    return TokenFactoryAdapter(
+        run_id=run.id,
+        allowed_tool_names=tuple(mission.allowed_tool_vocabulary),
+        task_vocabulary=tuple(mission.task_vocabulary),
+        token=os.environ.get("NEBIUS_API_KEY", ""),
+        project=os.environ.get("NEBIUS_PROJECT_ID", ""),
+        model=context.service_model or config.SERVICE_MODEL,
+        live_budget=live_budget,
+    )
 
 
 def bind_deployment_request(request, run, context, version, mission, state_bytes, *, phase="PUBLIC"):

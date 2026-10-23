@@ -299,9 +299,12 @@ def test_run_claim_cannot_reclaim_a_running_action(selected_migrated):
 def test_fresh_hosted_bellwether_replays_its_labelled_baseline(hosted_environment, tmp_path, monkeypatch):
     _FakeTokenFactoryAdapter.calls = []
     monkeypatch.setattr(orchestrator, 'TokenFactoryAdapter', _FakeTokenFactoryAdapter)
-    with TestClient(create_app(str(tmp_path / 'fresh-host.db'))) as client:
-        shift = client.post('/api/engagements/bookshop/shifts')
+    # S43: a first shift opened under the recorded executor binds mission v1 and
+    # its pinned starter, and a restart under the hosted executor keeps that binding.
+    with TestClient(create_app(str(tmp_path / 'fresh-host.db'), executor='recorded')) as offline:
+        shift = offline.post('/api/engagements/bookshop/shifts')
         assert shift.status_code == 201
+    with TestClient(create_app(str(tmp_path / 'fresh-host.db'))) as client:
         board = client.get('/api/engagements/bookshop/board').json()
         started = client.post('/api/shifts/' + shift.json()['id'] + '/runs', json={'client_request_id': 's28-fresh-starter'})
         assert started.status_code == 202
@@ -368,8 +371,10 @@ def test_distinct_operations_receive_distinct_fresh_meters(selected_migrated, mo
 
 def test_duplicate_diagnostic_workers_execute_only_once(hosted_environment, monkeypatch, tmp_path):
     database = tmp_path / 'duplicate-diagnostic.db'
+    # S43: open under the recorded executor so the shift binds mission v1 and its starter.
+    with TestClient(create_app(str(database), executor='recorded')) as offline:
+        sid = offline.post('/api/engagements/bookshop/shifts').json()['id']
     with TestClient(create_app(str(database))) as client:
-        sid = client.post('/api/engagements/bookshop/shifts').json()['id']
         source = client.post(f'/api/shifts/{sid}/runs', json={'client_request_id': 'duplicate-source'}).json()
         entry = client.post(f'/api/shifts/{sid}/investigations', json={
             'source_run_id': source['id'], 'source_request_ordinal': 1,

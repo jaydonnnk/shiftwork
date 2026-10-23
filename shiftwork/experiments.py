@@ -249,13 +249,7 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
             request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})
             request = orchestrator.bind_deployment_request(request, run, context, version, mission, snapshot_bytes)
             if run.adapter == orchestrator.TokenFactoryAdapter.name:
-                adapter = orchestrator.TokenFactoryAdapter(
-                    run_id=run.id,
-                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),
-                    token=os.environ.get("NEBIUS_API_KEY", ""),
-                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),
-                    model=context.service_model or config.SERVICE_MODEL,
-                )
+                adapter = orchestrator.service_adapter(run, mission, context)
             elif run.adapter == orchestrator.LocalProcessAdapter.name:
                 adapter = orchestrator.LocalProcessAdapter()
             else:

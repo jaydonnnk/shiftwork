@@ -75,10 +75,11 @@ def reviewed_disposable_pack(tmp_path, monkeypatch):
             raw = json.dumps(data).encode()
         path.write_bytes(raw)
     catalog = json.loads((root / "fixtures/catalogs/disposable_v3.json").read_bytes())
-    mission_path = root / renamed(bookshop.mission_path)
-    mission = json.loads(mission_path.read_bytes())
-    mission["contract_catalog_hash"] = catalog["content_hash"]
-    mission_path.write_bytes(json.dumps(mission).encode())
+    for version in bookshop.mission_paths():
+        mission_path = root / renamed(version)
+        mission = json.loads(mission_path.read_bytes())
+        mission["contract_catalog_hash"] = catalog["content_hash"]
+        mission_path.write_bytes(json.dumps(mission).encode())
     manifest_path = root / renamed(bookshop.manifest_path)
     manifest = json.loads(manifest_path.read_bytes())
     manifest["comparison_state_sha256"] = hashlib.sha256(
@@ -93,6 +94,7 @@ def reviewed_disposable_pack(tmp_path, monkeypatch):
         **{field: renamed(getattr(bookshop, field)) for field in (
             "mission_path", "public_state_path", "comparison_state_path",
             "incident_request_path", "manifest_path")},
+        "mission_versions": tuple(renamed(path) for path in bookshop.mission_versions),
         "families": tuple(f.model_copy(update={
             "family": "disposable_" + f.family, "case_file": renamed(f.case_file)
         }) for f in bookshop.families),

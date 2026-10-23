@@ -437,7 +437,7 @@ def create_qualifying_comparison(
                 f"{COMPARISONS_PER_SHIFT})",
             )
 
-        mission_path = config.PACKAGE_DIR / pack.mission_path
+        mission_path = config.PACKAGE_DIR / orchestrator.shift_mission_path(conn, shift, pack)
         mission_bytes = mission_path.read_bytes()
         mission = task_contract.load_mission_bytes(mission_bytes, label=mission_path.name)
         if mission.engagement_slug != shift.engagement_slug:
@@ -794,7 +794,7 @@ def create_later_condition_comparison(
                     "only the two pinned reviewed candidates are executable as an offline comparison",
                 )
 
-        mission_path = config.PACKAGE_DIR / pack.mission_path
+        mission_path = config.PACKAGE_DIR / orchestrator.shift_mission_path(conn, shift, pack)
         mission_bytes = mission_path.read_bytes()
         mission = task_contract.load_mission_bytes(mission_bytes, label=mission_path.name)
         if mission.engagement_slug != shift.engagement_slug:
@@ -1129,14 +1129,7 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
             request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})
             request = orchestrator.bind_deployment_request(request, run, context, version, mission, snapshot_bytes)
             if run.adapter == orchestrator.TokenFactoryAdapter.name:
-                adapter = orchestrator.TokenFactoryAdapter(
-                    run_id=run.id,
-                    allowed_tool_names=tuple(mission.allowed_tool_vocabulary),
-                    token=os.environ.get("NEBIUS_API_KEY", ""),
-                    project=os.environ.get("NEBIUS_PROJECT_ID", ""),
-                    model=context.service_model or config.SERVICE_MODEL,
-                    live_budget=live_budget,
-                )
+                adapter = orchestrator.service_adapter(run, mission, context, live_budget)
             elif run.adapter == orchestrator.LocalProcessAdapter.name:
                 adapter = orchestrator.LocalProcessAdapter()
             else:

@@ -107,6 +107,10 @@ class EngagementPack(BaseModel):
     display: BoardDisplay
     assist: AssistPolicy
     mission_path: PackPath
+    # S43: every public mission version in order, first equal to mission_path.
+    # Empty means the pack has only mission_path. A later version is bound only
+    # by a new shift (orchestrator.bind_new_shift_mission), and only once pinned.
+    mission_versions: tuple[PackPath, ...] = ()
     public_state_path: PackPath
     comparison_state_path: PackPath
     incident_request_path: PackPath
@@ -124,14 +128,21 @@ class EngagementPack(BaseModel):
             ([f.family for f in self.families], "family name"),
             ([d.doc_id for d in self.documents], "document id"),
             ([p.path for p in self.reviewed_pins], "reviewed pin"),
+            (list(self.mission_versions), "mission version"),
         ):
             if len(values) != len(set(values)):
                 raise ValueError(f"duplicate {label}")
-        paths = (*self.required_paths(), *(pin.path for pin in self.reviewed_pins))
+        if self.mission_versions and self.mission_versions[0] != self.mission_path:
+            raise ValueError("the first mission version must be mission_path")
+        paths = (*self.required_paths(), *self.mission_versions,
+                 *(pin.path for pin in self.reviewed_pins))
         if any(p.startswith("/") or any(part in ("", ".", "..") for part in p.split("/"))
                for p in paths):
             raise ValueError("pack paths must stay within the package")
         return self
+
+    def mission_paths(self) -> tuple[str, ...]:
+        return self.mission_versions or (self.mission_path,)
 
     def required_paths(self) -> tuple[str, ...]:
         return (self.mission_path, self.public_state_path, self.comparison_state_path,
@@ -166,6 +177,9 @@ _BELLWETHER_PINS = (
     ReviewedPin(path="fixtures/requests/bookshop_compare_pair_02_specs.json", sha256="78294186d99b589ac577a282d6930978e02c9ae137836c1f57e0871ebb061c08"),
     ReviewedPin(path="fixtures/requests/bookshop_compare_pair_03.jsonl", sha256="c0e0ed996c2cc6f05971be34ceb68daadb36aa838d6a1344d2d3e13b1000bb0f"),
     ReviewedPin(path="fixtures/requests/bookshop_compare_pair_03_specs.json", sha256="0a05eb2d8ccd74861119570c0269b20781036e62c89e2f0297039e37744005fe"),
+    # S43 mission v2 and its task-plan starter, approved by the operator on 2026-10-24.
+    ReviewedPin(path="fixtures/mission/bookshop_pivot_v2.json", sha256="9defd8e35e2afc59b993095c706935a130f4dd70a3051ec484f5d38161fdd9d4"),
+    ReviewedPin(path="fixtures/artifacts/bookshop/task_plan_starter_service.py", sha256="7736c38410ce24b52ba610b4062b228856aaad228c8a59a1eb0040e06185bdc1"),
 )
 
 
@@ -261,6 +275,8 @@ _PACKS = (
         assist=AssistPolicy(level_label="scaffolded", allowed_roles=tuple(AssistRole),
                             total_calls_per_shift=3, max_patch_proposals=1),
         mission_path="fixtures/mission/bookshop_pivot_v1.json",
+        mission_versions=("fixtures/mission/bookshop_pivot_v1.json",
+                          "fixtures/mission/bookshop_pivot_v2.json"),
         public_state_path="fixtures/shop/bookshop_pivot_public_state.json",
         comparison_state_path="fixtures/shop/bookshop_compare_state_v1.json",
         incident_request_path="fixtures/requests/bookshop_pivot_incident.jsonl",

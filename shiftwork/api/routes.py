@@ -70,10 +70,12 @@ def get_board(slug: str, conn: sqlite3.Connection = Depends(get_conn)) -> schema
 @router.post("/engagements/{slug}/shifts", response_model=schemas.ShiftView, status_code=201)
 def open_shift(
     slug: str,
+    request: Request,
     body: None = Body(default=None),
     conn: sqlite3.Connection = Depends(get_conn),
 ) -> schemas.ShiftView:
-    return schemas.ShiftView.of(orchestrator.open_next_shift(conn, slug))
+    return schemas.ShiftView.of(orchestrator.open_next_shift(
+        conn, slug, executor_name=request.app.state.executor))
 
 
 @router.get("/shifts/{shift_id}/artifact", response_model=schemas.DraftView)
