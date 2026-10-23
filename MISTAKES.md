@@ -3705,3 +3705,83 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: the first S43 resolver broke 13 tests and 8 errors in the full suite. The failing areas were seeding, the hosted Bellwether flows, a TOCTOU mission test and GTM historical-capture tests.
 - Root cause: three separate shortcuts. The starter map stored absolute paths, but tests repoint `config.PACKAGE_DIR`. The resolver read the mission bytes itself, which moved the read out of the frame that `test_changed_mission_between_selection_check_and_freeze_blocks_run` hooks. It also rejected a re-pinned mission update that the existing hash checks already govern. A pack-copy fixture also did not know the new `mission_versions` field.
 - Prevention rule: when replacing a call site's file read with a helper, return the path and keep each caller's own read. Store pack material as pack-relative paths. Grep tests for code that copies or renames every model field before adding a field.
+
+
+## 2026-10-24 S44: overlapping baseline, capture type and wrong Python runtime
+
+- What happened: the first full-suite baseline overlapped the S43 source mutation harness and source edits, invalidating its seven-failure result. The first S44 execution double passed text to RawCapture.body and failed validation. The archive setup used the older system python3, which lacks tarfile.extractall(filter=), so extraction stopped.
+- Root cause: a source reader was treated as independent of source mutation, the double copied the demo representation instead of the executor contract, and a helper did not use the project interpreter.
+- Prevention rule: isolate baseline source before mutations, encode demo text as UTF-8 at the executor boundary, and use .venv/bin/python for all project helper scripts on macOS.
+
+## 2026-10-24 S44: an unrelated bootstrap denial changed its public explanation
+
+- What happened: the focused suite had one regression because the task-plan bootstrap exception changed the denial text for ordinary shifts.
+- Root cause: a new exception unnecessarily rewrote an existing public refusal that callers already test.
+- Prevention rule: preserve the old denial on the old branch; describe the new allowed case through its own orientation copy.
+
+
+## 2026-10-24 S44: capture replay revealed a mutable batch read
+
+- What happened: the first recorded-replay check stopped on a missing fixture path, instead of replaying its frozen request bytes.
+- Root cause: execute_experiment normalized outputs with load_batch(ref), even though the request already retained request_batch_bytes. A recorded reference is an identity, not a mutable fixture path.
+- Prevention rule: when an execution context freezes a request batch, pass those frozen bytes to every batch consumer, including capture normalization.
+
+## 2026-10-24 S44: a missing-reply test stopped at SQLite's immutability trigger
+
+- What happened: the missing-reply proof failed at DELETE instead of its summary assertion. The append-only observation trigger correctly blocked the test's storage corruption.
+- Root cause: the test did not account for the table's write boundary before injecting its fault.
+- Prevention rule: inspect storage triggers before intentional corruption. Disable only the relevant trigger in that test's disposable database, then require the named summary refusal. A storage exception is not a passing mutation proof.
+
+## 2026-10-24 S44: the mutation result parser consumed a newline
+
+- What happened: the first S44 harness reported every fault as a survivor, including failures at the expected assertions.
+- Root cause: the pattern [^ ]+ excluded spaces but consumed the newline and next summary token after pytest's failed node id.
+- Prevention rule: parse test node ids with a non-whitespace pattern and inspect one genuine fault's complete result before running a proof batch. Do not count the invalid harness run as evidence.
+
+## 2026-10-24 S44: the retained-run selector overflowed the mobile panel
+
+- What happened: at 390px, the page scrolled to 585px because the new selector's intrinsic width was 550px. The desktop page stayed at 1280px.
+- Root cause: the selector was outside the existing .field styling and its long option determined its width.
+- Prevention rule: constrain diagnostic selectors to the panel width, then measure the document at desktop and mobile widths with realistic long option labels. Keep the selected run's full mode in the adjacent evidence text.
+
+## 2026-10-24 S44: UI edits were missing their source provenance update
+
+- What happened: the first full regression added an asset-closure failure. I first attributed it to styles.css without checking which row failed. The first failing row was index.html; app.js and evidence.js also needed current digests.
+- Root cause: the approved provenance inventory covers HTML and JavaScript as well as styling. New controls also bypassed the existing .field pattern, causing an unnecessary CSS change.
+- Prevention rule: map edited sources to provenance rows before changing UI. Reuse existing field styling, restore unnecessary CSS edits, and maintain only the changed sources' digests in the approved provenance record. It is source metadata, not a generated build output.
+
+## 2026-10-24 S44: review found incomplete reply validation and a stale diagnostic selection
+
+- What happened: a raw reference containing unreadable JSON still produced a summary, and a selection left by another experiment defaulted to a passing first repetition instead of an observed miss.
+- Root cause: reply completeness checked only a URI prefix; selection fallback combined the selected and missed ids before testing membership.
+- Prevention rule: decode retained reply bytes and require the provider message before counting a complete batch. Resolve selected membership, then the observed miss, then the first run. Reproduce both failures at named assertions before fixing them.
+
+
+## 2026-10-24 S44: a second recorded diagnostic duplicated an immutable context
+
+- What happened: a second recorded replay with a fresh request key failed the unique execution-context hash constraint.
+- Root cause: recording import inserted an identical context instead of reusing its existing hash, unlike freeze_diagnostic_context.
+- Prevention rule: look up an immutable context by its content hash before inserting, while keeping the diagnostic reservation and its two-slot budget separate.
+
+## 2026-10-24 S44: the room driver read document.body before navigation completed
+
+- What happened: the first demonstration driver stopped before opening a shift. The database still had zero shifts, experiments and runs, so no live allowance was consumed.
+- Root cause: its initial readiness check accessed document.body.dataset while the new page still had no body, unlike the existing browser helper's nullable check.
+- Prevention rule: use document.body?.dataset for the first navigation readiness check, then require the normal loaded state before any UI action.
+
+## 2026-10-24 S44: the room driver guessed the station endpoint
+
+- What happened: after starting the one authorized batch through the UI, the driver polled /investigate, which returns 404. The real batch still finished and retained all ten calls. No second batch was sent.
+- Root cause: the driver did not copy the existing /investigations route from the client and route declaration, despite the helper-contract rule.
+- Prevention rule: inspect and copy the exact route before calling it; reject non-2xx responses immediately. Use read-only inspection mode to recover demonstration evidence after a completed live action, never rerun the action.
+
+The first read-only recovery also closed over the Node variable `mode` inside a
+browser-evaluated callback, so it stopped with ReferenceError before inspecting
+anything. Pass the expected state through the helper's explicit argument list;
+browser callbacks cannot read their caller's Node scope. This consumed no call.
+
+## 2026-10-24 S44: diagnostic trials lacked their candidate version binding
+
+- What happened: inspection of the real captured/replayed room showed Step unknown and unavailable station labels, although the diagnostic rates rendered.
+- Root cause: the diagnostic public projection omitted artifact_version_id. The schema supplied null, and the workplace correctly rejected a trial that did not match its candidate. The rendering fixture repeated the same omission.
+- Prevention rule: publish each diagnostic trial's actual run version and frozen candidate hash. Verify the real room's consistency as well as the panel's values, and require the API binding in the retained-row test.

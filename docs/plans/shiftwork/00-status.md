@@ -1,4 +1,63 @@
-**S43 ACCEPTED 2026-10-24 on `shiftwork/slice-43` (verified offline 2026-10-23, pinned 2026-10-24); committed in focused batches, not pushed, not merged.**
+**S44 VERIFIED LOCALLY 2026-10-24 on `shiftwork/slice-44`; committed, merged to main and pushed on the user's direction.**
+
+The user directed on 2026-10-24: "Make the wording, fixes, and then commit and push slice 44 to main". This record treats that as the direction to publish; S45 has not started.
+Wording fix before publishing: the board line "task missed in N of M runs" implied the plan skipped a step.
+It now reads, from the retained replies only, for example "collection task missing in 5 of 10 runs (reply cut off at the output limit in 5, invalid plan in 0, plan left the task out in 0)", with "cause not retained in N" when a run's reply lacks the data.
+The incident line now says "investigate a retained run where a required task is missing".
+Observed failure: output-budget truncation. Semantic task omission was not observed in this batch.
+Proof: `tests/client/diagnostic_rates.test.mjs` adds an attribution test; four classifier mutations (cut-off test, request matching, invalid-plan branch, omission test) each fail it and restore; the s44 browser check passes clean and fails under both named faults; the real replay at port 8446 shows the new line.
+After the fix: node 287 passed; pytest 1544 passed, 1 skipped, 2 failed (`port_dead` and the packaging test, which fails at the same proof in the baseline); S43 and S44 mutation harnesses SURVIVORS 0.
+
+
+One live DIAGNOSTIC experiment retained ten repetitions of the pinned mission's
+one public request. Collection and alternative were each missing in five of ten
+runs. All five failures were empty replies at the 1,024-token cap, with
+`finish_reason=length` and `SCHEMA_INVALID`. All five valid plans included both
+required tasks and completed the request. This is an observed output-budget
+incident, not evidence of semantic task omission or a general Nano miss rate.
+The no-miss stop rule did not trigger. No request shape or pinned byte changed.
+
+The same ten captures replay offline as `RECORDED_INSPECTION`; outputs,
+assessments, observations and summary match the source. Eligibility stays false,
+and both databases have zero ledger writes and zero protected draws. The real
+replayed room passes at desktop and mobile widths and guides the learner to
+explain the cause. No learner entry was fabricated.
+
+Live totals: ten Nano calls, ten Sandbox operations, 2,620 input tokens and
+8,932 output tokens, no retry. Token-cost projection: $0.00230088 at existing
+project rates, not a current vendor quote. Actual provider billing and Sandbox
+cost remain unknown. The live controller is stopped; the recorded review room
+remains at http://127.0.0.1:8446/?board=bookshop#investigate. This local replay uses
+`SHIFTWORK_DIAGNOSTIC_RECORDING` and the retained gitignored package.
+
+The user first authorized S44 with "Yes it has my go ahead", then said:
+"GO ahead and the spend ceiling is roughly 5 bucks i have 27 bucks in token factory call count is based on call spending so go ahead and start s44 for reals".
+This latest instruction delegates the call count to spending. The plan fixed ten
+calls and ten operations before results, with $5 as the maximum inference
+allowance, not a target. The old six-request/60-call estimate did not describe
+the pinned workload. The user then identified the credential source with
+"they are in .env.local". A bounded launcher loaded the relevant assignments
+into the controller environment without printing values. All six Sandbox
+permissions passed. Other live actions were disabled. No deployment occurred.
+
+Git was reverified before branching: clean main = origin/main =
+`1c2a6a271410ef9bf069aa9926804591d55806b4`. S43 is merged and pushed; older
+publication notices below describe earlier stops. S44 remains uncommitted.
+No commit, merge, push, dependency install, protected edit or S45 is authorized.
+The operator-reviewed mission and starter hashes remain unchanged.
+
+Final full suite: 1544 passed, one skipped, two known baseline failures:
+`test_conformance_suite_recorded_local[port_dead]` and
+`test_clean_env_install_and_run` with "Native canvas pick opened the wrong panel".
+The isolated main baseline reproduced 1513 passes and those same failures.
+S43's 27 mutations pass. S44's named proof harness covers 29 faults with exact
+restoration and clean controls; Node has 286 passes, and both served UI faults
+fail their named assertions. Final proof receipts and architect cleanup are in
+[the checkpoint](slice44-checkpoint-2026-10-24.md). `git diff --check` is clean.
+The invalid overlapping baseline and driver errors are retained in MISTAKES.md
+and are not counted as passing evidence. No second live batch was sent.
+
+**S43 ACCEPTED 2026-10-24 on `shiftwork/slice-43` (verified offline 2026-10-23, pinned 2026-10-24); publication is now verified above.**
 
 The user accepted in chat on 2026-10-24: "I accept S43. Commit it in focused batches on shiftwork/slice-43, no co-author trailer, no push."
 
@@ -6,7 +65,7 @@ The operator reviewed and approved the pins in chat on 2026-10-24: "I approve th
 Mission v2 draft (`fixtures/mission/bookshop_pivot_v2.json`, `DRAFT_PENDING_OPERATOR_REVIEW`) adds `task_vocabulary` (collection, alternative, price, stock) and three fixed-kind tools, five in total; its request specs and rules equal v1's.
 The new starter `fixtures/artifacts/bookshop/task_plan_starter_service.py` asks the gateway for a plan and performs only the planned tasks, with the tool each step names.
 Each shift now records the mission version it bound at open (`shift_mission_bindings`, in `v6_tables.sql`). An engagement's first Bellwether shift binds v2 only under `tokenfactory`, later shifts inherit their predecessor's mission, and shifts opened before S43 keep v1. The user chose inheritance in chat on 2026-10-23.
-Mission v2 and the starter carry no reviewed pin, so a `tokenfactory` first Bellwether shift is refused with "awaits operator review" until the operator pins them. A v2 starter baseline run is refused rather than replaying a v1-era capture, until S44 supplies one.
+Before the 2026-10-24 pin approval, a `tokenfactory` first Bellwether shift was refused with "awaits operator review". The pins are now approved. S44 supplies real retained captures through the recorded-diagnostic path; a missing capture still cannot fall back to the v1-era output.
 Evidence: `python -m demos.s43_task_plan` (labelled operator-authored test replies, no model call): the full plan completes all required tasks; omitting the alternative gives `REQUIRED_TASK_MISSING`; an unlisted tool gives `TOOL_NOT_ALLOWED` and no task results.
 Obligations 61, 62 and 63 are covered by `tests/executor/test_task_plan_gateway.py`, `tests/executor/test_task_plan_starter.py` and `tests/orchestrator/test_mission_binding.py`. `tests/s43_mutation_proofs.py` killed 27 of 27 mutations, each at its named test, and restored each byte-identically. The receipt is the gitignored `docs/plans/shiftwork/evidence/slice43-mutations-2026-10-23.txt`.
 Full offline suite: 1511 passed, 1 skipped, 2 failed: the known `port_dead`, and `tests/packaging/test_clean_env_install_and_run.py`, which also fails on a clean `git archive HEAD` copy ("Native canvas pick opened the wrong panel"), so it predates S43.
