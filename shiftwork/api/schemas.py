@@ -454,9 +454,12 @@ class ExperimentRequest(BaseModel):
     observed_run_id: str | None = None
     declared_treatment: str | None = Field(default=None, max_length=2000)
     client_request_id: str
+    public_repetitions: int = Field(default=1, ge=1, le=10, strict=True)
 
     @model_validator(mode="after")
     def _check_kind_shape(self) -> "ExperimentRequest":
+        if self.kind != "DIAGNOSTIC" and self.public_repetitions != 1:
+            raise ValueError("comparison repetitions belong to S45")
         if self.kind == "QUALIFYING_COMPARISON":
             if self.candidate_a_version_id is None or self.candidate_b_version_id is None:
                 raise ValueError("a qualifying comparison needs two candidate versions")
@@ -528,11 +531,10 @@ class ObservationView(BaseModel):
 
 
 class ExperimentTrialView(BaseModel):
-    """One trial slot: a diagnostic's single trial, or one of a comparison's six.
+    """One public diagnostic repetition, or one of a comparison's six trial slots.
 
-    A comparison fills every slot field, including the exact candidate version
-    and the precommitted execution ordinal; a diagnostic leaves those at their
-    defaults and carries its rendered customer text instead.
+    Both kinds identify the exact candidate version and execution ordinal.
+    A diagnostic carries rendered customer text and has no protected request.
     """
 
     model_config = _FROZEN
@@ -599,6 +601,9 @@ class ExperimentView(BaseModel):
     eligible: bool
     eligibility_reason: str
     state: str
+    public_repetitions: int = 1
+    repetition_summary: dict[str, Any] | None = None
+    summary_refusal: str | None = None
 
     @classmethod
     def of(cls, payload: dict[str, Any]) -> "ExperimentView":

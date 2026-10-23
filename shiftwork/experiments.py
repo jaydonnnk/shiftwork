@@ -1,4 +1,4 @@
-"""The diagnostic experiment subsystem, moved verbatim out of orchestrator."""
+"""Public diagnostic reservation, repetitions and retained evidence."""
 
 import asyncio
 import base64
@@ -60,8 +60,9 @@ def create_diagnostic_experiment(
     investigation_id: str | None,
     client_request_id: str,
     adapter: str = "local_process",
+    public_repetitions: int = 1,
 ) -> Experiment:
-    """Reserve one public diagnostic experiment and queue its single run.
+    """Reserve one public diagnostic and queue its frozen public repetitions.
 
     The controller chooses the workload, the executor and the treatment; the caller
     names only a candidate version and the investigation it belongs to. The
@@ -71,13 +72,14 @@ def create_diagnostic_experiment(
     conn.execute("BEGIN IMMEDIATE")
     try:
         shift = _require_open_shift(conn, shift_id)
+        if type(public_repetitions) is not int or not 1 <= public_repetitions <= 10:
+            raise LifecycleError("conflict", "public repetitions must be from 1 to 10")
         isolated = adapter == orchestrator.TokenFactoryAdapter.name
         if adapter not in (orchestrator.LocalProcessAdapter.name, orchestrator.TokenFactoryAdapter.name):
             raise LifecycleError("conflict", "no safe diagnostic executor is configured")
         if isolated and (not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID")):
             raise BootstrapBlocked("the verified isolated executor and its controller credentials are unavailable")
         if investigation_id is None:
-            reserve_bootstrap_diagnostic(conn, shift_id, adapter=adapter)
             investigation = None
         else:
             investigation = repo.get_investigation(conn, investigation_id)
@@ -101,12 +103,15 @@ def create_diagnostic_experiment(
                 and replay.investigation_id == (investigation.id if investigation else None)
                 and candidate is not None
                 and candidate.artifact_version_id == version.id
+                and repetition_count(conn, replay) == public_repetitions
             ):
                 conn.rollback()
                 return replay
             raise LifecycleError(
                 "conflict", "client_request_id was already used for a different experiment"
             )
+        if investigation_id is None:
+            reserve_bootstrap_diagnostic(conn, shift_id, adapter=adapter)
         starter_key = config.offline_fixture_keys(shift.engagement_slug)[0]
         starter_pin = config.TRUSTED_LOCAL_FIXTURES.get(starter_key)
         if not isolated and (starter_pin is None or version.content_hash != starter_pin[0]):
@@ -121,10 +126,11 @@ def create_diagnostic_experiment(
                 f"diagnostic budget exhausted for this shift ({used} of "
                 f"{DIAGNOSTIC_EXPERIMENTS_PER_SHIFT} used)",
             )
-        context = freeze_diagnostic_context(conn, shift, isolated=isolated)
+        context = freeze_diagnostic_context(conn, shift, isolated=isolated,
+                                            public_repetitions=public_repetitions)
         ordinal = used + 1
         treatment = (
-            "Run this frozen learner-owned service once in the isolated Sandbox "
+            f"Run this frozen learner-owned service {public_repetitions} time(s) in the isolated Sandbox "
             "against the reviewed initial public request and state; no protected "
             "case, eligibility or business consequence is reserved."
             if isolated else DIAGNOSTIC_TREATMENT
@@ -160,23 +166,24 @@ def create_diagnostic_experiment(
             created_at=_now(),
         )
         repo.insert_experiment(conn, experiment)
-        run = Run(
-            id=f"run-{repo.count_runs_all(conn) + 1:04d}",
-            shift_id=shift.id,
-            artifact_version_id=version.id,
-            request_batch_ref=Path(orchestrator.pack_registry.resolve_pack(
-                shift.engagement_slug).incident_request_path).name,
-            shop_snapshot_ref=f"frozen-context:{context.id}",
-            attempt_number=repo.count_runs(conn, shift.id) + 1,
-            state=RunState.QUEUED,
-            adapter=adapter,
-            started_at=_now(),
-            purpose=RunPurpose.EXPERIMENT,
-            evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
-            context_id=context.id,
-            experiment_id=experiment.id,
-        )
-        repo.insert_run(conn, run)
+        for _ in range(public_repetitions):
+            run = Run(
+                id=f"run-{repo.count_runs_all(conn) + 1:04d}",
+                shift_id=shift.id,
+                artifact_version_id=version.id,
+                request_batch_ref=Path(orchestrator.pack_registry.resolve_pack(
+                    shift.engagement_slug).incident_request_path).name,
+                shop_snapshot_ref=f"frozen-context:{context.id}",
+                attempt_number=repo.count_runs(conn, shift.id) + 1,
+                state=RunState.QUEUED,
+                adapter=adapter,
+                started_at=_now(),
+                purpose=RunPurpose.EXPERIMENT,
+                evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
+                context_id=context.id,
+                experiment_id=experiment.id,
+            )
+            repo.insert_run(conn, run)
         repo.update_experiment_state(conn, experiment.id, "RUNNING")
         conn.commit()
     except Exception:
@@ -185,7 +192,7 @@ def create_diagnostic_experiment(
     return experiment
 
 
-def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
+def execute_experiment(conn: sqlite3.Connection, run_id: str, live_budget=None) -> Run:
     """Execute one reserved diagnostic and assess it against the frozen rubric.
 
     The frozen context is the only source of the mission, the public state and the
@@ -205,9 +212,14 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
     version = repo.get_version(conn, run.artifact_version_id)
     if context is None or version is None or not context.workloads:
         repo.update_run(conn, run_id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
-        repo.update_experiment_state(conn, run.experiment_id, "FAILED")
+        _update_diagnostic_state(conn, run.experiment_id)
         conn.commit()
         return repo.get_run(conn, run_id)
+
+    experiment = repo.get_experiment(conn, run.experiment_id)
+    if (run.adapter == orchestrator.TokenFactoryAdapter.name
+            and repetition_count(conn, experiment) > 1 and live_budget is None):
+        raise LifecycleError("conflict", "live repetitions require a bounded diagnostic budget")
 
     workload = context.workloads[0]
     try:
@@ -232,7 +244,7 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
         )
     except (ValueError, ShiftworkDomainError):
         repo.update_run(conn, run_id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
-        repo.update_experiment_state(conn, run.experiment_id, "FAILED")
+        _update_diagnostic_state(conn, run.experiment_id)
         conn.commit()
         return repo.get_run(conn, run_id)
 
@@ -249,9 +261,13 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
             request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})
             request = orchestrator.bind_deployment_request(request, run, context, version, mission, snapshot_bytes)
             if run.adapter == orchestrator.TokenFactoryAdapter.name:
-                adapter = orchestrator.service_adapter(run, mission, context)
+                adapter = orchestrator.service_adapter(run, mission, context, live_budget=live_budget)
             elif run.adapter == orchestrator.LocalProcessAdapter.name:
                 adapter = orchestrator.LocalProcessAdapter()
+            elif run.adapter == "recorded" and run.evidence_mode is EvidenceMode.RECORDED_INSPECTION:
+                from shiftwork.diagnostic_recording import RecordingAdapter
+                ordinal = [row.id for row in diagnostic_runs(conn, experiment)].index(run.id)
+                adapter = RecordingAdapter(context, ordinal)
             else:
                 raise LifecycleError("conflict", "reserved diagnostic has no safe executor")
             result = asyncio.run(adapter.execute(request))
@@ -259,7 +275,8 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
         for ordinal, observation in enumerate(result.observations, start=1):
             raw = json.dumps(observation.raw_payload, sort_keys=True, default=str).encode("utf-8")
             repo.insert_observation(conn, ExecutionObservation(
-                id=f"{run.id}-obs-{ordinal}", run_id=run.id, request_ordinal=1,
+                id=f"{run.id}-obs-{ordinal}", run_id=run.id,
+                request_ordinal=observation.public_payload.get("request_ordinal", 1),
                 ordinal=ordinal, kind=ObservationKind(observation.kind),
                 public_payload_json=observation.public_payload,
                 raw_payload_ref="data:application/json;base64," + base64.b64encode(raw).decode("ascii"),
@@ -268,7 +285,7 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
 
         outputs = []
         if result.captures:
-            batch = {entry.ordinal: entry for entry in executor.load_batch(request.request_batch)}
+            batch = {entry.ordinal: entry for entry in executor.load_batch(request.request_batch, request.request_batch_bytes)}
             for output in executor.normalize_captures(result.captures, request.deadline_s):
                 output = output.model_copy(update={
                     "id": f"{run.id}-out-{output.request_ordinal}",
@@ -329,30 +346,46 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str) -> Run:
         )
         if result.failure is not None:
             repo.update_run(conn, run_id, RunState.FAILED, result.failure, _now())
-            repo.update_experiment_state(conn, run.experiment_id, "FAILED")
+            _update_diagnostic_state(conn, run.experiment_id)
         else:
             repo.update_run(conn, run_id, RunState.FINALIZED, None, _now())
-            repo.update_experiment_state(conn, run.experiment_id, "FINALIZED")
+            _update_diagnostic_state(conn, run.experiment_id)
         conn.commit()
     except Exception:
         conn.rollback()
         repo.update_run(conn, run_id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
-        repo.update_experiment_state(conn, run.experiment_id, "FAILED")
+        _update_diagnostic_state(conn, run.experiment_id)
         conn.commit()
         raise
     return repo.get_run(conn, run_id)
 
 
-def execute_experiment_task(db_path: str, run_id: str) -> None:
+def execute_experiment_task(db_path: str, run_id: str, live_budget=None) -> None:
     conn = db.connect(db_path)
     try:
-        execute_experiment(conn, run_id)
+        execute_diagnostic_batch(conn, run_id, live_budget)
     finally:
         conn.close()
 
 
+def execute_diagnostic_batch(conn, run_id: str, live_budget=None) -> None:
+    first = repo.get_run(conn, run_id)
+    experiment = repo.get_experiment(conn, first.experiment_id)
+    context = repo.get_execution_context(conn, experiment.context_id)
+    runs = diagnostic_runs(conn, experiment)
+    if first.adapter == orchestrator.TokenFactoryAdapter.name:
+        if repetition_count(conn, experiment) > 1 and live_budget is None:
+            raise LifecycleError("conflict", "live repetitions require a bounded diagnostic budget")
+        if live_budget is not None:
+            live_budget.preflight(model=context.service_model,
+                repetitions=repetition_count(conn, experiment),
+                requests=context.workloads[0].request_count)
+    for run in runs:
+        execute_experiment(conn, run.id, live_budget=live_budget)
+
+
 def experiment_run(conn: sqlite3.Connection, experiment_id: str) -> Run | None:
-    """The run a reserved experiment executes, or None before it was created."""
+    """The first run of a reserved diagnostic, or None before reservation."""
     experiment = repo.get_experiment(conn, experiment_id)
     if experiment is None:
         return None
@@ -417,7 +450,120 @@ def experiment_view(conn: sqlite3.Connection, experiment_id: str) -> dict[str, A
     return _diagnostic_experiment_view(conn, experiment)
 
 
+def diagnostic_runs(conn: sqlite3.Connection, experiment: Experiment) -> list[Run]:
+    return [run for run in repo.list_runs_for_shift(conn, experiment.shift_id)
+            if run.experiment_id == experiment.id]
+
+
+def diagnostic_context_hash(context: ExecutionContext) -> str:
+    names = ("engagement_slug", "workloads", "mission_hash", "public_data_hash",
+             "starting_business_state_hash", "requirement_set_id", "requirement_set_hash",
+             "visible_check_set_hash", "condition", "evaluator_version", "reducer_version",
+             "executor_class", "harness_hash", "image_ref", "service_model",
+             "service_model_settings_json", "resource_limits_json")
+    frozen = context.model_dump(mode="json")
+    return canonical.content_hash({name: frozen[name] for name in names})
+
+
+def repetition_count(conn: sqlite3.Connection, experiment: Experiment) -> int:
+    context = repo.get_execution_context(conn, experiment.context_id)
+    count = context.resource_limits_json.get("public_repetitions", 1)
+    if type(count) is not int or not 1 <= count <= 10:
+        raise LifecycleError("conflict", "invalid retained repetition declaration")
+    if "public_repetitions" in context.resource_limits_json:
+        if diagnostic_context_hash(context) != context.content_hash:
+            raise LifecycleError("conflict", "retained repetition declaration changed after reservation")
+    return count
+
+
+def _update_diagnostic_state(conn: sqlite3.Connection, experiment_id: str) -> None:
+    experiment = repo.get_experiment(conn, experiment_id)
+    runs = diagnostic_runs(conn, experiment)
+    state = ("RUNNING" if any(run.state in (RunState.QUEUED, RunState.RUNNING) for run in runs)
+             else "FAILED" if any(run.state is RunState.FAILED for run in runs)
+             else "FINALIZED")
+    repo.update_experiment_state(conn, experiment_id, state)
+
+
+def _has_retained_reply(observation: ExecutionObservation) -> bool:
+    if not observation.raw_payload_ref.startswith("data:application/json;base64,"):
+        return False
+    try:
+        raw = json.loads(base64.b64decode(observation.raw_payload_ref.split(",", 1)[1], validate=True))
+        message = raw["provider_response"]["choices"][0]["message"]
+        return isinstance(message, dict) and "content" in message
+    except (ValueError, KeyError, IndexError, TypeError):
+        return False
+
+
+def repetition_summary(conn: sqlite3.Connection, experiment: Experiment) -> dict[str, Any]:
+    """A complete retained denominator, or a refusal. Never extrapolate a rate."""
+    count = repetition_count(conn, experiment)
+    context = repo.get_execution_context(conn, experiment.context_id)
+    mission = task_contract.load_mission_bytes(base64.b64decode(context.mission_bytes_base64))
+    runs = diagnostic_runs(conn, experiment)
+    expected = {(ordinal, task.id) for ordinal, spec in enumerate(mission.request_specs, 1)
+                for task in spec.tasks}
+    rows = []
+    if len(runs) != count:
+        raise LifecycleError("conflict", "summary refused: retained repetitions differ from declaration")
+    for run in runs:
+        outputs = repo.list_outputs(conn, run.id)
+        assessments = repo.list_task_assessment_models(conn, run.id)
+        if mission.task_vocabulary:
+            replies = [row for row in repo.list_observations(conn, run.id)
+                       if row.kind is ObservationKind.INFERENCE_RESULT]
+            if len(replies) != len(mission.request_specs) or any(
+                    not _has_retained_reply(row) for row in replies):
+                raise LifecycleError("conflict", "summary refused: missing retained model reply")
+        if (run.state is not RunState.FINALIZED or run.context_id != experiment.context_id
+                or run.artifact_version_id != experiment.candidates[0].artifact_version_id
+                or {output.request_ordinal for output in outputs} != set(range(1, len(mission.request_specs) + 1))
+                or any(output.transport_error is not None for output in outputs)
+                or {(row.request_ordinal, row.task_id) for row in assessments} != expected):
+            raise LifecycleError("conflict", "summary refused: incomplete retained repetition evidence")
+        rows.append((run, assessments))
+    tasks = []
+    for ordinal, spec in enumerate(mission.request_specs, 1):
+        for task in spec.tasks:
+            if not task.required:
+                continue
+            matches = [(run, next(row for row in assessments
+                                  if row.request_ordinal == ordinal and row.task_id == task.id))
+                       for run, assessments in rows]
+            misses = [run.id for run, row in matches
+                      if any(code.value == "REQUIRED_TASK_MISSING" for code in row.reason_codes)]
+            tasks.append({"request_id": spec.id, "task_id": task.id, "required": task.required,
+                          "misses": len(misses), "total": count, "miss_run_ids": misses,
+                          "mandatory_failures": sum(not row.mandatory_pass for _, row in matches)})
+    return {"retained_repetitions": count, "tasks": tasks,
+            "run_ids": [run.id for run in runs],
+            "limits": "One model, one request set and a small sample. Synthetic scenario; no general model claim.",
+            "stop_rule_triggered": not any(task["misses"] for task in tasks if task["required"])}
+
+
 def _diagnostic_experiment_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[str, Any]:
+    runs = diagnostic_runs(conn, experiment)
+    payload = _diagnostic_run_view(conn, experiment, runs[0] if runs else None)
+    trials = []
+    for ordinal, run in enumerate(runs, 1):
+        trial = _diagnostic_run_view(conn, experiment, run)["trials"][0]
+        trial["execution_ordinal"] = ordinal
+        trials.append(trial)
+    payload["trials"] = trials
+    payload["public_repetitions"] = repetition_count(conn, experiment)
+    payload["repetition_summary"] = None
+    payload["summary_refusal"] = None
+    if payload["public_repetitions"] > 1:
+        try:
+            payload["repetition_summary"] = repetition_summary(conn, experiment)
+        except LifecycleError as exc:
+            payload["summary_refusal"] = exc.message
+    assert_public_safe(payload, _private_public_needles(conn))
+    return payload
+
+
+def _diagnostic_run_view(conn: sqlite3.Connection, experiment: Experiment, run: Run | None) -> dict[str, Any]:
     """The public diagnostic projection.
 
     It carries the frozen workload identity, the candidate, the trial's public
@@ -430,7 +576,6 @@ def _diagnostic_experiment_view(conn: sqlite3.Connection, experiment: Experiment
     if context is None:
         raise LifecycleError("not_found", f"unknown context: {experiment.context_id}")
     workload = context.workloads[0]
-    run = experiment_run(conn, experiment.id)
     assessments: list[dict[str, Any]] = []
     outputs: list[dict[str, Any]] = []
     observations: list[dict[str, Any]] = []
@@ -505,6 +650,8 @@ def _diagnostic_experiment_view(conn: sqlite3.Connection, experiment: Experiment
             {
                 "pair_ordinal": 1,
                 "candidate_label": experiment.candidates[0].label,
+                "artifact_version_id": run.artifact_version_id if run is not None else None,
+                "artifact_content_hash": experiment.candidates[0].artifact_content_hash,
                 "workload_id": workload.id,
                 "request_batch_hash": workload.request_batch_hash,
                 "request_count": workload.request_count,
