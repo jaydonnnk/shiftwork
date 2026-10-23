@@ -14,7 +14,7 @@ let pollTimer = null;
 let workplaceHost = null, latestPresentation = null, hostEpoch = 0, hostLoading = false, hostTimer = null;
 let inspection = { mode: 'current', historicalRunId: null };
 let expandedWork = false;
-let inspectorOpen = false, inspectorCover = 0, logFilter = 'all';
+let inspectorOpen = false, inspectorCover = 0, logFilter = 'all', openStationId = null;
 let reportPrevious = null, chooseOpener = null, reportOpener = null;
 const reportedRuns = new Set();
 const REPORTED_TEST_STATES = new Set(['RESERVED', 'RUNNING', 'COMPLETE', 'FAILED']);
@@ -417,6 +417,8 @@ function openInspector() { inspectorOpen = true; syncInspector(); }
 function closeInspector(returnFocus = true) {
   if (expandedWork) setExpandedWork(false);
   inspectorOpen = false; syncInspector();
+  // Gate 3 section 14.2 rule 3: closing the inspector sends your bot home.
+  openStationId = null; workplaceHost?.setOpenStation(null);
   if (returnFocus) document.querySelector(`.room-hotspots:not([hidden]) [data-station="${state.station}"]`)?.focus({ preventScroll: true });
 }
 // Tags sit just above their projected anchor. A tag that would cover another tag,
@@ -426,7 +428,21 @@ function closeInspector(returnFocus = true) {
 // free, it takes the spot that covers the least of the tags already placed, then
 // the least of everything else (Gate 3 section 13.6). The inspector is not avoided
 // here: only the scene's view offset keeps tags clear of it.
-let tagAnchors = {};
+let tagAnchors = {}, crewPoints = {};
+// The scene reports station and crew points together; a walk alone reports only the
+// crew, so only the "You" chip moves and the tag layout is left as it is.
+function placeAnchors({ crew, ...positions }) {
+  crewPoints = crew ?? {};
+  if (Object.keys(positions).length) placeStationTags(positions); else placeYouChip();
+}
+// The "You" chip is the only text on your bot (Gate 3 section 14.2 rule 6).
+function placeYouChip() {
+  const chip = $('you-chip'), point = crewPoints.you;
+  chip.hidden = !point?.visible;
+  if (chip.hidden) return;
+  chip.style.setProperty('--chip-x', `${Math.round(point.x)}px`);
+  chip.style.setProperty('--chip-y', `${Math.round(point.y)}px`);
+}
 function placeStationTags(positions = tagAnchors) {
   tagAnchors = positions;
   const stage = document.querySelector('.room').getBoundingClientRect();
@@ -468,11 +484,12 @@ function placeStationTags(positions = tagAnchors) {
   }
   placeBubbles();
 }
-// Each bubble sits next to its station's tag, wherever the tag ended up, so the
-// static fallback and the drawn room place it the same way. It tries above, then
-// below, then further out, and takes the first spot clear of every tag, panel and
-// the other bubble, or the least covering one. Narrow layouts stack it instead.
+// Over the drawn room each bubble sits above its speaker bot; over the static room it
+// sits next to its station's tag. It tries above, then below, then further out, and
+// takes the first spot clear of every tag, panel and the other bubble, or the least
+// covering one. Narrow layouts stack it instead.
 function placeBubbles() {
+  placeYouChip();
   const layer = $('station-tags').getBoundingClientRect();
   const local = r => ({ left: r.left - layer.left, top: r.top - layer.top, right: r.right - layer.left, bottom: r.bottom - layer.top });
   const room = local(document.querySelector('.room').getBoundingClientRect());
@@ -481,19 +498,26 @@ function placeBubbles() {
   const taken = [...document.querySelectorAll('.room-hotspots:not([hidden]) [data-station]'), $('status-bar'), $('step-chip'),
     $('next-action'), $('shift-log'), document.querySelector('.graphics-controls')]
     .map(node => node.getBoundingClientRect()).filter(r => r.width && r.height).map(local);
-  const overlap = box => taken.reduce((sum, r) => sum
+  // Your bot's chip outweighs everything else: a bubble never hides who you are.
+  const chip = [$('you-chip').getBoundingClientRect()].filter(r => r.width && r.height).map(local);
+  const area = (box, rects) => rects.reduce((sum, r) => sum
     + Math.max(0, Math.min(box.right, r.right) - Math.max(box.left, r.left)) * Math.max(0, Math.min(box.bottom, r.bottom) - Math.max(box.top, r.top)), 0);
-  for (const [id, station] of [['customer-bubble', 'customers'], ['owner-bubble', 'owner']]) {
-    const bubble = $(id), tag = document.querySelector(`#bookshop-stations [data-station="${station}"]`);
+  const overlap = box => area(box, taken) + 1000 * area(box, chip);
+  const drawn = document.querySelector('.room').dataset.graphics === 'ready';
+  for (const [id, station, role] of [['customer-bubble', 'customers', 'customer'], ['owner-bubble', 'owner', 'owner']]) {
+    const bubble = $(id), tag = document.querySelector(`#bookshop-stations [data-station="${station}"]`), speaker = drawn ? crewPoints[role] : null;
     if (bubble.hidden || !tag || narrowLayout()) { bubble.style.removeProperty('--bubble-x'); bubble.style.removeProperty('--bubble-y'); continue; }
-    const t = local(tag.getBoundingClientRect()), width = bubble.offsetWidth, height = bubble.offsetHeight;
+    // The canvas and the tag layer share the room's origin, so a bot's point is already local.
+    const t = speaker?.visible ? { left: speaker.x - 20, right: speaker.x + 20, top: speaker.y - 4, bottom: speaker.y + 4 } : local(tag.getBoundingClientRect());
+    const width = bubble.offsetWidth, height = bubble.offsetHeight;
     // The static room's tag layer is narrower than the stage, so bubbles may use the whole room.
     const clampX = x => Math.min(Math.max(room.left + 8, x), Math.max(room.left + 8, room.right - width - 8));
     const clampY = y => Math.min(Math.max(room.top + 8, y), Math.max(room.top + 8, room.bottom - height - 8));
     // Nearest first: directly above or below the tag, then beside it, then one or two rows further out.
-    const rows = [0, 1, 2].flatMap(row => [[t.top - height - 6 - row * 24], [t.bottom + 6 + row * 24]]).flat();
+    // Gate 1: a speaker bot's words appear above it, never below.
+    const rows = [0, 1, 2].flatMap(row => speaker?.visible ? [t.top - height - 6 - row * 24] : [[t.top - height - 6 - row * 24], [t.bottom + 6 + row * 24]]).flat();
     const spots = [...rows.flatMap(y => [t.left, t.right - width, t.left - width / 2, t.left - width, t.right].map(x => [x, y])),
-      [t.right + 6, t.top], [t.left - width - 6, t.top]].map(([x, y]) => [clampX(x), clampY(y)]);
+      ...(speaker?.visible ? [] : [[t.right + 6, t.top], [t.left - width - 6, t.top]])].map(([x, y]) => [clampX(x), clampY(y)]);
     const box = ([x, y]) => ({ left: x, top: y, right: x + width, bottom: y + height });
     const [x, y] = spots.find(spot => overlap(box(spot)) === 0) ?? spots.reduce((best, spot) => overlap(box(spot)) < overlap(box(best)) ? spot : best);
     taken.push(box([x, y]));
@@ -518,7 +542,7 @@ async function initializeGraphics() {
     clearTimeout(hostTimer); hostTimer = null;
     workplaceHost = createWorkplaceHost({ container: $('workplace-canvas'), fallback: document.querySelector('img.room-art'), status: $('graphics-status'),
       onConsequence({ count }) { showWallTrace(count); },
-      onAnchors: placeStationTags,
+      onAnchors: placeAnchors,
       onHover(stationId) {
         for (const button of document.querySelectorAll('.room-hotspots [data-hover]')) delete button.dataset.hover;
         if (stationId) document.querySelector(`.room-hotspots:not([hidden]) [data-station="${stationId}"]`)?.setAttribute('data-hover', '');
@@ -530,6 +554,7 @@ async function initializeGraphics() {
       } });
     if (expandedWork) workplaceHost.setExpanded(true);
     syncInspector();
+    workplaceHost.setOpenStation(openStationId);
     if (latestPresentation) workplaceHost.publish(latestPresentation);
   } catch {
     if (epoch !== hostEpoch) return;
@@ -1895,7 +1920,7 @@ function activateStation(name, userIntent = true) {
   document.querySelectorAll('[data-view]').forEach(link => {
     if (link.dataset.view === view) link.setAttribute('aria-current', 'page'); else link.removeAttribute('aria-current');
   });
-  if (userIntent) { openInspector(); bringStationPanelIntoReach(); }
+  if (userIntent) { openInspector(); bringStationPanelIntoReach(); openStationId = name; workplaceHost?.setOpenStation(name); }
   publishPresentation('station');
 }
 function selectFile(name) {

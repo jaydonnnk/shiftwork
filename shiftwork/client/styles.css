@@ -360,6 +360,9 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
 .room { order: 1; position: relative; width: 100%; isolation: isolate; }
 #workplace-canvas { position: relative; width: 100%; height: 240px; border-radius: 12px; overflow: hidden; }
 #workplace-canvas canvas { width: 100%; height: 100%; display: block; touch-action: pan-y; }
+/* Gate 3 section 14.2 rule 6: the only text on your bot. It follows the bot's head over the drawn room. */
+.you-chip { position: absolute; z-index: 2; left: var(--chip-x, 0); top: var(--chip-y, 0); transform: translate(-50%, -100%); padding: 1px 6px; border-radius: 6px; background: #edbd68; color: #2b1d05; font-size: 11px; font-weight: 700; letter-spacing: .06em; line-height: 16px; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
+.room:not([data-graphics="ready"]) .you-chip { display: none; }
 .room-art { height: 240px; bottom: auto; filter: none; }
 .room[data-graphics="ready"] .room-art, .room[data-graphics="ready"] .room-bookplate, body[data-board="bookshop"] .evidence-path { display: none; }
 .room-caption { display: none; }
