@@ -1,3 +1,18 @@
+**S43 TO S50 SLICE ENTRIES APPROVED, 2026-10-23 Asia/Singapore.**
+
+Jaydon approved in chat: "Approve the S43 to S50 Gate 4 entries, and the proposed Gate 3 clarification: the new mission binds only under the tokenfactory executor, and recorded mode keeps the old mission and replays S44 captures."
+The draft notice below is kept for its scope; its "awaiting review" status is superseded.
+No slice has started.
+Each slice still needs its own go-ahead, and each live call, spend ceiling, fixture review and seal, outreach, deployment, publication and submission stays separately authorized.
+
+**S43 TO S50 SLICE ENTRIES DRAFTED, 2026-10-23 Asia/Singapore. AWAITING REVIEW.**
+
+This draft adds dependency rows 43 to 50 (section 2), exit contracts for S43 to S50 (section 3) and trace rows for Gate 3 obligations 61 to 69 (section 4).
+It implements the approved [S43/S46 backtrack](backtrack-s43-s46-draft-2026-10-23.md) and the [path-to-15 plan](path-to-15-slice-plan-draft-2026-10-23.md).
+Nothing below is approved until the user approves this revision in chat.
+Approval of the entries would still not start any slice: each slice needs its own go-ahead, and each live call, spend ceiling, fixture review and seal, outreach, deployment, publication and submission stays separately authorized.
+Earlier notices retain their dated scope.
+
 **S29 local continuation verified, 2026-10-19 Asia/Singapore.**
 
 Local Bellwether 200% zoom, focus/retry and partial-initialization controls now
@@ -353,8 +368,8 @@ walkthrough; its staged views are not live evidence. For room demonstrations,
 start `python -m uvicorn shiftwork.app:create_app --factory --port 8000`, open
 `http://127.0.0.1:8000/`, and report the actual URL/port used. Use the project's
 approved interpreter. Every guard test needs a valid, behavior-changing
-mutation that fails at its named assertion. Gate 3 section 9 has **60 numbered
-obligations with multiple assertion clauses**, not 60 single-clause tests. Section
+mutation that fails at its named assertion. Gate 3 section 9 has **69 numbered
+obligations with multiple assertion clauses** (61 to 69 added 2026-10-23), not 69 single-clause tests. Section
 4 maps the clauses and names where partial coverage becomes complete.
 
 **Stop rule:** if a slice falsifies an approved Gate 2 or Gate 3 decision, stop
@@ -388,6 +403,14 @@ run-bound channel before the adapter implements one.
 | 26 | Optional reviewed Tavily curation and ablation | 25; separate Tavily authority if live |
 | 27 | Reproducible full-pivot test build and submission evidence | 22b, 25, and 26 only if a Tavily claim is made |
 | 28 | Conditional hosted demo, only if spike and delivery decision support it | 12, 27; separate deployment authority |
+| 43 | A Bellwether starter whose behavior depends on Nemotron's task plan, with no rescue code, shown offline through labelled test replies | 28; approved S43/S46 backtrack; operator review of the new mission and starter |
+| 44 | Live repeated runs measure the starter's real miss rate, and the observed misses become the incident | 43; live call and spend authority |
+| 45 | Repairs are compared on pass rates over public repetitions, and eligibility needs every repetition to pass | 44; live call and spend authority |
+| 46 | An optional coach proposes one patch and runs it once in isolation against the learner's public tests | 45; coach model choice; live call and spend authority |
+| 47 | A guided first-run path in plain language, with technical values behind a toggle | 43 (copy only); can run beside S44 to S46 |
+| 48 | The hosted demo runs current main with live inference, and the README opens with a judge path | 45, 47; 46 if shipped; deployment authority |
+| 49 | Five short learner sessions on the hosted path, with real numbers | 48; outreach and consent authority |
+| 50 | A video under three minutes and the submission text, filled only from retained evidence | 48; 49 if run; publication and submission authority |
 
 Build order for the new boards: the FDE pack first at S22a and S22b, then the
 GTM pack at S23 to S25, then Tavily, package and hosting at S26 to S28.
@@ -1060,6 +1083,133 @@ one.
   the demo URL, plus live inference calls within the existing Token Factory
   credits. No Nebius Console spend and no paid platform tier.
 
+### Slice 43: Nemotron reads the request and the service depends on it (offline)
+
+Branch: `shiftwork/slice-43`.
+
+- **Working result:** a new Bellwether mission version with `task_vocabulary` and four or five public tools, and a new starter that sends each customer request to the gateway and acts only on the returned task plan.
+The gateway parses the reply against the frozen task-plan schema and returns a plan or exactly one of `SCHEMA_INVALID`, `TOOL_NOT_ALLOWED` or `TASK_TYPE_UNKNOWN`.
+It never repairs, completes or reorders a plan.
+The starter contains no code that completes a task the model omitted.
+The existing `pivot_starter_failure_service.py`, its recorded baseline and every earlier shift stay as history.
+- **Demo:** a planned `python -m demos.s43_task_plan` entry point runs the starter offline with labelled operator-authored test replies.
+One reply omits the conditional alternative and the matching visible check fails; one reply names an unlisted tool and the gateway returns `TOOL_NOT_ALLOWED`.
+The demo labels every reply as a test reply, never as model output or `RECORDED_INSPECTION`.
+- **Tests:** obligations 61, 62 and 63, each with a behavior-changing mutation that fails at its named assertion.
+Obligation 36 still passes unchanged.
+The full offline suite keeps only the known `port_dead` failure.
+- **Offline mode (decided 2026-10-23):** `LocalProcessAdapter` refuses any request with an inference grant (`shiftwork/executor/local_process.py:133`), so a model-dependent starter cannot run as `TRUSTED_LOCAL`.
+Gate 3 section 2 now says new Bellwether shifts bind the new mission version.
+Without credentials, that would leave new Bellwether shifts with no runnable starter and would break the offline journeys in `demos.final_pivot` and the packaging check.
+Approved resolution: the new mission is bound only when the `tokenfactory` executor is configured; recorded mode keeps the old mission for offline journeys and replays S44's real captures as `RECORDED_INSPECTION` for diagnosis only.
+The Gate 3 section 2 clarification was approved and applied on 2026-10-23.
+S43 adds a test that a new Bellwether shift binds the new mission only under `tokenfactory` and the old mission under `recorded`, with a mutation that swaps them failing.
+- **Limits:** test replies are fixtures written by the operator, not observed model behavior.
+S43 proves the no-rescue mechanism, not that the model fails.
+- **Authorization:** slice go-ahead; operator review of the new mission and starter bytes and their pins.
+No live call.
+
+### Slice 44: live repeated runs, real misses become the incident
+
+Branch: `shiftwork/slice-44`.
+
+- **Working result:** one `DIAGNOSTIC` experiment runs the starter's public Bellwether requests with up to 10 repetitions, fixed before any result is visible, through the live Sandbox and Nemotron Nano.
+Every reply, parsed plan, plan failure and check result is retained.
+The board shows a per-request miss rate built only from retained repetitions, for example "collection task missed in 7 of 10 runs".
+The incident the learner diagnoses cites the observed misses.
+Real captures from this run become the recorded inspection for the no-credential mode, labelled `RECORDED_INSPECTION`.
+- **Demo:** the live run through the room, then the same captures replayed offline with their label.
+- **Tests:** a summary built from fewer retained repetitions than declared is refused; a shown rate that disagrees with the retained rows fails; the meter stops at its ceiling; obligation 68's diagnostic arm (a changed repetition count after results is refused).
+- **Stop rule:** if Nano misses no task across the declared repetitions, the starter defect is not real.
+Stop and decide with the user between harder operator-reviewed request shapes and a different defect.
+Never script a failure and present it as a model failure.
+- **Limits:** one model, one request set and a small sample; the UI says so.
+- **Authorization:** slice go-ahead; an explicit call count and spend ceiling.
+Planning estimate: 60 Nano calls at roughly 100 input and 150 output tokens, under $0.01 at the projection rates in `shiftwork/hosted.py`.
+That is an estimate from existing projection rates, not a vendor quote.
+Sandbox operation cost is unmeasured.
+
+### Slice 45: repairs compared on pass rates
+
+Branch: `shiftwork/slice-45`.
+
+- **Working result:** the existing paired comparison runs each frozen candidate with up to 3 public repetitions per slot, fixed in the frozen context, plus the unchanged protected phase once per pair.
+Eligibility needs every mandatory check to pass in every repetition.
+Efficiency is compared only after that.
+The choose screen shows each candidate's pass rate, for example "A: 9 of 9 complete, B: 5 of 9", with a link to every retained repetition.
+Protected inventory, seals and Gate 2 section 8.1 rules are unchanged.
+- **Demo:** one live comparison of two learner-style repairs (for example prompt wording against schema validation), then explicit selection of the eligible one.
+- **Tests:** obligation 68's comparison arm and obligation 69 (one failed repetition makes the candidate ineligible and the shown rate counts it); unequal repetition counts between candidates make the comparison `INCOMPLETE`; changing one retained repetition changes the shown rate.
+Existing obligations 50 to 54 still pass with repetitions in place.
+- **Limits:** 9 runs per request is a small sample.
+Operations per comparison rise from 12 to 24.
+- **Authorization:** slice go-ahead; a fresh cost estimate for 24 Sandbox operations; an explicit call count and ceiling (planning estimate: about 110 Nano calls).
+
+### Slice 46: coach proposes one patch and runs it once in isolation
+
+Branch: `shiftwork/slice-46`.
+
+- **Working result:** after a complete investigation, the Bellwether `PATCH_PROPOSAL` role returns a labelled patch.
+The learner may run it once: `run_assist_proposal` executes the proposal bytes as a `DIAGNOSTIC` experiment under the isolated executor, against the learner's public tests and public records only.
+The report is the deterministic check result.
+Accepting copies the proposal into the learner's draft and the next saved version's `generated_patch_accepted_count` rises by one.
+A coach-authored version reaches selection only through S45's comparison.
+- **Demo:** cause and falsifier recorded, coach proposal, one isolated run with its pass rate, learner accepts, saves and compares.
+- **Tests:** obligations 64, 65, 66 and 67, each with its own mutation.
+Obligations 5, 7 and 8 still pass.
+- **Open decision before the go-ahead:** which larger Nemotron model Token Factory serves for `SHIFTWORK_ASSIST_MODEL`, and at what rate, is unverified.
+Check the live model list before choosing.
+- **Limits:** one proposal and one run per proposal; the run uses a diagnostic slot, so the learner has one fewer diagnostic experiment.
+- **Authorization:** slice go-ahead; the coach model; an explicit call count and ceiling.
+This slice is the first to cut if time runs short.
+
+### Slice 47: guided first-run path in plain language (offline)
+
+Branch: `shiftwork/slice-47`.
+
+- **Working result:** a first-run mode with five steps shown one panel at a time: Read the failure, Explain it, Compare repairs, Choose, Next shift.
+Hashes, run IDs and evidence-mode codes move behind a "Technical details" toggle that reveals the same values.
+Evidence modes get plain labels beside their codes (for example "replayed recording" for `RECORDED_INSPECTION`, "ran live in a sandbox" for `ISOLATED_LIVE`).
+The overlapping room labels, the empty dark area at 1440px and the visible skip link recorded in the S28 hosted screenshots are fixed.
+- **Demo:** the guided path at 1440x900, 1280x720 and 390x844.
+- **Tests:** browser checks that no label overlaps another, no hash text is visible by default, the toggle reveals the same values and the skip link is visible only on focus; the existing three journeys, fullscreen and fault suites still pass.
+- **Gate check:** these client files are governed by the workplace-3d gates.
+If the guided path changes an approved workplace screen rather than its presentation, stop for a scoped workplace Gate 1 check.
+- **Authorization:** slice go-ahead.
+No live call.
+
+### Slice 48: redeploy current main and rewrite the judge path
+
+Branch: `shiftwork/slice-48`.
+
+- **Working result:** the existing free Render service runs current main with both credentials set, so the hosted demo matches the code judges read.
+The README opens with a five-line judge path, then the model, Sandbox and Token Factory explanation; slice history moves to `docs/`.
+- **Demo:** the deployed URL showing the guided path, one live smoke diagnostic and a recorded wake from sleep.
+- **Tests:** the existing S28 hosted checks against the deployed URL; the packaging check from an isolated source copy.
+- **Limits:** the free tier sleeps and is not an availability guarantee.
+- **Authorization:** deployment and one live smoke call within existing Token Factory credits.
+No paid tier and no Nebius Console spend.
+
+### Slice 49: five short learner sessions
+
+Branch: none (evidence only, recorded under `docs/plans/shiftwork/evidence/`).
+
+- **Working result:** five people with basic coding skills each try the hosted guided path for about 20 minutes, with consent.
+Record task completion, whether they named the observed cause, time taken and one quote each.
+Report the real numbers, including weak ones.
+- **Limits:** five sessions show usability, not learning gain; there is no comparison group.
+- **Authorization:** outreach and recruitment; a consent note; a live call ceiling for the hosted sessions.
+
+### Slice 50: video and submission text
+
+Branch: `shiftwork/slice-50`.
+
+- **Working result:** a public video under three minutes of one live hosted run: an observed model miss, the learner's explanation, the coach proposal if S46 shipped, a pass-rate comparison, an explicit choice and the next shift's inheritance.
+Submission text and model feedback answers come only from retained calls.
+The Tavily answer is "no" unless a genuine runtime call ships, which this plan does not include.
+- **Tests:** every number in the submission text and video narration traces to a retained evidence file.
+- **Authorization:** live calls for the recorded run; YouTube publication; the Devpost submission.
+
 ## 4. Gate 3 assertion-clause trace
 
 The numbers refer only to `03-program-design.md` section 9. A slice may add a
@@ -1128,6 +1278,15 @@ Every row includes the assertion clauses, not merely a test name.
 | 58 | S24 proves one `OWNER_ASSIGNED` and one `SLA_CLOCK_STARTED` per completed GTM signal, a duplicate owner or write as `DUPLICATE_COMMITMENT`, an unowned required signal as `REQUIRED_TASK_MISSING`, the human-handoff record never presenting a sent message, one missed-handoff `INCIDENT_OPENED` per failing record with its decision trace, and no experimental, selection or revenue quantity write | S24 |
 | 59 | S22b proves the FDE all-or-nothing pilot arm: full acceptance emits the pilot-state events with exactly one `ROLLOUT_APPROVED`, a failing run opens incidents and writes no pilot state, `COUNTER_FOLLOWUP_RECORDED` stays a follow-up, and close refuses a missing declared runbook document and otherwise appends one `HANDOVER_DECLARED` carrying the runbook version, declared limits and unresolved incidents that a later experiment cannot alter | S22b |
 | 60 | S22a and S22b validate the typed acceptance-aspect schema with the FDE family: an absent or unparseable aspect, an unknown kind, a missing or unknown task id, an empty expected-outcomes tuple, a forbidden parameter for the kind and an out-of-vocabulary reason code are rejected with no exposure recorded, and a declared task-outcomes and a declared no-task reason code each pass and fail; the GTM family repeats at S23 | S23 (partial S22a, S22b) |
+| 61 | S43 valid, invalid, unlisted-tool and unknown-task replies each give the expected plan or code; a fill-in or drop mutation fails | S43 |
+| 62 | S43 a labelled reply omitting a required task fails its visible check and is not useful completion; re-added guard completion fails the test; S44 repeats on live replies | S44 (partial S43) |
+| 63 | S43 a wider task vocabulary or tool list through request body or prompt text is refused before any provider call | S43 |
+| 64 | S46 proposal run refused without a complete investigation, on a second run and with no diagnostic slot, each with no executor call | S46 |
+| 65 | S46 proposal run refused under recorded and trusted-local executors; a fallback mutation to `LocalProcessAdapter` fails | S46 |
+| 66 | S46 proposal run inputs and public surfaces scanned with obligation 39's needles and a scanner self-test; the run never appears in eligibility | S46 |
+| 67 | S46 accepting changes only the draft, creates no version, freeze or selection, and raises the next version's `generated_patch_accepted_count` by one | S46 |
+| 68 | S44 a changed repetition count after results is refused for a diagnostic experiment; S45 repeats for a comparison | S45 (partial S44) |
+| 69 | S45 one failed mandatory check in one repetition makes the candidate ineligible and the shown rate counts it | S45 |
 
 ## 5. No-go conditions and evidence boundaries
 

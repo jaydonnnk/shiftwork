@@ -1,3 +1,27 @@
+**GATE 3 CLARIFICATION APPROVED, 2026-10-23 Asia/Singapore.**
+
+Jaydon approved in chat: "Approve the S43 to S50 Gate 4 entries, and the proposed Gate 3 clarification: the new mission binds only under the tokenfactory executor, and recorded mode keeps the old mission and replays S44 captures."
+Section 2's Bellwether starter row now states that the new mission version binds only under the `tokenfactory` executor.
+Under the recorded executor, new Bellwether shifts keep the earlier mission and starter, and S44's real captures replay as `RECORDED_INSPECTION` for diagnosis only.
+`LocalProcessAdapter` still refuses inference grants; no other clause changes.
+Design text only: no implementation, live call, commit or push is authorized by this notice.
+
+**SCOPED BACKTRACK FOR S43 AND S46 APPROVED, 2026-10-23 Asia/Singapore.**
+
+Jaydon approved Parts A, B and C of the
+[S43/S46 backtrack draft](backtrack-s43-s46-draft-2026-10-23.md) in chat:
+"Approve Parts A, B and C of the S43/S46 backtrack. Apply them to the Gate 2
+and Gate 3 documents with dated revision notices." In this document it changes
+section 2 (file map rows), 3.2 (one isolated run of a patch proposal), 3.5
+(task-plan reply, no gateway repair), 3.7 (the assist event view gains the run
+reference), 7 (inference, proposal-run and repetition limits), 9 (obligations
+61 to 69) and 12. Gate 3 has no mission-policy type in 3.10, so the draft's A3
+task vocabulary lands on the Bellwether mission file row in section 2 and in
+the 3.5 gateway paragraph. The approval covers design text only. It does not
+authorize implementation, fixture authoring, sealing, live calls, spend,
+deployment, a Gate 4 slice entry, a commit or a push. Earlier notices retain
+their dated scope.
+
 **Post-S28 rendering design extension approved. 2026-10-19 Asia/Singapore.**
 
 The approved scoped [Gate 3 design](workplace-3d/03-program-design.md) extends this
@@ -530,6 +554,9 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/client/evidence.js` | Pure formatting of public evidence, metrics and reason codes. |
 | `shiftwork/client/styles.css` | Existing room direction plus clear purpose/status hierarchy and mobile access. |
 | `shiftwork/client/room.svg` | Keep the accepted room composition; add only state hooks needed by the approved stations. |
+| `shiftwork/gateway/protocol.py` | 2026-10-23: `TaskPlanStep` and the revised `InferenceReply` in 3.5. |
+| `shiftwork/gateway/service_inference.py` | 2026-10-23: parse model content against the frozen task-plan schema and return a plan or one `plan_failure` code; never repair, complete or reorder a plan. |
+| `shiftwork/executor/tokenfactory.py` | 2026-10-23: the trusted driver forwards the plan or failure code to the service; public repetitions run as fresh public workspaces (section 7). |
 
 ### New production files
 
@@ -550,8 +577,8 @@ vertical slices, but it may not silently change their ownership.
 | `shiftwork/curation/__init__.py` | Package boundary only; never imported by the runtime application. |
 | `shiftwork/curation/pipeline.py` | Operator-only Tavily discovery, human verification and frozen-fixture lifecycle. |
 | `shiftwork/curation/ablation.py` | Frozen, known-page polling and Tavily comparison with the retained DROP rule. |
-| `shiftwork/fixtures/mission/bookshop_pivot_v1.json` | Public mandatory tasks, visible requirements, allowed information/tool vocabulary and deterministic render vocabulary for Bellwether. |
-| `shiftwork/fixtures/artifacts/bookshop/pivot_starter_failure_service.py` | Executable learner-editable Bellwether starter whose reviewed incident request exposes the task-completion failure. It must use the approved executor protocol; its contents and pin are not supplied by this design. |
+| `shiftwork/fixtures/mission/bookshop_pivot_v1.json` | Public mandatory tasks, visible requirements, allowed information/tool vocabulary and deterministic render vocabulary for Bellwether. 2026-10-23: a new mission version adds `task_vocabulary` (task type to description) beside the enlarged tool vocabulary; both are frozen mission policy that the learner request and prompt text cannot widen. Exact names come from S43 fixture authoring and operator review. The earlier version stays for history. |
+| `shiftwork/fixtures/artifacts/bookshop/pivot_starter_failure_service.py` | Executable learner-editable Bellwether starter whose reviewed incident request exposes the task-completion failure. It must use the approved executor protocol; its contents and pin are not supplied by this design. 2026-10-23: this starter, its recorded baseline and every earlier run stay as history under their original contract. New Bellwether shifts bind a new model-dependent starter with no rescue code (Gate 2 section 10); its contents and pin come from S43 authoring and review. Earlier shifts are not migrated. Clarified 2026-10-23: the new mission version binds only when the controller's configured executor is `tokenfactory`; under the recorded executor new Bellwether shifts keep the earlier mission and starter for offline journeys, and S44's real captures of the new starter replay as `RECORDED_INSPECTION` for diagnosis only, never as fresh execution or eligibility. |
 | `shiftwork/fixtures/requests/bookshop_pivot_incident.jsonl` | Reviewed public Bellwether failure request for the first investigation, distinct from protected cases and the three paired workloads. |
 | `shiftwork/fixtures/shop/bookshop_pivot_public_state.json` | Reviewed public records and dependency condition needed to reproduce that failure; exact bytes are captured with the run. |
 | `shiftwork/fixtures/runs/bookshop_pivot_incident_recorded.json` | Optional labelled offline inspection capture for the same pinned starter/request/state; never fresh eligibility or a substitute for the live service. |
@@ -812,6 +839,8 @@ class AssistEvent(BaseModel):
     response_text: str
     proposed_patch: str | None
     accepted: bool | None
+    diagnostic_run_id: Id | None      # 2026-10-23: the one isolated run of proposed_patch, if requested
+    proposal_source_sha256: str | None
     created_at: datetime
 
 class AssistRequest(BaseModel):
@@ -824,14 +853,24 @@ class AssistDecision(BaseModel):
 
 def request_assist(conn, shift_id: Id, request: AssistRequest) -> AssistEvent: ...
 def record_assist_decision(conn, event_id: Id, decision: AssistDecision) -> AssistEvent: ...
+def run_assist_proposal(conn, shift_id: Id, event_id: Id) -> ExperimentRun: ...
 ```
 
 An investigation revision never overwrites its parent. Every non-orientation
 assist role requires a complete investigation owned by the shift. The shift's
 pack declares the allowed roles and the shared call budget (3.10); a role outside
 the declaration, a patch proposal where none is declared, or an exhausted budget
-is refused before any model call. Accepting a patch records attribution only. It
-does not edit code, freeze a version, prove a cause or affect eligibility.
+is refused before any model call.
+
+`run_assist_proposal` is allowed once per patch proposal. It reuses the `DIAGNOSTIC`
+experiment path (6.4) with the proposal bytes as a transient candidate, under the
+configured isolated executor only. Under the recorded or trusted-local executor it
+is refused with no run. Accepting a patch copies the proposal into the learner's
+draft, and the next saved version counts it in the existing
+`VersionAuthorship.generated_patch_accepted_count` (3.6). It does not freeze a
+version, prove a cause or affect eligibility. A coach-authored version is
+compared and chosen exactly like any other version. (Revised 2026-10-23, S46
+backtrack Part B; previously acceptance recorded attribution only.)
 
 ### 3.3 Public task contract and service response
 
@@ -1141,9 +1180,14 @@ class InferenceRequest(BaseModel):
     request_ordinal: int
     input_text: str
 
+class TaskPlanStep(BaseModel):  # 2026-10-23, S43 backtrack Part A
+    task_type: str            # member of the frozen mission task vocabulary
+    tool_name: str            # member of the grant's allowed_tool_names
+
 class InferenceReply(BaseModel):
-    text: str
-    proposed_tool_names: tuple[str, ...]
+    text: str                 # raw model content, retained privately
+    plan: tuple[TaskPlanStep, ...] | None   # None when the content fails the schema
+    plan_failure: Literal["SCHEMA_INVALID", "TOOL_NOT_ALLOWED", "TASK_TYPE_UNKNOWN"] | None
     input_tokens: int | None
     output_tokens: int | None
 
@@ -1165,6 +1209,16 @@ allow-listed tool vocabulary, not a URL proxy. It
 records trusted request/response/usage observations before returning.
 The grant is revoked when the run ends. The capability, provider headers and raw
 provider errors must be removed from captures, logs and every public projection.
+
+The gateway parses the model content as JSON against the frozen task-plan schema.
+It returns the parsed plan, or `plan = None` with one `plan_failure` code. A plan
+failure is service behavior, not a gateway error: the call still counts, the run
+continues, and the service receives the failure so its own code decides what to
+do. The gateway never repairs, completes or reorders a plan. The task vocabulary
+and tool allowlist are both derived from the frozen mission policy, never from
+the learner request or the prompt. Tool execution stays with the trusted request
+driver, which still refuses any unlisted tool. (Added 2026-10-23, S43 backtrack
+Part A.)
 
 ### 3.6 Selection, ancestry and orchestration
 
@@ -1261,6 +1315,7 @@ class AssistEventView(BaseModel):
     response_text: str
     proposed_patch: str | None
     accepted: bool | None
+    diagnostic_run_id: Id | None      # 2026-10-23: public run reference only
     created_at: datetime
 
 class InvestigationView(BaseModel):
@@ -2425,13 +2480,16 @@ These are product ceilings, not measured vendor performance.
 | Unplanned comparison retries | 0 | Any missing/failed slot makes evidence incomplete; create a new shift/comparison only under a new reservation. |
 | Operational reservations per shift | 2 maximum | Second allowed only when the first failed with zero accepted customer outputs and zero reducer writes; same selection/context only. |
 | Successful operational finalizations per shift | 1 | Unique database constraint. |
-| Service inference calls per customer request | 1 maximum | Zero is valid when ordinary code handles the request. |
+| Service inference calls per customer request | 1 maximum | 2026-10-23: a new Bellwether starter must make exactly 1. A learner repair may make 0 if it is labelled as code-only. |
 | Customer requests per trial | 4 public maximum, plus exactly 1 protected stimulus | Exact public denominator is frozen in context; the protected step carries its own ordinal and denominator. |
-| Executor operations per trial slot | 2 (public phase, protected phase) | Each phase is a fresh workspace with the frozen bytes for that phase; the live spike's cost estimate must be revised for two operations per slot before any live comparison is authorized. |
+| Executor operations per trial slot | Public repetitions + 1 protected (2026-10-23; was 2) | Each public repetition and the protected phase is a fresh workspace with the frozen bytes for that phase. Operations per comparison rise from 12 to 24 at 3 repetitions; a fresh cost estimate is required before any live comparison is authorized. |
 | Gateway input per call | 8 KiB UTF-8 | Reject before provider call. |
 | Gateway output per call | 1,024 tokens | Provider request and local guard. |
 | Gateway deadline per call | 20 seconds | Trusted gateway measurement. |
 | Assist model calls per shift | Declared per pack: 3 (Bellwether), 2 (Go-To-Market), 1 (FDE) | The pack declaration is the enforcement source (3.10). Bellwether shares its three calls across HINT, DIAGNOSIS and PATCH_PROPOSAL with one patch proposal maximum; Go-To-Market shares two across HINT and DIAGNOSIS with no patch proposal; the FDE board allows one HINT call. A role outside the declaration is refused before any model call. |
+| Public repetitions per diagnostic experiment | Up to 10 (2026-10-23) | Fixed before any result is visible; a summary from fewer retained repetitions is refused. |
+| Public repetitions per comparison slot | Up to 3 (2026-10-23) | Fixed in the frozen context; every mandatory check must pass in every repetition. Protected variants per family per comparison stay at 3: the protected phase runs once per pair. |
+| Isolated runs of a patch proposal | 1 per patch proposal (2026-10-23) | Consumes one diagnostic experiment slot from the existing cap of 2 per shift; no new budget. Refused under recorded or trusted-local executors. Packs without a patch proposal are unaffected. |
 | Public learner text fields | 2,000 Unicode scalar values each | API validation before storage/model use. |
 
 The live capability spike must measure whether these ceilings are feasible with the
@@ -2902,6 +2960,41 @@ at `:650-669`, which section 2's candidate B row supersedes, and the
 which section 4's two new columns change. The Gate 4 Slice 15 contract names all
 four.
 
+### Model-dependent service, coach run and repetitions (2026-10-23 backtrack)
+
+61. `test_gateway_returns_plan_or_one_failure_code_and_never_repairs` feeds valid
+   JSON, invalid JSON, an unlisted tool and an unknown task type. Each case must
+   give the expected plan or code. A mutation that fills a missing step or drops
+   an invalid one must fail.
+62. `test_starter_omitting_a_required_task_fails_the_visible_check` replays a
+   labelled reply that omits one required task. The matching deterministic check
+   must fail and the run must not count as useful completion. A mutation that
+   re-adds guard completion must make this test fail.
+63. `test_task_vocabulary_and_tool_allowlist_come_only_from_frozen_mission`
+   injects a wider vocabulary through the request body and through prompt text.
+   Each must be refused before any provider call, as obligation 36 does for tools.
+64. `test_assist_proposal_run_refused_before_investigation_twice_or_without_slot`
+   covers no complete investigation, a second run of one proposal and no
+   diagnostic slot left. Each is refused with no executor call.
+65. `test_assist_proposal_never_runs_trusted_local_or_recorded` sets each
+   non-isolated executor and requires refusal. A mutation that falls back to
+   `LocalProcessAdapter` must fail.
+66. `test_assist_proposal_run_sees_no_protected_material_and_cannot_qualify` scans
+   the run's inputs and every public surface with obligation 39's needles, with a
+   scanner self-test, and requires the run to be absent from eligibility.
+67. `test_accepted_proposal_is_draft_only_and_attributed` checks that accepting
+   changes only the draft, creates no version, freeze or selection, and that the
+   next saved version's `generated_patch_accepted_count` rises by one.
+68. `test_repetition_count_changed_after_results_is_refused` changes the declared
+   repetition count after a result is visible, for a diagnostic experiment and
+   for a comparison; each must be refused.
+69. `test_one_failed_repetition_blocks_eligibility` fails one mandatory check in
+   one repetition of one slot; the candidate must be ineligible and the shown
+   rate must count the failure.
+
+Obligations 61 to 69 are new with the 2026-10-23 backtrack. Each guard needs its
+own mutation proving one real failure.
+
 ## 10. Learning and product evidence plan
 
 The service checks above prove software behavior, not learning.
@@ -3084,3 +3177,14 @@ live call, commit or push, and it changes no runtime behavior by itself. The
 Gate 4 slice revision, including the clause trace over these obligations,
 follows under its own explicit approval; 04-slices.md and AGENTS.md are not
 edited by this draft.
+
+**Scoped S43/S46 backtrack, APPROVED 2026-10-23:** sections 2, 3.2, 3.5, 3.7,
+7, 9 and this section apply Parts A, B and C of
+[the backtrack draft](backtrack-s43-s46-draft-2026-10-23.md): the task-plan
+reply with no gateway repair, the frozen Bellwether task vocabulary, the
+one-call model-dependent starter, one isolated diagnostic run per patch
+proposal with draft-only acceptance, public repetitions with unchanged
+protected inventory, and obligations 61 to 69. ADR 0005 and ADR 0001 carry
+dated notes. The approval covers design text only. Gate 4 slice entries for
+S43 to S50, each slice's go-ahead, fixture authoring and review, seals, live
+calls, spend, deployment, commits and pushes remain separately authorized.

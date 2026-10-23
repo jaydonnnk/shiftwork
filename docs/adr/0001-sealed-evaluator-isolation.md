@@ -131,3 +131,9 @@ Status of this update: ACCEPTED 2026-09-28 with the user's explicit approval
 of Gate 2 S8.1, Gate 3, Gate 4 and ADR 0006.
 No implementation, operator review, seal, live run, installation, credential use or
 publication is authorized by this note.
+
+**Dated note, 2026-10-23 (S43/S46 backtrack, approved).** The isolated run of
+an assist patch proposal is inside this boundary: it receives no protected
+cases, evaluator code or credentials, and Gate 3 obligation 66 scans its inputs
+and public surfaces with the sealed needles. This decision is otherwise
+unchanged and not superseded.

@@ -126,3 +126,12 @@ unachieved stretch target with its own credential and spend authorization; see
 (`test_observed_context_references_reject_update_and_delete`) and the twenty
 `tests/s20_mutation_proofs.py` rows. The offline verification is recorded in
 `docs/plans/shiftwork/00-status.md`; acceptance is a separate user decision.
+
+**Dated note, 2026-10-23 (S43/S46 backtrack, approved).** A patch proposal from
+the assist gateway may be run once as a `DIAGNOSTIC` experiment under the
+isolated executor only (Gate 2 section 10, Gate 3 section 3.2). That run uses
+public tests and records only, consumes a diagnostic slot and never creates
+eligibility. An accepted proposal reaches only the learner's draft; only the
+learner can save, freeze, compare and choose it. Public repetitions per
+comparison slot (Gate 3 section 7) require every mandatory check to pass in
+every repetition. This decision is otherwise unchanged and not superseded.

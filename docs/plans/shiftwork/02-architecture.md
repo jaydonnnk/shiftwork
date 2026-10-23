@@ -1,3 +1,16 @@
+**SCOPED BACKTRACK FOR S43 AND S46 APPROVED, 2026-10-23 Asia/Singapore.**
+
+Jaydon approved Parts A, B and C of the
+[S43/S46 backtrack draft](backtrack-s43-s46-draft-2026-10-23.md) in chat:
+"Approve Parts A, B and C of the S43/S46 backtrack. Apply them to the Gate 2
+and Gate 3 documents with dated revision notices." In this document it changes
+only section 10 (Nemotron must decide a task plan; no hidden rescue code; one
+isolated run of a coach proposal) and the assist gateway row in section 2.
+Part C changes Gate 3 limits only. The approval covers design text only. It
+does not authorize implementation, fixture authoring, sealing, live calls,
+spend, deployment, a Gate 4 slice entry, a commit or a push. Earlier notices
+retain their dated scope.
+
 **3D workplace Gates 1 to 3 approved, 2026-10-19 Asia/Singapore.**
 
 The approved scoped [Gate 2](workplace-3d/02-architecture.md) is unchanged.
@@ -136,7 +149,7 @@ authoritative for assessment, selection or business history.
 | Executor adapter and trusted request driver | Provision exact version and public data, stream permitted requests, observe outputs and enforce limits | Cannot read sealed cases, grading rules, ledger internals or provider secrets |
 | Learner service | Code, request interpretation, allowed information/tool selection and responses | Cannot choose authoritative request identities, grading, eligibility or operational mutations |
 | Service inference gateway | Controller-side, bounded Nemotron calls for service behavior; trusted usage/timing capture | No sealed loader, evaluator/ledger access, arbitrary URL proxy or provider secret in returned data |
-| Assist gateway | Optional attributable orientation, hints and patch proposals | No diagnostic help before learner cause/falsifier; no silent selection or self-grading |
+| Assist gateway | Optional attributable orientation, hints and patch proposals; may request one isolated diagnostic run of its own proposal against the learner's public tests | No diagnostic help before learner cause/falsifier; no protected cases, evaluator or credentials; no trusted-local execution; no freeze, eligibility, selection or self-grading |
 | Pure evaluator / comparison policy | Independent task/correctness checks and evidence eligibility from explicit inputs | No files, database, network or model calls; no automatic winner |
 | Pure ledger reducer | Operational captures and checks to synthetic event drafts | No experiments or selections as business results |
 | Sealed store | Protected cases and historical assessment material, registered and resolved per engagement pack (section 21), loaded only by orchestration | No browser, learner, executor, gateway or curation access |
@@ -543,9 +556,14 @@ remain explicitly synthetic, never revenue, trust, competence or learning eviden
 
 ## 10. Nemotron responsibilities and learner authorship
 
-Nemotron performs meaningful behavior inside the starter service, such as interpreting
-requests and proposing information/tool selection. Learner code owns the control flow
-and exact transaction/stock rules. Ordinary code may replace unnecessary AI work.
+Nemotron performs meaningful behavior inside the starter service: it interprets each
+customer request into a structured task plan and proposes the information/tool steps
+for it. Learner code owns the control flow, validation and exact transaction/stock
+rules. Ordinary code may replace unnecessary AI work, but only as a labelled repair
+the learner authors and compares. A shipped starter or reviewed candidate that
+presents model-dependent behavior must not contain hidden code that completes tasks
+the model omitted. When the model's plan is wrong, the visible checks must be able
+to fail. (Revised 2026-10-23, S43 backtrack Part A.)
 Observed model outputs and tool calls are investigation evidence, not authoritative
 explanations of the model's internal reasoning.
 
@@ -554,6 +572,16 @@ explain controls; hints, diagnoses and labelled patch proposals require the lear
 initial cause/falsifier. Gate this in the controller, not only by hiding a button.
 Record original reasoning, chosen tests, authored source and accepted/rejected help.
 Models never own requirements, experiments, grading, promotion or the final choice.
+
+A patch proposal may be tested once before the learner decides. The controller,
+not the model, runs the proposed source as a diagnostic public experiment in the
+same isolation class as learner code. It uses only the learner's public tests and
+public records, never protected cases. The report is the deterministic check
+result, not model prose. The run consumes one of the shift's diagnostic
+experiment slots and can never create eligibility. If the learner accepts, the
+proposal is copied into the learner's draft and counted in that version's
+authorship record. Only the learner can save, freeze, compare and choose it.
+(Added 2026-10-23, S46 backtrack Part B.)
 
 The deterministic controller/evaluator remains testable offline. That does not make
 recorded transcripts an adequate demonstration of the pivot's AI-service learning
