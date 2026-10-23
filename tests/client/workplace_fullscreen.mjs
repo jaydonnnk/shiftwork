@@ -114,9 +114,9 @@ export const FAULTS = {
     expect: 'next_action_navigates_only: fresh shift next action sent' },
   'both-actions': { file: '/styles.css', needle: '  .world[data-inspector="open"] .next-action { display: none; }\n', replacement: '',
     expect: 'main_view_shows_one_of_each: fresh shift shows 2 next actions or inspector footers' },
-  'two-owner-lines': { file: '/app.js', needle: "  text('owner-bubble-text', owner ?? '');\n",
-    replacement: "  text('owner-bubble-text', owner ?? '');\n  if (owner && !document.getElementById('duplicate-owner')) document.getElementById('story-layer').append(Object.assign(document.getElementById('owner-bubble').cloneNode(true), { id: 'duplicate-owner' }));\n",
-    expect: 'main_view_shows_one_of_each: fresh shift shows 2 owner' },
+  'two-owner-lines': { file: '/app.js', needle: "  text('owner-bubble-text', said('owner')?.text ?? '');\n",
+    replacement: "  text('owner-bubble-text', said('owner')?.text ?? '');\n  if (said('owner') && !document.getElementById('duplicate-owner')) document.getElementById('story-layer').append(Object.assign(document.getElementById('owner-bubble').cloneNode(true), { id: 'duplicate-owner' }));\n",
+    expect: 'main_view_shows_one_of_each: investigating shows 2 owner' },
   'draft-enables': { file: '/app.js',
     needle: "for (const id of ['cause-input', 'falsifier-input']) $(id).addEventListener('input', () => renderGuide());",
     replacement: "for (const id of ['cause-input', 'falsifier-input']) $(id).addEventListener('input', () => { renderGuide(); document.getElementById('run-comparison').disabled = false; });",
@@ -232,7 +232,7 @@ export const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftRepor
 
 export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S40 receipts must use a disposable /tmp/shiftwork-s36-*, s37-*, s38-*, s39-* or s40-* root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41|42)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S40 receipts must use a disposable /tmp/shiftwork-s36-*, s37-*, s38-*, s39-* or s40-* root');
   const patch = fault ? FAULTS[fault] : null;
   if (fault) assert.ok(patch, `Unknown S36 fault ${fault}`);
   await mkdir(out, { recursive: true });

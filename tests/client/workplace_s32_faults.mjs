@@ -9,7 +9,7 @@ import { pythonPath, repoRoot } from './env.mjs';
 import { runFaultControl } from './workplace_s32.mjs';
 
 const out = process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:32|40|41)-/.test(out ?? ''), 'Pass a disposable /tmp/shiftwork-s32-* or /tmp/shiftwork-s40-* output directory');
+assert.ok(/^\/tmp\/shiftwork-s(?:32|40|41|42)-/.test(out ?? ''), 'Pass a disposable /tmp/shiftwork-s32-* or /tmp/shiftwork-s40-* output directory');
 await mkdir(out, { recursive: true });
 const onlyIndex = process.argv.indexOf('--only');
 const only = onlyIndex === -1 ? null : process.argv[onlyIndex + 1].split(',');

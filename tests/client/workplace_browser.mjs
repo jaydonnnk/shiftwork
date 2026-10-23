@@ -19,7 +19,7 @@ export function replaceOnce(text, needle, replacement) {
 
 export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=1280,windowHeight=900,layoutFault=''}={}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39|40|41)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39|40|41|42)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an approved temporary root');
   await mkdir(out, { recursive: true });
   const profile = await mkdtemp(path.join(out, 'profile-'));
   if(zoom!==1) {
@@ -508,9 +508,9 @@ export async function openBrowser(base, out, fault = '', {zoom=1,windowWidth=128
         source=replaceOnce(source,needle,'function settleAllPulses() { settlePulse(); settleComparisonPulse(); settleSelectionPulse(); }');
       }
       if(fault==='motion-omit-settle') {
-        const needle='setReducedMotion(value) { reducedMotion=value; if(value) { settleAllPulses(); settleAmbient(); settleCamera(); } requestFrame(); }';
+        const needle='setReducedMotion(value) { reducedMotion=value; if(value) { settleAllPulses(); settleAmbient(); settleCamera(); crew?.settle(); crewWalking=false; crewDirty=true; } requestFrame(); }';
         assert.equal(source.split(needle).length-1,1,'Reduced motion settlement anchor changed');
-        source=replaceOnce(source,needle,'setReducedMotion(value) { reducedMotion=value; if(value) { settleAmbient(); settleCamera(); } requestFrame(); }');
+        source=replaceOnce(source,needle,'setReducedMotion(value) { reducedMotion=value; if(value) { settleAmbient(); settleCamera(); crew?.settle(); crewWalking=false; crewDirty=true; } requestFrame(); }');
       }
       if(fault === 'constructor') source=replaceOnce(source,'renderer = new THREE.WebGLRenderer(', 'throw new Error("injected constructor"); renderer = new THREE.WebGLRenderer(');
       if(fault === 'render') source=replaceOnce(source,'renderer.render(scene, camera);','throw new Error("injected render");');
