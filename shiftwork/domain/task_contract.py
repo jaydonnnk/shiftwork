@@ -475,6 +475,9 @@ class MissionSpec(BaseModel):
     allowed_tool_vocabulary: dict[str, str]
     render_vocabulary: dict[str, str]
     evidence_limits: tuple[str, ...]
+    # S43 (Gate 3 section 3.5): frozen task types the service's model may plan;
+    # empty for missions that predate plan mode.
+    task_vocabulary: dict[str, str] = {}
 
 
 class ShopEntity(BaseModel):
@@ -666,6 +669,8 @@ def load_mission_bytes(raw: bytes, *, label: str = "frozen mission bytes") -> Mi
             for code, body in data["explanation_codes"].items()
         }
         constants = data["constants"]
+        if "task_vocabulary" in data and not data["task_vocabulary"]:
+            raise MissionSpecInvalid(f"mission {label} declares an empty task vocabulary")
         mission = MissionSpec(
             engagement_slug=data["engagement_slug"],
             version=data["version"],
@@ -680,6 +685,7 @@ def load_mission_bytes(raw: bytes, *, label: str = "frozen mission bytes") -> Mi
             tomorrow_basis=constants["tomorrow_basis"],
             explanation_codes=codes,
             allowed_tool_vocabulary=data["allowed_tool_vocabulary"],
+            task_vocabulary=data.get("task_vocabulary", {}),
             render_vocabulary=data["render_vocabulary"],
             evidence_limits=tuple(data["evidence_limits"]),
         )

@@ -15,10 +15,24 @@ from typing import Any
 import httpx
 from pydantic import ValidationError
 
-from shiftwork.gateway.protocol import InferencePolicy, InferenceRequest
+from shiftwork.gateway.protocol import InferencePolicy, InferenceRequest, TaskPlan
 from shiftwork.live_budget import LiveInferenceMeter
 
 PROVIDER_URL = "https://api.tokenfactory.nebius.com/v1/chat/completions"
+
+
+def parse_task_plan(content: str, task_vocabulary: tuple[str, ...],
+                    allowed_tool_names: tuple[str, ...]) -> tuple[list[dict[str, str]] | None, str | None]:
+    """Strict plan parse. The gateway never repairs, completes or reorders a plan."""
+    try:
+        plan = TaskPlan.model_validate_json(content.strip())
+    except ValidationError:
+        return None, "SCHEMA_INVALID"
+    if any(step.task_type not in task_vocabulary for step in plan.plan):
+        return None, "TASK_TYPE_UNKNOWN"
+    if any(step.tool_name not in allowed_tool_names for step in plan.plan):
+        return None, "TOOL_NOT_ALLOWED"
+    return [step.model_dump() for step in plan.plan], None
 
 
 class GatewayRejected(Exception):
@@ -38,6 +52,8 @@ class ServiceInferenceGateway:
             raise ValueError("unsupported service inference ceiling")
         if not policy.allowed_tool_names or len(set(policy.allowed_tool_names)) != len(policy.allowed_tool_names):
             raise ValueError("a frozen unique tool policy is required")
+        if len(set(policy.task_vocabulary)) != len(policy.task_vocabulary):
+            raise ValueError("a frozen unique task vocabulary is required")
         self._token = token
         self.policy = policy
         self._http = http
@@ -86,7 +102,8 @@ class ServiceInferenceGateway:
             {"source": "controller_verified", "request_ordinal": request.request_ordinal,
              "model": self.policy.model, "input_bytes": len(raw_input),
              "input_sha256": hashlib.sha256(raw_input).hexdigest(),
-             "allowed_tool_names": list(self.policy.allowed_tool_names)},
+             "allowed_tool_names": list(self.policy.allowed_tool_names),
+             **({"task_vocabulary": list(self.policy.task_vocabulary)} if self.policy.task_vocabulary else {})},
             {"input_text": request.input_text},
         ))
         provider_request = {
@@ -117,6 +134,8 @@ class ServiceInferenceGateway:
             finish_reason = choice.get("finish_reason")
         except (ValueError, TypeError, KeyError, IndexError):
             self._reject("PROVIDER_RESPONSE_INVALID", {"body": response.text[:65536]})
+        if self.policy.task_vocabulary:
+            return self._plan_reply(content, body, finish_reason, elapsed_ms, usage)
         selected_tool = content.strip()
         public = {
             "source": "controller_verified", "model": body.get("model"),
@@ -131,3 +150,20 @@ class ServiceInferenceGateway:
         if isinstance(usage.get("completion_tokens"), int) and usage["completion_tokens"] > self.policy.max_output_tokens:
             raise GatewayRejected("GATEWAY_OUTPUT_LIMIT")
         return {"kind": "inference_reply", "selected_tool": selected_tool}
+
+    def _plan_reply(self, content: str, body: dict[str, Any], finish_reason: Any, elapsed_ms: int,
+                    usage: dict[str, Any]) -> dict[str, Any]:
+        # A plan failure is service behavior, not a gateway error: the call has
+        # counted, and the service's own code decides what to do with it.
+        plan, plan_failure = parse_task_plan(content, self.policy.task_vocabulary, self.policy.allowed_tool_names)
+        public = {
+            "source": "controller_verified", "model": body.get("model"),
+            "plan": plan, "plan_failure": plan_failure,
+            "finish_reason": finish_reason, "elapsed_ms": elapsed_ms,
+            "input_tokens": usage.get("prompt_tokens"),
+            "output_tokens": usage.get("completion_tokens"),
+        }
+        self.observations.append(("INFERENCE_RESULT", public, {"provider_response": body}))
+        if isinstance(usage.get("completion_tokens"), int) and usage["completion_tokens"] > self.policy.max_output_tokens:
+            raise GatewayRejected("GATEWAY_OUTPUT_LIMIT")
+        return {"kind": "inference_reply", "plan": plan, "plan_failure": plan_failure}

@@ -58,6 +58,9 @@ MAX_BODY = 1024 * 1024
 MAX_LOG = 8192
 config = json.loads(sys.stdin.readline())
 allowed = tuple(config['allowed_tool_names'])
+# S43 mission v2: fixed-kind views over the same public records.
+FIXED_KIND_TOOLS = {'public_price_lookup': 'price', 'public_stock_lookup': 'stock',
+                    'public_availability_lookup': 'availability'}
 public_state = json.loads((ROOT / 'shop.json').read_bytes())
 events = []
 infer_lock = threading.Lock()
@@ -115,6 +118,13 @@ class GatewayHandler(BaseHTTPRequestHandler):
                     answer = json.loads(sys.stdin.readline())
                     if answer.get('kind') != 'inference_reply' or answer.get('error'):
                         return self.reply(503, {'error': 'INFERENCE_UNAVAILABLE'})
+                    if 'plan' in answer:
+                        plan = answer.get('plan')
+                        failure = answer.get('plan_failure')
+                        if plan is not None and any(step.get('tool_name') not in allowed for step in plan):
+                            return self.reply(403, {'error': 'TOOL_NOT_ALLOWED'})
+                        events.append({'kind': 'inference_result', 'plan': plan, 'plan_failure': failure})
+                        return self.reply(200, {'plan': plan, 'plan_failure': failure})
                     choice = answer.get('selected_tool')
                     if choice not in allowed:
                         return self.reply(403, {'error': 'TOOL_NOT_ALLOWED'})
@@ -127,6 +137,14 @@ class GatewayHandler(BaseHTTPRequestHandler):
                 if name not in allowed:
                     events.append({'kind': 'tool_rejected', 'tool': str(name)[:80]})
                     return self.reply(403, {'error': 'TOOL_NOT_ALLOWED'})
+                if name in FIXED_KIND_TOOLS:
+                    entity = body.get('entity_ref')
+                    if not isinstance(entity, str):
+                        return self.reply(422, {'error': 'REQUEST_INVALID'})
+                    kind = FIXED_KIND_TOOLS[name]
+                    records = [r for r in public_state['records'] if r['entity_ref'] == entity and r['kind'] == kind]
+                    events.append({'kind': 'tool_result', 'tool': name, 'record_ids': [r['record_id'] for r in records]})
+                    return self.reply(200, {'records': records})
                 if name == 'public_record_lookup':
                     entity = body.get('entity_ref')
                     kind = body.get('record_kind')
@@ -262,9 +280,10 @@ class TokenFactoryAdapter:
 
     def __init__(self, *, run_id: str, allowed_tool_names: tuple[str, ...], token: str, project: str,
                  model: str = MODEL, client: ContreeAsyncClient | None = None,
-                 live_budget: LiveInferenceMeter | None = None):
+                 live_budget: LiveInferenceMeter | None = None, task_vocabulary: tuple[str, ...] = ()):
         self.run_id = run_id
         self.allowed_tool_names = allowed_tool_names
+        self.task_vocabulary = task_vocabulary
         self.token = token
         self.project = project
         self.model = model
@@ -376,6 +395,7 @@ class TokenFactoryAdapter:
             gateway = ServiceInferenceGateway(self.token, InferencePolicy(
                 run_id=self.run_id, operation_id=operation_id, model=self.model,
                 allowed_tool_names=self.allowed_tool_names, request_ordinal=1,
+                task_vocabulary=self.task_vocabulary,
             ), **gateway_kwargs)
             gateway_observations_recorded = False
             observations.append(RawObservation(kind="INTERPRETATION",
@@ -456,6 +476,7 @@ class TokenFactoryAdapter:
                             gateway = ServiceInferenceGateway(self.token, InferencePolicy(
                                 run_id=self.run_id, operation_id=operation_id, model=self.model,
                                 allowed_tool_names=self.allowed_tool_names, request_ordinal=ordinal + 1,
+                                task_vocabulary=self.task_vocabulary,
                             ), **gateway_kwargs)
                             gateway_observations_recorded = False
                     elif event_body.get("kind") == "driver_failure":

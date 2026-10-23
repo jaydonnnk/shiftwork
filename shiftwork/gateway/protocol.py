@@ -17,6 +17,19 @@ class InferenceRequest(BaseModel):
     input_text: str
 
 
+class TaskPlanStep(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+    task_type: str
+    tool_name: str
+
+
+class TaskPlan(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True, strict=True)
+
+    plan: tuple[TaskPlanStep, ...] = Field(min_length=1)
+
+
 @dataclass(frozen=True)
 class InferencePolicy:
     run_id: str
@@ -24,6 +37,9 @@ class InferencePolicy:
     model: str
     allowed_tool_names: tuple[str, ...]
     request_ordinal: int = 1
+    # Gate 3 section 3.5 (S43): a non-empty frozen task vocabulary selects plan
+    # mode; empty keeps the historical single-tool-name reply.
+    task_vocabulary: tuple[str, ...] = ()
     max_calls: int = 1
     max_input_bytes: int = 8192
     max_output_tokens: int = GATEWAY_MAX_OUTPUT_TOKENS
