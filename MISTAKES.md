@@ -3677,3 +3677,24 @@ The pending-state repair also covers opening/operating and close/next-shift comp
 - What happened: the `host-retry-omit-epoch` clean control failed with "Timed-out host retry did not recover".
 - Root cause: `workplace_browser.mjs` instruments `createWorkplaceHost` by matching its full parameter list; adding `onHover` broke the anchor, the intercept threw, and the host module was never served.
 - Prevention rule: before changing a production signature, search `tests/client` for the old line text and update observation anchors in the same change, recording the old anchor in the checkpoint.
+
+
+## 2026-10-23 S42: a layout cache skipped the relayout that follows graphics becoming ready
+
+- What happened: the customer bubble rendered at x -230px, off the left edge of the 1280x720 room.
+- Root cause: to avoid laying tags out on every walk frame, `placeAnchors` skipped `placeStationTags` when station points were unchanged. The scene's first anchors arrive while `.room` is still `fallback`, so bubbles were placed in the narrower static layer; the later identical anchors, sent after `data-graphics="ready"`, were skipped.
+- Prevention rule: never cache a layout on its numeric inputs alone when it also reads DOM state. Let the producer say what changed (here the scene reports crew-only frames with null stations) and keep every producer-signalled relayout.
+
+
+## 2026-10-23 S42: a suspend mid-walk left the "You" chip behind the settled bot
+
+- What happened: with the tab hidden about 800ms into a walk and shown again, the chip stayed 166px from the bot, which had already been settled at its stand.
+- Root cause: `setSuspended(true)` settled the crew but did not mark the crew anchors dirty, unlike `setReducedMotion`. The first browser check hid the tab 150ms into the walk, while the camera ease was still running, and settling the camera refreshed every anchor, which masked the gap.
+- Prevention rule: when a settle path moves an object that a DOM overlay follows, mark that overlay's anchors dirty in the same statement, and test it after every other settle that could refresh anchors has finished.
+
+
+## 2026-10-23 S42: an S41 rewrite silently broke a fullscreen fault needle
+
+- What happened: the `two-owner-lines` fault in `workplace_fullscreen.mjs` reported "anchor matched 0 times in /app.js" instead of being caught.
+- Root cause: S41 changed `text('owner-bubble-text', owner ?? '')` to read `said('owner')?.text`, and S41 ran only its own new faults, not the whole fullscreen fault list.
+- Prevention rule: after editing any production line, run every existing fault whose needle sits in that file, not only the slice's new faults.

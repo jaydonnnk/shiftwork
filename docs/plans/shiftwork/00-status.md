@@ -1,3 +1,5 @@
+**S42 ACCEPTED 2026-10-23 and pushed to main.** Robot crew on three boards. Open decisions: stand-to-stand walk length, bot size. See the [S42 checkpoint](workplace-3d/s42-checkpoint-2026-10-23.md).
+
 **S41 ACCEPTED 2026-10-23 and pushed to main.** Calm Bellwether room: one tag and one bubble at rest. See the [S41 checkpoint](workplace-3d/s41-checkpoint-2026-10-23.md).
 
 **Workplace Gate 1 BACKTRACKED 2026-10-23 for a robot crew and room declutter; Gates 1 to 4 RE-APPROVED the same day; S41 started on `shiftwork/slice-41`.** The user chose staff bots plus a learner bot on all three boards, replacing the old S41 replay and S42 away-room story layer with S41 declutter and S42 robot crew. See the [workplace status](workplace-3d/00-status.md). No product code changed.
