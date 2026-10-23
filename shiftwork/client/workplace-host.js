@@ -3,7 +3,7 @@ import { diffWorkplace } from './workplace-view.js';
 export function createWorkplaceHost({container,fallback,status,onStation,onConsequence,onAnchors,onHover}) {
   let latest=null, previous=null, scene=null, token=0, disposed=false, expanded=false, visible=false, mounting=false, timer=null, brokenModule=false;
   let simple=false, unavailable=false, mountedTier=null, failureCode=null, generation=-1, inspector={open:false,widthPx:0};
-  let lastInput=-Infinity, inputTimer=null;
+  let lastInput=-Infinity, inputTimer=null, openStation=null;
   const world=container.closest('#workplace-world');
   const motion=matchMedia('(prefers-reduced-motion: reduce)');
   const controls=container.parentElement.parentElement;
@@ -47,11 +47,14 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
       handle=createWorkplaceScene({container,view,tier:mountedTier,reducedMotion:motion.matches,
         onPick(stationId) { if(!disposed && owner===token && latest?.kind==='accepted' && latest.view.context.board===view.context.board && latest.view.context.shiftId===view.context.shiftId) onStation({board:view.context.board,shiftId:view.context.shiftId,stationId,mountToken:owner}); },
         onFailure(code) { if(owner===token && !disposed) failure(code); },
-        onAnchors(positions) { if(owner===token && !disposed) onAnchors?.(positions); },
+        // Gate 3 section 14.1: crew screen points ride in the same payload under `crew`.
+        onAnchors(positions,crew) { if(owner===token && !disposed) onAnchors?.(positions ? {...positions,crew:crew ?? {}} : {crew:crew ?? {}}); },
         onHover(stationId) { if(owner===token && !disposed) onHover?.(stationId); }});
     } catch { if(owner===token && !disposed) failure('init-failed'); return; }
     if(disposed || owner!==token) { handle.dispose(); return; }
     clearTimeout(timer); timer=null; mounting=false; scene=handle; handle.setInspector(inspector);
+    // A remount shows the learner's bot already at the open station: no walk without a new choice.
+    handle.setOpenStation(openStation,{settled:true});
     const transitions=diffWorkplace(previous,view);
     previous=view.consistency==='conflict'?previous:view;
     fallback.hidden=true; container.parentElement.dataset.graphics='ready'; retryButton.hidden=true;
@@ -91,7 +94,9 @@ export function createWorkplaceHost({container,fallback,status,onStation,onConse
   for(const type of ['pointerdown','keydown','touchstart']) world.addEventListener(type,noteInput,{passive:true});
   retryButton.addEventListener('click',retry); simplerButton.addEventListener('click',lowerQuality);
   function setInspector(value) { inspector={open:!!value?.open,widthPx:value?.open?Math.max(0,Number(value.widthPx)||0):0}; scene?.setInspector(inspector); }
-  return {publish,setExpanded(value) {expanded=value;suspend();},setInspector,noteInput,retry,dispose() {
+  // Gate 3 section 14.2 rule 3: only the app's station choice and inspector close call this.
+  function setOpenStation(stationId) { openStation=stationId ?? null; scene?.setOpenStation(openStation); }
+  return {publish,setExpanded(value) {expanded=value;suspend();},setInspector,setOpenStation,noteInput,retry,dispose() {
     if(disposed) return; disposed=true; release(); previous=null; latest=null;
     for(const type of ['pointerdown','keydown','touchstart']) world.removeEventListener(type,noteInput);
     size.disconnect(); intersection.disconnect(); document.removeEventListener('visibilitychange',suspend); motion.removeEventListener('change',onMotion);

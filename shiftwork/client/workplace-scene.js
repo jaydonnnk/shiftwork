@@ -1,5 +1,6 @@
 import * as THREE from './vendor/three-r180/three.module.js';
 import { roomDefinitions } from './workplace-rooms.js';
+import { createCrew } from './workplace-crew.js';
 
 export function createWorkplaceScene({ container, view, tier, reducedMotion, onPick, onFailure, onAnchors, onHover = () => {} }) {
   let renderer, disposed = false, suspended = false, raf = null, pointer = null, lastDraw = -Infinity, pulse = null, indicatorMaterial = null;
@@ -9,6 +10,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   let size = null, inspector = { open: false, widthPx: 0 }, anchorsDirty = true;
   let environment = null, attentionRing = null, ambientActive = false, replayRunning = false;
   let cameraEase = null, inspectorReady = false, drawInset = 0;
+  let crew = null, crewWalking = false, crewDirty = false, lastTick = null;
   const drawTarget = new THREE.Vector3();
   const lampMeshes = {}, lampMaterials = {};
   const candidateMaterials = {}, routingMaterials = {}, northlineMarkers = {}, geometries = new Set(), materials = new Set(), targets = [];
@@ -58,9 +60,17 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
   function draw(now = performance.now()) {
     raf = null;
     if (disposed || suspended) return;
-    if ((tier === 'compact' || (ambientEligible() && !pulse && !comparisonPulse && !selectionPulse && !wallTrace && !cameraEase)) && now - lastDraw < 1000 / 30 - .2) { raf = requestAnimationFrame(draw); return; }
+    if ((tier === 'compact' || (ambientEligible() && !pulse && !comparisonPulse && !selectionPulse && !wallTrace && !cameraEase && !crewWalking)) && now - lastDraw < 1000 / 30 - .2) { raf = requestAnimationFrame(draw); return; }
     lastDraw = now;
     cameraFrame(now);
+    // Gate 3 section 14.2 rules 3 and 5: the learner's bot walks only after setOpenStation;
+    // idle crew motion runs only while ambient drawing is eligible.
+    if (crew) {
+      const wasWalking = crewWalking;
+      crewWalking = crew.tick(Math.min(.05, Math.max(0, now - (lastTick ?? now)) / 1000), now / 1000, ambientEligible());
+      if (crewWalking || wasWalking) crewDirty = true;
+    }
+    lastTick = now;
     if(ambientEligible()) {
       const wave=(1-Math.cos(now*2*Math.PI/2500))/2;
       attentionRing?.scale.setScalar(1+.05*wave);
@@ -97,8 +107,9 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     }
     try { renderer.render(scene, camera); }
     catch { onFailure('render-failed'); }
-    if (anchorsDirty && !disposed) { anchorsDirty = false; onAnchors?.(anchorPositions()); }
-    if (pulse || comparisonPulse || selectionPulse || wallTrace || cameraEase || ambientEligible()) requestFrame();
+    // A walk alone reports only crew points (stations null), so tags are not laid out per frame.
+    if ((anchorsDirty || crewDirty) && !disposed) { const stations = anchorsDirty ? anchorPositions() : null; anchorsDirty = false; crewDirty = false; onAnchors?.(stations, crewAnchors()); }
+    if (pulse || comparisonPulse || selectionPulse || wallTrace || cameraEase || crewWalking || ambientEligible()) requestFrame();
   }
   function requestFrame() { if (!disposed && !suspended && raf === null) raf = requestAnimationFrame(draw); }
   function resize({width,height,pixelRatio}) {
@@ -195,10 +206,30 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     }
     return positions;
   }
+  // Screen points above the learner's bot and the speaking staff bots, for the "You"
+  // chip and the single narrator bubble (Gate 3 section 14.1).
+  function crewAnchors() {
+    const points = {};
+    if(!size || !crew) return points;
+    for(const [role,anchor] of [['you',crew.youAnchor()],['owner',crew.speakerAnchor('owner')],['customer',crew.speakerAnchor('customer')]]) {
+      if(!anchor) continue;
+      const point = anchor.project(camera), x = (point.x+1)/2*size.width, y = (1-point.y)/2*size.height;
+      points[role] = { x, y, visible: point.z>=-1 && point.z<=1 && x>=0 && x<=size.width && y>=0 && y<=size.height };
+    }
+    return points;
+  }
+  function setOpenStation(stationId, { settled = false } = {}) {
+    if(disposed || !crew) return;
+    crew.walkTo(stationId ?? null);
+    // A walk is never shown on the compact tier, with reduced motion or while suspended.
+    if(settled || tier==='compact' || reducedMotion || suspended) crew.settle();
+    crewWalking = crew.walking; crewDirty = true; lastTick = null; requestFrame();
+  }
   function dispose() {
     if(disposed) return; disposed = true;
     settleAllPulses(); settleAmbient(); cameraEase=null; ambientActive=false;
     if(raf!==null) cancelAnimationFrame(raf); raf = null;
+    crew?.settle(); crew?.dispose(); crew = null; crewWalking = false;
     for(const [type,fn] of listeners) renderer?.domElement.removeEventListener(type,fn);
     listeners.length = 0; targets.length = 0;
     scene.clear();
@@ -327,6 +358,9 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     const ringGeometry=new THREE.TorusGeometry(.82,.035,6,48); geometries.add(ringGeometry);
     const ringMaterial=new THREE.MeshBasicMaterial({color:'#ffb648',toneMapped:false}); materials.add(ringMaterial);
     attentionRing=new THREE.Mesh(ringGeometry,ringMaterial); attentionRing.rotation.x=-Math.PI/2; scene.add(attentionRing);
+    // Crew resources join the scene's sets, so they are released once by dispose, also after a partial start.
+    const register = resource => { if(resource.isMaterial) materials.add(resource); else geometries.add(resource); return resource; };
+    if(room.crew) { crew = createCrew({THREE,room,tier,reducedMotion,register}); scene.add(crew.group); }
     const testColors = {RESERVED:'#edbd68',RUNNING:'#91acb9',COMPLETE:'#8fbf9f',FAILED:'#d98a7a'};
     function apply(next, transitions = []) {
       if(disposed) return false;
@@ -440,7 +474,7 @@ export function createWorkplaceScene({ container, view, tier, reducedMotion, onP
     apply(view,[]);
     resize({width:container.clientWidth,height:container.clientHeight,pixelRatio:devicePixelRatio});
     if(raf!==null) cancelAnimationFrame(raf); raf = null; draw();
-    return { apply, resize, setInspector, anchorPositions, setSuspended(value) { suspended=value; if(value) { settleAllPulses(); settleAmbient(); settleCamera(); } if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
-      setReducedMotion(value) { reducedMotion=value; if(value) { settleAllPulses(); settleAmbient(); settleCamera(); } requestFrame(); }, setAmbient, dispose };
+    return { apply, resize, setInspector, anchorPositions, setSuspended(value) { suspended=value; if(value) { settleAllPulses(); settleAmbient(); settleCamera(); crew?.settle(); crewWalking=false; crewDirty=true; } if(value && raf!==null) { cancelAnimationFrame(raf); raf=null; } else if(!value) requestFrame(); },
+      setReducedMotion(value) { reducedMotion=value; if(value) { settleAllPulses(); settleAmbient(); settleCamera(); crew?.settle(); crewWalking=false; crewDirty=true; } requestFrame(); }, setAmbient, crewAnchors, setOpenStation, dispose };
   } catch(error) { dispose(); throw error; }
 }
