@@ -232,7 +232,7 @@ export const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftRepor
 
 export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41|42)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'S36 to S40 receipts must use a disposable /tmp/shiftwork-s36-*, s37-*, s38-*, s39-* or s40-* root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41|42|44)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an owned disposable /tmp/shiftwork-sN-* root');
   const patch = fault ? FAULTS[fault] : null;
   if (fault) assert.ok(patch, `Unknown S36 fault ${fault}`);
   await mkdir(out, { recursive: true });
