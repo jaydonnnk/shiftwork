@@ -809,6 +809,12 @@ def start_run(
         # bound to a later mission must never replay it as its own starter's output.
         if shift.engagement_slug == "bookshop" and selection.kind == "STARTER_BASELINE":
             pack = admit_pack(shift.engagement_slug)
+            from shiftwork.diagnostic_recording import recording_path, reserve_recorded
+            retained_path = recording_path()
+            if retained_path is not None:
+                run = reserve_recorded(conn, shift, retained_path, client_request_id)
+                conn.commit()
+                return run
             if shift_mission_path(conn, shift, pack) != pack.mission_path:
                 raise LifecycleError("conflict", "this starter has no reviewed capture to replay yet")
         # Bellwether's legacy baseline is a saved inspection with its original
@@ -971,6 +977,10 @@ def execute_run(conn: sqlite3.Connection, run_id: str,
         raise LifecycleError("not_found", f"unknown run: {run_id}")
     if run.context_id is not None and run.purpose is RunPurpose.OPERATION:
         return execute_selected_operation(conn, run_id, live_budget)
+    if run.purpose is RunPurpose.EXPERIMENT and run.evidence_mode is EvidenceMode.RECORDED_INSPECTION:
+        from shiftwork.experiments import execute_diagnostic_batch
+        execute_diagnostic_batch(conn, run_id)
+        return repo.get_run(conn, run_id)
     if run.state is not RunState.QUEUED:
         return run
     try:
@@ -1807,13 +1817,18 @@ def reconcile_interrupted(conn: sqlite3.Connection) -> list[str]:
     that shift until its runs are reconciled.
     """
     reconciled: list[str] = []
+    diagnostics = set()
     for run in repo.list_nonterminal_runs(conn):
         repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
+        if run.purpose is RunPurpose.EXPERIMENT and run.trial_slot_id is None and run.experiment_id:
+            diagnostics.add(run.experiment_id)
         if run.trial_slot_id is not None:
             # A comparison slot shares its run's fate: the slot is not refunded,
             # not re-executed and not silently dropped from the six-slot schedule.
             repo.update_trial_slot(conn, run.trial_slot_id, state="FAILED")
         reconciled.append(run.id)
+    for experiment_id in diagnostics:
+        repo.update_experiment_state(conn, experiment_id, "FAILED")
     for event in repo.list_pending_assist_events(conn):
         repo.finish_assist_event(
             conn, event.id, response="", proposed_patch=None, failure_code=ASSIST_INTERRUPTED
@@ -2408,9 +2423,13 @@ def assist_event_view(event: AssistEvent) -> dict[str, Any]:
 def reserve_bootstrap_diagnostic(
     conn: sqlite3.Connection, shift_id: str, *, adapter: str = "local_process"
 ) -> None:
-    """Validate the one public source diagnostic for a no-run v5 shift."""
+    """Validate a source diagnostic for a no-run v5 shift or task-plan starter."""
     shift = _require_open_shift(conn, shift_id)
-    if shift.opening_mode is not ShiftOpeningMode.LEGACY_FIRST_CHOICE:
+    pack = admit_pack(shift.engagement_slug)
+    task_plan_starter = (shift.engagement_slug == "bookshop"
+                         and shift_mission_path(conn, shift, pack) != pack.mission_path
+                         and repo.get_latest_operating_selection(conn, shift.engagement_slug).kind == "STARTER_BASELINE")
+    if shift.opening_mode is not ShiftOpeningMode.LEGACY_FIRST_CHOICE and not task_plan_starter:
         raise BootstrapBlocked("a null investigation is reserved only for a legacy first-choice shift")
     if adapter != TokenFactoryAdapter.name or not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID"):
         raise BootstrapBlocked("the verified isolated executor and its controller credentials are unavailable")
@@ -2647,7 +2666,7 @@ def _verify_pipeline_history(conn: sqlite3.Connection, events) -> None:
 
 def freeze_diagnostic_context(
     conn: sqlite3.Connection, shift: Shift, *, isolated: bool = False,
-    operation: bool = False,
+    operation: bool = False, public_repetitions: int = 1,
 ) -> ExecutionContext:
     """Freeze the reviewed public material one diagnostic is assessed against.
 
@@ -2734,6 +2753,10 @@ def freeze_diagnostic_context(
             "resource_limits_json": {"deadline_s": 45, "max_requests": 1,
                                      "max_layer_bytes": 16 * 1024 * 1024},
         })
+    if type(public_repetitions) is not int or not 1 <= public_repetitions <= 10:
+        raise LifecycleError("conflict", "public repetitions must be from 1 to 10")
+    if public_repetitions != 1:
+        fields["resource_limits_json"]["public_repetitions"] = public_repetitions
     content_hash = canonical.content_hash(fields)
     existing = repo.get_execution_context_by_hash(conn, content_hash)
     if existing is not None:
