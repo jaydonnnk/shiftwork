@@ -13,7 +13,7 @@ from shiftwork.domain.errors import ShiftworkDomainError
 from shiftwork.domain.models import AssistRole, ContractParams, InvestigationRequest, SelectionRequest
 from shiftwork.orchestrator import LifecycleError
 from shiftwork.store import db
-from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
+from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget, LiveDiagnosticBudget
 
 router = APIRouter(prefix="/api")
 
@@ -301,6 +301,10 @@ def create_experiment(
                                     request.app.state.db_path, experiment.id,
                                     live_budget)
     else:
+        live_budget = (_action_budget(request.app.state.live_diagnostic_budget, LiveDiagnosticBudget)
+                       if adapter == "tokenfactory" else None)
+        if adapter == "tokenfactory" and body.public_repetitions > 1 and live_budget is None:
+            raise orchestrator.LifecycleError("conflict", "live repetitions require a bounded diagnostic budget")
         experiment = experiments.create_diagnostic_experiment(
             conn,
             shift_id,
@@ -308,11 +312,12 @@ def create_experiment(
             investigation_id=body.investigation_id,
             client_request_id=body.client_request_id,
             adapter=adapter,
+            public_repetitions=body.public_repetitions,
         )
         run = experiments.experiment_run(conn, experiment.id)
         if run is not None:
             background.add_task(
-                experiments.execute_experiment_task, request.app.state.db_path, run.id
+                experiments.execute_experiment_task, request.app.state.db_path, run.id, live_budget
             )
     return schemas.ExperimentView.of(experiments.experiment_view(conn, experiment.id))
 

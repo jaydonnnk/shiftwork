@@ -105,4 +105,38 @@ class LiveOperationBudget:
             raise ValueError("live operation projected inference spend ceiling reached")
 
 
-LiveInferenceMeter = LiveComparisonBudget | LiveOperationBudget
+@dataclass
+class LiveDiagnosticBudget(LiveOperationBudget):
+    """One frozen public batch. Failed attempts are charged and never retried."""
+
+    max_operations: int = 10
+    max_calls: int = 40
+
+    def preflight(self, *, model: str, repetitions: int, requests: int) -> None:
+        if (model != self.model or type(repetitions) is not int
+                or not 1 <= repetitions <= 10 or not 1 <= requests <= 4
+                or self.operations or self.calls
+                or repetitions > self.max_operations
+                or repetitions * requests > self.max_calls
+                or self.input_usd_per_million < 0 or self.output_usd_per_million < 0
+                or self.reserved_input_tokens_per_call < 8192
+                or self.reserved_output_tokens_per_call < 1024):
+            raise ValueError("live diagnostic shape, model or rates are unverified")
+        if self._cost(repetitions * requests) > self.max_projected_usd:
+            raise ValueError("live diagnostic projected inference spend ceiling reached")
+        self.max_operations = repetitions
+        self.max_calls = repetitions * requests
+
+    def _cost(self, calls: int) -> Decimal:
+        return calls * (self.input_usd_per_million * self.reserved_input_tokens_per_call
+                        + self.output_usd_per_million * self.reserved_output_tokens_per_call) / 1_000_000
+
+    def before_inference(self, model: str) -> None:
+        if model != self.model or self.calls >= self.max_calls:
+            raise ValueError("live diagnostic inference call ceiling reached")
+        if self._cost(self.calls + 1) > self.max_projected_usd:
+            raise ValueError("live diagnostic projected inference spend ceiling reached")
+        self.calls += 1
+
+
+LiveInferenceMeter = LiveComparisonBudget | LiveOperationBudget | LiveDiagnosticBudget

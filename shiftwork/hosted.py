@@ -11,7 +11,7 @@ from contree_client.httpx import ContreeAsyncClient
 from shiftwork import config
 from shiftwork.app import create_app
 from shiftwork.assist.gateway import LiveAssistGateway
-from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
+from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget, LiveDiagnosticBudget
 
 PERMISSIONS = ('cancel', 'import', 'list', 'set_image_tag', 'spawn', 'spawn_disposable')
 # Existing conservative projection rates, not a claim of a current vendor quote.
@@ -27,6 +27,10 @@ def comparison_budget() -> LiveComparisonBudget:
     return LiveComparisonBudget(config.SERVICE_MODEL, INPUT_RATE, OUTPUT_RATE)
 
 
+def diagnostic_budget() -> LiveDiagnosticBudget:
+    return LiveDiagnosticBudget(config.SERVICE_MODEL, INPUT_RATE, OUTPUT_RATE)
+
+
 def create_hosted_app(db_path: str | None = None):
     token = os.environ.get('NEBIUS_API_KEY', '')
     project = os.environ.get('NEBIUS_PROJECT_ID', '')
@@ -39,6 +43,7 @@ def create_hosted_app(db_path: str | None = None):
         assist_gateway=LiveAssistGateway(token) if live else None,
         live_operation_budget=operation_budget if live else None,
         live_comparison_budget=comparison_budget if live else None,
+        live_diagnostic_budget=diagnostic_budget if live else None,
     )
     app.state.hosted_runtime = {
         'hosted': True, 'configured_executor': app.state.executor,

@@ -15,7 +15,7 @@ from shiftwork.assist.gateway import AssistGateway
 from shiftwork.api.routes import domain_error_handler, lifecycle_error_handler, router
 from shiftwork.domain.errors import ShiftworkDomainError
 from shiftwork.orchestrator import LifecycleError
-from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
+from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget, LiveDiagnosticBudget
 from shiftwork.store import db
 
 
@@ -43,6 +43,7 @@ def create_app(
     assist_gateway: AssistGateway | None = None,
     live_comparison_budget: LiveComparisonBudget | Callable[[], LiveComparisonBudget] | None = None,
     live_operation_budget: LiveOperationBudget | Callable[[], LiveOperationBudget] | None = None,
+    live_diagnostic_budget: LiveDiagnosticBudget | Callable[[], LiveDiagnosticBudget] | None = None,
 ) -> FastAPI:
     """Build the controller app; ``executor`` and ``shop_snapshot`` are the
     controller-side run binding new runs persist (program design 2: adapter
@@ -59,6 +60,7 @@ def create_app(
     app.state.assist_gateway = assist_gateway
     app.state.live_comparison_budget = live_comparison_budget
     app.state.live_operation_budget = live_operation_budget
+    app.state.live_diagnostic_budget = live_diagnostic_budget
     app.state.shop_snapshot = (
         Path(shop_snapshot) if shop_snapshot is not None else config.BOOKSHOP_SNAPSHOT
     )
