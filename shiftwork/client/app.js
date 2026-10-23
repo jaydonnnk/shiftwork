@@ -1,4 +1,4 @@
-import { bodyBytes, selectEvidence } from './evidence.js';
+import { bodyBytes, selectEvidence, diagnosticRateLines } from './evidence.js';
 import { projectWorkplace } from './workplace-view.js';
 import { statusBarValues, logEntries, guideStep, narrator, restingTags, reduceShiftReport, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
 
@@ -1151,17 +1151,26 @@ function renderInvestigations(station) {
     return row;
   }));
 }
+function repeatedDiagnosticTrial() {
+  const experiment = state.diagnostic ?? state.stationView?.latest_diagnostic;
+  if (!(experiment?.public_repetitions > 1)) return null;
+  const selected = $('diagnostic-result').dataset.selectedRunId;
+  const missed = experiment.repetition_summary?.tasks.find(row => row.misses > 0)?.miss_run_ids?.[0];
+  return experiment.trials.find(trial => trial.run_id === selected)
+    ?? experiment.trials.find(trial => trial.run_id === missed) ?? experiment.trials[0] ?? null;
+}
 function renderSource(station) {
   const select = $('source-ordinal');
-  const run = state.run;
+  const diagnostic = repeatedDiagnosticTrial();
+  const run = diagnostic ? {id: diagnostic.run_id, state: diagnostic.state, evidence_mode: diagnostic.evidence_mode} : state.run;
   const previous = select.value;
-  select.replaceChildren(...state.outputs.map(output => {
+  select.replaceChildren(...(diagnostic?.outputs ?? state.outputs).map(output => {
     const option = element('option', `Request ${output.request_ordinal}`);
     option.value = String(output.request_ordinal);
     return option;
   }));
   if (previous && [...select.options].some(option => option.value === previous)) select.value = previous;
-  const ready = Boolean(station && run && state.outputs.length);
+  const ready = Boolean(station && run && (diagnostic?.outputs ?? state.outputs).length);
   select.disabled = !ready;
   text('append-investigation', station?.latest_investigation_id ? 'Record revision of latest entry' : 'Record entry');
   $('append-investigation').disabled = state.pending || !ready;
@@ -1205,7 +1214,7 @@ function renderAssist(station) {
 }
 function renderDiagnostic(station) {
   const experiment = state.diagnostic ?? station?.latest_diagnostic ?? null;
-  const trial = experiment?.trials?.[0] ?? null;
+  const trial = repeatedDiagnosticTrial() ?? experiment?.trials?.[0] ?? null;
   const trialState = trial && REPORTED_TEST_STATES.has(trial.state) ? trial.state : null;
   const output = trial?.outputs?.[0] ?? null;
   const result = $('diagnostic-result');
@@ -1222,6 +1231,32 @@ function renderDiagnostic(station) {
   text('diagnostic-note', experiment.declared_treatment);
   result.dataset.experimentId = experiment.id;
   result.replaceChildren();
+  $('diagnostic-repetitions').disabled = state.pending || experiment.state === 'RUNNING';
+  if (experiment.public_repetitions > 1) {
+    result.append(element('p', `${experiment.trials.filter(row => ['COMPLETE', 'FAILED'].includes(row.state)).length} of ${experiment.public_repetitions} retained repetitions finished.`, 'evidence-meta'));
+    if (experiment.summary_refusal) result.append(element('p', experiment.summary_refusal, 'denial'));
+    try {
+      for (const line of diagnosticRateLines(experiment)) result.append(element('p', line, 'evidence-text'));
+    } catch (error) { result.append(element('p', error.message, 'denial')); }
+    if (experiment.repetition_summary) {
+      result.append(element('p', experiment.repetition_summary.limits, 'help-text'));
+      result.append(element('p', experiment.repetition_summary.stop_rule_triggered
+        ? 'No required task was missed. Stop: the starter defect was not observed. The operator must decide the next defect or request shapes.'
+        : 'Observed incident: investigate a retained run where a required task is missing. The selected repetition below is the source for your entry.', 'evidence-text'));
+    }
+    const label = element('label', 'Inspect a retained repetition');
+    const select = element('select'); select.id = 'diagnostic-retained-run'; label.htmlFor = select.id;
+    for (const row of experiment.trials) {
+      const option = element('option', `Run ${row.execution_ordinal}: ${row.run_id} · ${row.state} · ${row.evidence_mode}`);
+      option.value = row.run_id; select.append(option);
+    }
+    select.value = trial?.run_id ?? '';
+    select.addEventListener('change', () => {
+      result.dataset.selectedRunId = select.value;
+      renderDiagnostic(station); renderSource(station);
+    });
+    const field = element('div', null, 'field'); field.append(label, select); result.append(field);
+  }
   for (const [label, value] of [
     ['Evidence class', `${experiment.context_evidence_class} · ${humanize(experiment.kind)}`],
     ['Trial state', trial ? `${trialState ?? 'Not reported'} · candidate ${trial.candidate_label}` : 'No trial reserved'],
@@ -1742,7 +1777,7 @@ async function appendInvestigation() {
   state.pending = true; renderBoard(); renderInvestigate();
   try {
     await api(`/shifts/${encodeURIComponent(shiftId)}/investigations`, { method: 'POST', body: JSON.stringify({
-      source_run_id: state.run.id,
+      source_run_id: repeatedDiagnosticTrial()?.run_id ?? state.run.id,
       source_request_ordinal: ordinal,
       cause: $('cause-input').value,
       falsifier: $('falsifier-input').value,
@@ -1816,10 +1851,11 @@ async function runDiagnostic() {
       investigation_id: state.stationView?.latest_investigation_id ?? null,
       candidate_a_version_id: versionId,
       client_request_id: requestId('diagnostic'),
+      public_repetitions: Number($('diagnostic-repetitions').value),
     }) });
     acceptDiagnostic(owner, experiment);
-    const deadline = Date.now() + 75000;
-    while (!['COMPLETE', 'FAILED'].includes(experiment.trials[0]?.state) && Date.now() < deadline) {
+    const deadline = Date.now() + 600000;
+    while (!['FINALIZED', 'FAILED'].includes(experiment.state) && Date.now() < deadline) {
       await new Promise(resolve => setTimeout(resolve, 400));
       experiment = await api(`/experiments/${encodeURIComponent(experiment.id)}`);
       acceptDiagnostic(owner, experiment);

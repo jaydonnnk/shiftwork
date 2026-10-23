@@ -245,6 +245,15 @@
         <section class="panel-section" data-synthetic-region="diagnostic">
           <div class="section-heading"><h3>Public diagnostic</h3><span class="synthetic">Synthetic scenario</span></div>
           <p id="diagnostic-note" class="help-text"></p>
+          <div class="field">
+            <label for="diagnostic-repetitions">Public repetitions, fixed before results</label>
+            <select id="diagnostic-repetitions" aria-describedby="diagnostic-sample-limit">
+              <option value="1">1 run</option><option value="2">2 runs</option>
+              <option value="3">3 runs</option><option value="5">5 runs</option>
+              <option value="10">10 runs</option>
+            </select>
+          </div>
+          <p id="diagnostic-sample-limit" class="help-text">One model, one request set and a small sample. These results do not establish a general model failure rate.</p>
           <div class="panel-actions"><button id="run-diagnostic" class="button secondary">Run public diagnostic</button></div>
           <div id="diagnostic-result"></div>
         </section>
