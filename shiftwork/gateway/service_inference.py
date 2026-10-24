@@ -8,6 +8,7 @@ run, while public observations contain only allowlisted measurements and choices
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import time
 from typing import Any
@@ -15,7 +16,7 @@ from typing import Any
 import httpx
 from pydantic import ValidationError
 
-from shiftwork.gateway.protocol import InferencePolicy, InferenceRequest, TaskPlan
+from shiftwork.gateway.protocol import InferencePolicy, InferenceRequest, TaskPlan, REASONING_OFF_MODEL
 from shiftwork.live_budget import LiveInferenceMeter
 
 PROVIDER_URL = "https://api.tokenfactory.nebius.com/v1/chat/completions"
@@ -86,6 +87,9 @@ class ServiceInferenceGateway:
             self._reject("INFERENCE_REQUEST_INVALID")
         if request.request_ordinal != self.policy.request_ordinal:
             self._reject("REQUEST_ORDINAL_OUTSIDE_FROZEN_WORKLOAD")
+        if request.enable_thinking is False and (
+                self.policy.allow_reasoning_off is not True or self.policy.model != REASONING_OFF_MODEL):
+            self._reject("REASONING_OFF_NOT_ALLOWED")
         raw_input = request.input_text.encode("utf-8")
         if len(raw_input) > self.policy.max_input_bytes:
             self._reject("GATEWAY_INPUT_LIMIT")
@@ -103,7 +107,8 @@ class ServiceInferenceGateway:
              "model": self.policy.model, "input_bytes": len(raw_input),
              "input_sha256": hashlib.sha256(raw_input).hexdigest(),
              "allowed_tool_names": list(self.policy.allowed_tool_names),
-             **({"task_vocabulary": list(self.policy.task_vocabulary)} if self.policy.task_vocabulary else {})},
+             **({"task_vocabulary": list(self.policy.task_vocabulary)} if self.policy.task_vocabulary else {}),
+             **({"enable_thinking": False} if request.enable_thinking is False else {})},
             {"input_text": request.input_text},
         ))
         provider_request = {
@@ -112,15 +117,30 @@ class ServiceInferenceGateway:
             "temperature": 0,
             "max_tokens": self.policy.max_output_tokens,
         }
+        if request.enable_thinking is False:
+            provider_request["chat_template_kwargs"] = {"enable_thinking": False}
         started = time.monotonic()
         try:
-            if self._http is None:
-                async with httpx.AsyncClient(timeout=self.policy.deadline_s) as http:
-                    response = await http.post(PROVIDER_URL, headers={"Authorization": "Bearer " + self._token}, json=provider_request)
-            else:
-                response = await self._http.post(PROVIDER_URL, headers={"Authorization": "Bearer " + self._token}, json=provider_request)
-        except (httpx.TimeoutException, httpx.RequestError):
-            self._reject("PROVIDER_TRANSPORT_FAILED", {"provider_request": provider_request})
+            async with asyncio.timeout(self.policy.deadline_s):
+                if self._http is None:
+                    async with httpx.AsyncClient(timeout=self.policy.deadline_s) as http:
+                        response = await http.post(PROVIDER_URL, headers={"Authorization": "Bearer " + self._token}, json=provider_request)
+                else:
+                    response = await self._http.post(PROVIDER_URL, headers={"Authorization": "Bearer " + self._token}, json=provider_request)
+        except (TimeoutError, httpx.TimeoutException, httpx.RequestError) as exc:
+            category = {
+                TimeoutError: "deadline",
+                httpx.ConnectTimeout: "connect_timeout",
+                httpx.ReadTimeout: "read_timeout",
+                httpx.WriteTimeout: "write_timeout",
+                httpx.PoolTimeout: "pool_timeout",
+                httpx.TimeoutException: "httpx_timeout",
+            }.get(type(exc), "request_error")
+            self._reject("PROVIDER_TRANSPORT_FAILED", {
+                "provider_request": provider_request,
+                "transport_failure": {"category": category,
+                                      "elapsed_ms": round((time.monotonic() - started) * 1000)},
+            })
         elapsed_ms = round((time.monotonic() - started) * 1000)
         if response.status_code != 200:
             self._reject("PROVIDER_HTTP_FAILED", {"http_status": response.status_code, "body": response.text[:65536]})
