@@ -203,6 +203,13 @@ export const OWNER_LINES = {
 };
 export function ownerLine(view, guide) {
   if (!guide?.step || !view) return null;
+  if (guide.step === 4) {
+    const comparison = view.tests?.comparison;
+    if (comparison?.outcomeStatus !== 'COMPLETE' || comparison.state !== 'FINALIZED' ||
+        comparison.candidates.map(candidate => candidate.label).sort().join('') !== 'AB' ||
+        comparison.candidates.some(candidate => !Number.isInteger(candidate.plannedRepetitions) || candidate.plannedRepetitions < 1 ||
+          candidate.retainedRepetitions !== candidate.plannedRepetitions)) return null;
+  }
   const tally = view.slips?.tally ?? null;
   if (view.shiftState === 'closed') return OWNER_LINES.closed;
   if (guide.step === 1) {

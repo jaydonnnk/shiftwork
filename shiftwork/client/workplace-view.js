@@ -105,6 +105,10 @@ export function projectWorkplace(input) {
         const metrics = item.outcome?.candidate_metrics?.find(row => row.candidate_label === candidate.label);
         return { label: candidate.label, versionId: candidate.artifact_version_id,
           contentHash: candidate.artifact_content_hash, eligible: eligibility?.eligible ?? null,
+          plannedRepetitions: item.public_repetitions * (item.workloads?.length ?? 0),
+          retainedRepetitions: (item.trials ?? []).filter(trial => trial.candidate_label === candidate.label)
+            .flatMap(trial => trial.repetitions ?? []).filter(row => ['COMPLETE', 'FAILED'].includes(row.state) &&
+              (row.outputs?.length || row.observations?.length)).length,
           blockingReasonCodes: [...(eligibility?.blocking_reason_codes ?? [])],
           metrics: publicMetrics(metrics) };
       }),
