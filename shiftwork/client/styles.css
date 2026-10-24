@@ -536,6 +536,8 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
 .decision-dialog .field { margin: 20px 0; }
 .decision-dialog label { color: #eef2f6; }
 .decision-dialog #rationale-help, #report-completeness { color: #a9b6c4; font-size: 14px; }
+#choose-rate-limit { color: #a9b6c4; }
+#choose-links-summary { color: #a9b6c4; font-size: 16px; }
 .decision-dialog textarea { width: 100%; max-width: 100%; min-height: 90px; background: #0b1420; color: #eef2f6; border-color: #a9b6c4; }
 .decision-dialog .button { min-height: 44px; min-width: 44px; white-space: normal; }
 .decision-dialog .button.secondary { background: transparent; color: #eef2f6; border-color: #a9b6c4; }

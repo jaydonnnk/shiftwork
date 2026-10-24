@@ -13,6 +13,43 @@ export function bodyBytes(base64) {
   return Uint8Array.from(atob(base64), character => character.charCodeAt(0));
 }
 
+export function comparisonRateLines(experiment) {
+  if (!experiment.repetition_summary) return [];
+  const seen = new Set();
+  return experiment.repetition_summary.candidates.map(summary => {
+    const slots = experiment.trials.filter(trial => trial.candidate_label === summary.candidate_label);
+    const rows = slots.flatMap(trial => (trial.repetitions ?? []).map(row => ({trial, row})));
+    for (const {row} of rows) {
+      if (!row.run_id || seen.has(row.run_id)) throw new Error('Comparison repetition identity is missing or duplicated.');
+      seen.add(row.run_id);
+    }
+    const passed = rows.filter(({trial, row}) => row.state === 'COMPLETE' && row.task_assessments.length > 0 &&
+      row.task_assessments.every(task => task.mandatory_pass) &&
+      new Set(row.outputs.filter(output => output.transport_error === null && output.body_base64).map(output => output.request_ordinal)).size === trial.request_count).length;
+    const retained = rows.filter(({row}) => ['COMPLETE', 'FAILED'].includes(row.state) && (row.outputs.length || row.observations.length)).length;
+    const declared = experiment.public_repetitions * experiment.workloads.length;
+    if (summary.passed !== passed || summary.retained !== retained || summary.declared !== declared || rows.length > declared) {
+      throw new Error('Comparison rate disagrees with retained repetitions.');
+    }
+    const causes = {cut: 0, invalid: 0, omitted: 0, other: 0, unknown: 0, execution: 0};
+    for (const {row} of rows) {
+      const failures = row.task_assessments.filter(task => !task.mandatory_pass);
+      if (row.state === 'FAILED' && (row.outputs.length || row.observations.length)) {
+        causes.execution += 1;
+        continue;
+      }
+      if (!failures.length) continue;
+      const missing = failures.filter(task => task.reason_codes.includes('REQUIRED_TASK_MISSING'));
+      const retainedCauses = missing.map(task => missCause(row, task));
+      const cause = ['cut', 'invalid', 'omitted'].find(kind => retainedCauses.includes(kind))
+        ?? (missing.length ? 'unknown' : 'other');
+      causes[cause] += 1;
+    }
+    return `${summary.candidate_label}: ${passed} of ${declared} public repetitions pass mandatory checks; ${retained} retained; ${declared - retained} missing or unfinished ` +
+      `(cut off ${causes.cut}, invalid plan ${causes.invalid}, omitted task ${causes.omitted}, other check failure ${causes.other}, cause not retained ${causes.unknown}, execution incomplete ${causes.execution})`;
+  });
+}
+
 export function diagnosticRateLines(experiment) {
   const summary = experiment.repetition_summary;
   if (!summary) return [];

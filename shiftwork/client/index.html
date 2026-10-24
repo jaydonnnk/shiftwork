@@ -288,6 +288,8 @@
           <div class="section-heading"><h3>Reserve the paired comparison</h3><span class="synthetic">Synthetic scenario</span></div>
           <p id="compare-note" class="help-text"></p>
           <div class="field"><label for="treatment-input">Declared treatment: what is the one difference between A and B?</label><textarea id="treatment-input" rows="2" maxlength="2000"></textarea></div>
+          <p class="help-text">Declare task-filling fallbacks or code-only behavior and which candidate uses them. A fallback is a valid repair choice; this comparison does not rank one automatically.</p>
+          <div class="field"><label for="comparison-repetitions">Public repetitions per candidate and pair, fixed before results</label><select id="comparison-repetitions"><option value="1">1 repetition</option><option value="2">2 repetitions</option><option value="3" selected>3 repetitions</option></select></div>
           <div class="panel-actions"><button id="run-comparison" class="button primary">Reserve and run all six slots</button></div>
           <p id="compare-error" class="denial" role="status"></p>
         </section>
@@ -375,6 +377,7 @@
     <h2 id="choose-title">Choose a live version</h2>
     <p id="choose-why">Why we ask: only the version you choose goes live</p>
     <p>Earlier runs and their consequences stay recorded as they happened.</p>
+    <div id="choose-rates"></div><p id="choose-rate-limit" class="help-text"></p><div id="choose-links"></div>
     <div class="field"><label for="selection-rationale">Why this exact version?</label><p id="rationale-help">Required. Your reason stays with this choice.</p><textarea id="selection-rationale" rows="3" maxlength="2000" aria-describedby="rationale-help"></textarea></div>
     <h3>What happens to the other version</h3>
     <p id="choose-backup">The other version stays as your backup</p>

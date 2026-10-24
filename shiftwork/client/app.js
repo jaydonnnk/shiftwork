@@ -1,4 +1,4 @@
-import { bodyBytes, selectEvidence, diagnosticRateLines } from './evidence.js';
+import { bodyBytes, selectEvidence, diagnosticRateLines, comparisonRateLines } from './evidence.js';
 import { projectWorkplace } from './workplace-view.js';
 import { statusBarValues, logEntries, guideStep, narrator, restingTags, reduceShiftReport, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
 
@@ -310,6 +310,30 @@ function openChoose(label) {
   $('selection-rationale').value = '';
   text('selection-error', '');
   text('choose-title', `Make ${candidate.artifact_version_id} the live version?`);
+  $('choose-rates').replaceChildren(...comparisonRateLines(state.comparison).map(line => element('p', line)));
+  text('choose-rate-limit', state.comparison.repetition_summary?.limits ?? 'Retained evidence is shown in the comparison.');
+  const links = element('details');
+  const linksSummary = element('summary', 'Inspect the retained repetitions before choosing');
+  linksSummary.id = 'choose-links-summary';
+  links.append(linksSummary);
+  for (const trial of state.comparison.trials) for (const repetition of trial.repetitions ?? []) {
+    const link = element('a', `${trial.candidate_label}, pair ${trial.pair_ordinal}, repetition ${repetition.repetition_ordinal}: ${repetition.run_id}`, 'button secondary');
+    link.href = `#comparison-repetition-${encodeURIComponent(repetition.run_id)}`;
+    link.dataset.chooseRepetitionRunId = repetition.run_id;
+    link.id = `choose-repetition-${repetition.run_id}`;
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      const dialog = $('choose-dialog');
+      dialog.addEventListener('close', () => {
+        if (dialog.open) return;
+        [...document.querySelectorAll('a[data-repetition-run-id]')]
+          .find(node => node.dataset.repetitionRunId === repetition.run_id)?.click();
+      }, {once: true});
+      dialog.close();
+    });
+    const row = element('p'); row.append(link); links.append(row);
+  }
+  $('choose-links').replaceChildren(links);
   const backup = state.comparison.candidates.find(item => item.label !== label);
   text('choose-backup-version', `${backup?.artifact_version_id ?? 'The other tested version'} stays saved. You can test it again later; that test never changes history.`);
   for (const key of ['A', 'B']) {
@@ -1311,7 +1335,7 @@ function renderDiagnostic(station) {
   if (!trial.observations.length) observations.append(element('p', 'The service reported no interpretation or tool events for this run. Nothing is inferred from their absence.', 'empty'));
   for (const observation of trial.observations) {
     const row = element('div', null, 'event-row');
-    row.append(element('strong', humanize(observation.kind)), element('pre', JSON.stringify(observation.public_payload_json, null, 2)));
+    appendObservationEvidence(row, observation);
     observations.append(row);
   }
   result.append(observations);
@@ -1361,6 +1385,21 @@ function renderInvestigate() {
   renderSource(station);
   renderDiagnostic(station);
 }
+function appendObservationEvidence(container, observation) {
+  const {reasoning_text: reasoning, ...metadata} = observation.public_payload_json;
+  container.append(element('strong', humanize(observation.kind)), element('pre', JSON.stringify(metadata, null, 2)));
+  if (observation.kind !== 'INFERENCE_RESULT') return;
+  container.append(element('p', `Output tokens: ${metadata.output_tokens ?? 'unknown'} of the 1,024 cap. Provider reasoning: ${metadata.reasoning_characters ?? 'unknown'} characters. Reasoning-token count is unavailable in this view.`, 'evidence-meta'));
+  if (typeof reasoning === 'string') {
+    const detail = element('details');
+    detail.dataset.providerReasoning = 'true';
+    detail.append(element('summary', "model's reasoning, as returned by the provider"));
+    detail.append(element('p', 'Provider-returned text is untrusted evidence, not an authoritative explanation or a correctness check.', 'help-text'));
+    detail.append(element('pre', reasoning));
+    container.append(detail);
+  } else container.append(element('p', `Provider reasoning: ${metadata.reasoning_status ?? 'not retained'}.`, 'evidence-meta'));
+}
+
 function renderCompare() {
   renderDraftEditor();
   const board = state.board;
@@ -1384,7 +1423,10 @@ function renderCompare() {
   text('compare-tag', !shift ? 'Not loaded' : compare ? `${compare.trials.length} slots · ${humanize(compare.state)}` : 'Not reserved');
   const selectedHere = Boolean(compare && board?.operating_selection?.comparison_id === compare.id);
   const rationale = $('selection-rationale').value.trim();
-  const eligible = label => compare?.outcome?.status === 'COMPLETE' &&
+  let rateLines = [], rateError = null;
+  try { if (compare) rateLines = comparisonRateLines(compare); }
+  catch (error) { rateError = error.message; }
+  const eligible = label => !rateError && compare?.outcome?.status === 'COMPLETE' &&
     compare.outcome.eligibility.some(item => item.candidate_label === label && item.eligible);
   for (const label of ['A', 'B']) {
     const blocked = state.pending || !shift || shift.state !== 'open' || selectedHere || !eligible(label);
@@ -1420,6 +1462,8 @@ function renderCompare() {
     : !state.stationView?.latest_investigation_id ? 'Record your cause, what would prove you wrong and a public test first. A comparison cites your investigation entry and cannot run before it exists.'
     : !treatment ? 'Name the one declared treatment that differs between the two candidates.'
     : 'The controller requires operator-sealed workloads and protected variants before reservation. Draft material is refused. This station derives no winner.');
+  $('comparison-repetitions').disabled = state.pending || Boolean(compare);
+  if (compare) $('comparison-repetitions').value = String(compare.public_repetitions ?? 1);
   const slots = $('comparison-slots');
   const outcomeView = $('comparison-outcome');
   if (!compare) { text('compare-summary', ''); outcomeView.replaceChildren(); return empty(slots, 'Every slot, its run, version, batch count and missing evidence appear here once reserved.'); }
@@ -1430,6 +1474,9 @@ function renderCompare() {
   const outcome = compare.outcome;
   text('compare-summary', `${compare.candidates.map(candidate => `Candidate ${candidate.label} · ${candidate.artifact_version_id} · ${candidate.artifact_content_hash.slice(0, 12)}…`).join(' · ')} · ${outcome?.status ?? 'INCOMPLETE'} · public requests per candidate ${compare.shared_public_denominator_requests} · protected steps per candidate ${compare.protected_denominator_requests_per_candidate} · ${protectedStatus} · ${missingSlots} missing slot${missingSlots === 1 ? '' : 's'} · no winner derived here`);
   outcomeView.replaceChildren();
+  if (rateError) outcomeView.append(element('p', rateError, 'denial'));
+  for (const line of rateLines) outcomeView.append(element('p', line, 'comparison-pass-rate'));
+  if (compare.repetition_summary) outcomeView.append(element('p', compare.repetition_summary.limits, 'help-text'));
   if (outcome) {
     const note = element('p', `${compare.context_evidence_class} evidence. Public efficiency excludes protected steps. Non-completion categories are incidences and may overlap. Unknown usage or cost is never treated as zero.`, 'comparison-outcome-note');
     outcomeView.append(note);
@@ -1468,6 +1515,24 @@ function renderCompare() {
         list.append(element('dt', name), value);
       }
       card.append(list);
+      if (metrics.service_calls === 0) card.append(element('p', 'No model call in the public repetitions.', 'evidence-meta'));
+      for (const trial of compare.trials.filter(row => row.candidate_label === label)) {
+        for (const repetition of trial.repetitions ?? []) {
+          const target = `comparison-repetition-${repetition.run_id}`;
+          const link = element('a', `Inspect pair ${trial.pair_ordinal}, repetition ${repetition.repetition_ordinal}: ${repetition.run_id}`, 'button secondary');
+          link.href = `#${encodeURIComponent(target)}`;
+          link.dataset.repetitionRunId = repetition.run_id;
+          link.addEventListener('click', event => {
+            event.preventDefault();
+            const detail = document.getElementById(target);
+            if (!detail) return;
+            detail.open = true;
+            detail.scrollIntoView({block: 'start', behavior: 'instant'});
+            detail.querySelector('summary').focus();
+          });
+          const entry = element('p'); entry.append(link); card.append(entry);
+        }
+      }
       outcomeView.append(card);
     }
   }
@@ -1500,6 +1565,24 @@ function renderCompare() {
     }
     for (const output of trial.outputs) row.append(element('p', `Request ${output.request_ordinal}: ${output.request_text}`, 'evidence-text request-quote'));
     if (trial.missing_evidence.length) row.append(element('p', `Missing evidence: ${trial.missing_evidence.join('; ')}`, 'denial'));
+    for (const repetition of trial.repetitions ?? []) {
+      const detail = element('details');
+      detail.id = `comparison-repetition-${repetition.run_id}`;
+      detail.dataset.repetitionRunId = repetition.run_id;
+      detail.append(element('summary', `Public repetition ${repetition.repetition_ordinal} · ${repetition.run_id} · ${humanize(repetition.state)}`));
+      detail.append(element('p', `${repetition.evidence_mode} · ${trial.artifact_version_id} · ${trial.artifact_content_hash}`, 'evidence-meta'));
+      detail.append(element('p', `Public phase: ${humanize(repetition.state)}. Overall run: ${humanize(repetition.overall_run_state ?? 'unknown')}. Later phase failures stay separate from the public pass rate.`, 'evidence-meta'));
+      for (const output of repetition.outputs) {
+        detail.append(element('p', `Request ${output.request_ordinal}: ${output.request_text}`, 'request-quote'));
+        detail.append(element('pre', new TextDecoder().decode(bodyBytes(output.body_base64))));
+      }
+      for (const assessment of repetition.task_assessments) {
+        detail.append(element('p', `Request ${assessment.request_ordinal} · ${assessment.task_id} · ${assessment.mandatory_pass ? 'mandatory check passes' : 'mandatory check fails'} · ${assessment.reason_codes.join(', ')}`));
+      }
+      for (const observation of repetition.observations) appendObservationEvidence(detail, observation);
+      if (repetition.missing_evidence.length) detail.append(element('p', repetition.missing_evidence.join('; '), 'denial'));
+      row.append(detail);
+    }
     return row;
   }));
 }
@@ -1725,6 +1808,7 @@ async function runComparison() {
   try {
     let experiment = await api(`/shifts/${encodeURIComponent(shiftId)}/experiments`, { method: 'POST', body: JSON.stringify({
       kind: 'QUALIFYING_COMPARISON',
+      public_repetitions: Number($('comparison-repetitions').value),
       investigation_id: state.stationView?.latest_investigation_id ?? null,
       candidate_a_version_id: a.id,
       candidate_b_version_id: b.id,
@@ -2028,7 +2112,7 @@ for (const id of ['choose-dialog', 'shift-report']) {
   dialog.addEventListener('keydown', event => {
     if (event.key === 'Escape') event.stopPropagation();
     if (event.key !== 'Tab' || !dialog.open) return;
-    const controls = [...dialog.querySelectorAll('button, textarea')].filter(node => !node.disabled && !node.hidden);
+    const controls = [...dialog.querySelectorAll('button, textarea, a[href], summary')].filter(node => !node.disabled && !node.hidden && node.getClientRects().length);
     const first = controls[0], last = controls.at(-1);
     if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
