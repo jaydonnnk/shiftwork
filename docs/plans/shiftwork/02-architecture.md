@@ -384,6 +384,20 @@ except the verified restricted channel. Close/termination revokes it. The safe
 transport is an explicit spike obligation; if it cannot be verified, fail closed
 rather than injecting a key or running arbitrary learner code locally.
 
+Scoped Gate 2/3 amendment approved 2026-10-24 during S45: the learner may request
+only optional `enable_thinking=false` through the service gateway for the exact
+Nano model. Omission preserves the provider default. A new frozen context records
+permission for this option; old contexts without it retain their original policy.
+The controller maps the validated false value to
+`chat_template_kwargs: {"enable_thinking": false}` and records it. Arbitrary
+provider dictionaries, true and non-boolean values remain forbidden. The exact
+candidate source contains its choice, and selection/operation preserve the tested
+permission. Both candidates and their protected phases share the same admitted
+permission; an intentional setting difference must be declared as the treatment.
+One call, no retry, one user message, temperature 0, 8 KiB input, 1,024 output tokens
+and the 20-second gateway deadline remain unchanged. The user's separate one-call
+compatibility allowance is not approval for the live comparison.
+
 ## 8. Fair comparison and repeated-probing controls
 
 A comparison freezes both candidates before any protected result is released. Both

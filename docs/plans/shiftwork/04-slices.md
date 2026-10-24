@@ -1141,9 +1141,10 @@ Protected inventory, seals and Gate 2 section 8.1 rules are unchanged.
 - **Demo:** one live comparison of two learner-style repairs (for example prompt wording against schema validation), then explicit selection of the eligible one.
 - **Tests:** obligation 68's comparison arm and obligation 69 (one failed repetition makes the candidate ineligible and the shown rate counts it); unequal repetition counts between candidates make the comparison `INCOMPLETE`; changing one retained repetition changes the shown rate.
 Existing obligations 50 to 54 still pass with repetitions in place.
-- **Limits:** 9 runs per request is a small sample.
+- **Limits:** the pinned three pairs contain six public requests. Three repetitions per slot give nine public batch runs per candidate, with each individual request repeated three times. This is a small sample.
+  Count wording corrected during the 2026-10-24 S45 audit; the frozen schedule, repetition ceiling, workloads and protected inventory are unchanged.
 Operations per comparison rise from 12 to 24.
-- **Authorization:** slice go-ahead; a fresh cost estimate for 24 Sandbox operations; an explicit call count and ceiling (planning estimate: about 110 Nano calls).
+- **Authorization:** slice go-ahead; a fresh cost estimate for 24 Sandbox operations; an explicit call count and ceiling. The pinned workload permits at most 42 Nano calls at three repetitions, verified 2026-10-24 as `2 candidates * 3 pairs * (2 public requests * 3 repetitions + 1 protected request)`. This replaces the historical 110-call planning estimate, with no workload or ceiling change. The separately approved 2026-10-24 Gate 2/3 reasoning-off option changes no repetition, token, call or protected-case ceiling. Live comparison authority remains separate.
 
 ### Slice 46: coach proposes one patch and runs it once in isolation
 

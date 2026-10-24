@@ -864,6 +864,15 @@ Common budgets change as follows; the rest of section 9's list stays:
 
 Each new check follows section 10's rule: pass clean, apply one in-memory fault, require the named assertion to fail, restore exactly, pass again.
 
+S45 state-gating correction explicitly approved by the user, 2026-10-24:
+the existing step-4 owner line appears only on a COMPLETE, FINALIZED comparison
+where both candidates have every planned public repetition retained with equal
+counts. Hide it on INCOMPLETE comparisons and when counts are missing or unequal.
+Catalogue text is unchanged. The absent incomplete state and present complete
+state each require their own mutation, and owner_lines_never_suggest still passes.
+The actual stopped comparison is checked in the browser, including the latest
+planned-count copy. See [the S45 audit](../slice45-offline-audit-2026-10-24.md).
+
 | Planned check | Observable assertion and the deliberate fault that must fail it |
 |---|---|
 | `guide_step_follows_recorded_state` | Ten literal public views give the exact step and station for every rule in 13.5. Separately: read `latest_run` instead of the operation run; treat the newest saved version as chosen; give step 5 when no candidate is eligible; drop the shift-ID match. Each fails its own case. |

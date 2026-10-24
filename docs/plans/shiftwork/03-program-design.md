@@ -1179,6 +1179,7 @@ class InferenceRequest(BaseModel):
     grant: str
     request_ordinal: int
     input_text: str
+    enable_thinking: Literal[False] | None = None  # omitted or strict false only
 
 class TaskPlanStep(BaseModel):  # 2026-10-23, S43 backtrack Part A
     task_type: str            # member of the frozen mission task vocabulary
@@ -1219,6 +1220,23 @@ and tool allowlist are both derived from the frozen mission policy, never from
 the learner request or the prompt. Tool execution stays with the trusted request
 driver, which still refuses any unlisted tool. (Added 2026-10-23, S43 backtrack
 Part A.)
+
+Scoped Gate 2/3 amendment approved 2026-10-24 in S45: new isolated contexts for
+`nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` freeze
+`resource_limits_json.allow_reasoning_off = true`. Missing means false, preserving
+historical contexts. The trusted InferencePolicy carries this permission, and
+every public request and protected phase receives it from its frozen context.
+InferenceRequest admits only an omitted enable_thinking or the strict boolean
+false; explicit null, true, numbers, strings and arbitrary provider dictionaries
+are invalid. False additionally requires the frozen permission and exact Nano
+model before any call is reserved. The controller adds only the provider body's
+top-level `chat_template_kwargs: {"enable_thinking": false}` and records the
+chosen setting in its request observation. Omission preserves the original wire
+body. A learner repair's exact source contains its setting; selection and
+operation carry the tested permission, including historical denial. No reasoning
+text or setting acts as a correctness oracle. Existing byte, token, deadline,
+one-call/no-retry, tool and task boundaries still apply. One public compatibility
+call is separately authorized after offline proof; the comparison remains pending.
 
 ### 3.6 Selection, ancestry and orchestration
 
@@ -2485,6 +2503,7 @@ These are product ceilings, not measured vendor performance.
 | Executor operations per trial slot | Public repetitions + 1 protected (2026-10-23; was 2) | Each public repetition and the protected phase is a fresh workspace with the frozen bytes for that phase. Operations per comparison rise from 12 to 24 at 3 repetitions; a fresh cost estimate is required before any live comparison is authorized. |
 | Gateway input per call | 8 KiB UTF-8 | Reject before provider call. |
 | Gateway output per call | 1,024 tokens | Provider request and local guard. |
+| Gateway reasoning control | Omitted or strict enable_thinking=false | Approved 2026-10-24; exact Nano model and frozen permission only. No arbitrary provider fields or automatic fallback. |
 | Gateway deadline per call | 20 seconds | Trusted gateway measurement. |
 | Assist model calls per shift | Declared per pack: 3 (Bellwether), 2 (Go-To-Market), 1 (FDE) | The pack declaration is the enforcement source (3.10). Bellwether shares its three calls across HINT, DIAGNOSIS and PATCH_PROPOSAL with one patch proposal maximum; Go-To-Market shares two across HINT and DIAGNOSIS with no patch proposal; the FDE board allows one HINT call. A role outside the declaration is refused before any model call. |
 | Public repetitions per diagnostic experiment | Up to 10 (2026-10-23) | Fixed before any result is visible; a summary from fewer retained repetitions is refused. |
