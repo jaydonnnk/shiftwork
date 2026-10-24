@@ -1,0 +1,24 @@
+{
+  "state": "USER_SELECTED_B",
+  "s45_acceptance": "ACCEPTED_BY_USER",
+  "user_words": "Select B and accept S45",
+  "selection": {
+    "id": "sel-0002",
+    "kind": "LEARNER_CHOICE",
+    "selected_version_id": "ver-0004",
+    "selected_content_hash": "a71808a838c2df4cfa62883ea992d50bb942ab29beb0f6821162ccc9fbf41667",
+    "comparison_id": "experiment-bookshop-shift-01-c1",
+    "retained_alternative_version_id": "ver-0003",
+    "rationale": "USER-SELECTED OPERATOR DEMO: choose the exact tested B version because it passed all nine public batches and all three protected phases; A failed two public batches. The user explicitly selected B and accepted S45. The examples and investigation are operator-performed, not learner work or learning evidence.",
+    "requirement_set_hash": "9defd8e35e2afc59b993095c706935a130f4dd70a3051ec484f5d38161fdd9d4",
+    "prior_selection_id": "sel-0001",
+    "state": "VALID",
+    "created_at": "2026-10-24T15:48:42.977017Z"
+  },
+  "selected_source_sha256": "7d08d2833130cf3f6de155d3ecd925e9d1e7bff0d670d3b936b91ad4fdee628f",
+  "comparison_package_sha256": "465ef763b1724df2a1a7081afcd2f07d422162a7f0b43b8da4137b8dc3811564",
+  "new_provider_calls": 0,
+  "new_sandbox_operations": 0,
+  "ledger_unchanged": true,
+  "authorship": "operator-authored examples and operator-performed investigation; not learner work or learning evidence"
+}
