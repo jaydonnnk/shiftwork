@@ -545,7 +545,7 @@ def _create_comparison(
     )
 
 
-def _reserve_comparison(session, candidate_a, candidate_b, investigation, key: str = "cmp-raw"):
+def _reserve_comparison(session, candidate_a, candidate_b, investigation, key: str = "cmp-raw", public_repetitions: int = 1):
     """Reserve through the orchestrator so nothing executes yet."""
     conn = db.connect(session.db_file)
     try:
@@ -557,6 +557,7 @@ def _reserve_comparison(session, candidate_a, candidate_b, investigation, key: s
             investigation_id=investigation["id"],
             declared_treatment=TREATMENT,
             client_request_id=key,
+            public_repetitions=public_repetitions,
         )
         view = experiments.experiment_view(conn, experiment.id)
         return experiment, view
@@ -1681,7 +1682,8 @@ def test_comparison_persists_the_second_requests_observation_ordinal(session, mo
     finally:
         conn.close()
     assert [(item.request_ordinal, item.public_payload_json["probe"])
-            for item in observations] == [(2, "second_request"), (3, "second_request")]
+            for item in observations if "probe" in item.public_payload_json] == [(2, "second_request"), (3, "second_request")]
+    assert sum(item.id.endswith("-public-status") for item in observations) == 1
 
 
 @pytest.mark.parametrize("tamper", ["swap_bytes", "wrong_count", "slot_hash", "slot_count"])
@@ -2253,6 +2255,8 @@ def test_persisted_protected_usage_stays_out_of_public_efficiency_and_route(sess
     conn = db.connect(session.db_file)
     try:
         slot = repo.list_trial_slots(conn, experiment_id)[0]
+        existing = repo.list_observations(conn, slot.run_id)
+        offset = max((item.ordinal for item in existing), default=0)
         for ordinal, request_ordinal, kind, payload in (
             (1, 1, ObservationKind.INFERENCE_REQUEST, {}),
             (2, 1, ObservationKind.INFERENCE_RESULT,
@@ -2264,12 +2268,12 @@ def test_persisted_protected_usage_stays_out_of_public_efficiency_and_route(sess
         ):
             repo.insert_observation(conn, ExecutionObservation(
                 id=f"{slot.run_id}-usage-boundary-{ordinal}", run_id=slot.run_id,
-                request_ordinal=request_ordinal, ordinal=ordinal, kind=kind,
+                request_ordinal=request_ordinal, ordinal=offset + ordinal, kind=kind,
                 public_payload_json=payload, raw_payload_ref="",
                 measured_at=datetime.now(timezone.utc),
             ))
         conn.commit()
-        assert len(repo.list_observations(conn, slot.run_id)) == 4
+        assert len(repo.list_observations(conn, slot.run_id)) == len(existing) + 4
     finally:
         conn.close()
     response = session.client.get(f"/api/experiments/{experiment_id}")
@@ -2534,12 +2538,13 @@ def test_a_comparison_requires_two_distinct_reviewed_candidates_and_an_owned_ent
 # --- S15 protected phase, approved obligations 50 to 54 --------------------
 
 
-def test_slot_runs_public_phase_then_protected_phase_in_frozen_order(session, monkeypatch):
+@pytest.mark.parametrize("repetitions", [1, 3])
+def test_slot_runs_public_phase_then_protected_phase_in_frozen_order(session, monkeypatch, repetitions):
     """Test 50: one run identity, two fresh executor operations, exact frozen bytes."""
     from shiftwork.executor.local_process import LocalProcessAdapter
 
     candidate_a, candidate_b, investigation = _comparison_session(session)
-    experiment, _ = _reserve_comparison(session, candidate_a, candidate_b, investigation)
+    experiment, _ = _reserve_comparison(session, candidate_a, candidate_b, investigation, public_repetitions=repetitions)
     seen = []
 
     class RecordingAdapter(LocalProcessAdapter):
@@ -2565,10 +2570,14 @@ def test_slot_runs_public_phase_then_protected_phase_in_frozen_order(session, mo
             conn, context.protected_reservation_id, pair) for pair in (1, 2, 3)}
         view = experiments.experiment_view(conn, experiment.id)
         assert view["state"] == "FINALIZED"
-        assert len(seen) == 12
+        assert len(seen) == 6 * (repetitions + 1)
         for index, slot in enumerate(slots):
-            public, protected = seen[2 * index:2 * index + 2]
-            assert (public[0], protected[0]) == ("public", "protected")
+            phases = seen[(repetitions + 1) * index:(repetitions + 1) * (index + 1)]
+            *publics, protected = phases
+            public = publics[0]
+            assert [phase[0] for phase in phases] == ["public"] * repetitions + ["protected"]
+            assert len({phase[1] for phase in phases}) == repetitions + 1, "a slot reused the public workspace"
+            assert all(phase[2:] == public[2:] for phase in publics), "public repetition bytes changed"
             assert public[1] != protected[1], "a slot reused the public workspace"
             assert public[2] == config.PIVOT_COMPARE_STATE.read_bytes()
             assert protected[2] == states[slot.pair_ordinal]
@@ -2599,10 +2608,11 @@ def test_slot_runs_public_phase_then_protected_phase_in_frozen_order(session, mo
         executor_base.load_single_request(ref, None, 3)
 
 
-def test_protected_variant_is_bound_and_snapshotted_before_any_result(session):
+@pytest.mark.parametrize("repetitions", [1, 3])
+def test_protected_variant_is_bound_and_snapshotted_before_any_result(session, repetitions):
     """Test 51: restricted bytes and context hash survive exact readback."""
     candidate_a, candidate_b, investigation = _comparison_session(session)
-    experiment, view = _reserve_comparison(session, candidate_a, candidate_b, investigation)
+    experiment, view = _reserve_comparison(session, candidate_a, candidate_b, investigation, public_repetitions=repetitions)
     conn = db.connect(session.db_file)
     try:
         context = repo.get_execution_context(conn, experiment.context_id)
@@ -2671,10 +2681,11 @@ def test_protected_delta_collision_is_rejected_before_exposure(session, monkeypa
         conn.close()
 
 
-def test_each_pair_shares_one_identical_protected_stimulus(session):
+@pytest.mark.parametrize("repetitions", [1, 3])
+def test_each_pair_shares_one_identical_protected_stimulus(session, repetitions):
     """Test 52: each A/B pair uses one binding and no pair borrows another's."""
     candidate_a, candidate_b, investigation = _comparison_session(session)
-    experiment, _ = _reserve_comparison(session, candidate_a, candidate_b, investigation)
+    experiment, _ = _reserve_comparison(session, candidate_a, candidate_b, investigation, public_repetitions=repetitions)
     conn = db.connect(session.db_file)
     try:
         context = repo.get_execution_context(conn, experiment.context_id)
@@ -2699,11 +2710,12 @@ def test_each_pair_shares_one_identical_protected_stimulus(session):
         conn.close()
 
 
-def test_public_and_protected_counts_reconcile_without_merging(session):
+@pytest.mark.parametrize("repetitions", [1, 3])
+def test_public_and_protected_counts_reconcile_without_merging(session, repetitions):
     """Test 54: public six and protected three remain separate per candidate."""
     candidate_a, candidate_b, investigation = _comparison_session(session)
-    experiment, before = _reserve_comparison(session, candidate_a, candidate_b, investigation)
-    assert before["shared_public_denominator_requests"] == 6
+    experiment, before = _reserve_comparison(session, candidate_a, candidate_b, investigation, public_repetitions=repetitions)
+    assert before["shared_public_denominator_requests"] == 6 * repetitions
     assert before["protected_denominator_requests_per_candidate"] == 3
     assert before["protected_counts"] is None
     assert all(trial["request_count"] == 2 and trial["protected_request_count"] == 1
@@ -2713,7 +2725,7 @@ def test_public_and_protected_counts_reconcile_without_merging(session):
     try:
         after = experiments.experiment_view(conn, experiment.id)
         assert after["state"] == "FINALIZED"
-        assert after["shared_public_denominator_requests"] == 6
+        assert after["shared_public_denominator_requests"] == 6 * repetitions
         assert after["protected_denominator_requests_per_candidate"] == 3
         assert after["protected_counts"] == {
             "A": {"reserved": 3, "captured": 3, "missing": 0},
@@ -2722,12 +2734,15 @@ def test_public_and_protected_counts_reconcile_without_merging(session):
         for trial in after["trials"]:
             assert len(trial["outputs"]) == trial["request_count"] == 2
             assert len(repo.list_outputs(conn, trial["run_id"])) == 3
+            assert len(trial["repetitions"]) == repetitions
+            assert all(len(row["outputs"]) == 2 for row in trial["repetitions"])
     finally:
         conn.close()
 
 
 
-def test_protected_content_and_captures_never_reach_public_surfaces(tmp_path, monkeypatch):
+@pytest.mark.parametrize("repetitions", [1, 3])
+def test_protected_content_and_captures_never_reach_public_surfaces(tmp_path, monkeypatch, repetitions):
     """Test 53: short private values use source and ordinal checks, not global needles."""
     from fastapi.testclient import TestClient
     from shiftwork.app import create_app
@@ -2801,7 +2816,7 @@ def test_protected_content_and_captures_never_reach_public_surfaces(tmp_path, mo
             current.open()
             current.freeze()
             candidate_a, candidate_b, investigation = _comparison_session(current)
-            experiment, before = _reserve_comparison(current, candidate_a, candidate_b, investigation)
+            experiment, before = _reserve_comparison(current, candidate_a, candidate_b, investigation, public_repetitions=repetitions)
             assert before["protected_counts"] is None
             before_route = client.get(f"/api/experiments/{experiment.id}")
             assert before_route.status_code == 200, before_route.text
