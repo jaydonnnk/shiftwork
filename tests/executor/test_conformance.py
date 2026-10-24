@@ -445,6 +445,38 @@ def test_local_process_uses_literal_requests_and_snapshot(executor):
     assert all(c.elapsed_ms is not None and 0 <= c.elapsed_ms <= result.wall_ms for c in result.captures)
 
 
+@pytest.mark.parametrize("stage, expected", [
+    ("connect", ExecutorFailure.SERVICE_UNREACHABLE),
+    ("response", ExecutorFailure.REQUEST_TIMEOUT),
+])
+def test_local_timeout_reports_whether_a_connection_was_established(executor, monkeypatch, stage, expected):
+    class Connection:
+        connected = False
+
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def connect(self):
+            if stage == "connect":
+                raise TimeoutError("connection never established")
+            self.connected = True
+
+        def request(self, *_args, **_kwargs):
+            if not self.connected:
+                self.connect()
+
+        def getresponse(self):
+            raise TimeoutError("connected service did not respond")
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(executor.local.http.client, "HTTPConnection", Connection)
+    result = executor.local._request(12345, 1, b"{}", executor.local.time.monotonic() + 1)
+    assert result.transport_error is expected, "connection and response timeouts must retain distinct causes"
+    assert result.http_status is None and result.body == b""
+
+
 @pytest.mark.parametrize("adapter_name", ["recorded", "local_process"])
 def test_bad_batch_hash_refused_before_execution(executor, monkeypatch, adapter_name):
     request = request_for(executor)

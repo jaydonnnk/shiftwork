@@ -32,8 +32,11 @@ def _request(port: int, ordinal: int, body: bytes, deadline: float, token: str |
     status = None
     captured = bytearray()
     error = None
+    connected = False
     connection = http.client.HTTPConnection("127.0.0.1", port, timeout=max(0.001, deadline - time.monotonic()))
     try:
+        connection.connect()
+        connected = True
         headers = {"Content-Type": "application/json"}
         if token is not None:
             headers["X-Shiftwork-Request-Token"] = token
@@ -63,7 +66,7 @@ def _request(port: int, ordinal: int, body: bytes, deadline: float, token: str |
             except UnicodeDecodeError:
                 error = ExecutorFailure.CAPTURE_NON_UTF8
     except TimeoutError:
-        error = ExecutorFailure.REQUEST_TIMEOUT
+        error = ExecutorFailure.REQUEST_TIMEOUT if connected else ExecutorFailure.SERVICE_UNREACHABLE
     except http.client.IncompleteRead as exc:
         captured.extend(exc.partial)
         error = ExecutorFailure.CAPTURE_TRUNCATED
