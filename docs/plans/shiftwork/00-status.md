@@ -1,3 +1,20 @@
+**S45 ACCEPTED and PUBLISHED on the slice branch, 2026-10-25; S46 not started.**
+The user said: "I accept. Please commit and push, and then give a copy paste
+handoff prompt for another agent to begin s46." The S45 code, tests, records
+and eight named public evidence files were committed in 16 focused batches
+ending at b7babdd572978e4b1a91ca6ea74a56587211f92d and pushed to
+origin/shiftwork/slice-45. The remote was read back and matched, with zero
+left/right divergence. Current publication notices and the handoff are a
+subsequent documentation-only commit. Main and origin/main remained fc0d21d;
+no merge to main or deployment is claimed. No repository CI workflow is present.
+Fresh publication checks: 1,732 Python passes, one live-only skip, one excluded
+installation test; 310 Node passes; exact public-packet credential scan and
+git diff --check passed. No installation or further live call occurred.
+See [the publication record](slice45-publication-2026-10-25.md) and
+[the S46 handoff](slice46-handoff-2026-10-25.md).
+S46's model/rate decision, explicit go-ahead and live allowance are still pending.
+Earlier uncommitted or pending-choice notices below retain their historical scope.
+
 **S45 COMPLETE and ACCEPTED, 2026-10-24; user explicitly selected B.**
 The user answered "Select B and accept S45" after reviewing the completed live
 comparison. The production append_selection path recorded sel-0002, selecting

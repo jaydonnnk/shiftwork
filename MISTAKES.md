@@ -3978,3 +3978,9 @@ browser callbacks cannot read their caller's Node scope. This consumed no call.
 - What happened: the first selected-state browser check expected B's choose button to remain enabled. The product correctly disables both buttons once a choice from that comparison is recorded. The saved B selection was unchanged and no further live call or operation occurred.
 - Root cause: the acceptance check retained a pre-choice control assertion after advancing the stored workflow state.
 - Prevention rule: inspect renderCompare's selectedHere branch before adapting a workflow-state check. Verify the exact saved selection note, both disabled choice buttons and Step 6 after selection; keep the earlier enabled-B confirmation proof as pre-selection evidence. Preserve the failed receipt rather than changing product behavior to fit it.
+
+## 2026-10-25 S45 publication: metadata staging crossed the ignored evidence parent
+
+- What happened: ordinary git add rejected the ignored evidence directory during metadata staging, after other named documentation paths had been staged. A later tool call attempted only a no-op push of the already-published code tip; no metadata commit was created or published by that failed sequence.
+- Root cause: the metadata path did not preserve the first packet's explicit force-add treatment for public evidence, and tool exit status was not used to stop the next dependent call.
+- Prevention rule: stage only the named public evidence file with git add -f, inspect the exact index after a partial failure, and require a zero exit status before any dependent commit or push. Keep private evidence excluded. Do not treat a nonzero tool result as an exception that automatically stops later calls.

@@ -1,5 +1,13 @@
 # S45 revised live comparison, 2026-10-24
 
+Publication update, 2026-10-25: the accepted S45 code, tests and named public
+evidence were pushed to origin/shiftwork/slice-45 at b7babdd572978e4b1a91ca6ea74a56587211f92d.
+This report and the public comparison/selection packages are now deliberately
+tracked. Earlier uncommitted/ignored-only statements below describe their
+pre-publication checkpoints. Private databases and restricted captures remain
+local. See [the publication record](../slice45-publication-2026-10-25.md).
+No merge to main, deployment or additional live action is implied.
+
 S45 is COMPLETE and ACCEPTED. After reviewing this result, the user explicitly
 said "Select B and accept S45". Choice sel-0002 now selects the exact tested B,
 ver-0004, with artifact hash

@@ -1,3 +1,16 @@
+**S45 ACCEPTED and PUBLISHED on shiftwork/slice-45, 2026-10-25.**
+The user authorized committing/pushing S45 and a handoff for another agent.
+Sixteen focused implementation/evidence commits ending at b7babdd were pushed
+and verified against the remote branch. Publication/handoff records follow in
+a documentation-only commit. Main remains fc0d21d; no main merge, deployment
+or CI success is claimed. Fresh local checks: 1,732 Python passes with one
+live-only skip and one excluded install test, plus 310 Node passes. Public
+evidence was deliberately included; private stores and credentials stay local.
+See [publication](plans/shiftwork/slice45-publication-2026-10-25.md) and
+[S46 handoff](plans/shiftwork/slice46-handoff-2026-10-25.md).
+S46 is not started and still needs its model decision and applicable authority.
+Earlier uncommitted/pending notices below describe their historical checkpoints.
+
 **S45 COMPLETE and ACCEPTED, 2026-10-24; B explicitly selected.**
 The user said "Select B and accept S45". Stored choice sel-0002 selects the
 exact tested B, ver-0004, and retains A as the alternative. B passed all nine
