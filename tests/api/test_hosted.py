@@ -120,7 +120,7 @@ def test_hosted_meters_are_fresh_and_preserve_consumed_allowances(hosted_environ
     app = create_app(str(tmp_path / 'meters.db'))
     for name, cls, operations, calls in (
         ('live_operation_budget', LiveOperationBudget, 1, 1),
-        ('live_comparison_budget', LiveComparisonBudget, 12, 18),
+        ('live_comparison_budget', LiveComparisonBudget, 24, 42),
     ):
         factory = getattr(app.state, name)
         assert callable(factory), 'hosted actions need meter factories'

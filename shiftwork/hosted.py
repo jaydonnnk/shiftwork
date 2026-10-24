@@ -24,7 +24,8 @@ def operation_budget() -> LiveOperationBudget:
 
 
 def comparison_budget() -> LiveComparisonBudget:
-    return LiveComparisonBudget(config.SERVICE_MODEL, INPUT_RATE, OUTPUT_RATE)
+    return LiveComparisonBudget(config.SERVICE_MODEL, INPUT_RATE, OUTPUT_RATE,
+                                max_operations=24, max_calls=42)
 
 
 def diagnostic_budget() -> LiveDiagnosticBudget:

@@ -272,6 +272,7 @@ def create_experiment(
             declared_treatment=body.declared_treatment,
             client_request_id=body.client_request_id,
             adapter=adapter,
+            public_repetitions=body.public_repetitions,
         )
         if experiment.state == "PLANNED" and comparison_flow.comparison_run(conn, experiment.id) is not None:
             if live_budget is None:
@@ -291,6 +292,7 @@ def create_experiment(
             declared_treatment=body.declared_treatment,
             client_request_id=body.client_request_id,
             adapter=adapter,
+            public_repetitions=body.public_repetitions,
         )
         if experiment.state == "PLANNED" and comparison_flow.comparison_run(conn, experiment.id) is not None:
             if live_budget is None:

@@ -458,8 +458,8 @@ class ExperimentRequest(BaseModel):
 
     @model_validator(mode="after")
     def _check_kind_shape(self) -> "ExperimentRequest":
-        if self.kind != "DIAGNOSTIC" and self.public_repetitions != 1:
-            raise ValueError("comparison repetitions belong to S45")
+        if self.kind != "DIAGNOSTIC" and self.public_repetitions > 3:
+            raise ValueError("comparison public repetitions must be from 1 to 3")
         if self.kind == "QUALIFYING_COMPARISON":
             if self.candidate_a_version_id is None or self.candidate_b_version_id is None:
                 raise ValueError("a qualifying comparison needs two candidate versions")
@@ -558,6 +558,9 @@ class ExperimentTrialView(BaseModel):
     customer_text: str | None = None
     missing_evidence: tuple[str, ...]
     metrics: dict[str, Any] | None
+    repetitions: tuple["ExperimentTrialView", ...] = ()
+    repetition_ordinal: int = 1
+    overall_run_state: str | None = None
 
 
 class CandidateView(BaseModel):

@@ -26,17 +26,25 @@ class LiveComparisonBudget:
                     + self.output_usd_per_million * self.reserved_output_tokens_per_call) / 1_000_000
         return per_call * self.calls
 
-    def preflight(self, *, model: str, slots: int, requests: int) -> None:
-        if (model != self.model or slots != 6 or requests != 18
-                or self.max_operations != 12 or self.max_calls != 18
+    def preflight(self, *, model: str, slots: int, requests: int,
+                  public_repetitions: int = 1,
+                  requests_per_slot: tuple[int, ...] = (2, 2, 2, 2, 2, 2)) -> None:
+        if (model != self.model or slots != 6 or type(public_repetitions) is not int
+                or not 1 <= public_repetitions <= 3 or len(requests_per_slot) != slots
+                or any(type(count) is not int or not 1 <= count <= 4 for count in requests_per_slot)
+                or requests != sum(count * public_repetitions + 1 for count in requests_per_slot)
+                or self.operations or self.calls
+                or self.max_operations < slots * (public_repetitions + 1) or self.max_calls < requests
                 or self.input_usd_per_million < 0 or self.output_usd_per_million < 0
                 or self.reserved_input_tokens_per_call < 8192
                 or self.reserved_output_tokens_per_call < 1024):
             raise ValueError("live comparison shape, model or rate ceiling is unverified")
         if (self.input_usd_per_million * self.reserved_input_tokens_per_call
                 + self.output_usd_per_million * self.reserved_output_tokens_per_call
-                ) * self.max_calls / 1_000_000 > self.max_projected_usd:
-            raise ValueError("live comparison projected inference spend exceeds $0.10")
+                ) * requests / 1_000_000 > self.max_projected_usd:
+            raise ValueError("live comparison projected inference spend exceeds its ceiling")
+        self.max_operations = slots * (public_repetitions + 1)
+        self.max_calls = requests
 
     def before_operation(self) -> None:
         if self.operations >= self.max_operations:
@@ -46,9 +54,12 @@ class LiveComparisonBudget:
     def before_inference(self, model: str) -> None:
         if model != self.model or self.calls >= self.max_calls:
             raise ValueError("live comparison inference call ceiling reached")
-        self.calls += 1  # Count a failed provider request; never refund it.
-        if self.projected_usd > self.max_projected_usd:
+        next_projection = self.projected_usd + (
+            self.input_usd_per_million * self.reserved_input_tokens_per_call
+            + self.output_usd_per_million * self.reserved_output_tokens_per_call) / 1_000_000
+        if next_projection > self.max_projected_usd:
             raise ValueError("live comparison projected inference spend ceiling reached")
+        self.calls += 1  # Count a failed provider request; never refund it.
 
 
 @dataclass
