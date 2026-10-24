@@ -232,7 +232,7 @@ export const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftRepor
 
 export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41|42|44)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an owned disposable /tmp/shiftwork-sN-* root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41|42|44|45)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an owned disposable /tmp/shiftwork-sN-* root');
   const patch = fault ? FAULTS[fault] : null;
   if (fault) assert.ok(patch, `Unknown S36 fault ${fault}`);
   await mkdir(out, { recursive: true });
@@ -659,10 +659,10 @@ export async function dialogJourney(browser, base) {
     await browser.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code: key, windowsVirtualKeyCode: code, modifiers });
   };
   const trap = async id => {
-    const tabs = await browser.evaluate(id => [...document.getElementById(id).querySelectorAll('button,textarea')]
+    const tabs = await browser.evaluate(id => [...document.getElementById(id).querySelectorAll('button,textarea,a[href],summary')]
       .filter(node => !node.disabled && !node.hidden && node.getClientRects().length).map(node => node.id), id);
     for (const reverse of [false, true]) {
-      await browser.evaluate((id, reverse) => { const nodes = [...document.getElementById(id).querySelectorAll('button,textarea')]
+      await browser.evaluate((id, reverse) => { const nodes = [...document.getElementById(id).querySelectorAll('button,textarea,a[href],summary')]
         .filter(node => !node.disabled && !node.hidden && node.getClientRects().length); nodes[reverse ? 0 : nodes.length - 1].focus(); }, id, reverse);
       await key('Tab', reverse ? 8 : 0);
       assert.equal(await browser.evaluate(() => document.activeElement.id), tabs[reverse ? tabs.length - 1 : 0], `dialog_keyboard: ${id} did not trap ${reverse ? 'reverse ' : ''}Tab`);
