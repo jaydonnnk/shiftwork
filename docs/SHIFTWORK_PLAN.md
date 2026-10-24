@@ -1,4 +1,93 @@
-**S44 verified locally and published to main on the user's direction, 2026-10-24.** Ten live Nano calls retained five empty replies at the 1,024-token cap and five valid, complete plans. Collection and alternative were each missing in five of ten runs. This is an output-budget incident, not evidence of semantic task omission. The same captures replay as RECORDED_INSPECTION with identical evidence. Token-cost projection is $0.00230088; actual billing and Sandbox cost are unknown. The user's $5 allowance and delegated ten-call limit are recorded in [current status](plans/shiftwork/00-status.md). The live controller is stopped; the local recorded review is on port 8446. See [the checkpoint](plans/shiftwork/slice44-checkpoint-2026-10-24.md). No commit, push, deployment or S45 is authorized. Older no-work and publication notices below are historical.
+**S45 COMPLETE and ACCEPTED, 2026-10-24; B explicitly selected.**
+The user said "Select B and accept S45". Stored choice sel-0002 selects the
+exact tested B, ver-0004, and retains A as the alternative. B passed all nine
+public batches and all three protected phases. Selection added only its own
+row, preserved the operational ledger and made no provider/Sandbox call.
+The old comparison snapshot and receipts are retained. See
+[the accepted result](plans/shiftwork/evidence/slice45-revised-live-2026-10-24.md).
+This is bounded operator-demo evidence, not learner or general-reliability proof.
+S45 remains uncommitted. Operation, publication, deployment and S46 remain
+separate. Earlier pending notices below describe their historical checkpoints.
+
+**S45 revised comparison COMPLETE, 2026-10-24; B eligible, selection pending.**
+The single approved action completed all 42 calls and 24 Sandbox operations.
+A passes seven of nine public batches; B passes nine of nine. Both retain all
+batches and pass three of three protected phases. Only B is eligible. The actual
+desktop/mobile review passes at 100% and 200%, with no mutation. No version was
+chosen and the operational ledger is unchanged. Reserved inference is
+US$0.09289728; reported usage projects US$0.00154494. Billing and Sandbox cost
+remain unknown. See [the result](plans/shiftwork/evidence/slice45-revised-live-2026-10-24.md).
+S45 still needs explicit eligible selection and acceptance. Publication remains
+separate, and no further live action follows from the exhausted allowance.
+
+**S45 revised live comparison APPROVED, 2026-10-24, before execution.**
+The user approved the exact revised pair and one fresh action bounded by 42
+calls, 24 Sandbox operations and US$0.09289728 reserved inference. Preparation,
+freeze and refusal controls are included. No retry, tuning or automatic choice.
+Both previous stopped allowances stay closed. Selection, S45 acceptance and
+publication remain separate. See [the proposal](plans/shiftwork/slice45-revised-comparison-proposal-2026-10-24.md).
+
+**S45 offline follow-up verified, 2026-10-24; revised live approval pending.**
+Revised proposed examples make task names and customer task boundaries explicit.
+The gateway retains safe private failure categories and elapsed time without
+changing public failures or deadlines. Model compliance remains unmeasured.
+Python: 1,732 passed, one live-only skip and one excluded installation check.
+Node: 310 passed. Twenty-nine mutation checks cover 23 distinct edits with restored
+controls. Both stopped actions and all 106 material hashes are preserved.
+No live call, installation, credential read, selection or publication occurred.
+See [the follow-up](plans/shiftwork/slice45-repair-followup-2026-10-24.md) and
+[exact revised proposal](plans/shiftwork/slice45-revised-comparison-proposal-2026-10-24.md).
+S45 remains incomplete, unaccepted and uncommitted; the old allowances remain closed.
+
+**S45 approved prompt/schema comparison STOPPED, 2026-10-24.**
+The outcome is INCOMPLETE after 23 calls and 13 operations. A has zero of nine
+planned public batches passing with four retained; B has four of nine with six
+retained. Neither is eligible, no selection occurred and the ledger is unchanged.
+The stop follows a provider transport failure. The Sandbox itself reported
+SUCCESS and both captures were read back. The adapter's SANDBOX_TERMINATED label
+comes from its gateway-failure branch. The underlying transport cause is unknown.
+Reserved inference is US$0.05087232, with actual billing and Sandbox cost unknown.
+No retry or new live allowance remains. Fresh browser checks pass at 100%/200%
+desktop/mobile. See [the evidence](plans/shiftwork/evidence/slice45-prompt-schema-live-2026-10-24.md).
+S45 remains incomplete, unaccepted and uncommitted. Earlier approvals are historical.
+
+**S45 prompt/schema pair and one new live comparison APPROVED, 2026-10-24.**
+The user approved the exact [proposal](plans/shiftwork/slice45-new-comparison-proposal-2026-10-24.md):
+42 calls, 24 Sandbox operations, US$0.09289728 reserved inference and unchanged
+deadlines. Sandbox cost remains unknown. Preparation uses a fresh store and
+preserves the old stop. Selection, operation, S45 acceptance and publication
+remain separate. Earlier notices retain their checkpoint scope.
+
+**S45 new comparison proposal prepared 2026-10-24; approval pending.**
+The [exact proposal](plans/shiftwork/slice45-new-comparison-proposal-2026-10-24.md)
+names the reviewed prompt and schema sources, one fresh comparison, 42 model
+calls, 24 Sandbox operations and US$0.09289728 reserved inference at repository
+rates. Sandbox cost remains unknown. The favourable source review recommends
+experimental approval; approval has not been inferred. Fresh offline checks
+include 21 proposal tests and four authored omission/extra-task controls.
+Original evidence and all 106 material hashes match. No new candidate freeze,
+credential read or live action occurred. S45 is INCOMPLETE and unaccepted.
+Earlier notices below retain their checkpoint scope.
+
+**S45 offline audit continued 2026-10-24; incomplete, unaccepted and uncommitted.**
+The retained stop is before terminal completion and checkpoint readback.
+Known provider time is 17,461 ms; 28,370 ms of the action remain unattributed.
+The underlying latency cause remains unknown. No live call or selection was
+made. port_dead is repaired, and an absolute provider deadline now enforces
+the unchanged 20-second ceiling. Fresh Python regression: 1,703 passed, one
+live-only skip and one deselected install test. Node: 310 passed. The existing
+owner line is hidden on incomplete or missing/unequal repetition counts, with
+catalogue text unchanged and final actual-stop browser checks at desktop,
+mobile and native 200%. A new prompt/schema pair is proposed for source review,
+with identical model/deadline settings, no approval or measured effectiveness.
+See [the audit](plans/shiftwork/slice45-offline-audit-2026-10-24.md).
+Earlier S45 notices below retain their historical scope.
+
+### Earlier S45 stop handoff, before the fresh offline audit
+
+**S45 STOPPED and handed off 2026-10-24; incomplete, unaccepted and uncommitted.** The approved comparison stopped in A's first Sandbox operation with REQUEST_TIMEOUT after 45,831 milliseconds. Two provider replies were retained, but no customer-response capture was verified. B and the protected phase did not run; neither candidate is eligible and no selection occurred. The underlying timeout cause is unknown. Port 8452 showed an authored 8/9 versus 9/9 rendering fixture, not live results, and is stopped. The actual stopped comparison has a read-only review on port 8453. Fresh live authorization is required after the stop. Latest regression: 1,676 passes, the existing port_dead failure, one skip and one deselected install test. All eight S45 inference reservations total US$0.01769472 at repository projection rates; actual billing and Sandbox cost are unknown. See [current status](plans/shiftwork/00-status.md) and [the S45 checkpoint](plans/shiftwork/slice45-checkpoint-2026-10-24.md). No commit, merge, push, deployment or later slice is authorized. Earlier notices below retain their historical scope.
+
+**S44 verified locally and published to main on the user's direction, 2026-10-24.** Ten live Nano calls retained five empty replies at the 1,024-token cap and five valid, complete plans. Collection and alternative were each missing in five of ten runs. This is an output-budget incident, not evidence of semantic task omission. The same captures replay as RECORDED_INSPECTION with identical evidence. Token-cost projection is $0.00230088; actual billing and Sandbox cost are unknown. The user's $5 allowance and delegated ten-call limit are recorded in [current status](plans/shiftwork/00-status.md). The live controller is stopped; the local recorded review is on port 8446. See [the checkpoint](plans/shiftwork/slice44-checkpoint-2026-10-24.md).
 
 **Gate 4 S43 to S50 entries and the Gate 3 offline-mode clarification APPROVED 2026-10-23.** Jaydon approved in chat: "Approve the S43 to S50 Gate 4 entries, and the proposed Gate 3 clarification: the new mission binds only under the tokenfactory executor, and recorded mode keeps the old mission and replays S44 captures." See [04-slices.md](plans/shiftwork/04-slices.md) and the [Gate 3](plans/shiftwork/03-program-design.md) section 2 Bellwether starter row. No slice has started; S43 needs its own go-ahead on `shiftwork/slice-43`, plus operator review of the new mission and starter. Nothing is committed.
 

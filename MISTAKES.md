@@ -3785,3 +3785,196 @@ browser callbacks cannot read their caller's Node scope. This consumed no call.
 - What happened: inspection of the real captured/replayed room showed Step unknown and unavailable station labels, although the diagnostic rates rendered.
 - Root cause: the diagnostic public projection omitted artifact_version_id. The schema supplied null, and the workplace correctly rejected a trial that did not match its candidate. The rendering fixture repeated the same omission.
 - Prevention rule: publish each diagnostic trial's actual run version and frozen candidate hash. Verify the real room's consistency as well as the panel's values, and require the API binding in the retained-row test.
+
+## 2026-10-24 S45: a new test omitted a required helper argument
+
+- What happened: the first repetition-bound tests errored before reaching their assertions because count_experiments_for_shift requires an ExperimentKind.
+- Root cause: I copied the helper's name without first checking its signature. This violated the existing call-contract rule.
+- Prevention rule: inspect the current signature before the first helper call, including in test setup. The invalid run is not red behavioral evidence; the corrected run fails the five new repetition assertions and passes the existing bounds checks.
+
+## 2026-10-24 S45: the inherited mutation runner pinned its old branch
+
+- What happened: the S44 baseline runner stopped at its branch assertion before applying any fault.
+- Root cause: its branch() helper requires shiftwork/slice-44; S45 is correctly on shiftwork/slice-45.
+- Prevention rule: inspect mutation-runner preconditions first. Adapt only that assertion in memory, retain the exact adaptation in the checkpoint, and leave the inherited script unchanged. A precondition failure is no mutation proof.
+
+## 2026-10-24 S45: test SQL guessed a ledger column
+
+- What happened: the repetition test reached its last check, then errored because ledger_events has no run_id column.
+- Root cause: I guessed a storage shape instead of copying the existing comparison's before-and-after business-row check.
+- Prevention rule: inspect the schema before writing SQL. Compare actual retained business rows before and after the comparison, preserving the existing seeded ledger as a positive control.
+
+## 2026-10-24 S45: extraction kept an extra indentation level
+
+- What happened: source inspection caught an over-indented extracted helper body before execution.
+- Root cause: the transform removed four spaces while moving a nested block that needed eight removed.
+- Prevention rule: inspect the transformed helper boundary immediately after structural edits, before running tests. This intermediate source is not passing verification evidence.
+
+## 2026-10-24 S45: review exposed evidence loss and mixed phase status
+
+- What happened: an exception in repetition two discarded the already returned first result; a protected transport failure also reduced the public rate from 9 of 9 to 8 of 9 despite complete passing public evidence.
+- Root cause: the first result was retained after later work, and its public state reused the combined public/protected run state.
+- Prevention rule: commit each public capture before assessment and every later phase. Retain a controller-owned public completion record separately from combined state. The driver-error, assessment-error and protected-transport tests reproduce these failures at named assertions.
+
+## 2026-10-24 S45: queued executor identity was incomplete
+
+- What happened: a changed additional-run adapter could enter the local adapter branch. The local executor's pin guard remained, but the comparison invoked the wrong execution class before later drift detection.
+- Root cause: queued binding validation omitted adapter, evidence mode and purpose, and a ternary treated every non-tokenfactory adapter as local.
+- Prevention rule: validate the full queued binding before the first executor call, and use a shared dispatcher with two explicit admitted classes and a refusal. Test each changed field with an observed-call assertion; an injected spy stop itself is not a mutation kill.
+
+## 2026-10-24 S45: modal evidence links and keyboard controls were missing
+
+- What happened: the choice dialog initially showed rates without links, while the modal blocked the comparison links beneath it. Its old focus trap also omitted the new summary and links.
+- Root cause: I extended the panel without following the complete choice interaction and reused a two-control focus selector.
+- Prevention rule: prove inspection from inside the modal, including normal close cleanup, exact-run focus and no selection request. Include every visible focusable control in the trap and retain the initial rationale focus.
+
+## 2026-10-24 S45: the displayed rate accepted an empty capture
+
+- What happened: a retained repetition with an empty capture still counted as passing in the new summary when its assessment rows were unchanged.
+- Root cause: the rate checked capture ordinals and transport errors but not retained body presence.
+- Prevention rule: require nonempty retained captures in both server and browser readings, then prove the empty-capture guard independently. Do not substitute a cached passing summary for current retained rows.
+
+## 2026-10-24 S45: test setup guessed storage and observation state
+
+- What happened: a binding test assumed another context and experiment existed; a no-network double used load_batch on a protected single-request phase; and an observation-injection test assumed the run contained no prior observations.
+- Root cause: setup copied names without carrying the actual data and phase contracts.
+- Prevention rule: create explicit valid foreign bindings, honor load_single_request for the protected phase, and append test observations after the current ordinal. The invalid setup runs are not behavioral red evidence or mutation kills.
+
+## 2026-10-24 S45: a patch matched the wrong test function
+
+- What happened: an observation-offset setup was briefly inserted into an earlier test with the same slot lookup; source inspection caught it before the next check.
+- Root cause: a short patch anchor was not globally unique, contrary to the existing anchor rule.
+- Prevention rule: constrain transforms to the named current function and assert one match within that function. Check the affected function immediately after editing.
+
+## 2026-10-24 S45: inherited packaging validation installed dependencies
+
+- What happened: the initial requested full baseline ran test_clean_env_install_and_run, which creates a temporary environment and installs the locked dependencies, despite the handoff's no-install boundary.
+- Root cause: I ran the broad command before inspecting the packaging test's setup.
+- Prevention rule: inspect setup steps before a broad check when installs are forbidden. The later broad run was interrupted before packaging, and the authorized final suite explicitly deselects that one test. Keep its baseline failure and current exclusion visible; do not call it a pass.
+
+## 2026-10-24 S45: restored source still loaded a cached S43 mutation
+
+- What happened: seven gateway rejection checks failed even though protocol.py was byte-identical to HEAD and said extra=forbid. A normal import loaded extra=ignore, while a fresh cache-prefix import rejected the same input. The stale cache's timestamp and source size matched the restored file.
+- Root cause: the inherited S43 runner compiles same-size mutations into timestamp-based bytecode and restores source without isolating caches or running a restored control for every mutation. Source byte restoration alone did not establish runtime restoration.
+- Prevention rule: each S45 fault and control gets a fresh bytecode prefix with bytecode writes disabled. A positive-control test creates a poisoned same-size cache and proves the runner reads restored source. Preserve the identified stale cache receipt, regenerate the identified cache from checked source, and run inherited harnesses with cache isolation. Do not weaken the gateway guards or accept the stale-cache regression as source behavior.
+
+## 2026-10-24 S45: the hosted-meter test retained the old ceiling
+
+- What happened: the old hosted factory check exhausted 12 operations and 18 calls, then expected refusal from the S45 factory, which now reserves up to 24 operations and 42 calls.
+- Root cause: I updated the factory without updating its literal approved-shape expectation.
+- Prevention rule: retain literal expectations for the newly approved shape, preserve exhaustion and fresh-instance assertions, and separately prove preflight clamps a one-repetition action to its original 12-operation, 18-call shape.
+
+## 2026-10-24 S45: a child lookup displaced the primary output boundary
+
+- What happened: replacing the primary slot lookup with only a run-to-slot join lost the original public-output boundary when the primary run's back-reference was missing. The route refused instead of returning its two public captures.
+- Root cause: I replaced the existing authoritative primary pointer while extending lookup to child repetitions.
+- Prevention rule: preserve the primary pointer lookup, then use the child join as a fallback. The new missing-back-reference route test and its independent mutation prove that boundary, while the child lookup fault remains separately proved.
+
+## 2026-10-24 S45: new modal copy inherited low-contrast colors
+
+- What happened: visual review found the new small-sample warning and evidence disclosure too dim on the dark choice dialog; the browser contrast assertion reproduced the warning failure.
+- Root cause: the new controls inherited colors intended for the light workbench.
+- Prevention rule: inspect rendered modal copy at the required sizes and check foreground against its actual background. Both warning and evidence-label colors now have independent served faults with named failures and clean controls.
+
+## 2026-10-24 S45: provider usage detail was explicitly null
+
+- What happened: the first offline probe-summary script stopped while reading reasoning-token details because the provider returned completion_tokens_details as null.
+- Root cause: I handled a missing key but assumed a present value was a dictionary.
+- Prevention rule: preserve absent or null optional usage details as unknown. The corrected summary uses the retained total token counts and reasoning-character lengths; no provider call was repeated.
+
+## 2026-10-24 S45 reasoning amendment: test setup omitted the current helper contract
+
+- What happened: new policy tests guessed a comparison hash-helper name and a selection getter, assumed protected bindings were a context property, and omitted policy from an adapter's gateway double. Those failures occurred before their intended assertions.
+- Root cause: I read the helper body without copying its exact signature and reused an incomplete double.
+- Prevention rule: copy the current helper name and arguments, and give the double the members the adapter actually reads. The invalid setup failures are not behavioral red evidence or mutation kills; rerun the corrected tests before implementation.
+
+## 2026-10-24 S45 reasoning amendment: a self-hash did not anchor tested permission
+
+- What happened: review found that changing a context permission and recomputing its own hash could upgrade an operating selection. The first admitted-policy fixture made that change after selection and therefore accepted behavior it should reject.
+- Root cause: the new inheritance check verified only the context's self-hash, without its binding to the selected experiment's immutable schedule hash.
+- Prevention rule: anchor permission to both context and experiment hashes. Freeze positive policy fixtures before comparison and selection. The real reservation counterexample fails at DID NOT RAISE before the fix; separate context-only and rehashed-upgrade faults now target their own refusal assertions.
+
+## 2026-10-24 S45 reasoning amendment: a historical test double lacked required context data
+
+- What happened: the broad regression found two vocabulary-wiring checks whose minimal Context double had service_model but omitted ExecutionContext's required resource_limits_json. The inherited S43 runner also reported its adapter_drops_vocabulary fault as killed by that setup error, which is not valid guard evidence.
+- Root cause: service_adapter now reads the frozen permission from that required field, while the old double did not model the real context shape.
+- Prevention rule: add the already-required empty resource map to the double and retain every original vocabulary/tool assertion. Do not add a permissive production fallback for an invalid test-only type. Reprove the affected inherited fault at its vocabulary assertion with a passing clean control; never count the old setup error as its kill. The two failures remain in the first amendment regression receipt.
+
+## 2026-10-24 S45 live preparation: an invented-ID lookup was an empty check
+
+- What happened: inspection found a temporary preparation assertion looking up trial slots for an invented experiment ID. It could not establish that the real shift had no comparison.
+- Root cause: I used a convenient empty result as a substitute for the actual reservation invariant.
+- Prevention rule: remove that assertion before live execution. Verify the real shift's comparison count and keep one-shot replay prevention plus the production reservation cap. The empty assertion is not verification evidence, and no live call occurred during preparation.
+
+
+## 2026-10-24 S45 handoff: read-only inspection guessed receipt and database shapes
+
+- What happened: read-only inspection first guessed a database failure column and later treated the receipt's integer calls counter as a list. The summary script stopped; no live call or evidence mutation occurred.
+- Root cause: I inferred data shapes instead of inspecting the current schema and key types first.
+- Prevention rule: inspect the schema and primitive types before querying or aggregating receipts. A failed inspection is not evidence about the product or provider.
+
+## 2026-10-24 S45 audit: a mutation anchor omitted its line break
+
+- What happened: the new owner-line unexecuted-count fault stopped at its unique-anchor assertion. It did not mutate or prove the guard. Early read-only inspection also guessed an SDK import name and a test path; those commands failed without changing product evidence. A later multi-file documentation patch used a partial inline-paragraph anchor and was rejected atomically; both target files were verified unchanged before the corrected update.
+- Root cause: the anchor used a space where the current source had a newline, and the inspection names were inferred before locating their definitions.
+- Prevention rule: copy exact multiline anchors from current source and discover module paths before importing. Count only the corrected assertion-bound fault and its passing pristine control, never the setup failure.
+
+## 2026-10-24 S45 audit: preview launch lacked the repository import path
+
+- What happened: the first authored-rendering preview launch stopped with ModuleNotFoundError before creating or serving its disposable database.
+- Root cause: invoking tests/client/s45_preview.py by path placed the test folder on sys.path; its existing launcher requires the repository on PYTHONPATH.
+- Prevention rule: use the launcher's explicit repository PYTHONPATH and verify startup before browser checks. The failed startup is not product, model or mutation evidence.
+
+## 2026-10-24 S45 audit: owner counts changed an unrelated transition key
+
+- What happened: the first full Node run had 308 passes and one failure because adding owner-line counts to comparisonKey changed an existing literal transition identity.
+- Root cause: I changed transition keys unnecessarily while adding display fields. The narrator already recomputes from the current view during render.
+- Prevention rule: keep new display conditions in the projection and narrator, preserve existing transition identities, and rerun the original full Node suite without weakening its assertions.
+
+## 2026-10-24 S45 audit: two absent reduced counts compared equal
+
+- What happened: a fresh counterexample removed both normalized owner-line counts. Their undefined values compared equal, so the owner line appeared on a direct reduced view despite missing counts.
+- Root cause: the predicate checked equality and a lower bound without first requiring a positive integer planned count.
+- Prevention rule: prove missing raw counts and missing reduced counts separately. Require an integer planned count before comparing retained evidence; the new guard has its own assertion-bound mutation.
+
+## 2026-10-24 S45 audit: a cleanup census counted definitions as references
+
+- What happened: the first cleanup identifier census included each function's own definition, so its empty no-reference list could not establish that callers exist.
+- Root cause: a text occurrence count was used where actual call-site evidence was needed.
+- Prevention rule: exclude definitions and inspect AST Call nodes. The corrected scan records actual call sites for each of the nine new top-level production functions; the initial empty list is not proof.
+
+## 2026-10-24 S45 comparison proposal: read-only SQLite setup omitted row mapping
+
+- What happened: the proposal preflight stopped in list_operating_selections with TypeError because a raw SQLite connection returned tuples. No live action or original database write occurred.
+- Root cause: I reused a repository reader without reproducing db.connect's sqlite3.Row factory on the read-only connection.
+- Prevention rule: inspect both the reader and its connection setup before reusing repository helpers. Set sqlite3.Row explicitly for mode=ro connections. Exclude this setup failure from assertion proof and rerun the corrected preflight.
+
+## 2026-10-24 S45 live result: final inventory assumed evidence files were untracked
+
+- What happened: the final preservation check failed its new-file inventory assertion even though both public result artifacts existed. The existing .gitignore excludes the entire evidence directory.
+- Root cause: I treated filesystem creation as proof that git status would list the files, without checking ignore rules.
+- Prevention rule: verify existence, hashes, Git inventory and ignore state separately. Record ignored local evidence explicitly and preserve it through handoff. Do not force-stage it without publication authority. This failed inventory assertion is not a product failure or passing proof.
+
+## 2026-10-24 S45 decision trail: parser assumed the wrong transcript record type
+
+- What happened: an optional transcript audit asserted before producing a receipt because it searched function_call arguments. This runtime records exec as custom_tool_call input and does not expose user messages in the inspected record types.
+- Root cause: I reused another transcript schema without first inspecting this file's record types and keys.
+- Prevention rule: inspect the exact transcript schema before aggregation. Verify execution calls from custom_tool_call input and keep approval grounded in the human's current chat. Do not claim saved-transcript approval proof when that record is unavailable. The initial parser failure is excluded from proof.
+
+## 2026-10-24 S45 follow-up: an inherited fault lacked an assertion-bound target
+
+- What happened: the stricter follow-up mutation runner rejected the inherited failure_raises fault because its old target ended with an uncaught GatewayRejected rather than a named assertion. Source bytes were restored; this result is excluded from passing proof.
+- Root cause: the runner reused a historical target without checking how that test reports the intentionally injected exception.
+- Prevention rule: catch the specific unexpected gateway rejection in a behavioral control and assert that plan failures return evidence. Reprove the fault at that assertion with fresh clean and restored controls; retain the rejected first receipt.
+
+## 2026-10-24 S45 live review: a stopped-state browser assertion was reused after success
+
+- What happened: the first browser review expected Step 4 from the earlier incomplete comparison, but the completed comparison with eligible B correctly showed Step 5. An investigation search also included an inferred, nonexistent workplace-model.js path. No live call or evidence mutation followed either setup error.
+- Root cause: the review copied a prior stop-state expectation without checking the current guide contract and guessed one source filename.
+- Prevention rule: discover source paths first and derive the guide expectation from actual terminal eligibility. The current workplace-story.js explicitly returns step 5 for a finalized complete comparison with an eligible candidate; retain the failed receipt and verify both corrected viewport and zoom controls. Do not change product behavior to match an obsolete test setup.
+
+## 2026-10-24 S45 acceptance: a pre-choice control expectation was reused after selection
+
+- What happened: the first selected-state browser check expected B's choose button to remain enabled. The product correctly disables both buttons once a choice from that comparison is recorded. The saved B selection was unchanged and no further live call or operation occurred.
+- Root cause: the acceptance check retained a pre-choice control assertion after advancing the stored workflow state.
+- Prevention rule: inspect renderCompare's selectedHere branch before adapting a workflow-state check. Verify the exact saved selection note, both disabled choice buttons and Step 6 after selection; keep the earlier enabled-B confirmation proof as pre-selection evidence. Preserve the failed receipt rather than changing product behavior to fit it.
