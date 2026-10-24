@@ -50,6 +50,7 @@ from shiftwork.orchestrator import (
     reserve_bootstrap_diagnostic,
 )
 from shiftwork.store import db, repo
+from shiftwork.public_evidence import public_observation
 
 
 def create_diagnostic_experiment(
@@ -605,8 +606,10 @@ def _diagnostic_run_view(conn: sqlite3.Connection, experiment: Experiment, run: 
             for output in repo.list_outputs(conn, run.id)
         ]
         observations = [
-            {"kind": observation.kind.value, "public_payload_json": observation.public_payload_json}
+            public_observation(observation, public_count=workload.request_count,
+                               needles=orchestrator._private_public_needles(conn))
             for observation in repo.list_observations(conn, run.id)
+            if observation.request_ordinal <= workload.request_count
         ]
         customer_text = _diagnostic_customer_text(conn, context, run.id)
         if run.failure_kind is not None:
