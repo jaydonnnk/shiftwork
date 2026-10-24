@@ -1544,7 +1544,14 @@ def list_trial_slots(conn: sqlite3.Connection, experiment_id: str) -> list[Trial
 
 def get_trial_slot_for_run(conn: sqlite3.Connection, run_id: str) -> TrialSlot | None:
     row = conn.execute("SELECT * FROM trial_slots WHERE run_id = ?", (run_id,)).fetchone()
+    if row is None:
+        row = conn.execute("SELECT t.* FROM trial_slots t JOIN runs r ON r.trial_slot_id = t.id WHERE r.id = ?", (run_id,)).fetchone()
     return _trial_slot(row) if row else None
+
+
+def list_slot_runs(conn: sqlite3.Connection, slot_id: str) -> list[Run]:
+    rows = conn.execute("SELECT * FROM runs WHERE trial_slot_id = ? ORDER BY attempt_number", (slot_id,)).fetchall()
+    return [_run(row) for row in rows]
 
 
 def update_trial_slot(

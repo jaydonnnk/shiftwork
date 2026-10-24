@@ -84,6 +84,7 @@ class TrialReading:
     observations: tuple[ExecutionObservation, ...]
     protected_pass: bool | None
     protected_rule_ids: tuple[str, ...]
+    repetitions: tuple["TrialReading", ...] = ()
 
 
 class AcceptanceAspectKind(StrEnum):
@@ -219,6 +220,13 @@ _BUDGET_METRICS = frozenset({
 })
 
 
+def public_repetition_count(context: ExecutionContext) -> int:
+    count = context.resource_limits_json.get("public_repetitions", 1)
+    if type(count) is not int or not 1 <= count <= 3:
+        raise ValueError("invalid frozen comparison repetition count")
+    return count
+
+
 def _known_sum(values: list[object], expected: int) -> int | None:
     if len(values) != expected or any(type(value) is not int or value < 0 for value in values):
         return None
@@ -228,7 +236,7 @@ def _known_sum(values: list[object], expected: int) -> int | None:
 def _metrics(candidate_label: str, candidate_version_id: str,
              readings: tuple[TrialReading, ...],
              workloads: tuple[FrozenWorkload, ...],
-             evidence_mode: EvidenceMode) -> CandidateMetrics:
+             evidence_mode: EvidenceMode, repetitions: int = 1) -> CandidateMetrics:
     counts = {name: 0 for name in _OUTCOME_FIELDS.values()}
     useful = 0
     protected_passed = protected_failed = protected_missing = 0
@@ -241,60 +249,65 @@ def _metrics(candidate_label: str, candidate_version_id: str,
     for workload in workloads:
         reading = by_pair.get(workload.ordinal)
         if reading is None:
-            counts["missing_outputs"] += workload.request_count
+            counts["missing_outputs"] += workload.request_count * repetitions
             protected_missing += 1
             meter_complete = False
             continue
-        slot = reading.slot
-        by_ordinal: dict[int, list[TaskAssessment]] = {}
-        for assessment in reading.task_assessments:
-            if assessment.request_ordinal <= slot.request_count:
-                by_ordinal.setdefault(assessment.request_ordinal, []).append(assessment)
-        captured = {output.request_ordinal for output in reading.outputs
-                    if output.transport_error is None and bool(output.body)}
-        for ordinal in range(1, slot.request_count + 1):
-            assessments = by_ordinal.get(ordinal, [])
-            required_ids = ({task.id for task in reading.public_specs[ordinal - 1].tasks if task.required}
-                            if ordinal <= len(reading.public_specs) else set())
-            outcomes = {item.outcome for item in assessments
-                        if item.outcome is not TaskOutcome.MISSING_OUTPUT or item.task_id in required_ids}
-            if ordinal not in captured or not assessments:
-                outcomes.add(TaskOutcome.MISSING_OUTPUT)
-            if ordinal <= len(reading.public_specs) and ordinal in captured and request_usefully_completed(
-                reading.public_specs[ordinal - 1], assessments
-            ):
-                useful += 1
-            for outcome, name in _OUTCOME_FIELDS.items():
-                if outcome in outcomes:
-                    counts[name] += 1
         if reading.protected_pass is True:
             protected_passed += 1
         elif reading.protected_pass is False:
             protected_failed += 1
         else:
             protected_missing += 1
-        # Protected work is a separate denominator and cannot enter public
-        # efficiency or cost counters, even when its model usage is recorded.
-        public_observations = tuple(item for item in reading.observations
-                                    if 1 <= item.request_ordinal <= slot.request_count)
-        if evidence_mode is EvidenceMode.ISOLATED_LIVE:
+        public_readings = (reading,) + reading.repetitions
+        counts["missing_outputs"] += max(0, repetitions - len(public_readings)) * workload.request_count
+        if len(public_readings) != repetitions:
+            meter_complete = False
+        for reading in public_readings:
+            slot = reading.slot
+            by_ordinal: dict[int, list[TaskAssessment]] = {}
+            for assessment in reading.task_assessments:
+                if assessment.request_ordinal <= slot.request_count:
+                    by_ordinal.setdefault(assessment.request_ordinal, []).append(assessment)
+            captured = {output.request_ordinal for output in reading.outputs
+                        if output.transport_error is None and bool(output.body)}
             for ordinal in range(1, slot.request_count + 1):
-                observed = sum(item.kind is ObservationKind.INFERENCE_REQUEST
-                               for item in public_observations if item.request_ordinal == ordinal)
-                meters = [item.public_payload_json for item in public_observations
-                          if item.kind is ObservationKind.INTERPRETATION
-                          and item.request_ordinal == ordinal
-                          and item.public_payload_json.get("inference_meter_complete") is True]
-                if (len(meters) != 1 or meters[0].get("source") != "controller_verified"
-                        or type(meters[0].get("service_calls")) is not int
-                        or meters[0]["service_calls"] != observed):
-                    meter_complete = False
-        calls += sum(item.kind is ObservationKind.INFERENCE_REQUEST for item in public_observations)
-        for item in public_observations:
-            if item.kind is ObservationKind.INFERENCE_RESULT:
-                token_in.append(item.public_payload_json.get("input_tokens"))
-                token_out.append(item.public_payload_json.get("output_tokens"))
-                latencies.append(item.public_payload_json.get("elapsed_ms"))
+                assessments = by_ordinal.get(ordinal, [])
+                required_ids = ({task.id for task in reading.public_specs[ordinal - 1].tasks if task.required}
+                                if ordinal <= len(reading.public_specs) else set())
+                outcomes = {item.outcome for item in assessments
+                            if item.outcome is not TaskOutcome.MISSING_OUTPUT or item.task_id in required_ids}
+                if ordinal not in captured or not assessments:
+                    outcomes.add(TaskOutcome.MISSING_OUTPUT)
+                if ordinal <= len(reading.public_specs) and ordinal in captured and request_usefully_completed(
+                    reading.public_specs[ordinal - 1], assessments
+                ):
+                    useful += 1
+                for outcome, name in _OUTCOME_FIELDS.items():
+                    if outcome in outcomes:
+                        counts[name] += 1
+            # Protected work is a separate denominator and cannot enter public
+            # efficiency or cost counters, even when its model usage is recorded.
+            public_observations = tuple(item for item in reading.observations
+                                        if 1 <= item.request_ordinal <= slot.request_count)
+            if evidence_mode is EvidenceMode.ISOLATED_LIVE:
+                for ordinal in range(1, slot.request_count + 1):
+                    observed = sum(item.kind is ObservationKind.INFERENCE_REQUEST
+                                   for item in public_observations if item.request_ordinal == ordinal)
+                    meters = [item.public_payload_json for item in public_observations
+                              if item.kind is ObservationKind.INTERPRETATION
+                              and item.request_ordinal == ordinal
+                              and item.public_payload_json.get("inference_meter_complete") is True]
+                    if (len(meters) != 1 or meters[0].get("source") != "controller_verified"
+                            or type(meters[0].get("service_calls")) is not int
+                            or meters[0]["service_calls"] != observed):
+                        meter_complete = False
+            calls += sum(item.kind is ObservationKind.INFERENCE_REQUEST for item in public_observations)
+            for item in public_observations:
+                if item.kind is ObservationKind.INFERENCE_RESULT:
+                    token_in.append(item.public_payload_json.get("input_tokens"))
+                    token_out.append(item.public_payload_json.get("output_tokens"))
+                    latencies.append(item.public_payload_json.get("elapsed_ms"))
     # The local fixture has no inference grant. For a live run, every public
     # request needs a controller-owned terminal meter, including explicit zeroes.
     measured = evidence_mode is EvidenceMode.TRUSTED_LOCAL or meter_complete
@@ -302,7 +315,7 @@ def _metrics(candidate_label: str, candidate_version_id: str,
     return CandidateMetrics(
         candidate_label=candidate_label,
         candidate_version_id=candidate_version_id,
-        public_denominator_requests=sum(item.request_count for item in workloads),
+        public_denominator_requests=sum(item.request_count for item in workloads) * repetitions,
         useful_completions=useful, **counts,
         protected_denominator=len(workloads), protected_passed=protected_passed,
         protected_failed=protected_failed, protected_missing=protected_missing,
@@ -314,15 +327,16 @@ def _metrics(candidate_label: str, candidate_version_id: str,
     )
 
 
-def _reading_complete(reading: TrialReading) -> bool:
+def _reading_complete(reading: TrialReading, protected_required: bool = True) -> bool:
     slot, run = reading.slot, reading.run
     if (slot.state != "COMPLETE" or run is None or run.state is not RunState.FINALIZED
             or reading.assessment is None or reading.assessment.expected_request_count != slot.request_count
-            or reading.assessment.context_hash == "" or reading.protected_pass is None):
+            or reading.assessment.context_hash == "" or (protected_required and reading.protected_pass is None)):
         return False
     outputs = {item.request_ordinal for item in reading.outputs
                if item.transport_error is None and bool(item.body)}
-    if outputs != set(range(1, slot.executed_request_count + 1)):
+    count = slot.executed_request_count if protected_required else slot.request_count
+    if outputs != set(range(1, count + 1)):
         return False
     expected_tasks = {(ordinal, task.id, spec.id)
                       for ordinal, spec in enumerate(reading.public_specs, 1)
@@ -342,6 +356,11 @@ def compare(
 ) -> ComparisonOutcome:
     """Read status and metrics without selecting or ranking either candidate."""
     drift = set(drift_fields)
+    try:
+        repetitions = public_repetition_count(context)
+    except ValueError:
+        repetitions = 1
+        drift.add("public_repetitions")
     budget_limits = getattr(context, "resource_limits_json", {}).get("mandatory_budget_metrics", {})
     if (type(budget_limits) is not dict or any(
         key not in _BUDGET_METRICS or type(limit) is not int or limit < 0
@@ -380,7 +399,9 @@ def compare(
     ]:
         drift.add("slot_schedule")
     complete = (len(readings) == 6 and experiment.state == "FINALIZED"
-                and all(_reading_complete(item) for item in readings))
+                and all(_reading_complete(item) and len(item.repetitions) == repetitions - 1
+                        and all(_reading_complete(rep, False) for rep in item.repetitions)
+                        for item in readings))
     status = "NOT_COMPARABLE" if drift else "COMPLETE" if complete else "INCOMPLETE"
     # A declared label that is absent is already recorded as candidates drift, so
     # it resolves to an empty version rather than raising before the verdict.
@@ -389,7 +410,7 @@ def compare(
         candidates[label].artifact_version_id if label in candidates else "",
         tuple(item for item in readings if item.slot.candidate_label == label),
         context.workloads,
-        context.executor_class,
+        context.executor_class, repetitions,
     ) for label in ("A", "B"))
     eligibility = []
     for label, item in zip(("A", "B"), metrics, strict=True):
@@ -398,8 +419,8 @@ def compare(
         blockers = []
         if status != "COMPLETE":
             blockers.append(status)
-        if any(reading.assessment is None or not reading.assessment.mandatory_pass
-               for reading in candidate_readings):
+        if any(rep.assessment is None or not rep.assessment.mandatory_pass
+               for reading in candidate_readings for rep in (reading,) + reading.repetitions):
             blockers.append("mandatory_public_rule")
         for reading in candidate_readings:
             if reading.protected_pass is False:
@@ -418,7 +439,7 @@ def compare(
         ))
     return ComparisonOutcome(
         experiment_id=experiment.id, status=status,
-        shared_public_denominator_requests=sum(item.request_count for item in context.workloads),
+        shared_public_denominator_requests=sum(item.request_count for item in context.workloads) * repetitions,
         candidate_metrics=metrics, eligibility=tuple(eligibility),
         drift_fields=tuple(sorted(drift)),
     )

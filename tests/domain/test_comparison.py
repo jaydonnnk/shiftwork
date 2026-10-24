@@ -21,7 +21,7 @@ def _task(ordinal, task_id="collection", outcome=TaskOutcome.USEFUL_COMPLETION,
 def _fixture():
     workloads = tuple(NS(id=f"workload-{pair}", ordinal=pair, request_count=2,
                          request_batch_hash=f"batch-{pair}") for pair in (1, 2, 3))
-    context = NS(workloads=workloads, content_hash="frozen-context",
+    context = NS(workloads=workloads, content_hash="frozen-context", resource_limits_json={},
                  executor_class=EvidenceMode.TRUSTED_LOCAL)
     candidates = tuple(NS(label=label, artifact_version_id=f"version-{label}")
                        for label in ("A", "B"))

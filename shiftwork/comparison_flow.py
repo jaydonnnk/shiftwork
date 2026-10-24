@@ -38,11 +38,12 @@ from shiftwork.domain.models import (
 )
 from shiftwork.evaluator import evaluator
 from shiftwork.executor import base as executor
-from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS
+from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS, REASONING_OFF_MODEL
 from shiftwork.gateway.redaction import assert_public_safe
 from shiftwork.ledger import chain
 from shiftwork.live_budget import LiveComparisonBudget
 from shiftwork.packs.registry import FamilyClass
+from shiftwork.public_evidence import public_observation
 from shiftwork.orchestrator import (
     COMPARE_DEADLINE_S,
     DIAGNOSTIC_HARNESS_REF,
@@ -258,6 +259,7 @@ def _comparison_context_fields(
     starting_state: dict[str, Any],
     protected_bindings: tuple[task_contract.ProtectedBinding, ...],
     condition: ContextCondition,
+    public_repetitions: int = 1,
 ) -> dict[str, Any]:
     fields: dict[str, Any] = {
         "engagement_slug": shift.engagement_slug,
@@ -296,6 +298,10 @@ def _comparison_context_fields(
         "protected_reservation_id": reservation_id,
         "protected_bindings": [binding.model_dump(mode="json") for binding in protected_bindings],
     }
+    if public_repetitions != 1:
+        fields["resource_limits_json"]["public_repetitions"] = public_repetitions
+    if isolated and config.SERVICE_MODEL == REASONING_OFF_MODEL:
+        fields["resource_limits_json"]["allow_reasoning_off"] = True
     return fields
 
 
@@ -351,6 +357,7 @@ def create_qualifying_comparison(
     declared_treatment: str,
     client_request_id: str,
     adapter: str = "local_process",
+    public_repetitions: int = 1,
 ) -> Experiment:
     """Reserve one qualifying comparison atomically, before any result exists.
 
@@ -363,6 +370,8 @@ def create_qualifying_comparison(
     """
     conn.execute("BEGIN IMMEDIATE")
     try:
+        if type(public_repetitions) is not int or not 1 <= public_repetitions <= 3:
+            raise LifecycleError("conflict", "comparison public repetitions must be from 1 to 3")
         shift = _require_open_shift(conn, shift_id)
         pack = orchestrator.admit_pack(shift.engagement_slug)
         isolated = adapter == orchestrator.TokenFactoryAdapter.name
@@ -423,6 +432,7 @@ def create_qualifying_comparison(
                 and replay.investigation_id == investigation.id
                 and replay.candidates == candidates
                 and replay.declared_treatment == treatment
+                and comparison.public_repetition_count(repo.get_execution_context(conn, replay.context_id)) == public_repetitions
             ):
                 conn.rollback()
                 return replay
@@ -536,6 +546,7 @@ def create_qualifying_comparison(
         fields = _comparison_context_fields(
             shift, mission, mission_bytes, snapshot_bytes, workloads, reservation_id, isolated,
             starting_state, bindings, observed_condition(snapshot_bytes, snapshot.dependencies),
+            public_repetitions,
         )
         context_hash = canonical.content_hash(fields)
         existing_context = repo.get_execution_context_by_hash(conn, context_hash)
@@ -625,24 +636,26 @@ def create_qualifying_comparison(
                 state="RESERVED",
             )
             repo.insert_trial_slot(conn, slot)
-            run = Run(
-                id=f"run-{repo.count_runs_all(conn) + 1:04d}",
-                shift_id=shift.id,
-                artifact_version_id=versions[label].id,
-                request_batch_ref=f"frozen-workload:{workload.id}",
-                shop_snapshot_ref=f"frozen-context:{context.id}",
-                attempt_number=repo.count_runs(conn, shift.id) + 1,
-                state=RunState.QUEUED,
-                adapter=adapter,
-                started_at=_now(),
-                purpose=RunPurpose.EXPERIMENT,
-                evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
-                context_id=context.id,
-                experiment_id=experiment.id,
-                trial_slot_id=slot.id,
-            )
-            repo.insert_run(conn, run)
-            repo.update_trial_slot(conn, slot.id, run_id=run.id)
+            for repetition in range(public_repetitions):
+                run = Run(
+                    id=f"run-{repo.count_runs_all(conn) + 1:04d}",
+                    shift_id=shift.id,
+                    artifact_version_id=versions[label].id,
+                    request_batch_ref=f"frozen-workload:{workload.id}",
+                    shop_snapshot_ref=f"frozen-context:{context.id}",
+                    attempt_number=repo.count_runs(conn, shift.id) + 1,
+                    state=RunState.QUEUED,
+                    adapter=adapter,
+                    started_at=_now(),
+                    purpose=RunPurpose.EXPERIMENT,
+                    evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
+                    context_id=context.id,
+                    experiment_id=experiment.id,
+                    trial_slot_id=slot.id,
+                )
+                repo.insert_run(conn, run)
+                if repetition == 0:
+                    repo.update_trial_slot(conn, slot.id, run_id=run.id)
         conn.commit()
     except Exception:
         conn.rollback()
@@ -686,6 +699,7 @@ def create_later_condition_comparison(
     declared_treatment: str,
     client_request_id: str,
     adapter: str = "local_process",
+    public_repetitions: int = 1,
 ) -> Experiment:
     """Re-test the selected and retained versions under an observed later condition.
 
@@ -700,6 +714,8 @@ def create_later_condition_comparison(
     """
     conn.execute("BEGIN IMMEDIATE")
     try:
+        if type(public_repetitions) is not int or not 1 <= public_repetitions <= 3:
+            raise LifecycleError("conflict", "comparison public repetitions must be from 1 to 3")
         shift = _require_open_shift(conn, shift_id)
         pack = orchestrator.admit_pack(shift.engagement_slug)
         isolated = adapter == orchestrator.TokenFactoryAdapter.name
@@ -767,6 +783,7 @@ def create_later_condition_comparison(
                 and replay.observed_run_id == observed_run.id
                 and replay.candidates == candidates
                 and replay.declared_treatment == treatment
+                and comparison.public_repetition_count(repo.get_execution_context(conn, replay.context_id)) == public_repetitions
             ):
                 conn.rollback()
                 return replay
@@ -896,6 +913,7 @@ def create_later_condition_comparison(
         fields = _comparison_context_fields(
             shift, mission, mission_bytes, snapshot_bytes, workloads, reservation_id, isolated,
             starting_state, bindings, observed_condition(snapshot_bytes, snapshot.dependencies),
+            public_repetitions,
         )
         context_hash = canonical.content_hash(fields)
         existing_context = repo.get_execution_context_by_hash(conn, context_hash)
@@ -986,24 +1004,26 @@ def create_later_condition_comparison(
                 state="RESERVED",
             )
             repo.insert_trial_slot(conn, slot)
-            run = Run(
-                id=f"run-{repo.count_runs_all(conn) + 1:04d}",
-                shift_id=shift.id,
-                artifact_version_id=versions[label].id,
-                request_batch_ref=f"frozen-workload:{workload.id}",
-                shop_snapshot_ref=f"frozen-context:{context.id}",
-                attempt_number=repo.count_runs(conn, shift.id) + 1,
-                state=RunState.QUEUED,
-                adapter=adapter,
-                started_at=_now(),
-                purpose=RunPurpose.EXPERIMENT,
-                evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
-                context_id=context.id,
-                experiment_id=experiment.id,
-                trial_slot_id=slot.id,
-            )
-            repo.insert_run(conn, run)
-            repo.update_trial_slot(conn, slot.id, run_id=run.id)
+            for repetition in range(public_repetitions):
+                run = Run(
+                    id=f"run-{repo.count_runs_all(conn) + 1:04d}",
+                    shift_id=shift.id,
+                    artifact_version_id=versions[label].id,
+                    request_batch_ref=f"frozen-workload:{workload.id}",
+                    shop_snapshot_ref=f"frozen-context:{context.id}",
+                    attempt_number=repo.count_runs(conn, shift.id) + 1,
+                    state=RunState.QUEUED,
+                    adapter=adapter,
+                    started_at=_now(),
+                    purpose=RunPurpose.EXPERIMENT,
+                    evidence_mode=EvidenceMode.ISOLATED_LIVE if isolated else EvidenceMode.TRUSTED_LOCAL,
+                    context_id=context.id,
+                    experiment_id=experiment.id,
+                    trial_slot_id=slot.id,
+                )
+                repo.insert_run(conn, run)
+                if repetition == 0:
+                    repo.update_trial_slot(conn, slot.id, run_id=run.id)
         conn.commit()
     except Exception:
         conn.rollback()
@@ -1015,6 +1035,10 @@ def _terminalize_comparison_slot(
     conn: sqlite3.Connection, slot: TrialSlot, state: str, failure: ExecutorFailure | None
 ) -> None:
     repo.update_run(conn, slot.run_id, RunState.FAILED if failure else RunState.FINALIZED, failure, _now())
+    if failure:
+        for run in repo.list_slot_runs(conn, slot.id):
+            if run.state not in (RunState.FINALIZED, RunState.FAILED):
+                repo.update_run(conn, run.id, RunState.FAILED, failure, _now())
     repo.update_trial_slot(conn, slot.id, state=state)
 
 
@@ -1044,6 +1068,73 @@ def retire_comparison_exposure(conn: sqlite3.Connection, reservation_id: str) ->
         raise
 
 
+def _retain_public_repetition(conn, run, context, workload, result, mission, snapshot_bytes, *, finalize=True):
+    """Commit one public result before any subsequent phase can fail."""
+    batch = executor.load_batch(executor.BatchRef(path_ref=f"frozen-workload:{workload.id}",
+        content_hash=workload.request_batch_hash), base64.b64decode(workload.request_batch_bytes_base64))
+    for ordinal, observation in enumerate(result.observations, 1):
+        request_ordinal = observation.public_payload.get("request_ordinal", 1)
+        if type(request_ordinal) is not int or not 1 <= request_ordinal <= workload.request_count:
+            raise ValueError("public repetition observation outside frozen workload")
+        raw = json.dumps(observation.raw_payload, sort_keys=True, default=str).encode()
+        repo.insert_observation(conn, ExecutionObservation(id=f"{run.id}-obs-{ordinal}",
+            run_id=run.id, request_ordinal=request_ordinal, ordinal=ordinal,
+            kind=ObservationKind(observation.kind), public_payload_json=observation.public_payload,
+            raw_payload_ref="data:application/json;base64," + _encode(raw), measured_at=_now()))
+    outputs = {}
+    for output in executor.normalize_captures(result.captures, int(context.resource_limits_json.get("deadline_s", COMPARE_DEADLINE_S))):
+        if not 1 <= output.request_ordinal <= workload.request_count:
+            raise ValueError("public repetition capture outside frozen workload")
+        output = output.model_copy(update={"id": f"{run.id}-out-{output.request_ordinal}",
+            "run_id": run.id, "request_text": batch[output.request_ordinal - 1].text})
+        repo.insert_output(conn, output)
+        outputs[output.request_ordinal] = output
+    conn.commit()  # Raw captures survive even an assessment or later-phase error.
+    specs = tuple(task_contract.CustomerRequestSpec.model_validate(item)
+        for item in json.loads(base64.b64decode(workload.request_specs_bytes_base64)))
+    completed, mandatory_pass = 0, True
+    for ordinal, spec in enumerate(specs, 1):
+        output = outputs.get(ordinal)
+        response = None
+        if output is not None and output.transport_error is None:
+            try:
+                response = task_contract.validate_response_envelope(spec, output.body)
+            except TaskEnvelopeInvalid:
+                pass
+        assessed = evaluator.assess_request(spec=spec, request_ordinal=ordinal, mission=mission,
+            snapshot=task_contract.load_public_state_bytes(snapshot_bytes), response=response,
+            **orchestrator.deployment_assessment_inputs(conn, run, spec, ordinal, snapshot_bytes,
+                base64.b64decode(workload.request_batch_bytes_base64)))
+        for row in assessed:
+            repo.insert_task_assessment(conn, assessment_id=f"{run.id}-a{ordinal}-{row.task_id}",
+                run_id=run.id, assessment=row, assessed_at=_now())
+        mandatory_pass = mandatory_pass and all(row.mandatory_pass for row in assessed)
+        completed += evaluator.request_usefully_completed(spec, assessed)
+    repo.insert_run_assessment(conn, RunAssessment(run_id=run.id, context_hash=context.content_hash,
+        complete_request_count=completed, expected_request_count=workload.request_count,
+        mandatory_pass=mandatory_pass, rule_version=COMPARE_EVALUATOR_VERSION, assessed_at=_now()))
+    complete = (result.failure is None and set(outputs) == set(range(1, workload.request_count + 1))
+        and all(row.transport_error is None and row.body for row in outputs.values()))
+    repo.insert_observation(conn, ExecutionObservation(id=f"{run.id}-public-status", run_id=run.id,
+        request_ordinal=1, ordinal=len(result.observations) + 1, kind=ObservationKind.INTERPRETATION,
+        public_payload_json={"source": "controller_verified", "request_ordinal": 1,
+                             "public_repetition_complete": bool(complete)},
+        raw_payload_ref="data:application/json;base64,e30=", measured_at=_now()))
+    state = (RunState.FINALIZED if finalize else RunState.CAPTURED) if complete else RunState.FAILED
+    repo.update_run(conn, run.id, state,
+        None if complete else result.failure or ExecutorFailure.CAPTURE_TRUNCATED, _now())
+    conn.commit()
+    return complete
+
+
+def _comparison_adapter(run, mission, context, live_budget):
+    if run.adapter == orchestrator.TokenFactoryAdapter.name:
+        return orchestrator.service_adapter(run, mission, context, live_budget)
+    if run.adapter == orchestrator.LocalProcessAdapter.name:
+        return orchestrator.LocalProcessAdapter()
+    raise LifecycleError("conflict", "reserved comparison slot has no safe executor")
+
+
 def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
                             live_budget: LiveComparisonBudget | None = None) -> TrialSlot:
     """Execute one reserved comparison slot against its own frozen workload.
@@ -1064,9 +1155,13 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
     reservation = (repo.get_exposure_reservation(conn, context.protected_reservation_id)
                    if context and context.protected_reservation_id else None)
     version = repo.get_version(conn, slot.artifact_version_id)
+    if (context is not None and context.executor_class is EvidenceMode.ISOLATED_LIVE
+            and comparison.public_repetition_count(context) > 1 and live_budget is None):
+        raise LifecycleError("conflict", "repeated live comparison requires a bounded meter")
     workload = next(
         (item for item in context.workloads if item.id == slot.workload_id), None
     ) if context else None
+    repetition_runs = repo.list_slot_runs(conn, slot.id)
     if (
         run is None
         or run.state is not RunState.QUEUED
@@ -1077,6 +1172,13 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
         or reservation.state != "ACTIVE"
         or workload.request_batch_hash != slot.request_batch_hash
         or workload.request_count != slot.request_count
+        or len(repetition_runs) != comparison.public_repetition_count(context)
+        or not repetition_runs or repetition_runs[0].id != slot.run_id
+        or any(item.state is not RunState.QUEUED or item.context_id != context.id
+               or item.artifact_version_id != slot.artifact_version_id
+               or item.experiment_id != slot.experiment_id or item.adapter != run.adapter
+               or item.evidence_mode != run.evidence_mode or item.purpose != run.purpose
+               for item in repetition_runs)
     ):
         if run is not None and run.state not in (RunState.FINALIZED, RunState.FAILED):
             repo.update_run(conn, slot.run_id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
@@ -1128,21 +1230,29 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
             snapshot_path.write_bytes(snapshot_bytes)
             request = request.model_copy(update={"shop_snapshot_ref": str(snapshot_path)})
             request = orchestrator.bind_deployment_request(request, run, context, version, mission, snapshot_bytes)
-            if run.adapter == orchestrator.TokenFactoryAdapter.name:
-                adapter = orchestrator.service_adapter(run, mission, context, live_budget)
-            elif run.adapter == orchestrator.LocalProcessAdapter.name:
-                adapter = orchestrator.LocalProcessAdapter()
-            else:
-                raise LifecycleError("conflict", "reserved comparison slot has no safe executor")
+            adapter = _comparison_adapter(run, mission, context, live_budget)
             public_result = asyncio.run(adapter.execute(request))
-        public_complete = (
-            public_result.failure is None
-            and len(public_result.captures) == workload.request_count
-            and {capture.request_ordinal for capture in public_result.captures}
-                == set(range(1, workload.request_count + 1))
-            and all(capture.transport_error is None and capture.body for capture in public_result.captures)
-        )
+        public_complete = _retain_public_repetition(conn, run, context, workload,
+            public_result, mission, snapshot_bytes, finalize=False)
         protected_result = None
+        for repetition in repetition_runs[1:]:
+            if not public_complete and live_budget is not None:
+                break
+            repo.update_run(conn, repetition.id, RunState.RUNNING)
+            repo.set_run_snapshot_bytes(conn, repetition.id, snapshot_bytes)
+            conn.commit()
+            with tempfile.TemporaryDirectory(prefix=f"shiftwork-compare-{slot.pair_ordinal}-") as directory:
+                path = Path(directory) / "public_state.json"
+                path.write_bytes(snapshot_bytes)
+                repeated_request = _comparison_run_request(repetition, context, workload, version)
+                repeated_request = repeated_request.model_copy(update={"shop_snapshot_ref": str(path)})
+                repeated_request = orchestrator.bind_deployment_request(
+                    repeated_request, repetition, context, version, mission, snapshot_bytes)
+                repeated_adapter = _comparison_adapter(repetition, mission, context, live_budget)
+                repeated_result = asyncio.run(repeated_adapter.execute(repeated_request))
+            retained = _retain_public_repetition(conn, repetition, context, workload,
+                repeated_result, mission, snapshot_bytes)
+            public_complete = public_complete and retained
         if public_complete and repo.get_exposure_reservation(conn, reservation.id).state == "ACTIVE":
             with tempfile.TemporaryDirectory(prefix=f"shiftwork-protected-{slot.pair_ordinal}-") as directory:
                 protected_path = Path(directory) / "protected_state.json"
@@ -1156,8 +1266,8 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
                 protected_request = orchestrator.bind_deployment_request(
                     protected_request, run, context, version, mission, protected_state_bytes, phase="PROTECTED")
                 protected_result = asyncio.run(adapter.execute(protected_request))
-        captures = list(public_result.captures)
-        observations = list(public_result.observations)
+        captures = []
+        observations = []
         if protected_result is not None:
             for capture in protected_result.captures:
                 captures.append(capture.model_copy(update={
@@ -1169,7 +1279,8 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
                                        "request_ordinal": slot.executed_request_count},
                 }))
 
-        for ordinal, observation in enumerate(observations, start=1):
+        observation_offset = len(repo.list_observations(conn, run.id))
+        for ordinal, observation in enumerate(observations, start=observation_offset + 1):
             request_ordinal = observation.public_payload.get("request_ordinal", 1)
             if type(request_ordinal) is not int or not 1 <= request_ordinal <= slot.executed_request_count:
                 raise ValueError("comparison observation ordinal is outside its frozen workload")
@@ -1196,34 +1307,8 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
                 outputs.append(output)
         conn.commit()
 
+        outputs = repo.list_outputs(conn, run.id)
         captured = {output.request_ordinal: output for output in outputs}
-        completed = 0
-        mandatory_pass = True
-        for index, spec in enumerate(specs, start=1):
-            output = captured.get(index)
-            response = None
-            if output is not None and output.transport_error is None:
-                try:
-                    response = task_contract.validate_response_envelope(spec, output.body)
-                except TaskEnvelopeInvalid:
-                    response = None
-            request_assessments = evaluator.assess_request(
-                spec=spec, request_ordinal=index, mission=mission, snapshot=snapshot, response=response,
-                **orchestrator.deployment_assessment_inputs(conn, run, spec, index, snapshot_bytes,
-                    base64.b64decode(workload.request_batch_bytes_base64)),
-            )
-            for assessment in request_assessments:
-                repo.insert_task_assessment(
-                    conn,
-                    assessment_id=f"{run.id}-a{index}-{assessment.task_id}",
-                    run_id=run.id,
-                    assessment=assessment,
-                    assessed_at=_now(),
-                )
-            if any(assessment.mandatory_pass is False for assessment in request_assessments):
-                mandatory_pass = False
-            if evaluator.request_usefully_completed(spec, request_assessments):
-                completed += 1
         # The protected request is assessed only by the controller, against the
         # exact reserved task spec and resolved state. Public projections filter
         # every assessment above the frozen public ordinal bound.
@@ -1250,18 +1335,6 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
                 conn, assessment_id=f"{run.id}-protected-{assessment.task_id}",
                 run_id=run.id, assessment=assessment, assessed_at=_now(),
             )
-        repo.insert_run_assessment(
-            conn,
-            RunAssessment(
-                run_id=run.id,
-                context_hash=context.content_hash,
-                complete_request_count=completed,
-                expected_request_count=len(specs),
-                mandatory_pass=mandatory_pass,
-                rule_version=COMPARE_EVALUATOR_VERSION,
-                assessed_at=_now(),
-            ),
-        )
         capture_complete = (
             len(outputs) == slot.executed_request_count
             and {output.request_ordinal for output in outputs} == set(range(1, slot.executed_request_count + 1))
@@ -1275,8 +1348,7 @@ def execute_comparison_slot(conn: sqlite3.Connection, slot: TrialSlot,
         conn.commit()
     except Exception:
         conn.rollback()
-        repo.update_run(conn, slot.run_id, RunState.FAILED, ExecutorFailure.INTERNAL, _now())
-        repo.update_trial_slot(conn, slot.id, state="FAILED")
+        _terminalize_comparison_slot(conn, slot, "FAILED", ExecutorFailure.INTERNAL)
         conn.commit()
         raise
     return repo.get_trial_slot(conn, slot.id)
@@ -1307,13 +1379,15 @@ def execute_comparison(conn: sqlite3.Connection, experiment_id: str,
         if (len(slots) != 6 or any(slot.state != "RESERVED" for slot in slots)
                 or sorted((slot.pair_ordinal, slot.candidate_label) for slot in slots)
                     != [(pair, label) for pair in (1, 2, 3) for label in ("A", "B")]
-                or any(slot.request_count != 2 or slot.executed_request_count != 3 for slot in slots)
+                or any(not 1 <= slot.request_count <= 4 or slot.executed_request_count != slot.request_count + 1 for slot in slots)
                 or any(run is None or run.adapter != orchestrator.TokenFactoryAdapter.name for run in runs)
                 or any(context is None for context in contexts)
                 or len({context.content_hash for context in contexts}) != 1):
             raise ValueError("live comparison reservation does not have six fresh bound slots")
+        repetitions = comparison.public_repetition_count(contexts[0])
         live_budget.preflight(model=contexts[0].service_model or config.SERVICE_MODEL,
-                              slots=len(slots), requests=sum(slot.executed_request_count for slot in slots))
+            slots=len(slots), requests=sum(slot.request_count * repetitions + 1 for slot in slots),
+            public_repetitions=repetitions, requests_per_slot=tuple(slot.request_count for slot in slots))
     if not repo.claim_comparison_execution(conn, experiment.id):
         conn.rollback()
         return repo.get_experiment(conn, experiment.id)
@@ -1356,6 +1430,8 @@ def execute_comparison(conn: sqlite3.Connection, experiment_id: str,
                 execute_comparison_slot(conn, slot)
             else:
                 execute_comparison_slot(conn, slot, live_budget)
+            if live_budget is not None and repo.get_trial_slot(conn, slot.id).state == "FAILED":
+                raise LifecycleError("conflict", "live comparison stopped after a driver failure; no retry")
             active_slot_id = None
         slots = repo.list_trial_slots(conn, experiment.id)
         if repo.get_experiment(conn, experiment.id).state == "INVALIDATED":
@@ -1438,7 +1514,7 @@ def _slot_evidence(
         if output.request_ordinal <= public_count
     ]
     observations = [
-        {"kind": observation.kind.value, "public_payload_json": observation.public_payload_json}
+        public_observation(observation, public_count=public_count, needles=_private_public_needles(conn))
         for observation in repo.list_observations(conn, run.id)
         if observation.request_ordinal <= public_count
     ]
@@ -1458,6 +1534,51 @@ def _slot_evidence(
         "outputs": outputs,
         "missing_evidence": missing_evidence,
     }
+
+
+def _public_assessment_matches(conn, run, slot, assessment, mission, public_snapshot,
+                               public_bytes, workload, specs, all_assessments, outputs):
+    expected_public = []
+    expected_completed = 0
+    for ordinal, spec in enumerate(specs, 1):
+        output = next((item for item in outputs if item.request_ordinal == ordinal), None)
+        response = None
+        if output is not None and output.transport_error is None:
+            try:
+                response = task_contract.validate_response_envelope(spec, output.body)
+            except TaskEnvelopeInvalid:
+                pass
+        assessed = evaluator.assess_request(
+            spec=spec, request_ordinal=ordinal, mission=mission,
+            snapshot=public_snapshot, response=response,
+            **orchestrator.deployment_assessment_inputs(
+                conn, run, spec, ordinal, public_bytes,
+                base64.b64decode(workload.request_batch_bytes_base64, validate=True),
+                phase="PUBLIC",
+            ) if run is not None else {},
+        )
+        expected_public.extend(assessed)
+        expected_completed += evaluator.request_usefully_completed(spec, assessed)
+    recorded_public = tuple(item for item in all_assessments
+                            if item.request_ordinal <= slot.request_count)
+    if (tuple(expected_public) != recorded_public
+            or assessment.complete_request_count != expected_completed
+            or assessment.mandatory_pass != all(item.mandatory_pass
+                                                 for item in expected_public)):
+        return False
+    return True
+
+
+def _frozen_comparison_experiment_hash(experiment, context, slots):
+    return canonical.content_hash({
+        "shift_id": experiment.shift_id, "kind": experiment.kind.value,
+        "candidates": [item.model_dump(mode="json") for item in experiment.candidates],
+        "context_hash": context.content_hash,
+        "trial_count_per_candidate": experiment.trial_count_per_candidate,
+        "declared_treatment": experiment.declared_treatment,
+        "schedule": [{"pair_ordinal": slot.pair_ordinal, "candidate_label": slot.candidate_label,
+                      "execution_ordinal": slot.execution_ordinal} for slot in slots],
+    })
 
 
 def _comparison_outcome(
@@ -1530,19 +1651,7 @@ def _comparison_outcome(
         drift.add("protected_binding")
     elif _frozen_comparison_context_hash(context, bindings) != context.content_hash:
         drift.add("frozen_context")
-    schedule = [
-        {"pair_ordinal": slot.pair_ordinal, "candidate_label": slot.candidate_label,
-         "execution_ordinal": slot.execution_ordinal}
-        for slot in slots
-    ]
-    if canonical.content_hash({
-        "shift_id": experiment.shift_id, "kind": experiment.kind.value,
-        "candidates": [item.model_dump(mode="json") for item in experiment.candidates],
-        "context_hash": context.content_hash,
-        "trial_count_per_candidate": experiment.trial_count_per_candidate,
-        "declared_treatment": experiment.declared_treatment,
-        "schedule": schedule,
-    }) != experiment.content_hash:
+    if _frozen_comparison_experiment_hash(experiment, context, slots) != experiment.content_hash:
         drift.add("experiment_schedule")
     for candidate in experiment.candidates:
         try:
@@ -1584,35 +1693,9 @@ def _comparison_outcome(
         if assessment is not None and assessment.context_hash != context.content_hash:
             drift.add("assessment_context")
         if assessment is not None and mission is not None and public_snapshot is not None:
-            expected_public = []
-            expected_completed = 0
-            for ordinal, spec in enumerate(specs_by_workload.get(slot.workload_id, ()), 1):
-                output = next((item for item in outputs if item.request_ordinal == ordinal), None)
-                response = None
-                if output is not None and output.transport_error is None:
-                    try:
-                        response = task_contract.validate_response_envelope(spec, output.body)
-                    except TaskEnvelopeInvalid:
-                        pass
-                assessed = evaluator.assess_request(
-                    spec=spec, request_ordinal=ordinal, mission=mission,
-                    snapshot=public_snapshot, response=response,
-                    **orchestrator.deployment_assessment_inputs(
-                        conn, run, spec, ordinal, public_bytes,
-                        base64.b64decode(next(item.request_batch_bytes_base64
-                                             for item in context.workloads
-                                             if item.id == slot.workload_id), validate=True),
-                        phase="PUBLIC",
-                    ) if run is not None else {},
-                )
-                expected_public.extend(assessed)
-                expected_completed += evaluator.request_usefully_completed(spec, assessed)
-            recorded_public = tuple(item for item in all_assessments
-                                    if item.request_ordinal <= slot.request_count)
-            if (tuple(expected_public) != recorded_public
-                    or assessment.complete_request_count != expected_completed
-                    or assessment.mandatory_pass != all(item.mandatory_pass
-                                                         for item in expected_public)):
+            if not _public_assessment_matches(conn, run, slot, assessment, mission, public_snapshot,
+                    public_bytes, next(w for w in context.workloads if w.id == slot.workload_id),
+                    specs_by_workload.get(slot.workload_id, ()), all_assessments, outputs):
                 drift.add("public_assessment")
         if reserved is not None and mission is not None and run is not None:
             protected_assessments = tuple(item for item in all_assessments
@@ -1645,14 +1728,76 @@ def _comparison_outcome(
                         drift.add("protected_assessment")
                 except ShiftworkDomainError:
                     drift.add("protected_assessment")
+        repetitions = []
+        for repeated in repo.list_slot_runs(conn, slot.id):
+            if repeated.id == slot.run_id:
+                continue
+            if (repeated.context_id != context.id or repeated.artifact_version_id != slot.artifact_version_id
+                    or repeated.experiment_id != experiment.id or run is None or repeated.adapter != run.adapter
+                    or repeated.evidence_mode != run.evidence_mode or repeated.purpose != run.purpose):
+                drift.add("repetition_binding")
+            repeated_assessment = repo.get_run_assessment(conn, repeated.id)
+            repeated_tasks = tuple(repo.list_task_assessment_models(conn, repeated.id))
+            repeated_outputs = tuple(repo.list_outputs(conn, repeated.id))
+            if repeated_assessment is not None:
+                if repeated_assessment.context_hash != context.content_hash:
+                    drift.add("repetition_context")
+                if mission is not None and public_snapshot is not None and not _public_assessment_matches(
+                        conn, repeated, slot, repeated_assessment, mission, public_snapshot, public_bytes,
+                        next(w for w in context.workloads if w.id == slot.workload_id),
+                        specs_by_workload.get(slot.workload_id, ()), repeated_tasks, repeated_outputs):
+                    drift.add("repetition_assessment")
+            repetitions.append(comparison.TrialReading(slot=slot, run=repeated,
+                assessment=repeated_assessment, public_specs=specs_by_workload.get(slot.workload_id, ()),
+                task_assessments=repeated_tasks, outputs=repeated_outputs,
+                observations=tuple(repo.list_observations(conn, repeated.id)),
+                protected_pass=None, protected_rule_ids=()))
         readings.append(comparison.TrialReading(
             slot=slot, run=run, assessment=assessment,
             public_specs=specs_by_workload.get(slot.workload_id, ()),
             task_assessments=all_assessments, outputs=outputs,
             observations=tuple(repo.list_observations(conn, run.id)) if run else (),
-            protected_pass=protected_pass, protected_rule_ids=rule_ids,
+            protected_pass=protected_pass, protected_rule_ids=rule_ids, repetitions=tuple(repetitions),
         ))
     return comparison.compare(experiment, context, tuple(readings), tuple(drift))
+
+
+def _public_repetition_state(conn, run):
+    status = next((row for row in repo.list_observations(conn, run.id)
+                   if row.id == f"{run.id}-public-status"), None)
+    if status is not None and status.public_payload_json.get("source") == "controller_verified":
+        return "COMPLETE" if status.public_payload_json.get("public_repetition_complete") is True else "FAILED"
+    return ("COMPLETE" if run.state is RunState.FINALIZED else
+            "FAILED" if run.state is RunState.FAILED else
+            "RUNNING" if run.state in (RunState.RUNNING, RunState.CAPTURED) else "RESERVED")
+
+
+def _comparison_repetition_summary(context, trials):
+    specs = {workload.id: json.loads(base64.b64decode(workload.request_specs_bytes_base64))
+             for workload in context.workloads}
+    candidates = []
+    for label in ("A", "B"):
+        repetitions = [(trial, row) for trial in trials if trial["candidate_label"] == label
+                       for row in trial["repetitions"]]
+        passed = 0
+        for trial, row in repetitions:
+            expected = {(ordinal, spec["id"], task["id"])
+                        for ordinal, spec in enumerate(specs[trial["workload_id"]], 1)
+                        for task in spec["tasks"]}
+            actual = {(a["request_ordinal"], a["request_id"], a["task_id"])
+                      for a in row["task_assessments"]}
+            if (row["state"] == "COMPLETE" and len(row["task_assessments"]) == len(expected)
+                    and actual == expected and all(a["mandatory_pass"] for a in row["task_assessments"])
+                    and {o["request_ordinal"] for o in row["outputs"]
+                         if o["transport_error"] is None and o["body_base64"]} == set(range(1, trial["request_count"] + 1))):
+                passed += 1
+        candidates.append({"candidate_label": label, "passed": passed,
+            "retained": sum(row["state"] in ("COMPLETE", "FAILED") and bool(row["outputs"] or row["observations"])
+                            for _, row in repetitions),
+            "declared": len(context.workloads) * comparison.public_repetition_count(context)})
+    count = comparison.public_repetition_count(context)
+    return {"candidates": candidates,
+        "limits": f"Small sample: {sum(w.request_count for w in context.workloads)} public requests planned for {count} repetitions per version. Retained counts show what completed. Results cover these versions and conditions; any model evidence covers one configured model. Even {len(context.workloads) * count} of {len(context.workloads) * count} passing batches does not establish general reliability. Protected checks remain separate."}
 
 
 def comparison_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[str, Any]:
@@ -1674,7 +1819,7 @@ def comparison_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[st
     for slot in slots:
         run = repo.get_run(conn, slot.run_id) if slot.run_id else None
         evidence = _slot_evidence(conn, run, slot.request_count)
-        trials.append({
+        trial = {
             "pair_ordinal": slot.pair_ordinal,
             "execution_ordinal": slot.execution_ordinal,
             "candidate_label": slot.candidate_label,
@@ -1693,7 +1838,16 @@ def comparison_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[st
             "evidence_mode": run.evidence_mode.value if run and run.evidence_mode else None,
             **evidence,
             "metrics": None,
-        })
+        }
+        repetitions = []
+        for ordinal, repeated in enumerate(repo.list_slot_runs(conn, slot.id), 1):
+            repeated_state = _public_repetition_state(conn, repeated)
+            repetitions.append({**trial, **_slot_evidence(conn, repeated, slot.request_count),
+                "run_id": repeated.id, "state": repeated_state,
+                "overall_run_state": repeated.state.value,
+                "protected_request_count": 0, "repetition_ordinal": ordinal})
+        trial["repetitions"] = repetitions
+        trials.append(trial)
     protected_counts = None
     outcome = None
     if experiment.state in ("FINALIZED", "FAILED", "INVALIDATED"):
@@ -1737,7 +1891,9 @@ def comparison_view(conn: sqlite3.Connection, experiment: Experiment) -> dict[st
             for candidate in experiment.candidates
         ],
         "trials": trials,
-        "shared_public_denominator_requests": sum(item.request_count for item in context.workloads),
+        "public_repetitions": comparison.public_repetition_count(context),
+        "repetition_summary": _comparison_repetition_summary(context, trials),
+        "shared_public_denominator_requests": sum(item.request_count for item in context.workloads) * comparison.public_repetition_count(context),
         "protected_denominator_requests_per_candidate": len(context.workloads),
         "protected_counts": protected_counts,
         "outcome": outcome.model_dump(mode="json") if outcome else None,
