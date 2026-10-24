@@ -280,10 +280,12 @@ class TokenFactoryAdapter:
 
     def __init__(self, *, run_id: str, allowed_tool_names: tuple[str, ...], token: str, project: str,
                  model: str = MODEL, client: ContreeAsyncClient | None = None,
-                 live_budget: LiveInferenceMeter | None = None, task_vocabulary: tuple[str, ...] = ()):
+                 live_budget: LiveInferenceMeter | None = None, task_vocabulary: tuple[str, ...] = (),
+                 allow_reasoning_off: bool = False):
         self.run_id = run_id
         self.allowed_tool_names = allowed_tool_names
         self.task_vocabulary = task_vocabulary
+        self.allow_reasoning_off = allow_reasoning_off
         self.token = token
         self.project = project
         self.model = model
@@ -396,6 +398,7 @@ class TokenFactoryAdapter:
                 run_id=self.run_id, operation_id=operation_id, model=self.model,
                 allowed_tool_names=self.allowed_tool_names, request_ordinal=1,
                 task_vocabulary=self.task_vocabulary,
+                allow_reasoning_off=self.allow_reasoning_off,
             ), **gateway_kwargs)
             gateway_observations_recorded = False
             observations.append(RawObservation(kind="INTERPRETATION",
@@ -477,6 +480,7 @@ class TokenFactoryAdapter:
                                 run_id=self.run_id, operation_id=operation_id, model=self.model,
                                 allowed_tool_names=self.allowed_tool_names, request_ordinal=ordinal + 1,
                                 task_vocabulary=self.task_vocabulary,
+                                allow_reasoning_off=self.allow_reasoning_off,
                             ), **gateway_kwargs)
                             gateway_observations_recorded = False
                     elif event_body.get("kind") == "driver_failure":

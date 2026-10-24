@@ -134,7 +134,7 @@ def test_service_adapter_takes_vocabulary_and_tools_from_the_frozen_mission(seed
     # the gateway policy can only carry the frozen mission's lists.
     mission = task_contract.load_mission(config.PACKAGE_DIR / name)
     run = type("Run", (), {"id": "run-0001"})()
-    context = type("Context", (), {"service_model": "pinned-model"})()
+    context = type("Context", (), {"service_model": "pinned-model", "resource_limits_json": {}})()
     adapter = orchestrator.service_adapter(run, mission, context)
     assert adapter.task_vocabulary == vocabulary
     assert adapter.allowed_tool_names == tuple(mission.allowed_tool_vocabulary)

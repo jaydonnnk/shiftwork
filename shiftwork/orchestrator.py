@@ -92,7 +92,7 @@ from shiftwork.executor import base as executor
 from shiftwork.executor.local_process import LocalProcessAdapter
 from shiftwork.executor.recorded import RecordedAdapter
 from shiftwork.executor.tokenfactory import TokenFactoryAdapter
-from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS
+from shiftwork.gateway.protocol import GATEWAY_MAX_OUTPUT_TOKENS, REASONING_OFF_MODEL
 from shiftwork.gateway.redaction import assert_public_safe
 from shiftwork.live_budget import LiveComparisonBudget, LiveOperationBudget
 from shiftwork.ledger import chain, reducer
@@ -885,6 +885,25 @@ def start_run(
     return run
 
 
+def _selected_reasoning_permission(conn, selection):
+    if selection.comparison_id is None:
+        return False
+    from shiftwork.comparison_flow import (
+        _frozen_comparison_context_hash, _frozen_comparison_experiment_hash, _reserved_protected_bindings,
+    )
+    experiment = repo.get_experiment(conn, selection.comparison_id)
+    context = repo.get_execution_context(conn, experiment.context_id) if experiment else None
+    if context is None:
+        raise LifecycleError("conflict", "selected reasoning permission is unavailable")
+    bindings = _reserved_protected_bindings(conn, context.protected_reservation_id)
+    if _frozen_comparison_context_hash(context, bindings) != context.content_hash:
+        raise LifecycleError("conflict", "selected reasoning permission changed")
+    slots = repo.list_trial_slots(conn, experiment.id)
+    if _frozen_comparison_experiment_hash(experiment, context, slots) != experiment.content_hash:
+        raise LifecycleError("conflict", "selected comparison permission was not tested")
+    return context.resource_limits_json.get("allow_reasoning_off") is True
+
+
 def _reserve_selected_operation(
     conn: sqlite3.Connection, shift: Shift, selection: OperatingSelection,
     version: ArtifactVersion, client_request_id: str | None,
@@ -938,7 +957,8 @@ def _reserve_selected_operation(
             raise LifecycleError("conflict", "retry requires zero captured outputs and no business write")
         if previous.selection_id != selection.id or previous.context_id is None:
             raise LifecycleError("conflict", "retry selection or context changed")
-    context = freeze_diagnostic_context(conn, shift, operation=True, isolated=isolated)
+    context = freeze_diagnostic_context(conn, shift, operation=True, isolated=isolated,
+        allow_reasoning_off=_selected_reasoning_permission(conn, selection))
     if context.mission_hash != selection.requirement_set_hash:
         raise LifecycleError("conflict", "selected requirements changed before operation")
     if prior_operations and prior_operations[0].context_id != context.id:
@@ -2667,6 +2687,7 @@ def _verify_pipeline_history(conn: sqlite3.Connection, events) -> None:
 def freeze_diagnostic_context(
     conn: sqlite3.Connection, shift: Shift, *, isolated: bool = False,
     operation: bool = False, public_repetitions: int = 1,
+    allow_reasoning_off: bool | None = None,
 ) -> ExecutionContext:
     """Freeze the reviewed public material one diagnostic is assessed against.
 
@@ -2753,6 +2774,11 @@ def freeze_diagnostic_context(
             "resource_limits_json": {"deadline_s": 45, "max_requests": 1,
                                      "max_layer_bytes": 16 * 1024 * 1024},
         })
+        permission = config.SERVICE_MODEL == REASONING_OFF_MODEL if allow_reasoning_off is None else allow_reasoning_off
+        if permission is True:
+            if config.SERVICE_MODEL != REASONING_OFF_MODEL:
+                raise LifecycleError("conflict", "reasoning-off permission requires the exact Nano model")
+            fields["resource_limits_json"]["allow_reasoning_off"] = True
     if type(public_repetitions) is not int or not 1 <= public_repetitions <= 10:
         raise LifecycleError("conflict", "public repetitions must be from 1 to 10")
     if public_repetitions != 1:
@@ -2811,6 +2837,7 @@ def service_adapter(run: Run, mission: task_contract.MissionSpec, context: Execu
         project=os.environ.get("NEBIUS_PROJECT_ID", ""),
         model=context.service_model or config.SERVICE_MODEL,
         live_budget=live_budget,
+        allow_reasoning_off=context.resource_limits_json.get("allow_reasoning_off") is True,
     )
 
 
