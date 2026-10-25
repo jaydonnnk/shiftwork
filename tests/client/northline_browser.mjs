@@ -138,7 +138,7 @@ async function verifyComparison() {
   for (const [index, trial] of comparison.trials.entries()) {
     const slot = rendered.slots[index];
     assert.equal(slot.version, trial.artifact_version_id, 'Trial version differs from Northline API');
-    assert.deepEqual(slot.requests, trial.outputs.map(output => `Request ${output.request_ordinal}: ${output.request_text}`), 'Trial request differs from Northline API');
+    assert.deepEqual(slot.requests, [...trial.outputs, ...(trial.repetitions ?? []).flatMap(row => row.outputs)].map(output => `Request ${output.request_ordinal}: ${output.request_text}`), 'Trial request differs from Northline API');
     assert.deepEqual(slot.tasks, trial.task_assessments.map(row => ({ id: row.task_id, ordinal: String(row.request_ordinal), outcome: row.outcome, verdict: row.mandatory_pass ? 'pass' : 'fail', text: `${row.task_id} · ${humanize(row.outcome)}${row.reason_codes.length ? ` · ${row.reason_codes.join(', ')}` : ''}` })), 'Trial outcome differs from Northline API');
   }
   for (const metrics of comparison.outcome.candidate_metrics) {
@@ -338,6 +338,8 @@ async function verifyLaterAlternative(chosen) {
 
 const fault = process.env.SHIFTWORK_FAULT;
 const FAULTS = {
+  trialRequest: ["row.append(element('p', `Request ${output.request_ordinal}: ${output.request_text}`, 'evidence-text request-quote'));", "row.append(element('p', `Request ${output.request_ordinal}: WRONG_ORIGINAL_REQUEST`, 'evidence-text request-quote'));", 'Trial request differs from Northline API'],
+  repetitionRequest: ["detail.append(element('p', `Request ${output.request_ordinal}: ${output.request_text}`, 'request-quote'));", "detail.append(element('p', `Request ${output.request_ordinal}: WRONG_REPETITION_REQUEST`, 'request-quote'));", 'Trial request differs from Northline API'],
   selectedWorksheet: ["['Selected version', selected?.files, selected?.id]", "['Selected version', draft?.files, selected?.id]", 'Selected worksheet differs from exact Northline version'],
   pilotPayload: ['JSON.stringify(event.payload, null, 2)', "JSON.stringify({ ...event.payload, weight: 999 }, null, 2)", 'Pilot history differs from recorded Northline API'],
   handoverPayload: ['JSON.stringify(event.payload, null, 2)', "JSON.stringify(event.event_type === 'HANDOVER_DECLARED' ? { ...event.payload, runbook_version_id: 'wrong-version' } : event.payload, null, 2)", 'Handover history differs from recorded Northline API'],
@@ -352,10 +354,9 @@ const FAULTS = {
   mobileFocus: ["panel.focus({ preventScroll: true });", 'void panel;', 'Mobile station does not focus its panel'],
   protectedDenominator: ['protected steps per candidate ${compare.protected_denominator_requests_per_candidate}', 'protected steps per candidate 999', 'Comparison protected denominator differs from Northline API'],
   dirtySwitch: ["state.pending || hasUnsavedDraft() || !state.workplaces.some", "state.pending || false || !state.workplaces.some", 'Dirty programmatic board switch was accepted'],
-  unreviewedSwitch: ["board.engagement_slug === slug && board.availability === 'AVAILABLE'", 'board.engagement_slug === slug', 'Unreviewed programmatic board switch was accepted'],
+  unreviewedSwitch: ["if (state.pending || hasUnsavedDraft() || !state.workplaces.some(board => board.engagement_slug === slug && board.availability === 'AVAILABLE')) {", "if (state.pending || hasUnsavedDraft() || !state.workplaces.some(board => board.engagement_slug === slug)) {", 'Unreviewed programmatic board switch was accepted'],
   purpose: ["['purpose', 'Purpose', humanize(compare.kind)]", "['purpose', 'Purpose', 'operation']", 'Comparison purpose differs from Northline API'],
   context: ["['context', 'Frozen context', compare.context_hash]", "['context', 'Frozen context', 'wrong-context']", 'Comparison context differs from Northline API'],
-  trialRequest: ['`Request ${output.request_ordinal}: ${output.request_text}`', '`Request ${output.request_ordinal}: wrong Northline request`', 'Trial request differs from Northline API'],
   trialOutcome: ['item.dataset.outcome = result.outcome;', "item.dataset.outcome = 'WRONG_OUTCOME';", 'Trial outcome differs from Northline API'],
   outcomeMetric: ["const value = element('dd', metrics[key] ?? 'unknown');", "const value = element('dd', key === 'useful_completions' ? 999 : (metrics[key] ?? 'unknown'));", 'Candidate metrics differ from Northline API'],
   falseBlocker: ["eligibility.blocking_reason_codes.length ? ` · ${eligibility.blocking_reason_codes.join(', ')}` : ''", "' · WRONG_BLOCKER'", 'Candidate blocker differs from Northline API'],

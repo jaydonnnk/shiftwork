@@ -163,7 +163,7 @@ async function verifyComparison() {
   for (const [index, trial] of comparison.trials.entries()) {
     const slot = rendered.slots[index];
     assert.equal(slot.version, trial.artifact_version_id, 'Trial version differs from GTM API');
-    assert.deepEqual(slot.requests, trial.outputs.map(output => `Request ${output.request_ordinal}: ${output.request_text}`), 'Trial request differs from GTM API');
+    assert.deepEqual(slot.requests, [...trial.outputs, ...(trial.repetitions ?? []).flatMap(row => row.outputs)].map(output => `Request ${output.request_ordinal}: ${output.request_text}`), 'Trial request differs from GTM API');
     assert.deepEqual(slot.tasks, trial.task_assessments.map(row => ({ id: row.task_id, ordinal: String(row.request_ordinal), outcome: row.outcome, verdict: row.mandatory_pass ? 'pass' : 'fail', text: `${row.task_id} · ${humanize(row.outcome)}${row.reason_codes.length ? ` · ${row.reason_codes.join(', ')}` : ''}` })), 'Trial outcome differs from GTM API');
   }
   for (const metrics of comparison.outcome.candidate_metrics) {
@@ -205,6 +205,7 @@ async function verifyBinding(runId) {
   for (const event of generated) assert.ok(outputs.some(output => output.id === event.cause_refs[2]), 'Operational event does not bind a captured output');
   return { run, outputs, checks, ledger };
 }
+let roomCaptures = 0;
 async function verifyRoom() {
   const boards = await api('/api/boards');
   const actual = await evaluate(() => ({ options: [...document.getElementById('workplace-board').options].map(option => ({ slug: option.value, disabled: option.disabled, label: option.textContent })), room: document.querySelector('.room').getAttribute('aria-label'), names: [...document.querySelectorAll('#gtm-stations button')].map(node => node.lastChild.textContent), visible: [...document.querySelectorAll('[data-station]')].filter(node => node.getClientRects().length).length, tabs: [...document.querySelectorAll('.file-tabs [data-file]')].filter(node => !node.hidden).map(node => node.dataset.file) }));
@@ -217,7 +218,8 @@ async function verifyRoom() {
   assert.deepEqual(actual.tabs, ['contract', 'files'], 'GTM exposes draft files it does not own');
   await waitFor(() => document.getElementById('graphics-status').dataset.state === 'ready', 'Stonebridge real room did not render');
   assert.equal(await evaluate(() => Boolean(document.querySelector('#workplace-canvas canvas')) && getComputedStyle(document.getElementById('gtm-art')).display === 'none'), true, 'Stonebridge room did not replace its static fallback');
-  await screenshot('stonebridge-room');
+  roomCaptures += 1;
+  await screenshot(roomCaptures === 1 ? 'stonebridge-room' : `stonebridge-room-${roomCaptures}`);
 }
 
 async function assertPublicDOM(label) {
@@ -330,6 +332,8 @@ async function verifyReach() {
 
 const fault = process.env.SHIFTWORK_FAULT;
 const FAULTS = {
+  trialRequest: ["row.append(element('p', `Request ${output.request_ordinal}: ${output.request_text}`, 'evidence-text request-quote'));", "row.append(element('p', `Request ${output.request_ordinal}: WRONG_ORIGINAL_REQUEST`, 'evidence-text request-quote'));", 'Trial request differs from GTM API'],
+  repetitionRequest: ["detail.append(element('p', `Request ${output.request_ordinal}: ${output.request_text}`, 'request-quote'));", "detail.append(element('p', `Request ${output.request_ordinal}: WRONG_REPETITION_REQUEST`, 'request-quote'));", 'Trial request differs from GTM API'],
   pipelineOwner: ['row.dataset.pipelineOwner = payload.owner ?? \'\';', 'row.dataset.pipelineOwner = \'wrong-owner\';', 'Pipeline wall pipeline-owners differs from recorded GTM API'],
   pipelineClock: ['row.dataset.pipelineRecord = payload.record_ref ?? \'\';', 'row.dataset.pipelineRecord = \'wrong-record\';', 'Pipeline wall pipeline-clocks differs from recorded GTM API'],
   pipelineResolving: ['row.dataset.pipelineResolvingVersion = event.payload.resolving_version_id;', 'row.dataset.pipelineResolvingVersion = \'wrong-version\';', 'Pipeline incidents differ from GTM API'],
@@ -357,7 +361,7 @@ const FAULTS = {
   assistanceBudget: ['`${station.assist_used} of ${station.assist_limit} help calls used this shift. Failed calls also count.`', '`0 of 9 help calls used this shift. Failed calls also count.`', 'Assistance budget differs from GTM API'],
   availability: ['option.disabled = board.availability !== \'AVAILABLE\';', 'option.disabled = false;', 'Workplace availability differs from API'],
   dirtySwitch: ['state.pending || hasUnsavedDraft() || !state.workplaces.some', 'state.pending || false || !state.workplaces.some', 'Dirty programmatic board switch was accepted'],
-  unreviewedSwitch: ['board.engagement_slug === slug && board.availability === \'AVAILABLE\'', 'board.engagement_slug === slug', 'Unreviewed programmatic board switch was accepted'],
+  unreviewedSwitch: ["if (state.pending || hasUnsavedDraft() || !state.workplaces.some(board => board.engagement_slug === slug && board.availability === 'AVAILABLE')) {", "if (state.pending || hasUnsavedDraft() || !state.workplaces.some(board => board.engagement_slug === slug)) {", 'Unreviewed programmatic board switch was accepted'],
   privateDOM: ['document.body.dataset.loadState = board.latest_shift ? \'ready\' : \'empty\';', 'document.body.dataset.loadState = board.latest_shift ? \'ready\' : \'empty\'; document.body.dataset.secret = \'S22B_TEST_PROVIDER_SECRET\';', 'GTM DOM contains private material'],
   mobileFocus: ['panel.focus({ preventScroll: true });', 'void panel;', 'Mobile station does not focus its panel'],
 };
