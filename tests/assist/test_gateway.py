@@ -34,7 +34,9 @@ class RecordedGateway:
 
     def generate(self, *, model_id, role, prompt):
         self.calls.append((model_id, role.value, prompt))
-        reply = next(self.replies, AssistReply("Check the collection task against your public test.", output_tokens=20))
+        default = (json.dumps({"old": "import json", "new": "# Coach test proposal\nimport json"})
+                   if role is AssistRole.PATCH_PROPOSAL else "Check the collection task against your public test.")
+        reply = next(self.replies, AssistReply(default, output_tokens=20))
         if isinstance(reply, Exception):
             raise reply
         return reply
@@ -501,3 +503,24 @@ def test_startup_verifies_every_seeded_engagement_projection(session, monkeypatc
         with TestClient(create_app(str(path), assist_gateway=gateway)):
             pass
     assert gateway.calls == []
+
+
+@pytest.mark.parametrize("role", [AssistRole.HINT, AssistRole.PATCH_PROPOSAL])
+def test_gateway_counts_complete_role_specific_utf8_input_before_transport(role):
+    from shiftwork.assist.gateway import MAX_INPUT_BYTES, assist_system_message
+    requests = []
+    def respond(request):
+        requests.append(request)
+        return httpx.Response(200, json={"choices": [{"message": {"content": "authored double"}}]})
+    remaining = MAX_INPUT_BYTES - len(assist_system_message(role).encode())
+    prompt = "界" * (remaining // 3) + "x" * (remaining % 3)
+    with httpx.Client(transport=httpx.MockTransport(respond)) as http:
+        gateway = LiveAssistGateway("LOCAL_TEST_TOKEN", http=http)
+        gateway.generate(model_id="test-model", role=role, prompt=prompt)
+        refused = False
+        try:
+            gateway.generate(model_id="test-model", role=role, prompt=prompt + "x")
+        except AssistRejected as exc:
+            refused = exc.code == "ASSIST_INPUT_LIMIT"
+    assert refused, "gateway admitted a complete UTF-8 request over its input cap"
+    assert len(requests) == 1, "gateway sent oversized context to transport"

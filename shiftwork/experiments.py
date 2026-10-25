@@ -62,6 +62,7 @@ def create_diagnostic_experiment(
     client_request_id: str,
     adapter: str = "local_process",
     public_repetitions: int = 1,
+    proposal_event_id: str | None = None,
 ) -> Experiment:
     """Reserve one public diagnostic and queue its frozen public repetitions.
 
@@ -75,8 +76,22 @@ def create_diagnostic_experiment(
         shift = _require_open_shift(conn, shift_id)
         if type(public_repetitions) is not int or not 1 <= public_repetitions <= 10:
             raise LifecycleError("conflict", "public repetitions must be from 1 to 10")
+        proposal_event = None
+        if proposal_event_id is not None:
+            proposal_event = repo.get_assist_event(conn, proposal_event_id)
+            if (proposal_event is None or proposal_event.shift_id != shift.id
+                    or proposal_event.role.value != "PATCH_PROPOSAL" or proposal_event.state != "COMPLETE"):
+                raise LifecycleError("conflict", "a complete owned coach proposal is required")
+            if adapter != orchestrator.TokenFactoryAdapter.name:
+                raise LifecycleError("conflict", "coach proposals require the isolated executor")
+            if proposal_event.diagnostic_run_id is not None:
+                raise LifecycleError("conflict", "this coach proposal already reserved its one diagnostic run")
+            if public_repetitions != 1:
+                raise LifecycleError("conflict", "a coach proposal has exactly one diagnostic repetition")
+            investigation_id = proposal_event.investigation_id
+            orchestrator.proposal_version(conn, proposal_event_id)
         isolated = adapter == orchestrator.TokenFactoryAdapter.name
-        if adapter not in (orchestrator.LocalProcessAdapter.name, orchestrator.TokenFactoryAdapter.name):
+        if proposal_event is None and adapter not in (orchestrator.LocalProcessAdapter.name, orchestrator.TokenFactoryAdapter.name):
             raise LifecycleError("conflict", "no safe diagnostic executor is configured")
         if isolated and (not os.environ.get("NEBIUS_API_KEY") or not os.environ.get("NEBIUS_PROJECT_ID")):
             raise BootstrapBlocked("the verified isolated executor and its controller credentials are unavailable")
@@ -90,11 +105,19 @@ def create_diagnostic_experiment(
             raise LifecycleError(
                 "conflict", "a diagnostic must cite an investigation owned by this shift"
             )
+        if proposal_event is not None and (investigation is None or any(
+                not getattr(investigation, field).strip() for field in ("cause", "falsifier", "public_test"))):
+            raise LifecycleError("conflict", "a complete investigation is required for a proposal run")
         version = repo.get_version(conn, candidate_version_id)
         if version is None:
             raise LifecycleError("not_found", f"unknown artifact version: {candidate_version_id}")
-        if version.shift_id != shift.id:
+        if version.shift_id != shift.id and proposal_event is None:
             raise LifecycleError("conflict", "a diagnostic candidate must belong to this shift")
+        if proposal_event is not None:
+            snapshot = repo.get_assist_proposal(conn, proposal_event.id)
+            if snapshot["base_version_id"] != version.id:
+                raise LifecycleError("conflict", "the proposal contract reference differs")
+            version = orchestrator.proposal_version(conn, proposal_event.id)
         replay = repo.get_experiment_by_client_request_id(conn, client_request_id)
         if replay is not None:
             candidate = replay.candidates[0] if replay.candidates else None
@@ -103,7 +126,8 @@ def create_diagnostic_experiment(
                 and replay.kind is ExperimentKind.DIAGNOSTIC
                 and replay.investigation_id == (investigation.id if investigation else None)
                 and candidate is not None
-                and candidate.artifact_version_id == version.id
+                and ((proposal_event is not None and candidate.proposal_event_id == proposal_event.id)
+                     or (proposal_event is None and candidate.artifact_version_id == version.id))
                 and repetition_count(conn, replay) == public_repetitions
             ):
                 conn.rollback()
@@ -115,7 +139,7 @@ def create_diagnostic_experiment(
             reserve_bootstrap_diagnostic(conn, shift_id, adapter=adapter)
         starter_key = config.offline_fixture_keys(shift.engagement_slug)[0]
         starter_pin = config.TRUSTED_LOCAL_FIXTURES.get(starter_key)
-        if not isolated and (starter_pin is None or version.content_hash != starter_pin[0]):
+        if proposal_event is None and not isolated and (starter_pin is None or version.content_hash != starter_pin[0]):
             raise LifecycleError(
                 "conflict",
                 "only the pinned reviewed starter is executable as a public diagnostic candidate",
@@ -139,7 +163,8 @@ def create_diagnostic_experiment(
         candidates = (
             CandidateRef(
                 label="A",
-                artifact_version_id=version.id,
+                artifact_version_id=None if proposal_event else version.id,
+                proposal_event_id=proposal_event_id,
                 artifact_content_hash=version.content_hash,
             ),
         )
@@ -185,6 +210,8 @@ def create_diagnostic_experiment(
                 experiment_id=experiment.id,
             )
             repo.insert_run(conn, run)
+            if proposal_event is not None:
+                repo.reserve_assist_proposal_run(conn, proposal_event.id, run.id)
         repo.update_experiment_state(conn, experiment.id, "RUNNING")
         conn.commit()
     except Exception:
@@ -221,6 +248,21 @@ def execute_experiment(conn: sqlite3.Connection, run_id: str, live_budget=None) 
     if (run.adapter == orchestrator.TokenFactoryAdapter.name
             and repetition_count(conn, experiment) > 1 and live_budget is None):
         raise LifecycleError("conflict", "live repetitions require a bounded diagnostic budget")
+
+    proposal_event_id = experiment.candidates[0].proposal_event_id
+    if proposal_event_id is not None:
+        proposal = repo.get_assist_proposal_for_run(conn, run.id)
+        if (run.adapter != orchestrator.TokenFactoryAdapter.name
+                or run.evidence_mode is not EvidenceMode.ISOLATED_LIVE
+                or proposal is None or proposal["event_id"] != proposal_event_id
+                or context.protected_reservation_id is not None):
+            repo.update_run(conn, run.id, RunState.FAILED, ExecutorFailure.PROVISION_FAILED, _now())
+            _update_diagnostic_state(conn, run.experiment_id)
+            conn.commit()
+            return repo.get_run(conn, run.id)
+        version = orchestrator.proposal_version(conn, proposal_event_id)
+        if version.content_hash != experiment.candidates[0].artifact_content_hash:
+            raise LifecycleError("conflict", "proposal identity differs from its diagnostic reservation")
 
     workload = context.workloads[0]
     try:
@@ -646,6 +688,7 @@ def _diagnostic_run_view(conn: sqlite3.Connection, experiment: Experiment, run: 
                 "label": candidate.label,
                 "artifact_version_id": candidate.artifact_version_id,
                 "artifact_content_hash": candidate.artifact_content_hash,
+                "proposal_event_id": candidate.proposal_event_id,
             }
             for candidate in experiment.candidates
         ],
@@ -653,7 +696,8 @@ def _diagnostic_run_view(conn: sqlite3.Connection, experiment: Experiment, run: 
             {
                 "pair_ordinal": 1,
                 "candidate_label": experiment.candidates[0].label,
-                "artifact_version_id": run.artifact_version_id if run is not None else None,
+                "artifact_version_id": experiment.candidates[0].artifact_version_id,
+                "proposal_event_id": experiment.candidates[0].proposal_event_id,
                 "artifact_content_hash": experiment.candidates[0].artifact_content_hash,
                 "workload_id": workload.id,
                 "request_batch_hash": workload.request_batch_hash,
