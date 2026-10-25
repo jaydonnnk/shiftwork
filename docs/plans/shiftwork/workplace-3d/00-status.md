@@ -1,3 +1,104 @@
+**S47 ACCEPTED; branch and main publication authorized, 2026-10-25.**
+The user said: "Accept. S46 is still ongoing. But u can publish ur branch and
+push to main." Acceptance includes the completed final-byte proof below.
+S47 publication proceeds in focused commits from the accepted S45 base.
+S46 remains ongoing and separate; its changes are not part of this publication.
+No deployment, live call, installation, protected edit or S48 is authorized.
+Publication verification will be recorded before a completion claim.
+Earlier notices below retain their historical scope.
+
+**S47 final-byte proof COMPLETE; user acceptance pending, 2026-10-25.**
+Fresh fullscreen 192, affected-fullscreen 6 and review-id-green 24 rows pass on
+the pinned final client. No rows from the older receipt root were carried.
+Every fault reached its named assertion with clean/restored controls. The new
+validator enforces matching client bytes in all eight acceptance proof sets and
+rejects the three actual stale receipts. All 106 protected files, 44 inherited
+bytecode files and 2,097 checked older receipts are preserved. No product or test
+source changed in this verification continuation. The occupied-port setup and
+premature incomplete-packet validation are retained separately; neither counts
+as fault proof. Existing final-client suites and business journeys were retained.
+See [final evidence](s47-final-offline-2026-10-25.md).
+No acceptance, integration, publication, deployment or S48 is inferred.
+Earlier notices below retain their historical scope.
+
+**S47 acceptance BLOCKED by final-byte proof gap, 2026-10-25.**
+User review confirmed that fullscreen (192 rows), affected-fullscreen (6 rows)
+and review-id-green (24 rows) have older app.js and workplace-assets.json hashes.
+Their passing rows do not establish the corresponding final-client guarantees.
+No fresh rerun has started. The runtime reported 300,728 context input tokens,
+above the user's 300k limit, so this session stopped before the long reruns.
+The existing final-client GTM, Northline, guided, rates-final and review-final
+proofs remain valid. No acceptance or publication is claimed.
+[Exact continuation](s47-final-byte-proof-handoff-2026-10-25.md).
+Earlier notices below retain their dated scope.
+
+**S47 VERIFIED LOCALLY, awaiting acceptance, 2026-10-25 Asia/Singapore.**
+The remaining offline checks are complete. Final Node 331 and Python 1,732 pass;
+one live-only skip and one excluded installation test remain. All 32 GTM and
+24 Northline fault pairs, ambient/focus checks, S44/S45 controls, three-board
+five-panel captures and final S47 faults pass. Review repairs preserve ordinary
+prose, historical run identities, navigation context and all station entry paths.
+The exact fullscreen focus rule is isolated without weakening its assertion.
+Carried fullscreen/journey evidence retains its earlier-byte limits. All 106
+fixture/sealed files and 44 inherited bytecode files are preserved. Cleanup found
+no deletion candidate; the index is empty. No acceptance, integration or
+publication is claimed. [Final evidence and limits](s47-final-offline-2026-10-25.md).
+Earlier dated notices below retain their historical scope.
+
+**S47 continuation HALTED INCOMPLETE near the context limit, 2026-10-25.**
+The original fallback overlap is reproduced, localized to S47 button wrapping,
+and repaired without weakening the assertion. Three clean fullscreen boards,
+room checks, 152 source and 35 browser fault controls pass. Node 331 and all
+1,732 offline Python cases pass across two commands; only installation remains
+unrun. Fullscreen faults now stop on a non-unique focus-stays-hidden CSS anchor.
+GTM faults are partial. Replay, final S44/S45 and guided checks, cleanup review
+and acceptance remain pending. Only this continuation's owned processes were
+stopped. All 106 fixture/sealed files remain byte-identical; the index is empty.
+See [the continuation checkpoint](s47-resume-checkpoint-2026-10-25.md) for exact receipts, interrupted rows,
+bytecode/filter setup mistakes and remaining work. No integration or publication.
+Earlier dated notices retain their historical scope.
+
+**S47 HALTED INCOMPLETE at the context boundary, 2026-10-25.**
+The runtime reported about 367k context tokens against the 175k working limit;
+this was detected late. The scoped Gate 1 is re-approved and the five-panel
+implementation is local, but S47 is not accepted. Latest Python: 1,732 pass,
+one live-only skip and one deselected install test. Node: 331 pass. All three
+existing journeys passed. The fullscreen run then failed
+`fallback_tags_clear_of_panels: bookshop panels cover float-panel graphics-controls/evaluator`.
+Its cause and pre-existence are unverified; no assertion was weakened.
+The remaining browser/fault checks, cleanup review and acceptance are pending.
+All 106 fixture/sealed files are unchanged; only six original client files differ.
+No commit, integration, publication, live action or deployment followed.
+Current facts and the precise failure are in [the S47 checkpoint](s47-checkpoint-2026-10-25.md).
+Earlier notices below retain their dated scope.
+
+**S47 scoped workplace Gate 1 RE-APPROVED, 2026-10-25 Asia/Singapore.**
+The user answered "I re approve" after reviewing the five-panel proposal and HTML
+mockups. This approves the presented grouping and navigation-only boundary.
+S47 offline implementation continues in its isolated worktree. Every command keeps
+its existing handler and authority. Full workbench access and all three workplaces
+remain. No S46 integration, live call, credential use, install, protected edit,
+commit, push, merge, deployment or later slice is authorized.
+
+**S47 STARTED in an isolated worktree, 2026-10-25 Asia/Singapore. Scoped workplace Gate 1 pending.**
+The user authorized branch/worktree preparation and offline local implementation
+and tests, with no live calls, credential use, installs, protected edits or Git
+publication/integration. The managed worktree is
+`/Users/jayd0/.codex/worktrees/s47-guided-first-run/shiftwork`, on
+`shiftwork/slice-47` at accepted S45 `087585ff690194e6fde5d67be9827d732474879e`.
+Five first-run panels change the approved seven-step screen. The scoped
+[Gate 1 proposal](s47-gate1-2026-10-25.md) and
+[five HTML mockups](mockups/s47/index.html) are ready for review.
+Existing workplace approvals remain valid outside this proposed addition.
+Product code is unchanged. Node preflight: 300 pass, 10 inherited branch-name
+prerequisite failures; asset closure: 9 pass, 2 warnings. Static mockup QA passes
+15 panel/viewport combinations. Current layout samples use actual WebGL; the
+three historical screenshot defects did not reproduce in the sampled states.
+This is not full journey, S47 completion, acceptance or combined S46/S47 proof.
+No commit, push, merge, deployment or later slice followed. The next action is
+explicit scoped Gate 1 review, then the proposal's implementation plan.
+Earlier dated notices retain their original scope.
+
 **S42 ACCEPTED by the user, 2026-10-23.** The user answered "Okay can u commit and push s42 to main i accept it". S42 is committed in focused batches on `shiftwork/slice-42` without a co-author trailer, fast-forwarded into main and main is pushed. The open decisions below stay recorded as limits; the user did not change them.
 
 **Earlier: S42 verified locally, 2026-10-23.** On `shiftwork/slice-42` (nothing committed), all three boards have a robot crew: your bot with a "You" chip walks only when you open a station and goes home on close; staff bots stay put and the single bubble sits above its speaker. Node 283, crew browser checks on three boards with 9 served faults and 11 Node faults each failing their own assertion, 63 of 63 fullscreen faults, 152 source and 35 browser controls, s32 and s33 controls, three journeys, perf with no misses on three boards, closure 9, Python with only the known `port_dead`, renderer 39/50 with the same 11 inherited rows. Repaired in session: a stale "You" chip after a hidden tab mid-walk, and the S41-broken `two-owner-lines` fault needle. Open decisions: stand-to-stand walks take up to 5.31s against Gate 3's "about 3 seconds"; bot size; idle freeze kept. Evidence and limits: [S42 checkpoint](s42-checkpoint-2026-10-23.md).
