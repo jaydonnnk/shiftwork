@@ -17,7 +17,7 @@ try {
   for (const [width, height] of [[1280, 800], [390, 844]]) {
     await browser.send('Emulation.setDeviceMetricsOverride', {width, height, deviceScaleFactor: 1, mobile: false});
     await browser.send('Page.navigate', {url: base});
-    assert.ok(await browser.until(() => document.body.dataset.loadState === 'ready'), 'fixture board did not load');
+    assert.ok(await browser.until(() => document.body?.dataset.loadState === 'ready'), 'fixture board did not load');
     await browser.evaluate(() => document.querySelector('[data-station="investigate"]').click());
     assert.ok(await browser.until(() => document.getElementById('diagnostic-result').textContent.includes('Operator-authored')), 'rendering fixture label missing');
     const text = await browser.evaluate(() => document.getElementById('diagnostic-result').textContent);
