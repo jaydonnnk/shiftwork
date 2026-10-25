@@ -1,7 +1,6 @@
 // Authored public states. No model, Sandbox or learner evidence.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -77,7 +76,6 @@ for (const [name, file, needle, replacement, hidden] of faults) test(`owner line
   assert.equal(pristine[file].split(needle).length - 1, 1, `unique source anchor: ${name}`);
   const dir = await mkdtemp(path.join(tmpdir(), 'shiftwork-s45-owner-'));
   try {
-    assert.equal(execFileSync('git', ['branch', '--show-current'], {cwd: path.resolve(client, '../..'), encoding: 'utf8'}).trim(), 'shiftwork/slice-45');
     for (const source of files) await writeFile(path.join(dir, source), source === file ? pristine[source].replace(needle, replacement) : pristine[source]);
     const story = await import(pathToFileURL(path.join(dir, 'workplace-story.js')).href);
     const view = await import(pathToFileURL(path.join(dir, 'workplace-view.js')).href);

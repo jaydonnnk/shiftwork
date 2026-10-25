@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { repoRoot } from './env.mjs';
 import path from 'node:path';
 const out=process.argv[2];
-assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39|40|41|42)-/.test(out ?? '')); await mkdir(out,{recursive:true});
+assert.ok(/^\/tmp\/shiftwork-s(?:29|30|31|32|33|34|35|36|37|38|39|40|41|42|47)-/.test(out ?? '')); await mkdir(out,{recursive:true});
 const source=await readFile(path.join(repoRoot,'shiftwork/client/workplace-view.js'),'utf8');
 const hostSource=await readFile(path.join(repoRoot,'shiftwork/client/workplace-host.js'),'utf8');
 const rows=[
