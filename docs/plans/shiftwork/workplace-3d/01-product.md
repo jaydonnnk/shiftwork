@@ -1,5 +1,12 @@
 # Product: Shiftwork 3D workplace
 
+**S47 scoped addition RE-APPROVED, 2026-10-25.** The user answered "I re approve".
+The [five-panel first-run proposal](s47-gate1-2026-10-25.md) groups all existing
+approved actions, with separate explicit choice and operation and with outcome
+review before closing and inheritance. [HTML review](mockups/s47/index.html).
+It approves the first-run screen grouping and navigation-only interaction.
+The existing experience below remains available as the full workbench.
+
 Gate 1 RE-APPROVED 2026-10-23 after the same-day backtrack for the robot crew and room declutter. The user answered "I re-approve Gates 1 to 4 for the robot crew and declutter. Commit the docs, then start S41 on shiftwork/slice-41."
 The user compared the S40 Bellwether room at 100% zoom with the agentic-factory reference, called it "too cluttered", asked for "little robots and nice animation", and approved the backtrack with the role choice "Staff bots + your bot" for all three boards.
 The [crew and declutter mockup](mockups/v2/17-robot-crew.html) is the reference for this revision.
