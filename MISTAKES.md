@@ -3984,3 +3984,178 @@ browser callbacks cannot read their caller's Node scope. This consumed no call.
 - What happened: ordinary git add rejected the ignored evidence directory during metadata staging, after other named documentation paths had been staged. A later tool call attempted only a no-op push of the already-published code tip; no metadata commit was created or published by that failed sequence.
 - Root cause: the metadata path did not preserve the first packet's explicit force-add treatment for public evidence, and tool exit status was not used to stop the next dependent call.
 - Prevention rule: stage only the named public evidence file with git add -f, inspect the exact index after a partial failure, and require a zero exit status before any dependent commit or push. Keep private evidence excluded. Do not treat a nonzero tool result as an exception that automatically stops later calls.
+
+## 2026-10-25 S47 preflight: empty boards rejected by the baseline driver
+
+- What happened: the first disposable browser baseline captured Bellwether, then failed its readiness assertion on a board with no open shift. Its raw geometry.log and screenshots remain under /tmp/shiftwork-s47-preflight-20261025/. No product code changed.
+- Root cause: the driver required ready although app.js publishes empty for an initialized board without a shift. A bookshop-only preview does not open the other boards.
+- Prevention rule: for initial-layout diagnostics accept both ready and empty and record which was inspected; full-journey proof still requires a deliberately seeded active shift. Keep the rejected diagnostic separate from corrected receipts.
+
+## 2026-10-25 S47: empty patch hunk rejected before an edit
+
+- What happened: an apply_patch call contained context only and no added or removed lines. Validation rejected it; no file changed.
+- Root cause: the planned insertion was sent before its body was included.
+- Prevention rule: inspect the complete current anchor and include the actual change in the same hunk before applying it.
+
+## 2026-10-25 S47: technical-text observer reprocessed empty nodes
+
+- What happened: the first implemented guided browser page stalled before screenshots. The owned run was stopped; its directory is retained as rejected evidence.
+- Root cause: wrapping an evidence-mode text node inserted empty prefix/suffix nodes under the same mode field. The observer treated those empty nodes as fresh values and repeatedly wrapped them.
+- Prevention rule: skip empty text before field classification and explicitly verify idempotence with a second observer/render pass. Keep the stalled run separate from passing browser evidence.
+
+## 2026-10-25 S47: lookup inherited Object prototype members
+
+- What happened: added unknown-input checks showed that evidenceLabel('constructor') and firstRunPanel({step: 'toString'}) returned inherited object members. These were local red tests, with no external action.
+- Root cause: plain object indexing accepted arbitrary unknown keys.
+- Prevention rule: use explicit cases for evidence codes and require an integer guide step before indexed lookup. Test inherited names alongside ordinary unknown inputs.
+
+## 2026-10-25 S47: guided visibility needed restoration with DOM positions
+
+- What happened: code review found that mode-specific hidden flags on moved operation controls could survive returning to the full workbench and switching boards. No runtime evidence was counted for that path yet.
+- Root cause: restoration kept original DOM positions but omitted original visibility. The unmoved run-shift child also acquired a guided-only hidden flag.
+- Prevention rule: restore each moved node's original hidden state and separately preserve the run-shift child state. Verify mode exit followed by another board's operation controls.
+
+## 2026-10-25 S47: immediate geometry check exposed fading hidden tags
+
+- What happened: the stronger guided geometry check found the recorded-request bubble overlapping Evidence path and Repair bench during initialization. The earlier settled-only sample did not inspect that transition.
+- Root cause: hidden resting tags inherited a 180ms opacity transition after WebGL became ready, leaving visually present labels during declutter.
+- Prevention rule: test geometry during transitions as well as settled state. Hidden resting tags now disappear immediately; their hover and keyboard access remain unchanged. Keep the failing browser-geometry receipt and verify the repair without weakening overlap assertions.
+
+## 2026-10-25 S47: journey readiness read a pre-document body
+
+- What happened: the first guided journey driver read document.body.dataset before navigation created body. It stopped before any command; the raw failed attempt remains.
+- Root cause: its new readiness predicate omitted the existing browser convention's optional body access.
+- Prevention rule: start readiness predicates with optional document.body access. Retain this setup error separately from product or mutation proof.
+
+## 2026-10-25 S47: guided journey assumed a remaining operation attempt
+
+- What happened: the authored comparison's explicit choice passed, but its operation button stayed disabled and no run or report followed. The store and failed driver remain preserved.
+- Root cause: the driver assumed a completed repeated comparison left an operation allowance. Its board actually reported zero remaining attempts. The existing guard correctly refused the click.
+- Prevention rule: inspect the current board and disabled controls before expecting a command. Exercise the existing explicit close/open transition when the allowance is exhausted, verify exact inheritance, then operate in that new shift. Never relax the budget to complete presentation proof.
+
+## 2026-10-25 S47: journey asserted startup mode instead of frozen execution evidence
+
+- What happened: the fresh guided journey chose B, explicitly inherited it and completed an offline operation, then rejected its actual TRUSTED_LOCAL label because the test expected RECORDED_INSPECTION. The operation store and failed receipt remain.
+- Root cause: the test inferred evidence from preview startup configuration instead of the selected comparison's frozen execution class.
+- Prevention rule: compare an operation's evidence mode to its actual frozen context and retain the exact label. Never relabel trusted-local execution as recorded inspection or live evidence.
+
+## 2026-10-25 S47: a full-hash needle missed abbreviated hashes
+
+- What happened: a stronger rendered hash scan failed on the existing twelve-character comparison hash abbreviations, although the full-literal scanner passed.
+- Root cause: the text matcher put a word boundary after the non-word ellipsis, so abbreviations did not match. A full-hash needle cannot detect a truncated value.
+- Prevention rule: scan both full and abbreviated rendered hashes and prove each form. Match the twelve hex characters before the ellipsis, preserving the original literal when technical details open.
+
+## 2026-10-25 S47: generic hash scan also matched an ISBN
+
+- What happened: the stronger scan rejected a valid public record's thirteen-digit ISBN during a clean control.
+- Root cause: a generic hex-shaped-text expression classified a domain value as a technical hash.
+- Prevention rule: derive full and abbreviated hash needles from the actual public API hash fields. Keep ISBNs and other customer facts visible. Retain the rejected generic scan and require exact-value positive controls.
+
+## 2026-10-25 S47: mode entry added a mobile header row
+
+- What happened: the unchanged Bellwether journey rejected the customer station at 390px because its bottom was 911.5px in a 900px viewport.
+- Root cause: placing Guided first run in the header increased its height from 243px to 297px. A browser control measured the original, hidden-button and relocated-button layouts and isolated that exact 54px increase.
+- Prevention rule: test the unchanged native journey before completion. Keep the new mode entry beside the existing view controls, which restores the original header and station geometry. Preserve the failing assertion and diagnosis; do not weaken reach checks.
+
+## 2026-10-25 S47 regression: journey request assertion omitted retained repetitions
+
+- What happened: the GTM journey expected three original-slot requests but its descendant selector correctly returned those plus nine retained public-repetition requests.
+- Root cause: the journey's expected list still used trial.outputs alone after retained repetitions became part of the rendered slot. Northline used the identical selector and expectation.
+- Prevention rule: compare the full ordered original-plus-repetition request list to the API. Keep the exact request assertions and every original task/outcome check. Do not lower the repetition count or hide rows to obtain a pass; retain the failed receipt and reprove the fault assertion.
+
+## 2026-10-25 S47: context limit checked late; fullscreen fallback remains red
+
+- What happened: the first runtime usage inspection reported 366,746 context/input tokens, above the 175k working limit. The regression runner had stopped at fallback_tags_clear_of_panels because graphics-controls covered the evaluator label. That failure is recorded, not repaired or accepted.
+- Root cause: context usage was not checked before the broad continuation. The fullscreen failure's cause and pre-existence are unverified.
+- Prevention rule: read the current chat's token_count before starting a broad phase. Stop at the documented limit, preserve raw failures and hand off a consistent tree instead of beginning another diagnosis.
+
+## 2026-10-25 S47 resume: the local browser command omitted its interpreter override
+
+- What happened: the first exact reproduction stopped in env.mjs before launching a browser because the isolated worktree has no interpreter at its local candidate paths.
+- Root cause: the command omitted the checkpoint's SHIFTWORK_PYTHON override. The corrected launch reproduced the intended fallback assertion.
+- Prevention rule: set SHIFTWORK_PYTHON to the verified existing interpreter on every Node browser command. Preserve the setup failure separately from product proof.
+
+## 2026-10-25 S47 resume: mode entry wrapped the fallback view controls
+
+- What happened: the exact starter preview reproduced graphics-controls covering the evaluator tag with WebGL disabled. The panel grew from 110px to 162px when Guided first run wrapped below the other two buttons.
+- Root cause: the new entry reused a fixed-width flex panel without sharing its available row width. An accepted-S45-byte control passed, and hiding only the new button restored 110px.
+- Prevention rule: share the unavailable-view button row width, retain 44px touch targets and wrap readable labels inside the buttons. Keep the unchanged fallback geometry assertion and a served fault that removes this CSS rule.
+
+## 2026-10-25 S47 resume: board-switch fault matched the guard and picker message
+
+- What happened: GTM fault preflight stopped because unreviewedSwitch matched two app.js statements. Northline's equivalent anchor also matched twice. No browser fault ran in that rejected invocation.
+- Root cause: the old substring appeared in both command eligibility and picker explanation. The fault did not identify which statement owned the guard.
+- Prevention rule: anchor to the complete switch guard and remove only its availability clause. Keep the expected refusal assertion and reprove clean/fault controls. The request-rendering faults retain their separate original-slot and repetition anchors.
+
+## 2026-10-25 S47 resume: repeated room verification reused an exclusive screenshot name
+
+- What happened: the first GTM clean fault control reached the board-switch checks, then stopped with EEXIST while saving stonebridge-room.png a second time. No intended fault was proved by that result.
+- Root cause: verifyRoom can run repeatedly in the snapshot path, but its screenshot used one fixed filename with exclusive creation.
+- Prevention rule: give repeated room captures distinct numbered names while retaining exclusive writes and every room assertion. Preserve the rejected directory; restart proof in a fresh root with disabled bytecode and owned caches.
+
+## 2026-10-25 S47 resume: broad deselection matched a module name
+
+- What happened: -k 'not test_clean_env_install_and_run' deselected seven tests, including six permitted offline environment cases. The broad run passed 1,726. The omitted six were then explicitly run and passed.
+- Root cause: pytest -k matches the module name as well as test names.
+- Prevention rule: exclude the actual installation test by its full node ID with --deselect. Report the two-run coverage honestly; no installation ran.
+
+## 2026-10-25 S47 resume: direct fault launch omitted bytecode/cache controls
+
+- What happened: the rejected direct GTM fault launch lacked disabled-bytecode and owned-cache settings. Forty-four .pyc files in the S47 tree have post-entry modification times and remain preserved.
+- Root cause: the direct command carried only the interpreter override instead of the complete verified environment.
+- Prevention rule: reuse the full launch environment for every child process. Keep generated artifacts and failed receipts visible in the handoff; do not delete inherited or uncertain files to hide the mistake.
+
+## 2026-10-25 S47 finish: the driver import lacked its own interpreter override
+
+- What happened: the new selective fullscreen driver stopped while importing env.mjs, before starting a preview or browser. Its child environment was complete, but the parent import had no SHIFTWORK_PYTHON.
+- Root cause: the driver configured only spawned children and overlooked its own dynamic import of the existing fullscreen definitions.
+- Prevention rule: apply the same verified environment to the driver before importing repository browser helpers. The rejected setup receipt is preserved under /tmp/shiftwork-s47-finish-20261025-a/fullscreen.log and fullscreen-setup-rejected/.
+
+## 2026-10-25 S47 review: dynamic station picks stayed inside the guided layout
+
+- What happened: real Northline and GTM browser controls each failed station pick must open the full workbench. Their dynamically created controls activated a station whose content remained hidden by the guided layout.
+- Root cause: only the startup static station buttons had a mode-exit handler. Dynamic buttons and scene picks called the station activator directly.
+- Prevention rule: use pickStation for explicit room, button and next-action picks. Keep the underlying activator for guided navigation, inspection and operation so those actions retain the approved presentation. The separate three-board controls and served guard fault live in first_run_regressions.mjs.
+
+## 2026-10-25 S47 review: a run-prefix heuristic changed ordinary evidence prose
+
+- What happened: a browser control changed run-time and run-of-the-mill inside representative evidence text, failing the exact prose assertion.
+- Root cause: the technical-text regular expression classified every run-prefixed word as a run identifier.
+- Prevention rule: collect public run identities from current records and rendered metadata, retain exact token boundaries, and leave ordinary evidence words untouched. The scanner control now carries the same data-run-id metadata as real evidence. Require both exact prose and collapsed/revealed public-ID controls.
+
+## 2026-10-25 S47 review: loading publications reset panel navigation
+
+- What happened: a real delayed refresh changed browsed panel 5 to panel 1 before the same-shift response arrived. Its red receipt is preserved in review-red/refresh-bookshop.log.
+- Root cause: a loading publication's absent view was treated as a new unknown board/shift context and cleared browsedPanel.
+- Prevention rule: update the navigation context only from an accepted view. Test the loading interval, the restored same-shift response and a genuine different-board reset separately in first_run_regressions.mjs.
+
+## 2026-10-25 S47 review: exact run-ID collection omitted historical channels
+
+- What happened: the first exact-ID repair passed current-run controls but a new historical metadata control failed at data-opening-run. GTM inspection checks were deliberately stopped and their partial receipts preserved before this repair.
+- Root cause: the collector enumerated current and repetition metadata, overlooking historical incident, wall, pipeline and inheritance run attributes.
+- Prevention rule: inventory every semantic run attribute written by the renderer. Test a distinct historical identity for each channel with its own omitted-channel served fault and restored control. Preserve ordinary prose and exact identity reveal together.
+- Follow-up: the actual investigation renderer exposed one older source ID without any run metadata. It now sets the existing data-run-id attribute. A separate real-renderer red check, omission fault and clean/restored checks prove that wiring without changing the recorded cause text.
+
+## 2026-10-25 S47 final checks: S44 readiness read before document creation
+
+- What happened: the ambient suite passed, then S44's clean browser stopped with Cannot read properties of null before any rendering assertion. The first repair patch was rejected because it copied S45's assertion message instead of S44's current line; no file changed in that rejected patch.
+- Root cause: the readiness predicate accessed document.body.dataset immediately after navigation, before the new body existed. The patch error came from mixing adjacent harness messages.
+- Prevention rule: use optional body access in navigation readiness predicates, retaining the same ready state, timeout and every rendering assertion. Copy the exact current line before patching. The rejected receipt remains in /tmp/shiftwork-s47-finish-20261025-a/remaining/s44-clean.log. Resume S44/S45 in fresh stores without repeating the passed ambient stage.
+
+## 2026-10-25 S47 evidence review: stale client proofs were overstated
+
+- What happened: user review found older app.js/manifest bytes in fullscreen, affected-fullscreen and review-id-green. The report overstated historical-ID final-byte coverage. Fresh verification has not run.
+- Root cause: validate_finish.py calculated changed-client lists but enforced emptiness for only five proof sets. A success exit was presented too broadly. Function-level reasoning was substituted for pinned served-file proof.
+- Prevention rule: pin the acceptance client bytes before proof, prohibit carried rows in a final-byte rerun, and require every acceptance proof set to match those bytes. Record previous receipts as historical instead of calling their guarantees current.
+
+## 2026-10-25 S47 final-byte rerun: fixed port sequence reached an existing listener
+
+- What happened: the fresh fullscreen driver completed 184 valid rows, then its pre-launch port probe rejected occupied port 8765. No browser or preview started for the rejected row. The listener and all completed receipts were preserved.
+- Root cause: a fixed sequence checked each port before use but assumed the whole range would be available. It did not allocate ports through the operating system.
+- Prevention rule: allocate an unused local port for each owned preview, reject reuse within the proof set and retain setup failures separately from named fault proof. Resume only an exact verified prefix from the same pinned fresh run; never import stale historical rows. The original driver, failure, prefix and successful resume remain in /tmp/shiftwork-s47-finalbytes-20261025-a/.
+
+## 2026-10-25 S47 final-byte rerun: validation invoked before the final process exited
+
+- What happened: the acceptance validator was launched with only 23 of 24 historical-ID rows recorded. It correctly rejected the incomplete packet. The final restored check later exited zero without a rerun, and complete validation passed.
+- Root cause: a printed PASS line was treated as near completion while the browser process was still closing. The run-complete marker had not been checked first.
+- Prevention rule: require the driver to exit zero and verify its run-complete marker before acceptance validation. Preserve the incomplete-packet rejection; never treat a printed PASS as the process result. validation-before-docs.log retains the rejected invocation.
