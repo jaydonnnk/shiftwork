@@ -170,7 +170,7 @@ export function lampStates(view) {
   const ledger = view.consequences?.chainStatus !== 'VALID' ? lamp('ledger', 'unknown', 'Unavailable')
     : open ? lamp('ledger', 'fail', `${open} open`) : lamp('ledger', 'idle', 'None open');
   const comparison = view.tests?.comparison;
-  const running = comparison && (['PLANNED', 'RUNNING'].includes(comparison.state) || comparison.trials.some(trial => ['RESERVED', 'RUNNING'].includes(trial.state)));
+  const running = comparison && ['PLANNED', 'RUNNING'].includes(comparison.state);
   const compare = running ? lamp('compare', 'attention', 'Running')
     : !comparison ? lamp('compare', 'idle', 'Not started')
     : comparison.outcomeStatus === 'COMPLETE' ? lamp('compare', 'idle', 'No score, no default')

@@ -1,4 +1,4 @@
-import { bodyBytes, selectEvidence, diagnosticRateLines, comparisonRateLines } from './evidence.js';
+import { bodyBytes, selectEvidence, diagnosticRateLines, comparisonRateLines, proposalDiagnosticSummary } from './evidence.js';
 import { projectWorkplace } from './workplace-view.js';
 import { statusBarValues, logEntries, guideStep, narrator, restingTags, reduceShiftReport, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
 
@@ -925,7 +925,10 @@ async function refresh(runId = null) {
     renderBoard();
     activateStation(state.station, false);
     publishPresentation('refresh');
-    if (!terminal(run)) pollTimer = setTimeout(() => refresh(run.id), 1000);
+    const parentStopped = run?.purpose === 'EXPERIMENT' && comparison?.kind === 'QUALIFYING_COMPARISON' &&
+      comparison.id === run.experiment_id && comparison.shift_id === run.shift_id &&
+      ['FINALIZED', 'FAILED', 'INVALIDATED'].includes(comparison.state);
+    if (!terminal(run) && !parentStopped) pollTimer = setTimeout(() => refresh(run.id), 1000);
     return true;
   } catch (error) {
     if (generation !== state.generation) return;
@@ -1219,14 +1222,34 @@ function renderAssist(station) {
     if (event.state === 'COMPLETE') {
       row.append(element('p', event.response_text, 'evidence-text'));
       if (event.role === 'PATCH_PROPOSAL') {
-        row.append(element('p', event.accepted === null ? 'Proposal only. It has not changed code, checks, or selection.' :
-          `${event.accepted ? 'Accepted' : 'Rejected'} as help attribution. Code remains yours to edit.`, 'evidence-meta'));
+        row.append(element('p', event.accepted === true
+          ? 'Coach proposal copied into your draft. Save a version, compare it and choose separately.'
+          : event.accepted === false ? 'Coach proposal dismissed. Your draft is unchanged.'
+          : 'Coach proposal for your review. Running it uses one diagnostic slot. Acceptance changes only your draft.', 'evidence-meta'));
+        if (event.proposal_source_sha256) {
+          row.append(element('p', `Proposed service source SHA-256: ${event.proposal_source_sha256}`, 'evidence-meta'));
+          const preview = element('details');
+          preview.dataset.coachSource = event.id;
+          preview.append(element('summary', 'Review resulting service.py · coach proposal'), element('pre', event.proposal_source));
+          row.append(preview);
+          const runButton = element('button', event.diagnostic_run_id ? 'View isolated report' : 'Run proposal once in isolation', 'button secondary');
+          runButton.type = 'button'; runButton.dataset.proposalRun = event.id;
+          runButton.disabled = state.pending || hasUnsavedDraft() || inspection.mode !== 'current';
+          runButton.addEventListener('click', () => event.diagnostic_run_id
+            ? inspectProposalReport(event.diagnostic_run_id) : runDiagnostic(event.id));
+          row.append(runButton);
+          const report = [state.diagnostic, station.latest_diagnostic].find(item =>
+            item?.trials?.some(trial => trial.run_id === event.diagnostic_run_id));
+          if (report) row.append(element('p', proposalDiagnosticSummary(report), 'proposal-pass-rate'));
+        } else row.append(element('p', 'Historical prose proposal. It has no executable source snapshot.', 'evidence-meta'));
       }
       if (event.accepted !== null && event.role !== 'PATCH_PROPOSAL') row.append(element('p',
         event.accepted ? 'Marked as used help.' : 'Marked as dismissed help.', 'evidence-meta'));
       if (event.accepted === null) for (const [label, accepted] of [['Mark used', true], ['Dismiss', false]]) {
-        const button = element('button', label, 'button secondary');
-        button.type = 'button'; button.disabled = state.pending;
+        const patch = event.role === 'PATCH_PROPOSAL';
+        const button = element('button', patch && accepted ? 'Copy proposal into draft' : label, 'button secondary');
+        button.type = 'button';
+        button.disabled = state.pending || (patch && accepted && (!event.proposal_source_sha256 || hasUnsavedDraft() || inspection.mode !== 'current'));
         button.addEventListener('click', () => decideAssist(event.id, accepted));
         row.append(button);
       }
@@ -1300,7 +1323,7 @@ function renderDiagnostic(station) {
     request.append(element('p', output.request_text, 'evidence-text request-quote'));
     result.append(request);
     step += 1;
-    const answer = evidenceStep(step, 'Exact output the starter produced');
+    const answer = evidenceStep(step, trial?.proposal_event_id ? 'Exact output the coach proposal produced' : 'Exact output the saved service produced');
     let decoded = null;
     try { decoded = new TextDecoder('utf-8', { fatal: true }).decode(bodyBytes(output.body_base64)); } catch { decoded = null; }
     answer.append(element('p', decoded ?? 'The captured body is not valid UTF-8. The base64 below preserves every byte.', 'evidence-text'));
@@ -1366,7 +1389,21 @@ function renderFailedRequest() {
   target.dataset.runId = run.id;
   target.dataset.outputId = output.id;
   target.append(element('p', output.request_text, 'evidence-text request-quote'));
-  target.append(element('p', `Run ${run.id} · request ${output.request_ordinal} · executed ${run.artifact_version_id} · ${humanize(run.purpose)} · ${run.evidence_mode ?? 'unknown mode'}`, 'evidence-meta'));
+  const executed = run.proposal_event_id ? `coach proposal ${run.proposal_event_id}` : run.artifact_version_id;
+  target.append(element('p', `Run ${run.id} · request ${output.request_ordinal} · executed ${executed} · ${humanize(run.purpose)} · ${run.evidence_mode ?? 'unknown mode'}`, 'evidence-meta'));
+  if (run.proposal_event_id) {
+    const report = [state.diagnostic, state.stationView?.latest_diagnostic].find(item =>
+      item?.kind === 'DIAGNOSTIC' && item.id === run.experiment_id && item.shift_id === run.shift_id);
+    const trial = run.artifact_version_id === null && output.run_id === run.id ? report?.trials.find(item =>
+      item.run_id === run.id && item.proposal_event_id === run.proposal_event_id && item.artifact_version_id === null) : null;
+    if (!trial) return target.append(element('p', 'No matching proposal diagnostic is loaded. Open its isolated report to inspect the answer and task evidence.', 'evidence-meta'));
+    target.append(element('p', trial.customer_text ?? 'No customer answer was rendered for this trial.', 'evidence-text'));
+    const tasks = trial.task_assessments.filter(row => row.request_ordinal === output.request_ordinal);
+    target.append(element('p', tasks.length
+      ? `Reported independent task evidence: ${tasks.map(row => `${humanize(row.task_id)}: mandatory check ${row.mandatory_pass ? 'passes' : 'fails'}${row.reason_codes.length ? ` · ${row.reason_codes.join(', ')}` : ''}`).join('; ')}`
+      : 'No task assessment was recorded for this request.', 'evidence-meta'));
+    return;
+  }
   target.append(element('p', output.customer_answer?.display_text ?? 'No validated customer answer is recorded for this request.', 'evidence-text'));
   const failed = linked.checks.filter(check => check.verdict !== 'pass');
   target.append(element('p', failed.length
@@ -1508,6 +1545,7 @@ function renderCompare() {
       card.append(element('p', eligibility.blocking_reason_codes.length
         ? `Blocking reasons: ${eligibility.blocking_reason_codes.join(', ')}`
         : 'Blocking reasons: none recorded.', 'evidence-meta'));
+      card.append(element('p', 'Public requests are planned totals. Missing outputs includes planned requests that never ran.', 'help-text'));
       const list = element('dl');
       for (const [name, key] of fields) {
         const value = element('dd', metrics[key] ?? 'unknown');
@@ -1923,14 +1961,23 @@ function acceptDiagnostic(owner, experiment) {
   renderInvestigate();
   if (diagnosticPublicationAllowed(owner)) publishPresentation('diagnostic');
 }
-async function runDiagnostic() {
+async function inspectProposalReport(runId) {
+  const owner = diagnosticOwner();
+  try {
+    const run = await api(`/runs/${encodeURIComponent(runId)}`);
+    acceptDiagnostic(owner, await api(`/experiments/${encodeURIComponent(run.experiment_id)}`));
+  } catch (error) { text('assist-denial', error.message); }
+}
+async function runDiagnostic(proposalEventId = null) {
   const shiftId = state.board?.latest_shift?.id;
   const versionId = state.board?.latest_saved_version_id;
-  if (!shiftId || !versionId || state.pending) return;
+  if (!shiftId || (!proposalEventId && !versionId) || state.pending || hasUnsavedDraft()) return;
   const owner = diagnosticOwner();
   state.pending = true; renderBoard(); renderInvestigate();
   try {
-    let experiment = await api(`/shifts/${encodeURIComponent(shiftId)}/experiments`, { method: 'POST', body: JSON.stringify({
+    let experiment = proposalEventId
+      ? await api(`/shifts/${encodeURIComponent(shiftId)}/assist-events/${encodeURIComponent(proposalEventId)}/run`, {method: 'POST'})
+      : await api(`/shifts/${encodeURIComponent(shiftId)}/experiments`, { method: 'POST', body: JSON.stringify({
       kind: 'DIAGNOSTIC',
       investigation_id: state.stationView?.latest_investigation_id ?? null,
       candidate_a_version_id: versionId,
@@ -2074,7 +2121,7 @@ $('run-shift').addEventListener('click', () => {
 $('refresh').addEventListener('click', () => { inspection = { mode: 'current', historicalRunId: null }; publishPresentation('history'); refresh(); });
 $('append-investigation').addEventListener('click', appendInvestigation);
 $('request-assist').addEventListener('click', requestAssist);
-$('run-diagnostic').addEventListener('click', runDiagnostic);
+$('run-diagnostic').addEventListener('click', () => runDiagnostic());
 $('save-draft').addEventListener('click', saveDraft);
 $('draft-file').addEventListener('change', renderDraftEditor);
 $('draft-source').addEventListener('input', () => {
