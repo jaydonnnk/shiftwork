@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 
 type JsonValue = str | int | bool | None | list[JsonValue] | dict[str, JsonValue]
 type Id = str
@@ -201,6 +201,15 @@ class Shift(BaseModel):
     operation_allowed: bool = False
 
 
+class VersionAuthorship(BaseModel):
+    model_config = _FROZEN
+
+    learner_edited: bool
+    generated_patch_seen_count: int = Field(ge=0)
+    generated_patch_accepted_count: int = Field(ge=0)
+    learner_declared_generated_patch_use: bool
+
+
 class ArtifactVersion(BaseModel):
     """Immutable, content-hashed snapshot (program design S3.2).
 
@@ -221,6 +230,7 @@ class ArtifactVersion(BaseModel):
     contract: ContractParams
     contract_catalog_hash: str
     created_by: Literal["template", "learner"]
+    authorship: VersionAuthorship | None = None
     created_at: datetime
 
 
@@ -331,6 +341,9 @@ class AssistEvent(BaseModel):
     response_text: str
     proposed_patch: str | None = None
     accepted: bool | None = None
+    diagnostic_run_id: Id | None = None
+    proposal_source_sha256: str | None = None
+    proposal_source: str | None = None
     state: Literal["PENDING", "COMPLETE", "FAILED"]
     failure_code: str | None = None
     client_request_id: str
@@ -479,8 +492,22 @@ class CandidateRef(BaseModel):
     model_config = _FROZEN
 
     label: Literal["A", "B"]
-    artifact_version_id: Id
+    artifact_version_id: Id | None
     artifact_content_hash: str
+    proposal_event_id: Id | None = None
+
+    @model_validator(mode="after")
+    def one_source(self):
+        if bool(self.artifact_version_id) == bool(self.proposal_event_id):
+            raise ValueError("a candidate identifies one version or one proposal")
+        return self
+
+    @model_serializer(mode="wrap")
+    def preserve_version_identity(self, handler):
+        value = handler(self)
+        if self.proposal_event_id is None:
+            value.pop("proposal_event_id")
+        return value
 
 
 class Experiment(BaseModel):

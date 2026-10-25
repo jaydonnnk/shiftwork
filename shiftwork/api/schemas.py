@@ -4,11 +4,12 @@ import base64
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 
 from shiftwork.domain.comparison import ComparisonOutcome
 from shiftwork.domain.models import (
     ArtifactVersion,
+    VersionAuthorship,
     AssistRole,
     CheckResult,
     Incident,
@@ -64,6 +65,7 @@ class FreezeVersionRequest(BaseModel):
     model_config = _FROZEN
 
     contract: ContractView
+    learner_declared_generated_patch_use: bool = False
 
 
 class ShiftView(BaseModel):
@@ -93,6 +95,7 @@ class ArtifactVersionView(BaseModel):
     contract: ContractView
     contract_catalog_hash: str
     created_by: Literal["template", "learner"]
+    authorship: VersionAuthorship | None = None
     created_at: datetime
 
     @classmethod
@@ -111,6 +114,7 @@ class ArtifactSourceView(BaseModel):
     files: dict[str, str]
     contract: ContractView
     authorship: Literal["template", "learner"]
+    version_authorship: VersionAuthorship | None = None
 
 
 class OperationRequest(BaseModel):
@@ -124,7 +128,9 @@ class RunView(BaseModel):
 
     id: str
     shift_id: str
-    artifact_version_id: str
+    artifact_version_id: str | None
+    proposal_event_id: str | None = None
+    experiment_id: str | None = None
     attempt_number: int
     state: Literal["QUEUED", "RUNNING", "CAPTURED", "FINALIZED", "FAILED"]
     adapter: Literal["local_process", "recorded", "tokenfactory"]
@@ -430,6 +436,9 @@ class AssistEventView(BaseModel):
     request_text: str
     response_text: str
     proposed_patch: str | None
+    diagnostic_run_id: str | None = None
+    proposal_source_sha256: str | None = None
+    proposal_source: str | None = None
     accepted: bool | None
     state: Literal["PENDING", "COMPLETE", "FAILED"]
     failure_code: str | None
@@ -543,6 +552,7 @@ class ExperimentTrialView(BaseModel):
     execution_ordinal: int = 1
     candidate_label: Literal["A", "B"]
     artifact_version_id: str | None = None
+    proposal_event_id: str | None = None
     artifact_content_hash: str | None = None
     workload_id: str
     workload_ordinal: int = 1
@@ -567,8 +577,16 @@ class CandidateView(BaseModel):
     model_config = _FROZEN
 
     label: Literal["A", "B"]
-    artifact_version_id: str
+    artifact_version_id: str | None
+    proposal_event_id: str | None = None
     artifact_content_hash: str
+
+    @model_serializer(mode="wrap")
+    def preserve_version_identity(self, handler):
+        value = handler(self)
+        if self.proposal_event_id is None:
+            value.pop("proposal_event_id")
+        return value
 
 
 class ContextConditionView(BaseModel):

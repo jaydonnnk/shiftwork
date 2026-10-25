@@ -303,6 +303,7 @@ def _version(row: sqlite3.Row) -> ArtifactVersion:
         contract=contract,
         contract_catalog_hash=contract_catalog_hash,
         created_by=row["created_by"],
+        authorship=_load(row["authorship_json"]) if row["authorship_json"] else None,
         created_at=row["created_at"],
     )
 
@@ -310,8 +311,8 @@ def _version(row: sqlite3.Row) -> ArtifactVersion:
 def insert_version(conn: sqlite3.Connection, version: ArtifactVersion) -> None:
     conn.execute(
         "INSERT INTO artifact_versions (id, shift_id, parent_id, restored_from_id, content_hash, "
-        "storage_ref, files_json, contract_json, contract_catalog_hash, created_by, created_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "storage_ref, files_json, contract_json, contract_catalog_hash, created_by, created_at, authorship_json) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         (
             version.id,
             version.shift_id,
@@ -324,6 +325,7 @@ def insert_version(conn: sqlite3.Connection, version: ArtifactVersion) -> None:
             version.contract_catalog_hash,
             version.created_by,
             version.created_at.isoformat(),
+            _dump(version.authorship.model_dump(mode="json")) if version.authorship else None,
         ),
     )
 
@@ -996,6 +998,51 @@ def latest_investigation_for_shift(
     return _investigation(row) if row else None
 
 
+_ASSIST_EVENT_SELECT = (
+    "SELECT a.*, p.proposal_source_sha256, p.files_json AS proposal_files_json, "
+    "r.run_id AS diagnostic_run_id FROM assist_events a "
+    "LEFT JOIN assist_proposal_snapshots p ON p.event_id = a.id "
+    "LEFT JOIN assist_proposal_runs r ON r.event_id = a.id "
+)
+
+
+def insert_assist_proposal_base(conn, event_id: str, version_id: str, files: dict[str, str]) -> None:
+    base = get_version(conn, version_id)
+    base_hash = canonical.artifact_content_hash(files, canonical.contract_params_json(base.contract),
+                                                 base.contract_catalog_hash)
+    conn.execute("INSERT INTO assist_proposal_snapshots "
+                 "(event_id, base_version_id, base_files_json, base_hash) VALUES (?, ?, ?, ?)",
+                 (event_id, version_id, _dump(files), base_hash))
+
+
+def complete_assist_proposal(conn, event_id: str, files: dict[str, str], artifact_hash: str,
+                            source_hash: str) -> None:
+    conn.execute("UPDATE assist_proposal_snapshots SET files_json = ?, artifact_content_hash = ?, "
+                 "proposal_source_sha256 = ? WHERE event_id = ? AND files_json IS NULL",
+                 (_dump(files), artifact_hash, source_hash, event_id))
+
+
+def get_assist_proposal(conn, event_id: str) -> sqlite3.Row | None:
+    return conn.execute("SELECT * FROM assist_proposal_snapshots WHERE event_id = ?", (event_id,)).fetchone()
+
+
+def get_assist_proposal_for_run(conn, run_id: str) -> sqlite3.Row | None:
+    return conn.execute("SELECT p.* FROM assist_proposal_snapshots p JOIN assist_proposal_runs r "
+                        "ON r.event_id = p.event_id WHERE r.run_id = ?", (run_id,)).fetchone()
+
+
+def reserve_assist_proposal_run(conn, event_id: str, run_id: str) -> None:
+    conn.execute("INSERT INTO assist_proposal_runs (event_id, run_id) VALUES (?, ?)", (event_id, run_id))
+
+
+def generated_patch_counts(conn, shift_id: str) -> tuple[int, int]:
+    row = conn.execute("SELECT COUNT(*) AS seen, COALESCE(SUM(a.accepted = 1), 0) AS accepted "
+                       "FROM assist_events a JOIN assist_proposal_snapshots p ON p.event_id = a.id "
+                       "WHERE a.shift_id = ? AND a.state = 'COMPLETE' AND p.files_json IS NOT NULL",
+                       (shift_id,)).fetchone()
+    return row["seen"], row["accepted"]
+
+
 def _assist_event(row: sqlite3.Row) -> AssistEvent:
     return AssistEvent(
         id=row["id"], shift_id=row["shift_id"],
@@ -1005,6 +1052,9 @@ def _assist_event(row: sqlite3.Row) -> AssistEvent:
         elapsed_ms=row["elapsed_ms"], request_text=row["request_text"],
         response_text=row["response_text"], proposed_patch=row["proposed_patch"],
         accepted=None if row["accepted"] is None else bool(row["accepted"]),
+        diagnostic_run_id=row["diagnostic_run_id"],
+        proposal_source_sha256=row["proposal_source_sha256"],
+        proposal_source=_load(row["proposal_files_json"])["service.py"] if row["proposal_files_json"] else None,
         state=row["state"], failure_code=row["failure_code"],
         client_request_id=row["client_request_id"], created_at=row["created_at"],
     )
@@ -1025,24 +1075,24 @@ def insert_assist_event(conn: sqlite3.Connection, event: AssistEvent) -> None:
 
 
 def get_assist_event(conn: sqlite3.Connection, event_id: str) -> AssistEvent | None:
-    row = conn.execute("SELECT * FROM assist_events WHERE id = ?", (event_id,)).fetchone()
+    row = conn.execute(_ASSIST_EVENT_SELECT + "WHERE a.id = ?", (event_id,)).fetchone()
     return _assist_event(row) if row else None
 
 
 def get_assist_by_client_request_id(conn: sqlite3.Connection, client_request_id: str) -> AssistEvent | None:
-    row = conn.execute("SELECT * FROM assist_events WHERE client_request_id = ?", (client_request_id,)).fetchone()
+    row = conn.execute(_ASSIST_EVENT_SELECT + "WHERE a.client_request_id = ?", (client_request_id,)).fetchone()
     return _assist_event(row) if row else None
 
 
 def list_assist_for_shift(conn: sqlite3.Connection, shift_id: str) -> list[AssistEvent]:
     return [_assist_event(row) for row in conn.execute(
-        "SELECT * FROM assist_events WHERE shift_id = ? ORDER BY rowid", (shift_id,)
+        _ASSIST_EVENT_SELECT + "WHERE a.shift_id = ? ORDER BY a.rowid", (shift_id,)
     ).fetchall()]
 
 
 def list_pending_assist_events(conn: sqlite3.Connection) -> list[AssistEvent]:
     return [_assist_event(row) for row in conn.execute(
-        "SELECT * FROM assist_events WHERE state = 'PENDING' ORDER BY rowid"
+        _ASSIST_EVENT_SELECT + "WHERE a.state = 'PENDING' ORDER BY a.rowid"
     ).fetchall()]
 
 

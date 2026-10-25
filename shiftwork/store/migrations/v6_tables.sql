@@ -408,3 +408,40 @@ BEFORE DELETE ON shift_mission_bindings
 BEGIN
     SELECT RAISE(ABORT, 'a shift mission binding is never deleted');
 END;
+
+
+-- S46 keeps transient proposals separate from learner-saved versions.
+CREATE TABLE IF NOT EXISTS assist_proposal_snapshots (
+    event_id TEXT PRIMARY KEY REFERENCES assist_events(id),
+    base_version_id TEXT NOT NULL REFERENCES artifact_versions(id),
+    base_files_json TEXT NOT NULL CHECK(json_valid(base_files_json)),
+    base_hash TEXT NOT NULL,
+    files_json TEXT CHECK(files_json IS NULL OR json_valid(files_json)),
+    artifact_content_hash TEXT,
+    proposal_source_sha256 TEXT,
+    CHECK ((files_json IS NULL AND artifact_content_hash IS NULL AND proposal_source_sha256 IS NULL)
+        OR (files_json IS NOT NULL AND artifact_content_hash IS NOT NULL AND proposal_source_sha256 IS NOT NULL))
+);
+CREATE TRIGGER IF NOT EXISTS assist_proposal_snapshots_no_delete
+BEFORE DELETE ON assist_proposal_snapshots BEGIN
+    SELECT RAISE(ABORT, 'proposal snapshots are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS assist_proposal_snapshots_complete_once
+BEFORE UPDATE ON assist_proposal_snapshots BEGIN
+    SELECT RAISE(ABORT, 'proposal snapshots complete once') WHERE NOT (
+        OLD.event_id IS NEW.event_id AND OLD.base_version_id IS NEW.base_version_id
+        AND OLD.base_files_json IS NEW.base_files_json AND OLD.base_hash IS NEW.base_hash
+        AND OLD.files_json IS NULL AND NEW.files_json IS NOT NULL);
+END;
+CREATE TABLE IF NOT EXISTS assist_proposal_runs (
+    event_id TEXT PRIMARY KEY REFERENCES assist_proposal_snapshots(event_id),
+    run_id TEXT NOT NULL UNIQUE REFERENCES runs(id)
+);
+CREATE TRIGGER IF NOT EXISTS assist_proposal_runs_no_update
+BEFORE UPDATE ON assist_proposal_runs BEGIN
+    SELECT RAISE(ABORT, 'proposal run reservations are immutable');
+END;
+CREATE TRIGGER IF NOT EXISTS assist_proposal_runs_no_delete
+BEFORE DELETE ON assist_proposal_runs BEGIN
+    SELECT RAISE(ABORT, 'proposal run reservations are immutable');
+END;
