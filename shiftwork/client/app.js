@@ -1,6 +1,6 @@
-import { bodyBytes, selectEvidence, diagnosticRateLines, comparisonRateLines } from './evidence.js';
+import { bodyBytes, selectEvidence, diagnosticRateLines, comparisonRateLines, evidenceLabel } from './evidence.js';
 import { projectWorkplace } from './workplace-view.js';
-import { statusBarValues, logEntries, guideStep, narrator, restingTags, reduceShiftReport, STEP_NAMES, SHIFT_CARDS } from './workplace-story.js';
+import { statusBarValues, logEntries, guideStep, narrator, restingTags, reduceShiftReport, STEP_NAMES, SHIFT_CARDS, FIRST_RUN_PANELS, firstRunPanel } from './workplace-story.js';
 
 const $ = id => document.getElementById(id);
 const state = { board: null, loadedShiftId: null, draft: null, stationView: null, run: null, outputs: [], checks: [], events: [], selected: null, station: 'service', view: 'board', file: 'contract', generation: 0, intent: 0, pending: false, diagnostic: null, comparison: null, candidates: { A: null, B: null } };
@@ -14,6 +14,11 @@ let pollTimer = null;
 let workplaceHost = null, latestPresentation = null, hostEpoch = 0, hostLoading = false, hostTimer = null;
 let inspection = { mode: 'current', historicalRunId: null };
 let expandedWork = false;
+let firstRun = false, browsedPanel = null, firstRunContext = null;
+let workbenchRunHidden = false;
+const guidedPlacements = [];
+const GUIDED_ACTIONS = ['Read the complaints', 'Explain the cause; say what would prove you wrong; write and run your public test',
+  'Try two fixes under the same conditions', 'Choose one, then run the shift', 'Review this shift before carrying it forward'];
 let inspectorOpen = false, inspectorCover = 0, logFilter = 'all', openStationId = null;
 let reportPrevious = null, chooseOpener = null, reportOpener = null;
 const reportedRuns = new Set();
@@ -256,6 +261,7 @@ function publishPresentation(reason) {
       (view.run ? `Inspected run: ${view.run.id}. Executed version: ${view.run.versionId}. ${view.run.purpose} / ${view.run.evidenceMode ?? 'unknown mode'}. ${verdicts || 'Independent evidence incomplete.'}` : 'No run loaded.'));
   }
   latestPresentation = publication;
+  renderFirstRun(publication.kind === 'accepted' ? publication.view : null);
   workplaceHost?.publish(publication);
 }
 const LOG_TONES = { fail: 'Fail', pass: 'Pass', info: 'Record', you: 'You' };
@@ -424,6 +430,141 @@ function renderGuide(view = latestPresentation?.kind === 'accepted' ? latestPres
     if (item.stationId === view.attention) button.dataset.attention = 'true'; else delete button.dataset.attention;
   }
 }
+// First-run groups contain the actual workbench nodes, with their existing handlers.
+// Comment anchors restore every node, including unsaved inputs, to its original parent.
+function placeGuided(node, panel) {
+  const anchor = document.createComment('S47 workbench position');
+  node.before(anchor);
+  guidedPlacements.push({node, anchor, hidden: node.hidden});
+  $(`guided-panel-${panel}`).append(node);
+}
+function setFirstRun(enabled) {
+  if (firstRun === enabled) return;
+  firstRun = enabled; browsedPanel = null; firstRunContext = null;
+  document.body.dataset.firstRun = String(enabled);
+  document.body.dataset.technicalOpen = 'false';
+  document.querySelectorAll('[data-guided-technical-toggle]').forEach(node => node.setAttribute('aria-pressed', 'false'));
+  $('guided-toggle').textContent = enabled ? 'Full workbench' : 'Guided first run';
+  $('guided-toggle').setAttribute('aria-pressed', String(enabled));
+  $('guided-controls').hidden = !enabled; $('guided-view').hidden = !enabled;
+  document.querySelectorAll('.guided-dialog-technical').forEach(node => { node.hidden = !enabled; });
+  if (!enabled) {
+    for (const {node, anchor, hidden} of guidedPlacements.splice(0).reverse()) { anchor.replaceWith(node); node.hidden = hidden; }
+    $('run-shift').hidden = workbenchRunHidden;
+    document.querySelectorAll('option[data-guided-original-label]').forEach(option => {
+      option.textContent = option.dataset.guidedOriginalLabel; delete option.dataset.guidedOriginalLabel;
+    });
+    document.querySelectorAll('.technical-value').forEach(node => node.replaceWith(document.createTextNode(node.querySelector('.technical-literal').textContent)));
+    activateStation(state.station, false);
+    return;
+  }
+  if (expandedWork) setExpandedWork(false);
+  workbenchRunHidden = $('run-shift').hidden;
+  const groups = [
+    [$('failed-request').closest('section'), $('repair-view'), $('customer-view')],
+    [$('investigate-view')], [$('compare-view')],
+    [$('choice-controls'), $('operation-controls'), $('run-help'), $('operate-pilot'), $('pilot-help'), $('operate-pipeline'), $('pipeline-help')],
+    [$('guided-consequences'), $('rollout-view'), $('pipeline-view'), $('next-view')],
+  ];
+  groups.forEach((nodes, index) => nodes.forEach(node => placeGuided(node, index + 1)));
+  openInspector();
+  renderFirstRun(latestPresentation?.kind === 'accepted' ? latestPresentation.view : null);
+}
+function showFirstRunPanel(panel) {
+  browsedPanel = panel;
+  // Activation reads and focuses existing records. It never saves, tests or executes.
+  activateStation(['customers', 'investigate', 'compare', 'compare', 'next'][panel - 1]);
+  $('guided-status').focus({preventScroll: true});
+  if (narrowLayout()) $('station-panel').scrollIntoView({block: 'start', behavior: 'instant'});
+}
+function renderFirstRun(view) {
+  if (!firstRun) return;
+  const guide = guideStep(view, {activeStation: state.station, causeDraft: $('cause-input').value.trim() !== ''});
+  const recommended = firstRunPanel(guide);
+  if (view) {
+    const context = `${state.slug}/${view.context?.shiftId ?? 'unknown'}`;
+    if (firstRunContext !== context) { firstRunContext = context; browsedPanel = null; }
+  }
+  const panel = browsedPanel ?? recommended ?? 1;
+  $('guided-view').dataset.panel = String(panel);
+  text('guided-status', recommended ? `Recommended: ${FIRST_RUN_PANELS[recommended - 1]}. Viewing panel ${panel} of 5.` : 'Recorded state unavailable. Recommended step unknown.');
+  $('guided-status').tabIndex = -1;
+  text('guided-action', GUIDED_ACTIONS[panel - 1]);
+  text('panel-title', FIRST_RUN_PANELS[panel - 1]);
+  text('panel-kicker', 'Guided first run');
+  $('guided-back').disabled = panel === 1; $('guided-next').disabled = panel === 5;
+  for (const node of document.querySelectorAll('[data-guided-panel]')) node.hidden = Number(node.dataset.guidedPanel) !== panel;
+  for (const node of document.querySelectorAll('[data-first-run-go]')) {
+    if (Number(node.dataset.firstRunGo) === panel) node.setAttribute('aria-current', 'step'); else node.removeAttribute('aria-current');
+  }
+  // These are parent workbench sections. Nested availability/command guards stay untouched.
+  for (const id of ['repair-view', 'customer-view', 'investigate-view', 'compare-view', 'next-view']) $(id).hidden = false;
+  $('rollout-view').hidden = !northline(); $('pipeline-view').hidden = !gtm();
+  $('operate-pilot').hidden = !northline(); $('pilot-help').hidden = !northline();
+  $('operate-pipeline').hidden = !gtm(); $('pipeline-help').hidden = !gtm();
+  $('run-shift').hidden = northline() || gtm();
+  const records = $('comparison-records'), parent = $(`guided-panel-${panel === 4 ? 4 : 3}`);
+  if (records.parentNode !== parent) {
+    if (!guidedPlacements.some(item => item.node === records)) placeGuided(records, panel === 4 ? 4 : 3);
+    else parent.append(records);
+  }
+  text('guided-operation-status', state.board?.operating_selection?.kind === 'LEARNER_CHOICE'
+    ? `Your choice is saved. Run it explicitly. Selected version: ${state.board.operating_selection.selected_version_id}.`
+    : 'No learner choice is recorded. Saving and comparing never choose an operating version.');
+  collapseGuidedTechnical();
+  syncInspector();
+}
+const TECHNICAL_TEXT = /\b(?:[a-f0-9]{64}|[a-f0-9]{12}(?=…)|RECORDED_INSPECTION|ISOLATED_LIVE|TRUSTED_LOCAL)\b/g;
+function collapseGuidedTechnical() {
+  if (!firstRun) return;
+  const options = [...document.querySelectorAll('option[data-evidence-mode]')];
+  const modes = new Set(['RECORDED_INSPECTION', 'ISOLATED_LIVE', 'TRUSTED_LOCAL', state.run?.evidence_mode,
+    state.comparison?.context_evidence_class, state.diagnostic?.context_evidence_class,
+    ...options.map(option => option.dataset.evidenceMode)].filter(value => typeof value === 'string' && value.length));
+  const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const runAttributes = ['data-run-id', 'data-repetition-run-id', 'data-choose-repetition-run-id',
+    'data-opening-run', 'data-wall-run', 'data-pipeline-run', 'data-pipeline-incident-run',
+    'data-selected-run-id', 'data-observed-run', 'data-latest-run', 'data-observed-run-id'];
+  const runIds = new Set([state.run?.id, state.board?.latest_run?.id, ...options.map(option => option.value),
+    ...[...document.querySelectorAll(runAttributes.map(attribute => `[${attribute}]`).join(','))]
+      .flatMap(node => runAttributes.map(attribute => node.getAttribute(attribute)))]
+    .filter(value => typeof value === 'string' && value.length));
+  const technicalText = new RegExp([...modes, ...runIds].sort((a, b) => b.length - a.length)
+    .map(value => `\\b${escape(value)}\\b`).concat(TECHNICAL_TEXT.source).join('|'), 'g');
+  for (const option of options) {
+    option.dataset.guidedOriginalLabel ??= option.textContent;
+    const original = option.dataset.guidedOriginalLabel, mode = option.dataset.evidenceMode;
+    const shown = document.body.dataset.technicalOpen === 'true' ? original
+      : original.replaceAll(option.value, 'recorded run').replaceAll(mode, evidenceLabel(mode));
+    if (option.textContent !== shown) option.textContent = shown;
+  }
+  const roots = [$('station-panel'), $('choose-dialog'), $('shift-report')];
+  for (const root of roots) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    const nodes = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (node.parentElement.closest('.technical-value, textarea, select, script, pre, [data-provider-reasoning]')) continue;
+      if (node.parentElement.closest('[data-execution-field="mode"] strong, [data-comparison-field="mode"] strong') || node.textContent.match(technicalText)) nodes.push(node);
+    }
+    for (const node of nodes) {
+      const mode = node.parentElement.closest('[data-execution-field="mode"] strong, [data-comparison-field="mode"] strong');
+      const matches = mode ? [{0: node.textContent, index: 0}] : [...node.textContent.matchAll(technicalText)];
+      const fragment = document.createDocumentFragment(); let end = 0;
+      for (const match of matches) {
+        if (match.index > end) fragment.append(document.createTextNode(node.textContent.slice(end, match.index)));
+        const value = match[0], span = element('span', null, 'technical-value');
+        const label = mode || modes.has(value) ? evidenceLabel(value)
+          : runIds.has(value) ? 'recorded run' : 'record hash';
+        span.append(element('span', label, 'technical-label'), element('code', value, 'technical-literal'));
+        fragment.append(span); end = match.index + value.length;
+      }
+      if (end < node.textContent.length) fragment.append(document.createTextNode(node.textContent.slice(end)));
+      node.replaceWith(fragment);
+    }
+  }
+}
+
 const narrowLayout = () => window.matchMedia('(max-width: 760px)').matches;
 // The inspector is the existing #station-panel. Opening it never sends a request;
 // the scene only learns how much of the stage it covers.
@@ -574,7 +715,7 @@ async function initializeGraphics() {
       onStation({ board, shiftId, stationId }) {
         if (latestPresentation?.kind !== 'accepted' || board !== state.slug || shiftId !== state.loadedShiftId || latestPresentation.generation !== state.generation || latestPresentation.intent !== state.intent) return;
         if (!document.querySelector(`#${board}-stations [data-station="${stationId}"]`)) return;
-        activateStation(stationId);
+        pickStation(stationId);
       } });
     if (expandedWork) workplaceHost.setExpanded(true);
     syncInspector();
@@ -646,7 +787,7 @@ function buildStations(prefix, names, labels) {
     const button = element('button', undefined, `station ${prefix}-${name}`);
     button.dataset.station = name;
     button.append(element('span', String(index + 1).padStart(2, '0'), 'station-marker'), element('span', labels[index]));
-    button.addEventListener('click', () => activateStation(name));
+    button.addEventListener('click', () => pickStation(name));
     hotspots.append(button);
     const link = element('a', labels[index]); link.href = `#${name}`; link.dataset.view = name;
     link.addEventListener('click', event => { event.preventDefault(); navigate(name); });
@@ -1162,6 +1303,7 @@ function renderInvestigations(station) {
   list.replaceChildren(...station.investigations.map(entry => {
     const row = element('div', null, 'investigation-entry');
     row.dataset.investigationId = entry.id;
+    row.dataset.runId = entry.source_run_id;
     row.dataset.authoredBy = entry.authored_by;
     if (entry.revision_of_id) row.dataset.revisionOf = entry.revision_of_id;
     row.append(element('strong', `${entry.id} · ${entry.authored_by === 'learner' ? 'your entry' : entry.authored_by}${entry.revision_of_id ? ` · revises ${entry.revision_of_id}` : ''}`));
@@ -1273,6 +1415,7 @@ function renderDiagnostic(station) {
     for (const row of experiment.trials) {
       const option = element('option', `Run ${row.execution_ordinal}: ${row.run_id} · ${row.state} · ${row.evidence_mode}`);
       option.value = row.run_id; select.append(option);
+      option.dataset.evidenceMode = row.evidence_mode ?? 'unknown mode';
     }
     select.value = trial?.run_id ?? '';
     select.addEventListener('change', () => {
@@ -1990,6 +2133,10 @@ function bringStationPanelIntoReach() {
   }[state.station] : null;
   (content ?? panel).scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 }
+function pickStation(name) {
+  if (firstRun) setFirstRun(false);
+  activateStation(name);
+}
 function activateStation(name, userIntent = true) {
   if (userIntent) state.intent += 1;
   // Choosing a station keeps the current shift, so the picker steps aside.
@@ -2135,11 +2282,11 @@ $('select-candidate-a').addEventListener('click', () => chooseCandidate('A'));
 $('select-candidate-b').addEventListener('click', () => chooseCandidate('B'));
 $('selection-rationale').addEventListener('input', () => renderCompare());
 // The next action only opens the guide's station; it sends no request.
-$('next-action-go').addEventListener('click', () => activateStation(storyGuide?.stationId ?? state.station));
+$('next-action-go').addEventListener('click', () => pickStation(storyGuide?.stationId ?? state.station));
 // A cause draft moves the chip between steps 2 and 3 only; nothing is sent or credited.
 for (const id of ['cause-input', 'falsifier-input']) $(id).addEventListener('input', () => renderGuide());
 $('back-board').addEventListener('click', () => { location.hash = 'board'; navigate('board'); });
-document.querySelectorAll('[data-station]').forEach(button => button.addEventListener('click', () => activateStation(button.dataset.station)));
+document.querySelectorAll('[data-station]').forEach(button => button.addEventListener('click', () => pickStation(button.dataset.station)));
 document.querySelectorAll('[data-view]').forEach(link => link.addEventListener('click', event => {
   event.preventDefault();
   navigate(link.dataset.view);
@@ -2223,6 +2370,29 @@ if (!deepLink || deepLink === 'board') closeInspector(false);
 // A first-time visitor (no board parameter and no station link) starts at the picker.
 // It opens after the start-up navigation, which would otherwise close it.
 if (!requestedSlug && !deepLink) showPicker(true);
+
+FIRST_RUN_PANELS.forEach((name, index) => {
+  const panel = element('section'); panel.id = `guided-panel-${index + 1}`; panel.dataset.guidedPanel = String(index + 1); panel.hidden = true;
+  $('guided-view').append(panel);
+  const button = element('button', `${index + 1}. ${name}`); button.type = 'button'; button.dataset.firstRunGo = String(index + 1);
+  button.addEventListener('click', () => showFirstRunPanel(index + 1)); $('guided-nav').append(button);
+});
+const operationStatus = element('p'); operationStatus.id = 'guided-operation-status'; $('guided-panel-4').append(operationStatus);
+const review = element('button', 'Review shift report', 'button secondary'); review.id = 'guided-review-report'; review.type = 'button';
+review.addEventListener('click', () => showShiftReport(latestPresentation?.kind === 'accepted' ? latestPresentation.view : null));
+$('guided-panel-5').append(element('h3', 'Review this shift before carrying it forward'), review);
+$('guided-toggle').addEventListener('click', () => setFirstRun(!firstRun));
+for (const id of ['guided-back', 'guided-next']) $(id).addEventListener('click', () => showFirstRunPanel(Number($('guided-view').dataset.panel) + (id === 'guided-back' ? -1 : 1)));
+document.querySelectorAll('[data-guided-technical-toggle]').forEach(button => button.addEventListener('click', () => {
+  const open = document.body.dataset.technicalOpen !== 'true'; document.body.dataset.technicalOpen = String(open);
+  document.querySelectorAll('[data-guided-technical-toggle]').forEach(node => node.setAttribute('aria-pressed', String(open)));
+  collapseGuidedTechnical();
+}));
+// Renderers still own their nodes. This observer only collapses fresh public text before paint.
+new MutationObserver(() => collapseGuidedTechnical()).observe($('station-panel'), {subtree: true, childList: true, characterData: true});
+new MutationObserver(() => collapseGuidedTechnical()).observe($('choose-dialog'), {subtree: true, childList: true, characterData: true});
+document.body.dataset.firstRun = 'false';
+if (new URL(location.href).searchParams.get('guide') === '1') setFirstRun(true);
 $('close-inspector').addEventListener('click', () => closeInspector());
 document.addEventListener('keydown', event => {
   if (event.key !== 'Escape' || !inspectorOpen || expandedWork || event.defaultPrevented) return;

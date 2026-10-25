@@ -62,6 +62,7 @@
         <p id="graphics-status" role="status" data-state="loading">Loading recorded context. Your workbench is ready.</p>
         <button type="button" data-graphics-retry hidden>Retry 3D view</button>
         <button type="button" data-graphics-simple aria-pressed="false">Simpler 3D</button>
+    <button type="button" id="guided-toggle" class="change-shift" aria-pressed="false">Guided first run</button>
       </div>
       <div class="room" aria-label="Bellwether operational room">
         <div id="workplace-canvas" aria-hidden="true"><span id="you-chip" class="you-chip" hidden>You</span></div>
@@ -138,7 +139,15 @@
     </section>
     <aside class="detail-panel" id="station-panel" tabindex="-1" aria-labelledby="panel-title">
       <div class="panel-heading"><div><p class="eyebrow" id="panel-kicker">YOUR WORKING ARTIFACT</p><h2 id="panel-title">Service workbench</h2></div><button type="button" id="close-inspector" class="close-inspector" aria-label="Close the inspector">Close</button></div>
+      <section id="guided-controls" class="guided-controls" aria-label="First-run navigation" hidden>
+        <p id="guided-status" role="status"></p>
+        <nav id="guided-nav" aria-label="Five first-run panels"></nav>
+        <p id="guided-action" class="help-text"></p>
+        <p class="help-text">Navigation never saves or runs your work.</p>
+        <div class="panel-actions"><button type="button" id="guided-technical" data-guided-technical-toggle aria-pressed="false">Technical details</button><button type="button" id="guided-back">Back</button><button type="button" id="guided-next">Next panel</button></div>
+      </section>
       <div class="inspector-sheet">
+      <div id="guided-view" hidden></div>
       <div id="inspection-bar" class="inspection-bar" data-mode="current" role="status">
         <span id="inspection-mode">Current inspection</span>
         <button id="inspect-current" class="inspection-return" type="button" hidden>Return to current shift</button>
@@ -185,7 +194,7 @@
         <div id="artifact-detail" class="artifact-detail"></div>
         <section class="panel-section" data-synthetic-region="incidents"><div class="section-heading"><h3>Unresolved incidents</h3><span class="synthetic">Synthetic scenario</span></div><div id="incident-list"></div></section>
         <section class="panel-section"><h3>Known limits</h3><div id="limit-list"></div></section>
-        <section class="panel-section" data-synthetic-region="ledger">
+        <section id="guided-consequences" class="panel-section" data-synthetic-region="ledger">
           <div class="section-heading"><h3>Consequence wall</h3><span class="synthetic">Synthetic scenario</span></div>
           <p class="help-text">Only a linked operational record adds an event. One new linked event adds one 320ms recorded-evidence trace; it never means the customer succeeded.</p>
           <p id="wall-trace" class="wall-trace" data-state="idle" role="status">No recorded-evidence trace.</p>
@@ -193,7 +202,7 @@
           <div id="ledger-totals"></div>
           <div id="wall-events"></div>
         </section>
-        <div class="panel-actions"><button id="open-shift" class="button secondary" disabled>Open shift</button><button id="run-shift" class="button primary" disabled>Run customer shift <span aria-hidden="true">→</span></button></div>
+        <div id="operation-controls" class="panel-actions"><button id="open-shift" class="button secondary" disabled>Open shift</button><button id="run-shift" class="button primary" disabled>Run customer shift <span aria-hidden="true">→</span></button></div>
         <p id="run-help" class="help-text">Load the board to see available actions.</p>
       </section>
       <section id="repair-view" hidden>
@@ -293,13 +302,13 @@
           <div class="panel-actions"><button id="run-comparison" class="button primary">Reserve and run all six slots</button></div>
           <p id="compare-error" class="denial" role="status"></p>
         </section>
-        <section class="panel-section" data-synthetic-region="comparison-slots">
+        <section id="comparison-records" class="panel-section" data-synthetic-region="comparison-slots">
           <div class="section-heading"><h3>Six frozen slots</h3><span class="synthetic">Synthetic scenario</span></div>
           <p id="compare-summary" class="help-text"></p>
           <div id="comparison-outcome" class="comparison-outcome"></div>
           <div id="comparison-slots"></div>
         </section>
-        <section class="panel-section">
+        <section id="choice-controls" class="panel-section">
           <h3>Choose the version to operate</h3>
           <p id="selection-note" class="help-text" tabindex="-1">A complete eligible comparison is required.</p>
           <div class="panel-actions"><button id="open-choose-a" class="button secondary" disabled>Choose A…</button><button id="open-choose-b" class="button secondary" disabled>Choose B…</button></div>
@@ -377,6 +386,7 @@
     <h2 id="choose-title">Choose a live version</h2>
     <p id="choose-why">Why we ask: only the version you choose goes live</p>
     <p>Earlier runs and their consequences stay recorded as they happened.</p>
+    <button type="button" class="guided-dialog-technical" data-guided-technical-toggle aria-pressed="false" hidden>Technical details</button>
     <div id="choose-rates"></div><p id="choose-rate-limit" class="help-text"></p><div id="choose-links"></div>
     <div class="field"><label for="selection-rationale">Why this exact version?</label><p id="rationale-help">Required. Your reason stays with this choice.</p><textarea id="selection-rationale" rows="3" maxlength="2000" aria-describedby="rationale-help"></textarea></div>
     <h3>What happens to the other version</h3>

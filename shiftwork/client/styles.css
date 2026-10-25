@@ -568,3 +568,34 @@ main { flex: 1 0 auto; display: flex; flex-direction: column; width: 100%; min-w
 .shift-picker-message:empty { display: none; }
 .shift-picker-message { margin: 12px 0 0; color: #edbd68; }
 .close-picker { width: auto; margin-top: 16px; min-height: 44px; font-size: 14px; }
+
+/* S47: optional first-run presentation, using the original workbench controls. */
+.graphics-controls:has(#graphics-status:not([data-state="ready"])) button { flex: 1 1 0; min-width: 0; padding: 8px; font-size: 13px; line-height: 18px; }
+.guided-controls { margin: 0 4px 12px; padding: 12px; border: 1px solid #405166; border-radius: 8px; }
+.guided-controls p { margin: 0 0 8px; color: #eef2f6; }
+#guided-status { font-size: 14px; line-height: 20px; }
+#guided-nav { display: flex; flex-wrap: wrap; gap: 6px; }
+#guided-nav button, .guided-controls button { min-height: 44px; padding: 8px 10px; border: 1px solid #8293a6; border-radius: 6px; background: transparent; color: #eef2f6; font: inherit; cursor: pointer; }
+#guided-nav [aria-current] { border-color: #edbd68; color: #edbd68; }
+.guided-controls button:disabled { opacity: .6; cursor: default; }
+body[data-first-run="true"] .technical-literal { display: none; }
+body[data-first-run="true"][data-technical-open="true"] .technical-literal { display: inline; margin-left: 6px; overflow-wrap: anywhere; }
+.technical-label { font: inherit; }
+body[data-first-run="true"] #station-panel .technical-value { overflow-wrap: anywhere; }
+body[data-first-run="true"] #guided-operation-status { border-left: 3px solid #be8c36; padding: 8px 12px; }
+body[data-first-run="true"] #guided-view [data-guided-panel] > h3 { margin-top: 0; }
+body[data-first-run="true"] .guided-dialog-technical { min-height: 44px; padding: 8px 12px; border: 1px solid #8293a6; border-radius: 6px; background: transparent; color: #eef2f6; }
+@media (min-width: 761px) {
+  body[data-first-run="true"] #station-panel { top: calc(16px + var(--status-h, 64px) + 12px); }
+}
+@media (max-width: 760px) {
+  #guided-toggle { flex-shrink: 0; }
+  #guided-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #guided-nav button { text-align: left; white-space: normal; }
+}
+.guided-controls .panel-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.guided-controls .help-text { font-size: 13px; line-height: 18px; }
+/* Hidden resting tags disappear immediately so a fading label cannot cover narration. */
+.room[data-graphics="ready"] .station:is([data-resting="false"], [data-resting="speaker"]):not(:focus-visible):not([data-hover]) { transition: none; }
+body[data-first-run="true"] .journey, body[data-first-run="true"] .step-chip { display: none; }
+body[data-first-run="true"] .inspector-sheet > :not(#guided-view):not(#inspection-bar):not(#load-message) { display: none; }
