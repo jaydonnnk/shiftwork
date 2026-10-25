@@ -14,6 +14,9 @@ import { chromePath } from './env.mjs';
 // A fault run executes only the check its expected assertion names, so one fault
 // cannot be masked by an earlier check that it also happens to break.
 export const FAULTS = {
+  'guided-controls-wrap': { file: '/styles.css',
+    needle: '.graphics-controls:has(#graphics-status:not([data-state="ready"])) button { flex: 1 1 0; min-width: 0; padding: 8px; font-size: 13px; line-height: 18px; }',
+    replacement: '', expect: 'fallback_tags_clear_of_panels: bookshop' },
   // S41 calm room (Gate 3 section 14.4).
   'resting-all-visible': { file: '/app.js',
     needle: "button.dataset.resting = button.dataset.station === speaker?.stationId ? 'speaker' : String(resting.has(button.dataset.station));",
@@ -25,8 +28,8 @@ export const FAULTS = {
     expect: 'one_narrator_bubble: bubbles shown' },
   'open-tag-hidden': { file: '/styles.css', needle: '.world[data-inspector="open"] .room[data-graphics="ready"] .station[data-resting="false"][aria-pressed="true"] { opacity: 1; pointer-events: auto; }',
     replacement: '', expect: 'resting_tags_show_next_and_one_failure: the open station hides its tag' },
-  'focus-stays-hidden': { file: '/styles.css', needle: '.station:is([data-resting="false"], [data-resting="speaker"]):not(:focus-visible):not([data-hover])',
-    replacement: '.station:is([data-resting="false"], [data-resting="speaker"]):not([data-hover])', expect: 'hidden_tags_stay_reachable: a focused tag stays hidden' },
+  'focus-stays-hidden': { file: '/styles.css', needle: '.room[data-graphics="ready"] .station:is([data-resting="false"], [data-resting="speaker"]):not(:focus-visible):not([data-hover]) { opacity: 0; pointer-events: none; }',
+    replacement: '.room[data-graphics="ready"] .station:is([data-resting="false"], [data-resting="speaker"]):not([data-hover]) { opacity: 0; pointer-events: none; }', expect: 'hidden_tags_stay_reachable: a focused tag stays hidden' },
   'hidden-leaves-tab-order': { file: '/styles.css', needle: ':not([data-hover]) { opacity: 0; pointer-events: none; }',
     replacement: ':not([data-hover]) { opacity: 0; pointer-events: none; display: none; }', expect: 'hidden_tags_stay_reachable: a hidden tag cannot take focus' },
   'choose-confirm-focus': { file: '/app.js', needle: "  $('selection-rationale').focus();",
@@ -105,11 +108,11 @@ export const FAULTS = {
   'next-unreachable': { file: '/styles.css', needle: '#next-action-go { min-height: 44px; }', replacement: '#next-action-go { min-height: 44px; visibility: hidden; }',
     expect: 'narrow_stack_reach: the next action is out of reach' },
   'next-runs-shift': { file: '/app.js',
-    needle: "$('next-action-go').addEventListener('click', () => activateStation(storyGuide?.stationId ?? state.station));",
+    needle: "$('next-action-go').addEventListener('click', () => pickStation(storyGuide?.stationId ?? state.station));",
     replacement: "document.getElementById('next-action-go').addEventListener('click', () => document.getElementById('run-shift').click());",
     expect: 'next_action_navigates_only: fresh shift next action opened' },
   'next-posts': { file: '/app.js',
-    needle: "$('next-action-go').addEventListener('click', () => activateStation(storyGuide?.stationId ?? state.station));",
+    needle: "$('next-action-go').addEventListener('click', () => pickStation(storyGuide?.stationId ?? state.station));",
     replacement: "document.getElementById('next-action-go').addEventListener('click', () => { activateStation(storyGuide?.stationId ?? state.station); fetch('/api/engagements/bookshop/board', { method: 'POST' }).catch(() => {}); });",
     expect: 'next_action_navigates_only: fresh shift next action sent' },
   'both-actions': { file: '/styles.css', needle: '  .world[data-inspector="open"] .next-action { display: none; }\n', replacement: '',
@@ -232,7 +235,7 @@ export const INSTRUMENT = [{ file: '/app.js', needle: 'function updateShiftRepor
 
 export async function openBrowser(base, out, fault = '', { zoom = 1, webgl = true } = {}) {
   assert.ok(base.startsWith('http://127.0.0.1:'), 'Only owned local previews are allowed');
-  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41|42|44|45)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an owned disposable /tmp/shiftwork-sN-* root');
+  assert.ok(/^\/(?:private\/)?tmp\/shiftwork-s(?:3[6789]|40|41|42|44|45|47)-[^/]+(?:\/|$)/.test(path.resolve(out)), 'Workplace receipts must use an owned disposable /tmp/shiftwork-sN-* root');
   const patch = fault ? FAULTS[fault] : null;
   if (fault) assert.ok(patch, `Unknown S36 fault ${fault}`);
   await mkdir(out, { recursive: true });
