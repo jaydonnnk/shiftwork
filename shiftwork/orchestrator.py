@@ -33,7 +33,8 @@ from typing import Any
 
 from shiftwork import config
 from shiftwork.assist.gateway import (
-    AssistGateway, AssistRejected, ASSIST_SYSTEM_MESSAGE, MAX_INPUT_BYTES, SAFE_FAILURE_CODES,
+    AssistGateway, AssistRejected, MAX_INPUT_BYTES, SAFE_FAILURE_CODES,
+    apply_proposal, proposal_source_excerpt, assist_system_message,
 )
 from shiftwork.domain import canonical, comparison, contract_catalog, customer_answer, task_contract
 from shiftwork.domain.errors import (
@@ -47,6 +48,7 @@ from shiftwork.domain.errors import (
 )
 from shiftwork.domain.models import (
     ArtifactVersion,
+    VersionAuthorship,
     AssistEvent,
     AssistRole,
     CandidateRef,
@@ -672,7 +674,8 @@ def save_draft(conn: sqlite3.Connection, shift_id: str, files: dict[str, str]) -
 
 
 def freeze_version(
-    conn: sqlite3.Connection, shift_id: str, contract: ContractParams
+    conn: sqlite3.Connection, shift_id: str, contract: ContractParams,
+    *, learner_declared_generated_patch_use: bool = False,
 ) -> ArtifactVersion:
     """Freeze ONE immutable, content-hashed version of the draft + contract.
 
@@ -684,50 +687,79 @@ def freeze_version(
     records that base as ``parent_id`` and ``restored_from_id`` (Gate 3 S3.6), so
     saving or freezing a new candidate cannot substitute itself as an ancestor.
     """
-    shift = _require_open_shift(conn, shift_id)
-    draft = repo.get_draft(conn, shift_id)
-    if draft is None:
-        raise LifecycleError("conflict", f"no draft to freeze for shift: {shift_id}")
-    files, _ = draft
+    if not conn.in_transaction:
+        conn.execute("BEGIN IMMEDIATE")
+    try:
+        shift = _require_open_shift(conn, shift_id)
+        draft = repo.get_draft(conn, shift_id)
+        if draft is None:
+            raise LifecycleError("conflict", f"no draft to freeze for shift: {shift_id}")
+        files, _ = draft
 
-    if shift.engagement_slug == "northline":
-        _validate_deployment_records(files)
+        if shift.engagement_slug == "northline":
+            _validate_deployment_records(files)
 
-    catalog = contract_catalog.load_catalog(shift.engagement_slug, contract.catalog_version)
-    contract_catalog.validate_contract(catalog, contract)
+        catalog = contract_catalog.load_catalog(shift.engagement_slug, contract.catalog_version)
+        contract_catalog.validate_contract(catalog, contract)
 
-    content_hash = canonical.artifact_content_hash(
-        files, canonical.contract_params_json(contract), catalog.content_hash
-    )
-    ordinal = repo.count_versions(conn) + 1
-    base_version_id = repo.get_draft_base_version_id(conn, shift_id)
-    if base_version_id is not None:
-        base = repo.get_version(conn, base_version_id)
-        if base is None:
-            raise LifecycleError("conflict", "the draft base version is missing")
-    else:
-        base = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
-            conn, shift.engagement_slug
+        content_hash = canonical.artifact_content_hash(
+            files, canonical.contract_params_json(contract), catalog.content_hash
         )
-    version = ArtifactVersion(
-        id=f"ver-{ordinal:04d}",
-        shift_id=shift_id,
-        parent_id=base.id if base else None,
-        restored_from_id=base_version_id,
-        content_hash=content_hash,
-        storage_ref=f"inline:{content_hash}",
-        files=dict(files),
-        contract=contract,
-        contract_catalog_hash=catalog.content_hash,
-        created_by="learner",
-        created_at=_now(),
-    )
-    repo.insert_version(conn, version)
-    # The draft now holds exactly this version, so it becomes the base a later
-    # freeze descends from; a subsequent restore points the base somewhere else.
-    repo.set_draft_base_version(conn, shift_id, version.id)
-    conn.commit()
-    return version
+        ordinal = repo.count_versions(conn) + 1
+        base_version_id = repo.get_draft_base_version_id(conn, shift_id)
+        if base_version_id is not None:
+            base = repo.get_version(conn, base_version_id)
+            if base is None:
+                raise LifecycleError("conflict", "the draft base version is missing")
+        else:
+            base = repo.get_latest_version(conn, shift_id) or repo.get_latest_version_for_engagement(
+                conn, shift.engagement_slug
+            )
+        # Count this shift's events once, then carry only the earlier shift's disclosure.
+        inherited = base
+        while inherited is not None and inherited.shift_id == shift_id:
+            inherited = repo.get_version(conn, inherited.parent_id) if inherited.parent_id else None
+        prior = inherited.authorship if inherited is not None else None
+        seen, accepted = repo.generated_patch_counts(conn, shift_id)
+        accepted_count = (prior.generated_patch_accepted_count if prior else 0) + accepted
+        base_disclosure = base.authorship if base else None
+        earlier_edits = base_disclosure.learner_edited if base_disclosure else bool(base and base.created_by == "learner")
+        learner_edited = earlier_edits or base is None or files != base.files
+        if accepted_count > (base_disclosure.generated_patch_accepted_count if base_disclosure else 0):
+            for event in repo.list_assist_for_shift(conn, shift_id):
+                if event.role is AssistRole.PATCH_PROPOSAL and event.accepted:
+                    proposal = repo.get_assist_proposal(conn, event.id)
+                    if proposal is not None and proposal["files_json"] and files == json.loads(proposal["files_json"]):
+                        learner_edited = earlier_edits or base is None or json.loads(proposal["base_files_json"]) != base.files
+        authorship = VersionAuthorship(
+            learner_edited=learner_edited,
+            generated_patch_seen_count=(prior.generated_patch_seen_count if prior else 0) + seen,
+            generated_patch_accepted_count=accepted_count,
+            learner_declared_generated_patch_use=learner_declared_generated_patch_use,
+        )
+        version = ArtifactVersion(
+            id=f"ver-{ordinal:04d}",
+            shift_id=shift_id,
+            parent_id=base.id if base else None,
+            restored_from_id=base_version_id,
+            authorship=authorship,
+            content_hash=content_hash,
+            storage_ref=f"inline:{content_hash}",
+            files=dict(files),
+            contract=contract,
+            contract_catalog_hash=catalog.content_hash,
+            created_by="learner",
+            created_at=_now(),
+        )
+        repo.insert_version(conn, version)
+        # The draft now holds exactly this version, so it becomes the base a later
+        # freeze descends from; a subsequent restore points the base somewhere else.
+        repo.set_draft_base_version(conn, shift_id, version.id)
+        conn.commit()
+        return version
+    except Exception:
+        conn.rollback()
+        raise
 
 
 def _validate_deployment_records(files):
@@ -2295,6 +2327,35 @@ def append_investigation(
     return investigation
 
 
+def _proposal_inference_result(conn: sqlite3.Connection, investigation: Investigation) -> str:
+    """Project only one bound controller result. Raw observations stay private."""
+    unavailable = "Unavailable: no unique valid controller-verified inference result for the historical source request."
+    rows = [row.public_payload_json for row in repo.list_observations(conn, investigation.source_run_id)
+            if row.run_id == investigation.source_run_id
+            and row.request_ordinal == investigation.source_request_ordinal
+            and row.kind == "INFERENCE_RESULT"
+            and row.public_payload_json.get("source") == "controller_verified"
+            and type(row.public_payload_json.get("request_ordinal")) is int
+            and row.public_payload_json.get("request_ordinal") == investigation.source_request_ordinal]
+    if len(rows) != 1:
+        return unavailable
+    payload = rows[0]
+    fields = ("source", "request_ordinal", "model", "plan", "plan_failure", "finish_reason", "output_tokens")
+    if not all(field in payload for field in fields):
+        return unavailable
+    if any(payload[field] is not None and not isinstance(payload[field], str)
+           for field in ("model", "plan_failure", "finish_reason")):
+        return unavailable
+    if payload["output_tokens"] is not None and (type(payload["output_tokens"]) is not int or payload["output_tokens"] < 0):
+        return unavailable
+    plan = payload["plan"]
+    if plan is not None and (not isinstance(plan, list) or any(
+            not isinstance(step, dict) or set(step) != {"task_type", "tool_name"}
+            or any(not isinstance(value, str) for value in step.values()) for step in plan)):
+        return unavailable
+    return json.dumps({field: payload[field] for field in fields}, ensure_ascii=False)
+
+
 def request_assist(
     conn: sqlite3.Connection, shift_id: str, investigation_id: str | None, role: AssistRole,
     *, message: str = "", client_request_id: str = "", gateway: AssistGateway | None = None,
@@ -2316,6 +2377,8 @@ def request_assist(
             "conflict", "diagnostic help must reference an investigation owned by this shift"
         )
 
+    if any(not getattr(investigation, field).strip() for field in ("cause", "falsifier", "public_test")):
+        raise InvestigationIncomplete(ASSIST_GATE_REASON)
     policy = verified_assist_policy(conn, shift.engagement_slug)
     admit_pack(shift.engagement_slug)
     if role not in policy.allowed_roles:
@@ -2346,7 +2409,32 @@ def request_assist(
         f"Learner cause: {investigation.cause}\nLearner falsifier: {investigation.falsifier}\n"
         f"Learner public test: {investigation.public_test}\nLearner question: {message.strip()}"
     )
-    if len(prompt.encode("utf-8")) + len(ASSIST_SYSTEM_MESSAGE.encode("utf-8")) > MAX_INPUT_BYTES:
+    proposal_base = None
+    proposal_base_version = None
+    if role is AssistRole.PATCH_PROPOSAL:
+        draft = repo.get_draft(conn, shift.id)
+        proposal_base_version = repo.get_draft_base_version_id(conn, shift.id)
+        if proposal_base_version is None:
+            latest_version = repo.get_latest_version(conn, shift.id)
+            proposal_base_version = latest_version.id if latest_version else None
+        if draft is None or proposal_base_version is None or "service.py" not in draft[0]:
+            raise LifecycleError("conflict", "a proposal requires a public draft and an existing contract")
+        proposal_base = draft[0]
+        assert_public_projection(proposal_base, conn)
+        source_run = repo.get_run(conn, investigation.source_run_id)
+        if source_run is None:
+            raise LifecycleError("conflict", "the historical source identity is unavailable")
+        source_version = repo.get_version(conn, source_run.artifact_version_id)
+        if source_version is None:
+            raise LifecycleError("conflict", "the historical source identity is unavailable")
+        prompt += ("\nHistorical source (distinct from current frozen draft): " + json.dumps({
+            "run_id": source_run.id, "artifact_version_id": source_version.id,
+            "artifact_content_hash": source_version.content_hash,
+        }) + "\nController-verified public inference result: " + _proposal_inference_result(conn, investigation))
+        excerpt = proposal_source_excerpt(proposal_base["service.py"])
+        prompt += ("\nPublic service.py source excerpt follows. Omitted source is unavailable. "
+                   "Propose one exact replacement as JSON old/new; no prose or fences.\n" + excerpt)
+    if len(prompt.encode("utf-8")) + len(assist_system_message(role).encode("utf-8")) > MAX_INPUT_BYTES:
         raise LifecycleError("conflict", "assist prompt exceeds the gateway input limit")
     try:
         assert_public_safe({"prompt": prompt}, _private_public_needles())
@@ -2380,6 +2468,10 @@ def request_assist(
             client_request_id=client_request_id, created_at=_now(),
         )
         repo.insert_assist_event(conn, event)
+        if proposal_base is not None:
+            if repo.get_draft(conn, shift.id)[0] != proposal_base:
+                raise LifecycleError("conflict", "the public draft changed before proposal reservation")
+            repo.insert_assist_proposal_base(conn, event.id, proposal_base_version, proposal_base)
         conn.commit()
     except Exception:
         conn.rollback()
@@ -2397,6 +2489,17 @@ def request_assist(
                                _private_public_needles())
         except ValueError as exc:
             raise AssistRejected("ASSIST_PRIVATE_OUTPUT") from exc
+        if role is AssistRole.PATCH_PROPOSAL:
+            proposed_files = apply_proposal(reply.text, proposal_base)
+            try:
+                assert_public_safe(proposed_files, _private_public_needles(conn))
+            except ValueError as exc:
+                raise AssistRejected("ASSIST_PRIVATE_OUTPUT") from exc
+            base_version = repo.get_version(conn, proposal_base_version)
+            artifact_hash = canonical.artifact_content_hash(proposed_files,
+                canonical.contract_params_json(base_version.contract), base_version.contract_catalog_hash)
+            repo.complete_assist_proposal(conn, event.id, proposed_files, artifact_hash,
+                                          _hash_bytes(proposed_files["service.py"].encode("utf-8")))
         repo.finish_assist_event(conn, event.id, response=reply.text,
                                  proposed_patch=reply.text if role is AssistRole.PATCH_PROPOSAL else None,
                                  failure_code=None, reported_model_id=reply.reported_model_id,
@@ -2415,15 +2518,69 @@ def request_assist(
     return repo.get_assist_event(conn, event.id)
 
 
-def record_assist_decision(conn: sqlite3.Connection, event_id: str, accepted: bool) -> AssistEvent:
+def proposal_version(conn: sqlite3.Connection, event_id: str) -> ArtifactVersion:
+    """Resolve and verify the transient source without saving a version."""
     event = repo.get_assist_event(conn, event_id)
-    if event is None:
-        raise LifecycleError("not_found", f"unknown assist event: {event_id}")
-    if event.state != "COMPLETE":
-        raise LifecycleError("conflict", "only completed help has an accept/reject decision")
-    if not repo.decide_assist_event(conn, event_id, accepted):
-        raise LifecycleError("conflict", "this assist event already has a decision")
-    conn.commit()
+    snapshot = repo.get_assist_proposal(conn, event_id)
+    if (event is None or event.role is not AssistRole.PATCH_PROPOSAL or event.state != "COMPLETE"
+            or not event.proposed_patch or snapshot is None or snapshot["files_json"] is None):
+        raise LifecycleError("conflict", "a complete applicable coach proposal is required")
+    base = repo.get_version(conn, snapshot["base_version_id"])
+    base_files = json.loads(snapshot["base_files_json"])
+    files = json.loads(snapshot["files_json"])
+    if (base is None or repo.get_shift(conn, base.shift_id).engagement_slug !=
+            repo.get_shift(conn, event.shift_id).engagement_slug
+            or canonical.artifact_content_hash(base_files, canonical.contract_params_json(base.contract),
+                 base.contract_catalog_hash) != snapshot["base_hash"]
+            or apply_proposal(event.proposed_patch, base_files) != files
+            or _hash_bytes(files["service.py"].encode("utf-8")) != snapshot["proposal_source_sha256"]
+            or canonical.artifact_content_hash(files, canonical.contract_params_json(base.contract),
+                 base.contract_catalog_hash) != snapshot["artifact_content_hash"]):
+        raise LifecycleError("conflict", "the retained proposal source no longer matches its identity")
+    assert_public_projection(files, conn)
+    return base.model_copy(update={"files": files, "content_hash": snapshot["artifact_content_hash"],
+                                   "created_by": "learner"})
+
+
+def run_assist_proposal(conn: sqlite3.Connection, shift_id: str, event_id: str,
+                        *, adapter: str | None = None) -> Run:
+    """Reserve once; execution is queued by the API using its bounded meter."""
+    from shiftwork import experiments
+
+    snapshot = repo.get_assist_proposal(conn, event_id)
+    if snapshot is None:
+        raise LifecycleError("conflict", "a complete applicable coach proposal is required")
+    experiment = experiments.create_diagnostic_experiment(conn, shift_id,
+        candidate_version_id=snapshot["base_version_id"], investigation_id=None,
+        client_request_id="proposal-run:" + event_id,
+        adapter=adapter or config.EXECUTOR_ADAPTER, proposal_event_id=event_id)
+    return experiments.experiment_run(conn, experiment.id)
+
+
+def record_assist_decision(conn: sqlite3.Connection, event_id: str, accepted: bool) -> AssistEvent:
+    conn.execute("BEGIN IMMEDIATE")
+    try:
+        event = repo.get_assist_event(conn, event_id)
+        if event is None:
+            raise LifecycleError("not_found", f"unknown assist event: {event_id}")
+        if event.state != "COMPLETE":
+            raise LifecycleError("conflict", "only completed help has an accept/reject decision")
+        if event.accepted is not None:
+            raise LifecycleError("conflict", "this assist event already has a decision")
+        if accepted and event.role is AssistRole.PATCH_PROPOSAL:
+            _require_open_shift(conn, event.shift_id)
+            version = proposal_version(conn, event.id)
+            snapshot = repo.get_assist_proposal(conn, event.id)
+            draft = repo.get_draft(conn, event.shift_id)
+            if draft is None or draft[0] != json.loads(snapshot["base_files_json"]):
+                raise LifecycleError("conflict", "the draft changed; review your edits before accepting")
+            repo.upsert_draft(conn, event.shift_id, version.files, _now())
+        if not repo.decide_assist_event(conn, event_id, accepted):
+            raise LifecycleError("conflict", "this assist event already has a decision")
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
     return repo.get_assist_event(conn, event_id)
 
 
@@ -2435,6 +2592,9 @@ def assist_event_view(event: AssistEvent) -> dict[str, Any]:
             "elapsed_ms": event.elapsed_ms, "request_text": event.request_text,
             "response_text": event.response_text, "proposed_patch": event.proposed_patch,
             "accepted": event.accepted, "state": event.state,
+            "diagnostic_run_id": event.diagnostic_run_id,
+            "proposal_source_sha256": event.proposal_source_sha256,
+            "proposal_source": event.proposal_source,
             "failure_code": event.failure_code, "created_at": event.created_at.isoformat()}
     assert_public_projection(view)
     return view
@@ -2594,6 +2754,7 @@ def artifact_source(conn: sqlite3.Connection, version_id: str) -> dict[str, Any]
         "id": version.id, "parent_id": version.parent_id,
         "content_hash": version.content_hash, "files": version.files,
         "contract": version.contract.model_dump(mode="json"), "authorship": version.created_by,
+        "version_authorship": version.authorship.model_dump(mode="json") if version.authorship else None,
     }
     assert_public_projection(payload, conn)
     return payload

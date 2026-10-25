@@ -60,9 +60,20 @@ def get_workplace_boards(conn: sqlite3.Connection = Depends(get_conn)) -> list[s
     return payload
 
 
+def _run_view(conn, run):
+    view = schemas.RunView.of(run)
+    proposal = orchestrator.repo.get_assist_proposal_for_run(conn, run.id)
+    if proposal is not None:
+        view = view.model_copy(update={"artifact_version_id": None, "proposal_event_id": proposal["event_id"]})
+    return view
+
+
 @router.get("/engagements/{slug}/board", response_model=schemas.BoardView)
 def get_board(slug: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.BoardView:
-    payload = schemas.BoardView.of(orchestrator.board_snapshot(conn, slug))
+    snapshot = orchestrator.board_snapshot(conn, slug)
+    if snapshot["latest_run"] is not None:
+        snapshot["latest_run"] = _run_view(conn, snapshot["latest_run"])
+    payload = schemas.BoardView.of(snapshot)
     orchestrator.assert_public_projection(payload.model_dump(mode="json"), conn)
     return payload
 
@@ -108,7 +119,8 @@ def freeze_version(
         declared_limits=tuple(body.contract.declared_limits),
     )
     return schemas.ArtifactVersionView.of(
-        orchestrator.freeze_version(conn, shift_id, contract)
+        orchestrator.freeze_version(conn, shift_id, contract,
+            learner_declared_generated_patch_use=body.learner_declared_generated_patch_use)
     )
 
 
@@ -148,7 +160,7 @@ def start_run(
 
 @router.get("/runs/{run_id}", response_model=schemas.RunView)
 def get_run(run_id: str, conn: sqlite3.Connection = Depends(get_conn)) -> schemas.RunView:
-    return schemas.RunView.of(orchestrator.get_run(conn, run_id))
+    return _run_view(conn, orchestrator.get_run(conn, run_id))
 
 
 @router.get("/runs/{run_id}/outputs", response_model=list[schemas.RunOutputView])
@@ -369,3 +381,16 @@ def decide_assist(event_id: str, body: schemas.AssistDecision,
                   conn: sqlite3.Connection = Depends(get_conn)) -> schemas.AssistEventView:
     event = orchestrator.record_assist_decision(conn, event_id, body.accepted)
     return schemas.AssistEventView.model_validate(orchestrator.assist_event_view(event))
+
+
+@router.post("/shifts/{shift_id}/assist-events/{event_id}/run",
+             response_model=schemas.ExperimentView, status_code=202)
+def run_assist_proposal(shift_id: str, event_id: str, background: BackgroundTasks,
+                        request: Request, conn: sqlite3.Connection = Depends(get_conn)):
+    adapter = request.app.state.executor
+    budget = _action_budget(request.app.state.live_diagnostic_budget, LiveDiagnosticBudget)
+    if adapter == "tokenfactory" and budget is None:
+        raise orchestrator.LifecycleError("conflict", "a proposal run requires a bounded diagnostic budget")
+    run = orchestrator.run_assist_proposal(conn, shift_id, event_id, adapter=adapter)
+    background.add_task(experiments.execute_experiment_task, request.app.state.db_path, run.id, budget)
+    return schemas.ExperimentView.of(experiments.experiment_view(conn, run.experiment_id))

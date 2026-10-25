@@ -24,8 +24,9 @@ def test_source_route_exposes_owned_files_without_storage_locator(tmp_path):
         source = client.get(f"/api/artifact-versions/{frozen.json()['id']}")
         assert source.status_code == 200, source.text
         payload = source.json()
-        assert set(payload) == {"id", "parent_id", "content_hash", "files", "contract", "authorship"}
+        assert set(payload) == {"id", "parent_id", "content_hash", "files", "contract", "authorship", "version_authorship"}
         assert payload["authorship"] == "learner"
+        assert payload["version_authorship"]["generated_patch_accepted_count"] == 0
         assert "service.py" in payload["files"]
         assert "storage_ref" not in json.dumps(payload)
         assert str(Path.cwd()) not in json.dumps(payload)

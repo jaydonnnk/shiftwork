@@ -4159,3 +4159,199 @@ browser callbacks cannot read their caller's Node scope. This consumed no call.
 - What happened: the acceptance validator was launched with only 23 of 24 historical-ID rows recorded. It correctly rejected the incomplete packet. The final restored check later exited zero without a rerun, and complete validation passed.
 - Root cause: a printed PASS line was treated as near completion while the browser process was still closing. The run-complete marker had not been checked first.
 - Prevention rule: require the driver to exit zero and verify its run-complete marker before acceptance validation. Preserve the incomplete-packet rejection; never treat a printed PASS as the process result. validation-before-docs.log retains the rejected invocation.
+
+
+## 2026-10-25 S46 preflight: the model-list URL retained the chat path
+
+- What happened: the first authenticated model lookup used /v1/chat/models and returned 404. It made no inference call. The corrected /v1/models request returned 200.
+- Root cause: removing only the completion suffix from the inference URL preserved its chat component.
+- Prevention rule: resolve the API root separately from resource paths and inspect the full resulting URL before a credentialed lookup. Keep the failed read receipt separate from model availability evidence.
+
+## 2026-10-25 S46 documentation: a guessed mistake-log anchor rejected the patch
+
+- What happened: the documentation patch included a placeholder MISTAKES.md anchor that did not exist. apply_patch rejected the whole operation; inspection confirmed no partial edit.
+- Root cause: a guessed anchor was included instead of copying the current file text, despite the repository rule.
+- Prevention rule: use exact current anchors for every patch; append mistake-log entries directly when no replacement is intended. Verify resulting file state after every rejected multi-file patch.
+
+
+## 2026-10-25 S46 tests: an experiment count helper received a string
+
+- What happened: the first green run reached a new assertion that passed a string where count_experiments_for_shift requires ExperimentKind. Nine tests passed, and that test stopped at AttributeError.
+- Root cause: I checked the helper name without carrying its enum argument contract into the new test.
+- Prevention rule: inspect and copy the complete signature and an existing call before use, including enum types. This invalid assertion is excluded from behavioral proof; the corrected test uses ExperimentKind.DIAGNOSTIC.
+
+## 2026-10-25 S46 UI edit: a source anchor matched two experiment actions
+
+- What happened: the guarded editor script rejected its experiment-create anchor because it matched both comparison and diagnostic handlers. Earlier independent evidence-helper edits had already been saved; app.js remained unchanged.
+- Root cause: a generic call prefix did not include its owning function.
+- Prevention rule: restrict the replacement to the verified function body and require one match there. Check partial file state before continuing. A subsequent Node pass covered the saved helper only, not the still-unmodified app handler.
+
+## 2026-10-25 S46 response: a new nullable candidate field changed the old API shape
+
+- What happened: full regression had 1,741 passes and one failure because normal version candidates gained proposal_event_id=null in their serialized response.
+- Root cause: domain canonical serialization omitted the new null field, but the API projection serializer did not.
+- Prevention rule: preserve legacy identity at both domain and public serializers. Keep the old candidate assertion unchanged and reprove it, while exposing the event ID only for transient proposals.
+
+## 2026-10-25 S46 inherited source: a prior-shift contract base was rejected
+
+- What happened: a proposal completed against an inherited selected draft, but the new API regression showed acceptance returning 409.
+- Root cause: source resolution required the contract base to belong to the current shift, although opening a shift deliberately inherits a prior-shift base.
+- Prevention rule: verify same-engagement ownership for a transient proposal contract, preserve the inherited base, and test the next-shift journey without forcing a redundant save. Exact proposal source/hash checks remain independent.
+
+
+## 2026-10-25 S46 review: exact source and authorship were misrepresented
+
+- What happened: review and focused regressions found that Unicode-equivalent later edits could be overwritten, coach-only acceptance was credited as learner editing, and the resulting retained source lacked a preview.
+- Root cause: a normalizing generic content hash was used for exact draft equality, source difference from a parent was treated as human authorship, and the UI carried a patch/hash without its resulting source.
+- Prevention rule: compare retained draft strings exactly, account for accepted coach changes separately from actual learner edits, and expose the public-safe retained source before acceptance. Preserve the Unicode, repeated-save and preview regressions.
+
+## 2026-10-25 S46 review: a report read bypassed the existing ownership guard
+
+- What happened: a delayed report fetch could replace diagnostic state after switching boards; the shared diagnostic renderer also called coach output starter output.
+- Root cause: the new read path assigned state directly rather than reusing diagnosticOwner/acceptDiagnostic, and the result heading did not derive from candidate identity.
+- Prevention rule: route every asynchronous diagnostic publication through the existing owner checks and derive source labels from stored identities. The Node stale-response regression and actual API identity tests remain.
+
+## 2026-10-25 S46 attribution: code and disclosure could be saved from different moments
+
+- What happened: a competing-connection regression accepted a patch after freeze read the old draft but before it counted assistance, attributing the generated patch to different saved bytes.
+- Root cause: the existing save method did not acquire its write transaction before reading the draft; new attribution made that gap consequential.
+- Prevention rule: hold BEGIN IMMEDIATE across the code/disclosure read and save, with rollback on error. Keep the actual competing-writer regression and independent atomic-save source fault.
+
+## 2026-10-25 S46 live preparation: imported inspection consumed a diagnostic slot
+
+- What happened: the runner imported an S44 diagnostic and then ran a fresh baseline, occupying both diagnostic slots before the proposed coach run. The coach failed first, so no proposal run was attempted.
+- Root cause: preparation reused the source-import call but did not verify its durable diagnostic count before spending. Imported inspection is not a free slot.
+- Prevention rule: assert the actual prepared diagnostic count and remaining proposal slot before any billed action. The separately proposed preparation imports one source diagnostic, runs no fresh baseline, and preserves the original stopped store and allowance.
+
+## 2026-10-25 S46 live export: a domain model reached raw JSON serialization
+
+- What happened: final export failed with TypeError because investigation_entry returns Investigation, not a JSON dictionary. The persisted receipt was stale until a read-only recovery completed.
+- Root cause: I reused the helper without carrying its return type into the export boundary, contrary to the existing helper-contract rule.
+- Prevention rule: serialize Pydantic models with model_dump(mode="json") before assembling a JSON packet, exercise the final export offline, and retain a terminal receipt independently of optional export. Recovery must use a read-only connection and prove the stopped database bytes unchanged.
+
+
+## 2026-10-25 S46 context boundary: the usage receipt was checked late
+
+- What happened: after the second bounded action stopped, the latest available native token receipt reported 432,496 context input tokens, above the user's 175k working limit. The session then stopped new work and recorded the current failure state and handoff.
+- Root cause: I relied on a rough visible-transcript estimate instead of locating the native usage receipt before the next long phase.
+- Prevention rule: check the available native last-input usage before a long continuation; finish only the current safe checkpoint when the user's working limit is exceeded. Do not begin new diagnosis or another phase after an unexpected outcome at that boundary.
+
+## 2026-10-25 S46 proposal summary used saved-version evidence
+
+- What happened: the tested coach proposal summary displayed `executed null`, no validated answer and incomplete independent evidence while its detailed diagnostic retained the answer and passing task checks.
+- Root cause: the summary interpolated the nullable saved-version ID and used the legacy output/check projection for a transient proposal diagnostic.
+- Prevention rule: identify coach output by its proposal event and reuse the diagnostic answer and task assessments only after exact experiment, shift, run and proposal matching. Keep saved-version behavior unchanged. The focused regression fails before the correction; each identity guard has a separate source fault proof.
+
+## 2026-10-25 S46 browser checks queried incomplete or hidden DOM
+
+- What happened: the first browser runner queried body.dataset before the new document had a body. A later reach check accepted a zero-height hidden modal button as visible. Both attempts are retained and excluded from completion evidence.
+- Root cause: readiness assumed the DOM existed, and rectangle containment lacked a positive-size assertion. The reach check selected the modal submission button instead of the visible Choose control.
+- Prevention rule: make readiness tolerate a not-yet-created DOM, identify the actual visible control from current HTML, and require positive dimensions as well as viewport containment. Recheck the corrected native-200% target. These were verification defects, not product failures.
+
+## 2026-10-25 S46 regression filter matched the installation module
+
+- What happened: `-k 'not test_clean_env_install_and_run'` also excluded the offline environment cases in the same-named module. This was caught before the final regression claim.
+- Root cause: pytest keyword selection matches module names as well as function names.
+- Prevention rule: deselect the installation function by its exact node ID. Supplement the omitted module's offline cases with that exact deselection and report the split totals. No installation case was executed.
+
+## 2026-10-25 S46 stopped comparison still looked active
+
+- What happened: the stopped comparison repeatedly disappeared while the client polled a queued child, and the room lamp said Running because other children remained reserved. Its Missing outputs metric also included planned requests that never executed without stating that in the label.
+- Root cause: polling considered only the child run state; the lamp let child reservations override the stopped parent; aggregate metric labels omitted the frozen-denominator definition.
+- Prevention rule: suppress polling only when a stopped qualifying comparison matches the run's experiment and shift. Derive the comparison lamp's activity from its parent state. Label planned denominators and missing counts explicitly without changing recorded grades or queued evidence. Separate fault proofs cover every polling guard and stopped state, while the actual snapshot review proves a stable display.
+
+## 2026-10-25 S46 metric clarification crowded the native-200% table
+
+- What happened: the first clarification put a full explanation into the Missing outputs label. The 390px native-200% screenshot showed excessive word splitting in the narrow two-column table.
+- Root cause: I extended a compact metric label without accounting for its narrow grid column.
+- Prevention rule: keep metric labels short and put denominator/evidence explanations in a full-width note. Inspect the actual narrow native-zoom screenshot as well as document overflow. Counts and grades must remain unchanged.
+
+## 2026-10-25 S46 completion review guessed two inspection paths
+
+- What happened: a read-only command requested nonexistent prepare_second.py and shiftwork/gateway/budget.py paths. The command returned missing-file errors; no product or evidence file changed.
+- Root cause: names were inferred from purpose instead of discovered from the current inventory.
+- Prevention rule: list the relevant directory or use rg --files before opening a helper. The actual files here are live_action_v2.py and shiftwork/live_budget.py. Inspection errors are not product failures or mutation proof.
+
+## 2026-10-25 S46 preparation saved an incremental AX receipt
+
+- What happened: the first saved pricing text contained only an unchanged accessibility-tree diff, so its beta-statement detection control returned false. It is retained and excluded. The full-tree receipt and its statement detection control then passed.
+- Root cause: getAXState defaults to differences after the first observation; the receipt writer assumed every returned string was a full page.
+- Prevention rule: request disableDiffing=true when preserving a complete accessibility-text receipt, then require the intended statement to be present before using it as pricing evidence.
+
+## 2026-10-25 S46 result review scrolled a nested source editor
+
+- What happened: scrolling the inspector by its accessibility container entered the nested source editor. Later screenshot filenames therefore do not prove visible numeric result tables; they are excluded from that claim. Actual accessibility text verifies the numeric report and disabled choices.
+- Root cause: the native scroll point for the outer container overlapped its nested editor.
+- Prevention rule: target a verified outer scrollbar or a point outside nested controls, then inspect the screenshot before describing its contents. Retain the mismatched screenshots and state the narrower proof instead of inferring from filenames.
+
+## 2026-10-25 S46 source investigation assumed storage and executor names
+
+- What happened: a read-only query assumed an observations table instead of execution_observations. Another search included the nonexistent token_factory.py name, and a zsh glob matched no audit scripts. These inspection failures did not change product or original evidence bytes and are excluded from behavioral proof.
+- Root cause: I inferred names before checking the database schema and discovered source inventory, repeating an existing inspection mistake.
+- Prevention rule: query sqlite_master before table-specific reads, and use discovered paths or Path.glob instead of guessed names and unmatched shell globs. Preserve failed inspection receipts and do not count setup errors as fault proofs.
+
+## 2026-10-25 S46 context extraction: AST and text boundaries disagreed
+
+- What happened: review reproduced truncated definitions for Unicode line separators, unrelated same-line statements in the excerpt, and an omitted destructuring duplicate binding. The initial focused tests did not cover these forms.
+- Root cause: string splitlines used more separators than Python physical lines, extraction ignored AST byte columns, and duplicate detection inspected direct assignment targets only.
+- Prevention rule: preserve UTF-8 physical lines and AST byte-column boundaries, count nested Store targets, and retain the reproduced failing tests and independent faults. No authored service text is executed.
+
+## 2026-10-25 S46 browser proof: harness failures are not UI evidence
+
+- What happened: attempts omitted SHIFTWORK_PYTHON, placed a proof endpoint after the static mount, clicked a hidden investigation control, inspected the older draft instead of the imported source version, then failed the diagnostic-report assertion. These attempts remain private failed receipts and do not prove a continuous journey.
+- Root cause: the harness assumed runtime discovery, route ordering, visible navigation, draft identity and report wording. The final report-assertion cause remains uninvestigated at the context stop.
+- Prevention rule: verify the served proof route and restored draft before interaction, observe actual visible panel state and retained report content, and count only an uninterrupted passing journey on a fresh disposable store. Preserve every failed attempt.
+
+## 2026-10-25 S46 continuation: native context was checked late again
+
+- What happened: the first native token receipt inspected in this session reported 218,289 input tokens, above the checkout's 175k limit. New work stopped immediately; running checks and preservation/handoff records were the only remainder.
+- Root cause: I relied on a rough transcript estimate through large read outputs rather than checking the native receipt before each long phase.
+- Prevention rule: use the current thread's native token_count last_token_usage.input_tokens before baseline, implementation, review, browser and preparation phases. An unexpected result beyond the boundary requires a checkpoint, not another repair attempt.
+
+## 2026-10-25 S46 inspection and proof setup errors
+
+- What happened: several read-only commands used nonexistent helper/skill paths or unmatched zsh globs; an initial review-test command used the projectless cwd; a public-pricing helper first had an invalid quote and then found no beta text in the static app shell.
+- Root cause: inferred paths, command context and static-page contents were not verified before use.
+- Prevention rule: use discovered paths and explicit cwd, keep setup failures separate from behavioral RED evidence, and verify rendered public terms instead of treating the JavaScript app shell as their content. These failures changed no product or original evidence bytes.
+
+## 2026-10-25 S46 final missing-version fault is not proved
+
+- What happened: the extended fault driver marked context-missing-version INVALID after its clean/fault/restored sequence and stopped before the remaining privacy faults. Earlier guards passed, but the complete final matrix is not green.
+- Root cause: not diagnosed because the native context boundary had already been exceeded. The retained failed receipt is evidence of an unfinished proof, not proof of the guard or a confirmed production defect.
+- Prevention rule: resume with the exact retained target and intended assertion in an isolated copy; retain the invalid result and never replace it with an unrelated assertion failure or a crash.
+
+## 2026-10-25 S46 continuation: missing-version fixture hid the draft base
+
+- What happened: investigation of the retained INVALID receipt found AttributeError in proposal-base persistence instead of the intended refusal assertion. The clean and restored controls passed.
+- Root cause: the test replaced every get_version lookup with None, including the current draft-base version needed after the historical guard was bypassed. It did not model one missing historical identity.
+- Prevention rule: hide only the named historical run or version and preserve unrelated lookups. Require the intended assertion failure, byte-identical restoration and passing restored control. Preserve the original invalid receipt.
+
+## 2026-10-25 S46 continuation: the browser completion wait queried the verdict
+
+- What happened: the fresh authored-double journey reached its completed comparison but timed out waiting for COMPLETE in the eligibility verdict. The retained DOM and finalized database show all six slots completed and neither candidate eligible. A read-only summary also assumed one exact AssertionError indentation and a helper read used the wrong parent directory; both inspection failures are excluded from proof.
+- Root cause: the inherited browser runner confused the completion summary with the eligibility result. Its earlier report assertion also used wording absent from the actual report.
+- Prevention rule: bind the exact diagnostic report to its retained experiment, source bytes and task rows, then query the rendered comparison completion summary and eligibility verdict separately. Start any rerun from a fresh disposable store and preserve failed attempts.
+
+- Continuation finding: the second fresh attempt matched COMPLETE inside INCOMPLETE and checked eligibility before comparison finished. The passing runner requires the exact ` · COMPLETE · ` delimiter. All four cells then pass from fresh stores. Unsupported low-detail image forwarding returned no images; the four screenshots were then re-emitted with supported detail and actually inspected.
+
+## 2026-10-25 S46 preparation: private runner controls missed connected failure paths
+
+- What happened: a separate read-only review found that the draft runner's first-failure, total-deadline and service-model claims exceeded its controls. The real adapter can continue to the next request in a batch after GatewayRejected; a late return could advance the draft or report completion; only the coach's reported model was checked. Six connected controls failed their intended assertions before the private-runner repair. No live action or production-source change occurred.
+- Root cause: the initial controls replaced the adapter entirely, tested only pre-action deadline expiry and treated the requested service model as sufficient identity evidence.
+- Prevention rule: use the real adapter with authored HTTP/Sandbox replies for within-batch failures, retain failed observations, latch gateway/identity failure before another inference or operation, and bound I/O plus check time before later draft/save/completion stages. Returned plan_failure remains observed service behavior. Keep the failed controls and exact response evidence.
+- Proof setup limits: the first new guard driver used a relative JUnit receipt path across a changed cwd; the next model fault hit a redundant settings check; the diagnostic fault hit a later general assertion. Those runs remain invalid, not guard proofs. The driver now resolves receipt paths, the private runner has one effective-settings guard, and a separate test checks the actual draft after diagnostic failure. A read-only helper search also guessed an absent test_tokenfactory.py path before using the discovered test_gateway_isolation.py helper.
+
+## 2026-10-25 S46 preparation: matching source bytes did not prove the frozen mission
+
+- What happened: a model-identity fault survived because the fresh prepared store used the older tool-selection mission. The model-dependent source bytes matched, but the gateway rejected the authored task-plan reply as an invalid tool before the intended identity check. No live action occurred.
+- Root cause: preparation verified artifact bytes while assuming fresh bootstrap selected the reviewed task-plan mission. The generic failure control did not require the intended stop reason.
+- Prevention rule: pin the actual frozen mission hash as well as source bytes, verify the real task vocabulary, require the named service stop reason and preserve the counterexample. The proposed V2 uses a byte-identical copy of the preserved correct pre-action snapshot; V1 stays superseded. Four UI journeys were rerun on the correct mission, and V2's complete 36-fault matrix and 59 controls pass.
+- Read-only setup limits: one inspection used an inferred module/SQL field name; one launch specified its not-yet-created output folder as cwd; final cleanup first compared an absolute process path with a relative invocation. These failed before any unsafe action. Inventory, model accessors and process cwd verification corrected them; they are not behavioral proof.
+
+- Final inspection also invoked redundant Git commands from the receipt directory. The preservation helper's explicit checkout checks had passed; the redundant commands were rerun with the checkout named explicitly. Every Git inspection must use its intended checkout cwd or `git -C`.
+
+## 2026-10-25 S46 integration: conflict validation and import ownership
+
+- What happened: the merge-resolution checker mistook an existing Markdown separator for a conflict marker. The first integrated Node run then failed ten owner-line controls at ReferenceError before their assertions.
+- Root cause: the checker matched bare equals signs; the accepted S47 tree removed execFileSync while S46 retained an ancestry call.
+- Prevention rule: check Git unmerged entries and actual conflict start/end markers, and inspect imports for retained calls when merging both sides. Preserve the failed receipt and rerun every affected control without weakening its named assertion.

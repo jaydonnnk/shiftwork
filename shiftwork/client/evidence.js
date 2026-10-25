@@ -95,3 +95,22 @@ function missCause(trial, assessment) {
   if (Array.isArray(reply.plan) && !reply.plan.some(step => step.task_type === assessment.task_id)) return 'omitted';
   return 'unknown';
 }
+
+
+export function proposalDiagnosticSummary(experiment) {
+  if (experiment?.kind !== 'DIAGNOSTIC' || experiment.eligible !== false ||
+      experiment.public_repetitions !== 1 || experiment.candidates?.length !== 1 ||
+      !experiment.candidates[0].proposal_event_id || experiment.candidates[0].artifact_version_id !== null) {
+    return 'Proposal report has inconsistent identity or eligibility.';
+  }
+  const trial = experiment.trials?.[0];
+  if (!trial || ['RESERVED', 'RUNNING'].includes(trial.state)) return 'One isolated diagnostic is in progress.';
+  const count = trial.request_count;
+  const captured = new Set(trial.outputs.filter(output => output.transport_error === null && output.body_base64)
+    .map(output => output.request_ordinal));
+  const passed = experiment.trials.length === 1 && trial.state === 'COMPLETE' && Number.isInteger(count) && count > 0 &&
+    trial.task_assessments.length > 0 && trial.task_assessments.every(task => task.mandatory_pass === true) &&
+    Array.from({length: count}, (_, index) => index + 1).every(ordinal => captured.has(ordinal) &&
+      trial.task_assessments.some(task => task.request_ordinal === ordinal));
+  return `${passed ? 1 : 0} of 1 public batches passed mandatory checks. This diagnostic cannot qualify a version.`;
+}

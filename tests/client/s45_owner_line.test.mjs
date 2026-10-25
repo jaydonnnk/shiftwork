@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 // Authored public states. No model, Sandbox or learner evidence.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -76,6 +77,8 @@ for (const [name, file, needle, replacement, hidden] of faults) test(`owner line
   assert.equal(pristine[file].split(needle).length - 1, 1, `unique source anchor: ${name}`);
   const dir = await mkdtemp(path.join(tmpdir(), 'shiftwork-s45-owner-'));
   try {
+    // S46 reuses the accepted S45 checks on a descendant, with unchanged fault assertions.
+    execFileSync('git', ['merge-base', '--is-ancestor', '087585ff690194e6fde5d67be9827d732474879e', 'HEAD'], {cwd: path.resolve(client, '../..')});
     for (const source of files) await writeFile(path.join(dir, source), source === file ? pristine[source].replace(needle, replacement) : pristine[source]);
     const story = await import(pathToFileURL(path.join(dir, 'workplace-story.js')).href);
     const view = await import(pathToFileURL(path.join(dir, 'workplace-view.js')).href);

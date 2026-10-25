@@ -1,3 +1,55 @@
+**Current S46 result, 2026-10-25 Asia/Singapore:** the approved corrected-context
+action ran once and stopped at the invalid coach response. All four actions and
+remainders are CLOSED, without retry. S46 remains INCOMPLETE and UNACCEPTED.
+[Actual outcome and limits](slice46-corrected-context-live-result-2026-10-25.md).
+Earlier checkpoint notices below are historical.
+
+**S46 approved offline work complete; live action proposed, 2026-10-25 Asia/Singapore.**
+The context correction, 63 guard proofs, four correct-mission native 100%/200%
+browser journeys and zero-call preparation are complete. The [new proposal](slice46-corrected-context-live-proposal-2026-10-25.md)
+has 59 authored controls and 36 independent private-runner fault proofs. It is
+NOT authorized. The private runner repairs do not change production source or
+an approved gate decision. All old actions and remainders stay CLOSED; S46 remains
+INCOMPLETE and UNACCEPTED.
+
+**S46 guard and browser proof complete; live preparation pending, 2026-10-25 Asia/Singapore.**
+The approved context correction now has 63 valid source fault proofs and four
+uninterrupted authored-double desktop/mobile journeys at native 100%/200%.
+The [checkpoint](slice46-coach-context-progress-2026-10-25.md) records fresh
+regression, exact receipts and limits. No production source changed in this
+continuation. New zero-call live preparation remains unfinished. All historical
+actions and remainders stay CLOSED. S46 remains INCOMPLETE and UNACCEPTED.
+
+**S46 coach context implemented; proof incomplete, 2026-10-25 Asia/Singapore.**
+The approved offline context correction is in place. Focused final checks pass
+97 Python cases. Final broad/fault results are recorded in the
+[implementation checkpoint](slice46-coach-context-progress-2026-10-25.md). The continuous authored-double browser journey
+and new zero-call live preparation remain unfinished. The native input receipt
+was checked late at 218,289 tokens, above the checkout's 175k limit, so new work
+stopped and a handoff was recorded. All three old actions remain closed. No new
+live/spending authority, S46 acceptance or publication follows. Earlier notices
+retain their historical scope.
+
+**S46 COACH CONTEXT CORRECTION APPROVED, 2026-10-25 Asia/Singapore.**
+The user replied "Yep, I approve." to the scoped PATCH_PROPOSAL context correction
+and its offline implementation/proof. Gate 3 is re-approved for this scope.
+The [read-only investigation and concrete correction](slice46-coach-context-correction-2026-10-25.md)
+establish that the retained request omits the historical verified plan failure,
+referenced vocabulary and caller. Their role in the weak patch remains unproved.
+The approved correction is not yet implemented. Earlier approved S46 contracts
+remain in force; no live allowance is reopened. The execution checkpoint is in
+the correction document. S46 remains INCOMPLETE and UNACCEPTED.
+
+**S46 SCOPED GATE 3 CORRECTION APPROVED, 2026-10-25 Asia/Singapore.**
+The user approved [the S46 correction](slice46-gate3-correction-2026-10-25.md).
+That document extends sections 2, 3.2, 3.6, 3.7, 4, 5 and 6 with the executable
+patch format, transient diagnostic identity, supplemental proposal relations,
+draft-only acceptance and persisted VersionAuthorship. Its specific contracts
+supersede the older affected rows below, including the attribution-only API row.
+There is no saved proposal version, protected reservation, qualification or
+operational effect. Existing candidate canonical bytes and historical rows stay
+unchanged. S47's independent copy work retains its existing authority.
+
 **GATE 3 CLARIFICATION APPROVED, 2026-10-23 Asia/Singapore.**
 
 Jaydon approved in chat: "Approve the S43 to S50 Gate 4 entries, and the proposed Gate 3 clarification: the new mission binds only under the tokenfactory executor, and recorded mode keeps the old mission and replays S44 captures."

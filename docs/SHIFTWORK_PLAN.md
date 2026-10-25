@@ -1,3 +1,166 @@
+**S46 corrected-context action STOPPED and CLOSED, 2026-10-25 Asia/Singapore.**
+The approved action ran once. The coach reached its 1,024-output-token limit with
+no string content; the app recorded ASSIST_PROVIDER_RESPONSE_INVALID. One
+entitlement read passed. No Nano call, Sandbox operation, proposal diagnostic,
+copy, save, comparison, selection or operation followed. Reserved inference is
+US$0.01075200, with actual billing unknown. All FOUR actions and every remainder
+are CLOSED, with no retry. [Actual result and limits](plans/shiftwork/slice46-corrected-context-live-result-2026-10-25.md).
+Focused commits, integration and pushing main remain authorized. S46 is INCOMPLETE
+and UNACCEPTED; publication does not accept it. Earlier notices are historical.
+
+**S46 named live action and main publication APPROVED, not started, 2026-10-25 Asia/Singapore.**
+The user approved the named proposal and asked to commit and push to main.
+[The authority record](plans/shiftwork/slice46-approved-live-and-publication-2026-10-25.md)
+pins the exact scope. Approval files exist; authorization checks pass. Execution
+and publication have not started because native context is near the extended
+350k maximum. All three old actions/remainders stay CLOSED. S46 remains INCOMPLETE
+and UNACCEPTED. The approval carries forward while the exact proposal remains valid.
+
+**S46 approved offline work complete; live action proposed, 2026-10-25 Asia/Singapore.**
+The approved context correction, 63 guard proofs, four correct-mission native
+100%/200% browser journeys and zero-call live preparation are complete. The
+[new named proposal](plans/shiftwork/slice46-corrected-context-live-proposal-2026-10-25.md)
+has 59 authored controls and 36 private-runner fault proofs. It is NOT authorized.
+All three historical actions and remainders remain CLOSED; S46 is INCOMPLETE
+and UNACCEPTED. No provider/Sandbox call, acceptance, new selection/operation,
+installation or Git publication occurred. The session extension was explicitly
+authorized to 300k-350k context tokens. Earlier notices retain historical scope.
+
+**S46 guard and browser proof complete; live preparation pending, 2026-10-25 Asia/Singapore.**
+The approved correction now has 63 valid source fault proofs and four uninterrupted
+authored-double desktop/mobile journeys at native 100%/200%. Fresh checks pass
+1,802 Python tests with one live-only skip, one exact installation deselection
+and two existing warnings, plus 340 Node tests. No production source changed in
+this continuation. See the [checkpoint](plans/shiftwork/slice46-coach-context-progress-2026-10-25.md).
+New zero-call live preparation remains unfinished at the context checkpoint.
+All three historical actions and all remainders stay CLOSED. S46 is INCOMPLETE
+and UNACCEPTED. No new live, spending, acceptance or publication is authorized.
+
+**S46 coach context implemented; proof incomplete, 2026-10-25 Asia/Singapore.**
+The approved offline context correction is in place. Focused final checks pass
+97 Python cases. Final broad/fault results are recorded in the
+[implementation checkpoint](plans/shiftwork/slice46-coach-context-progress-2026-10-25.md). The continuous authored-double browser journey
+and new zero-call live preparation remain unfinished. The native input receipt
+was checked late at 218,289 tokens, above the checkout's 175k limit, so new work
+stopped and a handoff was recorded. All three old actions remain closed. No new
+live/spending authority, S46 acceptance or publication follows. Earlier notices
+retain their historical scope.
+
+**S46 coach context correction APPROVED, 2026-10-25 Asia/Singapore.**
+The user replied "Yep, I approve." to the scoped Gate 3 correction and its offline
+implementation/proof. The [approved correction and checkpoint](plans/shiftwork/slice46-coach-context-correction-2026-10-25.md)
+remain unimplemented at the session's context boundary. No new live/spending
+authority is granted. All three prior actions remain closed and S46 is
+INCOMPLETE and UNACCEPTED. Approval carries forward to the next session.
+Earlier notices below retain their historical checkpoint scope.
+
+**S46 coach context correction PENDING, 2026-10-25 Asia/Singapore.**
+Read-only investigation binds the empty source response to a verified
+SCHEMA_INVALID plan result at the 1,024-token cap. The coach did not receive that
+trace, the task/tool definitions or its caller. Whether these omissions caused
+the weak patch remains unproved. A 6,199-byte context specimen fits the unchanged
+8 KiB cap. The [scoped Gate 3 proposal](plans/shiftwork/slice46-coach-context-correction-2026-10-25.md)
+requires re-approval before changing coach input. Product/test source is unchanged;
+56 focused Python and 30 Node checks pass. S46 is INCOMPLETE and UNACCEPTED,
+and all three live actions and their remainders remain closed.
+Earlier notices below retain their historical checkpoint scope.
+
+**S46 continued offline fixes verified, 2026-10-25 Asia/Singapore.**
+The user authorized continuing the fixes until half context. The client now stops
+polling queued children of an exactly matched stopped qualifying comparison, while
+preserving active and unrelated polling. The comparison lamp follows the parent
+state; reserved children no longer make a failed comparison appear Running. A
+full-width note explains that Public requests are planned totals and Missing
+outputs includes requests that never ran. Counts, grades and stored rows are
+unchanged. Actual stopped-snapshot checks at desktop/mobile-sized native Chrome
+100%/200% show one initial board read and a stable Incomplete result, with both
+choices disabled. Fresh regression: 1,761 Python passes, one live-only skip and
+one installation case excluded by exact node ID; 340 Node passes. All 11 new
+polling/lamp faults and the 12 summary faults fail their intended assertions with
+clean/restored controls. No new provider/Sandbox call, selection, operation,
+installation or Git publication occurred. S46 remains INCOMPLETE and UNACCEPTED;
+the live allowances and all remainders remain closed. The complete browser
+journey and causal repair remain unproved. See [the polling correction record](plans/shiftwork/slice46-polling-correction-2026-10-25.md).
+Earlier notices below retain their historical checkpoint scope.
+
+**S46 offline UI correction verified, 2026-10-25 Asia/Singapore.**
+The authorized correction now identifies the exact coach proposal and displays its
+retained diagnostic answer and task checks after experiment, shift, run and
+proposal matching. The focused regression fails before the correction. Twelve
+separate source faults fail their intended assertions, with clean/restored controls.
+Fresh regression covers 1,761 Python passes, one live-only skip and one excluded
+installation test, plus 317 Node passes. Python coverage was completed in two
+commands after the first keyword filter also omitted six offline environment
+cases; all six passed separately. The two existing deprecation warnings remain.
+Actual copied checkpoints pass desktop and mobile-sized native Chrome 100%/200%
+review. At the 390px target, 200% is 195 CSS pixels, DPR 2 and pinch scale 1.
+The queued-run refresh loop and misleading Running room lamp are reproduced;
+polling and stored rows remain unchanged. The earlier read-only review reconciled
+the provider deadline stop and completed the five-file credential scan. No new
+provider/Sandbox call, selection, operation, publication or deployment occurred.
+The live comparison remains INCOMPLETE, neither candidate is eligible, and S46 is
+UNACCEPTED. Both live allowances and all remainders stay closed. Work remains
+uncommitted with an empty index. See [the current correction record](plans/shiftwork/slice46-ui-correction-2026-10-25.md).
+Earlier notices below retain their historical checkpoint scope.
+
+**S46 second live action STOPPED; safe context handoff, 2026-10-25.**
+The user approved the corrected second action with "i approve2". Super returned a
+valid patch; its exact bytes ran once in isolation, were accepted into the draft
+and explicitly saved with one accepted generated patch and no false learner-edit
+credit. The comparison then stopped INCOMPLETE with neither candidate eligible.
+Actual use was one Super call, 14 Nano calls and eight Sandbox operations;
+reserved inference US$0.04171776, actual billing unknown. Both S46 actions total
+US$0.05468160 reserved. Ledger and selection rows were unchanged; no operating
+choice or operation followed. Both live allowances and all remainders are closed.
+The patch appears customer-behavior-neutral under static inspection; no causal
+repair, learning gain or completed S46 is claimed. Failure diagnosis, second-result
+credential scan/browser review and native 200% remain pending. The session stops
+because the latest available usage receipt reports about 432k context input
+above the user's 175k working limit. No further diagnosis or action follows here.
+See [the second result](plans/shiftwork/slice46-second-live-result-2026-10-25.md) and
+[the continuation handoff](plans/shiftwork/slice46-continuation-2026-10-25.md).
+S46 is INCOMPLETE and UNACCEPTED. No publication, merge or deployment occurred.
+Earlier notices below retain their historical checkpoint scope.
+
+**S46 second named live action APPROVED, 2026-10-25.**
+The user said "i approve2", approving the separately prepared corrected action:
+one Super coach call, at most 43 Nano service calls and 25 Sandbox operations,
+US$0.10586112 reserved inference within the existing US$5 all-in ceiling.
+The model protocol and limits stay unchanged. One remaining diagnostic slot is
+verified before spending. A failed call or execution stops the action with no
+retry, tuning, automatic selection or operation. The first action stays closed.
+See [the approved action](plans/shiftwork/slice46-second-live-proposal-2026-10-25.md).
+S46 acceptance, publication, merge and deployment remain separate.
+
+**S46 offline verified; first live action STOPPED, 2026-10-25.**
+The scoped Gate 3 correction and first named action were explicitly approved.
+Offline checks pass: 1,761 Python tests, one live-only skip and one excluded
+installation test; 312 Node tests; 22 assertion-bound source fault checks across
+21 distinct edits. The first live action used one Nano call, one Super call and
+one Sandbox operation. The coach failed with ASSIST_PROVIDER_RESPONSE_INVALID;
+its underlying response cause is unknown. No proposal was run or accepted, and
+no comparison, selection or operation followed. Reserved inference is
+US$0.01296384, not a bill. The original store and evidence are preserved.
+The first action and unsent remainders are closed. A corrected second action is
+prepared offline and awaits explicit approval. Native 200% and the successful
+proposal/run/accept/save/compare browser journey remain unverified. S46 is
+INCOMPLETE and UNACCEPTED. No publication, merge or deployment occurred.
+See [the S46 checkpoint](plans/shiftwork/slice46-checkpoint-2026-10-25.md),
+[the live stop](plans/shiftwork/evidence/slice46-live-stop-2026-10-25.md) and
+[the proposed second action](plans/shiftwork/slice46-second-live-proposal-2026-10-25.md).
+Earlier notices below retain their checkpoint scope.
+
+**S46 implementation authorized; scoped Gate 3 correction APPROVED, 2026-10-25.**
+The user authorized S46 alongside independent S47 work and preapproved live calls
+with a US$5 ceiling. The isolated S46 preflight found that the existing run/candidate
+types require a saved version and assistance has no runnable patch format.
+No product code has changed. See the proposed
+[Gate 3 correction](plans/shiftwork/slice46-gate3-correction-2026-10-25.md) and
+[implementation plan](plans/shiftwork/slice46-implementation-plan-2026-10-25.md).
+Super availability and public inference rates were verified. No inference or
+Sandbox execution occurred; unknown Sandbox charges prevent a guaranteed US$5
+all-in bound. S45's acceptance and evidence remain unchanged.
+
 **S45 ACCEPTED and PUBLISHED on shiftwork/slice-45, 2026-10-25.**
 The user authorized committing/pushing S45 and a handoff for another agent.
 Sixteen focused implementation/evidence commits ending at b7babdd were pushed
