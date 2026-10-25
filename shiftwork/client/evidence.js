@@ -1,3 +1,12 @@
+export function evidenceLabel(code) {
+  switch (code) {
+    case 'RECORDED_INSPECTION': return 'replayed recording';
+    case 'ISOLATED_LIVE': return 'ran live in a sandbox';
+    case 'TRUSTED_LOCAL': return 'ran locally with trusted test code';
+    default: return 'evidence unknown';
+  }
+}
+
 export function selectEvidence(output, checks, events) {
   if (!output) return { checks: [], events: [] };
   const linkedChecks = checks.filter(check => check.run_id === output.run_id && check.observed_ref === output.id);

@@ -4,6 +4,13 @@ import { selectEvidence } from './evidence.js';
 
 const words = value => String(value).toLowerCase().replaceAll('_', ' ');
 
+export const FIRST_RUN_PANELS = ['Read the failure', 'Explain it', 'Compare repairs', 'Choose', 'Next shift'];
+
+export function firstRunPanel(guide) {
+  if (!Number.isInteger(guide?.step)) return null;
+  return ({ 1: 1, 2: 2, 3: 2, 4: 3, 5: 4, 6: 4, 7: 5 })[guide?.step] ?? null;
+}
+
 const UNRESOLVED = new Set(['OPEN', 'CLOSED_UNRESOLVED']);
 const CHECK_WORDS = { pass: 'passed', fail: 'failed', error: 'errored' };
 
