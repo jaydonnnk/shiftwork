@@ -121,4 +121,6 @@ All named faults and clean/restored controls pass. The validator rejects changed
 client bytes for all eight acceptance sets and the three actual old stale
 receipts. The fixed-port collision and early incomplete-packet validation remain
 preserved separately. No product or test source changed in this verification
-continuation. Explicit S47 acceptance remains pending; see the final evidence.
+continuation. The user subsequently accepted S47, and its code packet is
+published to the branch and main. See the final evidence and
+[publication record](s47-publication-2026-10-25.md). S46 remains ongoing and separate.

@@ -4,7 +4,9 @@ Completion notice, 2026-10-25: the three reruns below now pass with 192, six and
 24 fresh rows in /tmp/shiftwork-s47-finalbytes-20261025-a/. The new validator
 enforces final bytes in all eight acceptance proof sets, checks named failures
 and preservation, and rejects the actual stale receipts. No product or test
-source changed. S47 still awaits user acceptance. See
+source changed. The user subsequently accepted S47 and authorized its branch
+and main publication. The code packet is remotely verified; see
+[the publication record](s47-publication-2026-10-25.md) and
 [the updated evidence](s47-final-offline-2026-10-25.md). The original handoff and
 its prompts below remain historical; do not restart the completed proof sets.
 

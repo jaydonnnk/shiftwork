@@ -1,14 +1,17 @@
 # S47 final offline verification, 2026-10-25 Asia/Singapore
 
 FINAL-BYTE PROOF COMPLETE. ACCEPTED by the user on 2026-10-25.
-Branch and main publication are authorized; remote verification is pending.
+The S47 code packet is published to its branch and main, with remote verification.
+See [the publication record](s47-publication-2026-10-25.md) for fresh regression,
+the verified commit range and the separate publication-notice commit.
 S46 remains ongoing and separate. No deployment is authorized.
 
-Branch: shiftwork/slice-47. HEAD: 087585ff690194e6fde5d67be9827d732474879e.
-All unstaged/untracked work remains preserved and the index is empty. This work
-made no edit or startup in the primary or S46 checkout. Scoped Gate 1 approval
-persists. No live call, credential use, install, protected edit, commit, push,
-merge, deployment or S48 work occurred.
+Verification branch: shiftwork/slice-47. Base: 087585ff690194e6fde5d67be9827d732474879e.
+At the verification checkpoint, inherited work was preserved and nothing was
+staged. Verification made no edit or startup in the primary or S46 checkout.
+Scoped Gate 1 approval persists. That phase made no live call, credential use,
+install, protected edit, Git publication, deployment or S48 change. Publication
+followed only after the user's later acceptance and explicit authorization.
 
 ## Result and repairs
 
@@ -133,7 +136,7 @@ entry point, alongside the preview, first-run browser/fault and journey controls
 
 ## Preview and limits
 
-Fresh offline acceptance preview:
+Preserved offline acceptance preview:
 http://127.0.0.1:8571/?board=bookshop&guide=1
 Store: /tmp/shiftwork-s47-finish-20261025-a/acceptance-preview.db.
 Older previews remain preserved. Completed test servers have stopped.
@@ -142,10 +145,10 @@ This is local headless Chromium/WebGL and authored/recorded/trusted-local proof.
 It does not establish hosted behavior, live model quality, learner comprehension,
 physical-device access, audible/named assistive-technology behavior or production
 readiness. Historical S28 empty-area and skip-link defects were not reproduced in
-current samples; no repair to an absent defect is claimed. S46/S47 integration,
-publication, deployment and S48 remain separately authorized work.
+current samples; no repair to an absent defect is claimed. Combined S46/S47
+integration, deployment and S48 remain separate work.
 
-The final-byte evidence block is closed. The user accepted S47 and authorized
-publishing its branch and pushing main. The earlier
+The final-byte evidence block is closed. The user accepted S47 and its code
+packet is published to the branch and main. The earlier
 [handoff](s47-final-byte-proof-handoff-2026-10-25.md)
 records the original gap; its rerun instructions are now satisfied.

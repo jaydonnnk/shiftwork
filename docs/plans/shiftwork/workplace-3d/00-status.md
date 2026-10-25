@@ -1,3 +1,15 @@
+**S47 ACCEPTED and PUBLISHED to its branch and main, 2026-10-25.**
+Thirteen focused commits through bad906b were pushed atomically and verified
+against both remote refs with zero divergence. Publication notices follow in a
+documentation-only commit. Main also receives the already-accepted S45 ancestry;
+S46 remains ongoing and separate. Fresh publication regression: Node 331 and
+Python 1,732 pass, with one live-only skip, one excluded installation test and
+two known warnings. The 222 final-byte browser rows remain current, and all 106
+protected files and 44 inherited bytecode files are preserved. No S46 working
+file or process was touched. No deployment or S48 occurred.
+See [the publication record](s47-publication-2026-10-25.md).
+Earlier notices below retain their historical scope.
+
 **S47 ACCEPTED; branch and main publication authorized, 2026-10-25.**
 The user said: "Accept. S46 is still ongoing. But u can publish ur branch and
 push to main." Acceptance includes the completed final-byte proof below.
