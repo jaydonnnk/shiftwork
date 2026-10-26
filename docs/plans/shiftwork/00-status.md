@@ -1,3 +1,22 @@
+**S46 CLOSED incomplete by user decision, 2026-10-26 Asia/Singapore.**
+Two scoped Gate 3 amendments were approved, implemented and proven offline: the
+coach output cap 1,024 to 4,096 tokens and the coach deadline 20 to 60 seconds.
+Two further named live actions then ran once each. The cap-4096 action stopped at
+the retained 20-second deadline with no response retained. The deadline-60 action's
+coach stage succeeded and measured 27,256 ms, 1,485 input and 3,537 output tokens
+with finish_reason stop and valid JSON content, then its single proposal diagnostic
+failed in the Sandbox with CAPTURE_TRUNCATED and zero inference calls. A static
+parse after closure proved the retained patch does not compile (SyntaxError at its
+line 73), so the in-Sandbox service never started and the driver decoded empty
+stdout; the failure is coach behavior, not a harness defect. All SIX actions and
+every remainder are CLOSED without retry. The user closed S46 as INCOMPLETE and
+UNACCEPTED on this evidence on 2026-10-26; publication does not imply acceptance.
+A pre-reservation compile guard on proposed source is recorded as a candidate
+future repair needing its own scoped approval. Focused commits and fast-forward to
+main are authorized by the same decision; push remains unauthorized.
+[Deadline result and root cause](slice46-coach-deadline-60-live-result-2026-10-26.md).
+Earlier notices below retain their historical scope.
+
 **S46 corrected-context action STOPPED and CLOSED, 2026-10-25 Asia/Singapore.**
 The approved action ran once. Its one coach response reached 1,024 output tokens
 with no string content and was recorded as ASSIST_PROVIDER_RESPONSE_INVALID.
