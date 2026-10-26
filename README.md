@@ -1,8 +1,8 @@
 # Shiftwork
 
-1. **Read the failure:** [start the current source locally](#start-locally), open Bellwether Books, open a shift, and select **Guided first run**.
+1. **Read the failure:** [open Shiftwork](https://shiftwork.onrender.com), choose Bellwether Books, open a shift, and select **Guided first run**.
 2. **Explain it:** inspect the retained evidence, then write your cause and a test that could prove your explanation wrong.
-3. **Compare repairs:** use the pinned repair fixtures in the offline demonstration. Fresh authored repairs require separately authorized isolated execution.
+3. **Compare repairs:** edit and save two repairs, then test them under the same requirements and conditions. Fresh hosted runs consume Token Factory credits.
 4. **Choose:** explicitly select an eligible, exact tested version. A newer save does not replace that selection.
 5. **Next shift:** operate the selection, close the shift, and inspect what the next shift inherits. Use **Technical details** to reveal the underlying IDs and evidence codes.
 
@@ -33,12 +33,12 @@ See [the evidence labels and limits](#evidence-modes-and-limits).
 ## Hosted practice demo
 
 [Open the shared practice demo](https://shiftwork.onrender.com).
-Read-only S48 checks observed main `42ffc2e` and its guided assets on the host.
-The local release repair remains unpublished. Fresh smoke and sleep/wake proof
-are pending. See [the current checkpoint](docs/plans/shiftwork/slice48-release-checkpoint-2026-10-26.md).
-[S48 preparation](docs/plans/shiftwork/slice48-offline-preparation-2026-10-25.md)
-records the pending release checks. No deployment of the local repair or fresh
-live smoke is claimed.
+S48's published runtime is `37f1394`. Hosted checks match all 18 client files,
+show the guided path at three viewport sizes, and record one completed live
+smoke diagnostic. After 16 minutes without owned polling, a wake request took
+32.54 seconds and the database reset. Public visitor traffic was uncontrolled.
+The smoke is closed with no retry. S48 awaits explicit user acceptance.
+See [the release evidence and limits](docs/plans/shiftwork/slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary).
 
 The hosted database is shared, has no private learner accounts, and can change
 when another visitor acts. The recorded free-hosting behavior includes sleep,
@@ -46,10 +46,9 @@ a wake delay, and a fresh database after sleep, restart, or redeploy.
 Use the local build to retain your own history. Free hosting is not an
 availability guarantee. See [the retained S28 hosted evidence](docs/plans/shiftwork/slice28-hosted-evidence-2026-10-19.md).
 
-[A source archive pinned to the tested S28 revision](https://codeload.github.com/jaydonnnk/shiftwork/zip/9f0adba1a966ffa944dbadc6794157bfb127041e)
-remains a historical download. It does not include the later guided path.
-[The public repository](https://github.com/jaydonnnk/shiftwork) contains the
-current source. See [the moved slice history](docs/README_HISTORY.md) for older
+[Download the S48 runtime source](https://codeload.github.com/jaydonnnk/shiftwork/zip/37f13945a0c073d9b3a31935bd170d09483d5b1e)
+to run the guided build locally. [The public repository](https://github.com/jaydonnnk/shiftwork)
+contains current source and subsequent release documentation. See [the moved slice history](docs/README_HISTORY.md) for older
 measurements and [S47 publication](docs/plans/shiftwork/workplace-3d/s47-publication-2026-10-25.md)
 for the accepted local source proof.
 
@@ -58,8 +57,10 @@ for the accepted local source proof.
 Use Python 3.12 or 3.13. Retained packaging evidence used macOS and Python 3.13.
 The current [S48 package result](docs/plans/shiftwork/slice48-release-checkpoint-2026-10-26.md#resumed-offline-result)
 passes a fresh isolated clean installation and all three offline browser journeys.
-That uncommitted source overlay is separate from committed-release and hosted proof.
-Broader OS compatibility remains unverified.
+All 371 product, test and configuration files match that tested package.
+Final documentation was checked separately. The package is offline evidence;
+the hosted smoke is a separate single-call result. Broader OS compatibility
+remains unverified.
 No Node, browser automation library, Docker, API key or GPU is needed to serve
 the app or run the offline Python demonstrations.
 
@@ -158,8 +159,10 @@ blocked. This is source-delivery evidence, not a clean installation or live run.
 Browser checks need existing Node and Chrome installations. The environment
 helper accepts `SHIFTWORK_PYTHON` and `CHROME_PATH`.
 
-Current bounded local results and their exclusions are in
-[S47 final proof](docs/plans/shiftwork/workplace-3d/s47-final-offline-2026-10-25.md).
+Current release results and exclusions are in
+[S48 release proof](docs/plans/shiftwork/slice48-release-checkpoint-2026-10-26.md).
+[S47 final proof](docs/plans/shiftwork/workplace-3d/s47-final-offline-2026-10-25.md)
+retains the earlier local presentation evidence.
 Dated suite counts and deferred device/accessibility checks remain in
 [the evidence history](docs/README_HISTORY.md). Do not treat older failures or
 passing counts as a fresh test of a different revision.
@@ -178,14 +181,15 @@ prevent inspection by someone who owns the controller filesystem.
 
 S44's retained ten-run incident concerns output-budget failures, not a general
 Nano failure rate. S45's recorded comparison and selected operation are bounded
-live evidence. S47's guided presentation is verified locally.
+live evidence. S48 verifies the guided presentation on the host through GET-only checks.
 Read [S44's observations](docs/plans/shiftwork/slice44-checkpoint-2026-10-24.md),
 [S45 publication](docs/plans/shiftwork/slice45-publication-2026-10-25.md), and
 [S47's final proof](docs/plans/shiftwork/workplace-3d/s47-final-offline-2026-10-25.md).
 This source includes S46, which is CLOSED INCOMPLETE and unaccepted. Its
 [retained coach proposal failed compilation](docs/plans/shiftwork/slice46-coach-deadline-60-live-result-2026-10-26.md).
-No successful coach repair, completed S48 hosted release, learner improvement, real
-business impact, production readiness, or total Sandbox-cost claim follows.
+No successful coach repair, learner improvement, real business impact,
+production readiness, or total Sandbox-cost claim follows. The S48 smoke proves
+one diagnostic route and response, without a full live repair-to-inheritance chain.
 
 For a fresh live demonstration, first approve a bounded packet with a model,
 call count, and spend ceiling. Provision `NEBIUS_API_KEY` and

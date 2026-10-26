@@ -9,12 +9,12 @@ The original preparation candidate was accepted S47 at
 `7d156b4541a0774cfc0e4196912c10a0e2e6e7e1`, including accepted S45.
 Read [S47 publication](plans/shiftwork/workplace-3d/s47-publication-2026-10-25.md)
 and [final local proof](plans/shiftwork/workplace-3d/s47-final-offline-2026-10-25.md)
-for that revision's local evidence. S48 now starts from main
-`42ffc2eb8487ee36f3cc567848a5abda7070d7ab`, including S46 source.
+for that revision's local evidence. S48's published runtime is
+`37f13945a0c073d9b3a31935bd170d09483d5b1e`, including S46 source.
 S46 is CLOSED INCOMPLETE and UNACCEPTED. Its actions stay closed and the compile
 guard remains unapproved. The [S48 checkpoint](plans/shiftwork/slice48-release-checkpoint-2026-10-26.md)
-separates current local package results, read-only hosted observations and the
-pending repaired release, live smoke and sleep/wake proof. [S28](plans/shiftwork/slice28-hosted-evidence-2026-10-19.md)
+separates the passing package, completed hosted checks, closed one-call smoke,
+observed idle/wake reset and pending explicit S48 acceptance. [S28](plans/shiftwork/slice28-hosted-evidence-2026-10-19.md)
 remains historical hosted evidence.
 
 ## Local 3D workplaces
