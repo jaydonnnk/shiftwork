@@ -5,7 +5,7 @@
 S48's runtime `37f1394` is published and deployed. Its isolated package,
 hosted guided path, one closed smoke and observed wake/reset have evidence.
 [The release record](slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary)
-keeps the exact proof limits and pending explicit acceptance. Installation,
+keeps the exact proof limits and explicit acceptance dated 2026-10-26. Installation,
 free deployment, focused commits and pushing main are already authorized.
 No inference allowance remains. Every other worktree is preserved. S46 stays
 CLOSED INCOMPLETE and UNACCEPTED, all six actions stay closed, and its compile

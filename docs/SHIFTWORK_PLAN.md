@@ -1,3 +1,18 @@
+**S48 ACCEPTED; acceptance-record publication authorized, 2026-10-26 Asia/Singapore.**
+The user said "I accept s48." and requested committing the working tree and
+pushing main. S48 is closed on its retained package, hosted guided/WebGL,
+closed one-call smoke and observed idle/wake-reset evidence. Release main
+`8a89232` was verified Live as `dep-dbff9crbc2fs7394k2s0`, with all 18 served
+files matching and 24 settled post-deployment views passing. The acceptance
+updates are documentation only. Existing test/evidence limits remain attached.
+The smoke has no retry or remaining allowance. Cleanup found no deletion
+candidate in the release scope. Other worktrees remain preserved. S46 stays
+CLOSED INCOMPLETE and UNACCEPTED, with six actions closed and its compile
+guard unapproved. The user requested an S49/S50 handoff, not execution of
+those slices. Their existing drafts and separate authorities remain intact.
+[Accepted release and limits](plans/shiftwork/slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary).
+Earlier notices below retain their dated historical scope.
+
 **S48 release checks verified; explicit acceptance pending, 2026-10-26 Asia/Singapore.**
 Published runtime `37f1394` matches all 18 hosted client files. The existing
 hosted checks, five guided panels at three sizes, 24 settled WebGL captures,

@@ -6,8 +6,9 @@ Runtime `37f1394` is published and hosted. Package attempt-g, hosted checks,
 settled WebGL captures, the one live diagnostic and the controlled idle/wake
 observation are recorded in the [release checkpoint](slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary).
 The actual smoke and every remainder are CLOSED with no retry. Final release
-documentation is separate from the tested package snapshot. Explicit S48
-acceptance remains pending. S46 is CLOSED INCOMPLETE and its compile guard
+documentation is separate from the tested package snapshot. The user explicitly
+accepted S48 on 2026-10-26 and requested focused commits and pushing main.
+S46 is CLOSED INCOMPLETE and its compile guard
 remains unapproved. The procedures and older notices below are historical;
 their pending authority and evidence statements no longer describe S48's
 current release. S49/S50 retain separate authority.
