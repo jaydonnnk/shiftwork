@@ -2554,9 +2554,9 @@ These are product ceilings, not measured vendor performance.
 | Customer requests per trial | 4 public maximum, plus exactly 1 protected stimulus | Exact public denominator is frozen in context; the protected step carries its own ordinal and denominator. |
 | Executor operations per trial slot | Public repetitions + 1 protected (2026-10-23; was 2) | Each public repetition and the protected phase is a fresh workspace with the frozen bytes for that phase. Operations per comparison rise from 12 to 24 at 3 repetitions; a fresh cost estimate is required before any live comparison is authorized. |
 | Gateway input per call | 8 KiB UTF-8 | Reject before provider call. |
-| Gateway output per call | 1,024 tokens | Provider request and local guard. |
+| Gateway output per call | Service 1,024 tokens; coach 4,096 tokens | Provider request and local guard. Coach cap amended 2026-10-25 after a 1,024 cap left coach content null. |
 | Gateway reasoning control | Omitted or strict enable_thinking=false | Approved 2026-10-24; exact Nano model and frozen permission only. No arbitrary provider fields or automatic fallback. |
-| Gateway deadline per call | 20 seconds | Trusted gateway measurement. |
+| Gateway deadline per call | Service 20 seconds; coach 60 seconds | Trusted gateway measurement. Coach deadline amended 2026-10-26 because one non-streaming full-cap coach response needs about 32 seconds at the catalog rate. |
 | Assist model calls per shift | Declared per pack: 3 (Bellwether), 2 (Go-To-Market), 1 (FDE) | The pack declaration is the enforcement source (3.10). Bellwether shares its three calls across HINT, DIAGNOSIS and PATCH_PROPOSAL with one patch proposal maximum; Go-To-Market shares two across HINT and DIAGNOSIS with no patch proposal; the FDE board allows one HINT call. A role outside the declaration is refused before any model call. |
 | Public repetitions per diagnostic experiment | Up to 10 (2026-10-23) | Fixed before any result is visible; a summary from fewer retained repetitions is refused. |
 | Public repetitions per comparison slot | Up to 3 (2026-10-23) | Fixed in the frozen context; every mandatory check must pass in every repetition. Protected variants per family per comparison stay at 3: the protected phase runs once per pair. |
