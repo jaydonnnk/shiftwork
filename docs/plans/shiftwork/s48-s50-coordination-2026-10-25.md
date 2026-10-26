@@ -1,6 +1,17 @@
 # S48 to S50 offline preparation, 2026-10-25
 
-## Current refresh, 2026-10-26 Asia/Singapore
+## Current S48 release boundary, 2026-10-26 Asia/Singapore
+
+S48's runtime `37f1394` is published and deployed. Its isolated package,
+hosted guided path, one closed smoke and observed wake/reset have evidence.
+[The release record](slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary)
+keeps the exact proof limits and pending explicit acceptance. Installation,
+free deployment, focused commits and pushing main are already authorized.
+No inference allowance remains. Every other worktree is preserved. S46 stays
+CLOSED INCOMPLETE and UNACCEPTED, all six actions stay closed, and its compile
+guard remains unapproved. S49/S50 are unchanged and are not started here.
+
+## Historical branch refresh, 2026-10-26 Asia/Singapore
 
 Both preparation branches now resolve to fetched origin/main
 `42ffc2eb8487ee36f3cc567848a5abda7070d7ab`. The 17 incoming commits include

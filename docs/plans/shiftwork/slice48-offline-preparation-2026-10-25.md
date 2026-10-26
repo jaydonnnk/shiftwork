@@ -1,15 +1,18 @@
 # S48 offline release preparation, 2026-10-25
 
-**Current continuation, 2026-10-26 Asia/Singapore.** Installation, existing-free-
-Render deployment and the bounded one-inference/one-Sandbox smoke/wake packet
-are authorized. Do not reconfirm those actions. Attempt-g passes the exact
-isolated clean-install node, all three browser journeys, actual rooms and
-Northline fallback. This is uncommitted overlay proof. The local repaired bytes
-and README have not been published or deployed. Git publication is the separate
-unresolved authority. See the [resumed checkpoint](slice48-release-checkpoint-2026-10-26.md#resumed-offline-result)
-for the capture-selector diagnosis, responsive readiness repair and failed
-attempts. S46 stays CLOSED INCOMPLETE and its compile guard stays unapproved.
-The preparation procedures and older notices below retain their dated scope.
+**Release verification, 2026-10-26 Asia/Singapore.** The existing S48 installation,
+free Render deployment and focused Git publication scopes are authorized.
+Runtime `37f1394` is published and hosted. Package attempt-g, hosted checks,
+settled WebGL captures, the one live diagnostic and the controlled idle/wake
+observation are recorded in the [release checkpoint](slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary).
+The actual smoke and every remainder are CLOSED with no retry. Final release
+documentation is separate from the tested package snapshot. Explicit S48
+acceptance remains pending. S46 is CLOSED INCOMPLETE and its compile guard
+remains unapproved. The procedures and older notices below are historical;
+their pending authority and evidence statements no longer describe S48's
+current release. S49/S50 retain separate authority.
+
+## Historical preparation and procedures
 
 S48 is incomplete. This packet prepares the README and a release procedure.
 No install, credential read, entitlement preflight, provider request, Sandbox

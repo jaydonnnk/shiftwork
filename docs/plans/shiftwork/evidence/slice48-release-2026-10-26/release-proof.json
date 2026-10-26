@@ -1,0 +1,906 @@
+{
+  "scope": "S48 hosted release verification; explicit acceptance pending",
+  "observed_utc": "2026-10-26T06:30:36.334374+00:00",
+  "runtime_source": "37f13945a0c073d9b3a31935bd170d09483d5b1e",
+  "initial_deploy_id": "dep-dbfdpdqjnfac73eljb90",
+  "service_id": "srv-dbaeg3om7kps738hj1sg",
+  "hosted_get_check": {
+    "base": "https://shiftwork.onrender.com",
+    "revision_expected": "37f13945a0c073d9b3a31935bd170d09483d5b1e",
+    "runtime": {
+      "hosted": true,
+      "configured_executor": "tokenfactory",
+      "python_version": "3.13.12",
+      "boot_id": "431702f6-f5f8-48ef-926e-af8737451c86",
+      "preflight_permissions": {
+        "cancel": true,
+        "import": true,
+        "list": true,
+        "set_image_tag": true,
+        "spawn": true,
+        "spawn_disposable": true
+      },
+      "notice": "Hosted tokenfactory executor: shared practice demo. Token Factory diagnostics, eligible selected operations and help are enabled. The first Bellwether baseline remains a labelled saved inspection. Free hosting sleeps after 15 idle minutes; waking may take about a minute. Sleep, restart or redeploy begins a fresh practice database. Download the build to keep your own history."
+    },
+    "boards": [
+      {
+        "engagement_slug": "bookshop",
+        "role_name": "Junior Applied AI Engineer",
+        "employer": null,
+        "client": "Bellwether Books",
+        "room_id": "bookshop",
+        "station_labels": [
+          "Incident board",
+          "Workbench",
+          "Comparison bench",
+          "Customer queue",
+          "Shift handover"
+        ],
+        "availability": "AVAILABLE"
+      },
+      {
+        "engagement_slug": "gtm",
+        "role_name": "Go-To-Market Engineer",
+        "employer": "Stonebridge Software",
+        "client": "Revenue team",
+        "room_id": "gtm",
+        "station_labels": [
+          "Signal inbox",
+          "Workflow",
+          "Comparison bench",
+          "Pipeline wall",
+          "Handoff queue"
+        ],
+        "availability": "AVAILABLE"
+      },
+      {
+        "engagement_slug": "northline",
+        "role_name": "Forward Deployed Engineer",
+        "employer": null,
+        "client": "Northline Bike Cooperative",
+        "room_id": "northline",
+        "station_labels": [
+          "Deployment brief",
+          "Discovery",
+          "Permissions",
+          "Acceptance tests",
+          "Rollout",
+          "Handover"
+        ],
+        "availability": "AVAILABLE"
+      }
+    ],
+    "assets": [
+      {
+        "path": "THIRD_PARTY_NOTICES.md",
+        "bytes": 472,
+        "sha256": "65cd8508d0bd447df80743c505c2066a4a79c798b567dfcd29173f5eb2f6938e",
+        "mime": "text/markdown"
+      },
+      {
+        "path": "app.js",
+        "bytes": 165284,
+        "sha256": "5368d2b0224f9b41ef90d2511bf9ee9fe642b88491c248d25221d8d8fa541225",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "evidence.js",
+        "bytes": 6864,
+        "sha256": "6cbc0ee662bfc9e2d1501d416c9c92cb77a0a3ea974ee9f53a258126f0d6da3d",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "index.html",
+        "bytes": 37628,
+        "sha256": "6d050fc2bbc202930bac2275b4f02682b957d543955b9052c2079091023ae541",
+        "mime": "text/html"
+      },
+      {
+        "path": "northline-deployment-protocol.html",
+        "bytes": 3544,
+        "sha256": "c94f6cb2f213de7cfc20c50f9ff47556b715b4d8a44df854221a872fb0cdcbff",
+        "mime": "text/html"
+      },
+      {
+        "path": "room.svg",
+        "bytes": 169879,
+        "sha256": "8eaceb338b096dc5ed9d7e321619b853851dcd784aa74c62a91321af724d5c18",
+        "mime": "image/svg+xml"
+      },
+      {
+        "path": "styles.css",
+        "bytes": 48758,
+        "sha256": "fa0b7a02b47f804f8eaf406d2cc7faf3d42a5f9f032b21e79839a49e5098aeae",
+        "mime": "text/css"
+      },
+      {
+        "path": "vendor/three-r180/LICENSE",
+        "bytes": 1081,
+        "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601",
+        "mime": "application/octet-stream"
+      },
+      {
+        "path": "vendor/three-r180/manifest.json",
+        "bytes": 863,
+        "sha256": "f549e2372e79f9bc1db0baf49f89b0d1d63b2e727ac055c459b2f3407fe67445",
+        "mime": "application/json"
+      },
+      {
+        "path": "vendor/three-r180/three.core.js",
+        "bytes": 1403455,
+        "sha256": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "vendor/three-r180/three.module.js",
+        "bytes": 603113,
+        "sha256": "c8211c69345d2e9949dc7a8ac969380497aa0600a5a8ac6a459c8cd02dd9cb8a",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "workplace-assets.json",
+        "bytes": 5691,
+        "sha256": "9b8e12087a1c983e7a05a65459362ae7a818279f21f6056b3958ff1ca8e888dc",
+        "mime": "application/json"
+      },
+      {
+        "path": "workplace-crew.js",
+        "bytes": 12699,
+        "sha256": "13613ef13b7081bb1853bb812c8f0821bea54593893066aecde30a6c65d2f2be",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "workplace-host.js",
+        "bytes": 8774,
+        "sha256": "76019520bb3c33a47a1fe7c9f2f949f95625d29a4b0a2b7f8aa8b1dc1d8f0b84",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "workplace-rooms.js",
+        "bytes": 15309,
+        "sha256": "3e54cc2d9abb4c1e3f6e1363b0075285fffcc4959529f101f4cb43d87e730cb4",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "workplace-scene.js",
+        "bytes": 33498,
+        "sha256": "688a5f6a6b7c1c67482239066b57328594ab67afeba7d5a09889ba034d1beb13",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "workplace-story.js",
+        "bytes": 19087,
+        "sha256": "f74de8cd9f8d6c34d08b3ad5cfea8a1cdca48a9adc143b776c8265c638872de4",
+        "mime": "text/javascript"
+      },
+      {
+        "path": "workplace-view.js",
+        "bytes": 23213,
+        "sha256": "9fc878fa915598630ef943d103d977c2b753a89343f361f06c57b1cdedeb491f",
+        "mime": "text/javascript"
+      }
+    ],
+    "elapsed_s": 11.732,
+    "provider_inference_requests": 0,
+    "scope": "Public GETs only; six startup permissions were already confirmed by this running boot."
+  },
+  "smoke": {
+    "action": "s48-hosted-smoke-20261026-37f1394",
+    "status": "CLOSED",
+    "request_attempts": 1,
+    "shift_id": "bookshop-shift-01",
+    "limits": {
+      "sandbox_operations": 1,
+      "provider_inference_calls": 1,
+      "projected_usd": "0.10"
+    },
+    "v1_marker_sha256": "37495924cd4008aea12ae4dd5a8bb650ca5fa02cc49ca8bd6eab5fc927f67b98",
+    "experiment_id": "experiment-bookshop-shift-01-d1",
+    "state": "FINALIZED",
+    "trial_state": "COMPLETE",
+    "evidence_mode": "ISOLATED_LIVE",
+    "captures": 1,
+    "metrics": null,
+    "task_assessments": [
+      {
+        "request_id": "bellwether-collection-001",
+        "request_ordinal": 1,
+        "task_id": "price",
+        "outcome": "MISSING_OUTPUT",
+        "mandatory_pass": true,
+        "reason_codes": []
+      },
+      {
+        "request_id": "bellwether-collection-001",
+        "request_ordinal": 1,
+        "task_id": "collection",
+        "outcome": "USEFUL_COMPLETION",
+        "mandatory_pass": true,
+        "reason_codes": []
+      },
+      {
+        "request_id": "bellwether-collection-001",
+        "request_ordinal": 1,
+        "task_id": "alternative",
+        "outcome": "USEFUL_COMPLETION",
+        "mandatory_pass": true,
+        "reason_codes": []
+      }
+    ],
+    "provider_raw_receipt": "Public API exposes sanitized observations only. Raw provider receipt, actual billing and independent meter counts are unavailable.",
+    "closed": true
+  },
+  "smoke_controller_observations": [
+    {
+      "kind": "INTERPRETATION",
+      "payload": {
+        "source": "controller_verified"
+      }
+    },
+    {
+      "kind": "INFERENCE_RESULT",
+      "payload": {
+        "finish_reason": "stop",
+        "input_tokens": 262,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "output_tokens": 906,
+        "request_ordinal": 1,
+        "source": "controller_verified"
+      }
+    },
+    {
+      "kind": "INTERPRETATION",
+      "payload": {
+        "inference_meter_complete": true,
+        "request_ordinal": 1,
+        "service_calls": 1,
+        "source": "controller_verified"
+      }
+    },
+    {
+      "kind": "USAGE",
+      "payload": {
+        "sandbox_status": "SUCCESS",
+        "source": "controller_verified",
+        "wall_ms": 8073
+      }
+    },
+    {
+      "kind": "INTERPRETATION",
+      "payload": {
+        "request_ordinal": 1,
+        "source": "controller_verified"
+      }
+    },
+    {
+      "kind": "INTERPRETATION",
+      "payload": {
+        "request_ordinal": 1,
+        "source": "driver_verified"
+      }
+    }
+  ],
+  "wake": {
+    "started_utc": "2026-10-26T05:03:35.738931+00:00",
+    "before_runtime": {
+      "hosted": true,
+      "configured_executor": "tokenfactory",
+      "python_version": "3.13.12",
+      "boot_id": "60249df7-f970-4fec-ab92-331d99bdb81f",
+      "preflight_permissions": {
+        "cancel": true,
+        "import": true,
+        "list": true,
+        "set_image_tag": true,
+        "spawn": true,
+        "spawn_disposable": true
+      },
+      "notice": "Hosted tokenfactory executor: shared practice demo. Token Factory diagnostics, eligible selected operations and help are enabled. The first Bellwether baseline remains a labelled saved inspection. Free hosting sleeps after 15 idle minutes; waking may take about a minute. Sleep, restart or redeploy begins a fresh practice database. Download the build to keep your own history."
+    },
+    "before_board": {
+      "engagement_slug": "bookshop",
+      "business_kind": "bookshop",
+      "latest_shift": {
+        "id": "bookshop-shift-01",
+        "engagement_slug": "bookshop",
+        "seq": 1,
+        "state": "open",
+        "opened_at": "2026-10-26T04:59:31.616793Z",
+        "closed_at": null,
+        "opening_mode": "STANDARD",
+        "operation_allowed": true
+      },
+      "latest_version": {
+        "id": "ver-0001",
+        "shift_id": "bookshop-shift-01",
+        "parent_id": null,
+        "content_hash": "fb394c5e18abe935edaec086932bfe9257b7aad867d68be68a1aa4414080c4a6",
+        "contract": {
+          "catalog_version": 3,
+          "must_never": [
+            "NEVER_INVENT_PRICE_STOCK_POLICY"
+          ],
+          "selections": {
+            "STANCE": "USE_NEWEST_RECORD_WITH_AGE"
+          },
+          "response_time_limit_ms": 3000,
+          "declared_limits": [
+            "Public collection and alternative answers only; no reservations or business writes."
+          ]
+        },
+        "contract_catalog_hash": "d9f18ddafd0cd7f791bd13b58b72b165954c1c51df824c96127ad4796bf7736a",
+        "created_by": "template",
+        "authorship": null,
+        "created_at": "2026-10-26T04:59:31.616793Z"
+      },
+      "latest_run": {
+        "id": "run-0001",
+        "shift_id": "bookshop-shift-01",
+        "artifact_version_id": "ver-0001",
+        "proposal_event_id": null,
+        "experiment_id": "experiment-bookshop-shift-01-d1",
+        "attempt_number": 1,
+        "state": "FINALIZED",
+        "adapter": "tokenfactory",
+        "failure_kind": null,
+        "started_at": "2026-10-26T05:01:58.686996Z",
+        "ended_at": "2026-10-26T05:02:07.241033Z",
+        "purpose": "EXPERIMENT",
+        "evidence_mode": "ISOLATED_LIVE",
+        "selection_id": null
+      },
+      "operating_status": "STARTER_BASELINE",
+      "draft_base_version_id": "ver-0001",
+      "latest_saved_version_id": "ver-0001",
+      "operating_selection": {
+        "id": "sel-0001",
+        "kind": "STARTER_BASELINE",
+        "selected_version_id": "ver-0001",
+        "selected_content_hash": "fb394c5e18abe935edaec086932bfe9257b7aad867d68be68a1aa4414080c4a6",
+        "comparison_id": null,
+        "retained_alternative_version_id": null,
+        "rationale": "Reviewed failing Bellwether starter; executable offline, not a qualified repair or live service.",
+        "requirement_set_hash": "9c753c69a4f3f1f2eeafe142f2ae49275a7a57cb2c0365f61dae7c110720881a",
+        "prior_selection_id": null,
+        "state": "VALID",
+        "created_at": "2026-10-26T04:59:31.616793Z"
+      },
+      "inherited_requirements": null,
+      "artifact_files": [
+        "service.py"
+      ],
+      "requests_run": 1,
+      "attempts_used": 0,
+      "attempt_limit": 3,
+      "attempts_remaining": 3,
+      "incidents": [],
+      "total_incidents": 0,
+      "unresolved_limits": [],
+      "ledger_event_count": 0,
+      "ledger_totals": {},
+      "chain_status": "VALID"
+    },
+    "minimum_idle_seconds": 960,
+    "owned_host_polling": "Stopped. Hosted and guided browser processes have exited; no owned public-host browser tab exists. No release push or manual deployment during idle.",
+    "uncontrolled_visitor_traffic": "Unknown",
+    "idle_elapsed_seconds": 960.0068546250695,
+    "first_wake_request_seconds": 32.53700599994045,
+    "wake_completed_utc": "2026-10-26T05:20:09.181723+00:00",
+    "after_runtime": {
+      "hosted": true,
+      "configured_executor": "tokenfactory",
+      "python_version": "3.13.12",
+      "boot_id": "69edae95-31e7-4590-8beb-53656aa4ef09",
+      "preflight_permissions": {
+        "cancel": true,
+        "import": true,
+        "list": true,
+        "set_image_tag": true,
+        "spawn": true,
+        "spawn_disposable": true
+      },
+      "notice": "Hosted tokenfactory executor: shared practice demo. Token Factory diagnostics, eligible selected operations and help are enabled. The first Bellwether baseline remains a labelled saved inspection. Free hosting sleeps after 15 idle minutes; waking may take about a minute. Sleep, restart or redeploy begins a fresh practice database. Download the build to keep your own history."
+    },
+    "after_board": {
+      "engagement_slug": "bookshop",
+      "business_kind": "bookshop",
+      "latest_shift": null,
+      "latest_version": null,
+      "latest_run": null,
+      "operating_status": null,
+      "draft_base_version_id": null,
+      "latest_saved_version_id": null,
+      "operating_selection": null,
+      "inherited_requirements": null,
+      "artifact_files": [],
+      "requests_run": 0,
+      "attempts_used": 0,
+      "attempt_limit": 3,
+      "attempts_remaining": 3,
+      "incidents": [],
+      "total_incidents": 0,
+      "unresolved_limits": [],
+      "ledger_event_count": 0,
+      "ledger_totals": {},
+      "chain_status": "VALID"
+    },
+    "boot_changed": true,
+    "board_reset": true,
+    "inference_requests_during_idle_wake": 0,
+    "qualification": "Observed idle with no owned polling. Public visitor traffic is uncontrolled. Startup entitlement reads are separate from inference.",
+    "verdict": "WAKE_AND_RESET_OBSERVED"
+  },
+  "settled_captures": {
+    "url": "https://shiftwork.onrender.com",
+    "scope": "GET-only hosted guided path and three actual WebGL2 rooms after readiness and two animation frames; synthetic non-GET blocker self-test never reached network; no inference or store writes",
+    "screens": [
+      {
+        "width": 1440,
+        "height": 900,
+        "panel": "1",
+        "title": "Read the failure",
+        "current": "1",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1440,
+          "height": 730,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "panel": "2",
+        "title": "Explain it",
+        "current": "2",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1440,
+          "height": 730,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "panel": "3",
+        "title": "Compare repairs",
+        "current": "3",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1440,
+          "height": 730,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "panel": "4",
+        "title": "Choose",
+        "current": "4",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1440,
+          "height": 730,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1440,
+        "height": 900,
+        "panel": "5",
+        "title": "Next shift",
+        "current": "5",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1440,
+          "height": 730,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "panel": "1",
+        "title": "Read the failure",
+        "current": "1",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1280,
+          "height": 560,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "panel": "2",
+        "title": "Explain it",
+        "current": "2",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1280,
+          "height": 560,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "panel": "3",
+        "title": "Compare repairs",
+        "current": "3",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1280,
+          "height": 560,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "panel": "4",
+        "title": "Choose",
+        "current": "4",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1280,
+          "height": 560,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 1280,
+        "height": 720,
+        "panel": "5",
+        "title": "Next shift",
+        "current": "5",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 1280,
+          "height": 560,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "panel": "1",
+        "title": "Read the failure",
+        "current": "1",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 358,
+          "height": 200,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "panel": "2",
+        "title": "Explain it",
+        "current": "2",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 358,
+          "height": 200,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "panel": "3",
+        "title": "Compare repairs",
+        "current": "3",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 358,
+          "height": 200,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "panel": "4",
+        "title": "Choose",
+        "current": "4",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 358,
+          "height": 200,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "width": 390,
+        "height": 844,
+        "panel": "5",
+        "title": "Next shift",
+        "current": "5",
+        "overflow": false,
+        "graphics": {
+          "state": "ready",
+          "width": 358,
+          "height": 200,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      }
+    ],
+    "boards": [
+      {
+        "status": 200,
+        "slug": "bookshop",
+        "chain": "VALID"
+      },
+      {
+        "status": 200,
+        "slug": "gtm",
+        "chain": "VALID"
+      },
+      {
+        "status": 200,
+        "slug": "northline",
+        "chain": "VALID"
+      }
+    ],
+    "consoleExceptions": [],
+    "rooms": [
+      {
+        "board": "bookshop",
+        "width": 1440,
+        "height": 900,
+        "graphics": {
+          "state": "ready",
+          "width": 1440,
+          "height": 730,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "board": "bookshop",
+        "width": 1280,
+        "height": 720,
+        "graphics": {
+          "state": "ready",
+          "width": 1280,
+          "height": 560,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "board": "bookshop",
+        "width": 390,
+        "height": 844,
+        "graphics": {
+          "state": "ready",
+          "width": 358,
+          "height": 200,
+          "webgl2": true,
+          "status": "3D Bellwether room. Select intake, the console, diagnosis or assessment."
+        }
+      },
+      {
+        "board": "gtm",
+        "width": 1440,
+        "height": 900,
+        "graphics": {
+          "state": "ready",
+          "width": 1440,
+          "height": 730,
+          "webgl2": true,
+          "status": "3D Stonebridge room. Select signal intake, qualification, routing or ownership."
+        }
+      },
+      {
+        "board": "gtm",
+        "width": 1280,
+        "height": 720,
+        "graphics": {
+          "state": "ready",
+          "width": 1280,
+          "height": 560,
+          "webgl2": true,
+          "status": "3D Stonebridge room. Select signal intake, qualification, routing or ownership."
+        }
+      },
+      {
+        "board": "gtm",
+        "width": 390,
+        "height": 844,
+        "graphics": {
+          "state": "ready",
+          "width": 358,
+          "height": 200,
+          "webgl2": true,
+          "status": "3D Stonebridge room. Select signal intake, qualification, routing or ownership."
+        }
+      },
+      {
+        "board": "northline",
+        "width": 1440,
+        "height": 900,
+        "graphics": {
+          "state": "ready",
+          "width": 1440,
+          "height": 730,
+          "webgl2": true,
+          "status": "3D Northline workshop. Select the brief, permission map, bench, acceptance, rollout or handover."
+        }
+      },
+      {
+        "board": "northline",
+        "width": 1280,
+        "height": 720,
+        "graphics": {
+          "state": "ready",
+          "width": 1280,
+          "height": 560,
+          "webgl2": true,
+          "status": "3D Northline workshop. Select the brief, permission map, bench, acceptance, rollout or handover."
+        }
+      },
+      {
+        "board": "northline",
+        "width": 390,
+        "height": 844,
+        "graphics": {
+          "state": "ready",
+          "width": 358,
+          "height": 200,
+          "webgl2": true,
+          "status": "3D Northline workshop. Select the brief, permission map, bench, acceptance, rollout or handover."
+        }
+      }
+    ],
+    "blockedWrites": [],
+    "blockedWriteSelfTest": [
+      {
+        "url": "https://s48-get-only.invalid/write-block-self-test",
+        "method": "POST"
+      }
+    ],
+    "navigations": [
+      {
+        "url": "https://shiftwork.onrender.com/?board=bookshop#board",
+        "loaderId": "B439BFDB23EAB8ECEA0CD0B046BD490D",
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=bookshop#board",
+        "loaderId": null,
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=bookshop#board",
+        "loaderId": null,
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=bookshop#board",
+        "loaderId": null,
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=bookshop#board",
+        "loaderId": null,
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=bookshop#board",
+        "loaderId": null,
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=gtm#board",
+        "loaderId": "F4E03878CC7B6BE95EEE5B300F116593",
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=gtm#board",
+        "loaderId": null,
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=gtm#board",
+        "loaderId": null,
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=northline#board",
+        "loaderId": "B8B88045872FE2F7404A48BBD99DDAC2",
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=northline#board",
+        "loaderId": null,
+        "committed": true
+      },
+      {
+        "url": "https://shiftwork.onrender.com/?board=northline#board",
+        "loaderId": null,
+        "committed": true
+      }
+    ]
+  },
+  "retained_regression": {
+    "python_passed": 1806,
+    "python_skipped": 1,
+    "python_deselected": 1,
+    "known_warnings": 2,
+    "node_passed": 361,
+    "asset_checks_passed": 9,
+    "rerun_in_finish": false
+  },
+  "package": {
+    "attempt": "g",
+    "exit_code": 0,
+    "seconds": 225.03,
+    "bytes": 12020908,
+    "sha256": "68bd4cdf7e6f4b93da3ad9c0cc820de419ad6e69de578d752c5d3c2d0615480a",
+    "matching_product_test_config_files": 371,
+    "final_documentation_separate": true
+  },
+  "capture_setup_failure": "First disposable capture failed with Inspected target navigated or closed before any screenshot. A trace showed evaluation preceding document commit. The corrected private driver waits for the expected loader commit. The original failure and both diagnostic runs are retained.",
+  "preservation": {
+    "other_worktrees": 6,
+    "prior_evidence_files_rehashed_unchanged": 122,
+    "both_smoke_markers_preserved": true
+  },
+  "limits": [
+    "No additional inference allowance or retry",
+    "No coach/comparison/explicit selection/operation in S48 smoke",
+    "Raw provider HTTP receipts and actual billing unavailable",
+    "One smoke is not model-quality or learning evidence",
+    "Desktop/mobile viewport checks are not physical-device or named assistive-technology certification",
+    "S46 CLOSED INCOMPLETE and UNACCEPTED; compile guard unapproved",
+    "No S49/S50 work performed in this S48 finish"
+  ],
+  "representative_captures": {
+    "hosted-desktop.png": {
+      "bytes": 295912,
+      "sha256": "5ccda5028dfade31c59d05d7c1552d16b969b9db97859887a6b182257118f386",
+      "state": "Empty shared board after wake, with actual WebGL2 ready"
+    },
+    "hosted-mobile.png": {
+      "bytes": 207958,
+      "sha256": "a798ab976553a3729c1ed66587a1ca022f0d223244d5838fb3333055f1495455",
+      "state": "Empty shared board after wake, with actual WebGL2 ready"
+    }
+  }
+}
