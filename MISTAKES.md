@@ -4413,3 +4413,15 @@ browser callbacks cannot read their caller's Node scope. This consumed no call.
 - What happened: the first disposable settled-capture driver stopped with `Inspected target navigated or closed` before saving any screenshot. No inference or store write was sent. The failed output root and log remain retained.
 - Root cause: a diagnostic CDP trace recorded `Runtime.evaluate` immediately before Chrome cleared its old execution context and committed the requested document. `Page.navigate` had returned a loader ID before that commit. Two diagnostic controls completed; a rerun alone did not repair the race.
 - Prevention rule: wait for the returned loader ID to appear in the main-frame commit event before evaluating document readiness. For room captures, assert the displayed board and actual WebGL2 readiness. Keep the non-GET blocker, prove it with an intercepted synthetic write, and retain its separate receipt. The corrected private driver records 15 guided panels and nine room views without product changes. These captures do not expand the closed smoke allowance.
+
+## 2026-10-26 S49/S50 handoff: provenance audit guessed ledger source kinds
+
+- What happened: two private read-only ledger audits stopped on their path fences, first on the explicitly referenced historical S46 document and then on a controller Python source. Neither audit changed an original file or produced a completed-verification claim.
+- Root cause: the audit guessed that the ledger contained only documents from the preparation roots instead of inspecting all declared paths first.
+- Prevention rule: inspect the complete ledger path list before defining the read-only fence. Keep the fence bounded to those source roots and actual file kinds. The corrected audit rehashed all 22 sources with matching bytes and digests. The failed setup records remain private; no source or pin was weakened to obtain a pass.
+
+## 2026-10-26 S48 acceptance: ignored evidence parent returned a failed staging exit
+
+- What happened: the first focused `git add` exited one with an ignored-evidence-parent diagnostic. Fresh index inspection showed all four intended batch files had nevertheless been staged. No commit or push occurred from that failed command.
+- Root cause: the command omitted the explicit force-add already required for the reviewed proof under the ignored evidence parent.
+- Prevention rule: inspect ignored-path handling before staging retained evidence. Complete only the exact intended batch, verify its staged file list, and check whitespace before committing. Preserve the failed staging receipt. Never clear the index broadly or stage a parent evidence directory to work around it.
