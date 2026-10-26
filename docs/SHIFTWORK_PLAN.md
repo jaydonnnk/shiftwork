@@ -1,3 +1,61 @@
+**S48 isolated clean package PASS; release incomplete, 2026-10-26 Asia/Singapore.**
+The capture mismatch came from a stale heading selector. Its correction preserves
+the byte assertions and has three independent rendering-fault proofs. The native
+driver also now waits for the correct responsive scene tier, with clean,
+predicate-removal and restored proof. Fresh attempt-g passes the full isolated
+clean-install package, all three journeys, actual rooms and Northline fallback.
+Fresh Node and asset checks pass 361 and nine cases. The completed broad Python
+run remains 1,806 passed, one skipped and one exact installation deselection.
+All failed attempts and S46 closures are preserved. The repair and release
+documents remain uncommitted. Git publication is unresolved; installation,
+free deployment and bounded S48 smoke/wake remain authorized. No new deployment
+or live call ran. See the [current checkpoint](plans/shiftwork/slice48-release-checkpoint-2026-10-26.md#resumed-offline-result).
+
+**S48 context checkpoint; release incomplete, 2026-10-26 Asia/Singapore.**
+The authorized installation found an empty-state test defect and a stale-intent
+navigation bug. The narrow local repair has native clean/restored proof, four
+faults and 361 passing Node checks, but the full package still fails an exact
+rendered-output assertion in the Bellwether journey. The already-running Python
+suite completed with 1,806 passed, one skipped, one exact installation deselection
+and two existing warnings, exit zero. Current Render main `42ffc2e`
+is verified; the local repair is not deployed. No fresh inference, manual
+deployment, commit or push ran. Native context exceeded the user's 300k limit.
+See [checkpoint](plans/shiftwork/slice48-release-checkpoint-2026-10-26.md).
+
+**S48 installation/deployment/live work authorized, 2026-10-26 Asia/Singapore.**
+The user authorized installation, deployment and live calls for S48. The existing
+free Render service already auto-deployed main `42ffc2e`; public runtime and 18
+client hashes match current source. The package check failed at the native
+repair-panel pick after installation and offline demos. That failure is retained
+and under offline diagnosis. No fresh inference has run. S48 is incomplete.
+See [current status](plans/shiftwork/00-status.md). Older notices retain their
+dated historical scope; S46's closure and all protected evidence remain intact.
+
+**S48/S50 branch refresh, 2026-10-26 Asia/Singapore.**
+Both preparation branches now include origin/main
+`42ffc2eb8487ee36f3cc567848a5abda7070d7ab`, with dirty preparation preserved.
+S46 is CLOSED INCOMPLETE and UNACCEPTED. Its retained coach patch failed
+compilation at line 73; the proposed compile guard remains unapproved and
+unimplemented. Coach limits are 4096 tokens/60 seconds only; service limits
+remain 1024 and 5/10/45. Current authority covers integration and focused offline
+checks, with no push, installation, provider call or deployment. Closed live
+actions and stores remain closed. S48/S49/S50 are incomplete; no hosted release
+or acceptance follows. See [current status](plans/shiftwork/00-status.md).
+The user sets this session's handoff threshold to 300k. Earlier notices retain
+their dated historical scope.
+
+**S48 to S50 offline packets prepared; slices incomplete, 2026-10-25.**
+The current continuation authorizes offline preparation in isolated S48/S50
+branches and a separate S49 output directory. Their source base is accepted,
+published S47 main `7d156b4`. The S47 publication and 18 client hashes were
+checked; S46 remains ongoing and unaccepted with its own agent. Its inclusion
+in a release is an explicit pending decision. S48, S49 and S50 remain incomplete.
+See [the coordination record](plans/shiftwork/s48-s50-coordination-2026-10-25.md)
+and [S47 publication](plans/shiftwork/workplace-3d/s47-publication-2026-10-25.md).
+No deployment, installation, credentialed action, provider call, spending,
+outreach, session, recording, commit, merge, push, publication or submission
+is authorized by this preparation. Earlier notices retain their dated scope.
+
 **S46 corrected-context action STOPPED and CLOSED, 2026-10-25 Asia/Singapore.**
 The approved action ran once. The coach reached its 1,024-output-token limit with
 no string content; the app recorded ASSIST_PROVIDER_RESPONSE_INVALID. One
