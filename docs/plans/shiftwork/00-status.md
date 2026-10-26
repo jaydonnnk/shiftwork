@@ -1,3 +1,35 @@
+**S48 release checks verified; explicit acceptance pending, 2026-10-26 Asia/Singapore.**
+Published runtime `37f1394` matches all 18 hosted client files. The existing
+hosted checks, five guided panels at three sizes, 24 settled WebGL captures,
+one closed live diagnostic and the recorded 960-second idle/wake reset have
+retained proof. The first wake GET took 32.54 seconds. Public visitor traffic
+was uncontrolled. The smoke has no retry or remaining inference allowance.
+The passing package's 371 product/test/configuration files still match source;
+final README/evidence documentation is checked separately. Cleanup found no
+deletion candidate in the release scope. Focused documentation publication and
+its deployment identity are verified separately from the original wake event.
+S48 is UNACCEPTED until the user's explicit decision. Every other worktree is
+preserved. S46 remains CLOSED INCOMPLETE and UNACCEPTED, with all six actions
+closed and its compile guard unapproved. S49/S50 are unchanged.
+[Release evidence and limits](slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary).
+Earlier notices below retain their dated historical scope.
+
+**S48 source published and deployed; one smoke CLOSED, 2026-10-26 Asia/Singapore.**
+The user authorized Git publication. Three focused commits are pushed and
+origin/main was verified at `37f1394`. The existing free Render service reports
+deploy `dep-dbfdpdqjnfac73eljb90` live. All 18 served client files match source.
+The unchanged hosted checks pass 12 views and three boards. GET-only guided
+navigation passes 15 panels at three viewport sizes, with zero exceptions.
+The single approved diagnostic finalized with one ISOLATED_LIVE capture, no
+missing evidence and one controller-verified service inference. It completed the
+required collection and alternative tasks. Starter baseline, operational ledger
+and attempt allowance are unchanged. The zero-send preparation failure remains
+retained. The actual smoke and every remainder are CLOSED with no retry.
+Controlled idle/wake and settled hosted WebGL captures remain pending, so S48
+is INCOMPLETE and UNACCEPTED. [Current release record](slice48-release-checkpoint-2026-10-26.md#published-release-and-closed-smoke).
+All other worktrees remain preserved. S46 remains CLOSED INCOMPLETE with all
+six actions closed and its compile guard unapproved. S49/S50 are unchanged.
+
 **S48 isolated clean package PASS; Git publication pending, 2026-10-26 Asia/Singapore.**
 Attempt-d selected an obsolete diagnostic heading. The one-line selector repair
 preserves all exact text, base64 and HTTP assertions; three separate rendered

@@ -1,3 +1,29 @@
+**S48 release checks verified; explicit acceptance pending, 2026-10-26 Asia/Singapore.**
+Published runtime `37f1394` matches all 18 hosted client files. The existing
+hosted checks, five guided panels at three sizes, 24 settled WebGL captures,
+one closed live diagnostic and the recorded 960-second idle/wake reset have
+retained proof. The first wake GET took 32.54 seconds. Public visitor traffic
+was uncontrolled. The smoke has no retry or remaining inference allowance.
+The passing package's 371 product/test/configuration files still match source;
+final README/evidence documentation is checked separately. Cleanup found no
+deletion candidate in the release scope. Focused documentation publication and
+its deployment identity are verified separately from the original wake event.
+S48 is UNACCEPTED until the user's explicit decision. Every other worktree is
+preserved. S46 remains CLOSED INCOMPLETE and UNACCEPTED, with all six actions
+closed and its compile guard unapproved. S49/S50 are unchanged.
+[Release evidence and limits](plans/shiftwork/slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary).
+Earlier notices below retain their dated historical scope.
+
+**S48 published and deployed; smoke CLOSED, release incomplete, 2026-10-26 Asia/Singapore.**
+Main `37f1394` is published and live on the existing free Render service. Its
+18 client files match source. Hosted checks pass 12 views; GET-only guided
+navigation passes all five panels at three viewport sizes. One authorized live
+diagnostic completed with one capture and one controller-verified inference.
+It did not change the starter baseline or operational history. That smoke is
+closed with no retry. Controlled idle/wake and settled WebGL captures remain
+pending. S48 is INCOMPLETE and UNACCEPTED. S46 and all its closed actions remain
+untouched; the compile guard remains unapproved. See the [release record](plans/shiftwork/slice48-release-checkpoint-2026-10-26.md#published-release-and-closed-smoke).
+
 **S48 isolated clean package PASS; release incomplete, 2026-10-26 Asia/Singapore.**
 The capture mismatch came from a stale heading selector. Its correction preserves
 the byte assertions and has three independent rendering-fault proofs. The native
