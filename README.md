@@ -37,7 +37,7 @@ S48's published runtime is `37f1394`. Hosted checks match all 18 client files,
 show the guided path at three viewport sizes, and record one completed live
 smoke diagnostic. After 16 minutes without owned polling, a wake request took
 32.54 seconds and the database reset. Public visitor traffic was uncontrolled.
-The smoke is closed with no retry. S48 awaits explicit user acceptance.
+The smoke is closed with no retry. The user accepted S48 on 2026-10-26.
 See [the release evidence and limits](docs/plans/shiftwork/slice48-release-checkpoint-2026-10-26.md#hosted-verification-and-acceptance-boundary).
 
 The hosted database is shared, has no private learner accounts, and can change

@@ -2,13 +2,22 @@
 
 ## Hosted verification and acceptance boundary
 
-S48's release checks are complete on their stated evidence. Explicit user
-acceptance is still pending. The published runtime is
+S48 is ACCEPTED on its stated evidence. On 2026-10-26 Asia/Singapore the user
+said "I accept s48." and requested committing the working tree and pushing main.
+This closes S48 only. S49/S50 execution is not authorized by the acceptance.
+The tested runtime is
 `37f13945a0c073d9b3a31935bd170d09483d5b1e`, initially deployed as
 `dep-dbfdpdqjnfac73eljb90` on the existing free service
 `srv-dbaeg3om7kps738hj1sg`. Final README and evidence publication changes only
-documentation. Its later commit/deployment identity is checked separately and
-must not be described as the original sleep/wake event.
+documentation. The release documentation at
+`8a8923209bc47ed5a37de5fcd40f3764c9296433` was verified Live as
+`dep-dbff9crbc2fs7394k2s0`. Final GETs matched all 18 files, Python 3.13.12,
+tokenfactory mode and six true permissions. A second post-deployment capture
+passed 15 guided panels and nine settled room views with no unplanned write.
+Its boot `965562a7-3709-434a-8405-0d8a2acebab6` is separate from the smoke and
+wake boots. The acceptance-record publication may trigger another automatic
+deploy of code-identical documentation. That later identity must remain
+separate from the original wake event. No new inference is authorized.
 
 - The unchanged S28 hosted runner passed 12 views and three board reads.
   GET-only guided checks passed all five panels at 1440x900, 1280x720 and

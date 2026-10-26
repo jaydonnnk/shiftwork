@@ -14,7 +14,7 @@ for that revision's local evidence. S48's published runtime is
 S46 is CLOSED INCOMPLETE and UNACCEPTED. Its actions stay closed and the compile
 guard remains unapproved. The [S48 checkpoint](plans/shiftwork/slice48-release-checkpoint-2026-10-26.md)
 separates the passing package, completed hosted checks, closed one-call smoke,
-observed idle/wake reset and pending explicit S48 acceptance. [S28](plans/shiftwork/slice28-hosted-evidence-2026-10-19.md)
+observed idle/wake reset and the user's explicit S48 acceptance on 2026-10-26. [S28](plans/shiftwork/slice28-hosted-evidence-2026-10-19.md)
 remains historical hosted evidence.
 
 ## Local 3D workplaces

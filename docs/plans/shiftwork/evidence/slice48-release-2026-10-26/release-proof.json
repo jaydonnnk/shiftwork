@@ -1,5 +1,5 @@
 {
-  "scope": "S48 hosted release verification; explicit acceptance pending",
+  "scope": "S48 hosted release verification; accepted by the user on 2026-10-26",
   "observed_utc": "2026-10-26T06:30:36.334374+00:00",
   "runtime_source": "37f13945a0c073d9b3a31935bd170d09483d5b1e",
   "initial_deploy_id": "dep-dbfdpdqjnfac73eljb90",
@@ -902,5 +902,13 @@
       "sha256": "a798ab976553a3729c1ed66587a1ca022f0d223244d5838fb3333055f1495455",
       "state": "Empty shared board after wake, with actual WebGL2 ready"
     }
+  },
+  "acceptance": {
+    "status": "ACCEPTED",
+    "date": "2026-10-26 Asia/Singapore",
+    "user_quote": "I accept s48.",
+    "publication_authority": "Commit the working tree and push to main",
+    "scope": "S48 only. S49/S50 handoff requested, execution not authorized.",
+    "observations_preserved": true
   }
 }
