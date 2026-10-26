@@ -17,6 +17,7 @@ from shiftwork.assist.gateway import (
     AssistReply,
     DEADLINE_S,
     LiveAssistGateway,
+    MAX_OUTPUT_TOKENS,
     PROVIDER_URL,
 )
 import shiftwork.assist.gateway as assist_gateway_module
@@ -178,7 +179,7 @@ def test_live_gateway_request_is_bounded_and_sends_no_controller_capabilities():
     assert str(requests[0].url) == PROVIDER_URL
     assert requests[0].headers["Authorization"] == "Bearer LOCAL_TEST_TOKEN"
     body = json.loads(requests[0].content)
-    assert body["max_tokens"] == 1024
+    assert body["max_tokens"] == 4096
     assert "Treat the learner cause as a hypothesis" in body["messages"][0]["content"]
     assert "service repair" in body["messages"][0]["content"]
     assert "LOCAL_TEST_TOKEN" not in json.dumps(body)
@@ -189,6 +190,31 @@ def test_live_gateway_request_is_bounded_and_sends_no_controller_capabilities():
             LiveAssistGateway("LOCAL_TEST_TOKEN", http=http).generate(
                 model_id="test-model", role="HINT", prompt="Role: HINT")
     assert len(requests) == 1, "invalid role must fail before transport"
+
+
+def test_live_gateway_output_guard_refuses_one_token_above_the_coach_cap():
+    """The coach cap is 4,096 (scoped Gate 3 amendment, 2026-10-25).
+
+    Reasoning tokens are billed inside the provider's completion_tokens, so the
+    request ceiling and this local guard are one budget and must move together.
+    """
+    assert MAX_OUTPUT_TOKENS == 4096
+    prompt = "Role: HINT\nLearner cause: routing"
+
+    def call(completion_tokens):
+        def respond(request):
+            return httpx.Response(200, json={
+                "model": "served-test-model",
+                "choices": [{"message": {"content": "Try the public test."}}],
+                "usage": {"prompt_tokens": 12, "completion_tokens": completion_tokens}})
+
+        with httpx.Client(transport=httpx.MockTransport(respond)) as http:
+            return LiveAssistGateway("LOCAL_TEST_TOKEN", http=http).generate(
+                model_id="test-model", role=AssistRole.HINT, prompt=prompt)
+
+    assert call(MAX_OUTPUT_TOKENS).output_tokens == MAX_OUTPUT_TOKENS
+    with pytest.raises(AssistRejected, match="ASSIST_OUTPUT_LIMIT"):
+        call(MAX_OUTPUT_TOKENS + 1)
 
 
 def test_live_transport_has_an_absolute_call_deadline(monkeypatch):
@@ -259,6 +285,58 @@ def test_injected_client_cannot_bypass_the_call_deadline():
                                "write": DEADLINE_S, "pool": DEADLINE_S}
 
 
+def test_coach_deadline_pins_the_async_client_at_sixty_seconds(monkeypatch):
+    seen = {}
+    original_async_client = httpx.AsyncClient
+
+    async def reply(request):
+        return httpx.Response(200, json={
+            "model": "served-test-model",
+            "choices": [{"message": {"content": "ok"}}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+        })
+
+    def async_client(*args, **kwargs):
+        seen["timeout"] = kwargs.get("timeout")
+        return original_async_client(transport=httpx.MockTransport(reply), **kwargs)
+
+    monkeypatch.setattr(assist_gateway_module.httpx, "AsyncClient", async_client)
+    result = LiveAssistGateway("LOCAL_TEST_TOKEN").generate(
+        model_id="test-model", role=AssistRole.HINT, prompt="Role: HINT")
+    assert result.text == "ok"
+    assert assist_gateway_module.DEADLINE_S == 60
+    assert seen["timeout"] == 60
+
+
+def test_coach_wait_for_bound_tracks_the_deadline_constant(monkeypatch):
+    # The constant and the client bound are pinned here so this check proves only
+    # the absolute wrapper: a reply slower than the old 20-second deadline must
+    # still complete, which a wrapper hardcoded at 20 would refuse.
+    monkeypatch.setattr(assist_gateway_module, "DEADLINE_S", 60)
+    original_async_client = httpx.AsyncClient
+
+    async def late_reply(request):
+        await asyncio.sleep(21)
+        return httpx.Response(200, json={
+            "model": "served-test-model",
+            "choices": [{"message": {"content": "ok"}}],
+            "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+        })
+
+    def async_client(*args, **kwargs):
+        kwargs["timeout"] = 60
+        return original_async_client(transport=httpx.MockTransport(late_reply), **kwargs)
+
+    monkeypatch.setattr(assist_gateway_module.httpx, "AsyncClient", async_client)
+    outcome = None
+    try:
+        outcome = LiveAssistGateway("LOCAL_TEST_TOKEN").generate(
+            model_id="test-model", role=AssistRole.HINT, prompt="Role: HINT").text
+    except AssistRejected as error:
+        outcome = str(error)
+    assert outcome == "ok", "the absolute coach deadline wrapper refused a 21-second reply"
+
+
 def test_injected_client_timeout_is_a_safe_transport_failure():
     """The bounded injected path surfaces a real client timeout as the safe code,
     never as a raw transport error or a partial reply."""
@@ -303,6 +381,30 @@ def test_system_plus_prompt_limit_refuses_before_reserving_budget(session):
     assert response.status_code == 409
     assert gateway.calls == []
     assert client.get(f"/api/shifts/{shift_id}/investigations").json()["assist_used"] == 0
+
+
+def test_controller_output_guard_tracks_the_coach_cap(session):
+    """The orchestrator enforces the same cap the gateway requests.
+
+    This drives the real API with a double that bypasses LiveAssistGateway, so
+    only the controller guard at orchestrator.py can accept the at-cap reply. The
+    counts are literals, not MAX_OUTPUT_TOKENS, because a hardcoded 1024 left in
+    the orchestrator must fail here while the gateway pin still passes.
+    """
+    client, _, shift_id, run_id, gateway = session
+    investigation_id = entry(client, shift_id, run_id).json()["id"]
+    gateway.replies = iter([
+        AssistReply("Over the approved coach cap.", output_tokens=4097),
+        AssistReply("At the approved coach cap.", output_tokens=4096),
+    ])
+    over = assist(client, shift_id, investigation_id).json()
+    assert over["state"] == "FAILED", over
+    assert over["failure_code"] == "ASSIST_OUTPUT_LIMIT"
+    assert not over["response_text"], "a refused reply must not publish its text"
+    at_cap = assist(client, shift_id, investigation_id, request_id="help-2").json()
+    assert at_cap["state"] == "COMPLETE", "the controller guard did not move with the coach cap"
+    assert at_cap["output_tokens"] == 4096
+    assert client.get(f"/api/shifts/{shift_id}/investigations").json()["assist_used"] == 2
 
 
 def test_unreviewed_northline_refuses_help_before_gateway(session, monkeypatch):

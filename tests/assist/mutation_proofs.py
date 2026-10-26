@@ -66,6 +66,32 @@ CASES = [
         "tests": f"{TEST}::test_injected_client_cannot_bypass_the_call_deadline",
         "expect": "test_injected_client_cannot_bypass_the_call_deadline",
     },
+    # S46 deadline amendment (2026-10-26): each coach transport bound has its own
+    # fault, and each fault is caught by exactly one named check.
+    {
+        "name": "coach_deadline_constant_reverted",
+        "file": "shiftwork/assist/gateway.py",
+        "old": "DEADLINE_S = 60",
+        "new": "DEADLINE_S = 20",
+        "tests": f"{TEST}::test_coach_deadline_pins_the_async_client_at_sixty_seconds",
+        "expect": "test_coach_deadline_pins_the_async_client_at_sixty_seconds",
+    },
+    {
+        "name": "coach_client_timeout_reverted",
+        "file": "shiftwork/assist/gateway.py",
+        "old": "                    async with httpx.AsyncClient(timeout=DEADLINE_S) as http:",
+        "new": "                    async with httpx.AsyncClient(timeout=20) as http:",
+        "tests": f"{TEST}::test_coach_deadline_pins_the_async_client_at_sixty_seconds",
+        "expect": "test_coach_deadline_pins_the_async_client_at_sixty_seconds",
+    },
+    {
+        "name": "coach_wait_for_reverted",
+        "file": "shiftwork/assist/gateway.py",
+        "old": "                response = asyncio.run(asyncio.wait_for(post_with_deadline(), timeout=DEADLINE_S))",
+        "new": "                response = asyncio.run(asyncio.wait_for(post_with_deadline(), timeout=20))",
+        "tests": f"{TEST}::test_coach_wait_for_bound_tracks_the_deadline_constant",
+        "expect": "test_coach_wait_for_bound_tracks_the_deadline_constant",
+    },
 ]
 
 

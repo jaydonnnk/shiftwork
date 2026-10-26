@@ -447,7 +447,7 @@ def test_coach_receives_exact_definitions_and_historical_identity(coach_context)
     system = p.outbound[0]["messages"][0]["content"]
     assert "public service.py source and controller-verified public inference result" in system, "patch role lacks authority for its supplied public evidence"
     assert "successful diagnostic does not prove a repair" in system, "a diagnostic was treated as proof of repair"
-    assert p.outbound[0]["max_tokens"] == 1024 and p.outbound[0]["temperature"] == 0
+    assert p.outbound[0]["max_tokens"] == 4096 and p.outbound[0]["temperature"] == 0
 
 
 @pytest.mark.parametrize("mismatch", ["run", "stored_ordinal", "payload_ordinal", "kind", "provenance"])
