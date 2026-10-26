@@ -33,7 +33,7 @@ from typing import Any
 
 from shiftwork import config
 from shiftwork.assist.gateway import (
-    AssistGateway, AssistRejected, MAX_INPUT_BYTES, SAFE_FAILURE_CODES,
+    AssistGateway, AssistRejected, MAX_INPUT_BYTES, MAX_OUTPUT_TOKENS, SAFE_FAILURE_CODES,
     apply_proposal, proposal_source_excerpt, assist_system_message,
 )
 from shiftwork.domain import canonical, comparison, contract_catalog, customer_answer, task_contract
@@ -2482,7 +2482,7 @@ def request_assist(
         reply = gateway.generate(model_id=event.model_id, role=role, prompt=prompt)
         if not reply.text.strip() or len(reply.text.encode("utf-8")) > 8192:
             raise AssistRejected("ASSIST_OUTPUT_LIMIT")
-        if reply.output_tokens is not None and not 0 <= reply.output_tokens <= 1024:
+        if reply.output_tokens is not None and not 0 <= reply.output_tokens <= MAX_OUTPUT_TOKENS:
             raise AssistRejected("ASSIST_OUTPUT_LIMIT")
         try:
             assert_public_safe({"reply": reply.text, "reported_model_id": reply.reported_model_id},

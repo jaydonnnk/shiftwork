@@ -13,8 +13,14 @@ from shiftwork.domain.models import AssistRole
 from shiftwork.gateway.service_inference import PROVIDER_URL
 
 MAX_INPUT_BYTES = 8192
-MAX_OUTPUT_TOKENS = 1024
-DEADLINE_S = 20
+# The coach cap is separate from and larger than the service ceiling: the provider
+# bills reasoning inside completion_tokens, so a reasoning model needs room for its
+# reasoning and its answer. Amended 2026-10-25 after a 1,024 cap left content null.
+MAX_OUTPUT_TOKENS = 4096
+# The coach deadline bounds one non-streaming call, so it must outlast a full-cap
+# response: at the catalog rate a 4,096-token generation needs about 32 seconds.
+# Amended 2026-10-26 after a 20-second deadline closed the cap-4096 action empty.
+DEADLINE_S = 60
 ASSIST_SYSTEM_MESSAGE = (
     "You advise a learner who already wrote a cause, falsifier and public test. "
     "Use only the public customer request and observed service response as evidence. "
