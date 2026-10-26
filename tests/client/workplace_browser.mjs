@@ -966,7 +966,7 @@ export async function runBrowser(base,out,fault = '',empty = false,slug='booksho
         // S37 review F7: a load flake under parallel workers has an unknown cause, so both messages carry the graphics state.
         const graphicsState=()=>b.evaluate(()=>JSON.stringify({status:document.getElementById('graphics-status')?.dataset.state??null,text:document.getElementById('graphics-status')?.textContent.trim().slice(0,160)??null,
           room:document.querySelector('.room')?.dataset.graphics??null,canvas:Boolean(document.querySelector('#workplace-canvas canvas'))}));
-        assert.ok(await b.until(()=>document.getElementById('graphics-status')?.dataset.state === 'ready'), `Real WebGL2 room did not become ready at ${width}px: ${await graphicsState()}`);
+        assert.ok(await b.until(expected=>document.getElementById('graphics-status')?.dataset.state === 'ready' && globalThis.__workplaceProbe?.tier === expected,12000,width<761?'compact':'standard'), `Real WebGL2 room did not become ready at ${width}px: ${await graphicsState()}`);
         assert.ok(await b.evaluate(()=>!!document.querySelector('#workplace-canvas canvas')?.getContext('webgl2')), `Actual WebGL2 context missing at ${width}px: ${await graphicsState()}`);
         assert.ok(await b.evaluate(()=>globalThis.__workplaceProbe?.triangles > 100), 'No real geometry was drawn');
         for(const [station,title] of slug==='northline'?NORTHLINE_STATIONS:slug==='gtm'?[['signals','Signal intake'],['rules','Qualification rules'],['workflow','Workflow bench'],['wall','Pipeline wall']]:[['customers','Customer evidence'],['evaluator','Independent evaluator'],['owner','Requirements'],['repair','Repair review'],['next','Next shift']]) {
@@ -975,10 +975,23 @@ export async function runBrowser(base,out,fault = '',empty = false,slug='booksho
           const count=b.commands.length;
           await b.send('Input.dispatchMouseEvent',{type:'mousePressed',...point,button:'left',clickCount:1});
           await b.send('Input.dispatchMouseEvent',{type:'mouseReleased',...point,button:'left',clickCount:1});
-          assert.equal(await b.evaluate(()=>document.getElementById('panel-title').textContent),title,'Native canvas pick opened the wrong panel');
+          if(empty && station==='repair') {
+            assert.deepEqual(await b.evaluate(()=>({title:document.getElementById('panel-title').textContent,
+              disabled:document.querySelector('[data-station="repair"]').getAttribute('aria-disabled'),
+              hidden:document.getElementById('repair-view').hidden,
+              context:document.getElementById('station-context').textContent})),
+              {title:'Requirements',disabled:'true',hidden:true,context:'No unresolved incident is loaded. The repair bench becomes available for an actual incident.'},
+              'Empty repair bench invented an incident or bypassed its unavailable state');
+          } else assert.equal(await b.evaluate(()=>document.getElementById('panel-title').textContent),title,'Native canvas pick opened the wrong panel');
           if(station==='owner') assert.equal(await b.evaluate(()=>!document.getElementById('owner-record').hidden && document.querySelectorAll('#owner-requirements .contract-line').length===6),true,'The owner desk does not show its complete requirements folder');
-          if(station==='repair') assert.equal(await b.evaluate(()=>!document.getElementById('repair-view').hidden && document.querySelectorAll('#repair-incidents .incident-row').length>0 && !document.querySelector('#repair-view input, #repair-view textarea, #repair-view select')),true,'The incident review tray is missing or editable');
-          if(station==='next') assert.equal(await b.evaluate(()=>!document.getElementById('next-view').hidden && document.querySelectorAll('#next-inheritance .contract-line').length>0 && document.querySelectorAll('#handover-incidents .incident-row').length>0),true,'The handover shelf is missing its inherited record or incident history');
+          if(station==='repair' && !empty) assert.equal(await b.evaluate(()=>!document.getElementById('repair-view').hidden && document.querySelectorAll('#repair-incidents .incident-row').length>0 && !document.querySelector('#repair-view input, #repair-view textarea, #repair-view select')),true,'The incident review tray is missing or editable');
+          if(station==='next') {
+            if(empty) assert.deepEqual(await b.evaluate(()=>({visible:!document.getElementById('next-view').hidden,
+              inheritance:document.querySelectorAll('#next-inheritance .contract-line').length,
+              incidents:document.querySelectorAll('#handover-incidents .incident-row').length})),
+              {visible:true,inheritance:0,incidents:0},'Empty handover invented inherited records or incidents');
+            else assert.equal(await b.evaluate(()=>!document.getElementById('next-view').hidden && document.querySelectorAll('#next-inheritance .contract-line').length>0 && document.querySelectorAll('#handover-incidents .incident-row').length>0),true,'The handover shelf is missing its inherited record or incident history');
+          }
           assert.equal(b.commands.length,count,'Canvas pick submitted a command');
         }
       }

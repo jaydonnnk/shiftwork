@@ -899,7 +899,7 @@ try {
     if (trialLine?.querySelector('strong')?.textContent !== `${trial.state} · candidate ${trial.candidate_label}`) throw new Error(`Rendered trial state does not match: ${trialLine?.querySelector('strong')?.textContent}`);
     const request = stepFor('Frozen incident request');
     if (request?.querySelector('.request-quote')?.textContent !== output.request_text) throw new Error('Rendered frozen request does not match the capture');
-    const exact = stepFor('Exact output the starter produced');
+    const exact = stepFor('Exact output the saved service produced');
     const bytes = Uint8Array.from(atob(output.body_base64), character => character.charCodeAt(0));
     if (exact?.querySelector('.evidence-text')?.textContent !== new TextDecoder('utf-8', { fatal: true }).decode(bytes)) throw new Error('Rendered exact output does not match the capture bytes');
     if (exact?.querySelector('[data-body-base64]')?.dataset.bodyBase64 !== output.body_base64) throw new Error('Rendered base64 capture does not match the capture');

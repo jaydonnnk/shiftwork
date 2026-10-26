@@ -2190,6 +2190,7 @@ function activateStation(name, userIntent = true) {
   if (userIntent) $('shift-picker').hidden = true;
   if (name === 'repair' && !state.board?.incidents.length) {
     text('station-context', 'No unresolved incident is loaded. The repair bench becomes available for an actual incident.');
+    publishPresentation('station');
     return;
   }
   if (northline()) name = ({ service: 'brief', owner: 'brief', customers: 'acceptance', pipeline: 'acceptance', ledger: 'rollout', repair: 'bench', investigate: 'bench', compare: 'bench', next: 'handover' })[name] ?? name;

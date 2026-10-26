@@ -13,7 +13,7 @@
     "asset_id": "app.js",
     "board": "shared",
     "source_path": "app.js",
-    "source_sha256": "696b0ae6051d15ebc8f92a823a000ced4fd5c41e309e5c6281cb47d8ff7487df",
+    "source_sha256": "5368d2b0224f9b41ef90d2511bf9ee9fe642b88491c248d25221d8d8fa541225",
     "origin": "shiftwork-existing",
     "author": "Shiftwork project, retained or extended existing source",
     "license": "MIT",
