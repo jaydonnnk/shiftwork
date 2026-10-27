@@ -1,3 +1,207 @@
+**S50 single live attempt CLOSED_INCOMPLETE: required miss absent, 2026-10-27 Asia/Singapore.**
+Secure owner setup and actual deployment/source/state binding completed. The real diagnostic passed required collection and alternative checks; absent optional price is not a mandatory failure. The frozen recording condition was not met, so the attempt stopped before explanation, comparison, choice, operation or inheritance. One inference dispatch and one Sandbox spawn are retained, zero ledger events, remaining allowance closed and permanent marker consumed. All85original frames and the21.853333-second uncut incomplete export were reviewed through complete frame coverage. This clip does not show the completed diagnostic result or a full S50 chain. S50 remains incomplete; no retry or publication occurred. [Outcome and evidence limits](plans/shiftwork/slice50-live-outcome-2026-10-27.md).
+
+**S50 private Free host created; secure save and live recording pending, 2026-10-27 Asia/Singapore.**
+Final v6 focused checks pass185. Product checks pass1791 with1skip, plus15non-install packaging checks. The reviewed final-source local HTTP/Chrome proof completes13steps and177frames using authored upstream stand-ins. Five reviewed setup, source, export and completion defects are repaired. The separate Free Render service is deployed from097bdbb in locked mode. Its new bootstrap is saved; the matching overlay and owner-entered values remain in the unsaved Environment form. No live marker, actual provider request or S50 footage exists. The user reported setup done, but actual secure setup and hosted state binding remain unverified. Existing approval continues without a context stop. [Checkpoint](plans/shiftwork/slice50-protected-host-v6-checkpoint-2026-10-27.md).
+
+**S50 v3 protected composition proved offline, 2026-10-27 Asia/Singapore.**
+External one-use admission, capture lease, private factory, saved checkpoints and a complete local HTTP/Chrome controller proof are implemented. Final focused checks pass158 with two existing warnings. The final authored-upstream proof completes13steps and75frames, with44 synthetic inference sends and26 synthetic spawns. The first controller attempt remains failed; full media review and encoding remain unperformed. Two admission proof gaps were repaired in tests and their bounded recheck is separate. No Render service, real provider action or live S50 footage exists. Secure host setup and actual deployment/state binding remain pending. Owner billing input remains resolved. Native input reached307083 after the user's300k extension; new work stopped. [Checkpoint](plans/shiftwork/slice50-protected-host-v3-checkpoint-2026-10-27.md).
+
+**S50 v2 offline controls and full stand-in chain verified, 2026-10-27 Asia/Singapore.**
+The two admission findings, safe cleanup binding and unknown-spawn handling are repaired. Original-executor disconnect proof passes. Final focused checks pass118; six copied-source faults fail assertions; scoped review passes. The broader suite passes1800 with1skip; six non-install packaging cases pass separately. Clean installation is unrun. A fresh13-step HTTP-double chain reaches eligible choice, operation and inheritance with44 authored inference sends and26 synthetic spawns. This is offline evidence. No deployment, real provider request or S50 footage exists. Owner billing input remains resolved. External durable admission/crash ordering, production composition, capture coupling and secure Free-host setup remain pending. S50 stays incomplete. [Checkpoint](plans/shiftwork/slice50-protected-host-v2-checkpoint-2026-10-27.md).
+
+**S50 owner billing input confirmed, 2026-10-27 Asia/Singapore.**
+The user personally verified the matters in the pending dashboard billing
+question. Treat existing-credit coverage and cash-overage protection as
+user-verified input; do not ask the same generic question again. This is not an
+independent agent audit or a new price/cap quote. Existing spending constraints
+and all remaining host-control, full-chain and recording proofs still apply.
+[Confirmation and evidence limits](plans/shiftwork/slice50-billing-confirmation-2026-10-27.md).
+Earlier pending-billing notices below are historical on that owner-input point.
+
+**S50 protected-host components checked; live readiness incomplete, 2026-10-27 Asia/Singapore.**
+The fresh external preparation passes 102 focused checks, comprising 49 new
+component checks and 53 existing hosted/budget checks. Follow-up review still
+reports two P2 variants. The HTTP-double chain stops before selection on a driver
+field-name error. A short browser capture/encoder test is not S50 footage. No
+service, deployment, live inference/Sandbox action or original recording exists.
+Credit-only billing coverage and cutoff remain unverified. The current approval
+still covers the same separate-host, deployment, bounded provider and recording
+categories. New implementation stopped at a native 318k input-token observation;
+the [checkpoint](plans/shiftwork/slice50-protected-host-checkpoint-2026-10-27.md)
+retains exact receipts, unresolved work and setup observations. S50 and S49 remain
+incomplete. S46 stays excluded; S48's historical acceptance is unchanged. Earlier
+notices retain their dated evidence and authority limits.
+
+**S50 separate-host design, deployment, provider calls and recording APPROVED, 2026-10-27 Asia/Singapore.**
+The user approved these four categories and specified existing credits only,
+with no top-ups or paid hosting. This supersedes older unapproved-category
+notices. The exact hosted implementation, access controls, state, transport,
+capture bridge and bounded recording packet still need proof before dispatch.
+No repeated generic approval is needed for the same authorized actions. Git
+publication, public YouTube upload, rule acceptance and submission remain
+separate. This turn prepared a handoff and rehashed the retained evidence;
+it ran no deployment, provider request, recording or test suite. S50 and S49
+remain incomplete. S46 remains unaccepted and S48 retains its prior acceptance.
+[Current authority, setup and copy-paste handoff](plans/shiftwork/slice50-approved-execution-handoff-2026-10-27.md).
+
+**S50 offline session controls and recorded rehearsal verified, 2026-10-27 Asia/Singapore.**
+The fresh recorded-mode API chain completes through explicit eligible selection,
+selected operation and inheritance. Final checks pass 59 cases and 20 named fault
+proofs. Desktop/mobile inheritance views and a synthetic 3-second encoder test
+are retained. These are offline evidence, not a new live task-plan run, S50
+recording or reviewed export. The controller rejects remote targets. Exclusive
+hosted state and access control remain unresolved; a separate-host design is
+proposed for review. No hosted-app request, provider call, Sandbox spawn, real
+recording, deployment, reset of existing state, Git publication or submission
+occurred. S50 and S49 remain incomplete. S46 remains unaccepted. S48 remains
+accepted on retained evidence. Earlier notices retain their dated scope.
+[Executable preparation and limits](plans/shiftwork/slice50-session-controls-2026-10-27.md).
+
+**S50 operator-demo preparation resumed; Jev is not a prerequisite, 2026-10-27 Asia/Singapore.**
+The user redirected focus to S50. Approved Gate 4 already lists its dependency
+as S48, with S49 only if run. No gate amendment or invented S49 result is
+needed to prepare S50. The paid Jev actions remain closed incomplete; they
+show bounded navigation/input attempts and save refusal, not a complete demo.
+S50 will use an operator-driven hosted run. Existing scripted controls support
+local rehearsal only. S49 remains incomplete, with its human contract unchanged.
+The earlier S50 shot plan, checklist, copy and ledgers are retained. Fresh hosted
+state/identity and whole-session action controls remain unresolved before a
+concrete recording action can be approved. No host request, provider call,
+recording, deployment, publication or Git operation occurred in this preparation.
+Earlier notices retain their dated scope.
+[Current S50 operator-demo continuation](plans/shiftwork/slice50-operator-demo-2026-10-27.md).
+
+**S49 JSON-string browser action CLOSED INCOMPLETE, 2026-10-27 Asia/Singapore.**
+The user authorized the offline newline correction and pre-approved one fresh
+paid pilot. The JSON-string transport passed offline controls and decoded both
+live typing responses. Their decoded hashes match the marker and code fixture
+each with one extra final LF: 33 instead of 32 bytes, and 118 instead of 117.
+The exact-save guard blocked the code before server dispatch. No draft was saved.
+The action made five Jev decisions and two typing sends. Local reservations
+were USD 0.26497024; actual billing is unverified. All 28 database tables remain
+unchanged, with no in-flight work. The browser and owned server stopped.
+The action and all unsent allowance are closed without retry or replacement.
+The paid end-to-end compatibility proof remains unmet. S49's human contract is
+unchanged and incomplete. S50 is incomplete. S48 remains accepted. S46 and all
+older actions remain closed. Steps 2 and 3 were not executed. Earlier notices
+retain their dated scope.
+[JSON typing correction and closed result](plans/shiftwork/slice49-browser-pilot-v3-2026-10-27.md).
+
+**S49 browser action CLOSED INCOMPLETE, 2026-10-27 Asia/Singapore.**
+The user explicitly approved the frozen Step 1 run. It launched once and made
+five Jev decisions plus two Gemini typing sends. The synthetic marker response
+matches exactly. The code-response hash matches the fixture without its required
+final newline, 116 bytes instead of 117. The browser's exact-save guard refused
+that payload before server dispatch. There were no successful saves.
+Local reservations were USD 0.26497024, not verified billing. All 28 database
+tables equal the baseline, although database file bytes differ. No in-flight
+work remains. The browser closed and the owned port is closed. The 1,433 frozen
+pins, 644 original preparation files, 70 separately inventoried new test receipts,
+48 original setup files, 1,840 protected files, seven worktree references and
+indexes remain preserved. Zero Nano, Sandbox, coach or retry calls occurred.
+The action and unsent remainder are closed. No replacement is authorized.
+S49 and S50 remain incomplete; the approved human-session contract is unchanged.
+S48 remains accepted. S46 and all old allowances remain closed. Steps 2 and 3
+were not executed. The notices below retain their earlier dated scope.
+[Closed browser action and evidence](plans/shiftwork/slice49-browser-pilot-v2-2026-10-27.md).
+
+**S49 fresh browser proposal frozen; paid approval pending, 2026-10-27 Asia/Singapore.**
+Step 1 preparation passes 100 Node checks, 15 new and five inherited Python
+state checks, 43 named removed-guard proofs and bounded browser controls.
+The new action allows at most 12 Jev decisions, two typing sends, one draft-save
+attempt, 120 seconds of agent time and USD 0.35 in local reservations. It made
+zero paid calls. Real Jev browser behavior and billing remain unverified.
+The [new proposal record](plans/shiftwork/slice49-browser-pilot-v2-2026-10-27.md) pins exact source/state/model/settings
+bytes and preserves the failed controls and review limits. Actual paid approval
+and B0 state are absent. The old P0 and diagnostic remain closed. Original
+preparation is byte-preserved; 70 newly added inherited-test receipts have a
+separate pinned inventory. No product, dependency, Render, installation,
+recording or Git publication change occurred. S49's human contract is unchanged.
+S49 and S50 remain incomplete. S48 remains accepted. S46 and old allowances stay
+closed. Stop at the Step 1 paid-approval boundary. Earlier notices retain their scope.
+
+**S49 one-send typing diagnostic PASSED and CLOSED, 2026-10-26 Asia/Singapore.**
+The user pre-approved safe diagnostics and one paid typing test. All 28 new
+offline tests, 34 original guard tests, and 14 named launch-guard mutation
+checks pass. The single Gemini typing send returned the exact synthetic marker
+under the original provider and price restrictions. Its local reservation is
+USD 0.10496; actual billing is unverified. The earlier HTTP failure did not
+recur, so its original cause remains unknown. The [diagnostic record](plans/shiftwork/slice49-typing-probe-2026-10-26.md)
+links the frozen action and receipts. No browser, application store, Nano,
+Sandbox, coach, reset, Render change, installation, or publication occurred.
+P0 remains CLOSED INCOMPLETE. No retry or replacement follows. S49's human
+contract is unchanged. S49 and S50 remain incomplete. S48 remains accepted.
+S46 and all old allowances remain closed. Earlier notices retain their scope.
+
+**S49 frozen P0 CLOSED INCOMPLETE; offline audit passed, 2026-10-26 Asia/Singapore.**
+After the completed offline audit, the user explicitly authorized one frozen
+P0 capped at USD 0.35. That attempt stopped at the first typing HTTP failure
+after two successful Jev decisions. Local reservations total USD 0.126980096.
+Actual billing and the provider failure cause remain unverified. No draft save,
+Nano, Sandbox, coach, retry, reset, Render change, recording, or publication occurred.
+All 28 P0 database tables equal the recorded baseline. Protected records and
+all old evidence remain preserved. The local server stopped. P0's store, marker,
+approval, results, and failed receipt are retained. The action and unsent
+remainder are closed. Five walkthroughs remain unauthorized. The
+[local pilot record](plans/shiftwork/slice49-local-pilot-preparation-2026-10-26.md) links the offline audit and closed outcome.
+S49's human contract is unchanged. S49 and S50 remain incomplete. S48 remains
+accepted. S46 and all old allowances remain closed. Earlier notices are history.
+
+**S49 offline coordinator audit resumed; one frozen P0 authorized, 2026-10-26 Asia/Singapore.**
+The explicit TAP rerun passes 34 guard tests. All five state tests pass.
+The audit verifies 965 frozen pins, 48 original setup pins, six retained named
+mutation failures, 1,840 protected files, and seven worktrees against their
+saved snapshots. Existing stores and failed receipts remain preserved.
+The [local pilot record](plans/shiftwork/slice49-local-pilot-preparation-2026-10-26.md) carries the current evidence and limits.
+The user explicitly authorized one frozen P0 after verification, capped at
+USD 0.35. The broader USD 5 ceiling does not expand this action's limits.
+P0 has not run at this notice. No approval file or P0 state exists yet.
+S49's human contract is unchanged. S49 and S50 remain incomplete. S48 remains
+accepted. S46 and every old allowance remain closed. Earlier notices are history.
+
+**S49 context handoff; final coordinator audit incomplete, 2026-10-26 Asia/Singapore.**
+The final wrapper rejected Node's spec reporter text despite 34 passes and
+exit zero. It stopped before remaining checks. Raw output and all prior
+controls are preserved. The [local pilot record](plans/shiftwork/slice49-local-pilot-preparation-2026-10-26.md)
+states the remaining verification. Native input was about 287k near the user's
+300k limit. No paid pilot, P0 store, approval file, or new live allowance exists.
+S49's human contract remains unchanged and incomplete. S50 remains incomplete.
+
+**S49 installed setup and local pilot prepared, 2026-10-26 Asia/Singapore.**
+The user supplied the actual setup path. Installed runner 0.8.8 and the saved
+basic Jev connection are directly verified; earlier suggested-path absence is
+historical. The [local pilot record](plans/shiftwork/slice49-local-pilot-preparation-2026-10-26.md)
+links isolated recorded state, five profiles, send guards, offline controls,
+exact source pins, and the unapproved paid-agent proposal. No new model call,
+reset, installation, Render change, recording, or Git publication occurred.
+S49's human contract and gate documents remain unchanged and incomplete.
+S50 remains incomplete. S48 remains accepted; all S46/S48 allowances stay closed.
+
+**S49/S50 parallel preparation reviewed, 2026-10-26 Asia/Singapore.**
+One bounded worker prepared each slice. The [coordinator record](plans/shiftwork/slice49-slice50-preparation-2026-10-26.md)
+links the proposed synthetic contract, protocol, submission copy, and recording
+checklist. S49 and S50 remain INCOMPLETE. The existing human-session contract
+and gate documents are unchanged pending explicit review. The proposed Jev
+runner is not installed at its suggested path, and its stock typing and retry
+behavior does not establish readiness for a complete repair walkthrough.
+Historical pins and inherited drafts are preserved. No live action, recording,
+installation, reset, deployment, staging, commit, push, or submission occurred.
+S48 remains ACCEPTED. S46 remains CLOSED INCOMPLETE and UNACCEPTED, with all
+actions closed and the compile guard unapproved. Older notices retain their scope.
+
+**S49/S50 preparation resumed, 2026-10-26 Asia/Singapore.**
+The user requested proceeding. Only the existing S50 branch fast-forwarded to
+accepted S48 main `097bdbb`; its original drafts and historical source ledger
+are preserved. Both slices remain INCOMPLETE. No participant observation,
+quote, new live execution or recording exists in this continuation.
+[S49 readiness](plans/shiftwork/evidence/slice49-readiness-2026-10-26.md) lists
+the remaining human and state-control decisions.
+[S50 continuation](plans/shiftwork/slice50-continuation-2026-10-26.md) separates
+accepted S48 hosting from the required new recording and entrant inputs.
+S46 remains CLOSED INCOMPLETE and UNACCEPTED. Closed allowances stay closed.
+Older notices retain their dated scope.
+
 **S48 ACCEPTED; acceptance-record publication authorized, 2026-10-26 Asia/Singapore.**
 The user said "I accept s48." and requested committing the working tree and
 pushing main. S48 is closed on its retained package, hosted guided/WebGL,

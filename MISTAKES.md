@@ -4425,3 +4425,211 @@ browser callbacks cannot read their caller's Node scope. This consumed no call.
 - What happened: the first focused `git add` exited one with an ignored-evidence-parent diagnostic. Fresh index inspection showed all four intended batch files had nevertheless been staged. No commit or push occurred from that failed command.
 - Root cause: the command omitted the explicit force-add already required for the reviewed proof under the ignored evidence parent.
 - Prevention rule: inspect ignored-path handling before staging retained evidence. Complete only the exact intended batch, verify its staged file list, and check whitespace before committing. Preserve the failed staging receipt. Never clear the index broadly or stage a parent evidence directory to work around it.
+
+## 2026-10-26 S49/S50 preparation: guessed package-relative paths
+
+- What happened: two read-only inspections guessed `shiftwork/api/app.py` and a repository-root `fixtures/` directory. The latter also assumed ordinary `rg --files` included ignored request fixtures. Both lookups failed before any product mutation.
+- Root cause: I used inferred paths instead of resolving the package-relative paths in the current registry and discovering ignored fixture files explicitly.
+- Prevention rule: inspect `PACKAGE_DIR` and the current registry, then use `rg --files --hidden --no-ignore` within the named package fixture directory. Keep missing-path inspection errors separate from product failures. The corrected read found one incident request and three comparison pairs of two public requests. No fixture changed.
+
+## 2026-10-26 S49/S50 source audit: semantic hash treated as file SHA-256
+
+- What happened: the first private current-source audit stopped when it compared a task-spec manifest digest with the raw file SHA-256. All three raw request digests matched. No supplemental ledger or changed fixture was written.
+- Root cause: I assumed the manifest's task-spec digest recipe without reading `_canonical_specs_bytes`. It hashes canonical validated `model_dump` JSON, while the evidence ledger hashes complete file bytes.
+- Prevention rule: inspect the hash producer before comparing pins. Retain file SHA-256 and semantic digests as separate fields with named recipes. All three task-spec canonical digests matched after using the loader's validated serialization. The original failed script and error are preserved privately.
+
+## 2026-10-26 S50 preparation: supplemental ledger schema guessed
+
+- What happened: a worker's read-only scratch audit stopped with `KeyError: 'sources'` before it verified any current-source pins.
+- Root cause: the historical ledger uses `sources`, while the supplemental audit uses `current_sources`. The audit assumed the same schema.
+- Prevention rule: inspect each ledger's actual keys before selecting its entries. Preserve the failed setup separately from evidence verification. The corrected read rehashed all 40 supplemental entry pins successfully. Private receipts are in `s50-audit-setup/` beneath `/Users/jayd0/Documents/Codex/2026-10-26/shiftwork-s49-s50-preparation/`. No product failure or guard proof follows from the setup error.
+
+## 2026-10-26 S50 preparation: difference exit treated as a failed whitespace check
+
+- What happened: the worker's final wrapper treated `git diff --no-index` exit 1 with empty diagnostics as a failed check.
+- Root cause: the wrapper conflated the command's normal difference exit with whitespace diagnostics.
+- Prevention rule: interpret each command's exit contract and inspect its diagnostics before assigning a verdict. Both setup and corrected receipts remain beside the ledger audit receipts. This was an audit setup failure, not a product failure or guard proof.
+
+## 2026-10-26 S49 local preparation: inspection paths guessed again
+
+- What happened: read-only commands named absent `tests/client/s48_package_install.py` and installed `dist/types.d.ts` paths. An unmatched `tests/client/s47*` zsh glob also stopped its search.
+- Root cause: inferred filenames bypassed the existing path-discovery rule.
+- Prevention rule: discover files before reading them and avoid shell globs for optional paths. These setup failures changed no product or retained evidence and are not guard proofs. The existing permanent rule already covers this repeated pattern.
+
+## 2026-10-26 S49 local guard: receipt driver directory and cwd errors
+
+- What happened: one receipt driver created its child directory before `checks/` existed. A later driver used a project-relative test path from the pilot directory. Neither attempt ran a test.
+- Root cause: the private driver assumed its parent directory and working directory.
+- Prevention rule: create the receipt parent and resolve the test path before dispatch. Both failures and corrected controls are retained under `/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/checks/`. Count only the actual assertions and final controls.
+
+## 2026-10-26 S49 installed typing: code boundary characters were stripped
+
+- What happened: an exact multiline-code control failed because installed runner 0.8.8 removed the final quote. Its helper also trims trailing whitespace.
+- Root cause: ordinary-field quote normalization was applied to code. Direct textarea entry did not exercise that helper.
+- Prevention rule: test the installed typing path against literal code bytes, including final quotes and newlines. Preserve the counterexample. The separate local adapter now supplies a documented removable envelope, with exact-byte controls. Product and installed package source remain unchanged. This is not proof of live repair quality.
+
+## 2026-10-26 S49 coordinator: test reporter format assumed
+
+- What happened: the final wrapper asserted on TAP text after Node returned exit zero and 34 passing tests in its spec reporter format. It stopped before state tests and final preservation checks.
+- Root cause: the wrapper assumed the reporter instead of selecting one or parsing the actual output.
+- Prevention rule: select `--test-reporter=tap` explicitly or inspect the retained spec summary. Preserve `coordinator-models-final.txt`. This is an audit parser failure, not a model-guard failure. Final coordinator verification remains incomplete at the context handoff.
+
+## 2026-10-26 S49 typing diagnostics: guessed installed helper path
+
+- What happened: a combined inventory and read command guessed an absent `dist/typing.js` despite the existing path-discovery rule. No product or installed source changed and no provider call followed that inspection.
+- Root cause: the read used a guessed filename before consuming the inventory. The actual helper is exported by the installed `dist/navigate.js`.
+- Prevention rule: finish discovery before issuing dependent reads. The existing permanent rule already covers this recurrence. The setup failure is retained in the new typing-probe directory and is not guard or product evidence.
+
+## 2026-10-26 S49 P0: HTTP failure metadata was discarded
+
+- What happened: P0 stopped correctly on the first typing HTTP failure, but its frozen guard retained only `upstream_http`. The exact HTTP status and provider cause could not be reconstructed.
+- Root cause: the failure branch rejected the response before preserving safe diagnostic metadata.
+- Prevention rule: verify body-free numeric-status reporting and fixed categories before a bounded paid diagnostic. Keep provider text and secrets out of receipts. A separate tested wrapper now records these fields without changing the frozen P0. The new one-send typing probe passed, so it did not identify P0's original cause. Preserve the failed attempt and do not label it transient from one later success.
+
+## 2026-10-27 S49 browser preparation: duplicate synthetic typing request
+
+- What happened: the new two-field offline control passed its first installed typing call, then failed its second. The retained model receipt records `duplicate_request`. No paid call ran.
+- Root cause: the test gave both different fields the same task, description and URL. The frozen guard correctly refused the identical request body. The corrected control uses the actual two distinct field descriptions and retains the same exact-byte assertions.
+- Prevention rule: reproduce each real caller's distinguishing inputs in multi-field controls. Preserve duplicate-request refusal and the failed receipt. Do not relax the guard to accommodate an unrealistic test fixture.
+- Inspection limit: one read-only package lookup used the repository cwd instead of the known installed setup. The absolute installed path corrected it. This repeated path-discovery mistake changed no product or dependency and is not guard evidence.
+- A subsequent combined documentation-and-test command used repository cwd for the pilot-relative receipt path and stopped before running tests. The corrected command uses the preparation cwd. Keep documentation mutations and dependent test dispatches separate when their working directories differ.
+
+## 2026-10-27 S49 browser preparation: normal guard closure marked success incomplete
+
+- What happened: read-only review found the live runner would mark a successful action incomplete during cleanup. A new offline regression reproduced the callback receiving `closed` as a failure. The deterministic browser control had no model guard, so it missed that integration path.
+- Root cause: the inherited guard deliberately latches dispatch on close and calls onStop with `closed`. The new runner treated every onStop callback as an action failure.
+- Prevention rule: test successful and failed lifecycle callbacks together. The new adapter keeps the underlying dispatch latch but excludes normal `closed` notification from the action-failure callback. Retain the failing regression and verify that no dispatch can follow closure. No paid call ran.
+
+## 2026-10-27 S49 browser preparation: overlapping launch guards hid a removed check
+
+- What happened: the second copied-source mutation survived its named negative test. Removing the approval-action check still let a different check reject the same malformed input. That test did not prove the removed guard. The failed mutation directory is retained.
+- Root cause: the new launch validator compared freeze and policy action identities through the approval object. This coupled three distinct identity guards and let one mask another.
+- Prevention rule: compare each of those external action identities with the exact reviewed action constant, then remove each guard independently and require its named test to fail. Preserve the failed coverage evidence. Do not count a fault caught by a second guard as proof of the first.
+
+## 2026-10-27 S49 browser preparation: receipt-close failure could skip teardown
+
+- What happened: read-only review found an HTTP-receipt close error could escape the runner's cleanup before browser close, owned-server termination, SQLite verification and result creation. No paid run exposed this.
+- Root cause: the new finally block called model snapshot and close without isolating their I/O failures from later cleanup.
+- Prevention rule: keep each fallible cleanup step from skipping the remaining teardown. The corrected runner records MODEL_CLOSE_FAILED and continues shutdown and independent state verification. A copied-source injected close failure exercises the complete real-browser launch path with authored transport only, returns a closed incomplete result and verifies the owned port is closed. This is offline failure proof, not provider evidence.
+
+## 2026-10-27 S49 browser preparation: runtime metadata schema assumed
+
+- What happened: a read-only metadata precheck raised KeyError for `runtime`. The new freeze helper had assumed the same key and required correction before writing a valid freeze.
+- Root cause: the typing diagnostic manifest uses a different metadata key than the original browser pilot manifest. Their file-pin schemas are shared, but their runtime metadata schemas are not.
+- Prevention rule: inspect manifest keys before reusing metadata. The new browser freeze takes runtime metadata from the verified original browser manifest. Keep this setup error separate from guard and product evidence. No paid call or credential inspection occurred.
+
+## 2026-10-27 S49 browser preparation: original test output root overlooked
+
+- What happened: final preservation refused 70 added files in the old pilot checks folder. All 644 entry files still matched their pins. The two inherited guard-suite reruns each created a new 35-file receipt root.
+- Root cause: I read the guard implementation but had not checked the inherited test's output-directory initialization before dispatch. The test uses its own module directory, regardless of cwd.
+- Prevention rule: inspect test output roots before rerunning inherited helpers. Do not delete new receipts or weaken original pins. Retain the exact 70-file supplemental inventory, source/test-report pins and strict inventory comparison. Future additions outside that recorded set remain failures. No old store, marker, source or receipt was overwritten.
+
+## 2026-10-27 S49 browser preparation: final receipt link preceded its creation
+
+- What happened: the final documentation audit refused a link to the final receipt that the same command creates only after all checks pass. Source pins, controls and preservation had already passed.
+- Root cause: the new record linked a future output, creating a circular file-existence dependency in the final verifier.
+- Prevention rule: link the already-retained offline verdict and describe the final receipt's output name until it exists. Keep the source freeze and link validator unchanged. This was documentation sequencing, not product or paid-run failure.
+
+## 2026-10-27 S49 JSON-typing preparation: copied-test edit setup errors
+
+- What happened: one read-only skill lookup used an inferred path before using the exact catalog path. A multi-file patch then refused a guessed inline test anchor without applying edits. A copied-test adaptation script also refused an anchor expected once that actually occurs twice. The following copied guard tests ran before their fixtures were adapted and failed all 34 constructor checks. No paid call ran.
+- Root cause: the setup mixed known source paths with guessed paths and partial inline statements, then the shell continued after the failed Python adaptation.
+- Prevention rule: use catalog and discovered absolute paths, copy complete current anchors, declare each intended occurrence count, and check one mutation's exit before dispatching dependent tests. Preserve the failed receipts. The corrected copied tests retain exact decoded-byte assertions and pass all 34 controls. Original sources and old evidence remain unchanged.
+
+## 2026-10-27 S50 preservation audit: snapshot formats misread
+
+- What happened: the new read-only audit incorrectly reported all 2,808 frozen pins and seven indexes as mismatches. Protected and preparation pins matched. The original failed receipt is retained privately.
+- Root cause: frozen entries are SHA-256 strings, while preservation entries are dictionaries. The saved index identity hashes `git ls-files --stage -z`, not raw index-file bytes.
+- Prevention rule: inspect one actual entry and its hash producer before comparing each snapshot format. Preserve setup failures separately and print counts instead of large inventories. The corrected audit verifies the original formats without changing their pins.
+
+## 2026-10-27 S50 offline controls: test class identity and recorded bootstrap
+
+- What happened: one test loaded the controller twice and expected the wrong Denied class. The first API rehearsal then correctly refused a null-investigation diagnostic on a standard recorded-mode shift. Both failures are retained privately; neither made an external call.
+- Root cause: the test module loader was uncached, and the rehearsal copied the live task-plan bootstrap shape into recorded mode without checking `reserve_bootstrap_diagnostic`.
+- Prevention rule: use one module identity per test process. Check bootstrap eligibility against the actual executor and mission. Rehearse recorded mode through its saved baseline inspection; close and inherit before its selected operation. Do not relax the application guard to make the rehearsal pass.
+
+## 2026-10-27 S50 external controller: late dispatch after preparation delay
+
+- What happened: review reproduced a transport starting after the session deadline when state observation or journal fsync consumed the remaining time. The controller closed only after sending. No real upstream request occurred.
+- Root cause: the deadline was checked before fallible preparation, but not immediately before dispatch.
+- Prevention rule: reserve durably, then recheck the deadline before transport. Preserve consumed reservations on refusal. Separate slow-observation and slow-journal regression cases now fail without the repair and pass with it. This does not prove cancellation of an already running upstream operation.
+
+## 2026-10-27 S50 fault harness: indentation substring matched twice
+
+- What happened: the first copied-source fault run stopped because its identity anchor also matched the more deeply indented post-action check. Existing partial receipts remain preserved.
+- Root cause: a substring containing leading spaces did not constrain the beginning of the physical line.
+- Prevention rule: include the preceding newline and enough following context for a unique physical-line anchor. The corrected final run catches20named faults in separate copied modules without mutating original source.
+
+## 2026-10-27 S50 protected-host preparation: discovery and SDK contracts
+
+- What happened: read-only discovery guessed absent src/tools directories, an unmatched test glob, and one receipt-relative path from the repository cwd. A scratch diagnostic had an unmatched parenthesis. The first transport classifier omitted the SDK's /v1 prefix; a synthetic FileResponse omitted its required size. These setup failures remain in the fresh preparation receipts.
+- Root cause: I inferred layout, URL construction and response fields before inspecting the complete installed producer/call contract. I also initially described RetryPolicy's constructed default as the SDK default; review showed retries are opt-in.
+- Prevention rule: discover paths first, inspect build_url and model signatures, and verify the actual wire path and response through the installed SDK. Keep setup failures separate from product proof. The existing permanent helper-contract rule already applies.
+
+## 2026-10-27 S50 transport journal: argument collision
+
+- What happened: the first transport run failed six checks because event(category, category=...) passed one argument twice. No upstream double was called on those paths.
+- Root cause: the event-name parameter reused a payload field name.
+- Prevention rule: use event_name for the journal event and keep category as a distinct serialized field. Require a real synthetic wire send in successful controls, not merely a rejection.
+
+## 2026-10-27 S50 protected components: independent review counterexamples
+
+- What happened: independent probes reproduced seven defects despite 38 green component checks. Journal failure skipped cancellation; SDK in-band SSE errors allowed resumes; ASGI timeout returned before a synchronous writer finished; controller query/unknown-route denials left allowance open; admission omitted the origin guard; failed cancellation bodies lacked an unknown result; ambiguous viewer cookies authenticated.
+- Root cause: controls covered individual happy/ordinary error paths without covering failure between layers, after response headers, or outside a pending network await.
+- Prevention rule: close through one cancellation path even on journal failure; catch parser failures in the private SDK iterator; shield and drain owned ASGI work before a terminal response; hide state while not quiescent; apply control denial/origin/auth guards before dispatch; record completed or unknown cleanup outcomes after body handling. Reproductions and failing-before-fix checks are retained. The full live composition is still unproved.
+- Follow-up limit: spaced duplicate cookie names and unknown controller GET routes still evade the intended ambiguity/closure guards. Both P2 variants remain unresolved at the context stop. The green 49-case suite does not cover those reproduced variants. The first inherited-document backup also guessed a trailing newline and refused its pin before writing; exact pinned bytes were subsequently recovered and verified.
+
+## 2026-10-27 S50 multi-step rehearsal: normal response mistaken for cancellation
+
+- What happened: chain-01 opened its shift, then closed CLIENT_DISCONNECT before the next step. A normal completed response woke the disconnect watcher before finally cancelled it.
+- Root cause: the watcher stayed active while the completed response was sent. One-action tests hid the defect because those sessions were already complete.
+- Prevention rule: cancel and drain the watcher after durable action verification and before sending the completed response. Keep a two-step regression. A genuine disconnect during background work still closes the gate and waits for quiescence.
+
+## 2026-10-27 S50 HTTP-double chain: projection and fixture assumptions
+
+- What happened: chain-02 looked for persistent operation check rows on a diagnostic experiment, whose mandatory results live in trial task_assessments. Chains 03/04 stopped when the authored provider double assumed protected wording appeared in the public text map. Chain-05 reached a complete eligible comparison but the driver raised KeyError before selection because eligibility uses candidate_version_id, not artifact_version_id.
+- Root cause: the rehearsal guessed projection fields and conflated public request wording with later protected stimuli. The last eligibility defect is identified but deliberately unfixed at the context stop.
+- Prevention rule: inspect each actual serialized projection, distinguish mandatory experiment assessments from operation checks, and retain all stopped roots. Authored fallback rules in a double are not model quality or remote isolation evidence. Do not resume a failed store or silently replace it.
+
+## 2026-10-27 S50 capture bridge: first-frame latency omitted
+
+- What happened: visual inspection of capture-01 showed more elapsed page time than the frame timeline represented. The first timestamp started after the initial screenshot returned.
+- Root cause: the bridge discarded that first screenshot's acquisition latency.
+- Prevention rule: anchor the timeline before the first acquisition and retain requested/completed bounds for each frame. Capture-02 uses that correction. Neither short bridge test is S50 original footage, a full media review or a demonstration duration.
+
+## 2026-10-27 S50 continuation: context stop discovered late
+
+- What happened: the first native usage check reported 318,476 last-input tokens. New implementation stopped; only current-step verification, preservation and handoff followed.
+- Root cause: repeated large authority/source outputs and late native usage inspection exceeded the checkout's 175k working limit before the counter was checked.
+- Prevention rule: check native last-input usage before implementation and at each proof boundary. Treat an unexpectedly failing final rehearsal as a handoff boundary, not permission to start another repair phase.
+
+## 2026-10-27 S50 v2 continuation: cookie grammar and worker proof
+
+- What happened: the first whitespace-cookie repair counted semicolon-delimited fields. Review reproduced four space/comma duplicate forms that the standard cookie parser still accepts. The original executor disconnect test first omitted Content-Type and got a 422 before any worker ran. Its first removed-stop proof later failed on a missing receipt after the timeout closed the gate, rather than the intended assertion. All failed outputs remain in the external v2 directory.
+- Root cause: the repair assumed stricter cookie separators than SimpleCookie. The test driver omitted a real HTTP header, then its long stand-in wait allowed the timeout guard to mask the removed disconnect guard.
+- Prevention rule: count every raw viewer-name occurrence before parsing, including whitespace and comma variants. Drive the actual route with the complete JSON HTTP contract. Use a finite stand-in wait and require a literal status or state assertion when the disconnect guard is removed. The corrected six-case mutation run requires AssertionError for each case. Read helpers from discovered paths and use absolute receipt paths.
+
+## 2026-10-27 S50 v3 continuation: lease timing, proof isolation and context
+
+- What happened: a first capture-lease implementation limited a healthy HTTP request to one lease interval despite continued frames. A new renewal test exposed it. The first full controller completed product steps and capture but Node remained alive after its PASS receipt, so the attempt stayed incomplete. The compact exit test was green even before the explicit CLI exit and does not reproduce that original trigger. Review also proved that freshness and marker-file-fsync test mutations survived. A v2 checkpoint copied chain-02's digest into the final-chain description. Later an image result was passed to text output, producing base64 output and a307083-token observation beyond the user's300k extension. Read-only setup also used a wrong cwd once and a system-Python datetime alias unavailable there.
+- Root cause: a renewable lease was treated as a fixed request timeout; missing Node process termination was conflated with completed capture; coupled HMAC/age tests and directory-only instrumentation did not isolate both guards; result labels were copied instead of read from the exact run; an image-return object was serialized instead of emitted as an image and native usage was not checked immediately afterward.
+- Prevention rule: separate renewable liveness from absolute deadlines and prove both with pending transport; treat failed process completion as failed evidence and retain unexplained triggers; re-sign malformed grant fixtures and instrument file and directory fsync separately; bind every digest to its exact result path; emit images with image(), never text(), and inspect native usage after any unexpectedly large result. Stop new work at the applicable context boundary. All old failed receipts and mistaken historical records remain retained with corrections in the newer checkpoint.
+
+## 2026-10-27 S50 v4 continuation: setup audit and test cwd
+
+- What happened: secure-configuration review found viewer/controller keys could create state before provider settings or expected origin were complete. The private overlay also refused a second start after a locked boot, preventing owner setup on a persistent filesystem. New copied-source checks reproduce both. During verification, one command omitted the isolated workdir and imported the Desktop package; source binding refused four tests. A preliminary freeze reader also overmatched synthetic test names containing credential and stopped before creating v4.
+- Root cause: the factory guarded only two auth fields; bootstrap extraction was exclusive even when the existing verified bytes were identical. Test execution inherited the default cwd, which precedes PYTHONPATH. The freeze-reader exclusion used substring matching instead of path-component matching.
+- Prevention rule: require complete provider/auth/origin configuration before any state; allow identical validated overlay extraction while keeping practice-state reuse forbidden. Set the explicit isolated workdir on every command, verify the imported package, and exclude actual credential/profile path components without rejecting synthetic test names. Keep all failed receipts and v3 immutable. These are offline controls, not live readiness.
+
+## 2026-10-27 S50 protected continuation: capture visibility and pre-live source/failure boundaries
+
+- What happened: inspecting retained screenshots showed the HTTP/Chrome proof never left the shift picker. The next capture reached the correct panels but left core evidence below the fold. New observer controls now use read-only refresh/navigation and focus the actual evidence, recording saved-frame acknowledgements. Independent review then reproduced local capture-source drift surviving owner start binding, missing terminal export after an admitted failure, and malformed origin values creating state. A recheck caught source rejection occurring after marker-directory creation. One expanded origin check also indexed a missing origin key and failed the existing health-only test.
+- Root cause: completed HTTP actions were mistaken for visible UI evidence. Owner start pinned host/ready state but omitted local imported source. Failure cleanup preserved only earlier checkpoints. URL parsing was treated as syntax validation, and the source recheck was placed after the one-use side effect. The canonical-origin guard assumed the optional key existed.
+- Prevention rule: verify saved screenshots of the actual evidence, bind frozen local control/capture source to ready/start and admission, check before the marker and each dispatch boundary, and retain a single bounded terminal export or an explicit unavailable receipt after failure closure. Validate malformed origins before any state and keep absent configuration health-only. Preserve all failed receipts and old stores. These checks remain offline; no model behavior or remote isolation is inferred.
+- Follow-up: a pulse failure during the final two-second capture hold could still write COMPLETE if the child later returned a PASS receipt. The controller had not drained the pulse task before success. The final code drains that task, latches its failure and checks one final failure guard before completion. The exact synthetic reproducer passes after repair; removing that single guard fails the literal no-COMPLETE assertion. No real provider call exposed this.
+
+## 2026-10-27 S50 incomplete-capture review: explicit Swift SDK
+
+- What happened: the first new decoder build could not load the Swift standard library for the default macOS target. Its failed log is retained.
+- Root cause: the installed compiler was called directly without the installed SDK path.
+- Prevention rule: resolve the existing macOS SDK and pass it explicitly. The second build and all85sample decodes passed without installing anything. Keep planned export timestamps distinct from measured codec timestamps in the frame ledger. The diagnostic's no-miss closure was an intended boundary, not a coding failure.
