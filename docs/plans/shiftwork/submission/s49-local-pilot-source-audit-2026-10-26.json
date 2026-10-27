@@ -1,0 +1,388 @@
+{
+  "status": "P0_CLOSED_INCOMPLETE_WITH_VERIFIED_PRESERVATION",
+  "observed_utc": "2026-10-26T15:15:09.694900+00:00",
+  "current_sources": {
+    "s44_recording": {
+      "path": "/Users/jayd0/Desktop/shiftwork/docs/plans/shiftwork/evidence/slice44-live-recording-2026-10-24.json",
+      "bytes": 348242,
+      "sha256": "ba13e0bb4b81a708c214817ae4b17c7b32931274b2d5507d554548720b3a1817"
+    },
+    "s44_note": {
+      "path": "docs/plans/shiftwork/slice44-checkpoint-2026-10-24.md",
+      "bytes": 7872,
+      "sha256": "ad3ce5bf8c31a813904a0730985cf38afd98491cfcdf869a4e9d7cdf5bbb361b"
+    },
+    "s45_comparison": {
+      "path": "docs/plans/shiftwork/evidence/slice45-revised-live-2026-10-24.json",
+      "bytes": 412474,
+      "sha256": "465ef763b1724df2a1a7081afcd2f07d422162a7f0b43b8da4137b8dc3811564"
+    },
+    "s45_selection": {
+      "path": "docs/plans/shiftwork/evidence/slice45-selected-b-2026-10-24.json",
+      "bytes": 1369,
+      "sha256": "5cb30d56af922dc3f624d539cd066fa34da48ff396e4e18e0dd85318da6a8d33"
+    },
+    "s45_note": {
+      "path": "docs/plans/shiftwork/evidence/slice45-revised-live-2026-10-24.md",
+      "bytes": 11297,
+      "sha256": "96cc21e91c735432980e6a82f86aeff550c9da08fd7e4c545f30f51233fc9de7"
+    },
+    "s47_publication": {
+      "path": "docs/plans/shiftwork/workplace-3d/s47-publication-2026-10-25.md",
+      "bytes": 3064,
+      "sha256": "7323be27f8bb7f338197d0f3c24e5164871158ef6e8e61083e7d3724c3ea3922"
+    },
+    "s47_evidence": {
+      "path": "docs/plans/shiftwork/workplace-3d/s47-final-offline-2026-10-25.md",
+      "bytes": 9641,
+      "sha256": "a9ccf6c4f1ef1c5c26d5ac7362dae195a893940b7d748a483be8b529fbd591ad"
+    },
+    "s28_hosting": {
+      "path": "docs/plans/shiftwork/slice28-hosted-evidence-2026-10-19.md",
+      "bytes": 10863,
+      "sha256": "a99f280ddb63ed4c452623b5f1142eb3017460beae887f9bb88b12bda77ace67"
+    },
+    "s46_result_only": {
+      "path": "/Users/jayd0/.codex/worktrees/shiftwork-s46/shiftwork/docs/plans/shiftwork/slice46-independent-comparison-result-2026-10-25.md",
+      "bytes": 6318,
+      "sha256": "607097089e074ebf43882a3a1a616c253dca0ee2f31546782751a35f32ad8b10"
+    },
+    "s26_manifest": {
+      "path": "docs/plans/shiftwork/evidence/test3-manifest.json",
+      "bytes": 222846,
+      "sha256": "c4ed97ac7cbe166dafb87f2af4eee62c5e40a1347bee7fe96f7b3289df5b1009"
+    },
+    "s26_source": {
+      "path": "shiftwork/curation/pipeline.py",
+      "bytes": 41506,
+      "sha256": "e7084c66aefa50da976265c0943c2590e286482852d591d95b259628e43cfe75"
+    },
+    "product": {
+      "path": "docs/plans/shiftwork/01-product.md",
+      "bytes": 19879,
+      "sha256": "e3ea71ea2d30f9d244ef816d9f5d654a08f4cae777452a4020069e4bf23fb5a1"
+    },
+    "architecture": {
+      "path": "docs/plans/shiftwork/02-architecture.md",
+      "bytes": 69332,
+      "sha256": "cbb59bc060080c60ee40b9d2e176ee8d6231883d9683066cb94e2b445235531d"
+    },
+    "slice_contract": {
+      "path": "docs/plans/shiftwork/04-slices.md",
+      "bytes": 110540,
+      "sha256": "95339ccca6941904eaf8aedb4a4836eafba25181a129d5beefc34275ceb65b19"
+    },
+    "guided_product": {
+      "path": "docs/plans/shiftwork/workplace-3d/01-product.md",
+      "bytes": 18144,
+      "sha256": "18f82df0afba7ef6f0786008a1b802c60acdb72ac6b6ed6977f089c6b82f76f4"
+    },
+    "task_plan_service": {
+      "path": "shiftwork/fixtures/artifacts/bookshop/task_plan_starter_service.py",
+      "bytes": 12409,
+      "sha256": "7736c38410ce24b52ba610b4062b228856aaad228c8a59a1eb0040e06185bdc1"
+    },
+    "hosted_composition": {
+      "path": "shiftwork/hosted.py",
+      "bytes": 3715,
+      "sha256": "e46a095a3c017038044688731475b30f44ecb6a44644849c671243f5d4fbf221"
+    },
+    "readme": {
+      "path": "README.md",
+      "bytes": 11109,
+      "sha256": "8879dda4c4a0a09c85a655af6dd4f43aa818afb4a8a39478849ff8b1b703a33c"
+    },
+    "license": {
+      "path": "LICENSE",
+      "bytes": 1067,
+      "sha256": "af8ffc889e7de794545330fd925425ca02c5ed1d1e1f357ec070a6d681e218a1"
+    },
+    "canonical_recipe": {
+      "path": "shiftwork/domain/canonical.py",
+      "bytes": 4124,
+      "sha256": "0a31d0dc957bd6c8f8dd3a0ea1ecce6d51219b10fb0981e0644291409d0ae712"
+    },
+    "recording_recipe": {
+      "path": "shiftwork/diagnostic_recording.py",
+      "bytes": 10547,
+      "sha256": "cb1dfbbc702479fc976d6473a28a23f4e7b971c5b63a6bc56a4c4a6d714ad471"
+    },
+    "s46_closure": {
+      "path": "docs/plans/shiftwork/slice46-coach-deadline-60-live-result-2026-10-26.md",
+      "bytes": 7145,
+      "sha256": "02b62241f5416f1ff0ee37e8dd5789192bb06de7261342543c6563f68f17dfca"
+    },
+    "s48_release_record": {
+      "path": "docs/plans/shiftwork/slice48-release-checkpoint-2026-10-26.md",
+      "bytes": 17810,
+      "sha256": "e69451caf61a956e7b16214562494c35ec12d3534664e4cddbe1df1ffe8b1377"
+    },
+    "s48_release_proof": {
+      "path": "docs/plans/shiftwork/evidence/slice48-release-2026-10-26/release-proof.json",
+      "bytes": 28636,
+      "sha256": "88d2bfb06e7151d89a0e3c96d0bee6ce501c2ae4a4b827c350d5df2901ead6b4"
+    },
+    "current_status": {
+      "path": "docs/plans/shiftwork/00-status.md",
+      "bytes": 786424,
+      "sha256": "737de570bf1f0101997b89c93c6ce4f517717faa9e2970eeeb007c7e36e17565"
+    },
+    "current_brief": {
+      "path": "docs/SHIFTWORK_PLAN.md",
+      "bytes": 137617,
+      "sha256": "de04322f6fbb62c1dc6a5d1a46fac56bfdf9805da5f6d27d09d490c9c28a3aa3"
+    },
+    "current_budget": {
+      "path": "shiftwork/live_budget.py",
+      "bytes": 7618,
+      "sha256": "b6f00eb8bf6138c2f9642779aefcf5874be796c4fd8381b2890169daa0c01c13"
+    },
+    "current_routes": {
+      "path": "shiftwork/api/routes.py",
+      "bytes": 17703,
+      "sha256": "75e6052242e09212cea3fdb37cf3587e97cc8057d812c5a3adc890d585dff356"
+    },
+    "pack_registry": {
+      "path": "shiftwork/packs/registry.py",
+      "bytes": 22489,
+      "sha256": "907abc945fda54cfe3619ac987697539e5a53b566781bc9f83eb26fc6fd8983b"
+    },
+    "current_config": {
+      "path": "shiftwork/config.py",
+      "bytes": 17708,
+      "sha256": "1e55a6bee806250c2ce0810073786b2fa01fe73d31e2723664f63fa0568c677c"
+    },
+    "public_comparison_manifest": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_manifest.json",
+      "bytes": 1848,
+      "sha256": "2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f"
+    },
+    "public_incident": {
+      "path": "shiftwork/fixtures/requests/bookshop_pivot_incident.jsonl",
+      "bytes": 200,
+      "sha256": "e9ae58c7d352f3f21b1f0edacbfcabf73a7c0edc0f551e7eb0bea8ae829cc399"
+    },
+    "s49_readiness": {
+      "path": "docs/plans/shiftwork/evidence/slice49-readiness-2026-10-26.md",
+      "bytes": 5037,
+      "sha256": "b33be8f66fa0a88abe913f0f9cc37733c3887650213afa7105e3252e3a1a95b0"
+    },
+    "s50_continuation": {
+      "path": "docs/plans/shiftwork/slice50-continuation-2026-10-26.md",
+      "bytes": 6146,
+      "sha256": "422d86683405135686e6e59581e0dc215b3b10da8e44b9380c6f26067c68c6a4"
+    },
+    "bookshop_compare_pair_01.jsonl": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_01.jsonl",
+      "bytes": 394,
+      "sha256": "749ea9360c55e8340ccd995234c3e333d66d0740cfb02e227223c60c9c406005"
+    },
+    "bookshop_compare_pair_01_specs.json": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_01_specs.json",
+      "bytes": 2865,
+      "sha256": "c6b5b4b09f71edf6480a4b88d026115029ff81d1dbfd02a9d1d155718da56c10"
+    },
+    "bookshop_compare_pair_02.jsonl": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_02.jsonl",
+      "bytes": 374,
+      "sha256": "43b5e8275ceb4a4fb444e26232fde303c7e4feb35ae8976bb443a3c143a21de5"
+    },
+    "bookshop_compare_pair_02_specs.json": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_02_specs.json",
+      "bytes": 2276,
+      "sha256": "78294186d99b589ac577a282d6930978e02c9ae137836c1f57e0871ebb061c08"
+    },
+    "bookshop_compare_pair_03.jsonl": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_03.jsonl",
+      "bytes": 376,
+      "sha256": "c0e0ed996c2cc6f05971be34ceb68daadb36aa838d6a1344d2d3e13b1000bb0f"
+    },
+    "bookshop_compare_pair_03_specs.json": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_03_specs.json",
+      "bytes": 2284,
+      "sha256": "0a05eb2d8ccd74861119570c0269b20781036e62c89e2f0297039e37744005fe"
+    },
+    "original_s49_synthetic_proposal": {
+      "path": "docs/plans/shiftwork/evidence/slice49-synthetic-walkthrough-proposal-2026-10-26.md",
+      "bytes": 4145,
+      "sha256": "38b501dd162e74952ff9c571ccd58b011ee9a77257e682b968ec55075a5f4207"
+    },
+    "s49_contract_review": {
+      "path": "docs/plans/shiftwork/slice49-synthetic-contract-review-2026-10-26.md",
+      "bytes": 10228,
+      "sha256": "c6c74d426e156112b33cdb563184d84f455398cdd04061214b4552f2ee497117"
+    },
+    "s49_protocol": {
+      "path": "docs/plans/shiftwork/slice49-synthetic-protocol-2026-10-26.md",
+      "bytes": 14409,
+      "sha256": "42fadacf1c2e31c522bc228f9d6d4e3033d985e47bebabeff79a727f897adc5a"
+    },
+    "s50_submission_copy": {
+      "path": "docs/plans/shiftwork/submission/s50-submission-copy-2026-10-26.md",
+      "bytes": 9168,
+      "sha256": "5e49040a26516730436e5f2b7e2cd16e99991c0f8a36bac63f61ec3751dc5d3e"
+    },
+    "s50_recording_checklist": {
+      "path": "docs/plans/shiftwork/submission/s50-recording-checklist-2026-10-26.md",
+      "bytes": 10209,
+      "sha256": "ec96a951b3ca9145a60116b1935557ce864926779f666423e356318bde610b60"
+    },
+    "coordinator_record": {
+      "path": "docs/plans/shiftwork/slice49-slice50-preparation-2026-10-26.md",
+      "bytes": 4867,
+      "sha256": "1935f662f24418167c80dc17d2e57b150178a9b8326f250dfb6e432c3387f299"
+    },
+    "mistakes_log": {
+      "path": "MISTAKES.md",
+      "bytes": 406744,
+      "sha256": "5f1d66add6b9a56a37bca7e78b9c2d922f48ff2137e4b4777a8fd475df71a4b4"
+    },
+    "local_pilot_record": {
+      "path": "docs/plans/shiftwork/slice49-local-pilot-preparation-2026-10-26.md",
+      "bytes": 9218,
+      "sha256": "7ca1e43c3204b983a520b505b263b16a716e852a1594eb5c8e22177ba7b9a4d1"
+    },
+    "proposal": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/README.md",
+      "bytes": 6433,
+      "sha256": "a7ab06c669775999d8d696a1104ce59118b57e81b13452bc6049edddd7f9411e"
+    },
+    "freeze": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/freeze.json",
+      "bytes": 170114,
+      "sha256": "9701746fed4a3b7ca48c7ee02ae18ad51785afb4c6625625ad935bf6deb334d6"
+    },
+    "policy": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/pilot-policy.json",
+      "bytes": 844,
+      "sha256": "7063c4b33515d3283fd1875d0dc1c146c533a00c3995402749b9bf5f2bb51c79"
+    },
+    "driver": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/run-pilot.mjs",
+      "bytes": 9849,
+      "sha256": "ff1ad5a99c10811870c646f1be1e362103d673bc750641767b4d28ecaa3a980d"
+    },
+    "state_helper": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/state.py",
+      "bytes": 7363,
+      "sha256": "d67f6de62c2f44c7417940e9dd44c46c75cd6c50cea0e57245a95c1a399f7fcd"
+    },
+    "model_guard": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/model-guard.mjs",
+      "bytes": 8796,
+      "sha256": "b70fb9a11d884234bacb3834404b223c055a01a325dcb4988cc1228f629d1db0"
+    },
+    "model_tests": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/model-guard.test.mjs",
+      "bytes": 14288,
+      "sha256": "6d01b2523d06ff23384fe8ed756d3cc3e7c8d68b68748276fbc35cef64ea1198"
+    },
+    "state_tests": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/state_test.py",
+      "bytes": 3618,
+      "sha256": "e57b3fea4e4d4da6cb66b03fcbb5f5150d8df98eabab41d6fe820efcc934e856"
+    },
+    "retained_connection": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/connection-observation.json",
+      "bytes": 559,
+      "sha256": "375b5ca3ba64b248a9bbd7d7251b329b7b328116ce7f796c73a0ad61e4158367"
+    },
+    "offline_ui_control": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/runs/offline-check-v3/result.json",
+      "bytes": 654,
+      "sha256": "2a8a32cde5be8033a68aa2b252b23c581c7c32ea50b9b19748e244d4308995e0"
+    },
+    "default_off_control": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/default-off-control.json",
+      "bytes": 210,
+      "sha256": "922d46cf6d049e090e280a4d9a65a9532e50ba1e5bb704683ff431876682715b"
+    },
+    "fault_manifest": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/checks/model-guard-envelope-mutations-sz4r6gi1/manifest.json",
+      "bytes": 2757,
+      "sha256": "18dff4ae0640eb38ef65eb44b77c2c3055b5b372eb2fdfe55694d2d04779163f"
+    },
+    "coordinator_model_output": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/coordinator-models-final.txt",
+      "bytes": 2363,
+      "sha256": "c4325cdef81f65355e6673f32cad78d9d0779366eec0192c193b96b2053e9a78"
+    },
+    "coordinator_resume_driver": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/verify-coordinator.py",
+      "bytes": 10738,
+      "sha256": "83bd3152af598a65b912640a3558d5cb10e411e1e49e8f19dbf812202f0d628b"
+    },
+    "coordinator_tap_output": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/coordinator-resume-20261026/models-final.txt",
+      "bytes": 5826,
+      "sha256": "e81d9fa98c8adf2fe0434285c57c10c0bbae4e72fd1cfdb51a36151ae44ef36c"
+    },
+    "coordinator_state_output": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/coordinator-resume-20261026/state-final.txt",
+      "bytes": 702,
+      "sha256": "2789af70ce151781ae2b25d9b9a8a8c823e5127d070b7125d854c7e945230915"
+    },
+    "coordinator_pre_documentation_verdict": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/coordinator-resume-20261026/verification-pre-docs.json",
+      "bytes": 5455,
+      "sha256": "94a71990e1d348ac46dc911f2d340c5485842869df9ca45d8bdf2d0395e14c23"
+    },
+    "coordinator_offline_verdict": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/coordinator-verification.json",
+      "bytes": 5455,
+      "sha256": "5097166bd323fc2c08ac71c812a02d8015eabddb41e1805cd276b1bc3ae0f40d"
+    },
+    "coordinator_post_p0_preservation": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/coordinator-resume-20261026/verification-post-p0.json",
+      "bytes": 5455,
+      "sha256": "beeb3500fc741bdbb883538398253be5594bacd0491fa5588f94ebaa71ab80ba"
+    },
+    "p0_closure": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/coordinator-resume-20261026/p0-closure.json",
+      "bytes": 8209,
+      "sha256": "af7d3afc1f393a2810292b33ab71a713fcdb802129b59370409c33edf45ff276"
+    },
+    "p0_result": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/runs/P0/result.json",
+      "bytes": 88,
+      "sha256": "fd3d6652a6bae2975a55bed9f1951a9dc4c7cb03ae84ede5e71976a5b61b545e"
+    },
+    "p0_stopped": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/runs/P0/stopped.json",
+      "bytes": 2226,
+      "sha256": "6a6fb1096cb4ff971761cb98c5a937569b9ee583a4aadb6fc5c89dcbdc9b2aef"
+    },
+    "p0_model_receipts": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/runs/P0/model-events.jsonl",
+      "bytes": 1222,
+      "sha256": "35a439d3beda3dd5d4c0ba0969c01209e55dba7315129dd993b8786d58645906"
+    },
+    "p0_protected_records": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/runs/P0/protected-records.json",
+      "bytes": 846,
+      "sha256": "dea14e8e08e41ff20b0747a64c8a0d2051be8eebfda0ae61ba938e8158cfd129"
+    },
+    "p0_authorization": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/pilot-approval.json",
+      "bytes": 477,
+      "sha256": "bc09cde8ad406210237c1d930a3597345332f910169cc6d6415a2d80b95c520f"
+    },
+    "coordinator_final_driver": {
+      "path": "/Users/jayd0/Documents/shiftwork-jev-five/preparation/s49-pilot/verify-final.py",
+      "bytes": 6215,
+      "sha256": "d2bc2c12258f1e22d1116eb0db134b879dff3c886fe1d6ce3ab5ea3d1f6da5bb"
+    }
+  },
+  "historical_ledgers_unchanged_by_design": true,
+  "verification_limit": "Offline audit and post-P0 preservation passed. One P0 stopped on the first typing HTTP failure. Exact HTTP status, provider cause, typing usage and actual billing are unverified. Final documentation is checked separately.",
+  "paid_pilot_run": true,
+  "p0_state_exists": true,
+  "approval_file_exists": true,
+  "human_contract_changed": false,
+  "human_authorization": "Run the frozen P0 once after verification, capped at $0.35",
+  "authorized_action_id": "s49-p0-local-compatibility-20261026-v1",
+  "authorized_freeze_sha256": "9701746fed4a3b7ca48c7ee02ae18ad51785afb4c6625625ad935bf6deb334d6",
+  "paid_pilot_outcome": "CLOSED_INCOMPLETE",
+  "retry_authorized": false,
+  "five_counted_runs_authorized": false
+}

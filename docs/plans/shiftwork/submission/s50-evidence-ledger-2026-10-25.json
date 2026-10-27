@@ -1,0 +1,489 @@
+{
+  "schema_version": 1,
+  "prepared_date": "2026-10-25",
+  "status": "OFFLINE_DRAFT_S50_INCOMPLETE",
+  "entry": {
+    "branch": "shiftwork/slice-50",
+    "head": "7d156b4541a0774cfc0e4196912c10a0e2e6e7e1"
+  },
+  "scope": "Documentation and read-only offline evidence inspection only. No app import, database opening, provider call, credential read, recording, publication or submission.",
+  "sources": {
+    "s44_recording": {
+      "path": "/Users/jayd0/Desktop/shiftwork/docs/plans/shiftwork/evidence/slice44-live-recording-2026-10-24.json",
+      "external_to_worktree": true,
+      "bytes": 348242,
+      "sha256": "ba13e0bb4b81a708c214817ae4b17c7b32931274b2d5507d554548720b3a1817"
+    },
+    "s44_note": {
+      "path": "docs/plans/shiftwork/slice44-checkpoint-2026-10-24.md",
+      "external_to_worktree": false,
+      "bytes": 7872,
+      "sha256": "ad3ce5bf8c31a813904a0730985cf38afd98491cfcdf869a4e9d7cdf5bbb361b"
+    },
+    "s45_comparison": {
+      "path": "docs/plans/shiftwork/evidence/slice45-revised-live-2026-10-24.json",
+      "external_to_worktree": false,
+      "bytes": 412474,
+      "sha256": "465ef763b1724df2a1a7081afcd2f07d422162a7f0b43b8da4137b8dc3811564"
+    },
+    "s45_selection": {
+      "path": "docs/plans/shiftwork/evidence/slice45-selected-b-2026-10-24.json",
+      "external_to_worktree": false,
+      "bytes": 1369,
+      "sha256": "5cb30d56af922dc3f624d539cd066fa34da48ff396e4e18e0dd85318da6a8d33"
+    },
+    "s45_note": {
+      "path": "docs/plans/shiftwork/evidence/slice45-revised-live-2026-10-24.md",
+      "external_to_worktree": false,
+      "bytes": 11297,
+      "sha256": "96cc21e91c735432980e6a82f86aeff550c9da08fd7e4c545f30f51233fc9de7"
+    },
+    "s47_publication": {
+      "path": "docs/plans/shiftwork/workplace-3d/s47-publication-2026-10-25.md",
+      "external_to_worktree": false,
+      "bytes": 3064,
+      "sha256": "7323be27f8bb7f338197d0f3c24e5164871158ef6e8e61083e7d3724c3ea3922"
+    },
+    "s47_evidence": {
+      "path": "docs/plans/shiftwork/workplace-3d/s47-final-offline-2026-10-25.md",
+      "external_to_worktree": false,
+      "bytes": 9641,
+      "sha256": "a9ccf6c4f1ef1c5c26d5ac7362dae195a893940b7d748a483be8b529fbd591ad"
+    },
+    "s28_hosting": {
+      "path": "docs/plans/shiftwork/slice28-hosted-evidence-2026-10-19.md",
+      "external_to_worktree": false,
+      "bytes": 10863,
+      "sha256": "a99f280ddb63ed4c452623b5f1142eb3017460beae887f9bb88b12bda77ace67"
+    },
+    "s46_result_only": {
+      "path": "/Users/jayd0/.codex/worktrees/shiftwork-s46/shiftwork/docs/plans/shiftwork/slice46-independent-comparison-result-2026-10-25.md",
+      "external_to_worktree": true,
+      "bytes": 6318,
+      "sha256": "607097089e074ebf43882a3a1a616c253dca0ee2f31546782751a35f32ad8b10"
+    },
+    "s26_manifest": {
+      "path": "docs/plans/shiftwork/evidence/test3-manifest.json",
+      "external_to_worktree": false,
+      "bytes": 222846,
+      "sha256": "c4ed97ac7cbe166dafb87f2af4eee62c5e40a1347bee7fe96f7b3289df5b1009"
+    },
+    "s26_source": {
+      "path": "shiftwork/curation/pipeline.py",
+      "external_to_worktree": false,
+      "bytes": 41506,
+      "sha256": "e7084c66aefa50da976265c0943c2590e286482852d591d95b259628e43cfe75"
+    },
+    "product": {
+      "path": "docs/plans/shiftwork/01-product.md",
+      "external_to_worktree": false,
+      "bytes": 19879,
+      "sha256": "e3ea71ea2d30f9d244ef816d9f5d654a08f4cae777452a4020069e4bf23fb5a1"
+    },
+    "architecture": {
+      "path": "docs/plans/shiftwork/02-architecture.md",
+      "external_to_worktree": false,
+      "bytes": 69332,
+      "sha256": "cbb59bc060080c60ee40b9d2e176ee8d6231883d9683066cb94e2b445235531d"
+    },
+    "slice_contract": {
+      "path": "docs/plans/shiftwork/04-slices.md",
+      "external_to_worktree": false,
+      "bytes": 110540,
+      "sha256": "95339ccca6941904eaf8aedb4a4836eafba25181a129d5beefc34275ceb65b19"
+    },
+    "guided_product": {
+      "path": "docs/plans/shiftwork/workplace-3d/01-product.md",
+      "external_to_worktree": false,
+      "bytes": 18144,
+      "sha256": "18f82df0afba7ef6f0786008a1b802c60acdb72ac6b6ed6977f089c6b82f76f4"
+    },
+    "task_plan_service": {
+      "path": "shiftwork/fixtures/artifacts/bookshop/task_plan_starter_service.py",
+      "external_to_worktree": false,
+      "bytes": 12409,
+      "sha256": "7736c38410ce24b52ba610b4062b228856aaad228c8a59a1eb0040e06185bdc1"
+    },
+    "hosted_composition": {
+      "path": "shiftwork/hosted.py",
+      "external_to_worktree": false,
+      "bytes": 3715,
+      "sha256": "e46a095a3c017038044688731475b30f44ecb6a44644849c671243f5d4fbf221"
+    },
+    "readme": {
+      "path": "README.md",
+      "external_to_worktree": false,
+      "bytes": 14852,
+      "sha256": "f0ea70f1346d34ea3ebe233903822354708938e2967a1a1e4690ce9d8014912d"
+    },
+    "license": {
+      "path": "LICENSE",
+      "external_to_worktree": false,
+      "bytes": 1067,
+      "sha256": "af8ffc889e7de794545330fd925425ca02c5ed1d1e1f357ec070a6d681e218a1"
+    },
+    "canonical_recipe": {
+      "path": "shiftwork/domain/canonical.py",
+      "external_to_worktree": false,
+      "bytes": 4124,
+      "sha256": "0a31d0dc957bd6c8f8dd3a0ea1ecce6d51219b10fb0981e0644291409d0ae712"
+    },
+    "recording_recipe": {
+      "path": "shiftwork/diagnostic_recording.py",
+      "external_to_worktree": false,
+      "bytes": 10547,
+      "sha256": "cb1dfbbc702479fc976d6473a28a23f4e7b971c5b63a6bc56a4c4a6d714ad471"
+    },
+    "s46_closure": {
+      "path": "docs/plans/shiftwork/slice46-coach-deadline-60-live-result-2026-10-26.md",
+      "external_to_worktree": false,
+      "bytes": 7145,
+      "sha256": "02b62241f5416f1ff0ee37e8dd5789192bb06de7261342543c6563f68f17dfca"
+    }
+  },
+  "claims": [
+    {
+      "id": "C01",
+      "claim": "The implemented service/workflow uses model task plans, independent checks, explicit exact-version choice and inherited synthetic consequences.",
+      "sources": [
+        "product",
+        "architecture",
+        "task_plan_service",
+        "hosted_composition",
+        "s47_evidence"
+      ],
+      "locators": [
+        "approved learning loop",
+        "task_plan_starter_service.ask_for_plan",
+        "guided journey and inherited operation evidence"
+      ],
+      "limit": "Product/runtime-source and retained local evidence. No current hosted-session completion or real learner outcome claimed."
+    },
+    {
+      "id": "C02",
+      "claim": "S44 retained one live diagnostic with ten repetitions and five output-budget failures.",
+      "sources": [
+        "s44_recording",
+        "s44_note"
+      ],
+      "locators": [
+        "/public_repetitions",
+        "/trials/*/task_assessments",
+        "/trials/*/observations kind INFERENCE_RESULT",
+        "/trials/*/retained_observations kind INFERENCE_RESULT raw_payload_ref"
+      ],
+      "observed": {
+        "source_evidence_mode": "ISOLATED_LIVE",
+        "source_experiment_id": "experiment-bookshop-shift-01-d1",
+        "declared_repetitions": 10,
+        "retained_repetitions": 10,
+        "model": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+        "failed_repetitions": 5,
+        "failures": [
+          {
+            "run_id": "run-0001",
+            "failed_required_tasks": [
+              "collection",
+              "alternative"
+            ],
+            "finish_reason": "length",
+            "output_tokens": 1024,
+            "plan_failure": "SCHEMA_INVALID",
+            "reply_content": null
+          },
+          {
+            "run_id": "run-0003",
+            "failed_required_tasks": [
+              "collection",
+              "alternative"
+            ],
+            "finish_reason": "length",
+            "output_tokens": 1024,
+            "plan_failure": "SCHEMA_INVALID",
+            "reply_content": null
+          },
+          {
+            "run_id": "run-0004",
+            "failed_required_tasks": [
+              "collection",
+              "alternative"
+            ],
+            "finish_reason": "length",
+            "output_tokens": 1024,
+            "plan_failure": "SCHEMA_INVALID",
+            "reply_content": null
+          },
+          {
+            "run_id": "run-0005",
+            "failed_required_tasks": [
+              "collection",
+              "alternative"
+            ],
+            "finish_reason": "length",
+            "output_tokens": 1024,
+            "plan_failure": "SCHEMA_INVALID",
+            "reply_content": null
+          },
+          {
+            "run_id": "run-0009",
+            "failed_required_tasks": [
+              "collection",
+              "alternative"
+            ],
+            "finish_reason": "length",
+            "output_tokens": 1024,
+            "plan_failure": "SCHEMA_INVALID",
+            "reply_content": null
+          }
+        ],
+        "canonical_payload_digest": "f2e1b32f5046b87d37ea89632f9984820124907e724eaf1e917442d8853714b7",
+        "canonical_digest_recomputed": "f2e1b32f5046b87d37ea89632f9984820124907e724eaf1e917442d8853714b7"
+      },
+      "limit": "One request shape, operator activity. Null content and token-limit finish support an output-budget incident, not semantic omission or general model reliability. No S50 hosted footage."
+    },
+    {
+      "id": "C03",
+      "claim": "S45 A passed 7/9 public batches and B 9/9; both protected aggregates 3/3.",
+      "sources": [
+        "s45_comparison",
+        "s45_note"
+      ],
+      "locators": [
+        "/comparison/trials/*/repetitions",
+        "/comparison/repetition_summary/candidates",
+        "/comparison/outcome/candidate_metrics",
+        "/comparison/outcome/eligibility"
+      ],
+      "observed": {
+        "context_evidence_class": "ISOLATED_LIVE",
+        "public_requests": "Small sample: 6 public requests planned for 3 repetitions per version. Retained counts show what completed. Results cover these versions and conditions; any model evidence covers one configured model. Even 9 of 9 passing batches does not establish general reliability. Protected checks remain separate.",
+        "candidates_recomputed": [
+          {
+            "candidate": "A",
+            "passed_public_batches": 7,
+            "retained_public_batches": 9,
+            "declared_public_batches": 9,
+            "public_outputs": 18,
+            "useful_completions": 10,
+            "justified_refusals": 6,
+            "protected_passed": 3,
+            "protected_denominator": 3,
+            "eligible": false
+          },
+          {
+            "candidate": "B",
+            "passed_public_batches": 9,
+            "retained_public_batches": 9,
+            "declared_public_batches": 9,
+            "public_outputs": 18,
+            "useful_completions": 12,
+            "justified_refusals": 6,
+            "protected_passed": 3,
+            "protected_denominator": 3,
+            "eligible": true
+          }
+        ],
+        "repetitions_per_slot": 3,
+        "calls_reserved": 42,
+        "sandbox_operations_reserved": 24,
+        "actual_billing": "unknown",
+        "sandbox_cost": "unknown"
+      },
+      "limit": "Operator-authored examples with different prompts. Refusals count as mandatory-check passes. Does not isolate validation effect, measure learning or prove general reliability."
+    },
+    {
+      "id": "C04",
+      "claim": "The user explicitly selected the exact tested B after S45; selection alone changed no ledger or external call.",
+      "sources": [
+        "s45_selection"
+      ],
+      "locators": [
+        "/selection",
+        "/new_provider_calls",
+        "/new_sandbox_operations",
+        "/ledger_unchanged",
+        "/authorship"
+      ],
+      "observed": {
+        "selection_id": "sel-0002",
+        "selected_version_id": "ver-0004",
+        "selected_content_hash": "a71808a838c2df4cfa62883ea992d50bb942ab29beb0f6821162ccc9fbf41667",
+        "comparison_id": "experiment-bookshop-shift-01-c1",
+        "new_provider_calls": 0,
+        "new_sandbox_operations": 0,
+        "ledger_unchanged": true,
+        "authorship": "operator-authored examples and operator-performed investigation; not learner work or learning evidence"
+      },
+      "limit": "No operation or inheritance follows merely from choice. Operator-written rationale is not a verbatim learner quote."
+    },
+    {
+      "id": "C05",
+      "claim": "S47 is accepted and published; guided panels are implemented and locally verified.",
+      "sources": [
+        "s47_publication",
+        "s47_evidence",
+        "guided_product"
+      ],
+      "locators": [
+        "Published packet",
+        "Verification",
+        "S47 scoped addition RE-APPROVED"
+      ],
+      "limit": "Publication history verified from retained records and current local ancestry. No new remote availability, deployment, physical-device, audible AT or learner-impact proof."
+    },
+    {
+      "id": "C06",
+      "claim": "A historical S28 Render hosted demo and reset evidence exist.",
+      "sources": [
+        "s28_hosting",
+        "readme"
+      ],
+      "locators": [
+        "Hosted practice demo",
+        "S28 hosted evidence"
+      ],
+      "candidate_url": "https://shiftwork.onrender.com",
+      "limit": "Historical. Hosted page was not opened. Current revision and S50 hosted path are unverified."
+    },
+    {
+      "id": "C07",
+      "claim": "S46 source is integrated, but S46 is CLOSED INCOMPLETE and UNACCEPTED. The retained coach patch failed compilation at line 73. Its earlier independent comparison had neither candidate eligible.",
+      "sources": [
+        "s46_result_only",
+        "s46_closure"
+      ],
+      "locators": [
+        "Actual retained live result",
+        "Source, cleanup and remaining decisions"
+      ],
+      "observed": {
+        "A_public_passed": 5,
+        "A_public_retained": 9,
+        "A_protected_passed": 3,
+        "A_protected_denominator": 3,
+        "B_public_passed": 4,
+        "B_public_retained": 9,
+        "B_protected_passed": 2,
+        "B_protected_denominator": 3,
+        "eligible": false
+      },
+      "limit": "Named result documents only. No raw-store audit or successful coach-repair evidence. Source integration does not establish acceptance or release readiness. Every closed action remains closed; the compile guard remains unapproved and unimplemented."
+    },
+    {
+      "id": "C08",
+      "claim": "Current S50 Tavily answer is No; historical shipped operator CLI really used Tavily and its DROP verdict is retained.",
+      "sources": [
+        "s26_manifest",
+        "s26_source",
+        "slice_contract",
+        "readme"
+      ],
+      "locators": [
+        "/outcomes/discovery_runs",
+        "/outcomes/sources",
+        "/outcomes/frozen_changes",
+        "Slice 50: video and submission text",
+        "README S26 DROP_TAVILY_CLAIM"
+      ],
+      "observed": {
+        "historical_discovery_runs": 8,
+        "quarantined_sources": 66,
+        "reviews": 0,
+        "frozen_changes": 0
+      },
+      "limit": "Operator-only curation is outside app runtime. No discovery benefit, bonus-qualification interpretation or new Tavily call. Do not claim never used."
+    },
+    {
+      "id": "C09",
+      "claim": "No learner gain, participant quote, general model ranking or numeric rating is supplied.",
+      "sources": [
+        "s44_note",
+        "s45_note",
+        "s46_result_only",
+        "slice_contract"
+      ],
+      "locators": [
+        "S44 bounded working result",
+        "S45 authorship and result limits",
+        "S46 causal-repair limits",
+        "S49 five short learner sessions"
+      ],
+      "limit": "Absence of these claims is scoped to this packet. Ratings and personal declarations require entrant input; no session is invented."
+    },
+    {
+      "id": "C10",
+      "claim": "Local repository origin is the named GitHub repository and local license is MIT.",
+      "sources": [
+        "license",
+        "readme"
+      ],
+      "locators": [
+        "LICENSE first line",
+        "README public repository statement"
+      ],
+      "candidate_repository_url": "https://github.com/jaydonnnk/shiftwork",
+      "limit": "No fresh anonymous remote-access, top-of-page license detection or full public test-build check."
+    }
+  ],
+  "official_sources": {
+    "checked_date": "2026-10-25",
+    "rules": "https://nebiusglobalaihackathon.devpost.com/rules",
+    "overview": "https://nebiusglobalaihackathon.devpost.com/",
+    "faq": "https://nebiusglobalaihackathon.devpost.com/details/faqs",
+    "latest_update": "https://nebiusglobalaihackathon.devpost.com/updates/47163-recording-will-your-project-ship",
+    "deadline_pacific": "2026-10-30T10:00:00-07:00",
+    "deadline_singapore": "2026-10-31T01:00:00+08:00",
+    "authenticated_form_checked": false,
+    "linked_update_video_reviewed": false,
+    "old_checklist_difference": "Best Apps wording now mentions Nemotron 3 Ultra as encouragement; no changed deadline or required model migration found."
+  },
+  "media_inventory": {
+    "roots": [
+      "/Users/jayd0/.codex/worktrees/s50-offline-submission/shiftwork",
+      "/Users/jayd0/Desktop/shiftwork"
+    ],
+    "command": "rg --files --hidden --no-ignore <roots> -g *.mp4 -g *.mov -g *.webm -g *.m4v -g *.srt -g *.vtt -g *.wav -g *.mp3; excluded dependency/Git/cache directories",
+    "matching_files": [],
+    "exact_protected_recording_paths": [
+      {
+        "path": "/Users/jayd0/.codex/worktrees/s50-offline-submission/shiftwork/submission/usage-proof/Workbuddy_evidence.mp4",
+        "exists": false
+      },
+      {
+        "path": "/Users/jayd0/Desktop/shiftwork/submission/usage-proof/Workbuddy_evidence.mp4",
+        "exists": false
+      }
+    ],
+    "full_playback_or_transcription": false,
+    "observed_footage_timestamps_or_quotes": [],
+    "limit": "No broader filesystem search. Missing media is not proof no recording exists elsewhere."
+  },
+  "video_plan": {
+    "planned_export_seconds": 165,
+    "observed_duration_seconds": null,
+    "new_hosted_recording_available": false,
+    "coach_included": false,
+    "stop_on_no_model_miss": true,
+    "stop_on_no_eligible_version": true,
+    "automatic_retry_authorized": false
+  },
+  "remaining_gaps": [
+    "current hosted revision/path verification",
+    "new explicitly bounded hosted action and full recording",
+    "actual explanation, eligible selection, selected operation and next-shift inheritance in that same hosted session",
+    "full original media and export review",
+    "entrant ratings, eligibility and current form review",
+    "separate YouTube publication and Devpost submission authority"
+  ],
+  "branch_refresh": {
+    "date": "2026-10-26",
+    "timezone": "Asia/Singapore",
+    "head": "42ffc2eb8487ee36f3cc567848a5abda7070d7ab",
+    "incoming_commits": 17,
+    "s46_status": "CLOSED INCOMPLETE, UNACCEPTED",
+    "authority": "Integrate fetched origin/main into S48 and S50, then focused offline checks. No new commit, staging, push, installation, provider call or deployment.",
+    "historical_entry_preserved": true,
+    "original_sources_rechecked": 21,
+    "new_source": "s46_closure"
+  }
+}

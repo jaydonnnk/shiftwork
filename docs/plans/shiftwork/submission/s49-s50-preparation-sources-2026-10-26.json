@@ -1,0 +1,346 @@
+{
+  "schema_version": 1,
+  "status": "PREPARATION_ONLY_S49_S50_INCOMPLETE",
+  "observed_utc": "2026-10-26T12:27:32.602335+00:00",
+  "head": "097bdbbdd27b9c04e22487503ee785f6edcd492e",
+  "branch": "shiftwork/slice-50",
+  "remote_main_read_only_observation": "097bdbbdd27b9c04e22487503ee785f6edcd492e",
+  "historical_ledger": {
+    "path": "docs/plans/shiftwork/submission/s50-evidence-ledger-2026-10-25.json",
+    "bytes": 18995,
+    "sha256": "54b454e02a8ff5d8b06992c6b7127e42bc24a4cd2b8a6ae23c417fbfaf3902e1",
+    "external_to_worktree": false
+  },
+  "previous_current_source_audit": {
+    "path": "docs/plans/shiftwork/submission/s50-current-source-audit-2026-10-26.json",
+    "bytes": 13892,
+    "sha256": "95d552ae1ed3a84061f64b207049d375261a5bee2f90e2bb4dd741b08bb2011c",
+    "external_to_worktree": false
+  },
+  "historical_pins_verified_at_entry": 22,
+  "previous_current_pins_verified_at_entry": 40,
+  "changed_previous_current_sources": [
+    {
+      "id": "current_status",
+      "path": "docs/plans/shiftwork/00-status.md",
+      "entry_sha256": "ddd4bd80916265e9e1549d073c2e1f80dfe29a727c18e98fb4618756c8fe8042",
+      "current_sha256": "d2153884f94c00a098cc23c5586a9f56e448aa99fb3f35b96dfbe7f4c596a004",
+      "reason": "New prepended continuation notice. Original document body preserved."
+    },
+    {
+      "id": "current_brief",
+      "path": "docs/SHIFTWORK_PLAN.md",
+      "entry_sha256": "5057559215b5c2e9bf468f1d15e58076323f8c6ae39915b0bbbf34f4eeb7027c",
+      "current_sha256": "05aa0be80ac165a4af5aa51d43d6eeb52a4fd0fcbaed52c8d6ea0360516dbee1",
+      "reason": "New prepended continuation notice. Original document body preserved."
+    }
+  ],
+  "current_sources": {
+    "s44_recording": {
+      "path": "/Users/jayd0/Desktop/shiftwork/docs/plans/shiftwork/evidence/slice44-live-recording-2026-10-24.json",
+      "bytes": 348242,
+      "sha256": "ba13e0bb4b81a708c214817ae4b17c7b32931274b2d5507d554548720b3a1817",
+      "external_to_worktree": true
+    },
+    "s44_note": {
+      "path": "docs/plans/shiftwork/slice44-checkpoint-2026-10-24.md",
+      "bytes": 7872,
+      "sha256": "ad3ce5bf8c31a813904a0730985cf38afd98491cfcdf869a4e9d7cdf5bbb361b",
+      "external_to_worktree": false
+    },
+    "s45_comparison": {
+      "path": "docs/plans/shiftwork/evidence/slice45-revised-live-2026-10-24.json",
+      "bytes": 412474,
+      "sha256": "465ef763b1724df2a1a7081afcd2f07d422162a7f0b43b8da4137b8dc3811564",
+      "external_to_worktree": false
+    },
+    "s45_selection": {
+      "path": "docs/plans/shiftwork/evidence/slice45-selected-b-2026-10-24.json",
+      "bytes": 1369,
+      "sha256": "5cb30d56af922dc3f624d539cd066fa34da48ff396e4e18e0dd85318da6a8d33",
+      "external_to_worktree": false
+    },
+    "s45_note": {
+      "path": "docs/plans/shiftwork/evidence/slice45-revised-live-2026-10-24.md",
+      "bytes": 11297,
+      "sha256": "96cc21e91c735432980e6a82f86aeff550c9da08fd7e4c545f30f51233fc9de7",
+      "external_to_worktree": false
+    },
+    "s47_publication": {
+      "path": "docs/plans/shiftwork/workplace-3d/s47-publication-2026-10-25.md",
+      "bytes": 3064,
+      "sha256": "7323be27f8bb7f338197d0f3c24e5164871158ef6e8e61083e7d3724c3ea3922",
+      "external_to_worktree": false
+    },
+    "s47_evidence": {
+      "path": "docs/plans/shiftwork/workplace-3d/s47-final-offline-2026-10-25.md",
+      "bytes": 9641,
+      "sha256": "a9ccf6c4f1ef1c5c26d5ac7362dae195a893940b7d748a483be8b529fbd591ad",
+      "external_to_worktree": false
+    },
+    "s28_hosting": {
+      "path": "docs/plans/shiftwork/slice28-hosted-evidence-2026-10-19.md",
+      "bytes": 10863,
+      "sha256": "a99f280ddb63ed4c452623b5f1142eb3017460beae887f9bb88b12bda77ace67",
+      "external_to_worktree": false
+    },
+    "s46_result_only": {
+      "path": "/Users/jayd0/.codex/worktrees/shiftwork-s46/shiftwork/docs/plans/shiftwork/slice46-independent-comparison-result-2026-10-25.md",
+      "bytes": 6318,
+      "sha256": "607097089e074ebf43882a3a1a616c253dca0ee2f31546782751a35f32ad8b10",
+      "external_to_worktree": true
+    },
+    "s26_manifest": {
+      "path": "docs/plans/shiftwork/evidence/test3-manifest.json",
+      "bytes": 222846,
+      "sha256": "c4ed97ac7cbe166dafb87f2af4eee62c5e40a1347bee7fe96f7b3289df5b1009",
+      "external_to_worktree": false
+    },
+    "s26_source": {
+      "path": "shiftwork/curation/pipeline.py",
+      "bytes": 41506,
+      "sha256": "e7084c66aefa50da976265c0943c2590e286482852d591d95b259628e43cfe75",
+      "external_to_worktree": false
+    },
+    "product": {
+      "path": "docs/plans/shiftwork/01-product.md",
+      "bytes": 19879,
+      "sha256": "e3ea71ea2d30f9d244ef816d9f5d654a08f4cae777452a4020069e4bf23fb5a1",
+      "external_to_worktree": false
+    },
+    "architecture": {
+      "path": "docs/plans/shiftwork/02-architecture.md",
+      "bytes": 69332,
+      "sha256": "cbb59bc060080c60ee40b9d2e176ee8d6231883d9683066cb94e2b445235531d",
+      "external_to_worktree": false
+    },
+    "slice_contract": {
+      "path": "docs/plans/shiftwork/04-slices.md",
+      "bytes": 110540,
+      "sha256": "95339ccca6941904eaf8aedb4a4836eafba25181a129d5beefc34275ceb65b19",
+      "external_to_worktree": false
+    },
+    "guided_product": {
+      "path": "docs/plans/shiftwork/workplace-3d/01-product.md",
+      "bytes": 18144,
+      "sha256": "18f82df0afba7ef6f0786008a1b802c60acdb72ac6b6ed6977f089c6b82f76f4",
+      "external_to_worktree": false
+    },
+    "task_plan_service": {
+      "path": "shiftwork/fixtures/artifacts/bookshop/task_plan_starter_service.py",
+      "bytes": 12409,
+      "sha256": "7736c38410ce24b52ba610b4062b228856aaad228c8a59a1eb0040e06185bdc1",
+      "external_to_worktree": false
+    },
+    "hosted_composition": {
+      "path": "shiftwork/hosted.py",
+      "bytes": 3715,
+      "sha256": "e46a095a3c017038044688731475b30f44ecb6a44644849c671243f5d4fbf221",
+      "external_to_worktree": false
+    },
+    "readme": {
+      "path": "README.md",
+      "bytes": 11109,
+      "sha256": "8879dda4c4a0a09c85a655af6dd4f43aa818afb4a8a39478849ff8b1b703a33c",
+      "external_to_worktree": false
+    },
+    "license": {
+      "path": "LICENSE",
+      "bytes": 1067,
+      "sha256": "af8ffc889e7de794545330fd925425ca02c5ed1d1e1f357ec070a6d681e218a1",
+      "external_to_worktree": false
+    },
+    "canonical_recipe": {
+      "path": "shiftwork/domain/canonical.py",
+      "bytes": 4124,
+      "sha256": "0a31d0dc957bd6c8f8dd3a0ea1ecce6d51219b10fb0981e0644291409d0ae712",
+      "external_to_worktree": false
+    },
+    "recording_recipe": {
+      "path": "shiftwork/diagnostic_recording.py",
+      "bytes": 10547,
+      "sha256": "cb1dfbbc702479fc976d6473a28a23f4e7b971c5b63a6bc56a4c4a6d714ad471",
+      "external_to_worktree": false
+    },
+    "s46_closure": {
+      "path": "docs/plans/shiftwork/slice46-coach-deadline-60-live-result-2026-10-26.md",
+      "bytes": 7145,
+      "sha256": "02b62241f5416f1ff0ee37e8dd5789192bb06de7261342543c6563f68f17dfca",
+      "external_to_worktree": false
+    },
+    "s48_release_record": {
+      "path": "docs/plans/shiftwork/slice48-release-checkpoint-2026-10-26.md",
+      "bytes": 17810,
+      "sha256": "e69451caf61a956e7b16214562494c35ec12d3534664e4cddbe1df1ffe8b1377",
+      "external_to_worktree": false
+    },
+    "s48_release_proof": {
+      "path": "docs/plans/shiftwork/evidence/slice48-release-2026-10-26/release-proof.json",
+      "bytes": 28636,
+      "sha256": "88d2bfb06e7151d89a0e3c96d0bee6ce501c2ae4a4b827c350d5df2901ead6b4",
+      "external_to_worktree": false
+    },
+    "current_status": {
+      "path": "docs/plans/shiftwork/00-status.md",
+      "bytes": 783204,
+      "sha256": "d2153884f94c00a098cc23c5586a9f56e448aa99fb3f35b96dfbe7f4c596a004",
+      "external_to_worktree": false
+    },
+    "current_brief": {
+      "path": "docs/SHIFTWORK_PLAN.md",
+      "bytes": 134333,
+      "sha256": "05aa0be80ac165a4af5aa51d43d6eeb52a4fd0fcbaed52c8d6ea0360516dbee1",
+      "external_to_worktree": false
+    },
+    "current_budget": {
+      "path": "shiftwork/live_budget.py",
+      "bytes": 7618,
+      "sha256": "b6f00eb8bf6138c2f9642779aefcf5874be796c4fd8381b2890169daa0c01c13",
+      "external_to_worktree": false
+    },
+    "current_routes": {
+      "path": "shiftwork/api/routes.py",
+      "bytes": 17703,
+      "sha256": "75e6052242e09212cea3fdb37cf3587e97cc8057d812c5a3adc890d585dff356",
+      "external_to_worktree": false
+    },
+    "pack_registry": {
+      "path": "shiftwork/packs/registry.py",
+      "bytes": 22489,
+      "sha256": "907abc945fda54cfe3619ac987697539e5a53b566781bc9f83eb26fc6fd8983b",
+      "external_to_worktree": false
+    },
+    "current_config": {
+      "path": "shiftwork/config.py",
+      "bytes": 17708,
+      "sha256": "1e55a6bee806250c2ce0810073786b2fa01fe73d31e2723664f63fa0568c677c",
+      "external_to_worktree": false
+    },
+    "public_comparison_manifest": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_manifest.json",
+      "bytes": 1848,
+      "sha256": "2391255db772f42577ad2676c16a39b85b5867923334155f5dd129e8f5930e3f",
+      "external_to_worktree": false
+    },
+    "public_incident": {
+      "path": "shiftwork/fixtures/requests/bookshop_pivot_incident.jsonl",
+      "bytes": 200,
+      "sha256": "e9ae58c7d352f3f21b1f0edacbfcabf73a7c0edc0f551e7eb0bea8ae829cc399",
+      "external_to_worktree": false
+    },
+    "s49_readiness": {
+      "path": "docs/plans/shiftwork/evidence/slice49-readiness-2026-10-26.md",
+      "bytes": 5037,
+      "sha256": "b33be8f66fa0a88abe913f0f9cc37733c3887650213afa7105e3252e3a1a95b0",
+      "external_to_worktree": false
+    },
+    "s50_continuation": {
+      "path": "docs/plans/shiftwork/slice50-continuation-2026-10-26.md",
+      "bytes": 6146,
+      "sha256": "422d86683405135686e6e59581e0dc215b3b10da8e44b9380c6f26067c68c6a4",
+      "external_to_worktree": false
+    },
+    "bookshop_compare_pair_01.jsonl": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_01.jsonl",
+      "bytes": 394,
+      "sha256": "749ea9360c55e8340ccd995234c3e333d66d0740cfb02e227223c60c9c406005",
+      "external_to_worktree": false
+    },
+    "bookshop_compare_pair_01_specs.json": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_01_specs.json",
+      "bytes": 2865,
+      "sha256": "c6b5b4b09f71edf6480a4b88d026115029ff81d1dbfd02a9d1d155718da56c10",
+      "external_to_worktree": false
+    },
+    "bookshop_compare_pair_02.jsonl": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_02.jsonl",
+      "bytes": 374,
+      "sha256": "43b5e8275ceb4a4fb444e26232fde303c7e4feb35ae8976bb443a3c143a21de5",
+      "external_to_worktree": false
+    },
+    "bookshop_compare_pair_02_specs.json": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_02_specs.json",
+      "bytes": 2276,
+      "sha256": "78294186d99b589ac577a282d6930978e02c9ae137836c1f57e0871ebb061c08",
+      "external_to_worktree": false
+    },
+    "bookshop_compare_pair_03.jsonl": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_03.jsonl",
+      "bytes": 376,
+      "sha256": "c0e0ed996c2cc6f05971be34ceb68daadb36aa838d6a1344d2d3e13b1000bb0f",
+      "external_to_worktree": false
+    },
+    "bookshop_compare_pair_03_specs.json": {
+      "path": "shiftwork/fixtures/requests/bookshop_compare_pair_03_specs.json",
+      "bytes": 2284,
+      "sha256": "0a05eb2d8ccd74861119570c0269b20781036e62c89e2f0297039e37744005fe",
+      "external_to_worktree": false
+    },
+    "original_s49_synthetic_proposal": {
+      "path": "docs/plans/shiftwork/evidence/slice49-synthetic-walkthrough-proposal-2026-10-26.md",
+      "bytes": 4145,
+      "sha256": "38b501dd162e74952ff9c571ccd58b011ee9a77257e682b968ec55075a5f4207",
+      "external_to_worktree": false
+    },
+    "s49_contract_review": {
+      "path": "docs/plans/shiftwork/slice49-synthetic-contract-review-2026-10-26.md",
+      "bytes": 10228,
+      "sha256": "c6c74d426e156112b33cdb563184d84f455398cdd04061214b4552f2ee497117",
+      "external_to_worktree": false
+    },
+    "s49_protocol": {
+      "path": "docs/plans/shiftwork/slice49-synthetic-protocol-2026-10-26.md",
+      "bytes": 14409,
+      "sha256": "42fadacf1c2e31c522bc228f9d6d4e3033d985e47bebabeff79a727f897adc5a",
+      "external_to_worktree": false
+    },
+    "s50_submission_copy": {
+      "path": "docs/plans/shiftwork/submission/s50-submission-copy-2026-10-26.md",
+      "bytes": 9168,
+      "sha256": "5e49040a26516730436e5f2b7e2cd16e99991c0f8a36bac63f61ec3751dc5d3e",
+      "external_to_worktree": false
+    },
+    "s50_recording_checklist": {
+      "path": "docs/plans/shiftwork/submission/s50-recording-checklist-2026-10-26.md",
+      "bytes": 10209,
+      "sha256": "ec96a951b3ca9145a60116b1935557ce864926779f666423e356318bde610b60",
+      "external_to_worktree": false
+    },
+    "coordinator_record": {
+      "path": "docs/plans/shiftwork/slice49-slice50-preparation-2026-10-26.md",
+      "bytes": 4867,
+      "sha256": "1935f662f24418167c80dc17d2e57b150178a9b8326f250dfb6e432c3387f299",
+      "external_to_worktree": false
+    },
+    "mistakes_log": {
+      "path": "MISTAKES.md",
+      "bytes": 404206,
+      "sha256": "57cada8bdd7185baa6e74fb931229d8e079bfc2fd8456c00789d297677f9f373",
+      "external_to_worktree": false
+    }
+  },
+  "gate_documents_changed": false,
+  "s49_synthetic_results_added": false,
+  "human_results_added": false,
+  "s50_original_recording_added": false,
+  "new_runtime_or_provider_observation": false,
+  "runner_source_observation": {
+    "observed_utc": "2026-10-26T12:19:33.160733+00:00",
+    "url": "https://registry.npmjs.org/@jkudish%2fjev-browser/latest",
+    "name": "@jkudish/jev-browser",
+    "version": "0.8.10",
+    "engines": {
+      "node": ">=22"
+    },
+    "gitHead": "817b09eea6e21aad836b5ed32a613c68e5644a08",
+    "dist_integrity": "sha512-vuaubJS+KX+LXBv97fx6KxNLjo20bUoZsH14PiHSz9q98zbZnZAPxDSzjrEnW3pgkKmqKAd6HnFWzv4GNE+PTg==",
+    "postinstall": "node scripts/ensure-chromium.mjs",
+    "scope": "Public package metadata only. No package download, installation or code execution."
+  },
+  "limits": [
+    "Historical deployment and pricing observations were not reverified against the app or provider here.",
+    "Synthetic contract and protocol remain unapproved. No compatibility pilot ran.",
+    "Documentation hashes do not establish human usability, learning or complete S50 hosted execution.",
+    "This manifest excludes itself to avoid a circular digest."
+  ]
+}
