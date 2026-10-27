@@ -88,8 +88,15 @@ learning gain or general model reliability.
 
 S49 has no verified participant results in this packet. Synthetic agent checks
 would remain synthetic. S46 is CLOSED INCOMPLETE and UNACCEPTED, so this draft
-makes no successful coach-repair claim and the planned video omits the coach.
-The new S50 hosted recording, reviewed export, and public video remain pending.
+makes no successful coach-repair claim and the video omits the coach.
+
+Three bounded S50 hosted recording attempts were made on 2026-10-27 and all
+closed incomplete. Attempt 01 completed one diagnostic whose required tasks
+passed, so the recording precondition of an observed miss was absent. Attempts
+02 and 03 stopped on provider transport failures at the first and second
+inference calls. No fresh S50 hosted chain, reviewed S50 export or S50 video is
+claimed here. The demonstration video uses the public release and retained
+historical S44 and S45 evidence, each labelled as such.
 
 Sources: [S44 retained evidence](../slice44-checkpoint-2026-10-24.md#retained-live-evidence),
 [S49 contract](../04-slices.md#slice-49-five-short-learner-sessions), and
